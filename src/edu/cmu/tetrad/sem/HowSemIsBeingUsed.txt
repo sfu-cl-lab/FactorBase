@@ -1,0 +1,65 @@
+jdramsey 1/20/2006
+
+I would like to start here a discussion of how the SEM package, in particular SemIM, is being used in Tetrad, in preparation for some upgrades. Please add to this discussion is you feel so moved.
+
+Let V be a list of variables and e:V-->W be a map from these variables to associated error terms. A SEM graph G is a graph over V such that between any two variables v1, v2 in V at most one directed edge and at most one bidirected edge is included in G.
+
+The interpretation of a SEM graph is as follows. Let G be a SEM graph over V (of order n) and let Parents(v_i) be the parents of v_i for each v_i in G. Then the SEM model G corresponds to is:
+
+v_i = SUM(a_j * v_j) + e(v_i), i = 1, ..., n, j = 1, ..., |Parents(v_i)|
+
+Bidirected edges represent correlated errors. A bidirected edge vi---vj represents the fact that e(v_i) is correlated with e(v_j).
+
+Given a SEM graph, a SEM parameterized model (SEM PM) is constructed by associated a (valueless) parameter with each a_i and with each e(v_i), i = 1,..., n.
+
+Given a SEM PM, a SEM instantiated model (SEM IM) is constructed with the following fields (this is a little more complicated):
+
+(a) Sem PM.
+
+(b) Variable nodes.
+
+(c) Exogenous nodes.
+
+(d) Measured nodes.
+
+(e) Free parameters.
+
+(f) Fixed parameters.
+
+(g) Edge coefficient matrix.
+
+(h) Error covariance matrix.
+
+(i) Variable means.
+
+(j) Sample covariance.
+
+(k) Sample size.
+
+(l) Implied covariance matrix.
+
+(m) Free mappings.
+
+(n) Fixed mappings.
+
+(o) Whether parameter bounds are enforced.
+
+(p) Whether the SEM IM has been estimated yet.
+
+I will discuss these one by one.
+
+Notes by FCW:
+
+1) The Gibbs sampler uses the copy constructor.  It assumes that the lists
+returned by get parameter type calls (of the SemIm itself and of its SemPm 
+member variable) are in the same order as in the SemIm used as the 
+constructor's argument.
+
+2) It might be helpful to be able to get the list of (all) parameters via a
+method of SemIm instead of first getting the SemPm of the SemIm.  This
+method could just call the SemPm's method.
+
+3) Instead of giving a SemIm instance to a method of a parameter to get the
+parameter's value, it would be convenient to have a SemIm method which
+returned a the value given a reference to the parameter.
+
