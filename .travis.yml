@@ -19,8 +19,6 @@ script:
   - java -jar FactorBase.jar > jar.txt
   - tail jar.txt
   - ls -lh
-  - tail sort_merge.csv
-  - tail Bif_unielwin.xml
   - tail dag_.txt
   - cd ../src
   - javac -cp ".:./lib/*" Config.java BZScriptRunner.java MakeSetup.java
