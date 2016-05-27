@@ -77,7 +77,8 @@ where
             length = (select 
                     max(length)
                 from
-                    lattice_set))*/
+                    lattice_set));
+*/                   
                  
 ALTER TABLE SchemaEdges ADD INDEX `HashIn`  (`Rchain`,`child`,`parent`);
 

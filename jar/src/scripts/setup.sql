@@ -225,7 +225,8 @@ CREATE TABLE PVariables AS SELECT CONCAT(EntityTables.TABLE_NAME, '0') AS pvid,
     EntityTables.TABLE_NAME,
     0 AS index_number FROM
     EntityTables 
-UNION SELECT 
+UNION 
+SELECT 
     CONCAT(EntityTables.TABLE_NAME, '1') AS pvid,
     EntityTables.TABLE_NAME,
     1 AS index_number
@@ -234,8 +235,11 @@ FROM
     SelfRelationships
 WHERE
     EntityTables.TABLE_NAME = SelfRelationships.REFERENCED_TABLE_NAME
-        AND EntityTables.COLUMN_NAME = SelfRelationships.REFERENCED_COLUMN_NAME 
-UNION SELECT 
+        AND EntityTables.COLUMN_NAME = SelfRelationships.REFERENCED_COLUMN_NAME ;
+/*zqian,Oct-02-13, reduce copies from 3 to 2*/
+/*
+UNION  
+SELECT 
     CONCAT(EntityTables.TABLE_NAME, '2') AS pvid,
     EntityTables.TABLE_NAME,
     2 AS index_number
@@ -245,7 +249,7 @@ FROM
 WHERE
     EntityTables.TABLE_NAME = SelfRelationships.REFERENCED_TABLE_NAME
         AND EntityTables.COLUMN_NAME = SelfRelationships.REFERENCED_COLUMN_NAME;
-        
+  */    
 ALTER TABLE PVariables ADD PRIMARY KEY (pvid);
 
 

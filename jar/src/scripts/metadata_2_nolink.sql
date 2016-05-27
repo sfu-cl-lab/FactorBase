@@ -210,7 +210,7 @@ FROM
             ' = ',
            Groundings.id) AS Entries 
 FROM
-    RNodes_pvars natural join Groundings*/;
+    RNodes_pvars natural join Groundings*/
     
     ;/* the table RNodes_pvars is such useful | added by zqian*/
 
@@ -396,6 +396,37 @@ insert ignore into Path_Forbidden_Edges   SELECT    distinct     *    FROM      
 CREATE TABLE  LearnedEdges like Path_BayesNets;
 CREATE TABLE  ContextEdges like Path_BayesNets;
 CREATE TABLE  InheritedEdges like Path_BayesNets;
+CREATE TABLE NewLearnedEdges LIKE Path_BayesNets;
+
+/*create or replace view LearnedEdges as
+
+    select 
+        Path_BayesNets.Rchain,
+        Path_BayesNets.child,
+        Path_BayesNets.parent
+    from
+        Path_BayesNets
+    where
+        Path_BayesNets.parent <> ''
+            and (Path_BayesNets.Rchain , Path_BayesNets.child,
+            Path_BayesNets.parent) not in (select 
+                *
+            from
+                Path_Required_Edges);
+
+create or replace view ContextEdges as
+
+    select distinct
+        LearnedEdges.Rchain as Rchain,
+        LearnedEdges.child as child,
+        lattice_membership.member as parent
+    from
+        LearnedEdges,
+        lattice_membership
+    where
+        LearnedEdges.Rchain = lattice_membership.name;
+        
+INSERT IGNORE INTO Path_BayesNets SELECT * FROM ContextEdges;*/
 
 
 

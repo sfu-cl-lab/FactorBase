@@ -1,0 +1,8 @@
+dbaddress = mysql://127.0.0.1
+dbusername = root
+dbpassword = 123456
+dbname = unielwin
+Continuous = 0
+AutomaticSetup = 1
+LinkCorrelations = 1
+ComputeKLD = 0

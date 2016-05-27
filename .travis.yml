@@ -16,7 +16,7 @@ before_script:
   - mysql -uroot -p123456 < testsql/Mutagenesis_std_moleatm.sql
 script: 
   - cd jar
-  - java -jar RunBB.jar > jar.txt
+  - java -jar FactorBase.jar > jar.txt
   - tail jar.txt
   - ls -lh
   - tail sort_merge.csv

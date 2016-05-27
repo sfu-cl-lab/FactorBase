@@ -210,7 +210,7 @@ FROM
             ' = ',
            Groundings.id) AS Entries 
 FROM
-    RNodes_pvars natural join Groundings*/;
+    RNodes_pvars natural join Groundings*/
     
     ;/* the table RNodes_pvars is such useful | added by zqian*/
 

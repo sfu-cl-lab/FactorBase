@@ -211,7 +211,7 @@ FROM
     RNodes_pvars natural join Groundings;
     */
     
-    ;/* the table RNodes_pvars is such useful | added by zqian*/
+    /* the table RNodes_pvars is such useful | added by zqian*/
 
 CREATE TABLE RNodes_1Nodes AS SELECT rnid, TABLE_NAME, 1nid, COLUMN_NAME, pvid1 AS pvid FROM
     RNodes,
@@ -304,12 +304,17 @@ CREATE TABLE  Entity_BayesNets (
 
 /******* create Tables to store Bayes nets in Lattice Chains  ****/
 
+/* //zqian, max key length limitation "The maximum column size is 767 bytes", 
+enable "innodb_large_prefix" to allow index key prefixes longer than 767 bytes (up to 3072 bytes).
+ Oct 17, 2013    */
+
 CREATE TABLE Path_BayesNets (
-    Rchain VARCHAR(256) NOT NULL,
-    child VARCHAR(197) NOT NULL,
+    Rchain VARCHAR(255) NOT NULL,     child VARCHAR(197) NOT NULL,
     parent VARCHAR(197) NOT NULL,
     PRIMARY KEY (Rchain , child , parent)
 );
+
+CREATE TABLE NewLearnedEdges LIKE Path_BayesNets;
 
 /****************
 Create tables that allow us to represent background knowledge
@@ -626,6 +631,23 @@ FROM
 /*WHERE
     PVariables.index_number = 0;
 */
+
+/* For The Testing databses, need the primary key, June 19, 2014 */
+/* We want to add the primary key for the target instances to keep a table of all groundings at the same time. */
+
+/*CREATE TABLE Test_PVariables_Select_List AS
+SELECT pvid, column_name as Entries 
+FROM `PVariables`  natural join  `EntityTables`;
+
+create table pvid_rnode_Select_List as
+SELECT distinct pvid, CONCAT(rnid,'.',COLUMN_NAME)  as Entries  FROM FNodes_pvars_UNION_RNodes_pvars
+natural join RNodes_pvars;
+
+CREATE TABLE Test_RNodes_Select_List as 
+select Fid,rnid,Entries from FNodes_pvars_UNION_RNodes_pvars 
+natural join  pvid_rnode_Select_List;
+*/
+
 CREATE TABLE ADT_PVariables_From_List AS SELECT pvid, CONCAT('@database@.',TABLE_NAME, ' AS ', pvid) AS Entries FROM
     PVariables;
 /*WHERE
