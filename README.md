@@ -7,6 +7,7 @@ First you should import data into your database. We provide two sets of example 
 ###Run .jar  
 + Modify `jar/cfg/subsetctcomputation.cfg` with your own configuration according to format explained [here](http://www.cs.sfu.ca/~oschulte/BayesBase/options.html)  
 + In `jar` folder, run `java -jar FactorBase.jar`  
++ For big databases, you need to specify larger java heap size. For example: `java -jar -Xmx8G FactorBase.jar`   
   
 ###Compile & Run  
 + Go into `src/cfg` folder and modify `subsetctcomputation.cfg`  
