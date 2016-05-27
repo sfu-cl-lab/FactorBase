@@ -1,4 +1,4 @@
-# BayesBase
+# FactorBase
 [![Build Status](https://travis-ci.org/sfu-cl-lab/BayesBase.svg?branch=master)](https://travis-ci.org/sfu-cl-lab/BayesBase)   
 The source code repository for the Bayes Base system.  Most of the code are classes for CMU's Tetrad system. We may also add datasets if we get around to it.  
 For more information about this project, visit our [project website](http://www.cs.sfu.ca/~oschulte/BayesBase/BayesBase.html)  
