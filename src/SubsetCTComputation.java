@@ -1819,6 +1819,7 @@ private static int getTargetSubCounts(String database_BN,String database_db,Stri
 				 */
 				if ( !linkAnalysis )
 				{
+					//System.out.println("\n\n come to here");
 					if ( noLinkRchainCT( fid ) != 0 )
 					{
 						System.out.println( "Failed to get Rchain CTs." );
@@ -1894,17 +1895,20 @@ private static int getTargetSubCounts(String database_BN,String database_db,Stri
 				
 				rs.close();
 				System.out.println("BiggestRchain is "+ BiggestRchain+ "\t rchain is : "+ rchain);
-				
+				System.out.println("BiggestRchain is "+ BiggestRchain+ "\t");
+
 				st.execute( "DROP TABLE IF EXISTS `" + fid + "_local_CT`;" );
 				st.execute( "DROP TABLE IF EXISTS "+database_db+".`" + fid + "_CT`;" );
 				//st.execute( "DROP TABLE IF EXISTS unielwin_Training1_target_final_CT.`" + fid + "_CT`;" );
 				
 				if ( RChainCreated )
 				{
+					System.out.println("\n\n come to here");
+
 					st.execute( "DELETE FROM `" + fid + "_" + BiggestRchain.replace( "`", "" ) +"_CT` WHERE MULT = '0';" );
 					
-					// local_ct has not INDEX !!! Oct.14, 2014,zqian
-					if ( linkAnalysis )
+					// local_ct has no INDEX !!! Oct.14, 2014,zqian
+					//if ( linkAnalysis )
 					{
 						System.out.println( "CREATE TABLE "+database_db+".`local_CT` AS SELECT * FROM `" + fid + "_" +BiggestRchain.replace( "`", "") + "_CT`;" );
 
@@ -1913,47 +1917,45 @@ private static int getTargetSubCounts(String database_BN,String database_db,Stri
 						//st.execute( "CREATE TABLE unielwin_Training1_target_final_CT.`" + fid + "_CT` AS SELECT * FROM `" + fid + "_" +BiggestRchain.replace( "`", "") + "_CT`;" );
 
 					}
-					else
-					{ // May 26 zqian, for rnid using linkon_CT
-						//st.execute( "CREATE TABLE `" + fid + "_" + rchain + "_local_CT` AS SELECT * FROM `" + fid + "_" + BiggestRchain.replace( "`", "") + "_counts`;" );
-						//if fid in rnids
-						Statement st_temp = con.createStatement();
-						ResultSet rs_temp = st_temp.executeQuery(" select rnid from "+ dbBNschema+".RNodes where rnid = '`"+fid+"`' ; " );
-						String temp = "";
-						while (rs_temp.next()) { 
-								temp = rs_temp.getString(1).replace("`", "");
-								System.out.println("temp is "+ temp);
-						}
-						if (temp.compareTo(fid)==0)
-						{
-						// select sum(mult) as mult, fid from ct_linkon_a,b_ct group by fid;
-							st.execute( "CREATE TABLE `" + fid + "_" + rchain + "_local_CT` AS SELECT sum(mult) as mult, `"+fid+"`  FROM "+dbDataSchema+"_CT_linkon.`" + rchain + "_CT`  group by "+fid+";" );
-							System.out.println( "CREATE TABLE `" + fid + "_" + rchain + "_local_CT` AS SELECT sum(mult) as mult, `"+fid+"`  FROM "+dbDataSchema+"_CT_linkon.`" + rchain + "_CT`  group by "+fid+";" );
-						// update the mult to be local_mult
-							Statement st1 = con.createStatement();
-							ResultSet rs1 = st1.executeQuery("select Tuples from  "+dbBNschema+"_local_BBH3.Pvars_Not_In_Family where child = '`"+ fid +"`' ;");
-							Statement st2 = con.createStatement();
-							long local = 1;
-						 		while(rs1.next()){
-									local = Long.parseLong (rs1.getString("Tuples"));
-									System.out.println("local is "+ local);
-									String sql = "update `" + fid + "_" + rchain + "_local_CT` set mult = mult/ "+local + " ;";
-									System.out.println(sql);
-									st2.execute(sql);			
-								}
-						 		if (!rs1.first()) {
-						 	 		System.out.println("local is 1, ******" );
-						 			String sql = "update `" + fid + "_" + rchain + "_local_CT` set mult = mult/ "+local + " ;";
-						 			st2.execute(sql);	
-						 	 	}
-													
-							
-						}
-						else
-							st.execute( "CREATE TABLE `" + fid + "_" + rchain + "_local_CT` AS SELECT * FROM `" + fid + "_" + BiggestRchain.replace( "`", "") + "_counts`;" );
-
-
-					}
+//					else{ // May 26 zqian, for rnid using linkon_CT
+//						//st.execute( "CREATE TABLE `" + fid + "_" + rchain + "_local_CT` AS SELECT * FROM `" + fid + "_" + BiggestRchain.replace( "`", "") + "_counts`;" );
+//						//if fid in rnids
+//						Statement st_temp = con.createStatement();
+//						ResultSet rs_temp = st_temp.executeQuery(" select rnid from "+ dbBNschema+".RNodes where rnid = '`"+fid+"`' ; " );
+//						String temp = "";
+//						while (rs_temp.next()) { 
+//								temp = rs_temp.getString(1).replace("`", "");
+//								System.out.println("temp is "+ temp);
+//						}
+//						if (temp.compareTo(fid)==0)	{
+//						// select sum(mult) as mult, fid from ct_linkon_a,b_ct group by fid;
+//							st.execute( "CREATE TABLE `" + fid + "_" + rchain + "_local_CT` AS SELECT sum(mult) as mult, `"+fid+"`  FROM "+dbDataSchema+"_CT_linkon.`" + rchain + "_CT`  group by "+fid+";" );
+//							System.out.println( "CREATE TABLE `" + fid + "_" + rchain + "_local_CT` AS SELECT sum(mult) as mult, `"+fid+"`  FROM "+dbDataSchema+"_CT_linkon.`" + rchain + "_CT`  group by "+fid+";" );
+//						// update the mult to be local_mult
+//							Statement st1 = con.createStatement();
+//							ResultSet rs1 = st1.executeQuery("select Tuples from  "+dbBNschema+"_local_BBH3.Pvars_Not_In_Family where child = '`"+ fid +"`' ;");
+//							Statement st2 = con.createStatement();
+//							long local = 1;
+//						 		while(rs1.next()){
+//									local = Long.parseLong (rs1.getString("Tuples"));
+//									System.out.println("local is "+ local);
+//									String sql = "update `" + fid + "_" + rchain + "_local_CT` set mult = mult/ "+local + " ;";
+//									System.out.println(sql);
+//									st2.execute(sql);			
+//								}
+//						 		if (!rs1.first()) {
+//						 	 		System.out.println("local is 1, ******" );
+//						 			String sql = "update `" + fid + "_" + rchain + "_local_CT` set mult = mult/ "+local + " ;";
+//						 			st2.execute(sql);	
+//						 	 	}
+//													
+//							
+//						}
+//						else {
+//							st.execute( "CREATE TABLE `" + fid + "_" + rchain + "_local_CT` AS SELECT * FROM `" + fid + "_" + BiggestRchain.replace( "`", "") + "_counts`;" );
+//						}
+//
+//					}
 					
 					/*
 					 * Drop columns which aren't parents
@@ -2969,7 +2971,7 @@ private static int getTargetSubCounts(String database_BN,String database_db,Stri
 			while ( rs.next() )
 			{
 				String Rchain = rs.getString( 1 );
-				
+			//	System.out.println("\n \n \t noLinkRchainCT() Rchain is :"+ Rchain); //Feb. 04, 2015
 				Statement st2 = con.createStatement();
 				
 				st2.execute( "DROP TABLE IF EXISTS `" + fid + "_" + 

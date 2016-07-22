@@ -299,6 +299,6 @@ public class Sort_merge3 {
         } catch (Exception ex) {
             System.err.println("Unable to load MySQL JDBC driver");
         }
-        con = (Connection) DriverManager.getConnection(CONN_STR, "abc", "def");
+        con = (Connection) DriverManager.getConnection(CONN_STR, "root", "alibz");
     }
 }

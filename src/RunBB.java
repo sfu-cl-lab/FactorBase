@@ -44,7 +44,7 @@ public class RunBB {
 		System.out.println("CSV files are generated.");
 		System.out.println("*********************************************************");
 		BayesBaseH.runBBH();
-		//System.out.println("\nFinish running BayesBaseH.");
+		System.out.println("\nFinish running BayesBaseH.");
 
 	}
 

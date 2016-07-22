@@ -177,7 +177,7 @@ SELECT DISTINCT
     rnid, CONCAT('@database@.',TABLE_NAME, ' AS ', rnid) AS Entries
 FROM
     RNodes 
-/* comment this out to omit columns with rnodes as headers
+/*comment this out to omit columns with rnodes as headers, Feb, 3rd, 2015, zqian */
 union distinct 
 select distinct
     rnid,
@@ -187,7 +187,7 @@ select distinct
             concat('`temp_', replace(rnid, '`', ''), '`')) as Entries
 from
     RNodes
-    */
+  
 ;
 /** we add a table that has a single column and single row contain "T" for "true", whose header is the rnid. This simulates the case where all the relationships are true.
 We need to replace the apostrophes in rnid to make the rnid a valid name for the temporary table 
@@ -253,13 +253,13 @@ FROM
         NATURAL JOIN
     RNodes order by RNodes.rnid,COLUMN_NAME
 ) as temp
-/* comment out to remove rnodes as column headers
+/* comment out to remove rnodes as column headers, Feb 3rd, 2015, zqian */
 UNION distinct 
 select 
     rnid, rnid AS Entries
 from
     RNodes 
-    */
+    
 ;
 
 CREATE TABLE RNodes_GroupBy_List AS SELECT DISTINCT rnid, 1nid AS Entries FROM

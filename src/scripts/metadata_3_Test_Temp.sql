@@ -177,7 +177,6 @@ SELECT DISTINCT
     rnid, CONCAT('@database@.',TABLE_NAME, ' AS ', rnid) AS Entries
 FROM
     RNodes 
-/* comment this out to omit columns with rnodes as headers
 union distinct 
 select distinct
     rnid,
@@ -187,11 +186,43 @@ select distinct
             concat('`temp_', replace(rnid, '`', ''), '`')) as Entries
 from
     RNodes
-    */
 ;
 /** we add a table that has a single column and single row contain "T" for "true", whose header is the rnid. This simulates the case where all the relationships are true.
 We need to replace the apostrophes in rnid to make the rnid a valid name for the temporary table 
 **/
+
+create table Groundings like @database@_setup.Groundings; 
+insert into Groundings select * from @database@_setup.Groundings;
+
+/*June 19, 2014, only need  for testing database*/
+/* this should specify a target node for testing */
+create table Test_Node like @database@_setup.Test_Node; 
+insert into Test_Node select * from @database@_setup.Test_Node;    
+
+
+/* For The Testing databses, need the primary key, June 19, 2014 */
+/* We want to add the primary key for the target instances to keep a table of all groundings at the same time. */
+/*if a pvariable appears in the test node, we add its id column to the select list for the entity tables */
+
+CREATE TABLE Test_PVariables_Select_List AS
+SELECT pvid, CONCAT(pvid,'.',column_name) as Entries 
+FROM `PVariables`  natural join  `EntityTables` natural join FNodes_pvars_UNION_RNodes_pvars natural join Test_Node;
+
+/* if a pvariable appears in the test node, we add its id column to the select list for any rnode that contains the pvariable */
+/* this table tells me which pvariables appear in both the test node and a given rnode */
+create table pvid_rnode_Select_List as
+SELECT distinct pvid, rnid, CONCAT(rnid,'.',COLUMN_NAME)  as Entries  FROM FNodes_pvars_UNION_RNodes_pvars
+/*the next natural join is supposed to find the pvariables contained in the test node and in the rnode, if any */
+natural join RNodes_pvars natural join Test_Node;
+
+/*if a pvariable appears in the test node, we add its id column to the select list for any rnode that contains the pvariable */
+CREATE TABLE Test_RNodes_Select_List as 
+select rnid,Entries from   pvid_rnode_Select_List ;
+/*select Fid,rnid,Entries from FNodes_pvars_UNION_RNodes_pvars 
+natural join  pvid_rnode_Select_List natural join Test_Node;   */
+/*June 19, 2014, only need  for testing database*/
+
+
 
 CREATE TABLE RNodes_Where_List AS SELECT rnid,
     CONCAT(rnid,
@@ -203,16 +234,27 @@ CREATE TABLE RNodes_Where_List AS SELECT rnid,
             REFERENCED_COLUMN_NAME) AS Entries 
 FROM
     RNodes_pvars
- /*   union
+    union
 	select rnid, CONCAT(rnid,
             '.',
             COLUMN_NAME,
             ' = ',
            Groundings.id) AS Entries 
 FROM
-    RNodes_pvars natural join Groundings*/;
-    
-    ;/* the table RNodes_pvars is such useful | added by zqian*/
+    RNodes_pvars natural join Groundings;
+
+
+
+/* // May be Sara need this
+create table pvid_rnode_Select_List as
+SELECT distinct pvid, CONCAT(rnid,'.',COLUMN_NAME)  as Entries  FROM FNodes_pvars_UNION_RNodes_pvars
+natural join RNodes_pvars;
+CREATE TABLE Test_RNodes_Select_List as 
+select Fid,rnid,Entries from FNodes_pvars_UNION_RNodes_pvars 
+natural join  pvid_rnode_Select_List;
+*/
+
+/* the table RNodes_pvars is such useful | added by zqian*/
 
 CREATE TABLE RNodes_1Nodes AS SELECT rnid, TABLE_NAME, 1nid, COLUMN_NAME, pvid1 AS pvid FROM
     RNodes,
@@ -234,11 +276,8 @@ select RNodes.rnid, 2Nodes.2nid from 2Nodes, RNodes where 2Nodes.TABLE_NAME = RN
 /** Each unary functor, and each binary functor, becomes an attribute to be retrieved in the select list.
 Make a table to record this. **/
 CREATE TABLE RNodes_Select_List AS 
-select rnid,
-/* old version where we actually compute the mult  
-    concat('count(*)',' as "MULT"') AS Entries
-   */
-  concat(1,' as "MULT"') AS Entries  
+select 
+    rnid, concat('count(*)',' as "MULT"') AS Entries
 from
     RNodes
 union
@@ -256,16 +295,15 @@ FROM
         NATURAL JOIN
     RNodes order by RNodes.rnid,COLUMN_NAME
 ) as temp
-/* comment out to remove rnodes as column headers
 UNION distinct 
 select 
     rnid, rnid AS Entries
 from
-    RNodes 
-    */
+    RNodes     
+union
+select * from Test_RNodes_Select_List  /*June 19 2014*/
 ;
 
-/* skip this for continuous, we are no longer grouping
 CREATE TABLE RNodes_GroupBy_List AS SELECT DISTINCT rnid, 1nid AS Entries FROM
     RNodes_1Nodes 
 UNION DISTINCT 
@@ -275,14 +313,14 @@ FROM
     2Nodes
         NATURAL JOIN
     RNodes 
- comment out to remove rnodes as column headers
 UNION distinct 
 select 
     rnid, rnid
 from
     RNodes
-    
-    ;*/
+union
+select * from Test_RNodes_Select_List  /*June 19 2014. If we have a target node for testing, need to keep id columns for groundings in rnode*/
+    ;
 
 
 /******************************************************
@@ -623,10 +661,7 @@ USE @database@_BN;
 
 CREATE TABLE ADT_PVariables_Select_List AS 
 SELECT 
-   /*  make change for continuous data
-   pvid, CONCAT('count(*)',' as "MULT"') AS Entries*/
-   
-   pvid, CONCAT(1,' as "MULT"') AS Entries
+    pvid, CONCAT('count(*)',' as "MULT"') AS Entries
 FROM
     PVariables
 UNION
@@ -635,7 +670,9 @@ SELECT
 FROM
     1Nodes
         NATURAL JOIN
-    PVariables;
+    PVariables 
+union 
+select * from Test_PVariables_Select_List;  /*June 19, 2014. If we have a target node, need to keep id keys around for the target predicate.*/
 /*WHERE
     PVariables.index_number = 0;
 */
@@ -655,21 +692,24 @@ WHERE
 *. May 13rd*/
 
 /* add a where clause to eliminate states with 0 count, trying to make the contigency table smaller */
-/*skip this for continuous
 create table PVariables_GroupBy_List as
 SELECT pvid,
     1nid AS Entries FROM
     1Nodes
         NATURAL JOIN
-    PVariables;
-*/
+    PVariables
+
+;
 
 create table ADT_PVariables_GroupBy_List as
 SELECT pvid,
     1nid AS Entries FROM
     1Nodes
         NATURAL JOIN
-    PVariables;
+    PVariables
+    union 
+select * from Test_PVariables_Select_List
+    ;
 /*WHERE
     PVariables.index_number = 0;
 * May 13rd/
@@ -684,6 +724,8 @@ union
 SELECT DISTINCT rnid,
     1nid AS Entries FROM
     RNodes_1Nodes 
+        union 
+select * from Test_RNodes_Select_List
 ;
 
 CREATE TABLE ADT_RNodes_1Nodes_FROM_List AS 
@@ -696,6 +738,8 @@ CREATE TABLE ADT_RNodes_1Nodes_GroupBY_List AS
 SELECT DISTINCT rnid,
     1nid AS Entries FROM
     RNodes_1Nodes 
+        union 
+select * from Test_RNodes_Select_List
 ;
 
 
@@ -704,15 +748,30 @@ SELECT DISTINCT rnid,
 CREATE TABLE ADT_RNodes_Star_Select_List AS 
 SELECT DISTINCT rnid,
     1nid AS Entries FROM
-    RNodes_1Nodes;
+    RNodes_1Nodes
+union
+/*June 20, 2014.if we have a target node, then for each pvid related to rnode, find the counts table pvid_counts, and select the id field in the counts table */
+SELECT 
+    rnid,
+    concat('`',
+            replace(pvid, '`', ''),
+            '_counts`',
+            '.',
+            referenced_column_name) as Entries
+FROM
+    pvid_rnode_Select_List
+        natural join
+    RNodes_pvars 
+    ;
+
 
 /** TODO: Also need to multiply the mult columns from the different tables, e.g. 
 select (t1.mult * t2.mult * t3.mult) as "MULT"
 **/
 
 CREATE TABLE ADT_RNodes_Star_From_List AS 
-SELECT DISTINCT rnid, concat('`',replace(pvid, '`', ''),'_counts`')
-    AS Entries FROM
+SELECT DISTINCT rnid, concat('`',replace(pvid, '`', ''),'_counts`') AS Entries 
+FROM
     RNodes_pvars;
 
 
@@ -724,7 +783,20 @@ from RNodes
 union
 SELECT DISTINCT rnid,
     concat('`',replace(rnid, '`', ''),'_star`.',1nid) AS Entries FROM
-    RNodes_1Nodes;
+    RNodes_1Nodes
+union /*June 20, 2014.*/
+SELECT 
+    rnid,
+    concat('`',
+            replace(rnid, '`', ''),
+            '_star`',
+            '.',
+            referenced_column_name) as Entries
+FROM
+    pvid_rnode_Select_List
+        natural join
+    RNodes_pvars 
+;
 
 create table ADT_RNodes_False_FROM_List as
 SELECT DISTINCT rnid, concat('`',replace(rnid, '`', ''),'_star`') as Entries from RNodes

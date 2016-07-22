@@ -393,7 +393,7 @@ public static void mapping_rnid() throws SQLException{
 		databaseName = "UW_std";
 		databaseName2 = databaseName + "_lattice";
 		dbUsername = "sfu";
-		dbPassword = "";
+		dbPassword = "joinBayes";
 		dbaddress = "mysql://kripke.cs.sfu.ca";
 
         //connect to db using jdbc

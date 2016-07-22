@@ -314,7 +314,7 @@ public class KLD_generator {
 			createclause = createclause + ", `" + list.get(i) + "` VARCHAR(20) NOT NULL";
 		}
 		createclause = createclause + " );";
-	//	System.out.println("createclause: " + createclause);
+		System.out.println("createclause: " + createclause);
 		st.execute(createclause);
 		
 		//add index to all columns in pair table
@@ -441,6 +441,8 @@ public class KLD_generator {
 		
 		st.execute("drop table if exists temp1 ;");
 		String query1="create table temp1 as select sum(mult) as parsum " +parents+" from "+ table_final_smoothed+" group by "+ parents.substring(2);
+		System.out.println( "query1 : "+ query1);
+		
 		st.execute(query1);
 		
 		//add index to temp1 (parsum and all parents)
@@ -462,7 +464,8 @@ public class KLD_generator {
 		}
 			
 		query2=query2+" "+compare+");";	
-		
+		System.out.println( "query2 : "+ query2);
+
 		st.execute(query2);
 		st.execute("update "+table_final_smoothed+"set CP = MULT / ParentSum ;");
 		
@@ -474,29 +477,35 @@ public class KLD_generator {
 		
 		ResultSet rst_temp1 = st.executeQuery("Select distinct" + parents.substring(2) + " from temp1;");
 		String whereclause="";
+		System.out.println("parents.substring(2) : " + parents.substring(2) );
 		//rst_temp1.absolute(0);
 		while(rst_temp1.next()) {
 			for (int i=1; i<list.size(); ++i) {
 				whereclause = whereclause + "`" + list.get(i) + "`='" + rst_temp1.getString(i) + "' AND ";
 			}
-			
+			System.out.println("whereclause : " + whereclause );
+
 			//let CV1 be the childvalue with the largest CP  Feb 6 Yan
+			System.out.println("Select distinct " + nodeName + " from " + table_final_smoothed + " where " + whereclause.substring(0, whereclause.length()-4) + " order by CP desc;");
 			ResultSet rst_temp = st1.executeQuery("Select distinct " + nodeName + " from " + table_final_smoothed + " where " + whereclause.substring(0, whereclause.length()-4) + " order by CP desc;");
-			//System.out.println("Select distinct " + nodeName + " from " + table_final_smoothed + " where " + whereclause.substring(0, whereclause.length()-4) + " order by CP desc;");
-			rst_temp.absolute(1);
-			String CV1 = rst_temp.getString(1);
-			//System.out.println(nodeName + " CV1: " + CV1);
-			
-			//System.out.println(whereclause);
-			ResultSet rst_temp2 = st1.executeQuery("Select sum(CP) from " + table_final_smoothed + "where " + whereclause + " " + nodeName + " <> '" + CV1 + "';");
-			rst_temp2.absolute(1);
-			float SubTot = rst_temp2.getFloat(1);
-			//if (SubTot >= 1.0)
-			//	SubTot = 1 ;
-			//System.out.println("SubTot : "+ SubTot);
-			String query_temp1 = "Update " + table_final_smoothed + " Set CP = 1-" + SubTot + " Where " + whereclause + " " + nodeName + "='" + CV1 + "';";
-			//System.out.println("may generate minus CP value"+query_temp1);// Nov 12 zqian
-			st1.execute(query_temp1);
+
+			String CV1 = null; 
+			if (rst_temp.absolute(1)){
+				CV1 = 	rst_temp.getString(1);
+				System.out.println(nodeName + " CV1: " + CV1);
+				
+				//System.out.println(whereclause);
+				ResultSet rst_temp2 = st1.executeQuery("Select sum(CP) from " + table_final_smoothed + "where " + whereclause + " " + nodeName + " <> '" + CV1 + "';");
+				rst_temp2.absolute(1);
+				float SubTot = rst_temp2.getFloat(1);
+				//if (SubTot >= 1.0)
+				//	SubTot = 1 ;
+				//System.out.println("SubTot : "+ SubTot);
+				String query_temp1 = "Update " + table_final_smoothed + " Set CP = 1-" + SubTot + " Where " + whereclause + " " + nodeName + "='" + CV1 + "';";
+				//System.out.println("may generate minus CP value"+query_temp1);// Nov 12 zqian
+				st1.execute(query_temp1);	
+				
+			}				
 			
 			whereclause = "";
 			
@@ -729,6 +738,7 @@ public class KLD_generator {
 		    parents.remove(parents.size()-1);
 		    parents.remove(parents.size()-1);
 		    parents.remove(parents.size()-1);		    
+		    parents.remove(parents.size()-1);
 		    parents.remove(parents.size()-1);
 		    
 		    //Nov 28 @ zqian, only add index to KLD table?  helpful for update?

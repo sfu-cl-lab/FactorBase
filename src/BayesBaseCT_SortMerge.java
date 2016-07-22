@@ -76,7 +76,9 @@ public class BayesBaseCT_SortMerge {
 		} else if (opt2.equals("1")) { //LinkCorrelations 
 			bzsr.runScript("src/scripts/metadata_2.sql");
 		} else {
-			bzsr.runScript("src/scripts/metadata_2_nolink.sql");
+			bzsr.runScript("src/scripts/metadata_2.sql");
+			// modified on Feb. 3rd, 2015, zqian, to include rnode as columns
+//			bzsr.runScript("src/scripts/metadata_2_nolink.sql");
 		}
 		
 		
@@ -109,6 +111,7 @@ public class BayesBaseCT_SortMerge {
 			bzsr.runScript("src/scripts/metadata_3.sql");
 		} else {
 			bzsr.runScript("src/scripts/metadata_3_nolink.sql");
+			// modified on Feb. 3rd, 2015, zqian, to include rnode as columns
 		}
 		
         // building CT tables for Rchain
@@ -140,6 +143,7 @@ public class BayesBaseCT_SortMerge {
 			bzsr.runScript("src/scripts/metadata_3.sql");
 		} else {
 			bzsr.runScript("src/scripts/metadata_3_nolink.sql");
+			// modified on Feb. 3rd, 2015, zqian, to include rnode as columns
 		}
 		
         // building CT tables for Rchain
@@ -172,6 +176,9 @@ public class BayesBaseCT_SortMerge {
 			bzsr.runScript("src/scripts/metadata_3.sql");
 		} else {
 			bzsr.runScript("src/scripts/metadata_3_nolink.sql");
+
+			// modified on Feb. 3rd, 2015, zqian, to include rnode as columns
+
 		}
 		
         // building CT tables for Rchain

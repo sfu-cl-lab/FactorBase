@@ -14,7 +14,7 @@ public class Config
     {
         configFile = new java.util.Properties();
         try {
-        	//fr = new FileReader("src/config.cfg"); // June 17, 2014, for FunctorWrapper, NOTE: real data for FunctorWrapper, cross validation: e.g. unielwin_Training1 
+        	//fr = new FileReader("src/config1.cfg"); // June 17, 2014, for FunctorWrapper, NOTE: real data for FunctorWrapper, cross validation: e.g. unielwin_Training1 
         	fr = new FileReader( "cfg/subsetctcomputation.cfg" );  // May 22, 2014 zqian, computing the score for link analysis off.
             reader = new BufferedReader(fr);
             configFile.load( reader );
