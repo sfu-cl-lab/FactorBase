@@ -137,26 +137,26 @@ public class BayesBaseH {
 			// Export to .mln file,banff workshop demo, 2015
 			//Exporter.strBuilder(con1,con2,databaseName);
 			//score Bayes net: compute KL divergence, and log-likelihood (average probability of  node value given its Markov blanket, compared to database frequencies)
-//May 7th, zqian, For RDN do not need to do the smoothing
-			//COMPUTE KLD
-			long l = System.currentTimeMillis(); //@zqian : measure structure learning time
-
-			if (opt3.equals("1")) {
-				System.out.println("\n KLD_generator.KLDGenerator.");
-				KLD_generator.KLDGenerator(databaseName,con2);
-			} else {
-				System.out.println("\n KLD_generator.smoothed_CP.");
-				KLD_generator.smoothed_CP(rchain, con2);
-			}
-
-			//generating the bif file, in order to feed into UBC tool (bayes.jar). Based on the largest relationship chain.
-			//need cp tables
-			BIF_Generator.generate_bif(databaseName,"Bif_"+databaseName+".xml",con2);
-
-			long l2 = System.currentTimeMillis();  //@zqian : measure structure learning time
-			System.out.print("smoothed_CP Time(ms): "+(l2-l)+" ms.\n");
-
-
+////May 7th, zqian, For RDN do not need to do the smoothing
+//			//COMPUTE KLD
+//			long l = System.currentTimeMillis(); //@zqian : measure structure learning time
+//
+//			if (opt3.equals("1")) {
+//				System.out.println("\n KLD_generator.KLDGenerator.");
+//				KLD_generator.KLDGenerator(databaseName,con2);
+//			} else {
+//				System.out.println("\n KLD_generator.smoothed_CP.");
+//				KLD_generator.smoothed_CP(rchain, con2);
+//			}
+//
+//			//generating the bif file, in order to feed into UBC tool (bayes.jar). Based on the largest relationship chain.
+//			//need cp tables
+//			BIF_Generator.generate_bif(databaseName,"Bif_"+databaseName+".xml",con2);
+//
+//			long l2 = System.currentTimeMillis();  //@zqian : measure structure learning time
+//			System.out.print("smoothed_CP Time(ms): "+(l2-l)+" ms.\n");
+//
+//
 		}
 
 		//now compute conditional probability estimates and write them to @database@_BN
