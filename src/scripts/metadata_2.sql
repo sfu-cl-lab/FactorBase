@@ -292,7 +292,10 @@ SELECT DISTINCT
 FROM
     2Nodes
         NATURAL JOIN
-    RNodes;
+    RNodes
+    /* next add the rnode as a functor node for itself Oct 13, 2016; */
+    union
+    select distinct rnid, rnid as Fid, main from RNodes;
 
 
 CREATE TABLE  Entity_BayesNets (
