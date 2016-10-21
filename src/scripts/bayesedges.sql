@@ -51,7 +51,23 @@ CREATE table Path_Aux_Edges as SELECT
     WHERE
         BN_nodes1.Rchain = BN_nodes2.Rchain
             AND FNodes.Fid = BN_nodes1.node
+            AND FNodes.main = 0
+            union distinct             
+            
+   SELECT 
+        BN_nodes1.Rchain AS Rchain,
+        BN_nodes1.node AS child,
+        BN_nodes2.node AS parent
+    FROM
+        Path_BN_nodes AS BN_nodes1,
+        Path_BN_nodes AS BN_nodes2,
+        FNodes
+    WHERE
+        BN_nodes1.Rchain = BN_nodes2.Rchain
+            AND FNodes.Fid = BN_nodes2.node
             AND FNodes.main = 0;
+/*zqian Oct 20, 2016*/
+
 ALTER TABLE Path_Aux_Edges ADD PRIMARY KEY (`Rchain`, `child`, `parent`);  
 
 
