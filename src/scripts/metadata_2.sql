@@ -368,7 +368,7 @@ union distinct
             AND FNodes.Fid = BN_nodes2.node
             AND FNodes.main = 0;
 /*zqian Oct 20, 2016*/
-*/
+
 
 ALTER TABLE Path_Aux_Edges ADD PRIMARY KEY (`Rchain`, `child`, `parent`); /* May 10th*/ 
 
