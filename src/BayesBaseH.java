@@ -106,6 +106,19 @@ public class BayesBaseH {
 		System.out.println(" ##### lattice is ready for use* "); //@zqian
 		//structure learning
 		StructureLearning(con2);
+		/**
+		 * OS: Nov 17, 2016. It can happen that Tetrad learns a forbidden edge. Argh. To catch this, we delete forbidden edges from any insertion. But then
+		 * it can happen that a node has no edge at all, not even with an empty parent. In that case the Bif generator gets messed up. So we catch such
+		 * orphaned nodes in the next statement.
+		 */
+		System.out.println("Inserting the Missing Fid as Child into Path_Bayes_Nets \n");
+		st.execute("insert ignore into Path_BayesNets select '"
+				+ rchain
+				+ "' as Rchain, Fid as child,'' as parent from FNodes  where Fid not in (select distinct child from Path_BayesNets where "
+				+ "Rchain='"
+				+ rchain
+				+ "')");
+		
 		//mapping the orig_rnid back and create a new table: Final_Path_BayesNets. //Sep 19, zqian
 		BIF_Generator.Final_Path_BayesNets(con2,rchain);
 		//parameter learning
@@ -137,26 +150,26 @@ public class BayesBaseH {
 			// Export to .mln file,banff workshop demo, 2015
 			//Exporter.strBuilder(con1,con2,databaseName);
 			//score Bayes net: compute KL divergence, and log-likelihood (average probability of  node value given its Markov blanket, compared to database frequencies)
-////May 7th, zqian, For RDN do not need to do the smoothing
-//			//COMPUTE KLD
-//			long l = System.currentTimeMillis(); //@zqian : measure structure learning time
-//
-//			if (opt3.equals("1")) {
-//				System.out.println("\n KLD_generator.KLDGenerator.");
-//				KLD_generator.KLDGenerator(databaseName,con2);
-//			} else {
-//				System.out.println("\n KLD_generator.smoothed_CP.");
-//				KLD_generator.smoothed_CP(rchain, con2);
-//			}
-//
-//			//generating the bif file, in order to feed into UBC tool (bayes.jar). Based on the largest relationship chain.
-//			//need cp tables
-//			BIF_Generator.generate_bif(databaseName,"Bif_"+databaseName+".xml",con2);
-//
-//			long l2 = System.currentTimeMillis();  //@zqian : measure structure learning time
-//			System.out.print("smoothed_CP Time(ms): "+(l2-l)+" ms.\n");
-//
-//
+//May 7th, zqian, For RDN do not need to do the smoothing
+			//COMPUTE KLD
+			long l = System.currentTimeMillis(); //@zqian : measure structure learning time
+
+			if (opt3.equals("1")) {
+				System.out.println("\n KLD_generator.KLDGenerator.");
+				KLD_generator.KLDGenerator(databaseName,con2);
+			} else {
+				System.out.println("\n KLD_generator.smoothed_CP.");
+				KLD_generator.smoothed_CP(rchain, con2);
+			}
+
+			//generating the bif file, in order to feed into UBC tool (bayes.jar). Based on the largest relationship chain.
+			//need cp tables
+			BIF_Generator.generate_bif(databaseName,"Bif_"+databaseName+".xml",con2);
+
+			long l2 = System.currentTimeMillis();  //@zqian : measure structure learning time
+			System.out.print("smoothed_CP Time(ms): "+(l2-l)+" ms.\n");
+
+
 		}
 
 		//now compute conditional probability estimates and write them to @database@_BN
