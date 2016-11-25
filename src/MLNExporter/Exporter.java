@@ -1,15 +1,22 @@
 package MLNExporter;
 
+
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.FileReader;
+import java.io.IOException;
 import java.io.PrintWriter;
+import java.io.Reader;
 import java.sql.Connection;
+import java.sql.DriverManager;
 //import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.ResultSet;
 import java.text.DecimalFormat;
+import java.util.Properties;
 /*
  * Description: This class is Exporter.
  *	   		   It allows the users to export the information for MLN file
@@ -27,7 +34,80 @@ import java.text.DecimalFormat;
  *
  */
 public class Exporter {
+	
+	
+	static Connection con1, con2;
 
+	//  to be read from config
+	static String databaseName, databaseName2;
+	static String dbUsername;
+	static String dbPassword;
+	static String dbaddress;
+	
+public static void main(String[] args) throws SQLException, IOException {
+		
+		//read config file
+		setVarsFromConfig();
+		connectDB();
+		
+		Exporter.strBuilder(con1,con2,databaseName);
+		
+		
+	    
+		
+		disconnectDB();
+	
+		
+	}
+public static void setVarsFromConfig(){
+	 Properties configFile;
+	    FileReader fr;
+	    Reader reader;
+	 configFile = new java.util.Properties();
+     try {
+     	fr = new FileReader("src/config.cfg"); 
+         reader = new BufferedReader(fr);
+         configFile.load( reader );
+     }catch(Exception eta){
+         eta.printStackTrace();
+     }	
+     databaseName = configFile.getProperty("dbname");
+	databaseName2 = databaseName + "_BN";
+	dbUsername = configFile.getProperty("dbusername");
+	dbPassword = configFile.getProperty("dbpassword");
+	dbaddress = configFile.getProperty("dbaddress");
+}
+
+
+
+public static void connectDB() throws SQLException {
+	String CONN_STR1 = "jdbc:" + dbaddress + "/" + databaseName;
+	try {
+		java.lang.Class.forName("com.mysql.jdbc.Driver");
+	} catch (Exception ex) {
+		System.err.println("Unable to load MySQL JDBC driver");
+	}
+	con1 = (Connection) DriverManager.getConnection(CONN_STR1, dbUsername, dbPassword);
+
+	String CONN_STR2 = "jdbc:" + dbaddress + "/" + databaseName2;
+	try {
+		java.lang.Class.forName("com.mysql.jdbc.Driver");
+	} catch (Exception ex) {
+		System.err.println("Unable to load MySQL JDBC driver");
+	}
+	con2 = (Connection) DriverManager.getConnection(CONN_STR2, dbUsername, dbPassword);
+	
+	
+}
+
+
+
+public static void disconnectDB() throws SQLException {
+	con1.close();
+	con2.close();
+
+}
+	
 	/*
 	 * connect to the database and explore the correct information of header(all entities) which will be used by MLN
 	 * @param con  a connection with the useful database
