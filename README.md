@@ -4,7 +4,7 @@ The source code repository for the Factor Base system. The flat learner of the c
 For more information about this project, visit our [project website](http://www.cs.sfu.ca/~oschulte/BayesBase/BayesBase.html)  
 ##How to Use  
 First you should import data into your database. We provide two sets of example datasets in `testsql` folder. Then you can either run `.jar` or compile the source yourself. If you want to visualize the BayesNet learned, you can run [BIF_Generator](https://github.com/sfu-cl-lab/BIF_Generator)  
-###Run .jar  
+###Run .jar to get the BN and MLN 
 + Modify `jar/config.cfg` with your own configuration according to format explained [here](http://www.cs.sfu.ca/~oschulte/BayesBase/options.html)  
 + In `jar` folder, run `java -jar FactorBase.jar`  
 + Converting the learned BN into MLN by running `java -jar MLNExporter.jar `
