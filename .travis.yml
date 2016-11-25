@@ -20,6 +20,8 @@ script:
   - tail jar.txt
   - ls -lh
   - tail dag_.txt
+  - java -jar MLNExporter.jar > mln_jar.txt
+  - tail mln_jar.txt
   - cd ../src
   - javac -cp ".:./lib/*" Config.java BZScriptRunner.java MakeSetup.java
   - javac -cp ".:./lib/*" RunBB.java
