@@ -418,8 +418,8 @@ public static void disconnectDB() throws SQLException {
 				file = new File(Schema + ".mln");
 				file.delete();
 				PrintWriter writer = new PrintWriter(new FileOutputStream( new File(Schema + ".mln"), true));
-				headerBuilder(con1, Schema, writer);
-				bodyBuilder(con2, Schema + "_BN", writer);
+				headerBuilder(con1, Schema, writer); //type declaration
+				bodyBuilder(con2, Schema + "_BN", writer); //builds the formulas with weights
 				writer.close();
 				System.out.println("Finished Writing MLN...");
 			} catch (FileNotFoundException e) {
