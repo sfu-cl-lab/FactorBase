@@ -12,7 +12,7 @@ First you should import data into your database. We provide two sets of example 
   
 ###Compile & Run  
 + Go into `src` folder 
-+ modify `config.cfg`  [how?]
++ modify `config.cfg`  with your own configuration according to format explained [here]
 + `javac -cp ".:./lib/*" Config.java BZScriptRunner.java MakeSetup.java`  
 + `javac -cp ".:./lib/*" RunBB.java`  
 + `mkdir src`  
