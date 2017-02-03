@@ -11,7 +11,8 @@ First you should import data into your database. We provide two sets of example 
 + For big databases, you need to specify larger java heap size. For example: `java -jar -Xmx8G FactorBase.jar`   
   
 ###Compile & Run  
-+ Go into `src` folder and modify `config.cfg`  
++ Go into `src` folder 
++ modify `config.cfg`  [how?]
 + `javac -cp ".:./lib/*" Config.java BZScriptRunner.java MakeSetup.java`  
 + `javac -cp ".:./lib/*" RunBB.java`  
 + `mkdir src`  
