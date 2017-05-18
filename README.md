@@ -24,11 +24,12 @@ The code in this repository implements the learn-and-join algorithm (see [algori
 
 The learned BN structure can be exported from the database to support a number of other applications.
 
-+ BIF format: Run the [BIF_Generator](https://github.com/sfu-cl-lab/BIF_Generator). This produces an .xml file that can be loaded into a standard Bayesian network tool. (We have tested it with the [AIspace tool](http://aispace.org/bayes/).) Queries in the learned Bayesian networks can be used as a Statistical-Relational Model to estimate frequencies in the database as explained [here](https://www.researchgate.net/publication/2919745_Selectivity_Estimation_using_Probabilistic_Models) and in our paper on [Modelling Relational Statistics With Bayes Nets](http://www.cs.sfu.ca/~oschulte/pubs.html). 
++ BIF format: Run the [BIF_Generator](https://github.com/sfu-cl-lab/BIF_Generator). This produces an .xml file that can be loaded into a standard Bayesian network tool. (We have tested it with the [AIspace tool](http://aispace.org/bayes/).) *This is the best way to visualize the learned graph structure.* 
+Queries in the learned Bayesian networks can be used as a Statistical-Relational Model to estimate frequencies in the database as explained [here](https://www.researchgate.net/publication/2919745_Selectivity_Estimation_using_Probabilistic_Models) and in our paper on [Modelling Relational Statistics With Bayes Nets](http://www.cs.sfu.ca/~oschulte/pubs.html). 
 
 + Markov Logic Network. Convert the learned BN into MLN by running `java -jar MLNExporter.jar `. For more details see [MLN_Generator](https://github.com/sfu-cl-lab/MLN_Generator).
 
-+ [Extract, Transform, Load](https://en.wikipedia.org/wiki/Extract,_transform,_load). The learned BN structure defines a set of features that can be used to transform the information in relational data into a single table format. The single table can then be loaded into standard machine learning tools. In the relational learning literature, this process is called [Propositionalization](http://link.springer.com/referenceworkentry/10.1007%2F978-0-387-30164-8_680). 
++ [Extract, Transform, Load](https://en.wikipedia.org/wiki/Extract,_transform,_load). The learned BN structure defines a set of features that can be used to transform the information in relational data into a single table format. The single table can then be loaded into standard machine learning tools. In the relational learning literature, this process is called [Propositionalization](http://link.springer.com/referenceworkentry/10.1007%2F978-0-387-30164-8_680). See also the [tutorial]See also the [tutorial](https://oschulte.github.io/srl-tutorial-slides/ch5-rel-bayes-net-classifier.pptx).
 
 	+ [Classification](https://github.com/sfu-cl-lab/etl-classification). Given a target predicate (DB column), this tool produces a single-table data with relational features. 
 	
@@ -46,15 +47,6 @@ After running the learn-and-join algorithm, the learned Bayesian network can be 
 + [Exception Mining](https://github.com/sfu-cl-lab/exception-mining) Given a relational database and a target entity set, ranks each entity according to how exceptional it is within its class. Implements our expected log-distance metric from our paper [
 Model-based Outlier Detection for Object-Relational Data] (http://www.cs.sfu.ca/~oschulte/pubs.html). Our approach fits within the general framework of [exceptional model mining](http://www.cs.uu.nl/groups/ADA/emm/), see also the [tutorial](https://oschulte.github.io/srl-tutorial-slides/ch6-anomaly.pptx). 
 
-
-
-## How to Use  
-First you should import data into your database. We provide two sets of example datasets in `testsql` folder. Then you can either run `.jar` or compile the source yourself. If you want to visualize the BayesNet learned, you can run [BIF_Generator](https://github.com/sfu-cl-lab/BIF_Generator)  
-### Run .jar to get the BN and MLN 
-1. Modify `jar/config.cfg` with your own configuration according to format explained [here](http://www.cs.sfu.ca/~oschulte/BayesBase/options.html)  
-2. In `jar` folder, run `java -jar FactorBase.jar`  
-+ Converting the learned BN into MLN by running `java -jar MLNExporter.jar `
-+ For big databases, you need to specify larger java heap size. For example: `java -jar -Xmx8G FactorBase.jar`   
   
 ### Compile & Run  
 + Go into `src` folder 
@@ -70,6 +62,4 @@ First you should import data into your database. We provide two sets of example 
   + `javac -cp ".:./lib/*" FunctorWrapper.java`  
   + `java -cp ".:./lib/*" MakeTargetSetup`  
   + `java -cp ".:./lib/*" FunctorWrapper` 
-  
-## Project Specification  
-Please visit our [project website](http://www.cs.sfu.ca/~oschulte/BayesBase/BayesBase.html)
+
