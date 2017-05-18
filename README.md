@@ -20,7 +20,7 @@ The code in this repository implements the learn-and-join algorithm (see [algori
 	1. The network structure is stored in `<db_BN>.Final_Path_BayesNets` where <db_BN> is the model database specified in your configuration file.
 	2. The conditional probability tables are stored in tables named `<db_BN.nodename>_CP` where `nodename` is the name of the child node.
 
-## Other Output Formats
+## Other Output Formats: BIF, MLN, ETL
 
 The learned BN structure can be exported from the database to support a number of other applications.
 
