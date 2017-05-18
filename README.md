@@ -3,14 +3,13 @@
 The source code repository for the FactorBase system. The input to the system is a relational schema hosted on a MySQL. The output is a Bayes net that shows probabilistic dependencies between the relationships and attributes represented in the database. 
 The code in this repository implements the learn-and-join algorithm (see [algorithm paper](http://www.cs.sfu.ca/~oschulte/pubs.html) on  ''Learning Graphical Models for Relational Data via Lattice Search''). 
 
-##Further Information
+## Further Information
 
 + Our [project website](http://www.cs.sfu.ca/~oschulte/BayesBase/BayesBase.html) contains various helpful information such as pointers to datasets, a gallery of learned models, and system tips. 
 + The [tutorial] explains the concepts underlying the algorithm and our other tools (https://oschulte.github.io/srl-tutorial-slides/)
 +  Our [system paper](http://www.cs.sfu.ca/~oschulte/pubs.html) titled '' FactorBase: Multi-Relational Model Learning with SQL All The Way'' explains the system components.
 
-
-##How to Use - Overview
+## How to Use - Overview
 
 1. Import data into a Mysql server. We provide two sets of example datasets in `testsql` folder. 
 2. Install the program: Make a local copy of `jar/FactorBase.jar` in a `jar` directory. You can also recompile the `FactorBase.jar` using our source code. (More details below.) 
@@ -21,18 +20,20 @@ The code in this repository implements the learn-and-join algorithm (see [algori
 	1. The network structure is stored in `<db_BN>.Final_Path_BayesNets` where <db_BN> is the model database specified in your configuration file.
 	2. The conditional probability tables are stored in tables named `<db_BN.nodename>_CP` where `nodename` is the name of the child node.
 
-##Other Output Formats
+## Other Output Formats
 
 The learned BN structure can be exported from the database to support a number of other applications.
 
 + BIF format: Run the [BIF_Generator](https://github.com/sfu-cl-lab/BIF_Generator). This produces an .xml file that can be loaded into a standard Bayesian network tool. (We have tested it with the [AIspace tool](http://aispace.org/bayes/).) Queries in the learned Bayesian networks can be used as a Statistical-Relational Model to estimate frequencies in the database as explained [here](https://www.researchgate.net/publication/2919745_Selectivity_Estimation_using_Probabilistic_Models) and in our paper on [Modelling Relational Statistics With Bayes Nets](http://www.cs.sfu.ca/~oschulte/pubs.html). 
+
 + Markov Logic Network. Convert the learned BN into MLN by running `java -jar MLNExporter.jar `. For more details see [MLN_Generator](https://github.com/sfu-cl-lab/MLN_Generator).
+
 + [Extract, Transform, Load](https://en.wikipedia.org/wiki/Extract,_transform,_load). The learned BN structure defines a set of features that can be used to transform the information in relational data into a single table format. The single table can then be loaded into standard machine learning tools. In the relational learning literature, this process is called [Propositionalization](http://link.springer.com/referenceworkentry/10.1007%2F978-0-387-30164-8_680). 
 	+[Classification](https://github.com/sfu-cl-lab/etl-classification). Given a target predicate (DB column), this tool produces a single-table data with relational features. 
-	+ [Outlier detection](https://github.com/sfu-cl-lab/etl-outlier-detection). Given a target entity class, this tool produces a single-table data with relational features. 
+	+[Outlier detection](https://github.com/sfu-cl-lab/etl-outlier-detection). Given a target entity class, this tool produces a single-table data with relational features. 
 
 
-##Model-based Tools for Other Applications
+## Model-based Tools for Other Applications
 
 After running the learn-and-join algorithm, the learned Bayesian network can be leveraged for various applications. 
 
