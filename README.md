@@ -6,8 +6,8 @@ The code in this repository implements the learn-and-join algorithm (see [algori
 ## Further Information
 
 + Our [project website](http://www.cs.sfu.ca/~oschulte/BayesBase/BayesBase.html) contains various helpful information such as pointers to datasets, a gallery of learned models, and system tips. 
-+ The [tutorial] explains the concepts underlying the algorithm and our other tools (https://oschulte.github.io/srl-tutorial-slides/)
-+  Our [system paper](http://www.cs.sfu.ca/~oschulte/pubs.html) titled '' FactorBase: Multi-Relational Model Learning with SQL All The Way'' explains the system components.
++ The [tutorial](https://oschulte.github.io/srl-tutorial-slides/) explains the concepts underlying the algorithm and our other tools 
++ Our [system paper](http://www.cs.sfu.ca/~oschulte/pubs.html) titled '' FactorBase: Multi-Relational Model Learning with SQL All The Way'' explains the system components.
 
 ## How to Use - Overview
 
@@ -16,8 +16,8 @@ The code in this repository implements the learn-and-join algorithm (see [algori
 3. Point the program to your MySQL server: Modify `jar/config.cfg` with your own configuration according to the format explained [here](http://www.cs.sfu.ca/~oschulte/BayesBase/options.html).  
 4. Learn a Bayesian network structure:  In the `jar` folder, run `java -jar FactorBase.jar`. 
 	+ For big databases, you may need to specify larger java heap size. For example: `java -jar -Xmx8G FactorBase.jar`.  
-5. Inspect the Bayesian network. We follow the [BayesStore](http://dl.acm.org/citation.cfm?id=1453896) design philophy where statistical objects are treated as managed within the database. 
-	1. The network structure is stored in `<db_BN>.Final_Path_BayesNets` where <db_BN> is the model database specified in your configuration file.
+5. Inspect the Bayesian network. We follow the [BayesStore](http://dl.acm.org/citation.cfm?id=1453896) design philosphy where statistical objects are treated as managed within the database. 
+	1. The network structure is stored in `<db_BN>.Final_Path_BayesNets` where `<db_BN>` is the model database specified in your configuration file.
 	2. The conditional probability tables are stored in tables named `<db_BN.nodename>_CP` where `nodename` is the name of the child node.
 
 ## Other Output Formats: BIF, MLN, ETL
@@ -40,12 +40,14 @@ Queries in the learned Bayesian networks can be used as a Statistical-Relational
 
 After running the learn-and-join algorithm, the learned Bayesian network can be leveraged for various applications. 
 
-+ [Relational Classification](https://github.com/sfu-cl-lab/relational-classification). Given a target instance (cell in the database), computes a probability for each possible value.
++ [Relational Classification](https://github.com/sfu-cl-lab/relational-classification). 
+Given a target instance (cell in the database), computes a probability for each possible value.
 
-+ [Data Cleaning](https://github.com/sfu-cl-lab/data-cleaning) Given a relational database, ranks the database values according to their (im)probability.
++ [Data Cleaning](https://github.com/sfu-cl-lab/data-cleaning) 
+Given a relational database, ranks the database values according to their (im)probability.
 
-+ [Exception Mining](https://github.com/sfu-cl-lab/exception-mining) Given a relational database and a target entity set, ranks each entity according to how exceptional it is within its class. Implements our expected log-distance metric from our paper [
-Model-based Outlier Detection for Object-Relational Data] (http://www.cs.sfu.ca/~oschulte/pubs.html). Our approach fits within the general framework of [exceptional model mining](http://www.cs.uu.nl/groups/ADA/emm/), see also the [tutorial](https://oschulte.github.io/srl-tutorial-slides/ch6-anomaly.pptx). 
++ [Exception Mining](https://github.com/sfu-cl-lab/exception-mining) 
+Given a relational database and a target entity set, ranks each entity according to how exceptional it is within its class. Implements our expected log-distance metric from our paper [Model-based Outlier Detection for Object-Relational Data](http://www.cs.sfu.ca/~oschulte/pubs.html). Our approach fits within the general framework of [exceptional model mining(http://www.cs.uu.nl/groups/ADA/emm/), see also the [tutorial](https://oschulte.github.io/srl-tutorial-slides/ch6-anomaly.pptx). 
 
   
 ### Compile & Run  
