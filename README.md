@@ -30,20 +30,20 @@ The learned BN structure can be exported from the database to support a number o
 
 + [Extract, Transform, Load](https://en.wikipedia.org/wiki/Extract,_transform,_load). The learned BN structure defines a set of features that can be used to transform the information in relational data into a single table format. The single table can then be loaded into standard machine learning tools. In the relational learning literature, this process is called [Propositionalization](http://link.springer.com/referenceworkentry/10.1007%2F978-0-387-30164-8_680). 
 
-	+[Classification](https://github.com/sfu-cl-lab/etl-classification). Given a target predicate (DB column), this tool produces a single-table data with relational features. 
+	+ [Classification](https://github.com/sfu-cl-lab/etl-classification). Given a target predicate (DB column), this tool produces a single-table data with relational features. 
 	
-	+[Outlier detection](https://github.com/sfu-cl-lab/etl-outlier-detection). Given a target entity class, this tool produces a single-table data with relational features. 
+	+ [Outlier detection](https://github.com/sfu-cl-lab/etl-outlier-detection). Given a target entity class, this tool produces a single-table data with relational features. 
 
 
 ## Model-based Tools for Other Applications
 
 After running the learn-and-join algorithm, the learned Bayesian network can be leveraged for various applications. 
 
-+[Relational Classification](https://github.com/sfu-cl-lab/relational-classification). Given a target instance (cell in the database), computes a probability for each possible value.
++ [Relational Classification](https://github.com/sfu-cl-lab/relational-classification). Given a target instance (cell in the database), computes a probability for each possible value.
 
-+[Data Cleaning](https://github.com/sfu-cl-lab/data-cleaning) Given a relational database, ranks the database values according to their (im)probability.
++ [Data Cleaning](https://github.com/sfu-cl-lab/data-cleaning) Given a relational database, ranks the database values according to their (im)probability.
 
-+[Exception Mining](https://github.com/sfu-cl-lab/exception-mining) Given a relational database and a target entity set, ranks each entity according to how exceptional it is within its class. Implements our expected log-distance metric from our paper [
++ [Exception Mining](https://github.com/sfu-cl-lab/exception-mining) Given a relational database and a target entity set, ranks each entity according to how exceptional it is within its class. Implements our expected log-distance metric from our paper [
 Model-based Outlier Detection for Object-Relational Data] (http://www.cs.sfu.ca/~oschulte/pubs.html). Our approach fits within the general framework of [exceptional model mining](http://www.cs.uu.nl/groups/ADA/emm/), see also the [tutorial](https://oschulte.github.io/srl-tutorial-slides/ch6-anomaly.pptx). 
 
 
