@@ -11,12 +11,38 @@ The code in this repository implements the learn-and-join algorithm (see [algori
 
 ## How to Use - Overview
 
-1. Import data into a Mysql server. We provide two sets of example datasets in `testsql` folder. 
-2. Install the program: Make a local copy of `jar/FactorBase.jar` in a `jar` directory. You can also recompile the `FactorBase.jar` using our source code. (More details below.) 
-3. Point the program to your MySQL server: Modify `jar/config.cfg` with your own configuration according to the format explained [here](http://www.cs.sfu.ca/~oschulte/BayesBase/options.html).  
-4. Learn a Bayesian network structure:  In the `jar` folder, run `java -jar FactorBase.jar`. 
-	+ For big databases, you may need to specify larger java heap size. For example: `java -jar -Xmx8G FactorBase.jar`.  
-5. Inspect the Bayesian network. We follow the [BayesStore](http://dl.acm.org/citation.cfm?id=1453896) design philosphy where statistical objects are treated as managed within the database. 
+1. **Import data into a Mysql server**
+
+	We provide two sets of example datasets in `testsql` folder. These are `.sql` files for:
+	* Mutagenesis
+	* Uneilwin : Dataset about the following schema ![University Schema](/images/univschema.png)
+	
+2. **Install the program** 
+
+	Navigate to the folder where you can find FactorBase.jar by 
+
+		`cd <pathToFactorBaseDirectory>/FactorBase/jar` 
+
+	Optional: You can also make a local copy of FactorBase.jar in ```/usr/bin/jar```.
+
+3. **Point to the required database in your MySQL server** 
+
+	Modify `jar/config.cfg` with your own configuration according to the sample format explained in the image. ![Sample Configuration](/images/configuration.png).  
+
+4. **Learn a Bayesian network structure** 
+
+	In the `FactorBase/jar` folder, run 
+		
+		`java -jar FactorBase.jar`
+		
+	**Note**: For big databases, you may need to specify larger java heap size by 
+	
+		`java -jar -Xmx8G FactorBase.jar`
+
+5. **Inspect the Bayesian Network (BN)**
+
+	We follow the [BayesStore](http://dl.acm.org/citation.cfm?id=1453896) design philosphy where statistical objects are treated as managed within the database. 
+	
 	1. The network structure is stored in `<db_BN>.Final_Path_BayesNets` where `<db_BN>` is the model database specified in your configuration file.
 	2. The conditional probability tables are stored in tables named `<db_BN.nodename>_CP` where `nodename` is the name of the child node.
 
