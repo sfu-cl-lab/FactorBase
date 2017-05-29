@@ -1,0 +1,120 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+
+<head>
+	<meta HTTP-EQUIV="CONTENT-TYPE" CONTENT="text/html; charset=utf-8">
+	<title>Examples: Datasets and Outputs</title>
+ 	<link rel="stylesheet" type="text/css" href="contributors_files/style.css">
+
+</head>
+<body>
+
+<div id="header">
+
+	<div id="header_inner" class="fixed">
+
+		<div id="logo">
+			<h1>Examples: Datasets and Outputs</h1>
+   		
+		</div>
+		<div id="menu">
+  		<ul>
+    		<li><a href="BayesBase.html">Home</a></li>
+      	<li><a href="download.html">Download</a></li>
+       	<li><a href="options.html">Options</a></li>
+        <li><a href="system.html">System</a></li>
+        <li><a href="issues.html">Issues</a></li>
+        <li><a href="input-output.html">Examples</a></li>
+        <li><a href="contributors.html">Contributors</a></li>
+        <li><a href="documents">Documentation</a></li>
+        <li><a href="src">Source</a></li>
+        <li><a href="Contact.html">Contact</a></li>
+      </ul>
+    </div>
+		
+	</div>
+
+</div>
+
+
+<div id="main">
+
+	<div id="main_inner" class="fixed">
+
+		<div id="primaryContent_2columns">
+  		
+  			<p>
+	We provide links to example datasets and outputs. Datasets are posted in various formats: (i) as a MySQL dump for a relational schema, (ii) in the <a href="http://pages.cs.wisc.edu/~tushar/rdnboost/will.html">WILL format</a>, similar to the Aleph ILP input format, (iii) in the .db format of <a href="http://alchemy.cs.washington.edu/">Markov Logic Networks</a> as implemented in the Alchemy system. Outputs are posted in two format: (i) a Bayes net in BIF/XML format, and (ii) a MySQL dump for a schema that contains tables for the Bayes net structure, conditional probability tables etc. </p>
+
+<br>
+
+<table class="gridtable">
+<tr>
+	<th colspan="4">Datasets</th>
+	<th colspan="2">Learned Models</th>
+</tr>
+<tr>
+	<th>Name</th>
+	<th>SQL</th>
+	<th>WILL</th>
+	<th>Alchemy</th>
+	<th>SQL</th>
+	<th>BIF/XML</th>
+</tr>
+<tr>
+	<td>unielwin</td>
+	<td><a href="DataSets/unielwin/unielwin_sql.tar.gz">unielwin_sql.tar.gz</a></td>
+	<td><a href="DataSets/WillFormat/unielwin-WillFormat.rar">unielwin-WillFormat.rar</a></td>
+	<td><a href="DataSets/AlchmeyFormat/unielwin.rar">unielwin.rar</a></td>
+	<td><a href="LearnedBNs/unielwin/unielwin_BN.tar.gz">unielwin_BN.tar.gz</a></td>
+	<td><a href="LearnedBNs/Bif_unielwin.xml">Bif_unielwin.xml</a></td>
+</tr>
+<tr>
+	<td>Mutagenesis_std</td>
+	<td><a href="DataSets/Mutagenesis_std/Mutagenesis_std_sql.tar.gz">Mutagenesis_std_sql.tar.gz</a></td>
+	<td><a href="DataSets/WillFormat/Muta-WillFormat.rar">Muta-WillFormat.rar</a></td>
+	<td><a href="DataSets/AlchmeyFormat/Mutagenesis_std.rar">Mutagenesis_std.rar</a></td>
+	<td><a href="LearnedBNs/Mutagenesis_std/Mutagenesis_std_BN.tar.gz">Mutagenesis_std_BN.tar.gz</a></td>
+	<td><a href="LearnedBNs/Bif_Mutagenesis_std.xml">Bif_Mutagenesis_std.xml</a></td>
+</tr>
+<tr>
+	<td>MovieLens_std</td>
+	<td><a href="DataSets/MovieLens_std/MovieLens_std_sql.tar.gz">MovieLens_std_sql.tar.gz</a></td>
+	<td><a href="DataSets/WillFormat/MovieLens-WillFormat.rar">MovieLens-WillFormat.rar</a></td>
+	<td><a href="DataSets/AlchmeyFormat/MovieLens_std.rar">MovieLens_std.rar</a></td>
+	<td><a href="LearnedBNs/MovieLens_std/MovieLens_std_BN.tar.gz">MovieLens_std_BN.tar.gz</a></td>
+	<td><a href="LearnedBNs/Bif_MovieLens_std.xml">Bif_MovieLens_std.xml</a></td>
+</tr>
+<tr>
+	<td>imdb_MovieLens</td>
+	<td><a href="DataSets/imdb_MovieLens/imdb_MovieLens_sql.tar.gz">imdb_MovieLens_sql.tar.gz</a></td>
+	<td><a href="DataSets/WillFormat/IMDB-WillFormat.rar">IMDB-WillFormat.rar</a></td>
+	<td><a href="DataSets/AlchmeyFormat/imdb_MovieLens.rar">imdb_MovieLens.rar</a></td>
+	<td><a href="LearnedBNs/imdb_MovieLens/imdb_MovieLens_BN.tar.gz">imdb_MovieLens_BN.tar.gz</a></td>
+	<td><a href="LearnedBNs/Bif_imdb_MovieLens.xml">Bif_imdb_MovieLens.xml</a></td>
+</tr>
+<tr>
+	<td>Hepatitis_std</td>
+	<td><a href="DataSets/Hepatitis_std/Hepatitis_std_sql.tar.gz">Hepatitis_std_sql.tar.gz</a></td>
+	<td><a href="DataSets/WillFormat/Hepatitis_std_WillFormat.rar">Hepatitis_std_WillFormat.rar</a></td>
+	<td><a href="DataSets/AlchmeyFormat/Hepatitis_std.rar">Hepatitis_std.rar</a></td>
+	<td><a href="LearnedBNs/Hepatitis_std/Hepatitis_std_BN.tar.gz">Hepatitis_std_BN.tar.gz</a></td>
+	<td><a href="LearnedBNs/Bif_Hepatitis_std.xml">Bif_Hepatitis_std.xml</a></td>
+</tr>
+<tr>
+	<td>Cont_PLG_TM<br>(Continuous database)</td>
+	<td><a href="DataSets/Hepatitis_std/Cont_PLG_TM.tar.gz">Cont_PLG_TM.tar.gz</a></td>
+	<td><a href="DataSets/WillFormat/Cont_PLG_TM_WillFormat.rar">Cont_PLG_TM_WillFormat.rar</a></td>
+	<td><a href="DataSets/AlchmeyFormat/Cont_PLG_TM.rar">Cont_PLG_TM.rar</a></td>
+	<td><a href="LearnedBNs/Cont_PLG_TM/Cont_PLG_TM_BN.tar.gz">Cont_PLG_TM_BN.tar.gz</a></td>
+	<td><em>(Cunrrently not avaliable)</em></td>
+</tr>
+</table>
+		</div>
+		
+	</div>
+	
+</div>
+
+
+</body></html>

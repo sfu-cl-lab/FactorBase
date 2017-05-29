@@ -1,0 +1,57 @@
+CREATE DATABASE  IF NOT EXISTS `Hepatitis_std_BN` /*!40100 DEFAULT CHARACTER SET latin1 */;
+USE `Hepatitis_std_BN`;
+-- MySQL dump 10.13  Distrib 5.1.69, for redhat-linux-gnu (x86_64)
+--
+-- Host: cs-oschulte-01.cs.sfu.ca    Database: Hepatitis_std_BN
+-- ------------------------------------------------------
+-- Server version	5.5.32
+
+/*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
+/*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
+/*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
+/*!40101 SET NAMES utf8 */;
+/*!40103 SET @OLD_TIME_ZONE=@@TIME_ZONE */;
+/*!40103 SET TIME_ZONE='+00:00' */;
+/*!40014 SET @OLD_UNIQUE_CHECKS=@@UNIQUE_CHECKS, UNIQUE_CHECKS=0 */;
+/*!40014 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0 */;
+/*!40101 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO' */;
+/*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
+
+--
+-- Table structure for table `alb(indis0)_CP`
+--
+
+DROP TABLE IF EXISTS `alb(indis0)_CP`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `alb(indis0)_CP` (
+  `MULT` decimal(42,0) DEFAULT NULL,
+  `ChildValue` varchar(45) DEFAULT NULL,
+  `tp(indis0)` varchar(45) DEFAULT NULL,
+  `ztt(indis0)` varchar(45) DEFAULT NULL,
+  `ParentSum` bigint(20) DEFAULT NULL,
+  `CP` float(7,6) DEFAULT NULL,
+  `likelihood` float DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `alb(indis0)_CP`
+--
+
+LOCK TABLES `alb(indis0)_CP` WRITE;
+/*!40000 ALTER TABLE `alb(indis0)_CP` DISABLE KEYS */;
+INSERT INTO `alb(indis0)_CP` VALUES ('9','0','0','0',12,0.750000,-0.287682),('153','0','0','1',167,0.916168,-0.0875556),('42','0','0','2',42,1.000000,0),('163','0','0','3',163,1.000000,0),('48','0','0','4',48,1.000000,0),('101','0','0','5',101,1.000000,0),('1','0','1','0',4,0.250000,-1.38629),('206','0','1','1',473,0.435518,-0.831219),('157','0','1','2',272,0.577206,-0.549556),('419','0','1','3',512,0.818359,-0.200454),('324','0','1','4',357,0.907563,-0.0969923),('702','0','1','5',711,0.987342,-0.0127388),('1','0','2','0',1,1.000000,0),('42','0','2','1',186,0.225806,-1.48808),('34','0','2','2',125,0.272000,-1.30195),('146','0','2','3',473,0.308668,-1.17549),('274','0','2','4',312,0.878205,-0.129875),('593','0','2','5',616,0.962662,-0.0380529),('9','0','3','0',87,0.103448,-2.26869),('4','0','3','1',25,0.160000,-1.83258),('1','0','3','2',63,0.015873,-4.14314),('9','0','3','3',171,0.052632,-2.94443),('58','0','3','4',236,0.245763,-1.40339),('655','0','3','5',800,0.818750,-0.199976),('3','1','0','0',12,0.250000,-1.38629),('14','1','0','1',167,0.083832,-2.47894),('3','1','1','0',4,0.750000,-0.287682),('267','1','1','1',473,0.564482,-0.571847),('115','1','1','2',272,0.422794,-0.86087),('93','1','1','3',512,0.181641,-1.70572),('33','1','1','4',357,0.092437,-2.38123),('9','1','1','5',711,0.012658,-4.36947),('144','1','2','1',186,0.774194,-0.255933),('91','1','2','2',125,0.728000,-0.317454),('327','1','2','3',473,0.691332,-0.369135),('38','1','2','4',312,0.121795,-2.10542),('23','1','2','5',616,0.037338,-3.28774),('78','1','3','0',87,0.896552,-0.109199),('21','1','3','1',25,0.840000,-0.174353),('62','1','3','2',63,0.984127,-0.0160003),('162','1','3','3',171,0.947368,-0.0540676),('178','1','3','4',236,0.754237,-0.282049),('145','1','3','5',800,0.181250,-1.70788);
+/*!40000 ALTER TABLE `alb(indis0)_CP` ENABLE KEYS */;
+UNLOCK TABLES;
+/*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
+
+/*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
+/*!40014 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS */;
+/*!40014 SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS */;
+/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
+/*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
+/*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
+/*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
+
+-- Dump completed on 2013-08-30 15:09:19

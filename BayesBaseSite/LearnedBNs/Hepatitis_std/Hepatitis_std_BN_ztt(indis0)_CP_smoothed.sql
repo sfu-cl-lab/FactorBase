@@ -1,0 +1,56 @@
+CREATE DATABASE  IF NOT EXISTS `Hepatitis_std_BN` /*!40100 DEFAULT CHARACTER SET latin1 */;
+USE `Hepatitis_std_BN`;
+-- MySQL dump 10.13  Distrib 5.1.69, for redhat-linux-gnu (x86_64)
+--
+-- Host: cs-oschulte-01.cs.sfu.ca    Database: Hepatitis_std_BN
+-- ------------------------------------------------------
+-- Server version	5.5.32
+
+/*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
+/*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
+/*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
+/*!40101 SET NAMES utf8 */;
+/*!40103 SET @OLD_TIME_ZONE=@@TIME_ZONE */;
+/*!40103 SET TIME_ZONE='+00:00' */;
+/*!40014 SET @OLD_UNIQUE_CHECKS=@@UNIQUE_CHECKS, UNIQUE_CHECKS=0 */;
+/*!40014 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0 */;
+/*!40101 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO' */;
+/*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
+
+--
+-- Table structure for table `ztt(indis0)_CP_smoothed`
+--
+
+DROP TABLE IF EXISTS `ztt(indis0)_CP_smoothed`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `ztt(indis0)_CP_smoothed` (
+  `MULT` decimal(42,0) DEFAULT NULL,
+  `ChildValue` varchar(45) DEFAULT NULL,
+  `ttt(indis0)` varchar(45) DEFAULT NULL,
+  `ParentSum` bigint(20) DEFAULT NULL,
+  `CP` float(7,6) DEFAULT NULL,
+  `likelihood` float DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `ztt(indis0)_CP_smoothed`
+--
+
+LOCK TABLES `ztt(indis0)_CP_smoothed` WRITE;
+/*!40000 ALTER TABLE `ztt(indis0)_CP_smoothed` DISABLE KEYS */;
+INSERT INTO `ztt(indis0)_CP_smoothed` VALUES ('100','0','0',415,0.240962,NULL),('5','0','1',373,0.013405,NULL),('2','0','2',589,0.003396,NULL),('192','1','0',415,0.462651,NULL),('207','1','1',373,0.554960,NULL),('215','1','2',589,0.365025,NULL),('152','1','3',882,0.172336,NULL),('70','1','4',901,0.077691,NULL),('21','1','5',2833,0.007413,NULL),('65','2','0',415,0.156627,NULL),('53','2','1',373,0.142091,NULL),('120','2','2',589,0.203735,NULL),('103','2','3',882,0.116780,NULL),('68','2','4',901,0.075472,NULL),('99','2','5',2833,0.034945,NULL),('56','3','0',415,0.134940,NULL),('80','3','1',373,0.214477,NULL),('181','3','2',589,0.307301,NULL),('380','3','3',882,0.430839,NULL),('271','3','4',901,0.300777,NULL),('357','3','5',2833,0.126015,NULL),('24','4','1',373,0.064343,NULL),('56','4','2',589,0.095076,NULL),('122','4','3',882,0.138322,NULL),('206','4','4',901,0.228635,NULL),('550','4','5',2833,0.194140,NULL),('4','5','1',373,0.010724,NULL),('15','5','2',589,0.025467,NULL),('124','5','3',882,0.140590,NULL),('285','5','4',901,0.316315,NULL),('1805','5','5',2833,0.637134,NULL),('1','0','3',882,0.001133,NULL),('1','0','4',901,0.001110,NULL),('1','0','5',2833,0.000353,NULL),('1','4','0',415,0.002410,NULL),('1','5','0',415,0.002410,NULL);
+/*!40000 ALTER TABLE `ztt(indis0)_CP_smoothed` ENABLE KEYS */;
+UNLOCK TABLES;
+/*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
+
+/*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
+/*!40014 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS */;
+/*!40014 SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS */;
+/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
+/*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
+/*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
+/*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
+
+-- Dump completed on 2013-08-30 15:09:20

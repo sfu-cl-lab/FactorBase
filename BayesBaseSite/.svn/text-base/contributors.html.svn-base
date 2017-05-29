@@ -1,0 +1,75 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<!--
+
+	Nonzero1.0 by nodethirtythree design
+	http://www.nodethirtythree.com
+	missing in a maze
+
+-->
+<html><head>
+<meta http-equiv="content-type" content="text/html; charset=windows-1252">
+<title>BayesBase</title>
+<meta name="keywords" content="">
+<meta name="description" content="">
+<link rel="stylesheet" type="text/css" href="contributors_files/style.css">
+</head>
+<body>
+
+<div id="header">
+
+	<div id="header_inner" class="fixed">
+
+		<div id="logo">
+			<h1>Contributors</h1>
+   		
+		</div>
+		<div id="menu">
+  		<ul>
+    		<li><a href="BayesBase.html">Home</a></li>
+      	<li><a href="download.html">Download</a></li>
+       	<li><a href="options.html">Options</a></li>
+        <li><a href="system.html">System</a></li>
+        <li><a href="issues.html">Issues</a></li>
+        <li><a href="input-output.html">Examples</a></li>
+        <li><a href="contributors.html">Contributors</a></li>
+        <li><a href="documents">Documentation</a></li>
+        <li><a href="src">Source</a></li>
+        <li><a href="Contact.html">Contact</a></li>
+      </ul>
+    </div>
+		
+	</div>
+
+</div>
+
+<div id="main">
+
+	<div id="main_inner" class="fixed">
+
+		<div id="primaryContent_2columns">
+
+			<div id="columnA_2columns" class="contributer_box">
+				<h2 align="center"><img src="contributors_files/Hassan.jpg" alt="width=&quot;120&quot;" align="absmiddle" height="170"><br><a href="http://www.cs.sfu.ca/%7Ehkhosrav/personal/"> Hassan Khosravi </a></h2>
+				<h2 align="center"><img src="contributors_files/Oliver.jpg" alt="width=&quot;120&quot;" align="absmiddle" height="170"><br><a href="http://www.cs.sfu.ca/%7Eoschulte/"> Oliver Schulte</a></h2>
+				<!-- <h2 align="center"><img src="contributors_files/Mike.jpg" alt="width=&quot;120&quot;" align="absmiddle" height="170"><br>Tong Man</h2>
+				<h2 align="center"><img src="contributors_files/bahareh.jpg" alt="width=&quot;120&quot;" align="absmiddle" height="170"><br><a href="http://www.sfu.ca/%7Ebba18/bahar-bina/Home.html"> Bahareh Bina </a></h2> -->
+				<!-- <h2 align="center"><img src="contributors_files/Vivian.jpg" alt="width=&quot;105&quot;" align="absmiddle" height="150"><br>Xiaoyuan Xu</h2> -->
+				<h2 align="center"><img src="contributors_files/Elwin.jpg" alt="width=&quot;105&quot;" align="absmiddle" height="150"><br>Tianxiang Gao</h2>
+				<h2 align="center"><img src="contributors_files/Yuke.jpg" alt="width=&quot;105&quot;" align="absmiddle" height="150"><br>Yuke Zhu</h2>
+				<h2 align="center"><img src="contributors_files/Yan.jpg" alt="width=&quot;105&quot;" align="absmiddle" height="150"><br>Yan Sun</h2>
+				<h2 align="center"><img src="contributors_files/Nicole.jpg" alt="width=&quot;105&quot;" align="absmiddle" height="150"><br>Qing Li</h2>
+				<h2 align="center"><img src="contributors_files/Samarth.jpg" alt="width=&quot;105&quot;" align="absmiddle" height="150"><br>Samarth Gupta</h2>
+				<h2 align="center"><img src="contributors_files/Zhensong.jpg" alt="width=&quot;105&quot;" align="absmiddle" height="150"><br>Zhensong Qian</h2>
+				<h2 align="center"><img src="contributors_files/Sarah.jpg" alt="width=&quot;105&quot;" align="absmiddle" height="150"><br>Sarah Riahi</h2>
+			</div>
+			
+		</div>
+		
+	</div>
+	
+</div>
+
+
+
+</body></html>
+<!-- web37412.mail.mud.yahoo.com compressed/chunked Fri Oct  5 14:02:09 PDT 2007 -->

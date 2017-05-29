@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<!--
+
+	Nonzero1.0 by nodethirtythree design
+	http://www.nodethirtythree.com
+	missing in a maze
+
+-->
+<html><head>
+<meta HTTP-EQUIV="CONTENT-TYPE" CONTENT="text/html; charset=utf-8">
+<title>Installation and Systems Requirement</title>
+<link rel="stylesheet" type="text/css" href="contributors_files/style.css">
+</head>
+<body>
+
+<div id="header">
+
+	<div id="header_inner" class="fixed">
+
+		<div id="logo">
+			<h1>Installation</h1>
+   		
+		</div>
+			<div id="menu">
+  		<ul>
+    		<li><a href="BayesBase.html">Home</a></li>
+      	<li><a href="Download.html">Download</a></li>
+       	<li><a href="options.html">Options</a></li>
+        <li><a href="system.html">System</a></li>
+        <li><a href="issues.html">Issues</a></li>
+        <li><a href="input-output.html">Examples</a></li>
+        <li><a href="contributors.html">Contributors</a></li>
+        <li><a href="documents">Documentation</a></li>
+        <li><a href="src">Source</a></li>
+        <li><a href="Contact.html">Contact</a></li>
+      </ul>
+    </div>
+		
+	</div>
+
+</div>
+
+<div id="main">
+
+	<div id="main_inner" class="fixed">
+
+		<div id="primaryContent_2columns">
+  		
+  			<h2>Running the System</h2>
+     		<p></p>
+				<ol style="list-style-type: decimal;">
+					<li>Download the <a href="DownloadCounter.php">package here</a> and extract.</li>
+					<li>The options are explained <a href="options.html"> here.</a> If <i>jardir</i> is the name of the directory containing your jar file, the configuration file should be placed in <i>jardir/src/ </i> so that they system can find it.</li>
+					<li>Run the jar file <i>RunBB.jar</i>. At a unix terminal, you would type: <br>java -jar RunBB.jar </br></li>
+					<li>If everything worked, you should find an output file called <br>BIF_<i>dbname</i>.xml</br> where <i>dbname</i> is what you entered in the configurations options in the field "dbname". You should be able to open this file using the UBC Bayes net tool. Here's a <a href="http://aispace.org/bayes/bayes.jnlp"> jar file</a> for that tool. Other Bayes net readers should work too but
+	we haven't tested them.</li>
+				<li>Also, the schema <i>dbname</i>_BN on your MySQL server should contain a table PathBayesNets that lists the edges in the learned Bayes net. There are many other database tables in that schema that contain information about the learned model.</li>
+	
+				</ol>
+				</br>
+    		</br>
+				<h2>Setting up the Target Database for Analysis</h2>
+				</br>
+				<p>The program reads information about tables, columns, data types etc. for your database from the systems catalog. <i> It assumes that your database schema follows a standard <a href="https://en.wikipedia.org/wiki/Entity-relationship_model"> Entity-Relationship design </a>. </i> </p>
+
+				<ol style="list-style-type: decimal;">
+					<li>For every entity type (domain) in your relational structure,
+there should be a table listing the members of that domain. The table should have a single primary key field and no foreign key pointers. For instance, you may have a table Students with a single primary key field sid, and a table Courses with a single primary key field cid.
+				</li>
+					<li>For every type of link/relationship, there should be a table listing the pairs in the relationship. That table should have two primary key fields, each of which is a foreign key field as well. For instance, you may have a table Registered with two primary key fields sid, cid, where sid is a foreign key pointer to Student and cid a foreign key pointer
+	to Courses.</li>
+					<li>The program should also be able to handle a functional relationship, e.g. Father(Person). In that case it expects a single table with one primary key field and two foreign key fields. </li>
+				</ol>
+
+				<p>The system tries to detect if your schema does not satisfy the ER design criteria and output a warning message. <br>When you choose the option AutomaticSetup = 1, the system creates a database named <i>dbname</i>_setup where <i>dbname</i> is what you entered in the configurations options in the field "dbname". </br>You can look at this database to see what information the program extracted from your schema. You can edit the setup database directly and then run the system again with AutomaticSetup = 0.</p>
+
+
+    		</br>
+      	</br>
+				<h2>Tips and Tricks</h2>
+    		</br>
+				<ol style="list-style-type: decimal;">
+					<li>If you get an error message like <p>Exception in thread "main" java.lang.OutOfMemoryError: Java heap space </p> the first thing to try is to increase the heap space. One option that has worked for us is to run the program as follows <p> java -jar -Xms512m -Xmx1024m RunBB.jar </p></li>
+					<li>Check the <a href="issues.html"> known issues and limitations file</a> for other problems. </li>
+					<li> If this doesn't help, contact us and we'll see what we can do. If you can send your database, that would be very helpful.
+				</ol>
+		</div>
+		
+	</div>
+	
+</div>
+
+
+
+</body></html>
+<!-- web37412.mail.mud.yahoo.com compressed/chunked Fri Oct  5 14:02:09 PDT 2007 -->

@@ -1,0 +1,73 @@
+KLD_generator
+Database name of original dataset and BN database are needed.
+
+
+1. smoothed_CP
+input: the biggest rchain 
+output: smoothed conditional probabiliy for each node in given rchain
+
+workflow:
+1) for the node that has parents: 
+	loop all such nodes
+	new_table_smoothed: generate smoothed CP for one node
+		1.1 pair_table: generate full pairs table (we mean pairs of child value + parent state)
+			join all node columns (e.g. ChildeValue, b, grade, sat...) in original CP table to get all possible pairs
+		1.2 insert rows into smoothed CP that exist in original CP table
+		1.3 insert rows into smoothed CP that not exist in original CP table, MULT=0, from full pair table
+			pair table is temprory table, can be dropped here
+		1.4 MULT=MULT+1
+		1.5 update_ps: calculate parent_sum and CP
+			create a temp table to get parent_sum for smoothed CP
+			update parentsum and CP column in smoothed CP table
+			
+2) for the node that doesn't have parents
+	loop all such nodes
+	copy values from original CP table and ++MULT, recalculate CP column
+	
+2. create_join_CP
+input: the biggest rchain 
+output: KLD for the given rchain
+
+Create one KLD table for given rchain, based on table `rchain_CT`.
+The structure of KLD table is similar to `rchain_CT`, and add columns for conditional probability for each node in rchain, joined probability (both smoothed and unsmoothed), and KLD.
+
+workflow:
+1) create KLD table
+2) insert value for each node into KLD table (select * from `rchain_CT`)
+3) insert_CP_Values: insert CP value to each node
+	for the node without parents
+		loop all such nodes
+			set the CP value of that node equal to its smoothed CP value when the node value match
+	for the node has parents
+		loop all such nodes
+			set the CP value of that node equal to its smoothed CP value when the node value match and the values of all its parents mathch
+			
+4) cal_KLD: calculate JP, JP_DB and KLD
+	JP(smoothed) = the product of conditional probability of all nodes in given rchain
+	JP_DB(unsmoothed) = mult / sum(mult)
+	KLD = JP_DB * LOG(JP_DB / JP)
+	
+3. generate_CLL
+input: the biggest rchain 
+output: CLL table of each node in given rchain
+
+workflow:
+loop all nodes in given rchain:
+generate_CLL_node: generate CLL table for one node
+
+	1) markov_blank: get markov blanket of one node in given rchain, and return the result in an array list
+		get children, parents and spouses of the node and store in a set (to reduce all duplicate nodes)
+		turn the set into an array list and return the list
+	2) create CLL table of the node, containing these columns: the value of the target node and all nodes in its markov blanket, JP_DB, JP_DB_blanket, CLL_DB, JP, JP_blanket, CLL_JP
+	
+	compute conditional probability by dividing joint probability of child + markov blanket over joint prob of markov blanket.
+	
+	JP_DB = sum(JP_DB) in KLD table of given rchain, group by the target node and all nodes in its markov blanket
+	JP = sum(JP) in KLD table of given rchain, group by the target node and all nodes in its markov blanket
+	JP_DB_blanket = sum(JP_DB) in CLL table of given node and group by all nodes in its markov blanket
+	JP_blanket = sum(JP) in CLL table of given node and group by all nodes in its markov blanket
+	CLL_DB = JP_DB / JP_DB_blanket
+	CLL = JP / JP_blanket
+	
+	
+	

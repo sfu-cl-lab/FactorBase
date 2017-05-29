@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<!--
+
+	Nonzero1.0 by nodethirtythree design
+	http://www.nodethirtythree.com
+	missing in a maze
+
+-->
+<html><head>
+<meta http-equiv="content-type" content="text/html; charset=windows-1252">
+<title>BayesBase</title>
+<meta name="keywords" content="">
+<meta name="description" content="">
+<link rel="stylesheet" type="text/css" href="contributors_files/style.css">
+</head>
+<body>
+
+<div id="header">
+
+	<div id="header_inner" class="fixed">
+
+		<div id="logo">
+			<h1>The BayesBase System</h1>
+   		<h2>Learning Bayes Nets for Relational Databases</h2>
+		</div>
+		<?php include("menu.php"); ?>
+		
+	</div>
+
+</div>
+
+<div id="main">
+
+	<div id="main_inner" class="fixed">
+
+		<div id="primaryContent_2columns">
+  			<p class="bold">This webpage provides access to source code, examples, and other resources for the BayesBase learning system. The system is mainly an implementation of the Learn-and-Join Algorithm. For background concepts and pseudocode, please see <a href="mlj.pdf"> our paper .</a> We make heavy use of the <a href="http://www.phil.cmu.edu/projects/tetrad/"> Tetrad System .</a> The previous version is <a href="http://www.cs.sfu.ca/~oschulte/jbn/laj.html">available here.</a> The current version does not yet output Markov Logic Networks, but the previous version does.</p>
+</div>
+<h2 class = "hleft">Basic Workflow </h2>
+
+<p class = "pleft">The input to the system is a relational schema hosted on a MySQL. The output is a Bayes net that shows probabilistic dependencies between the relationships and attributes represented in the database. The output comes in two formats.</p>
+
+<ol style="list-style-type: decimal;" class = "c">
+	<li>A representation of the Bayes net model in relational tables. We treat as first-class relational citizens all structured objects such as the
+	Bayes net graph, conditional probability tables, statistical scores. 
+	SQL can be used to query the Bayes net  model components.</li>
+	<li>A Bayes Net Interchange Format file for viewing in a standard Bayes net reader. We have tested this with UBC's <a href="http://aispace.org/bayes/"> AIspace tool .</a></li>
+</ol>
+		</div>
+		
+	</div>
+	
+</div>
+
+<?php
+        function get_hit($counter_file)   
+        {
+            $count=0;                           
+
+            if(file_exists($counter_file))      
+            {
+                $fp=fopen($counter_file,"r"); 
+                $count=0+fgets($fp,20);
+                fclose($fp);                    
+            }
+
+            $count++;                         
+            $fp=fopen($counter_file,"w");       
+            fputs($fp,$count);               
+            fclose($fp);
+            return($count);                  
+        }
+?>
+
+<?php
+                $hit=get_hit("bccounter.txt");
+                header('http://www.cs.sfu.ca/~oschulte/BayesBase/RunBayesBase1.0.tar.gz');
+?>
+
+</body></html>
+<!-- web37412.mail.mud.yahoo.com compressed/chunked Fri Oct  5 14:02:09 PDT 2007 -->

@@ -1,0 +1,53 @@
+K 25
+svn:wc:ra_dav:version-url
+V 73
+/svn/oschulte-srl/!svn/ver/1937/website/BayesBase/DataSets/imdb_MovieLens
+END
+imdb_MovieLens_sql.tar.gz
+K 25
+svn:wc:ra_dav:version-url
+V 99
+/svn/oschulte-srl/!svn/ver/1937/website/BayesBase/DataSets/imdb_MovieLens/imdb_MovieLens_sql.tar.gz
+END
+imdb_MovieLens_actors.sql
+K 25
+svn:wc:ra_dav:version-url
+V 99
+/svn/oschulte-srl/!svn/ver/1937/website/BayesBase/DataSets/imdb_MovieLens/imdb_MovieLens_actors.sql
+END
+imdb_MovieLens_directors.sql
+K 25
+svn:wc:ra_dav:version-url
+V 102
+/svn/oschulte-srl/!svn/ver/1937/website/BayesBase/DataSets/imdb_MovieLens/imdb_MovieLens_directors.sql
+END
+imdb_MovieLens_movies2actors.sql
+K 25
+svn:wc:ra_dav:version-url
+V 106
+/svn/oschulte-srl/!svn/ver/1937/website/BayesBase/DataSets/imdb_MovieLens/imdb_MovieLens_movies2actors.sql
+END
+imdb_MovieLens_u2base.sql
+K 25
+svn:wc:ra_dav:version-url
+V 99
+/svn/oschulte-srl/!svn/ver/1937/website/BayesBase/DataSets/imdb_MovieLens/imdb_MovieLens_u2base.sql
+END
+imdb_MovieLens_users.sql
+K 25
+svn:wc:ra_dav:version-url
+V 98
+/svn/oschulte-srl/!svn/ver/1937/website/BayesBase/DataSets/imdb_MovieLens/imdb_MovieLens_users.sql
+END
+imdb_MovieLens_movies.sql
+K 25
+svn:wc:ra_dav:version-url
+V 99
+/svn/oschulte-srl/!svn/ver/1937/website/BayesBase/DataSets/imdb_MovieLens/imdb_MovieLens_movies.sql
+END
+imdb_MovieLens_movies2directors.sql
+K 25
+svn:wc:ra_dav:version-url
+V 109
+/svn/oschulte-srl/!svn/ver/1937/website/BayesBase/DataSets/imdb_MovieLens/imdb_MovieLens_movies2directors.sql
+END
