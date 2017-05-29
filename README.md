@@ -21,7 +21,7 @@ The code in this repository implements the learn-and-join algorithm (see [algori
 
 	Navigate to the folder where you can find FactorBase.jar by 
 
-		`cd <pathToFactorBaseDirectory>/FactorBase/jar` 
+		` cd <pathToFactorBaseDirectory>/FactorBase/jar ` 
 
 	Optional: You can also make a local copy of FactorBase.jar in ```/usr/bin/jar```.
 
@@ -50,12 +50,17 @@ The code in this repository implements the learn-and-join algorithm (see [algori
 
 The learned BN structure can be exported from the database to support a number of other applications.
 
-+ BIF format: Run the [BIF_Generator](https://github.com/sfu-cl-lab/BIF_Generator). This produces an .xml file that can be loaded into a standard Bayesian network tool. (We have tested it with the [AIspace tool](http://aispace.org/bayes/).) *This is the best way to visualize the learned graph structure.* 
-Queries in the learned Bayesian networks can be used as a Statistical-Relational Model to estimate frequencies in the database as explained [here](https://www.researchgate.net/publication/2919745_Selectivity_Estimation_using_Probabilistic_Models) and in our paper on [Modelling Relational Statistics With Bayes Nets](http://www.cs.sfu.ca/%7Eoschulte/files/pubs/ilp2012.pdf). 
++ **[BIF_Generator](https://github.com/sfu-cl-lab/BIF_Generator)**
+	* Bayesian Interchange Format (BIF) Generator produces an .xml file that can be loaded into a standard **Bayesian Network** tool (like [AIspace tool](http://aispace.org/bayes/).) 
+	*This is the best way to visualize the learned graph structure.* 
+	* Queries in the learned Bayesian networks can be used as a Statistical-Relational Model to estimate frequencies in the database as explained [here](https://www.researchgate.net/publication/2919745_Selectivity_Estimation_using_Probabilistic_Models) and in our paper on [Modelling Relational Statistics With Bayes Nets](http://www.cs.sfu.ca/%7Eoschulte/files/pubs/ilp2012.pdf). 
 
-+ Markov Logic Network. Convert the learned BN into MLN by running `java -jar MLNExporter.jar `. For more details see [MLN_Generator](https://github.com/sfu-cl-lab/MLN_Generator).
++ **[MLN_Generator](https://github.com/sfu-cl-lab/MLN_Generator)**
+	* Markov Logic Network (MLN) is a first-order knowledge base with a weight attached to each formula (or clause)
+	* Convert the learned BN into MLN by running `java -jar MLNExporter.jar `. For more details see .
 
-+ [Extract, Transform, Load](https://en.wikipedia.org/wiki/Extract,_transform,_load). The learned BN structure defines a set of features that can be used to transform the information in relational data into a single table format. The single table can then be loaded into standard machine learning tools. In the relational learning literature, this process is called [Propositionalization](http://link.springer.com/referenceworkentry/10.1007%2F978-0-387-30164-8_680). See also the [tutorial]See also the [tutorial](https://oschulte.github.io/srl-tutorial-slides/ch5-rel-bayes-net-classifier.pptx).
++ **[Extract, Transform, Load](https://en.wikipedia.org/wiki/Extract,_transform,_load)**
+	* The learned BN structure defines a set of features that can be used to transform the information in relational data into a single table format. The single table can then be loaded into standard machine learning tools. In the relational learning literature, this process is called [Propositionalization](http://link.springer.com/referenceworkentry/10.1007%2F978-0-387-30164-8_680). See also the [tutorial]See also the [tutorial](https://oschulte.github.io/srl-tutorial-slides/ch5-rel-bayes-net-classifier.pptx).
 
 	+ [Classification](https://github.com/sfu-cl-lab/etl-classification). Given a target predicate (DB column), this tool produces a single-table data with relational features. 
 	
@@ -67,7 +72,7 @@ Queries in the learned Bayesian networks can be used as a Statistical-Relational
 After running the learn-and-join algorithm, the learned Bayesian network can be leveraged for various applications. 
 
 + [Relational Classification](https://github.com/sfu-cl-lab/relational-classification). 
-Given a target instance (cell in the database), computes a probability for each possible value.
+Given a tarN by running java -jar MLNExporter.jar. For more details see MLN_Generator.get instance (cell in the database), computes a probability for each possible value.
 
 + [Data Cleaning](https://github.com/sfu-cl-lab/data-cleaning) 
 Given a relational database, ranks the database values according to their (im)probability.
