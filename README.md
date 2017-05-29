@@ -79,7 +79,7 @@ For more details, see MLN_Generator. Get instance (cell in the database), comput
 Given a relational database, rank the database values according to their (im)probability.
 
 + [Exception Mining](https://github.com/sfu-cl-lab/exception-mining) 
-Given a relational database and a target entity set, rank each entity according to how exceptional it is within its class. This tool implements our expected **log-distance metric** from our paper [Model-based Outlier Detection for Object-Relational Data](http://www.cs.sfu.ca/~oschulte/pubs.html). Our approach fits within the general framework of [exceptional model mining(http://www.cs.uu.nl/groups/ADA/emm/), see also the [tutorial](https://oschulte.github.io/srl-tutorial-slides/ch6-anomaly.pptx). 
+Given a relational database and a target entity set, rank each entity according to how exceptional it is within its class. This tool implements our expected **log-distance metric** from our paper [Model-based Outlier Detection for Object-Relational Data](http://www.cs.sfu.ca/~oschulte/pubs.html). Our approach fits within the general framework of [exceptional model mining](http://www.cs.uu.nl/groups/ADA/emm/), also see the [tutorial on Anomaly Detection](https://oschulte.github.io/srl-tutorial-slides/ch6-anomaly.pptx). 
 
   
 ### Compile & Run  
