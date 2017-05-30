@@ -5,7 +5,7 @@ The code in this repository implements the learn-and-join algorithm (see [algori
 
 ## Further Information
 
-+ Our [project website](http://www.cs.sfu.ca/~oschulte/BayesBase/BayesBase.html) contains various helpful information such as pointers to datasets, a gallery of learned models, and system tips. 
++ Our [project website](https://sfu-cl-lab.github.io/FactorBase/) contains various helpful information such as pointers to datasets, a gallery of learned models, and system tips. 
 + The [tutorial](https://oschulte.github.io/srl-tutorial-slides/) explains the concepts underlying the algorithm and our other tools 
 + Our [system paper](http://www.cs.sfu.ca/~oschulte/pubs.html) titled '' FactorBase: Multi-Relational Model Learning with SQL All The Way'' explains the system components.
 
