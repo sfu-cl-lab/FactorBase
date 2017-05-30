@@ -1,0 +1,29 @@
+K 25
+svn:wc:ra_dav:version-url
+V 72
+/svn/oschulte-srl/!svn/ver/1922/website/BayesBase/DataSets/MovieLens_std
+END
+MovieLens_std_User.sql
+K 25
+svn:wc:ra_dav:version-url
+V 95
+/svn/oschulte-srl/!svn/ver/1922/website/BayesBase/DataSets/MovieLens_std/MovieLens_std_User.sql
+END
+MovieLens_std_item2.sql
+K 25
+svn:wc:ra_dav:version-url
+V 96
+/svn/oschulte-srl/!svn/ver/1922/website/BayesBase/DataSets/MovieLens_std/MovieLens_std_item2.sql
+END
+MovieLens_std_u2base.sql
+K 25
+svn:wc:ra_dav:version-url
+V 97
+/svn/oschulte-srl/!svn/ver/1922/website/BayesBase/DataSets/MovieLens_std/MovieLens_std_u2base.sql
+END
+MovieLens_std_sql.tar.gz
+K 25
+svn:wc:ra_dav:version-url
+V 97
+/svn/oschulte-srl/!svn/ver/1922/website/BayesBase/DataSets/MovieLens_std/MovieLens_std_sql.tar.gz
+END

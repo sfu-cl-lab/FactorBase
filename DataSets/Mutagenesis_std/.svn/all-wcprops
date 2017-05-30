@@ -1,0 +1,35 @@
+K 25
+svn:wc:ra_dav:version-url
+V 74
+/svn/oschulte-srl/!svn/ver/1922/website/BayesBase/DataSets/Mutagenesis_std
+END
+Mutagenesis_std_sql.tar.gz
+K 25
+svn:wc:ra_dav:version-url
+V 101
+/svn/oschulte-srl/!svn/ver/1922/website/BayesBase/DataSets/Mutagenesis_std/Mutagenesis_std_sql.tar.gz
+END
+Mutagenesis_std_Mole.sql
+K 25
+svn:wc:ra_dav:version-url
+V 99
+/svn/oschulte-srl/!svn/ver/1922/website/BayesBase/DataSets/Mutagenesis_std/Mutagenesis_std_Mole.sql
+END
+Mutagenesis_std_moleatm.sql
+K 25
+svn:wc:ra_dav:version-url
+V 102
+/svn/oschulte-srl/!svn/ver/1922/website/BayesBase/DataSets/Mutagenesis_std/Mutagenesis_std_moleatm.sql
+END
+Mutagenesis_std_Atom.sql
+K 25
+svn:wc:ra_dav:version-url
+V 99
+/svn/oschulte-srl/!svn/ver/1922/website/BayesBase/DataSets/Mutagenesis_std/Mutagenesis_std_Atom.sql
+END
+Mutagenesis_std_bond.sql
+K 25
+svn:wc:ra_dav:version-url
+V 99
+/svn/oschulte-srl/!svn/ver/1922/website/BayesBase/DataSets/Mutagenesis_std/Mutagenesis_std_bond.sql
+END
