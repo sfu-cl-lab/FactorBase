@@ -82,6 +82,8 @@ public class MakeTargetSetup {
 		//System.out.println( "SHOW TABLES IN " + databaseName + ";" );
 		ResultSet rs = st.executeQuery( "SHOW TABLES IN " + databaseName + ";" );
 		
+		//We believe that databaseName refers to the original data (e.g. unielwin) // O.S. June 12
+		//the next part copies tables and data from databaseName_test to databaseName1//
 		while ( rs.next() )
 		{
 			String tableName = rs.getString( 1 );
