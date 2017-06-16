@@ -37,11 +37,15 @@ public class MakeTargetSetup {
 		
 		/*
 		 * Create Markov Blanket
+		 e.g. in unielwin_BN. Seems to work June 16.
 		 */
 		MarkovBlanket.runMakeMarkovBlanket();
 		
+		
+		
 		/*
-		 *  Perform setup if not completed
+		 *  Perform setup if not completed.
+		 Isn't this redundant? Mayb we can just assume that setup database exists? June 16 2017
 		 */
 		RunBB.setVarsFromConfig();
 		if ( RunBB.opt1.equals( "1" ) )
@@ -59,7 +63,11 @@ public class MakeTargetSetup {
 		long t2 = System.currentTimeMillis(); 
 		System.out.println( "Running time is " + (t2-t1) + "ms." );
 		
+		/*creates new schemas, e.g. unielwin_target, unielwin_target_setup June 16*/
+		
 		runMakeTargetSetup();
+		
+		
 		
 		t2 = System.currentTimeMillis();
 		System.out.println( "Final runtime is: " + ( t2 - t1 ) + "ms." );
