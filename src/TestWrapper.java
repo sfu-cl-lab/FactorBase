@@ -172,6 +172,7 @@ public class TestWrapper {
 		MarkovBlanket.runMakeMarkovBlanket();
 		functorId = functors.get(i);
 		/* Store functorId in @database@_BN  */
+		/*so why didn't you just pass a functorID? Vidhi June 16 2017 */
 		 functorId_In_BN=functorId;
 		// Get pvars for functor, e.g. student0_counts */
 		ArrayList<String> functorArgs = GetFunctorArgs( functorId );
@@ -215,6 +216,7 @@ public class TestWrapper {
 		
 		// to do : generate local ct based on the associated columns, Aug. 8th, 2014, zqian
 		int max = BayesBaseCT_SortMerge.buildSubCTTarget(functorId,databaseName+"_BN",databaseName1,databaseName1+"_BN",databaseName6);
+		/*the main hard work */
 		
 		long ctt2 = System.currentTimeMillis();
 		System.out.println( "\nBayesBaseCT_SortMerge.buildCTTarget() for target and its parents run time is: " + ( ctt2 - ctt1 ) + "ms. \n ******************************** \n\n" );
