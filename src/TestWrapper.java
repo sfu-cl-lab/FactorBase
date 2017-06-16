@@ -1,3 +1,7 @@
+/*current error CREATE TABLE unielwin_target_final_CT.`diff(course0)_CT` like unielwin_target_db.`local_CT`;
+Table 'unielwin_target_db.local_CT' doesn't exist*/
+
+
 import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
