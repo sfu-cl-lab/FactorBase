@@ -18,6 +18,7 @@ public class TestWrapper {
 	//				unielwin, unielwin_target, unielwin_target_setup, unielwin_target_final_CT,
 	static String databaseName4, databaseName5,	databaseName6;
 	// 				unielwin_target_CT, unielwin_target_final, unielwin_target_db
+	//databaseName4 is not used
 	static String dbUsername;
 	static String dbPassword;
 	static String dbaddress;
