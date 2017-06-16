@@ -16,7 +16,7 @@ public class TestWrapper {
 	static Connection con0, con1, conFinal,con_preprocess;
 	static String databaseName, databaseName1, databaseName2, databaseName3;
 	//				unielwin, unielwin_target, unielwin_target_setup, unielwin_target_final_CT,
-	static String databaseName4, databaseName5,	databaseName6;;
+	static String databaseName4, databaseName5,	databaseName6;
 	// 				unielwin_target_CT, unielwin_target_final, unielwin_target_db
 	static String dbUsername;
 	static String dbPassword;
