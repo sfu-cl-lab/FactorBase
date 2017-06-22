@@ -27,13 +27,12 @@ script:
   - javac -cp ".:./lib/*" RunBB.java
   - javac -cp ".:./lib/*" MakeTargetSetup.java
   - javac -cp ".:./lib/*" FunctorWrapper.java
-  - mv config.cfg src/
-  - mv scripts src/
   - java -cp ".:./lib/*" MakeSetup > a.txt
   - java -cp ".:./lib/*" RunBB > b.txt
   - tail a.txt
   - tail b.txt
   - tail dag_.txt
+  - cd ../../../
 after_script:
   - mysql -e "show databases;" -uroot -p123456
   - mysql -e "use unielwin_BN; show tables;" -uroot -p123456
