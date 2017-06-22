@@ -31,7 +31,6 @@ script:
   - java -cp ".:./lib/*" RunBB > b.txt
   - tail a.txt
   - tail b.txt
-  - tail dag_.txt
   - cd ../../../
 after_script:
   - mysql -e "show databases;" -uroot -p123456
