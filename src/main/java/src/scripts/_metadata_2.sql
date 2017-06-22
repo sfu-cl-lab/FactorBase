@@ -1,5 +1,5 @@
 
-USE New_Financial_std_BN;
+USE unielwin_BN;
 SET storage_engine=INNODB;
 
 
@@ -162,11 +162,11 @@ WHERE
 
 
 
-CREATE TABLE RNodes_From_List AS SELECT DISTINCT rnid, CONCAT('New_Financial_std.',TABLE_NAME, ' AS ', pvid) AS Entries FROM
+CREATE TABLE RNodes_From_List AS SELECT DISTINCT rnid, CONCAT('unielwin.',TABLE_NAME, ' AS ', pvid) AS Entries FROM
     RNodes_pvars 
 UNION DISTINCT 
 SELECT DISTINCT
-    rnid, CONCAT('New_Financial_std.',TABLE_NAME, ' AS ', rnid) AS Entries
+    rnid, CONCAT('unielwin.',TABLE_NAME, ' AS ', rnid) AS Entries
 FROM
     RNodes 
 union distinct 
@@ -456,7 +456,7 @@ CREATE table Path_Complement_Edges like Path_BayesNets;
 
 
 
-USE New_Financial_std_BN;
+USE unielwin_BN;
 
 
 CREATE TABLE ADT_PVariables_Select_List AS 
@@ -478,7 +478,7 @@ FROM
 
 
 
-CREATE TABLE ADT_PVariables_From_List AS SELECT pvid, CONCAT('New_Financial_std.',TABLE_NAME, ' AS ', pvid) AS Entries FROM
+CREATE TABLE ADT_PVariables_From_List AS SELECT pvid, CONCAT('unielwin.',TABLE_NAME, ' AS ', pvid) AS Entries FROM
     PVariables;
 
 

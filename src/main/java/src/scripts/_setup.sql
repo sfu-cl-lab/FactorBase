@@ -1,12 +1,12 @@
 
 
-DROP SCHEMA IF EXISTS New_Financial_std_setup; 
-create schema New_Financial_std_setup;
+DROP SCHEMA IF EXISTS unielwin_setup; 
+create schema unielwin_setup;
 
-create schema if not exists New_Financial_std_BN;
-create schema if not exists New_Financial_std_CT;
+create schema if not exists unielwin_BN;
+create schema if not exists unielwin_CT;
 
-USE New_Financial_std_setup;
+USE unielwin_setup;
 SET storage_engine=INNODB;
 
 
@@ -18,7 +18,7 @@ CREATE TABLE Schema_Key_Info AS SELECT TABLE_NAME,
     CONSTRAINT_NAME FROM
     INFORMATION_SCHEMA.KEY_COLUMN_USAGE
 WHERE
-    (KEY_COLUMN_USAGE.TABLE_SCHEMA = 'New_Financial_std')
+    (KEY_COLUMN_USAGE.TABLE_SCHEMA = 'unielwin')
 ORDER BY TABLE_NAME;
 
 
@@ -30,8 +30,8 @@ CREATE TABLE Schema_Position_Info AS SELECT COLUMNS.TABLE_NAME,
     INFORMATION_SCHEMA.COLUMNS,
     INFORMATION_SCHEMA.TABLES
 WHERE
-    (COLUMNS.TABLE_SCHEMA = 'New_Financial_std'
-        AND TABLES.TABLE_SCHEMA = 'New_Financial_std'
+    (COLUMNS.TABLE_SCHEMA = 'unielwin'
+        AND TABLES.TABLE_SCHEMA = 'unielwin'
         AND TABLES.TABLE_NAME = COLUMNS.TABLE_NAME
         AND TABLES.TABLE_TYPE = 'BASE TABLE')
 ORDER BY TABLE_NAME;

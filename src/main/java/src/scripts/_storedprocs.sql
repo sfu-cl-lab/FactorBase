@@ -22,7 +22,7 @@ LOOP1: LOOP
 	SET @SQLQUERY = 'INSERT INTO Attribute_Value (';
 	SET @SQLQUERY = CONCAT(@SQLQUERY, 'SELECT distinct "', columnname);
 	SET @SQLQUERY = CONCAT(@SQLQUERY, '", ', columnname);
-	SET @SQLQUERY = CONCAT(@SQLQUERY, ' FROM  New_Financial_std.', tablename, ')');
+	SET @SQLQUERY = CONCAT(@SQLQUERY, ' FROM  unielwin.', tablename, ')');
 
 	PREPARE stmt1 FROM @SQLQUERY;
     EXECUTE stmt1;

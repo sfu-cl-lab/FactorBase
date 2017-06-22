@@ -1,0 +1,1745 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="AnalysisUIOptions">
+    <option name="ANALYZE_TEST_SOURCES" value="false" />
+    <option name="SCOPE_TYPE" value="3" />
+    <option name="CUSTOM_SCOPE_NAME" value="Open Files" />
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="c5490942-85a7-4626-9956-2798cf39a624" name="Default" comment="">
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/BIF_Generator.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/BN_ScoreComputation.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/BZScriptRunner.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/BayesBaseCT_SortMerge.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/BayesBaseCT_SortMerge_cont.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/BayesBaseH.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/CP.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/CPGenerator.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/CSVPrecomputor.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/Compute_Local_CT.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/Config.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/FunctorWrapper.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/KLD_generator.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/Local_CT.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/MLNExporter/BNNode.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/MLNExporter/Exporter.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/MLNExporter/MergeSort.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/MakeSetup.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/MakeTargetSetup.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/MarkovBlanket.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/RunBB.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/ScoreComputation.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/Sort_merge3.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/TestWrapper.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/bif/BIFExport.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/bif/BIFImport.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/bif/BIFReader.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/bif/BIF_IO.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/ca/sfu/Evaluation/AddConst.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/ca/sfu/Evaluation/ReadSQL_MLN_Files.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/ca/sfu/Evaluation/Table.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/ca/sfu/Oursmain.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/ca/sfu/autocorrelation/CorrelatedSQLToXML.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/ca/sfu/infer/Analyzer/AccuracyAnalyzer.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/ca/sfu/infer/Analyzer/Read.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/ca/sfu/infer/Analyzer/Table.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/ca/sfu/jbn/BayesNet_Learning_main.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/ca/sfu/jbn/BayesNet_Learning_main_dc.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/ca/sfu/jbn/MBN_learning.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/ca/sfu/jbn/MLN_DecisionTreeLearner_main.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/ca/sfu/jbn/MLN_ParameterLearning_main.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/ca/sfu/jbn/ParameterLearning_main.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/ca/sfu/jbn/SQLtoXML/CopyOfReadXML.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/ca/sfu/jbn/SQLtoXML/CopyOfTableXML.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/ca/sfu/jbn/SQLtoXML/ReadXML.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/ca/sfu/jbn/SQLtoXML/TableXML.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/ca/sfu/jbn/analyzeMLN/MakeModel.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/ca/sfu/jbn/analyzeMLN/Predicate.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/ca/sfu/jbn/analyzeMLN/Rule.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/ca/sfu/jbn/analyzeMLN/analyze.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/ca/sfu/jbn/common/ChangeGraph.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/ca/sfu/jbn/common/CombinationGenerator.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/ca/sfu/jbn/common/CommonClasses.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/ca/sfu/jbn/common/GetDataset.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/ca/sfu/jbn/common/GraphMAker.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/ca/sfu/jbn/common/LoggingOutputStream.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/ca/sfu/jbn/common/Parser.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/ca/sfu/jbn/common/StdOutErrLevel.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/ca/sfu/jbn/common/db.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/ca/sfu/jbn/common/global.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/ca/sfu/jbn/common/makeBayesPm.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/ca/sfu/jbn/decisionTree/ProbabilisticDecisionTree.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/ca/sfu/jbn/decisionTree/TreeNode.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/ca/sfu/jbn/decisionTree/TreeObservation.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/ca/sfu/jbn/editor/BayesImEditor.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/ca/sfu/jbn/editor/JoinBayesNetEditor.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/ca/sfu/jbn/editor/JoinBayesNetEstimatorParam.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/ca/sfu/jbn/editor/TesterDisplayComp.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/ca/sfu/jbn/editor/TesterEditor.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/ca/sfu/jbn/editor/dbBayesPmEditor.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/ca/sfu/jbn/editor/dbDagEditor.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/ca/sfu/jbn/editor/dbDataEditor.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/ca/sfu/jbn/frequency/BayesProbCounter.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/ca/sfu/jbn/frequency/BayesStat.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/ca/sfu/jbn/frequency/Compare_main.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/ca/sfu/jbn/frequency/CopyOfBayesStat.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/ca/sfu/jbn/frequency/CopyOfQueryGenerator.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/ca/sfu/jbn/frequency/Query.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/ca/sfu/jbn/frequency/QueryGenerator.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/ca/sfu/jbn/frequency/SubsampleLearner.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/ca/sfu/jbn/frequency/Updater.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/ca/sfu/jbn/model/BayesEstimatorWrapper.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/ca/sfu/jbn/model/BayesImWrapper.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/ca/sfu/jbn/model/CopyOfJoinBayesNetEstimatorWrapper.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/ca/sfu/jbn/model/DataWrapper.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/ca/sfu/jbn/model/JoinBayesNetEstimatorWrapper.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/ca/sfu/jbn/model/TesterModel.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/ca/sfu/jbn/model/dbBayesPmWrapper.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/ca/sfu/jbn/model/dbDagWrapper.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/ca/sfu/jbn/model/dbDataWrapper.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/ca/sfu/jbn/parameterLearning/Decisiontree.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/ca/sfu/jbn/parameterLearning/DecisiontreeStruct.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/ca/sfu/jbn/parameterLearning/MakeCnt.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/ca/sfu/jbn/parameterLearning/MakeCntCln.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/ca/sfu/jbn/parameterLearning/ParamTet.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/ca/sfu/jbn/parameterLearning/WekaTest.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/ca/sfu/jbn/parameterLearning/jointProbLearner.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/ca/sfu/jbn/parameterLearning/paramtet2.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/ca/sfu/jbn/structureLearning/CopyOfS_learning.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/ca/sfu/jbn/structureLearning/SLearning.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/ca/sfu/jbn/structureLearning/S_learning.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/callLocal_CT.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/cs/sfu/jbn/alchemy/CopyOfExportToMLN.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/cs/sfu/jbn/alchemy/ExportToMLN.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/cs/sfu/jbn/alchemy/NewWeight.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/cs/sfu/jbn/alchemy/TestMLN.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/database/DatabaseConnector.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/database/MySqlDatabaseConnector.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/bayes/ApproximateUpdater.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/bayes/BayesIm.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/bayes/BayesImDistanceFunction.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/bayes/BayesImFactory.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/bayes/BayesImProbs.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/bayes/BayesPm.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/bayes/BayesProperties.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/bayes/BayesUpdater.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/bayes/BayesUtils.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/bayes/BayesXmlParser.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/bayes/BayesXmlRenderer.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/bayes/BdeMetric.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/bayes/BdeMetricCache.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/bayes/CellTableProbs.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/bayes/CptInvariantMarginalCalculator.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/bayes/CptInvariantUpdater.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/bayes/DataSetProbs.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/bayes/DirichletBayesIm.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/bayes/DirichletDataSetProbs.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/bayes/DirichletEstimator.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/bayes/DiscreteProbs.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/bayes/EmBayesEstimator.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/bayes/EmBayesProperties.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/bayes/Evidence.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/bayes/ExtraCategoryInterpolator.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/bayes/FactoredBayesStructuralEM.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/bayes/IntAveDataSetProbs.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/bayes/IntMaxDataSetProbs.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/bayes/ManipulatingBayesUpdater.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/bayes/Manipulation.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/bayes/MeanInterpolator.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/bayes/MlBayesEstimator.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/bayes/MlBayesIm.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/bayes/ModeInterpolator.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/bayes/ModelGenerator.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/bayes/OnTheFlyMarginalCalculator.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/bayes/Proposition.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/bayes/RowSummingExactUpdater.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/bayes/StoredCellProbs.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/bayes/TestBDeMetric.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/bayes/TestBDeMetricCache.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/bayes/TestBayesBicScorer.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/bayes/TestBayesIm.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/bayes/TestBayesPm.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/bayes/TestBayesXml.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/bayes/TestCellProbabilities.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/bayes/TestCptInvariantUpdater.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/bayes/TestDataSetCellProbs.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/bayes/TestDiscreteBootstrap.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/bayes/TestDiscreteProbs.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/bayes/TestEmBayesEstimator.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/bayes/TestEvidence.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/bayes/TestFactoredBayesSemMd.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/bayes/TestFactoredScoreCacheMd.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/bayes/TestModelGenerator.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/bayes/TestProposition.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/bayes/TestRowSummingUpdater.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/bayes/TestUpdatedBayesIm.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/bayes/TestUpdaterJointMarginal.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/bayes/UpdatedBayesIm.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/bayes/UpdaterParams.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/bayes/package.html" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/cluster/ClusterUtils.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/cluster/ClusteringAlgorithm.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/cluster/FastIca.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/cluster/KMeans.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/cluster/metrics/Dissimilarity.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/cluster/metrics/SquaredErrorLoss.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/data/AbstractVariable.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/data/AndersonDarlingTest.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/data/BlankKnowledge.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/data/BootstrapSampler.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/data/CaseExpander.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/data/CellTable.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/data/Clusters.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/data/ColtDataSet.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/data/CompressedCorrelationMatrix.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/data/ContinuousDiscretizationSpec.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/data/ContinuousVariable.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/data/CorrelationMatrix.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/data/CovarianceMatrix.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/data/CovarianceMatrixOnTheFly.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/data/CrossValidation.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/data/DataFilter.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/data/DataModel.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/data/DataModelList.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/data/DataReader.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/data/DataSet.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/data/DataUtils.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/data/DataUtils2.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/data/DataWriter.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/data/DelimiterType.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/data/DiscreteDiscretizationSpec.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/data/DiscreteVariable.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/data/DiscreteVariableType.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/data/DiscretizationSpec.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/data/Discretizer.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/data/ICovarianceMatrix.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/data/IKnowledge.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/data/IndependenceFacts.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/data/Knowledge.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/data/KnowledgeBoxInput.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/data/KnowledgeBoxInput2.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/data/KnowledgeEdge.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/data/KnowledgeGroup.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/data/KnowledgeTransferable.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/data/Lineizer.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/data/LogDataUtils.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/data/NumberObjectDataSet.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/data/RandomSampler.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/data/RegexTokenizer.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/data/ShortTriangularMatrix.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/data/SplitCasesSpec.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/data/TestCellTable.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/data/TestColtDataSet.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/data/TestCovarianceMatrix.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/data/TestDataReader.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/data/TestDelimiterTokenizer.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/data/TestDelimiterType.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/data/TestKnowledge.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/data/TestNumberObjectDataSet.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/data/TimeSeriesData.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/data/TriangularMatrix.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/data/Variable.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/data/VariableSource.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/data/package.html" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/graph/AtMostOneEdgePerPair.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/graph/BidirectedToExogenous.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/graph/Dag.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/graph/DirectedBidirectedOnly.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/graph/DirectedEdgesOnly.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/graph/DirectedGraph.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/graph/DirectedUndirectedOnly.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/graph/Edge.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/graph/EdgeListGraph.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/graph/EdgeListGraph2.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/graph/Edges.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/graph/Endpoint.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/graph/FruchtermanReingoldLayout.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/graph/Graph.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/graph/GraphConstraint.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/graph/GraphConverter.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/graph/GraphGeneratorRandomNumEdges.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/graph/GraphGroup.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/graph/GraphNode.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/graph/GraphUtils.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/graph/GraphicalChange.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/graph/InArrowImpliesNonancestor.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/graph/IndependenceFact.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/graph/KamadaKawaiLayout.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/graph/LagGraph.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/graph/LayeredDrawing.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/graph/MatrixGraphSimplified.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/graph/MeasuredLatentOnly.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/graph/NoEdgeIntoUndirectedEndpoint.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/graph/NoEdgesIntoError.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/graph/NoEdgesToSelf.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/graph/NoHalfdirectedEdges.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/graph/Node.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/graph/NodePair.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/graph/NodeType.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/graph/OrderedPair.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/graph/Pag.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/graph/Pair.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/graph/Pattern.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/graph/SemGraph.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/graph/TestCollisions.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/graph/TestDag.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/graph/TestEdgeListGraph.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/graph/TestEndpointMatrixGraph.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/graph/TestFruchtermanReingoldLayout.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/graph/TestGraph.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/graph/TestGraphUtils.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/graph/TestIndependenceFact.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/graph/TestKamadaKawaiLayout.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/graph/TestSemGraph.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/graph/TestTimeLagGraph.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/graph/TestUniformGraphGenerator.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/graph/TimeLagGraph.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/graph/Triple.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/graph/Underline.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/graph/UniformGraphGenerator.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/graph/package.html" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/package.html" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/regression/LogisticRegression.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/regression/LogisticRegressionResult.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/regression/Regression.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/regression/RegressionCovariance.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/regression/RegressionDataset.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/regression/RegressionDatasetGeneralized.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/regression/RegressionInterpolator.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/regression/RegressionNew.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/regression/RegressionOld.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/regression/RegressionPlane.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/regression/RegressionResult.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/regression/RegressionToLag1.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/regression/RegressionUtils.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/regression/TestRegression.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/regression/TestRegressionOld.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/regression/TestRegressionUtils.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/search/BDeScore.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/search/BDeuScore.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/search/BDeuScore_dc.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/search/BayesUpdaterClassifier.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/search/BinaryFunction.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/search/BinaryFunctionUtils.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/search/BinaryTetradTest.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/search/BollenTingTetradTest.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/search/BpcAlgorithmType.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/search/BuildPureClusters.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/search/BuildPureClusters2.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/search/BuildPureClusters3.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/search/Ccd.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/search/Cefs.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/search/Cfci.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/search/CfciOld.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/search/ChiSquareTest.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/search/ContinuousTetradTest.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/search/Cpc.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/search/Cpc2.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/search/CpcOrienter.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/search/CyclicDiscoveryMethod.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/search/DagInPatternIterator.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/search/DagIterator.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/search/Dci.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/search/DirectedGraphIterator.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/search/DiscreteClassifier.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/search/DiscreteTetradTest.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/search/FactorAnalysis.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/search/Fas.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/search/Fas3.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/search/Fas4.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/search/Fas4a.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/search/Fas5.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/search/FasDci.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/search/FasDeterministic.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/search/FastIca.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/search/Fci.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/search/FciDsepLegalPairs.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/search/FciDsepLegalPairsCfci.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/search/FindOneFactorClusters.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/search/FmlSearch.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/search/GSquareTest.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/search/GaussianConfidenceInterval.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/search/Ges.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/search/Ges3.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/search/Ges3_dc.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/search/GesMbFilter.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/search/GesMbSearch.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/search/GesOrienter.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/search/GraphChange.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/search/GraphGroupSearch.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/search/GraphScorer.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/search/GraphScorer_dc.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/search/GraphSearch.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/search/GraphSearch_dc.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/search/GraphWithParameters.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/search/GrowShrink.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/search/GwpResult.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/search/HitonVariant.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/search/Hungarian.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/search/IImages.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/search/IPurify.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/search/Images.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/search/Images3.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/search/Images3Orienter.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/search/Images4Temp.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/search/Images5.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/search/ImagesFirstNontriangular.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/search/ImpliedOrientation.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/search/IndTestChiSquare.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/search/IndTestCramerT.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/search/IndTestDSep.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/search/IndTestFisherZ.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/search/IndTestFisherZ2.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/search/IndTestFisherZBootstrap.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/search/IndTestFisherZConcatenateResiduals.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/search/IndTestFisherZGeneralizedInverse.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/search/IndTestFisherZOnTheFly.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/search/IndTestFisherZShortTriangular.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/search/IndTestGSquare.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/search/IndTestHsic.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/search/IndTestIndependenceFacts.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/search/IndTestLogisticRegression.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/search/IndTestMimBuild.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/search/IndTestMulti.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/search/IndTestMultinomialLogisticRegression.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/search/IndTestRegression.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/search/IndTestSepset.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/search/IndTestTimeSeries.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/search/IndTestType.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/search/IndependenceTest.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/search/Ion.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/search/IonHittingSet.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/search/IonJoeModifications.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/search/IonLegalPairs.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/search/Jcpc.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/search/Jfci.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/search/Jpc.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/search/Kpc.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/search/LegalPairs.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/search/Ling.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/search/Lingam.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/search/LingamPattern.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/search/LingamPattern2.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/search/LingamPatternOld.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/search/LocalDiscreteScore.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/search/LocalLingOrientation2.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/search/LocalScoreCache.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/search/Lofs.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/search/Lofs2.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/search/Lofs3.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/search/Lofs4.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/search/MbClassify.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/search/MbSearch.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/search/MbUtils.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/search/Mbfs.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/search/MdluScore.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/search/MeekRules.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/search/MeekRules2.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/search/MeekRulesOld.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/search/MeekRulesPattern.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/search/MimAdjacencySearch.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/search/MimBuild.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/search/MimBuildPc.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/search/MimUtils.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/search/Mimbuild2.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/search/PValueImprover.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/search/PValueImprover0.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/search/PValueImprover2.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/search/PValueImprover3.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/search/PValueImprover4.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/search/PValueImprover5.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/search/PValueImprover6.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/search/PValueImproverGes.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/search/PagUtils.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/search/PatternToDag.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/search/Pc.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/search/PcPattern.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/search/PcSearchRsch.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/search/Pcd.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/search/Pcmb.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/search/PermutationMatrixPair.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/search/PopulationTetradTest.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/search/PossibleDConnectingPath.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/search/PossibleDsepCfci.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/search/PossibleDsepFci.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/search/PossibleGraphicalChangeFinder.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/search/Purify.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/search/PurifyScoreBased.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/search/PurifyTetradBased.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/search/PurifyTetradBased2.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/search/PurifyTetradBasedD.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/search/PurifyTetradBasedG.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/search/PurifyTetradBasedH.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/search/PurifyTetradBasedI.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/search/PurifyTetradBasedJ.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/search/PurifyTetradBasedc.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/search/Reorienter.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/search/ResolveSepsets.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/search/Ricf.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/search/ScoredGraph.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/search/SearchGraphUtils.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/search/SearchLogUtils.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/search/SepsetMap.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/search/SepsetMapDci.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/search/ShiftSearch.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/search/StagedGes.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/search/TestBinaryFunction.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/search/TestBollenTetradTest.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/search/TestBpc.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/search/TestCcd.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/search/TestCpc.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/search/TestDagInPatternIterator.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/search/TestFciSearch.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/search/TestFmlSearch.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/search/TestGes.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/search/TestGraph.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/search/TestGraphConverter.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/search/TestIndTestFisherZ.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/search/TestIndTestFisherZD.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/search/TestIndTestGSquare.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/search/TestIndTestHsic.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/search/TestIndTestLogisticRegression.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/search/TestIndTestTimeSeries.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/search/TestKpc.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/search/TestLing.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/search/TestLingamPattern.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/search/TestMbCalculationMethods.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/search/TestMbfReport.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/search/TestMbfs.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/search/TestMdlu.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/search/TestMimbuild.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/search/TestPValueImprover.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/search/TestPatternToDag.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/search/TestPc.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/search/TestPcPattern.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/search/TestPcd.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/search/TestPurify.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/search/TestResolveSepsets.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/search/TestRicf.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/search/TestType.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/search/TestVarianceTiebreaking.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/search/Tetrad.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/search/TetradTest.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/search/TimeSeriesLagSearch.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/search/TimeSeriesUtils.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/search/TripleClassifier.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/search/Washdown.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/search/kernel/Kernel.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/search/kernel/KernelGaussian.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/search/kernel/KernelUtils.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/search/kernel/TestKernelGaussian.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/search/mb/HitonMb.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/search/mb/Iamb.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/search/mb/IambnPc.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/search/mb/InterIamb.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/search/mb/Mmhc.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/search/mb/Mmmb.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/search/mb/MmmbGraphRestricted.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/search/mb/ReadMe" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/search/mb/TestMarkovBlanketSearches.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/search/mb/TestMbClassify.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/search/package.html" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/sem/CodedFunction.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/sem/ConjugateDirectionSearch.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/sem/ConnectionFunction.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/sem/DagScorer.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/sem/DistributionType.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/sem/ExploreSemEstimatorGibbs.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/sem/GeneralizedParameter.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/sem/GeneralizedSemIm.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/sem/GeneralizedSemPm.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/sem/GesOptimizationEm.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/sem/HowSemIsBeingUsed.txt" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/sem/ISemIm.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/sem/LargeSemSimulator.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/sem/Mapping.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/sem/MimBuildEstimator.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/sem/OptimizationSemIm.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/sem/ParamComparison.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/sem/ParamConstraint.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/sem/ParamConstraintType.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/sem/ParamType.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/sem/Parameter.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/sem/ParameterPair.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/sem/Scorer.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/sem/Sem2DistributionMapping.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/sem/Sem2Mapping.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/sem/Sem2MatrixMapping.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/sem/SemEstimator.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/sem/SemEstimatorGibbs.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/sem/SemEstimatorGibbsParams.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/sem/SemEvidence.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/sem/SemIm.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/sem/SemIm2.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/sem/SemImInitializationParams.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/sem/SemManipulation.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/sem/SemOptimizer.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/sem/SemOptimizerEm.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/sem/SemOptimizerNrPowell.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/sem/SemOptimizerPalCds.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/sem/SemOptimizerRegression.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/sem/SemOptimizerScattershot.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/sem/SemOptimizerUncmin.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/sem/SemPm.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/sem/SemPm2.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/sem/SemProposition.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/sem/SemStdErrorEstimator.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/sem/SemUpdater.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/sem/SemXmlConstants.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/sem/SemXmlParser.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/sem/SemXmlRenderer.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/sem/StandardizedSemIm.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/sem/StringFunction.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/sem/TemplateExpander.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/sem/TestDagScorer.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/sem/TestGeneralizedSem.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/sem/TestLargeSemSimulator.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/sem/TestSem.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/sem/TestSemEstimator.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/sem/TestSemEvidence.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/sem/TestSemIm.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/sem/TestSemManipulation.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/sem/TestSemProposition.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/sem/TestSemUpdater.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/sem/TestSemVarMeans.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/sem/TestSemXml.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/sem/TestStandardizedSem.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/sem/Tsls.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/sem/package.html" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/session/CouldNotCreateModelException.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/session/DelegatesEditing.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/session/DoNotAddOldModel.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/session/Executable.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/session/ExecutionRestarter.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/session/ModificationRegistery.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/session/ParamsResettable.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/session/Session.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/session/SessionAdapter.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/session/SessionEvent.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/session/SessionListener.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/session/SessionModel.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/session/SessionNode.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/session/SessionSupport.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/session/SimulationStudy.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/session/TestSession.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/session/TestSessionEvent.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/session/TestSessionNode.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/session/TestSessionSupport.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/session/TestSimulationStudy.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/session/Type1.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/session/Type10.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/session/Type11.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/session/Type12.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/session/Type2.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/session/Type3.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/session/Type4.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/session/Type5.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/session/Type6.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/session/Type7.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/session/Type8.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/session/Type9.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/session/package.html" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/test/ReadMe" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/test/TestDataLoadersRoundtrip.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/test/TestDiscretizer.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/test/TestStatUtils.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/util/ArrUtils.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/util/ChoiceGenerator.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/util/CombinationGenerator.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/util/CombinationIterator.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/util/CutoffFinder.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/util/DefaultTetradLoggerConfig.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/util/DepthChoiceGenerator.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/util/Function.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/util/IndexedMatrix.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/util/Integrator.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/util/JOptionUtils.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/util/LogUtils.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/util/MathUtils.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/util/MatrixUtils.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/util/Memorable.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/util/MultiDimIntTable.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/util/NamingProtocol.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/util/NumberFormatUtil.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/util/Params.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/util/PartialCorrelationPdf.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/util/PermutationGenerator.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/util/Point.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/util/PointXy.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/util/ProbUtils.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/util/RandomUtil.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/util/RocCalculator.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/util/SelectionGenerator.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/util/StatUtils.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/util/TestChoiceGenerator.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/util/TestCombinationGenerator.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/util/TestCombinationIterator.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/util/TestFdr.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/util/TestIntegrator.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/util/TestMathUtils.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/util/TestMatrixUtils.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/util/TestMultiDimIntTable.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/util/TestMultiDimIntTable2.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/util/TestPartialCorrelationPdf.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/util/TestPersistentRandomUtil.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/util/TestPoint.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/util/TetradLogger.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/util/TetradLoggerConfig.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/util/TetradLoggerEvent.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/util/TetradLoggerListener.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/util/TetradSerializable.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/util/TetradSerializableExcluded.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/util/TextTable.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/util/Unmarshallable.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/util/dist/Beta.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/util/dist/BreitWigner.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/util/dist/ChiSquare.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/util/dist/Discrete.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/util/dist/Discrete2.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/util/dist/Distribution.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/util/dist/Exponential.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/util/dist/ExponentialPower.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/util/dist/Gamma.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/util/dist/GaussianPower.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/util/dist/Hyperbolic.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/util/dist/Indicator.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/util/dist/LogNormal.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/util/dist/Logarithmic.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/util/dist/MixtureOfGaussians.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/util/dist/Normal.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/util/dist/Poisson.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/util/dist/SingleValue.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/util/dist/Split.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/util/dist/StudentT.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/util/dist/TestDistributions.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/util/dist/TruncatedNormal.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/util/dist/Uniform.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/util/dist/VonMises.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/edu/cmu/tetrad/util/package.html" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/fmt.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/lattice/LatticeGenerator.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/lattice/short_rnid_LatticeGenerator.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/lib/Jama-1.0.3.jar" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/lib/colt.jar" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/lib/commons-collections-3.1.jar" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/lib/commons-lang-2.6.jar" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/lib/ibatis-common-2.jar" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/lib/jdepend.jar" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/lib/jflex-1.4.2.jar" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/lib/jgrapht-jdk1.6.jar" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/lib/jh.jar" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/lib/junit.jar" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/lib/mrjtoolkitstubs.jar" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/lib/msbase.jar" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/lib/mssqlserver.jar" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/lib/mtj.jar" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/lib/mysql-connector-java-5.1.22-bin.jar" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/lib/opt77.jar" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/lib/packageManager.jar" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/lib/pal-1.4.jar" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/lib/weka.jar" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/lib/xom-1.1.jar" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/local_CP.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/src/config.cfg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/src/scripts/_bayesedges.sql" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/src/scripts/_markov_blanket.sql" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/src/scripts/_metadata_2.sql" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/src/scripts/_metadata_2_cont.sql" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/src/scripts/_metadata_2_nolink.sql" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/src/scripts/_metadata_3.sql" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/src/scripts/_metadata_3_nolink.sql" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/src/scripts/_setup.sql" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/src/scripts/_storedprocs.sql" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/src/scripts/_transfer.sql" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/src/scripts/_transfer2.sql" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/src/scripts/_transfer_to_target.sql" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/src/scripts/bayesedges.sql" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/src/scripts/markov_blanket.sql" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/src/scripts/metadata_2.sql" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/src/scripts/metadata_2_cont.sql" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/src/scripts/metadata_2_nolink.sql" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/src/scripts/metadata_3.sql" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/src/scripts/metadata_3_Test_Temp.sql" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/src/scripts/metadata_3_cont.sql" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/src/scripts/metadata_3_nolink.sql" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/src/scripts/setup.sql" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/src/scripts/storedprocs.sql" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/src/scripts/transfer.sql" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/src/scripts/transfer2.sql" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/src/scripts/transfer_to_target.sql" afterPath="" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/src/config.cfg" afterPath="$PROJECT_DIR$/src/main/java/src/config.cfg" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/src/scripts/_metadata_2.sql" afterPath="$PROJECT_DIR$/src/main/java/src/scripts/_metadata_2.sql" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/src/scripts/_setup.sql" afterPath="$PROJECT_DIR$/src/main/java/src/scripts/_setup.sql" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/src/scripts/_storedprocs.sql" afterPath="$PROJECT_DIR$/src/main/java/src/scripts/_storedprocs.sql" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/src/scripts/_transfer.sql" afterPath="$PROJECT_DIR$/src/main/java/src/scripts/_transfer.sql" />
+    </list>
+    <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
+    <option name="TRACKING_ENABLED" value="true" />
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="ExecutionTargetManager" SELECTED_TARGET="default_target" />
+  <component name="FileEditorManager">
+    <leaf>
+      <file leaf-file-name="BayesBaseCT_SortMerge.java" pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/src/main/java/BayesBaseCT_SortMerge.java">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="324">
+              <caret line="158" column="29" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="1412" selection-end-column="0" />
+              <folding>
+                <element signature="imports" expanded="true" />
+                <element signature="method#BuildCT_Rnodes_counts#0;class#BayesBaseCT_SortMerge#0" expanded="false" />
+                <element signature="method#BuildCT_Rnodes_counts2#0;class#BayesBaseCT_SortMerge#0" expanded="false" />
+                <element signature="method#BuildCT_Rnodes_flat#0;class#BayesBaseCT_SortMerge#0" expanded="false" />
+                <element signature="method#BuildCT_Rnodes_star#0;class#BayesBaseCT_SortMerge#0" expanded="false" />
+                <element signature="method#BuildCT_Rnodes_CT#0;class#BayesBaseCT_SortMerge#0" expanded="false" />
+                <element signature="method#BuildCT_Rnodes_join#0;class#BayesBaseCT_SortMerge#0" expanded="false" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+    </leaf>
+  </component>
+  <component name="FindInProjectRecents">
+    <findStrings>
+      <find>opt2</find>
+      <find>cont</find>
+      <find>con4</find>
+      <find>con3</find>
+      <find>con2</find>
+      <find>con1</find>
+      <find>databaseName2</find>
+      <find>databaseName3</find>
+      <find>databaseName4</find>
+      <find>databaseName</find>
+    </findStrings>
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="GradleLocalSettings">
+    <option name="externalProjectsViewState">
+      <projects_view />
+    </option>
+  </component>
+  <component name="IdeDocumentHistory">
+    <option name="CHANGED_PATHS">
+      <list>
+        <option value="$PROJECT_DIR$/src/RunBB.java" />
+        <option value="$PROJECT_DIR$/src/SubsetCTComputation.java" />
+        <option value="$PROJECT_DIR$/src/config.cfg" />
+        <option value="$PROJECT_DIR$/src/src/config.cfg" />
+        <option value="$PROJECT_DIR$/src/BayesBaseCT_SortMerge.java" />
+        <option value="$PROJECT_DIR$/src/main/java/TestWrapper.java" />
+        <option value="$PROJECT_DIR$/src/main/java/BayesBaseCT_SortMerge.java" />
+      </list>
+    </option>
+  </component>
+  <component name="JsBuildToolGruntFileManager" detection-done="true" sorting="DEFINITION_ORDER" />
+  <component name="JsBuildToolPackageJson" detection-done="true" sorting="DEFINITION_ORDER" />
+  <component name="JsGulpfileManager">
+    <detection-done>true</detection-done>
+    <sorting>DEFINITION_ORDER</sorting>
+  </component>
+  <component name="MavenImportPreferences">
+    <option name="generalSettings">
+      <MavenGeneralSettings>
+        <option name="localRepository" value="$MAVEN_REPOSITORY$" />
+        <option name="userSettingsFile" value="$USER_HOME$/.m2/settings.xml" />
+      </MavenGeneralSettings>
+    </option>
+  </component>
+  <component name="ProjectFrameBounds">
+    <option name="x" value="1919" />
+    <option name="width" value="1922" />
+    <option name="height" value="1081" />
+  </component>
+  <component name="ProjectView">
+    <navigator currentView="ProjectPane" proportions="" version="1">
+      <flattenPackages ProjectPane="true" />
+      <showMembers />
+      <showModules />
+      <showLibraryContents />
+      <hideEmptyPackages />
+      <abbreviatePackageNames />
+      <autoscrollToSource />
+      <autoscrollFromSource />
+      <sortByType />
+      <manualOrder />
+      <foldersAlwaysOnTop value="true" />
+    </navigator>
+    <panes>
+      <pane id="Scope">
+        <subPane subId="Project Files">
+          <PATH>
+            <PATH_ELEMENT USER_OBJECT="Root">
+              <option name="myItemId" value="" />
+              <option name="myItemType" value="" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT USER_OBJECT="FactorBase">
+              <option name="myItemId" value="" />
+              <option name="myItemType" value="" />
+            </PATH_ELEMENT>
+          </PATH>
+          <PATH>
+            <PATH_ELEMENT USER_OBJECT="Root">
+              <option name="myItemId" value="" />
+              <option name="myItemType" value="" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT USER_OBJECT="FactorBase">
+              <option name="myItemId" value="" />
+              <option name="myItemType" value="" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT USER_OBJECT="src">
+              <option name="myItemId" value="" />
+              <option name="myItemType" value="" />
+            </PATH_ELEMENT>
+          </PATH>
+        </subPane>
+      </pane>
+      <pane id="Scratches" />
+      <pane id="ProjectPane">
+        <subPane>
+          <PATH>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="FactorBase" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="FactorBase" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+          </PATH>
+          <PATH>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="FactorBase" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="FactorBase" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="src" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+          </PATH>
+          <PATH>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="FactorBase" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="FactorBase" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="src" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="main" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+          </PATH>
+          <PATH>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="FactorBase" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="FactorBase" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="src" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="main" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="java" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+          </PATH>
+          <PATH>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="FactorBase" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="FactorBase" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="src" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="main" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="java" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="scripts" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+          </PATH>
+          <PATH>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="FactorBase" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="FactorBase" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="src" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="main" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="java" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="lattice" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+          </PATH>
+        </subPane>
+      </pane>
+      <pane id="PackagesPane" />
+    </panes>
+  </component>
+  <component name="PropertiesComponent">
+    <property name="WebServerToolWindowFactoryState" value="false" />
+    <property name="aspect.path.notification.shown" value="true" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$" />
+    <property name="settings.editor.selected.configurable" value="reference.settingsdialog.project.gradle" />
+    <property name="run.code.analysis.last.selected.profile" value="pProject Default" />
+  </component>
+  <component name="RecentsManager">
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/build/src" />
+      <recent name="$PROJECT_DIR$/src" />
+    </key>
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/src/main/java" />
+      <recent name="$PROJECT_DIR$/src" />
+    </key>
+  </component>
+  <component name="RunDashboard">
+    <option name="ruleStates">
+      <list>
+        <RuleState>
+          <option name="name" value="ConfigurationTypeDashboardGroupingRule" />
+        </RuleState>
+        <RuleState>
+          <option name="name" value="StatusDashboardGroupingRule" />
+        </RuleState>
+      </list>
+    </option>
+  </component>
+  <component name="RunManager">
+    <configuration default="true" type="#org.jetbrains.idea.devkit.run.PluginConfigurationType" factoryName="Plugin">
+      <module name="" />
+      <option name="VM_PARAMETERS" value="-Xmx512m -Xms256m -XX:MaxPermSize=250m -ea" />
+      <option name="PROGRAM_PARAMETERS" />
+      <predefined_log_file id="idea.log" enabled="true" />
+      <method />
+    </configuration>
+    <configuration default="true" type="AndroidRunConfigurationType" factoryName="Android App">
+      <module name="" />
+      <option name="DEPLOY" value="true" />
+      <option name="ARTIFACT_NAME" value="" />
+      <option name="PM_INSTALL_OPTIONS" value="" />
+      <option name="ACTIVITY_EXTRA_FLAGS" value="" />
+      <option name="MODE" value="default_activity" />
+      <option name="TARGET_SELECTION_MODE" value="SHOW_DIALOG" />
+      <option name="PREFERRED_AVD" value="" />
+      <option name="CLEAR_LOGCAT" value="false" />
+      <option name="SHOW_LOGCAT_AUTOMATICALLY" value="false" />
+      <option name="SKIP_NOOP_APK_INSTALLATIONS" value="true" />
+      <option name="FORCE_STOP_RUNNING_APP" value="true" />
+      <option name="DEBUGGER_TYPE" value="Java" />
+      <option name="USE_LAST_SELECTED_DEVICE" value="false" />
+      <option name="PREFERRED_AVD" value="" />
+      <Java />
+      <Profilers>
+        <option name="ENABLE_ADVANCED_PROFILING" value="true" />
+        <option name="GAPID_ENABLED" value="false" />
+        <option name="GAPID_DISABLE_PCS" value="false" />
+        <option name="SUPPORT_LIB_ENABLED" value="true" />
+        <option name="INSTRUMENTATION_ENABLED" value="true" />
+      </Profilers>
+      <option name="DEEP_LINK" value="" />
+      <option name="ACTIVITY_CLASS" value="" />
+      <method />
+    </configuration>
+    <configuration default="true" type="AndroidTestRunConfigurationType" factoryName="Android Tests">
+      <module name="" />
+      <option name="TESTING_TYPE" value="0" />
+      <option name="INSTRUMENTATION_RUNNER_CLASS" value="" />
+      <option name="METHOD_NAME" value="" />
+      <option name="CLASS_NAME" value="" />
+      <option name="PACKAGE_NAME" value="" />
+      <option name="EXTRA_OPTIONS" value="" />
+      <option name="TARGET_SELECTION_MODE" value="SHOW_DIALOG" />
+      <option name="PREFERRED_AVD" value="" />
+      <option name="CLEAR_LOGCAT" value="false" />
+      <option name="SHOW_LOGCAT_AUTOMATICALLY" value="false" />
+      <option name="SKIP_NOOP_APK_INSTALLATIONS" value="true" />
+      <option name="FORCE_STOP_RUNNING_APP" value="true" />
+      <option name="DEBUGGER_TYPE" value="Java" />
+      <option name="USE_LAST_SELECTED_DEVICE" value="false" />
+      <option name="PREFERRED_AVD" value="" />
+      <Java />
+      <Profilers>
+        <option name="ENABLE_ADVANCED_PROFILING" value="true" />
+        <option name="GAPID_ENABLED" value="false" />
+        <option name="GAPID_DISABLE_PCS" value="false" />
+        <option name="SUPPORT_LIB_ENABLED" value="true" />
+        <option name="INSTRUMENTATION_ENABLED" value="true" />
+      </Profilers>
+      <method />
+    </configuration>
+    <configuration default="true" type="Applet" factoryName="Applet">
+      <option name="HTML_USED" value="false" />
+      <option name="WIDTH" value="400" />
+      <option name="HEIGHT" value="300" />
+      <option name="POLICY_FILE" value="$APPLICATION_HOME_DIR$/bin/appletviewer.policy" />
+      <module />
+      <method />
+    </configuration>
+    <configuration default="true" type="Application" factoryName="Application">
+      <extension name="coverage" enabled="false" merge="false" sample_coverage="true" runner="idea" />
+      <option name="MAIN_CLASS_NAME" />
+      <option name="VM_PARAMETERS" />
+      <option name="PROGRAM_PARAMETERS" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="false" />
+      <option name="ALTERNATIVE_JRE_PATH" />
+      <option name="ENABLE_SWING_INSPECTOR" value="false" />
+      <option name="ENV_VARIABLES" />
+      <option name="PASS_PARENT_ENVS" value="true" />
+      <module name="" />
+      <envs />
+      <method />
+    </configuration>
+    <configuration default="true" type="ArquillianJUnit" factoryName="" nameIsGenerated="true">
+      <extension name="coverage" enabled="false" merge="false" sample_coverage="true" runner="idea" />
+      <module name="" />
+      <option name="arquillianRunConfiguration">
+        <value>
+          <option name="containerStateName" value="" />
+        </value>
+      </option>
+      <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="false" />
+      <option name="ALTERNATIVE_JRE_PATH" />
+      <option name="PACKAGE_NAME" />
+      <option name="MAIN_CLASS_NAME" />
+      <option name="METHOD_NAME" />
+      <option name="TEST_OBJECT" value="class" />
+      <option name="VM_PARAMETERS" />
+      <option name="PARAMETERS" />
+      <option name="WORKING_DIRECTORY" />
+      <option name="ENV_VARIABLES" />
+      <option name="PASS_PARENT_ENVS" value="true" />
+      <option name="TEST_SEARCH_SCOPE">
+        <value defaultName="singleModule" />
+      </option>
+      <envs />
+      <patterns />
+      <method />
+    </configuration>
+    <configuration default="true" type="ArquillianTestNG" factoryName="">
+      <extension name="coverage" enabled="false" merge="false" sample_coverage="true" runner="idea" />
+      <module name="" />
+      <option name="arquillianRunConfiguration">
+        <value>
+          <option name="containerStateName" value="" />
+        </value>
+      </option>
+      <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="false" />
+      <option name="ALTERNATIVE_JRE_PATH" />
+      <option name="SUITE_NAME" />
+      <option name="PACKAGE_NAME" />
+      <option name="MAIN_CLASS_NAME" />
+      <option name="METHOD_NAME" />
+      <option name="GROUP_NAME" />
+      <option name="TEST_OBJECT" value="CLASS" />
+      <option name="VM_PARAMETERS" />
+      <option name="PARAMETERS" />
+      <option name="WORKING_DIRECTORY" />
+      <option name="OUTPUT_DIRECTORY" />
+      <option name="ANNOTATION_TYPE" />
+      <option name="ENV_VARIABLES" />
+      <option name="PASS_PARENT_ENVS" value="true" />
+      <option name="TEST_SEARCH_SCOPE">
+        <value defaultName="singleModule" />
+      </option>
+      <option name="USE_DEFAULT_REPORTERS" value="false" />
+      <option name="PROPERTIES_FILE" />
+      <envs />
+      <properties />
+      <listeners />
+      <method />
+    </configuration>
+    <configuration default="true" type="Cold Fusion runner description" factoryName="Cold Fusion" custom_browser="" web_path="">
+      <method />
+    </configuration>
+    <configuration default="true" type="CucumberJavaRunConfigurationType" factoryName="Cucumber java">
+      <extension name="coverage" enabled="false" merge="false" sample_coverage="true" runner="idea" />
+      <option name="myFilePath" />
+      <option name="GLUE" />
+      <option name="myNameFilter" />
+      <option name="myGeneratedName" />
+      <option name="MAIN_CLASS_NAME" />
+      <option name="VM_PARAMETERS" />
+      <option name="PROGRAM_PARAMETERS" />
+      <option name="WORKING_DIRECTORY" />
+      <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="false" />
+      <option name="ALTERNATIVE_JRE_PATH" />
+      <option name="ENABLE_SWING_INSPECTOR" value="false" />
+      <option name="ENV_VARIABLES" />
+      <option name="PASS_PARENT_ENVS" value="true" />
+      <module name="" />
+      <envs />
+      <method />
+    </configuration>
+    <configuration default="true" type="FlashRunConfigurationType" factoryName="Flash App">
+      <option name="BCName" value="" />
+      <option name="IOSSimulatorSdkPath" value="" />
+      <option name="adlOptions" value="" />
+      <option name="airProgramParameters" value="" />
+      <option name="appDescriptorForEmulator" value="Android" />
+      <option name="debugTransport" value="USB" />
+      <option name="debuggerSdkRaw" value="BC SDK" />
+      <option name="emulator" value="NexusOne" />
+      <option name="emulatorAdlOptions" value="" />
+      <option name="fastPackaging" value="true" />
+      <option name="fullScreenHeight" value="0" />
+      <option name="fullScreenWidth" value="0" />
+      <option name="launchUrl" value="false" />
+      <option name="launcherParameters">
+        <LauncherParameters>
+          <option name="browser" value="a7bb68e0-33c0-4d6f-a81a-aac1fdb870c8" />
+          <option name="launcherType" value="OSDefault" />
+          <option name="newPlayerInstance" value="false" />
+          <option name="playerPath" value="/usr/bin/flashplayerdebugger" />
+        </LauncherParameters>
+      </option>
+      <option name="mobileRunTarget" value="Emulator" />
+      <option name="moduleName" value="" />
+      <option name="overriddenMainClass" value="" />
+      <option name="overriddenOutputFileName" value="" />
+      <option name="overrideMainClass" value="false" />
+      <option name="runTrusted" value="true" />
+      <option name="screenDpi" value="0" />
+      <option name="screenHeight" value="0" />
+      <option name="screenWidth" value="0" />
+      <option name="url" value="http://" />
+      <option name="usbDebugPort" value="7936" />
+      <method />
+    </configuration>
+    <configuration default="true" type="FlexUnitRunConfigurationType" factoryName="FlexUnit" appDescriptorForEmulator="Android" class_name="" emulatorAdlOptions="" method_name="" package_name="" scope="Class">
+      <option name="BCName" value="" />
+      <option name="launcherParameters">
+        <LauncherParameters>
+          <option name="browser" value="a7bb68e0-33c0-4d6f-a81a-aac1fdb870c8" />
+          <option name="launcherType" value="OSDefault" />
+          <option name="newPlayerInstance" value="false" />
+          <option name="playerPath" value="/usr/bin/flashplayerdebugger" />
+        </LauncherParameters>
+      </option>
+      <option name="moduleName" value="" />
+      <option name="trusted" value="true" />
+      <method />
+    </configuration>
+    <configuration default="true" type="GradleRunConfiguration" factoryName="Gradle">
+      <ExternalSystemSettings>
+        <option name="executionName" />
+        <option name="externalProjectPath" />
+        <option name="externalSystemIdString" value="GRADLE" />
+        <option name="scriptParameters" />
+        <option name="taskDescriptions">
+          <list />
+        </option>
+        <option name="taskNames">
+          <list />
+        </option>
+        <option name="vmOptions" />
+      </ExternalSystemSettings>
+      <method />
+    </configuration>
+    <configuration default="true" type="GrailsRunConfigurationType" factoryName="Grails">
+      <setting name="vmparams" value="" />
+      <setting name="cmdLine" value="run-app" />
+      <setting name="passParentEnv" value="true" />
+      <setting name="launchBrowser" value="true" />
+      <setting name="launchBrowserUrl" value="" />
+      <setting name="depsClasspath" value="false" />
+      <method />
+    </configuration>
+    <configuration default="true" type="JUnit" factoryName="JUnit">
+      <extension name="coverage" enabled="false" merge="false" sample_coverage="true" runner="idea" />
+      <module name="" />
+      <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="false" />
+      <option name="ALTERNATIVE_JRE_PATH" />
+      <option name="PACKAGE_NAME" />
+      <option name="MAIN_CLASS_NAME" />
+      <option name="METHOD_NAME" />
+      <option name="TEST_OBJECT" value="class" />
+      <option name="VM_PARAMETERS" value="-ea" />
+      <option name="PARAMETERS" />
+      <option name="WORKING_DIRECTORY" value="$MODULE_DIR$" />
+      <option name="ENV_VARIABLES" />
+      <option name="PASS_PARENT_ENVS" value="true" />
+      <option name="TEST_SEARCH_SCOPE">
+        <value defaultName="singleModule" />
+      </option>
+      <envs />
+      <patterns />
+      <method />
+    </configuration>
+    <configuration default="true" type="JarApplication" factoryName="JAR Application">
+      <extension name="coverage" enabled="false" merge="false" sample_coverage="true" runner="idea" />
+      <envs />
+      <method />
+    </configuration>
+    <configuration default="true" type="Java Scratch" factoryName="Java Scratch">
+      <extension name="coverage" enabled="false" merge="false" sample_coverage="true" runner="idea" />
+      <option name="SCRATCH_FILE_ID" value="0" />
+      <option name="MAIN_CLASS_NAME" />
+      <option name="VM_PARAMETERS" />
+      <option name="PROGRAM_PARAMETERS" />
+      <option name="WORKING_DIRECTORY" />
+      <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="false" />
+      <option name="ALTERNATIVE_JRE_PATH" />
+      <option name="ENABLE_SWING_INSPECTOR" value="false" />
+      <option name="ENV_VARIABLES" />
+      <option name="PASS_PARENT_ENVS" value="true" />
+      <module name="" />
+      <envs />
+      <method />
+    </configuration>
+    <configuration default="true" type="JavaScriptTestRunnerJest" factoryName="Jest">
+      <node-interpreter value="project" />
+      <working-dir value="" />
+      <envs />
+      <scope-kind value="ALL" />
+      <method />
+    </configuration>
+    <configuration default="true" type="JavaScriptTestRunnerProtractor" factoryName="Protractor">
+      <config-file value="" />
+      <node-interpreter value="project" />
+      <envs />
+      <method />
+    </configuration>
+    <configuration default="true" type="JavascriptDebugType" factoryName="JavaScript Debug">
+      <method />
+    </configuration>
+    <configuration default="true" type="JetRunConfigurationType" factoryName="Kotlin">
+      <extension name="coverage" enabled="false" merge="false" sample_coverage="true" runner="idea" />
+      <option name="MAIN_CLASS_NAME" />
+      <option name="VM_PARAMETERS" />
+      <option name="PROGRAM_PARAMETERS" />
+      <option name="WORKING_DIRECTORY" />
+      <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="false" />
+      <option name="ALTERNATIVE_JRE_PATH" />
+      <option name="PASS_PARENT_ENVS" value="true" />
+      <module name="FactorBase" />
+      <envs />
+      <method />
+    </configuration>
+    <configuration default="true" type="KotlinStandaloneScriptRunConfigurationType" factoryName="Kotlin script">
+      <extension name="coverage" enabled="false" merge="false" sample_coverage="true" runner="idea" />
+      <option name="filePath" />
+      <option name="vmParameters" />
+      <option name="alternativeJrePath" />
+      <option name="programParameters" />
+      <option name="passParentEnvs" value="true" />
+      <option name="workingDirectory" />
+      <option name="isAlternativeJrePathEnabled" value="false" />
+      <envs />
+      <method />
+    </configuration>
+    <configuration default="true" type="Remote" factoryName="Remote">
+      <option name="USE_SOCKET_TRANSPORT" value="true" />
+      <option name="SERVER_MODE" value="false" />
+      <option name="SHMEM_ADDRESS" value="javadebug" />
+      <option name="HOST" value="localhost" />
+      <option name="PORT" value="5005" />
+      <method />
+    </configuration>
+    <configuration default="true" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot">
+      <extension name="coverage" enabled="false" merge="false" sample_coverage="true" runner="idea" />
+      <module name="" />
+      <envs />
+      <method />
+    </configuration>
+    <configuration default="true" type="TestNG" factoryName="TestNG">
+      <extension name="coverage" enabled="false" merge="false" sample_coverage="true" runner="idea" />
+      <module name="" />
+      <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="false" />
+      <option name="ALTERNATIVE_JRE_PATH" />
+      <option name="SUITE_NAME" />
+      <option name="PACKAGE_NAME" />
+      <option name="MAIN_CLASS_NAME" />
+      <option name="METHOD_NAME" />
+      <option name="GROUP_NAME" />
+      <option name="TEST_OBJECT" value="CLASS" />
+      <option name="VM_PARAMETERS" value="-ea" />
+      <option name="PARAMETERS" />
+      <option name="WORKING_DIRECTORY" value="$MODULE_DIR$" />
+      <option name="OUTPUT_DIRECTORY" />
+      <option name="ANNOTATION_TYPE" />
+      <option name="ENV_VARIABLES" />
+      <option name="PASS_PARENT_ENVS" value="true" />
+      <option name="TEST_SEARCH_SCOPE">
+        <value defaultName="singleModule" />
+      </option>
+      <option name="USE_DEFAULT_REPORTERS" value="false" />
+      <option name="PROPERTIES_FILE" />
+      <envs />
+      <properties />
+      <listeners />
+      <method />
+    </configuration>
+    <configuration default="true" type="js.build_tools.gulp" factoryName="Gulp.js">
+      <node-interpreter>project</node-interpreter>
+      <node-options />
+      <gulpfile />
+      <tasks />
+      <arguments />
+      <envs />
+      <method />
+    </configuration>
+    <configuration default="true" type="js.build_tools.npm" factoryName="npm">
+      <command value="run" />
+      <scripts />
+      <node-interpreter value="project" />
+      <envs />
+      <method />
+    </configuration>
+    <configuration default="true" type="osgi.bnd.run" factoryName="Run Launcher">
+      <method />
+    </configuration>
+    <configuration default="true" type="osgi.bnd.run" factoryName="Test Launcher (JUnit)">
+      <method />
+    </configuration>
+  </component>
+  <component name="ShelveChangesManager" show_recycled="false">
+    <option name="remove_strategy" value="false" />
+  </component>
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="c5490942-85a7-4626-9956-2798cf39a624" name="Default" comment="" />
+      <created>1498069138219</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1498069138219</updated>
+      <workItem from="1498069140180" duration="2819000" />
+      <workItem from="1498072195467" duration="4772000" />
+      <workItem from="1498087842359" duration="6612000" />
+    </task>
+    <servers />
+  </component>
+  <component name="TimeTrackingManager">
+    <option name="totallyTimeSpent" value="14203000" />
+  </component>
+  <component name="TodoView">
+    <todo-panel id="selected-file">
+      <is-autoscroll-to-source value="true" />
+    </todo-panel>
+    <todo-panel id="all">
+      <are-packages-shown value="true" />
+      <is-autoscroll-to-source value="true" />
+    </todo-panel>
+  </component>
+  <component name="ToolWindowManager">
+    <frame x="1919" y="0" width="1922" height="1081" extended-state="6" />
+    <editor active="true" />
+    <layout>
+      <window_info id="Palette" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
+      <window_info id="Nl-Palette" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
+      <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="7" side_tool="true" content_ui="tabs" />
+      <window_info id="Maven Projects" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
+      <window_info id="Properties" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
+      <window_info id="Capture Tool" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
+      <window_info id="Designer" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
+      <window_info id="Duplicates" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="-1" side_tool="false" content_ui="tabs" />
+      <window_info id="Database" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
+      <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
+      <window_info id="Ant Build" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
+      <window_info id="UI Designer" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
+      <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.4" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
+      <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.0" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
+      <window_info id="Messages" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32930845" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
+      <window_info id="Palette&#9;" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
+      <window_info id="Image Layers" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
+      <window_info id="Capture Analysis" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
+      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.3295099" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
+      <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32930845" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
+      <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.32846716" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
+      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.2553305" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
+      <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32930845" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
+      <window_info id="Theme Preview" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
+      <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="true" content_ui="tabs" />
+      <window_info id="Cvs" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
+      <window_info id="Message" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
+      <window_info id="Commander" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.4" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
+      <window_info id="Hierarchy" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="2" side_tool="false" content_ui="combo" />
+      <window_info id="Inspection" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.4" sideWeight="0.5" order="5" side_tool="false" content_ui="tabs" />
+    </layout>
+    <layout-to-restore>
+      <window_info id="Palette" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
+      <window_info id="Cvs" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="5" side_tool="false" content_ui="tabs" />
+      <window_info id="Nl-Palette" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
+      <window_info id="Message" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
+      <window_info id="Commander" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.4" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
+      <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="8" side_tool="true" content_ui="tabs" />
+      <window_info id="Maven Projects" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
+      <window_info id="Properties" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="5" side_tool="false" content_ui="tabs" />
+      <window_info id="Capture Tool" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
+      <window_info id="Designer" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
+      <window_info id="Hierarchy" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="2" side_tool="false" content_ui="combo" />
+      <window_info id="Duplicates" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
+      <window_info id="Database" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
+      <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
+      <window_info id="Ant Build" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
+      <window_info id="UI Designer" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="5" side_tool="false" content_ui="tabs" />
+      <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.4" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
+      <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.0" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
+      <window_info id="Messages" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32930845" sideWeight="0.5" order="9" side_tool="false" content_ui="tabs" />
+      <window_info id="Palette&#9;" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
+      <window_info id="Image Layers" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
+      <window_info id="Capture Analysis" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="8" side_tool="false" content_ui="tabs" />
+      <window_info id="Inspection" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.4" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
+      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.3295099" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
+      <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32930845" sideWeight="0.5" order="10" side_tool="false" content_ui="tabs" />
+      <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32846716" sideWeight="0.5" order="11" side_tool="false" content_ui="tabs" />
+      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.2553305" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
+      <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32930845" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
+      <window_info id="Theme Preview" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="9" side_tool="false" content_ui="tabs" />
+      <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="7" side_tool="true" content_ui="tabs" />
+    </layout-to-restore>
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="processedProjectFiles" value="true" />
+  </component>
+  <component name="VcsContentAnnotationSettings">
+    <option name="myLimit" value="2678400000" />
+  </component>
+  <component name="XDebuggerManager">
+    <breakpoint-manager>
+      <option name="time" value="4" />
+    </breakpoint-manager>
+    <watches-manager />
+  </component>
+  <component name="antWorkspaceConfiguration">
+    <option name="IS_AUTOSCROLL_TO_SOURCE" value="false" />
+    <option name="FILTER_TARGETS" value="false" />
+  </component>
+  <component name="editorHistoryManager">
+    <entry file="file://$PROJECT_DIR$/src/MarkovBlanket.java" />
+    <entry file="file://$PROJECT_DIR$/src/MakeTargetSetup.java" />
+    <entry file="file://$PROJECT_DIR$/src/edu/cmu/tetrad/bayes/package.html" />
+    <entry file="file://$PROJECT_DIR$/src/edu/cmu/tetrad/bayes/RowSummingExactUpdater.java" />
+    <entry file="file://$PROJECT_DIR$/src/edu/cmu/tetrad/bayes/TestDiscreteBootstrap.java" />
+    <entry file="file://$PROJECT_DIR$/src/edu/cmu/tetrad/bayes/TestProposition.java" />
+    <entry file="file://$PROJECT_DIR$/src/edu/cmu/tetrad/bayes/TestUpdaterJointMarginal.java" />
+    <entry file="file://$PROJECT_DIR$/src/cs/sfu/jbn/alchemy/CopyOfExportToMLN.java" />
+    <entry file="file://$PROJECT_DIR$/documentation/kurt-comment.rtf" />
+    <entry file="file://$PROJECT_DIR$/src/SubsetCTComputation.java" />
+    <entry file="file://$PROJECT_DIR$/src/Sort_merge3.java" />
+    <entry file="file://$PROJECT_DIR$/src/TestWrapper.java" />
+    <entry file="file://$PROJECT_DIR$/src/RunBB.java" />
+    <entry file="file://$PROJECT_DIR$/build/src/config.cfg" />
+    <entry file="file://$PROJECT_DIR$/src/src/scripts/setup.sql" />
+    <entry file="file://$PROJECT_DIR$/src/src/config.cfg" />
+    <entry file="file://$PROJECT_DIR$/src/bif/BIF_IO.java" />
+    <entry file="file://$PROJECT_DIR$/src/sort_merge.csv" />
+    <entry file="file://$PROJECT_DIR$/src/CP.java" />
+    <entry file="file://$PROJECT_DIR$/src/BayesBaseCT_SortMerge.java" />
+    <entry file="file://$PROJECT_DIR$/.travis.yml">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="0">
+          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/RunBB.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-180">
+          <caret line="11" column="4" lean-forward="false" selection-start-line="11" selection-start-column="4" selection-end-line="11" selection-end-column="4" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/src/scripts/setup.sql">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-162">
+          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/src/config.cfg">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="0">
+          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/edu/cmu/tetrad/test/ReadMe">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="0">
+          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/edu/cmu/tetrad/test/TestDataLoadersRoundtrip.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="0">
+          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+          <folding>
+            <element signature="e#0#5339#0" expanded="false" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/edu/cmu/tetrad/test/TestDiscretizer.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="0">
+          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+          <folding>
+            <element signature="imports" expanded="false" />
+            <element signature="e#2273#2274#0" expanded="false" />
+            <element signature="e#2300#2301#0" expanded="false" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/edu/cmu/tetrad/test/TestStatUtils.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-686">
+          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+          <folding>
+            <element signature="imports" expanded="false" />
+            <element signature="e#2293#2294#0" expanded="false" />
+            <element signature="e#2320#2321#0" expanded="false" />
+            <element signature="e#3979#3980#0" expanded="false" />
+            <element signature="e#4036#4037#0" expanded="false" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/lattice/short_rnid_LatticeGenerator.class">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="0">
+          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+          <folding>
+            <element signature="e#0#10779#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/build/Sort_merge3.class">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="0">
+          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+          <folding>
+            <element signature="e#0#10243#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/CPGenerator.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="108">
+          <caret line="9" column="102" lean-forward="false" selection-start-line="9" selection-start-column="102" selection-end-line="9" selection-end-column="102" />
+          <folding>
+            <element signature="imports" expanded="false" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/config.cfg">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="180">
+          <caret line="10" column="14" lean-forward="false" selection-start-line="10" selection-start-column="14" selection-end-line="10" selection-end-column="14" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/scripts/metadata_2_nolink.sql">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="234">
+          <caret line="13" column="18" lean-forward="true" selection-start-line="13" selection-start-column="18" selection-end-line="13" selection-end-column="18" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/scripts/metadata_2.sql">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="124">
+          <caret line="823" column="0" lean-forward="true" selection-start-line="823" selection-start-column="0" selection-end-line="823" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/TestWrapper.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="377">
+          <caret line="31" column="80" lean-forward="false" selection-start-line="31" selection-start-column="80" selection-end-line="31" selection-end-column="80" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/scripts/transfer2.sql">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="0">
+          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/lattice/LatticeGenerator.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="0">
+          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/BayesBaseCT_SortMerge.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="324">
+          <caret line="158" column="29" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="1412" selection-end-column="0" />
+          <folding>
+            <element signature="imports" expanded="true" />
+            <element signature="method#BuildCT_Rnodes_counts#0;class#BayesBaseCT_SortMerge#0" expanded="false" />
+            <element signature="method#BuildCT_Rnodes_counts2#0;class#BayesBaseCT_SortMerge#0" expanded="false" />
+            <element signature="method#BuildCT_Rnodes_flat#0;class#BayesBaseCT_SortMerge#0" expanded="false" />
+            <element signature="method#BuildCT_Rnodes_star#0;class#BayesBaseCT_SortMerge#0" expanded="false" />
+            <element signature="method#BuildCT_Rnodes_CT#0;class#BayesBaseCT_SortMerge#0" expanded="false" />
+            <element signature="method#BuildCT_Rnodes_join#0;class#BayesBaseCT_SortMerge#0" expanded="false" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+  </component>
+</project>
