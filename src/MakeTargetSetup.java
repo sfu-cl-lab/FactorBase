@@ -46,7 +46,6 @@ public class MakeTargetSetup {
 		/*
 		 *  Perform setup if not completed.
 		 Isn't this redundant? Mayb we can just assume that setup database exists? June 16 2017
-		 vidhi: It is assumed that the user wants to enable AutomaticSetup in config file and run this java file. June 22, 2017 
 		 */
 		RunBB.setVarsFromConfig();
 		if ( RunBB.opt1.equals( "1" ) )
