@@ -51,7 +51,7 @@ public final class TestDiscretizer extends TestCase {
     }
 
 
-    public static void testBreakpointCalculation(){
+    public static void testBreakpointCalculation() {
         double[] data = {13, 1.2, 2.2, 4.5, 12.005, 5.5, 10.1, 7.5, 3.4};
         double[] breakpoints = Discretizer.getEqualFrequencyBreakPoints(data, 3);
 
@@ -71,9 +71,9 @@ public final class TestDiscretizer extends TestCase {
 
     }
 
-    public static void testManualDiscretize(){
+    public static void testManualDiscretize() {
         Node x = new ContinuousVariable("X");
-        List<Node> nodes = Collections.singletonList(x);
+        List <Node> nodes = Collections.singletonList(x);
         DataSet data = new ColtDataSet(9, nodes);
 
         data.setDouble(0, 0, 13.0);
@@ -108,6 +108,17 @@ public final class TestDiscretizer extends TestCase {
 
     }
 
+    /**
+     * This method uses reflection to collect up all of the test methods from
+     * this class and return them to the test runner.
+     */
+    public static Test suite() {
+
+        // Edit the name of the class in the parens to match the name
+        // of this class.
+        return new TestSuite(TestDiscretizer.class);
+    }
+
     // Causes a package cycle.
     public void testManualDiscretize2() {
         Graph graph = GraphUtils.randomDag(5, 0, 5, 3, 3, 3, false);
@@ -115,7 +126,7 @@ public final class TestDiscretizer extends TestCase {
         SemIm im = new SemIm(pm);
         DataSet data = im.simulateData(100, false);
 
-        List<Node> nodes = data.getVariables();
+        List <Node> nodes = data.getVariables();
 
         Discretizer discretizer = new Discretizer(data);
         discretizer.setVariablesCopied(true);
@@ -143,7 +154,7 @@ public final class TestDiscretizer extends TestCase {
         SemIm im = new SemIm(pm);
         DataSet data = im.simulateData(100, false);
 
-        List<Node> nodes = data.getVariables();
+        List <Node> nodes = data.getVariables();
 
         Discretizer discretizer = new Discretizer(data);
         discretizer.setVariablesCopied(true);
@@ -178,28 +189,6 @@ public final class TestDiscretizer extends TestCase {
         return max;
     }
 
-    public void testContinuous() {
-        final double[] data = {1, 2, 2.5, 3, 4, 5};
-
-        double[] cutoffs = new double[] {2.5, 3.2};
-        List<String> categories = Arrays.asList("lo", "med", "hi");
-
-        Discretizer.Discretization discretization = Discretizer.discretize(data, cutoffs, "after", categories);
-
-        System.out.println(discretization);
-
-        List<String> discretizedCategories =
-                discretization.getVariable().getCategories();
-        int[] discretizedData = discretization.getData();
-
-        assertEquals("lo", discretizedCategories.get(discretizedData[0]));
-        assertEquals("lo", discretizedCategories.get(discretizedData[1]));
-        assertEquals("med", discretizedCategories.get(discretizedData[2]));
-        assertEquals("med", discretizedCategories.get(discretizedData[3]));
-        assertEquals("hi", discretizedCategories.get(discretizedData[4]));
-        assertEquals("hi", discretizedCategories.get(discretizedData[5]));
-    }
-
 //    public static void testDiscrete() {
 //        final int[] data = {1, 2, 1, 2, 0, 5, 3, 2, 3, 4, 3, 5};
 //
@@ -225,14 +214,25 @@ public final class TestDiscretizer extends TestCase {
 //        assertEquals("hi", discretizedCategories.get(discretizedData[5]));
 //    }
 
-    /**
-     * This method uses reflection to collect up all of the test methods from
-     * this class and return them to the test runner.
-     */
-    public static Test suite() {
+    public void testContinuous() {
+        final double[] data = {1, 2, 2.5, 3, 4, 5};
 
-        // Edit the name of the class in the parens to match the name
-        // of this class.
-        return new TestSuite(TestDiscretizer.class);
+        double[] cutoffs = new double[]{2.5, 3.2};
+        List <String> categories = Arrays.asList("lo", "med", "hi");
+
+        Discretizer.Discretization discretization = Discretizer.discretize(data, cutoffs, "after", categories);
+
+        System.out.println(discretization);
+
+        List <String> discretizedCategories =
+                discretization.getVariable().getCategories();
+        int[] discretizedData = discretization.getData();
+
+        assertEquals("lo", discretizedCategories.get(discretizedData[0]));
+        assertEquals("lo", discretizedCategories.get(discretizedData[1]));
+        assertEquals("med", discretizedCategories.get(discretizedData[2]));
+        assertEquals("med", discretizedCategories.get(discretizedData[3]));
+        assertEquals("hi", discretizedCategories.get(discretizedData[4]));
+        assertEquals("hi", discretizedCategories.get(discretizedData[5]));
     }
 }

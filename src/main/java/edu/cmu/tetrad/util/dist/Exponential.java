@@ -25,8 +25,9 @@ import edu.cmu.tetrad.util.RandomUtil;
 
 /**
  * Created by IntelliJ IDEA. User: jdramsey Date: Jan 15, 2008 Time: 5:06:02 PM
-* To change this template use File | Settings | File Templates.
-*/
+ * To change this template use File | Settings | File Templates.
+ */
+
 /**
  * Wraps a chi square distribution for purposes of drawing random samples.
  * Methods are provided to allow parameters to be manipulated in an interface.
@@ -42,16 +43,6 @@ public class Exponential implements Distribution {
         this.lambda = lambda;
     }
 
-    @Override
-	public int getNumParameters() {
-        return 1;
-    }
-
-    @Override
-	public String getName() {
-        return "Exponential";
-    }
-
     /**
      * Generates a simple exemplar of this class to test serialization.
      *
@@ -65,7 +56,17 @@ public class Exponential implements Distribution {
     }
 
     @Override
-	public void setParameter(int index, double value) {
+    public int getNumParameters() {
+        return 1;
+    }
+
+    @Override
+    public String getName() {
+        return "Exponential";
+    }
+
+    @Override
+    public void setParameter(int index, double value) {
         if (index == 0) {
             lambda = value;
         }
@@ -74,7 +75,7 @@ public class Exponential implements Distribution {
     }
 
     @Override
-	public double getParameter(int index) {
+    public double getParameter(int index) {
         if (index == 0) {
             return lambda;
         }
@@ -83,7 +84,7 @@ public class Exponential implements Distribution {
     }
 
     @Override
-	public String getParameterName(int index) {
+    public String getParameterName(int index) {
         if (index == 0) {
             return "Lambda";
         }
@@ -92,12 +93,12 @@ public class Exponential implements Distribution {
     }
 
     @Override
-	public double nextRandom() {
+    public double nextRandom() {
         return RandomUtil.getInstance().nextExponential(lambda);
     }
 
     @Override
-	public String toString() {
+    public String toString() {
         return "Exponential(" + lambda + ")";
     }
 }

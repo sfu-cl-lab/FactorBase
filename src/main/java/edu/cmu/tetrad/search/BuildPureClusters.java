@@ -25,8 +25,6 @@ import edu.cmu.tetrad.data.*;
 import edu.cmu.tetrad.graph.*;
 import edu.cmu.tetrad.util.TetradLogger;
 
-import java.util.*;
-
 
 /**
  * BuildPureClusters is a implementation of the automated clustering and purification methods described on the report
@@ -54,21 +52,6 @@ import java.util.*;
  */
 
 public final class BuildPureClusters {
-    private boolean outputMessage;
-
-    /**
-     * Data storage
-     */
-    private ICovarianceMatrix covarianceMatrix;
-    private int numVariables;
-
-    private TestType sigTestType;
-    private TestType purifyTestType;
-    private int labels[];
-    private boolean scoreTestMode;
-
-    private List impurePairs;
-
     /**
      * Color code for the different edges that show up during search
      */
@@ -80,7 +63,17 @@ public final class BuildPureClusters {
     final int EDGE_RED = 4;
     final int MAX_PURIFY_TRIALS = 50;
     final int MAX_CLIQUE_TRIALS = 50;
-
+    private boolean outputMessage;
+    /**
+     * Data storage
+     */
+    private ICovarianceMatrix covarianceMatrix;
+    private int numVariables;
+    private TestType sigTestType;
+    private TestType purifyTestType;
+    private int labels[];
+    private boolean scoreTestMode;
+    private List impurePairs;
     private TetradTest tetradTest;
     private IndependenceTest independenceTest;
     private DataSet dataSet;
@@ -245,10 +238,10 @@ public final class BuildPureClusters {
 
         print("\n**************Starting BPC search!!!*************\n");
 
-        List<int[]> clustering = findMeasurementPattern();
+        List <int[]> clustering = findMeasurementPattern();
 
         // Remove clusters of size < 3.
-        for (int[] cluster : new ArrayList<int[]>(clustering)) {
+        for (int[] cluster : new ArrayList <int[]>(clustering)) {
             if (cluster.length < 3) {
                 clustering.remove(cluster);
             }
@@ -287,10 +280,10 @@ public final class BuildPureClusters {
      * Returns the converted search graph, or null if there is no model.
      */
     private Graph convertSearchGraph(List clusters) {
-        List<Node> nodes = tetradTest.getVariables();
+        List <Node> nodes = tetradTest.getVariables();
         Graph graph = new EdgeListGraph(nodes);
 
-        List<Node> latents = new ArrayList<Node>();
+        List <Node> latents = new ArrayList <Node>();
         for (int i = 0; i < clusters.size(); i++) {
             Node latent = new GraphNode(MimBuild.LATENT_PREFIX + (i + 1));
             latent.setNodeType(NodeType.LATENT);
@@ -686,7 +679,7 @@ public final class BuildPureClusters {
 
 
         if (getCovarianceMatrix() != null) {
-            List<Node> variables = getCovarianceMatrix().getVariables();
+            List <Node> variables = getCovarianceMatrix().getVariables();
             return getIndependenceTest().isIndependent(variables.get(v1),
                     variables.get(v2));
 
@@ -734,7 +727,7 @@ public final class BuildPureClusters {
             Node xVar = getCovarianceMatrix().getVariables().get(x);
             Node yVar = getCovarianceMatrix().getVariables().get(y);
 
-            List<Node> zVar = new ArrayList<Node>();
+            List <Node> zVar = new ArrayList <Node>();
             zVar.add(getCovarianceMatrix().getVariables().get(z));
 
             boolean indep = getIndependenceTest().isIndependent(xVar, yVar, zVar);
@@ -748,7 +741,7 @@ public final class BuildPureClusters {
 
             return indep;
         } else {
-            List<Node> conditional = new ArrayList<Node>();
+            List <Node> conditional = new ArrayList <Node>();
             conditional.add(dataSet.getVariable(z));
             return getIndependenceTest().isIndependent(dataSet.getVariable(x),
                     dataSet.getVariable(y),
@@ -760,7 +753,7 @@ public final class BuildPureClusters {
      * ****************************************************** DEBUG UTILITIES *******************************************************
      */
 
-    private void printClustering(List<int[]> clustering) {
+    private void printClustering(List <int[]> clustering) {
         for (int[] cluster : clustering) {
             printClusterNames(cluster);
         }
@@ -1893,7 +1886,7 @@ public final class BuildPureClusters {
         print("**** INITIAL CLUSTERING OUTPUT: ");
         printClustering(clustering);
         print("**** INDIVIDUAL CLUSTER PURIFICATION: ");
-        List<int[]> individualOneFactors = individualPurification(clustering);
+        List <int[]> individualOneFactors = individualPurification(clustering);
         printClustering(individualOneFactors);
         clustering = individualOneFactors;
         print(">> Stage 0.4 - Finding pairwise cluster relations");
@@ -1906,9 +1899,9 @@ public final class BuildPureClusters {
         return purify(actualClustering, orderedIds, null);
     }
 
-    private List<int[]> individualPurification(List clustering) {
+    private List <int[]> individualPurification(List clustering) {
         boolean oldOutputMessage = this.outputMessage;
-        List<int[]> purified = new ArrayList();
+        List <int[]> purified = new ArrayList();
         int ids[] = {1};
         for (int i = 0; i < clustering.size(); i++) {
             print(" * Solving cluster #" + (i + 1));
@@ -1925,7 +1918,7 @@ public final class BuildPureClusters {
             dummyClusterings.add(dummyClustering);
             List dummyIds = new ArrayList();
             dummyIds.add(ids);
-            List<int[]> purification = purify(dummyClusterings, dummyIds, null);
+            List <int[]> purification = purify(dummyClusterings, dummyIds, null);
             if (purification.size() > 0) {
                 purified.add(purification.get(0));
             } else {
@@ -1940,7 +1933,7 @@ public final class BuildPureClusters {
 
     private boolean compatibleClusters(int cluster1[], int cluster2[],
                                        int cv[][]) {
-        HashSet<Integer> allNodes = new HashSet<Integer>();
+        HashSet <Integer> allNodes = new HashSet <Integer>();
 
         for (int i = 0; i < cluster1.length; i++) {
             allNodes.add(cluster1[i]);
@@ -2675,8 +2668,8 @@ public final class BuildPureClusters {
      * This implementation uses the Purify class.
      */
 
-    private List<int[]> purify(List actualClusterings, List clusterIds,
-                               List forbiddenList) {
+    private List <int[]> purify(List actualClusterings, List clusterIds,
+                                List forbiddenList) {
 //        if (true) return (List<int[]>) actualClusterings;
 
 
@@ -2706,11 +2699,11 @@ public final class BuildPureClusters {
                 clusterId++;
             }
 
-            List<List<Node>> partition2 = new ArrayList<List<Node>>();
+            List <List <Node>> partition2 = new ArrayList <List <Node>>();
 
             for (int j = 0; j < partition.size(); j++) {
                 int[] clusterIndices = (int[]) partition.get(j);
-                List<Node> cluster = new ArrayList<Node>();
+                List <Node> cluster = new ArrayList <Node>();
 
                 for (int k = 0; k < clusterIndices.length; k++) {
                     cluster.add(tetradTest.getVariables().get(clusterIndices[k]));
@@ -2739,8 +2732,7 @@ public final class BuildPureClusters {
             if (solutionGraph != null && solutionGraph.getNodes().size() > 1) {
                 List clusteringOutput = convertGraphToList(solutionGraph);
                 return clusteringOutput;
-            }
-            else if (actualClusterings.size() > 1) {
+            } else if (actualClusterings.size() > 1) {
                 rebuildClusteringList(actualClusterings, i, clusterIds);
             }
             return new ArrayList();
@@ -2750,12 +2742,12 @@ public final class BuildPureClusters {
         return new ArrayList();
     }
 
-    private List<int[]> convertListToInt(List<List<Node>> partition) {
-        List<Node> nodes = tetradTest.getVariables();
-        List<int[]> _partition = new ArrayList<int[]>();
+    private List <int[]> convertListToInt(List <List <Node>> partition) {
+        List <Node> nodes = tetradTest.getVariables();
+        List <int[]> _partition = new ArrayList <int[]>();
 
         for (int i = 0; i < partition.size(); i++) {
-            List<Node> cluster = partition.get(i);
+            List <Node> cluster = partition.get(i);
             int[] _cluster = new int[cluster.size()];
 
             for (int j = 0; j < cluster.size(); j++) {
@@ -2773,13 +2765,13 @@ public final class BuildPureClusters {
         return _partition;
     }
 
-    private List<List<Node>> convertIntToList(List<int[]> partition) {
-        List<Node> nodes = tetradTest.getVariables();
-        List<List<Node>> _partition = new ArrayList<List<Node>>();
+    private List <List <Node>> convertIntToList(List <int[]> partition) {
+        List <Node> nodes = tetradTest.getVariables();
+        List <List <Node>> _partition = new ArrayList <List <Node>>();
 
         for (int i = 0; i < partition.size(); i++) {
             int[] cluster = partition.get(i);
-            List<Node> _cluster = new ArrayList<Node>();
+            List <Node> _cluster = new ArrayList <Node>();
 
             for (int j = 0; j < cluster.length; j++) {
                 _cluster.add(nodes.get(cluster[j]));

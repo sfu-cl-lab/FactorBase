@@ -54,7 +54,7 @@ public final class TestDiscreteProbs extends TestCase {
         DiscreteVariable z = new DiscreteVariable("Z", 3);
         DiscreteVariable w = new DiscreteVariable("W", 2);
 
-        List<Node> variables = new LinkedList<Node>();
+        List <Node> variables = new LinkedList <Node>();
         variables.add(x);
         variables.add(y);
         variables.add(z);
@@ -64,6 +64,17 @@ public final class TestDiscreteProbs extends TestCase {
                 StoredCellProbs.createRandomCellTable(variables);
 
         System.out.println(cellProbabilities);
+    }
+
+    /**
+     * This method uses reflection to collect up all of the test methods from
+     * this class and return them to the test runner.
+     */
+    public static Test suite() {
+
+        // Edit the name of the class in the parens to match the name
+        // of this class.
+        return new TestSuite(TestDiscreteProbs.class);
     }
 
     public void testCreateUsingBayesIm() {
@@ -87,17 +98,6 @@ public final class TestDiscreteProbs extends TestCase {
 
         System.out.println("\n\nprob = " +
                 NumberFormatUtil.getInstance().getNumberFormat().format(cellProbs.getConditionalProb(assertion, condition)));
-    }
-
-    /**
-     * This method uses reflection to collect up all of the test methods from
-     * this class and return them to the test runner.
-     */
-    public static Test suite() {
-
-        // Edit the name of the class in the parens to match the name
-        // of this class.
-        return new TestSuite(TestDiscreteProbs.class);
     }
 }
 

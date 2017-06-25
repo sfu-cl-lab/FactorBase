@@ -69,14 +69,14 @@ public final class Pair implements TetradSerializable {
     }
 
     @Override
-	public final int hashCode() {
+    public final int hashCode() {
         int hash = 17;
         hash += 19 * (x.hashCode() + y.hashCode());
         return hash;
     }
 
     @Override
-	public final boolean equals(Object obj) {
+    public final boolean equals(Object obj) {
         if (!(obj instanceof Pair)) {
             return false;
         }
@@ -87,7 +87,7 @@ public final class Pair implements TetradSerializable {
     }
 
     @Override
-	public String toString() {
+    public String toString() {
         return "<" + x + ", " + y + ">";
     }
 }

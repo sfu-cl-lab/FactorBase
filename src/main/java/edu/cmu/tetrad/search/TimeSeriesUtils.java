@@ -54,7 +54,7 @@ public class TimeSeriesUtils {
      */
     public static DataSet ar(DataSet timeSeries, int numLags) {
         DataSet timeLags = createLagData(timeSeries, numLags);
-        List<Node> regressors = new ArrayList<Node>();
+        List <Node> regressors = new ArrayList <Node>();
 
         for (int i = timeSeries.getNumColumns(); i < timeLags.getNumColumns(); i++) {
             regressors.add(timeLags.getVariable(i));
@@ -77,7 +77,7 @@ public class TimeSeriesUtils {
     }
 
     public static DataSet ar2(DataSet timeSeries, int numLags) {
-        List<Node> missingVariables = new ArrayList<Node>();
+        List <Node> missingVariables = new ArrayList <Node>();
 
         for (Node node : timeSeries.getVariables()) {
             int index = timeSeries.getVariables().indexOf(node);
@@ -115,7 +115,7 @@ public class TimeSeriesUtils {
                 continue;
             }
 
-            List<Node> regressors = new ArrayList<Node>();
+            List <Node> regressors = new ArrayList <Node>();
 
             for (int i2 = timeSeries.getNumColumns(); i2 < timeLags.getNumColumns(); i2++) {
                 int varIndex = i2 % timeSeries.getNumColumns();
@@ -161,24 +161,6 @@ public class TimeSeriesUtils {
         return ColtDataSet.makeContinuousData(timeSeries.getVariables(), residuals);
     }
 
-    private int[] eliminateMissing(int[] parents, int dataIndex, DataSet dataSet, List<Node> missingVariables) {
-        List<Integer> _parents = new ArrayList<Integer>();
-
-        for (int k : parents) {
-            if (!missingVariables.contains(dataSet.getVariable(k))) {
-                _parents.add(k);
-            }
-        }
-
-        int[] _parents2 = new int[_parents.size()];
-
-        for (int i = 0; i < _parents.size(); i++) {
-            _parents2[i] = _parents.get(i);
-        }
-
-        return _parents2;
-    }
-
     public static VarResult structuralVar(DataSet timeSeries, int numLags) {
         DataSet timeLags = TimeSeriesUtils.createLagData(timeSeries, numLags);
         Knowledge knowledge = new Knowledge(timeLags.getKnowledge());
@@ -220,7 +202,7 @@ public class TimeSeriesUtils {
         for (int i = 0; i < timeSeries.getNumColumns(); i++) {
             Node target = timeLags.getVariable(i);
 
-            List<Node> regressors = new ArrayList<Node>();
+            List <Node> regressors = new ArrayList <Node>();
 
             // Collect up parents from each lagged variable behind
             // timelags.getVariable(i).
@@ -274,25 +256,6 @@ public class TimeSeriesUtils {
         return ColtDataSet.makeContinuousData(data.getVariables(), shiftedData);
     }
 
-    public static class VarResult {
-        private DataSet residuals;
-        private Graph collapsedVarGraph;
-
-        public VarResult(DataSet dataSet, Graph collapsedVarGraph) {
-            this.residuals = dataSet;
-            this.collapsedVarGraph = collapsedVarGraph;
-        }
-
-        public DataSet getResiduals() {
-            return residuals;
-        }
-
-        public Graph getCollapsedVarGraph() {
-            return collapsedVarGraph;
-        }
-    }
-
-
     public static double[] getSelfLoopCoefs(DataSet timeSeries) {
         DataSet timeLags = createLagData(timeSeries, 1);
 
@@ -301,7 +264,7 @@ public class TimeSeriesUtils {
         for (int j = 0; j < timeSeries.getNumColumns(); j++) {
             Node target = timeLags.getVariable(j);
             Node selfLoop = timeLags.getVariable(j + timeSeries.getNumColumns());
-            List<Node> regressors = Collections.singletonList(selfLoop);
+            List <Node> regressors = Collections.singletonList(selfLoop);
 
             Regression regression = new RegressionDatasetGeneralized(timeLags);
             RegressionResult result = regression.regress(target, regressors);
@@ -313,7 +276,7 @@ public class TimeSeriesUtils {
 
     public static double sumOfArCoefficients(DataSet timeSeries, int numLags) {
         DataSet timeLags = createLagData(timeSeries, numLags);
-        List<Node> regressors = new ArrayList<Node>();
+        List <Node> regressors = new ArrayList <Node>();
 
         for (int i = timeSeries.getNumColumns(); i < timeLags.getNumColumns(); i++) {
             regressors.add(timeLags.getVariable(i));
@@ -343,7 +306,6 @@ public class TimeSeriesUtils {
 
         return sum / n;
     }
-
 
     /**
      * Calculates the dth difference of the given data. If d = 0, the original data is returned. If d = 1, the data
@@ -378,12 +340,12 @@ public class TimeSeriesUtils {
      * Creates new time series dataset from the given one (fixed to deal with mixed datasets)
      */
     public static DataSet createLagData(DataSet data, int numLags) {
-        List<Node> variables = data.getVariables();
+        List <Node> variables = data.getVariables();
         int dataSize = variables.size();
         int laggedRows = data.getNumRows() - numLags;
         Knowledge knowledge = new Knowledge();
         Node[][] laggedNodes = new Node[numLags + 1][dataSize];
-        List<Node> newVariables = new ArrayList<Node>((numLags + 1) * dataSize + 1);
+        List <Node> newVariables = new ArrayList <Node>((numLags + 1) * dataSize + 1);
 
         for (int lag = 0; lag <= numLags; lag++) {
             for (int col = 0; col < dataSize; col++) {
@@ -424,6 +386,42 @@ public class TimeSeriesUtils {
         knowledge.setDefaultToKnowledgeLayout(true);
         laggedData.setKnowledge(knowledge);
         return laggedData;
+    }
+
+    private int[] eliminateMissing(int[] parents, int dataIndex, DataSet dataSet, List <Node> missingVariables) {
+        List <Integer> _parents = new ArrayList <Integer>();
+
+        for (int k : parents) {
+            if (!missingVariables.contains(dataSet.getVariable(k))) {
+                _parents.add(k);
+            }
+        }
+
+        int[] _parents2 = new int[_parents.size()];
+
+        for (int i = 0; i < _parents.size(); i++) {
+            _parents2[i] = _parents.get(i);
+        }
+
+        return _parents2;
+    }
+
+    public static class VarResult {
+        private DataSet residuals;
+        private Graph collapsedVarGraph;
+
+        public VarResult(DataSet dataSet, Graph collapsedVarGraph) {
+            this.residuals = dataSet;
+            this.collapsedVarGraph = collapsedVarGraph;
+        }
+
+        public DataSet getResiduals() {
+            return residuals;
+        }
+
+        public Graph getCollapsedVarGraph() {
+            return collapsedVarGraph;
+        }
     }
 }
 

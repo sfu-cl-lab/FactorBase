@@ -42,14 +42,14 @@ class FciDsepLegalPairsCfci implements LegalPairs {
      * Graph with respect to which graph properties are tested.
      */
     private Graph graph;
-    private Set<Triple> ambiguousTriples;
+    private Set <Triple> ambiguousTriples;
 
     /**
      * Constructs a new legal pairs object. See class level doc.
      *
      * @param graph The graph with respect to which legal pairs will be tested.
      */
-    public FciDsepLegalPairsCfci(Graph graph, Set<Triple> unfaithfulTriples) {
+    public FciDsepLegalPairsCfci(Graph graph, Set <Triple> unfaithfulTriples) {
         if (graph == null) {
             throw new NullPointerException();
         }
@@ -62,7 +62,7 @@ class FciDsepLegalPairsCfci implements LegalPairs {
      * Returns true iff x is adjacent to y.
      */
     @Override
-	public boolean isLegalFirstEdge(Node x, Node y) {
+    public boolean isLegalFirstEdge(Node x, Node y) {
         return this.graph.isAdjacentTo(x, y);
     }
 
@@ -72,8 +72,8 @@ class FciDsepLegalPairsCfci implements LegalPairs {
      * @throws IllegalArgumentException if x is not adjacent to y or y is not adjacent to z.
      */
     @Override
-	public boolean isLegalPair(Node x, Node y, Node z, List<Node> c,
-                               List<Node> d) {
+    public boolean isLegalPair(Node x, Node y, Node z, List <Node> c,
+                               List <Node> d) {
         if (!(graph.isAdjacentTo(x, y)) || !(graph.isAdjacentTo(y, z))) {
             throw new IllegalArgumentException();
         }

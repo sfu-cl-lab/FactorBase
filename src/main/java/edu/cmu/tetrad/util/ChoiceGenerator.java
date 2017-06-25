@@ -110,44 +110,6 @@ public final class ChoiceGenerator {
     }
 
     /**
-     * Returns the next combination in the series, or null if the series is
-     * finished.  The array that is produced should not be altered by the user,
-     * as it is reused by the choice generator.
-     * <p/>
-     * If the number of items chosen is zero, a zero-length array will be
-     * returned once, with null after that.
-     * <p/>
-     * The array that is returned is reused, but modifying it will not change
-     * the sequence of choices returned.
-     *
-     * @return the next combination in the series, or null if the series is
-     *         finished.
-     */
-    public int[] next() {
-        int i = getB();
-
-        // Scan from the right for the first index whose value is less than
-        // its expected maximum (i + diff) and perform the fill() operation
-        // at that index.
-        while (--i > -1) {
-            if (this.choiceLocal[i] < i + this.diff) {
-                fill(i);
-                begun = true;
-                System.arraycopy(choiceLocal, 0, choiceReturned, 0, b);
-                return choiceReturned;
-            }
-        }
-
-        if (this.begun) {
-            return null;
-        } else {
-            begun = true;
-            System.arraycopy(choiceLocal, 0, choiceReturned, 0, b);
-            return choiceReturned;
-        }
-    }
-
-    /**
      * This static method will print the series of combinations for a choose b
      * to System.out.
      *
@@ -177,6 +139,44 @@ public final class ChoiceGenerator {
         }
 
         System.out.println();
+    }
+
+    /**
+     * Returns the next combination in the series, or null if the series is
+     * finished.  The array that is produced should not be altered by the user,
+     * as it is reused by the choice generator.
+     * <p/>
+     * If the number of items chosen is zero, a zero-length array will be
+     * returned once, with null after that.
+     * <p/>
+     * The array that is returned is reused, but modifying it will not change
+     * the sequence of choices returned.
+     *
+     * @return the next combination in the series, or null if the series is
+     * finished.
+     */
+    public int[] next() {
+        int i = getB();
+
+        // Scan from the right for the first index whose value is less than
+        // its expected maximum (i + diff) and perform the fill() operation
+        // at that index.
+        while (--i > -1) {
+            if (this.choiceLocal[i] < i + this.diff) {
+                fill(i);
+                begun = true;
+                System.arraycopy(choiceLocal, 0, choiceReturned, 0, b);
+                return choiceReturned;
+            }
+        }
+
+        if (this.begun) {
+            return null;
+        } else {
+            begun = true;
+            System.arraycopy(choiceLocal, 0, choiceReturned, 0, b);
+            return choiceReturned;
+        }
     }
 
     /**

@@ -55,24 +55,20 @@ public final class NoEdgeIntoUndirectedEndpoint implements GraphConstraint {
      * Returns true iff the edge may be added. See main javadoc.
      */
     @Override
-	public boolean isEdgeAddable(Edge edge, Graph graph) {
+    public boolean isEdgeAddable(Edge edge, Graph graph) {
 
         if (edge.getEndpoint1() == Endpoint.ARROW) {
             if (existsAttachedUndirectedEdge(edge.getNode1(), graph)) {
                 return false;
             }
-        }
-        else if (edge.getEndpoint2() == Endpoint.ARROW) {
+        } else if (edge.getEndpoint2() == Endpoint.ARROW) {
             if (existsAttachedUndirectedEdge(edge.getNode2(), graph)) {
                 return false;
             }
-        }
-        else
-        if (Edges.isNondirectedEdge(edge) || Edges.isUndirectedEdge(edge)) {
+        } else if (Edges.isNondirectedEdge(edge) || Edges.isUndirectedEdge(edge)) {
             if (existsAttachedIntoEdge(edge.getNode1(), graph)) {
                 return false;
-            }
-            else if (existsAttachedIntoEdge(edge.getNode2(), graph)) {
+            } else if (existsAttachedIntoEdge(edge.getNode2(), graph)) {
                 return false;
             }
         }
@@ -84,7 +80,7 @@ public final class NoEdgeIntoUndirectedEndpoint implements GraphConstraint {
      * Returns true.
      */
     @Override
-	public boolean isNodeAddable(Node node, Graph graph) {
+    public boolean isNodeAddable(Node node, Graph graph) {
         return true;
     }
 
@@ -92,7 +88,7 @@ public final class NoEdgeIntoUndirectedEndpoint implements GraphConstraint {
      * Returns true.
      */
     @Override
-	public boolean isEdgeRemovable(Edge edge, Graph graph) {
+    public boolean isEdgeRemovable(Edge edge, Graph graph) {
         return true;
     }
 
@@ -100,7 +96,7 @@ public final class NoEdgeIntoUndirectedEndpoint implements GraphConstraint {
      * Returns true.
      */
     @Override
-	public boolean isNodeRemovable(Node node, Graph graph) {
+    public boolean isNodeRemovable(Node node, Graph graph) {
         return true;
     }
 
@@ -109,8 +105,7 @@ public final class NoEdgeIntoUndirectedEndpoint implements GraphConstraint {
      */
     private boolean existsAttachedUndirectedEdge(Node node, Graph graph) {
         for (Edge edge1 : graph.getEdges(node)) {
-            if (Edges.isNondirectedEdge(edge1) || Edges.isUndirectedEdge(edge1))
-            {
+            if (Edges.isNondirectedEdge(edge1) || Edges.isUndirectedEdge(edge1)) {
                 return true;
             }
         }
@@ -137,7 +132,7 @@ public final class NoEdgeIntoUndirectedEndpoint implements GraphConstraint {
      * Returns a string representation of this constraint.
      */
     @Override
-	public String toString() {
+    public String toString() {
         return "<Undirected edges block into edges.>";
     }
 }

@@ -36,9 +36,9 @@ import java.util.List;
 public interface IKnowledge {
     void addToTier(int tier, String var);
 
-    void addToTiersByVarNames(List<String> varNames);
+    void addToTiersByVarNames(List <String> varNames);
 
-    List<KnowledgeGroup> getKnowledgeGroups();
+    List <KnowledgeGroup> getKnowledgeGroups();
 
     void removeKnowledgeGroup(int index);
 
@@ -46,15 +46,15 @@ public interface IKnowledge {
 
     void setKnowledgeGroup(int index, KnowledgeGroup group);
 
-    Iterator<KnowledgeEdge> forbiddenCommonCausesIterator();
+    Iterator <KnowledgeEdge> forbiddenCommonCausesIterator();
 
-    Iterator<KnowledgeEdge> forbiddenEdgesIterator();
+    Iterator <KnowledgeEdge> forbiddenEdgesIterator();
 
-    Iterator<KnowledgeEdge> explicitlyForbiddenEdgesIterator();
+    Iterator <KnowledgeEdge> explicitlyForbiddenEdgesIterator();
 
-    List<String> getVarsNotInTier();
+    List <String> getVarsNotInTier();
 
-    List<String> getTier(int tier);
+    List <String> getTier(int tier);
 
     int getNumTiers();
 
@@ -79,17 +79,17 @@ public interface IKnowledge {
 
     boolean isEmpty();
 
-    Iterator<KnowledgeEdge> requiredCommonCausesIterator();
+    Iterator <KnowledgeEdge> requiredCommonCausesIterator();
 
-    Iterator<KnowledgeEdge> requiredEdgesIterator();
+    Iterator <KnowledgeEdge> requiredEdgesIterator();
 
-    Iterator<KnowledgeEdge> explicitlyRequiredEdgesIterator();
+    Iterator <KnowledgeEdge> explicitlyRequiredEdgesIterator();
 
     void setEdgeForbidden(String var1, String var2,
-                                       boolean forbid);
+                          boolean forbid);
 
     void setEdgeRequired(String var1, String var2,
-                                                                         boolean required);
+                         boolean required);
 
     void removeFromTiers(String var);
 
@@ -99,31 +99,31 @@ public interface IKnowledge {
 
     int getMaxTierForbiddenWithin();
 
+    boolean isDefaultToKnowledgeLayout();
+
     void setDefaultToKnowledgeLayout(
             boolean defaultToKnowledgeLayout);
-
-    boolean isDefaultToKnowledgeLayout();
 
     void clear();
 
     @Override
-	int hashCode();
+    int hashCode();
 
     @Override
-	@SuppressWarnings({"SimplifiableIfStatement"})
+    @SuppressWarnings({"SimplifiableIfStatement"})
     boolean equals(Object o);
 
     @Override
-	String toString();
+    String toString();
 
     boolean isViolatedBy(Graph graph);
 
-    void setTier(int tier, List<String> vars);
+    void setTier(int tier, List <String> vars);
 
     void addVariable(String varName);
 
     void removeVariable(String varName);
 
-    List<String> getVariables();
+    List <String> getVariables();
 }
 

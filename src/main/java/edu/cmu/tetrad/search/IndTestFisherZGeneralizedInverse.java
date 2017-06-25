@@ -46,34 +46,29 @@ import java.util.List;
 public final class IndTestFisherZGeneralizedInverse implements IndependenceTest {
 
     /**
+     * Formats as 0.0000.
+     */
+    private static NumberFormat nf = NumberFormatUtil.getInstance().getNumberFormat();
+    /**
      * The correlation matrix.
      */
     private final DoubleMatrix2D data;
-
     /**
      * The variables of the correlation matrix, in order. (Unmodifiable list.)
      */
-    private final List<Node> variables;
-
+    private final List <Node> variables;
     /**
      * The significance level of the independence tests.
      */
     private double alpha;
-
     /**
      * The cutoff value for 'alpha' area in the two tails of the partial correlation distribution function.
      */
     private double thresh = Double.NaN;
-
     /**
      * The value of the Fisher's Z statistic associated with the las calculated partial correlation.
      */
     private double fishersZ;
-
-    /**
-     * Formats as 0.0000.
-     */
-    private static NumberFormat nf = NumberFormatUtil.getInstance().getNumberFormat();
     private DataSet dataSet;
 
     //==========================CONSTRUCTORS=============================//
@@ -98,7 +93,7 @@ public final class IndTestFisherZGeneralizedInverse implements IndependenceTest 
      * Creates a new IndTestCramerT instance for a subset of the variables.
      */
     @Override
-	public IndependenceTest indTestSubset(List vars) {
+    public IndependenceTest indTestSubset(List vars) {
 //        if (vars.isEmpty()) {
 //            throw new IllegalArgumentException("Subset may not be empty.");
 //        }
@@ -142,7 +137,7 @@ public final class IndTestFisherZGeneralizedInverse implements IndependenceTest 
      * @throws RuntimeException if a matrix singularity is encountered.
      */
     @Override
-	public boolean isIndependent(Node xVar, Node yVar, List<Node> z) {
+    public boolean isIndependent(Node xVar, Node yVar, List <Node> z) {
         if (z == null) {
             throw new NullPointerException();
         }
@@ -233,19 +228,19 @@ public final class IndTestFisherZGeneralizedInverse implements IndependenceTest 
     }
 
     @Override
-	public boolean isIndependent(Node x, Node y, Node... z) {
-        List<Node> zList = Arrays.asList(z);
+    public boolean isIndependent(Node x, Node y, Node... z) {
+        List <Node> zList = Arrays.asList(z);
         return isIndependent(x, y, zList);
     }
 
     @Override
-	public boolean isDependent(Node x, Node y, List<Node> z) {
+    public boolean isDependent(Node x, Node y, List <Node> z) {
         return !isIndependent(x, y, z);
     }
 
     @Override
-	public boolean isDependent(Node x, Node y, Node... z) {
-        List<Node> zList = Arrays.asList(z);
+    public boolean isDependent(Node x, Node y, Node... z) {
+        List <Node> zList = Arrays.asList(z);
         return isDependent(x, y, zList);
     }
 
@@ -253,7 +248,7 @@ public final class IndTestFisherZGeneralizedInverse implements IndependenceTest 
      * Returns the probability associated with the most recently computed independence test.
      */
     @Override
-	public double getPValue() {
+    public double getPValue() {
         return 2.0 * (1.0 - RandomUtil.getInstance().normalCdf(0, 1, Math.abs(fishersZ)));
 
 //        double q = 2.0 * Integrator.getArea(npdf, 0.0, Math.abs(fishersZ), 100);
@@ -264,11 +259,19 @@ public final class IndTestFisherZGeneralizedInverse implements IndependenceTest 
     }
 
     /**
+     * Gets the current significance level.
+     */
+    @Override
+    public double getAlpha() {
+        return this.alpha;
+    }
+
+    /**
      * Sets the significance level at which independence judgments should be made.  Affects the cutoff for partial
      * correlations to be considered statistically equal to zero.
      */
     @Override
-	public void setAlpha(double alpha) {
+    public void setAlpha(double alpha) {
         if (alpha < 0.0 || alpha > 1.0) {
             throw new IllegalArgumentException("Significance out of range.");
         }
@@ -277,19 +280,11 @@ public final class IndTestFisherZGeneralizedInverse implements IndependenceTest 
     }
 
     /**
-     * Gets the current significance level.
-     */
-    @Override
-	public double getAlpha() {
-        return this.alpha;
-    }
-
-    /**
      * Returns the list of variables over which this independence checker is capable of determinine independence
      * relations-- that is, all the variables in the given graph or the given data set.
      */
     @Override
-	public List<Node> getVariables() {
+    public List <Node> getVariables() {
         return this.variables;
     }
 
@@ -297,7 +292,7 @@ public final class IndTestFisherZGeneralizedInverse implements IndependenceTest 
      * Returns the variable with the given name.
      */
     @Override
-	public Node getVariable(String name) {
+    public Node getVariable(String name) {
         for (int i = 0; i < getVariables().size(); i++) {
             Node variable = getVariables().get(i);
             if (variable.getName().equals(name)) {
@@ -312,9 +307,9 @@ public final class IndTestFisherZGeneralizedInverse implements IndependenceTest 
      * Returns the list of variable varNames.
      */
     @Override
-	public List<String> getVariableNames() {
-        List<Node> variables = getVariables();
-        List<String> variableNames = new ArrayList<String>();
+    public List <String> getVariableNames() {
+        List <Node> variables = getVariables();
+        List <String> variableNames = new ArrayList <String>();
         for (Node variable1 : variables) {
             variableNames.add(variable1.getName());
         }
@@ -322,7 +317,7 @@ public final class IndTestFisherZGeneralizedInverse implements IndependenceTest 
     }
 
     @Override
-	public String toString() {
+    public String toString() {
         return "Fisher's Z - Generalized Inverse, alpha = " + nf.format(getAlpha());
     }
 
@@ -369,7 +364,7 @@ public final class IndTestFisherZGeneralizedInverse implements IndependenceTest 
     }
 
     @Override
-	public boolean determines(List<Node> zList, Node xVar) {
+    public boolean determines(List <Node> zList, Node xVar) {
         if (zList == null) {
             throw new NullPointerException();
         }
@@ -446,7 +441,7 @@ public final class IndTestFisherZGeneralizedInverse implements IndependenceTest 
     }
 
     @Override
-	public DataSet getData() {
+    public DataSet getData() {
         return dataSet;
     }
 }

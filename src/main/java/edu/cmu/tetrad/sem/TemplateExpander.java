@@ -69,7 +69,7 @@ public class TemplateExpander {
      */
     public String expandTemplate(String template, GeneralizedSemPm semPm, Node node) throws ParseException {
         ExpressionParser parser = new ExpressionParser();
-        List<String> usedNames;
+        List <String> usedNames;
 
         if (semPm == null && template.contains("$")) {
             throw new IllegalArgumentException("If semPm is null, the template may not contain any parameters or " +
@@ -143,7 +143,7 @@ public class TemplateExpander {
 
     private String replaceLists(String operator, GeneralizedSemPm semPm, String formula, Node node)
             throws ParseException {
-        List<String> templateOperators = new ArrayList<String>();
+        List <String> templateOperators = new ArrayList <String>();
         templateOperators.add("TSUM");
         templateOperators.add("TPROD");
 
@@ -186,7 +186,7 @@ public class TemplateExpander {
                 }
             }
 
-            List<Node> parents = new ArrayList<Node>();
+            List <Node> parents = new ArrayList <Node>();
 
             if (semPm != null && node != null) {
                 parents = semPm.getParents(node);
@@ -244,9 +244,7 @@ public class TemplateExpander {
 
         if (error != null) {
             return formula.replaceAll("ERROR", error.getName());
-        }
-
-        else return formula;
+        } else return formula;
     }
 
     private String removeOperatorStrings(String formula) {
@@ -257,7 +255,7 @@ public class TemplateExpander {
         while (found) {
             found = false;
 
-            List<Character> operatorList = new ArrayList<Character>();
+            List <Character> operatorList = new ArrayList <Character>();
             int first = 0;
             int last = 0;
 
@@ -305,7 +303,7 @@ public class TemplateExpander {
         return formula;
     }
 
-    private String replaceNewParameters(GeneralizedSemPm semPm, String formula, List<String> usedNames) {
+    private String replaceNewParameters(GeneralizedSemPm semPm, String formula, List <String> usedNames) {
         String parameterPattern = "\\$|(([a-zA-Z]{1})([a-zA-Z0-9-_/]*))";
         Pattern p = Pattern.compile("NEW\\((" + parameterPattern + ")\\)");
 

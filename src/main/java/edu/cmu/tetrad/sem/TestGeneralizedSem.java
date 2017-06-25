@@ -33,7 +33,6 @@ import junit.framework.TestCase;
 import junit.framework.TestSuite;
 
 import java.text.ParseException;
-import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -52,6 +51,17 @@ public class TestGeneralizedSem extends TestCase {
         super(name);
     }
 
+    /**
+     * This method uses reflection to collect up all of the test methods from
+     * this class and return them to the test runner.
+     */
+    public static Test suite() {
+
+        // Edit the name of the class in the parens to match the name
+        // of this class.
+        return new TestSuite(TestGeneralizedSem.class);
+    }
+
     public void test1() {
         GeneralizedSemPm pm = makeTypicalPm();
 
@@ -63,10 +73,10 @@ public class TestGeneralizedSem extends TestCase {
 
         SemGraph graph = pm.getGraph();
 
-        List<Node> variablesNodes = pm.getVariableNodes();
+        List <Node> variablesNodes = pm.getVariableNodes();
         System.out.println(variablesNodes);
 
-        List<Node> errorNodes = pm.getErrorNodes();
+        List <Node> errorNodes = pm.getErrorNodes();
         System.out.println(errorNodes);
 
 
@@ -76,7 +86,7 @@ public class TestGeneralizedSem extends TestCase {
 
             String b1 = "B1";
 
-            Set<Node> nodes = pm.getReferencingNodes(b1);
+            Set <Node> nodes = pm.getReferencingNodes(b1);
 
             assertTrue(nodes.contains(x1));
             assertTrue(!nodes.contains(x2) && !nodes.contains(x2));
@@ -84,7 +94,7 @@ public class TestGeneralizedSem extends TestCase {
 //            assertTrue(nodes.contains(x1) && nodes.contains(x3));
 //            assertTrue(!(nodes.contains(x1) && nodes.contains(x2)));
 
-            Set<String> referencedParameters = pm.getReferencedParameters(x3);
+            Set <String> referencedParameters = pm.getReferencedParameters(x3);
 
             String b2 = "B2";
             String b3 = "B3";
@@ -100,19 +110,19 @@ public class TestGeneralizedSem extends TestCase {
             Node e_x3 = pm.getNode("E_X3");
 
             for (Node node : pm.getNodes()) {
-                Set<Node> referencingNodes = pm.getReferencingNodes(node);
+                Set <Node> referencingNodes = pm.getReferencingNodes(node);
                 System.out.println("Nodes referencing " + node + " are: " + referencingNodes);
             }
 
             for (Node node : pm.getVariableNodes()) {
-                Set<Node> referencingNodes = pm.getReferencedNodes(node);
+                Set <Node> referencingNodes = pm.getReferencedNodes(node);
                 System.out.println("Nodes referenced by " + node + " are: " + referencingNodes);
             }
 
-            Set<Node> referencingX3 = pm.getReferencingNodes(x3);
+            Set <Node> referencingX3 = pm.getReferencingNodes(x3);
             assertTrue(referencingX3.contains(x4) && !referencingX3.contains(x5));
 
-            Set<Node> referencedByX3 = pm.getReferencedNodes(x3);
+            Set <Node> referencedByX3 = pm.getReferencedNodes(x3);
             assertTrue(referencedByX3.contains(x1) && referencedByX3.contains(x2) && referencedByX3.contains(e_x3)
                     && !referencedByX3.contains(x4));
 
@@ -149,7 +159,7 @@ public class TestGeneralizedSem extends TestCase {
 
         int sampleSize = 1000;
 
-        List<Node> variableNodes = new ArrayList<Node>();
+        List <Node> variableNodes = new ArrayList <Node>();
         ContinuousVariable x1 = new ContinuousVariable("X1");
         ContinuousVariable x2 = new ContinuousVariable("X2");
         ContinuousVariable x3 = new ContinuousVariable("X3");
@@ -201,7 +211,7 @@ public class TestGeneralizedSem extends TestCase {
     }
 
     public void test3() {
-        List<Node> variableNodes = new ArrayList<Node>();
+        List <Node> variableNodes = new ArrayList <Node>();
         ContinuousVariable x1 = new ContinuousVariable("X1");
         ContinuousVariable x2 = new ContinuousVariable("X2");
         ContinuousVariable x3 = new ContinuousVariable("X3");
@@ -235,10 +245,10 @@ public class TestGeneralizedSem extends TestCase {
 
         GeneralizedSemPm pm = new GeneralizedSemPm(graph);
 
-        List<Node> variablesNodes = pm.getVariableNodes();
+        List <Node> variablesNodes = pm.getVariableNodes();
         System.out.println(variablesNodes);
 
-        List<Node> errorNodes = pm.getErrorNodes();
+        List <Node> errorNodes = pm.getErrorNodes();
         System.out.println(errorNodes);
 
 
@@ -270,16 +280,16 @@ public class TestGeneralizedSem extends TestCase {
 
         // For X3
 
-        Map<String, String[]> templates = new HashMap<String, String[]>();
+        Map <String, String[]> templates = new HashMap <String, String[]>();
 
         templates.put("NEW(b) + NEW(b) + NEW(c) + NEW(c) + NEW(c)", new String[]{"X1", "X2", "X3", "X4", "X5"});
         templates.put("NEW(X1) + NEW(b) + NEW(c) + NEW(c) + NEW(c)", new String[]{});
         templates.put("$", new String[]{});
         templates.put("TSUM($)", new String[]{"X1", "X2", "X3", "X4", "X5"});
-        templates.put("TPROD($)", new String[] {"X1", "X2", "X3", "X4", "X5"});
-        templates.put("TPROD($) + X2", new String[] {"X1", "X2", "X3", "X4", "X5"});
-        templates.put("TPROD($) + TSUM($)", new String[] {"X1", "X2", "X3", "X4", "X5"});
-        templates.put("tanh(TSUM(NEW(a)*$))", new String[] {"X1", "X2", "X3", "X4", "X5"});
+        templates.put("TPROD($)", new String[]{"X1", "X2", "X3", "X4", "X5"});
+        templates.put("TPROD($) + X2", new String[]{"X1", "X2", "X3", "X4", "X5"});
+        templates.put("TPROD($) + TSUM($)", new String[]{"X1", "X2", "X3", "X4", "X5"});
+        templates.put("tanh(TSUM(NEW(a)*$))", new String[]{"X1", "X2", "X3", "X4", "X5"});
         templates.put("Normal(0, 1)", new String[]{"X1", "X2", "X3", "X4", "X5"});
         templates.put("Normal(m, s)", new String[]{"X1", "X2", "X3", "X4", "X5"});
         templates.put("Normal(NEW(m), s)", new String[]{"X1", "X2", "X3", "X4", "X5"});
@@ -291,13 +301,13 @@ public class TestGeneralizedSem extends TestCase {
             GeneralizedSemPm semPm = makeTypicalPm();
             System.out.println(semPm.getGraph());
 
-            Set<Node> shouldWork = new HashSet<Node>();
+            Set <Node> shouldWork = new HashSet <Node>();
 
             for (String name : templates.get(template)) {
                 shouldWork.add(semPm.getNode(name));
             }
 
-            Set<Node> works = new HashSet<Node>();
+            Set <Node> works = new HashSet <Node>();
 
             for (int i = 0; i < semPm.getNodes().size(); i++) {
                 System.out.println("-----------");
@@ -319,7 +329,7 @@ public class TestGeneralizedSem extends TestCase {
                     System.out.println("Set formula " + _template + " for " + node);
 
                     if (semPm.getVariableNodes().contains(node)) {
-                        works.add(node);                             
+                        works.add(node);
                     }
 
                 } catch (Exception e) {
@@ -379,7 +389,7 @@ public class TestGeneralizedSem extends TestCase {
     }
 
     private GeneralizedSemPm makeTypicalPm() {
-        List<Node> variableNodes = new ArrayList<Node>();
+        List <Node> variableNodes = new ArrayList <Node>();
         ContinuousVariable x1 = new ContinuousVariable("X1");
         ContinuousVariable x2 = new ContinuousVariable("X2");
         ContinuousVariable x3 = new ContinuousVariable("X3");
@@ -405,7 +415,7 @@ public class TestGeneralizedSem extends TestCase {
         return semPm;
     }
 
-    private String replaceNewParameters(GeneralizedSemPm semPm, String formula, List<String> usedNames) {
+    private String replaceNewParameters(GeneralizedSemPm semPm, String formula, List <String> usedNames) {
         String parameterPattern = "\\$|(([a-zA-Z]{1})([a-zA-Z0-9-_/]*))";
         Pattern p = Pattern.compile("NEW\\((" + parameterPattern + ")\\)");
 
@@ -426,17 +436,5 @@ public class TestGeneralizedSem extends TestCase {
 //            System.out.println(formula);
         }
         return formula;
-    }
-
-
-    /**
-     * This method uses reflection to collect up all of the test methods from
-     * this class and return them to the test runner.
-     */
-    public static Test suite() {
-
-        // Edit the name of the class in the parens to match the name
-        // of this class.
-        return new TestSuite(TestGeneralizedSem.class);
     }
 }

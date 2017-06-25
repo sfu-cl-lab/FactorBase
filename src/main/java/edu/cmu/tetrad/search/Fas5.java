@@ -30,8 +30,6 @@ import edu.cmu.tetrad.graph.Node;
 import edu.cmu.tetrad.util.ChoiceGenerator;
 import edu.cmu.tetrad.util.TetradLogger;
 
-import java.util.*;
-
 /**
  * Implements the "fast adjacency search" used in several causal algorithms in this package. In the fast adjacency
  * search, at a given stage of the search, an edge X*-*Y is removed from the graph if X _||_ Y | S, where S is a subset
@@ -140,11 +138,11 @@ public class Fas5 {
         }
 
 
-        Map<Node, Set<Node>> adjacencies = new HashMap<Node, Set<Node>>();
-        List<Node> nodes = graph.getNodes();
+        Map <Node, Set <Node>> adjacencies = new HashMap <Node, Set <Node>>();
+        List <Node> nodes = graph.getNodes();
 
         for (Node node : nodes) {
-            adjacencies.put(node, new HashSet<Node>());
+            adjacencies.put(node, new HashSet <Node>());
         }
 
         for (int d = 0; d <= _depth; d++) {
@@ -218,8 +216,8 @@ public class Fas5 {
 //    }
 
 
-    private boolean searchAtDepth0(List<Node> nodes, IndependenceTest test, Map<Node, Set<Node>> adjacencies) {
-        List<Node> empty = Collections.emptyList();
+    private boolean searchAtDepth0(List <Node> nodes, IndependenceTest test, Map <Node, Set <Node>> adjacencies) {
+        List <Node> empty = Collections.emptyList();
         int removed = 0;
 
         for (int i = 0; i < nodes.size(); i++) {
@@ -273,27 +271,27 @@ public class Fas5 {
         return false;
     }
 
-    private boolean searchAtDepth(List<Node> nodes, IndependenceTest test, Map<Node, Set<Node>> adjacencies, int depth) {
+    private boolean searchAtDepth(List <Node> nodes, IndependenceTest test, Map <Node, Set <Node>> adjacencies, int depth) {
         int numRemoved = 0;
         int count = 0;
 
         for (Node x : nodes) {
             if (++count % 100 == 0) System.out.println("count " + count + " of " + nodes.size());
 
-            List<Node> adjx = new ArrayList<Node>(adjacencies.get(x));
+            List <Node> adjx = new ArrayList <Node>(adjacencies.get(x));
 
             EDGE:
             for (Node y : adjx) {
-                List<Node> _adjx = new ArrayList<Node>(adjacencies.get(x));
+                List <Node> _adjx = new ArrayList <Node>(adjacencies.get(x));
                 _adjx.remove(y);
-                List<Node> ppx = possibleParents(x, _adjx, knowledge);
+                List <Node> ppx = possibleParents(x, _adjx, knowledge);
 
                 if (ppx.size() >= depth) {
                     ChoiceGenerator cg = new ChoiceGenerator(ppx.size(), depth);
                     int[] choice;
 
                     while ((choice = cg.next()) != null) {
-                        List<Node> condSet = GraphUtils.asList(choice, ppx);
+                        List <Node> condSet = GraphUtils.asList(choice, ppx);
 
                         boolean independent;
 
@@ -378,9 +376,9 @@ public class Fas5 {
 //    }
 
 
-    private List<Node> possibleParents(Node x, List<Node> adjx,
-                                       IKnowledge knowledge) {
-        List<Node> possibleParents = new LinkedList<Node>();
+    private List <Node> possibleParents(Node x, List <Node> adjx,
+                                        IKnowledge knowledge) {
+        List <Node> possibleParents = new LinkedList <Node>();
         String _x = x.getName();
 
         for (Node z : adjx) {

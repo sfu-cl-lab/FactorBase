@@ -54,12 +54,12 @@ public class BreitWigner implements Distribution {
     }
 
     @Override
-	public double nextRandom() {
+    public double nextRandom() {
         return RandomUtil.getInstance().nextBreitWigner(mean, gamma, cut);
     }
 
     @Override
-	public void setParameter(int index, double value) {
+    public void setParameter(int index, double value) {
         if (index == 0) {
             mean = value;
         } else if (index == 1) {
@@ -72,7 +72,7 @@ public class BreitWigner implements Distribution {
     }
 
     @Override
-	public double getParameter(int index) {
+    public double getParameter(int index) {
         if (index == 0) {
             return mean;
         } else if (index == 1) {
@@ -85,7 +85,7 @@ public class BreitWigner implements Distribution {
     }
 
     @Override
-	public String getParameterName(int index) {
+    public String getParameterName(int index) {
         if (index == 0) {
             return "Mean";
         } else if (index == 1) {
@@ -98,13 +98,13 @@ public class BreitWigner implements Distribution {
     }
 
     @Override
-	public int getNumParameters() {
+    public int getNumParameters() {
         return 2;
     }
 
 
     @Override
-	public String getName() {
+    public String getName() {
         return "Breit Wigner";
     }
 }

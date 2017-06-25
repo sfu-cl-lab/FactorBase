@@ -38,8 +38,8 @@ public final class ModeInterpolator implements DataFilter {
 
 
     @Override
-	public DataSet filter(DataSet dataSet) {
-        List<Node> variables = new LinkedList<Node>();
+    public DataSet filter(DataSet dataSet) {
+        List <Node> variables = new LinkedList <Node>();
 
         for (int i = 0; i < dataSet.getNumColumns(); i++) {
             Node variable = dataSet.getVariable(i);
@@ -57,8 +57,7 @@ public final class ModeInterpolator implements DataFilter {
                 int[] categoryCounts = new int[numCategories];
 
                 for (int i = 0; i < dataSet.getNumRows(); i++) {
-                    if (dataSet.getInt(i, j) == DiscreteVariable.MISSING_VALUE)
-                    {
+                    if (dataSet.getInt(i, j) == DiscreteVariable.MISSING_VALUE) {
                         continue;
                     }
 
@@ -76,16 +75,13 @@ public final class ModeInterpolator implements DataFilter {
                 }
 
                 for (int i = 0; i < dataSet.getNumRows(); i++) {
-                    if (dataSet.getInt(i, j) == DiscreteVariable.MISSING_VALUE)
-                    {
+                    if (dataSet.getInt(i, j) == DiscreteVariable.MISSING_VALUE) {
                         newDataSet.setInt(i, j, mode);
-                    }
-                    else {
+                    } else {
                         newDataSet.setInt(i, j, dataSet.getInt(i, j));
                     }
                 }
-            }
-            else if (dataSet.getVariable(j) instanceof ContinuousVariable) {
+            } else if (dataSet.getVariable(j) instanceof ContinuousVariable) {
                 double[] data = new double[dataSet.getNumRows()];
                 int k = -1;
 
@@ -107,8 +103,7 @@ public final class ModeInterpolator implements DataFilter {
                 for (int i = 0; i < dataSet.getNumRows(); i++) {
                     if (Double.isNaN(dataSet.getDouble(i, j))) {
                         newDataSet.setDouble(i, j, mode);
-                    }
-                    else {
+                    } else {
                         newDataSet.setDouble(i, j, dataSet.getDouble(i, j));
                     }
                 }

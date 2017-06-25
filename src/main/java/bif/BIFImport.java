@@ -12,7 +12,7 @@ import java.util.ArrayList;
 public class BIFImport {
 
 	/*
-	 * Arguments:
+     * Arguments:
 	 * 	1st: filename: The name of the file to import (include directory information if appropriate)
 	 * 	2nd: database name: The name of the database to access. It is assumed that the we wish to insert into the
 	 * 			Entity_BayesNets table
@@ -37,23 +37,23 @@ public class BIFImport {
 		
 		System.out.println("Exited Normally");
 	}*/
-	
-	/*
-	 * Import a file into the database by getting all the pairs of links in the file and then writing them out
-	 * Links in the file showing no parent are written with an emtpy string parent to the database
-	 */
-	public static void Import(String filename, String id, String tableName, Connection con) throws IOException, SQLException, ParsingException {
-		ArrayList<String[]> pairs = BIF_IO.getLinksFromFile(filename);
-		
-		//System.out.print(id);
-		for (String[] pair : pairs) {
+
+    /*
+     * Import a file into the database by getting all the pairs of links in the file and then writing them out
+     * Links in the file showing no parent are written with an emtpy string parent to the database
+     */
+    public static void Import(String filename, String id, String tableName, Connection con) throws IOException, SQLException, ParsingException {
+        ArrayList <String[]> pairs = BIF_IO.getLinksFromFile(filename);
+
+        //System.out.print(id);
+        for (String[] pair : pairs) {
             Statement st = con.createStatement();
-            
+
             System.out.println("INSERT ignore INTO " + tableName + " VALUES (\'" + id + "\', \'" + pair[1] + "\', \'" + pair[0] + "\');");
             st.execute("INSERT ignore INTO " + tableName + " VALUES (\'" + id + "\', \'" + pair[1] + "\', \'" + pair[0] + "\');");
-            
-		}			
-	}	
+
+        }
+    }
 }
 
 

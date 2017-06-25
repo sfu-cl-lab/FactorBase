@@ -43,7 +43,7 @@ public final class Manipulation implements TetradSerializable {
      * @deprecated
      */
     @Deprecated
-	private BayesIm bayesIm;
+    private BayesIm bayesIm;
     private VariableSource variableSource;
 
     /**
@@ -106,7 +106,7 @@ public final class Manipulation implements TetradSerializable {
     }
 
     @Override
-	public String toString() {
+    public String toString() {
         StringBuilder buf = new StringBuilder();
 
         buf.append("\nManipulation:");
@@ -121,7 +121,7 @@ public final class Manipulation implements TetradSerializable {
     }
 
     @Override
-	public boolean equals(Object o) {
+    public boolean equals(Object o) {
         if (o == null) {
             return false;
         }
@@ -142,7 +142,7 @@ public final class Manipulation implements TetradSerializable {
     }
 
     @Override
-	public int hashCode() {
+    public int hashCode() {
         int hashCode = 37;
         hashCode = 19 * hashCode + getVariableSource().hashCode();
         hashCode = 19 * hashCode + manipulated.hashCode();

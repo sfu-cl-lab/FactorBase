@@ -25,8 +25,9 @@ import edu.cmu.tetrad.util.RandomUtil;
 
 /**
  * Created by IntelliJ IDEA. User: jdramsey Date: Jan 15, 2008 Time: 5:06:43 PM
-* To change this template use File | Settings | File Templates.
-*/
+ * To change this template use File | Settings | File Templates.
+ */
+
 /**
  * Wraps a chi square distribution for purposes of drawing random samples.
  * Methods are provided to allow parameters to be manipulated in an interface.
@@ -55,22 +56,22 @@ public class Logarithmic implements Distribution {
     }
 
     @Override
-	public String toString() {
+    public String toString() {
         return "Logarithmic(" + p + ")";
     }
 
     @Override
-	public int getNumParameters() {
+    public int getNumParameters() {
         return 1;
     }
 
     @Override
-	public String getName() {
+    public String getName() {
         return "Logarithmic";
     }
 
     @Override
-	public void setParameter(int index, double value) {
+    public void setParameter(int index, double value) {
         if (index == 0) {
             p = value;
         }
@@ -79,7 +80,7 @@ public class Logarithmic implements Distribution {
     }
 
     @Override
-	public double getParameter(int index) {
+    public double getParameter(int index) {
         if (p == 0) {
             return p;
         }
@@ -88,7 +89,7 @@ public class Logarithmic implements Distribution {
     }
 
     @Override
-	public String getParameterName(int index) {
+    public String getParameterName(int index) {
         if (p == 0) {
             return "P";
         }
@@ -97,7 +98,7 @@ public class Logarithmic implements Distribution {
     }
 
     @Override
-	public double nextRandom() {
+    public double nextRandom() {
         return RandomUtil.getInstance().nextLogarithmic(p);
     }
 }

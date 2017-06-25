@@ -53,7 +53,7 @@ import java.util.List;
  */
 public class LingamPattern2 {
     private Graph pattern;
-    private List<DataSet> dataSets;
+    private List <DataSet> dataSets;
     private Knowledge knowledge = new Knowledge();
     private Graph bestDag;
     private Graph ngDagPattern;
@@ -61,18 +61,18 @@ public class LingamPattern2 {
     private double alpha = 0.05;
     private long timeLimit = -1;
     private int numSamples = 200;
-    private List<Regression> regressions;
+    private List <Regression> regressions;
 
     /**
      * The logger for this class. The config needs to be set.
      */
     private TetradLogger logger = TetradLogger.getInstance();
-    private List<Node> variables;
-    private ArrayList<DoubleMatrix2D> data;
+    private List <Node> variables;
+    private ArrayList <DoubleMatrix2D> data;
 
     //===============================CONSTRUCTOR============================//
 
-    public LingamPattern2(Graph pattern, List<DataSet> dataSets)
+    public LingamPattern2(Graph pattern, List <DataSet> dataSets)
             throws IllegalArgumentException {
 
         if (dataSets == null) {
@@ -88,14 +88,14 @@ public class LingamPattern2 {
 
         this.variables = dataSets.get(0).getVariables();
 
-        data = new ArrayList<DoubleMatrix2D>();
+        data = new ArrayList <DoubleMatrix2D>();
 
         for (DataSet dataSet : getDataSets()) {
             DoubleMatrix2D _data = dataSet.getDoubleData();
             data.add(_data);
         }
 
-        regressions = new ArrayList<Regression>();
+        regressions = new ArrayList <Regression>();
 
         for (DoubleMatrix2D _data : data) {
             regressions.add(new RegressionDatasetGeneralized(_data, variables));
@@ -105,10 +105,6 @@ public class LingamPattern2 {
     }
 
     //===============================PUBLIC METHODS========================//
-
-    public void setKnowledge(Knowledge knowledge) {
-        this.knowledge = knowledge;
-    }
 
     public Graph search() {
         long initialTime = System.currentTimeMillis();
@@ -120,7 +116,7 @@ public class LingamPattern2 {
 //        List<Graph> dags = SearchGraphUtils.getDagsInPatternMeek(_pattern, getKnowledge());
 //        List<Graph> dags = SearchGraphUtils.generatePatternDags(_pattern, false);
 //        List<Dag> dags = SearchGraphUtils.getAllDagsByDirectingUndirectedEdges(_pattern);
-        List<Graph> dags = SearchGraphUtils.getAllGraphsByDirectingUndirectedEdges(_pattern);
+        List <Graph> dags = SearchGraphUtils.getAllGraphsByDirectingUndirectedEdges(_pattern);
 
         TetradLogger.getInstance().log("normalityTests", "Anderson Darling P value for Variables\n");
         NumberFormat nf = new DecimalFormat("0.0000");
@@ -146,7 +142,7 @@ public class LingamPattern2 {
 
         // Check that all the daga and the data contain the same variables.
 
-        List<Score> scores = new ArrayList<Score>();
+        List <Score> scores = new ArrayList <Score>();
 
         for (Graph dag : dags) {
 //            System.out.println(dag);
@@ -181,7 +177,7 @@ public class LingamPattern2 {
 
         Graph ngDagPattern = SearchGraphUtils.patternFromDag(dag);
 
-        List<Node> nodes = ngDagPattern.getNodes();
+        List <Node> nodes = ngDagPattern.getNodes();
 
         for (Edge edge : ngDagPattern.getEdges()) {
             Node node1 = edge.getNode1();
@@ -228,12 +224,10 @@ public class LingamPattern2 {
         return ngDagPattern;
     }
 
-    //=============================PRIVATE METHODS=========================//
-
-    private Score getScore1(Graph dag, List<DoubleMatrix2D> data, List<Node> variables) {
+    private Score getScore1(Graph dag, List <DoubleMatrix2D> data, List <Node> variables) {
 //        System.out.println("Scoring DAG: " + dag);
 
-        List<Regression> regressions = new ArrayList<Regression>();
+        List <Regression> regressions = new ArrayList <Regression>();
 
         for (DoubleMatrix2D _data : data) {
             regressions.add(new RegressionDatasetGeneralized(_data, variables));
@@ -247,19 +241,19 @@ public class LingamPattern2 {
 
         int numCols = data.get(0).columns();
 
-        List<Node> nodes = dag.getNodes();
+        List <Node> nodes = dag.getNodes();
         double score = 0.0;
         double[] pValues = new double[nodes.size()];
         DoubleMatrix2D absoluteStandardizedResiduals = new DenseDoubleMatrix2D(totalSampleSize, numCols);
 
         for (int i = 0; i < nodes.size(); i++) {
-            List<Double> _absoluteStandardizedResiduals = new ArrayList<Double>();
+            List <Double> _absoluteStandardizedResiduals = new ArrayList <Double>();
 
             for (int j = 0; j < data.size(); j++) {
                 Node _target = nodes.get(i);
-                List<Node> _regressors = dag.getParents(_target);
+                List <Node> _regressors = dag.getParents(_target);
                 Node target = getVariable(variables, _target.getName());
-                List<Node> regressors = new ArrayList<Node>();
+                List <Node> regressors = new ArrayList <Node>();
 
                 for (Node _regressor : _regressors) {
                     Node variable = getVariable(variables, _regressor.getName());
@@ -305,10 +299,12 @@ public class LingamPattern2 {
         return new Score(score, pValues);
     }
 
-    private Score getScore2(Graph dag, List<DoubleMatrix2D> data, List<Node> variables) {
+    //=============================PRIVATE METHODS=========================//
+
+    private Score getScore2(Graph dag, List <DoubleMatrix2D> data, List <Node> variables) {
 //        System.out.println("Scoring DAG: " + dag);
 
-        List<Regression> regressions = new ArrayList<Regression>();
+        List <Regression> regressions = new ArrayList <Regression>();
 
         for (DoubleMatrix2D _data : data) {
             regressions.add(new RegressionDatasetGeneralized(_data, variables));
@@ -322,18 +318,18 @@ public class LingamPattern2 {
 
         int numCols = data.get(0).columns();
 
-        List<Node> nodes = dag.getNodes();
+        List <Node> nodes = dag.getNodes();
         double score = 0.0;
         double[] pValues = new double[nodes.size()];
         DoubleMatrix2D residuals = new DenseDoubleMatrix2D(totalSampleSize, numCols);
 
         for (int j = 0; j < nodes.size(); j++) {
-            List<Double> _residuals = new ArrayList<Double>();
+            List <Double> _residuals = new ArrayList <Double>();
 
             Node _target = nodes.get(j);
-            List<Node> _regressors = dag.getParents(_target);
+            List <Node> _regressors = dag.getParents(_target);
             Node target = getVariable(variables, _target.getName());
-            List<Node> regressors = new ArrayList<Node>();
+            List <Node> regressors = new ArrayList <Node>();
 
             for (Node _regressor : _regressors) {
                 Node variable = getVariable(variables, _regressor.getName());
@@ -385,9 +381,7 @@ public class LingamPattern2 {
         return new Score(score, pValues);
     }
 
-    // Return the average score.
-
-    private Score getScore(Graph dag, List<DoubleMatrix2D> data, List<Node> variables) {
+    private Score getScore(Graph dag, List <DoubleMatrix2D> data, List <Node> variables) {
 //        System.out.println("Scoring DAG: " + dag);
 
         int totalSampleSize = 0;
@@ -398,18 +392,18 @@ public class LingamPattern2 {
 
         int numCols = data.get(0).columns();
 
-        List<Node> nodes = dag.getNodes();
+        List <Node> nodes = dag.getNodes();
         double score = 0.0;
         double[] pValues = new double[nodes.size()];
         DoubleMatrix2D residuals = new DenseDoubleMatrix2D(totalSampleSize, numCols);
 
         for (int j = 0; j < nodes.size(); j++) {
-            List<Double> _residuals = new ArrayList<Double>();
+            List <Double> _residuals = new ArrayList <Double>();
 
             Node _target = nodes.get(j);
-            List<Node> _regressors = dag.getParents(_target);
+            List <Node> _regressors = dag.getParents(_target);
             Node target = getVariable(variables, _target.getName());
-            List<Node> regressors = new ArrayList<Node>();
+            List <Node> regressors = new ArrayList <Node>();
 
             for (Node _regressor : _regressors) {
                 Node variable = getVariable(variables, _regressor.getName());
@@ -461,13 +455,15 @@ public class LingamPattern2 {
         return new Score(score, pValues);
     }
 
-    private double andersonDarlingPASquareStar(Node node, List<Node> parents) {
-        List<Double> _residuals = new ArrayList<Double>();
+    // Return the average score.
+
+    private double andersonDarlingPASquareStar(Node node, List <Node> parents) {
+        List <Double> _residuals = new ArrayList <Double>();
 
         Node _target = node;
-        List<Node> _regressors = parents;
+        List <Node> _regressors = parents;
         Node target = getVariable(variables, _target.getName());
-        List<Node> regressors = new ArrayList<Node>();
+        List <Node> regressors = new ArrayList <Node>();
 
         for (Node _regressor : _regressors) {
             Node variable = getVariable(variables, _regressor.getName());
@@ -515,7 +511,6 @@ public class LingamPattern2 {
         return p;
     }
 
-
     public double[] getPValues() {
         return pValues;
     }
@@ -540,15 +535,11 @@ public class LingamPattern2 {
         return bestDag;
     }
 
-    public void setTimeLimit(long timeLimit) {
-        this.timeLimit = timeLimit;
-    }
-
     private Graph getPattern() {
         return pattern;
     }
 
-    private List<DataSet> getDataSets() {
+    private List <DataSet> getDataSets() {
         return dataSets;
     }
 
@@ -556,25 +547,23 @@ public class LingamPattern2 {
         return knowledge;
     }
 
+    public void setKnowledge(Knowledge knowledge) {
+        this.knowledge = knowledge;
+    }
+
     private long getTimeLimit() {
         return timeLimit;
+    }
+
+    public void setTimeLimit(long timeLimit) {
+        this.timeLimit = timeLimit;
     }
 
     private int getNumSamples() {
         return numSamples;
     }
 
-    private static class Score {
-        public Score(double score, double[] pvals) {
-            this.score = score;
-            this.pvals = pvals;
-        }
-
-        double score;
-        double[] pvals;
-    }
-
-    private Node getVariable(List<Node> variables, String name) {
+    private Node getVariable(List <Node> variables, String name) {
         for (Node node : variables) {
             if (name.equals(node.getName())) {
                 return node;
@@ -582,5 +571,14 @@ public class LingamPattern2 {
         }
 
         return null;
+    }
+
+    private static class Score {
+        double score;
+        double[] pvals;
+        public Score(double score, double[] pvals) {
+            this.score = score;
+            this.pvals = pvals;
+        }
     }
 }

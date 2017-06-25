@@ -29,8 +29,6 @@ import junit.framework.TestSuite;
 import nu.xom.Element;
 import nu.xom.ParsingException;
 
-import java.util.*;
-
 /**
  * Tests the functions of EndpointMatrixGraph and EdgeListGraph through the
  * Graph interface.
@@ -44,6 +42,17 @@ public final class TestGraph extends TestCase {
      */
     public TestGraph(String name) {
         super(name);
+    }
+
+    /**
+     * This method uses reflection to collect up all of the test methods from
+     * this class and return them to the test runner.
+     */
+    public static Test suite() {
+
+        // Edit the name of the class in the parens to match the name
+        // of this class.
+        return new TestSuite(TestGraph.class);
     }
 
     public void testSearchGraph() {
@@ -62,24 +71,24 @@ public final class TestGraph extends TestCase {
     public void testXml() {
         Graph graph = GraphUtils.randomDag(10, 10, false);
 
-        Set<Triple> ambiguousTriples = new HashSet<Triple>();
+        Set <Triple> ambiguousTriples = new HashSet <Triple>();
         ambiguousTriples.add(pickRandomTriple(graph));
         ambiguousTriples.add(pickRandomTriple(graph));
         graph.setAmbiguousTriples(ambiguousTriples);
 
-        Set<Triple> underlineTriples = new HashSet<Triple>();
+        Set <Triple> underlineTriples = new HashSet <Triple>();
         underlineTriples.add(pickRandomTriple(graph));
         underlineTriples.add(pickRandomTriple(graph));
         graph.setUnderLineTriples(underlineTriples);
 
-        Set<Triple> dottedUnderlineTriples = new HashSet<Triple>();
+        Set <Triple> dottedUnderlineTriples = new HashSet <Triple>();
         dottedUnderlineTriples.add(pickRandomTriple(graph));
         dottedUnderlineTriples.add(pickRandomTriple(graph));
         graph.setDottedUnderLineTriples(dottedUnderlineTriples);
 
         System.out.println(graph);
-       
-        Map<String, Node> nodes = new HashMap<String, Node>();
+
+        Map <String, Node> nodes = new HashMap <String, Node>();
 
         for (Node node : graph.getNodes()) {
             nodes.put(node.getName(), node);
@@ -135,8 +144,7 @@ public final class TestGraph extends TestCase {
         try {
             graph.isAmbiguousTriple(z, x, y);
             fail();
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
         }
 
         // Waiting for Rob to check out some issues in the ION code.
@@ -150,8 +158,7 @@ public final class TestGraph extends TestCase {
         try {
             graph.isDottedUnderlineTriple(z, x, y);
             fail();
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
         }
 
         graph.removeAmbiguousTriple(x, z, w);
@@ -193,7 +200,7 @@ public final class TestGraph extends TestCase {
 
         graph.addDirectedEdge(z, w);
 
-        Set<Triple> triples = new HashSet<Triple>();
+        Set <Triple> triples = new HashSet <Triple>();
         triples.add(new Triple(x, z, w));
         triples.add(new Triple(x, y, z));
 
@@ -217,7 +224,7 @@ public final class TestGraph extends TestCase {
         Node z = new GraphNode("Z");
         Node w = new GraphNode("W");
 
-        List<Node> nodes = new ArrayList<Node>();
+        List <Node> nodes = new ArrayList <Node>();
 
         nodes.add(x);
         nodes.add(y);
@@ -235,7 +242,7 @@ public final class TestGraph extends TestCase {
     }
 
     private Triple pickRandomTriple(Graph graph) {
-        List<Node> nodes = graph.getNodes();
+        List <Node> nodes = graph.getNodes();
 
         int trial = 0;
 
@@ -243,7 +250,7 @@ public final class TestGraph extends TestCase {
             int i = RandomUtil.getInstance().nextInt(nodes.size());
             Node y = nodes.get(i);
 
-            List<Node> adjCenter = graph.getAdjacentNodes(y);
+            List <Node> adjCenter = graph.getAdjacentNodes(y);
 
             if (adjCenter.isEmpty()) {
                 continue;
@@ -284,13 +291,13 @@ public final class TestGraph extends TestCase {
 
         System.out.println(graph);
 
-        List<Node> children = graph.getChildren(x1);
-        List<Node> parents = graph.getParents(x4);
+        List <Node> children = graph.getChildren(x1);
+        List <Node> parents = graph.getParents(x4);
 
         System.out.println("Children of x1 = " + children);
         System.out.println("Parents of x4 = " + parents);
 
-        assertTrue(graph.isDConnectedTo(x1, x3, new LinkedList<Node>()));
+        assertTrue(graph.isDConnectedTo(x1, x3, new LinkedList <Node>()));
 
 
         graph.removeNode(x2);
@@ -347,17 +354,6 @@ public final class TestGraph extends TestCase {
     private void checkCopy(Graph graph) {
         Graph graph2 = new EdgeListGraph(graph);
         assertEquals(graph, graph2);
-    }
-
-    /**
-     * This method uses reflection to collect up all of the test methods from
-     * this class and return them to the test runner.
-     */
-    public static Test suite() {
-
-        // Edit the name of the class in the parens to match the name
-        // of this class.
-        return new TestSuite(TestGraph.class);
     }
 }
 

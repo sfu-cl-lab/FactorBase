@@ -37,10 +37,6 @@ public class Type3 implements SessionModel, TetradSerializableExcluded {
     public Type3(Type2 model1) {
     }
 
-    public static Type3 serializableInstance() {
-        return new Type3(Type2.serializableInstance());
-    }
-
     /**
      * It should also be possible to construct a Type3-model with two parents: a
      * Type1-node and a Type2-node.
@@ -48,25 +44,29 @@ public class Type3 implements SessionModel, TetradSerializableExcluded {
     public Type3(Type2 model1, Type4 model2) {
     }
 
-    @Override
-	public boolean equals(Object o) {
-        return (o instanceof Type3);
+    public static Type3 serializableInstance() {
+        return new Type3(Type2.serializableInstance());
     }
 
-    /**
-     * Sets the name of the session model.
-     */
     @Override
-	public void setName(String name) {
-        //To change body of implemented methods use File | Settings | File Templates.
+    public boolean equals(Object o) {
+        return (o instanceof Type3);
     }
 
     /**
      * Returns the name of the session model.
      */
     @Override
-	public String getName() {
+    public String getName() {
         return null;  //To change body of implemented methods use File | Settings | File Templates.
+    }
+
+    /**
+     * Sets the name of the session model.
+     */
+    @Override
+    public void setName(String name) {
+        //To change body of implemented methods use File | Settings | File Templates.
     }
 }
 

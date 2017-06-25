@@ -50,18 +50,27 @@ public class TestMdlu extends TestCase {
         super(name);
     }
 
+    /**
+     * This method uses reflection to collect up all of the test methods from this class and return them to the test
+     * runner.
+     */
+    public static Test suite() {
+
+        // Edit the name of the class in the parens to match the name
+        // of this class.
+        return new TestSuite(TestMdlu.class);
+    }
 
     @Override
-	public void setUp() throws Exception {
+    public void setUp() throws Exception {
 //        TetradLogger.getInstance().addOutputStream(System.out);
 //        TetradLogger.getInstance().setForceLog(true);
 //        RandomUtil.getInstance().setSeed(-1857293L);
 
     }
 
-
     @Override
-	public void tearDown() {
+    public void tearDown() {
         TetradLogger.getInstance().setForceLog(false);
         TetradLogger.getInstance().removeOutputStream(System.out);
     }
@@ -103,7 +112,7 @@ public class TestMdlu extends TestCase {
             Graph pattern4 = jpc.search();
 
 
-            List<Graph> patterns = new ArrayList<Graph>();
+            List <Graph> patterns = new ArrayList <Graph>();
             patterns.add(pattern1);
             patterns.add(pattern2);
             patterns.add(pattern3);
@@ -115,7 +124,7 @@ public class TestMdlu extends TestCase {
         }
     }
 
-    private void printErrors(Graph graph, Graph knowledgePattern, List<Graph> patterns) {
+    private void printErrors(Graph graph, Graph knowledgePattern, List <Graph> patterns) {
 
         for (Graph pattern : patterns) {
 
@@ -137,16 +146,5 @@ public class TestMdlu extends TestCase {
         }
 
         System.out.println();
-    }
-
-    /**
-     * This method uses reflection to collect up all of the test methods from this class and return them to the test
-     * runner.
-     */
-    public static Test suite() {
-
-        // Edit the name of the class in the parens to match the name
-        // of this class.
-        return new TestSuite(TestMdlu.class);
     }
 }

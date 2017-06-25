@@ -36,7 +36,6 @@ import edu.cmu.tetrad.util.StatUtils;
 import edu.cmu.tetrad.util.TetradLogger;
 
 import java.io.PrintStream;
-import java.util.*;
 
 /**
  * LOFS = Ling Orientation Fixed Structure.
@@ -44,11 +43,12 @@ import java.util.*;
  * @author Joseph Ramsey
  */
 public class Lofs3 {
+    private static Map <String, Map <String, Integer>> countMap = new HashMap <String, Map <String, Integer>>();
     private Graph pattern;
-    private List<DataSet> dataSets;
+    private List <DataSet> dataSets;
     private double alpha = 0.05;
-    private ArrayList<Regression> regressions;
-    private List<Node> variables;
+    private ArrayList <Regression> regressions;
+    private List <Node> variables;
     private boolean r1Done = true;
     private boolean r2Done = true;
     private boolean strongR2 = false;
@@ -56,15 +56,14 @@ public class Lofs3 {
     private boolean r2Orient2Cycles = true;
     private boolean meanCenterResiduals = false;
     private Graph trueGraph = null;
-    private static Map<String, Map<String, Integer>> countMap = new HashMap<String, Map<String, Integer>>();
-
     private Lofs.Score score = Lofs.Score.andersonDarling;
     private double epsilon = 0.0;
     private PrintStream dataOut = System.out;
 
     //===============================CONSTRUCTOR============================//
+    private int nodesIndex = 0;
 
-    public Lofs3(Graph pattern, List<DataSet> dataSets)
+    public Lofs3(Graph pattern, List <DataSet> dataSets)
             throws IllegalArgumentException {
 
         if (pattern == null) {
@@ -78,7 +77,7 @@ public class Lofs3 {
         this.pattern = pattern;
         this.dataSets = dataSets;
 
-        regressions = new ArrayList<Regression>();
+        regressions = new ArrayList <Regression>();
         this.variables = dataSets.get(0).getVariables();
 
         for (DataSet dataSet : dataSets) {
@@ -90,7 +89,7 @@ public class Lofs3 {
         Graph skeleton = GraphUtils.undirectedGraph(getPattern());
         Graph graph = new EdgeListGraph(skeleton.getNodes());
 
-        List<Node> nodes = skeleton.getNodes();
+        List <Node> nodes = skeleton.getNodes();
 //        Collections.shuffle(nodes);
 
         if (isR1Done()) {
@@ -122,7 +121,7 @@ public class Lofs3 {
             System.out.println(key);
             System.out.println();
 
-            Map<String, Integer> counts = countMap.get(key);
+            Map <String, Integer> counts = countMap.get(key);
 
             for (String key2 : counts.keySet()) {
                 System.out.println(key2 + "\t" + counts.get(key2));
@@ -130,19 +129,19 @@ public class Lofs3 {
         }
     }
 
-    private void ruleR1(Graph skeleton, Graph graph, List<Node> nodes) {
+    private void ruleR1(Graph skeleton, Graph graph, List <Node> nodes) {
         for (Node node : nodes) {
-            SortedMap<Double, String> scoreReports = new TreeMap<Double, String>();
+            SortedMap <Double, String> scoreReports = new TreeMap <Double, String>();
 
-            List<Node> adj = skeleton.getAdjacentNodes(node);
+            List <Node> adj = skeleton.getAdjacentNodes(node);
 
             DepthChoiceGenerator gen = new DepthChoiceGenerator(adj.size(), adj.size());
             int[] choice;
             double maxScore = Double.NEGATIVE_INFINITY;
-            List<Node> parents = null;
+            List <Node> parents = null;
 
             while ((choice = gen.next()) != null) {
-                List<Node> _parents = GraphUtils.asList(choice, adj);
+                List <Node> _parents = GraphUtils.asList(choice, adj);
 
                 double score = score(node, _parents);
                 scoreReports.put(-score, _parents.toString());
@@ -178,7 +177,7 @@ public class Lofs3 {
     }
 
     private void ruleR2(Graph skeleton, Graph graph) {
-        List<Edge> edgeList1 = skeleton.getEdges();
+        List <Edge> edgeList1 = skeleton.getEdges();
 //        Collections.shuffle(edgeList1);
 
         for (Edge adj : edgeList1) {
@@ -198,12 +197,12 @@ public class Lofs3 {
     }
 
     private boolean isTwoCycle(Graph graph, Node x, Node y) {
-        List<Edge> edges = graph.getEdges(x, y);
+        List <Edge> edges = graph.getEdges(x, y);
         return edges.size() == 2;
     }
 
     private boolean isUndirected(Graph graph, Node x, Node y) {
-        List<Edge> edges = graph.getEdges(x, y);
+        List <Edge> edges = graph.getEdges(x, y);
         if (edges.size() == 1) {
             Edge edge = graph.getEdge(x, y);
             return Edges.isUndirectedEdge(edge);
@@ -212,7 +211,7 @@ public class Lofs3 {
         return false;
     }
 
-    private boolean normal(Node node, List<Node> parents) {
+    private boolean normal(Node node, List <Node> parents) {
         if (getAlpha() > .999) {
             return false;
         }
@@ -234,10 +233,6 @@ public class Lofs3 {
 
     public PrintStream getDataOut() {
         return dataOut;
-    }
-
-    public void setDataOut(PrintStream dataOut) {
-        this.dataOut = dataOut;
     }
 
 //    private void resolveOneEdgeMax(Graph graph, Node x, Node y, boolean strong, Graph oldGraph) {
@@ -665,8 +660,8 @@ public class Lofs3 {
 //        return b1 && b2;
 //    }
 
-    private enum Direction {
-        left, right, bidirected, twoCycle, nonadjacent
+    public void setDataOut(PrintStream dataOut) {
+        this.dataOut = dataOut;
     }
 
 //    private void resolveOneEdgeMax2(Graph graph, Node x, Node y) {
@@ -905,19 +900,19 @@ public class Lofs3 {
 
         TetradLogger.getInstance().log("info", "\nEDGE " + x + " --- " + y);
 
-        SortedMap<Double, String> scoreReports = new TreeMap<Double, String>();
+        SortedMap <Double, String> scoreReports = new TreeMap <Double, String>();
 
         Direction direction = null;
 
-        List<Node> condxMinus = new ArrayList<Node>();
-        List<Node> condxPlus = new ArrayList<Node>(condxMinus);
+        List <Node> condxMinus = new ArrayList <Node>();
+        List <Node> condxPlus = new ArrayList <Node>(condxMinus);
         condxPlus.add(y);
 
         double xPlus = score(x, condxPlus);
         double xMinus = score(x, condxMinus);
 
-        List<Node> condyMinus = new ArrayList<Node>();
-        List<Node> condyPlus = new ArrayList<Node>(condyMinus);
+        List <Node> condyMinus = new ArrayList <Node>();
+        List <Node> condyPlus = new ArrayList <Node>(condyMinus);
         condyPlus.add(x);
 
         double yPlus = score(y, condyPlus);
@@ -951,8 +946,8 @@ public class Lofs3 {
 
         double tightBound = epsilon;
 
-        boolean xUnchanged = 1 / ratioX < 1 + 2*epsilon && ratioX < 1 + 2*epsilon;
-        boolean yUnchanged = 1 / ratioY < 1 + 2*epsilon && ratioY < 1 + 2*epsilon;
+        boolean xUnchanged = 1 / ratioX < 1 + 2 * epsilon && ratioX < 1 + 2 * epsilon;
+        boolean yUnchanged = 1 / ratioY < 1 + 2 * epsilon && ratioY < 1 + 2 * epsilon;
 
         boolean xUnchangedTight = 1 / ratioX < 1 + tightBound && ratioX < 1 + tightBound;
         boolean yUnchangedTight = 1 / ratioY < 1 + tightBound && ratioY < 1 + tightBound;
@@ -1134,7 +1129,7 @@ public class Lofs3 {
 
         if (direction == Direction.nonadjacent) {
             graph.removeEdges(x, y);
-        }else if (direction == Direction.bidirected) {
+        } else if (direction == Direction.bidirected) {
             graph.addBidirectedEdge(x, y);
         } else if (direction == Direction.twoCycle) {
             graph.addDirectedEdge(x, y);
@@ -1181,8 +1176,6 @@ public class Lofs3 {
         return Math.abs(x - y) < 5;
     }
 
-    private int nodesIndex = 0;
-
     private void count(double xPlus, double xMinus, double yPlus, double yMinus, Node x, Node y, Direction direction) {
 //        if (nodesIndex == 1) return;
 
@@ -1195,7 +1188,7 @@ public class Lofs3 {
             Node _x = trueGraph.getNode(x.getName());
             Node _y = trueGraph.getNode(y.getName());
 
-            List<Edge> edges = trueGraph.getEdges(_x, _y);
+            List <Edge> edges = trueGraph.getEdges(_x, _y);
             Edge edge = null;
 
             if (edges.size() == 1) {
@@ -1221,14 +1214,11 @@ public class Lofs3 {
         } else {
             if (direction == Direction.right) {
                 type = "X->Y";
-            }
-            else if (direction == Direction.left) {
+            } else if (direction == Direction.left) {
                 type = "X<-Y";
-            }
-            else if (direction == Direction.bidirected) {
+            } else if (direction == Direction.bidirected) {
                 type = "X<->Y";
-            }
-            else if (direction == Direction.twoCycle) {
+            } else if (direction == Direction.twoCycle) {
                 type = "X<=>Y";
             }
         }
@@ -1241,7 +1231,7 @@ public class Lofs3 {
         System.out.println(++nodesIndex + "\t" + x + "\t" + y);
 
         if (!countMap.containsKey(type)) {
-            countMap.put(type, new HashMap<String, Integer>());
+            countMap.put(type, new HashMap <String, Integer>());
         }
 
         if (greaterThan(xPlus, yPlus, epsilon)) {
@@ -1297,7 +1287,7 @@ public class Lofs3 {
         return x - y > epsilon;
     }
 
-    private void increment(Map<String, Map<String, Integer>> map, String key, String s) {
+    private void increment(Map <String, Map <String, Integer>> map, String key, String s) {
         if (map.get(key).get(s) == null) {
             map.get(key).put(s, 1);
         }
@@ -1309,7 +1299,7 @@ public class Lofs3 {
         return score1 + score2;
     }
 
-    private double score(Node y, List<Node> parents) {
+    private double score(Node y, List <Node> parents) {
         if (score == Lofs.Score.andersonDarling) {
             return andersonDarlingPASquareStar(y, parents);
         } else if (score == Lofs.Score.kurtosis) {
@@ -1325,17 +1315,15 @@ public class Lofs3 {
         throw new IllegalStateException();
     }
 
-    //=============================PRIVATE METHODS=========================//
-
-    private double localScoreA(Node node, List<Node> parents) {
+    private double localScoreA(Node node, List <Node> parents) {
         double score = 0.0;
 
-        List<Double> _residuals = new ArrayList<Double>();
+        List <Double> _residuals = new ArrayList <Double>();
 
         Node _target = node;
-        List<Node> _regressors = parents;
+        List <Node> _regressors = parents;
         Node target = getVariable(variables, _target.getName());
-        List<Node> regressors = new ArrayList<Node>();
+        List <Node> regressors = new ArrayList <Node>();
 
         for (Node _regressor : _regressors) {
             Node variable = getVariable(variables, _regressor.getName());
@@ -1388,15 +1376,17 @@ public class Lofs3 {
         return score;
     }
 
-    private double localScoreCosh(Node node, List<Node> parents) {
+    //=============================PRIVATE METHODS=========================//
+
+    private double localScoreCosh(Node node, List <Node> parents) {
         double score = 0.0;
 
-        List<Double> _residuals = new ArrayList<Double>();
+        List <Double> _residuals = new ArrayList <Double>();
 
         Node _target = node;
-        List<Node> _regressors = parents;
+        List <Node> _regressors = parents;
         Node target = getVariable(variables, _target.getName());
-        List<Node> regressors = new ArrayList<Node>();
+        List <Node> regressors = new ArrayList <Node>();
 
         for (Node _regressor : _regressors) {
             Node variable = getVariable(variables, _regressor.getName());
@@ -1448,15 +1438,15 @@ public class Lofs3 {
         return score;
     }
 
-    private double localScoreB(Node node, List<Node> parents) {
+    private double localScoreB(Node node, List <Node> parents) {
 
         double score = 0.0;
         double maxScore = Double.NEGATIVE_INFINITY;
 
         Node _target = node;
-        List<Node> _regressors = parents;
+        List <Node> _regressors = parents;
         Node target = getVariable(variables, _target.getName());
-        List<Node> regressors = new ArrayList<Node>();
+        List <Node> regressors = new ArrayList <Node>();
 
         for (Node _regressor : _regressors) {
             Node variable = getVariable(variables, _regressor.getName());
@@ -1510,13 +1500,13 @@ public class Lofs3 {
         return avg;
     }
 
-    private double andersonDarlingPASquareStar(Node node, List<Node> parents) {
-        List<Double> _residuals = new ArrayList<Double>();
+    private double andersonDarlingPASquareStar(Node node, List <Node> parents) {
+        List <Double> _residuals = new ArrayList <Double>();
 
         Node _target = node;
-        List<Node> _regressors = parents;
+        List <Node> _regressors = parents;
         Node target = getVariable(variables, _target.getName());
-        List<Node> regressors = new ArrayList<Node>();
+        List <Node> regressors = new ArrayList <Node>();
 
         for (Node _regressor : _regressors) {
             Node variable = getVariable(variables, _regressor.getName());
@@ -1567,13 +1557,13 @@ public class Lofs3 {
         return new AndersonDarlingTest(_f).getASquaredStar();
     }
 
-    private double andersonDarlingPASquareStarB(Node node, List<Node> parents) {
-        List<Double> _residuals = new ArrayList<Double>();
+    private double andersonDarlingPASquareStarB(Node node, List <Node> parents) {
+        List <Double> _residuals = new ArrayList <Double>();
 
         Node _target = node;
-        List<Node> _regressors = parents;
+        List <Node> _regressors = parents;
         Node target = getVariable(variables, _target.getName());
-        List<Node> regressors = new ArrayList<Node>();
+        List <Node> regressors = new ArrayList <Node>();
 
         for (Node _regressor : _regressors) {
             Node variable = getVariable(variables, _regressor.getName());
@@ -1621,13 +1611,13 @@ public class Lofs3 {
         return sum / dataSets.size();
     }
 
-    private double pValue(Node node, List<Node> parents) {
-        List<Double> _residuals = new ArrayList<Double>();
+    private double pValue(Node node, List <Node> parents) {
+        List <Double> _residuals = new ArrayList <Double>();
 
         Node _target = node;
-        List<Node> _regressors = parents;
+        List <Node> _regressors = parents;
         Node target = getVariable(variables, _target.getName());
-        List<Node> regressors = new ArrayList<Node>();
+        List <Node> regressors = new ArrayList <Node>();
 
         for (Node _regressor : _regressors) {
             Node variable = getVariable(variables, _regressor.getName());
@@ -1673,13 +1663,13 @@ public class Lofs3 {
         return new AndersonDarlingTest(_f).getP();
     }
 
-    private double[] residual(Node node, List<Node> parents) {
-        List<Double> _residuals = new ArrayList<Double>();
+    private double[] residual(Node node, List <Node> parents) {
+        List <Double> _residuals = new ArrayList <Double>();
 
         Node _target = node;
-        List<Node> _regressors = parents;
+        List <Node> _regressors = parents;
         Node target = getVariable(variables, _target.getName());
-        List<Node> regressors = new ArrayList<Node>();
+        List <Node> regressors = new ArrayList <Node>();
 
         for (Node _regressor : _regressors) {
             Node variable = getVariable(variables, _regressor.getName());
@@ -1739,7 +1729,7 @@ public class Lofs3 {
         return pattern;
     }
 
-    private Node getVariable(List<Node> variables, String name) {
+    private Node getVariable(List <Node> variables, String name) {
         for (Node node : variables) {
             if (name.equals(node.getName())) {
                 return node;
@@ -1781,12 +1771,12 @@ public class Lofs3 {
         this.strongR2 = strongR2;
     }
 
-    public void setR2Orient2Cycles(boolean r2Orient2Cycles) {
-        this.r2Orient2Cycles = r2Orient2Cycles;
-    }
-
     public boolean isR2Orient2Cycles() {
         return r2Orient2Cycles;
+    }
+
+    public void setR2Orient2Cycles(boolean r2Orient2Cycles) {
+        this.r2Orient2Cycles = r2Orient2Cycles;
     }
 
     public Lofs.Score getScore() {
@@ -1811,6 +1801,10 @@ public class Lofs3 {
 
     private void trainSvm() {
 
+    }
+
+    private enum Direction {
+        left, right, bidirected, twoCycle, nonadjacent
     }
 
 }

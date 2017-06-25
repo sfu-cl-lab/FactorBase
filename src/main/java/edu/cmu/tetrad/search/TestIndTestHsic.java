@@ -34,8 +34,6 @@ import edu.cmu.tetrad.util.TetradLogger;
 import junit.framework.TestCase;
 import no.uib.cipr.matrix.*;
 
-import java.util.*;
-
 /**
  * Tests IndTestHsic class
  *
@@ -50,16 +48,23 @@ public class TestIndTestHsic extends TestCase {
         super(name);
     }
 
+    private static double trace(Matrix A, int m) {
+        double trace = 0.0;
+        for (int i = 0; i < m; i++) {
+            trace += A.get(i, i);
+        }
+        return trace;
+    }
+
     @Override
-	public void setUp() throws Exception {
+    public void setUp() throws Exception {
         TetradLogger.getInstance().addOutputStream(System.out);
         TetradLogger.getInstance().setForceLog(true);
         TetradLogger.getInstance().setLogging(true);
     }
 
-
     @Override
-	public void tearDown() {
+    public void tearDown() {
         TetradLogger.getInstance().setForceLog(false);
         TetradLogger.getInstance().removeOutputStream(System.out);
     }
@@ -76,7 +81,7 @@ public class TestIndTestHsic extends TestCase {
         SemPm sem = new SemPm(dag);
         SemIm im = new SemIm(sem);
         DataSet data = im.simulateData(m, false);
-        List<Kernel> kernels = new ArrayList<Kernel>();
+        List <Kernel> kernels = new ArrayList <Kernel>();
         for (int i = 0; i < 3; i++) {
             Kernel k = new KernelGaussian(1);
             k.setDefaultBw(data, data.getVariable(i));
@@ -177,10 +182,10 @@ public class TestIndTestHsic extends TestCase {
             dataSet.setDouble(i, 1, dataY[i]);
         }
         IndTestHsic test = new IndTestHsic(dataSet, .05);
-        test.isIndependent(X, Y, new ArrayList<Node>());
+        test.isIndependent(X, Y, new ArrayList <Node>());
         System.out.println("HSIC P-value: " + test.getPValue());
         IndTestFisherZ test2 = new IndTestFisherZ(dataSet, .05);
-        test2.isIndependent(X, Y, new ArrayList<Node>());
+        test2.isIndependent(X, Y, new ArrayList <Node>());
         System.out.println("Fisher Z P-value: " + test2.getPValue());
     }
 
@@ -204,14 +209,6 @@ public class TestIndTestHsic extends TestCase {
         IndTestFisherZ test2 = new IndTestFisherZ(data, .05);
         test2.isIndependent(A, C, Arrays.asList(B));
         System.out.println("Fisher Z P-value: " + test2.getPValue());
-    }
-
-    private static double trace(Matrix A, int m) {
-        double trace = 0.0;
-        for (int i = 0; i < m; i++) {
-            trace += A.get(i, i);
-        }
-        return trace;
     }
 
 }

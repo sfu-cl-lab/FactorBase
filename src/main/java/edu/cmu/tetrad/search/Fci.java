@@ -27,8 +27,6 @@ import edu.cmu.tetrad.graph.*;
 import edu.cmu.tetrad.util.ChoiceGenerator;
 import edu.cmu.tetrad.util.TetradLogger;
 
-import java.util.*;
-
 
 /**
  * Extends Erin Korber's implementation of the Fast Causal Inference algorithm (found in Fci.java) with Jiji Zhang's
@@ -62,7 +60,7 @@ public final class Fci implements GraphSearch {
     /**
      * The variables to search over (optional)
      */
-    private List<Node> variables = new ArrayList<Node>();
+    private List <Node> variables = new ArrayList <Node>();
 
     /**
      * The independence test.
@@ -122,7 +120,7 @@ public final class Fci implements GraphSearch {
      * Constructs a new FCI search for the given independence test and background knowledge and a list of variables to
      * search over.
      */
-    public Fci(IndependenceTest independenceTest, List<Node> searchVars) {
+    public Fci(IndependenceTest independenceTest, List <Node> searchVars) {
         if (independenceTest == null || knowledge == null) {
             throw new NullPointerException();
         }
@@ -130,7 +128,7 @@ public final class Fci implements GraphSearch {
         this.independenceTest = independenceTest;
         this.variables.addAll(independenceTest.getVariables());
 
-        Set<Node> remVars = new HashSet<Node>();
+        Set <Node> remVars = new HashSet <Node>();
         for (Node node1 : this.variables) {
             boolean search = false;
             for (Node node2 : searchVars) {
@@ -161,12 +159,12 @@ public final class Fci implements GraphSearch {
     }
 
     @Override
-	public long getElapsedTime() {
+    public long getElapsedTime() {
         return this.elapsedTime;
     }
 
     @Override
-	public Graph search() {
+    public Graph search() {
         long beginTime = System.currentTimeMillis();
         logger.log("info", "Starting FCI algorithm.");
         logger.log("info", "Independence test = " + independenceTest + ".");
@@ -174,7 +172,7 @@ public final class Fci implements GraphSearch {
         setMaxReachablePathLength(maxReachablePathLength);
 
         //List<Node> variables = independenceTest.getVariables();       - Robert Tillman 2008
-        List<Node> nodes = new LinkedList<Node>();
+        List <Node> nodes = new LinkedList <Node>();
 
         for (Node variable : variables) {
             nodes.add(variable);
@@ -270,7 +268,7 @@ public final class Fci implements GraphSearch {
 
     /**
      * @return true if Zhang's complete rule set should be used, false if only R1-R4 (the rule set of the original FCI)
-     *         should be used. False by default.
+     * should be used. False by default.
      */
     public boolean isCompleteRuleSetUsed() {
         return completeRuleSetUsed;
@@ -292,10 +290,10 @@ public final class Fci implements GraphSearch {
      * Zhang's step F3, rule R0.
      */
     private void ruleR0() {
-        List<Node> nodes = graph.getNodes();
+        List <Node> nodes = graph.getNodes();
 
         for (Node b : nodes) {
-            List<Node> adjacentNodes = graph.getAdjacentNodes(b);
+            List <Node> adjacentNodes = graph.getAdjacentNodes(b);
 
             if (adjacentNodes.size() < 2) {
                 continue;
@@ -359,7 +357,8 @@ public final class Fci implements GraphSearch {
             while (changeFlag) {
                 changeFlag = false;
                 ruleR6R7();
-            };
+            }
+            ;
 
             // Finally, we apply R8-R10 as many times as possible.
             changeFlag = true;
@@ -367,7 +366,8 @@ public final class Fci implements GraphSearch {
             while (changeFlag) {
                 changeFlag = false;
                 rulesR8R9R10();
-            };
+            }
+            ;
         }
     }
 
@@ -375,10 +375,10 @@ public final class Fci implements GraphSearch {
     // triples multiple times per iteration of doFinalOrientation.
 
     private void rulesR1R2cycle() {
-        List<Node> nodes = graph.getNodes();
+        List <Node> nodes = graph.getNodes();
 
         for (Node B : nodes) {
-            List<Node> adj = graph.getAdjacentNodes(B);
+            List <Node> adj = graph.getAdjacentNodes(B);
 
             if (adj.size() < 2) {
                 continue;
@@ -526,12 +526,12 @@ public final class Fci implements GraphSearch {
      * This is Zhang's rule R3.
      */
     private void ruleR3() {
-        List<Node> nodes = graph.getNodes();
+        List <Node> nodes = graph.getNodes();
 
         for (Node B : nodes) {
 
-            List<Node> intoBArrows = graph.getNodesInTo(B, Endpoint.ARROW);
-            List<Node> intoBCircles = graph.getNodesInTo(B, Endpoint.CIRCLE);
+            List <Node> intoBArrows = graph.getNodesInTo(B, Endpoint.ARROW);
+            List <Node> intoBCircles = graph.getNodesInTo(B, Endpoint.CIRCLE);
 
             for (Node D : intoBCircles) {
                 if (intoBArrows.size() < 2) {
@@ -588,14 +588,14 @@ public final class Fci implements GraphSearch {
      * This is Zhang's rule R4, discriminating paths.
      */
     private void ruleR4() {
-        List<Node> nodes = graph.getNodes();
+        List <Node> nodes = graph.getNodes();
 
         for (Node b : nodes) {
 
             //potential A and C candidate pairs are only those
             // that look like this:   A<-*Bo-*C
-            List<Node> possA = graph.getNodesOutTo(b, Endpoint.ARROW);
-            List<Node> possC = graph.getNodesInTo(b, Endpoint.CIRCLE);
+            List <Node> possA = graph.getNodesOutTo(b, Endpoint.ARROW);
+            List <Node> possC = graph.getNodesInTo(b, Endpoint.CIRCLE);
 
 //            //keep arrows and circles
 //            List<Node> possA = new LinkedList<Node>(possAandC);
@@ -611,7 +611,7 @@ public final class Fci implements GraphSearch {
                         continue;
                     }
 
-                    LinkedList<Node> reachable = new LinkedList<Node>();
+                    LinkedList <Node> reachable = new LinkedList <Node>();
                     reachable.add(a);
                     reachablePathFind(a, b, c, reachable);
                 }
@@ -625,11 +625,11 @@ public final class Fci implements GraphSearch {
      * a DDP consists of colliders that are parents of c.
      */
     private void reachablePathFind(Node a, Node b, Node c,
-                                   LinkedList<Node> reachable) {
-        Set<Node> cParents = new HashSet<Node>(graph.getParents(c));
+                                   LinkedList <Node> reachable) {
+        Set <Node> cParents = new HashSet <Node>(graph.getParents(c));
 
         // Needed to avoid cycles in failure case.
-        Set<Node> visited = new HashSet<Node>();
+        Set <Node> visited = new HashSet <Node>();
         visited.add(b);
         visited.add(c);
 
@@ -641,7 +641,7 @@ public final class Fci implements GraphSearch {
             visited.add(x);
 
             // Possible DDP path endpoints.
-            List<Node> pathExtensions = graph.getNodesInTo(x, Endpoint.ARROW);
+            List <Node> pathExtensions = graph.getNodesInTo(x, Endpoint.ARROW);
             pathExtensions.removeAll(visited);
 
             for (Node d : pathExtensions) {
@@ -669,7 +669,7 @@ public final class Fci implements GraphSearch {
      * arguments.
      */
     private void doDdpOrientation(Node d, Node a, Node b, Node c) {
-        List<Node> sepset = this.sepsets.get(d, c);
+        List <Node> sepset = this.sepsets.get(d, c);
 
         if (sepset == null) {
             throw new IllegalArgumentException("The edge from d to c must have " +
@@ -703,16 +703,16 @@ public final class Fci implements GraphSearch {
      * <A,C,...,D,B> such that A,D nonadjacent and B,C nonadjacent, then A---B and orient every edge on u undirected.
      */
     private void ruleR5() {
-        List<Node> nodes = graph.getNodes();
+        List <Node> nodes = graph.getNodes();
 
         for (Node a : nodes) {
-            List<Node> adjacents = graph.getNodesInTo(a, Endpoint.CIRCLE);
+            List <Node> adjacents = graph.getNodesInTo(a, Endpoint.CIRCLE);
 
             for (Node b : adjacents) {
                 if (!(graph.getEndpoint(a, b) == Endpoint.CIRCLE)) continue;
                 // We know Ao-oB.
 
-                List<List<Node>> ucCirclePaths = getUcCirclePaths(a, b);
+                List <List <Node>> ucCirclePaths = getUcCirclePaths(a, b);
 
 //                System.out.println("Circle paths:");
 
@@ -720,7 +720,7 @@ public final class Fci implements GraphSearch {
 //                    System.out.println(GraphUtils.pathString(graph, path));
 //                }
 
-                for (List<Node> u : ucCirclePaths) {
+                for (List <Node> u : ucCirclePaths) {
                     if (u.size() < 3) continue;
 
                     Node c = u.get(1);
@@ -751,10 +751,10 @@ public final class Fci implements GraphSearch {
      * A---B--*C. R7: If A--oBo-*C and A,C nonadjacent, then A--oB--*C
      */
     private void ruleR6R7() {
-        List<Node> nodes = graph.getNodes();
+        List <Node> nodes = graph.getNodes();
 
         for (Node b : nodes) {
-            List<Node> adjacents = graph.getAdjacentNodes(b);
+            List <Node> adjacents = graph.getAdjacentNodes(b);
 
             if (adjacents.size() < 2) continue;
 
@@ -800,10 +800,10 @@ public final class Fci implements GraphSearch {
      * and R10 in that sequence on each Ao->C in the graph.
      */
     private void rulesR8R9R10() {
-        List<Node> nodes = graph.getNodes();
+        List <Node> nodes = graph.getNodes();
 
         for (Node c : nodes) {
-            List<Node> intoCArrows = graph.getNodesInTo(c, Endpoint.ARROW);
+            List <Node> intoCArrows = graph.getNodesInTo(c, Endpoint.ARROW);
 
             for (Node a : intoCArrows) {
                 if (!(graph.getEndpoint(c, a) == Endpoint.CIRCLE)) continue;
@@ -828,7 +828,7 @@ public final class Fci implements GraphSearch {
      *
      * @param path The path to orient as all tails.
      */
-    private void orientTailPath(List<Node> path) {
+    private void orientTailPath(List <Node> path) {
         for (int i = 0; i < path.size() - 1; i++) {
             Node n1 = path.get(i);
             Node n2 = path.get(i + 1);
@@ -852,13 +852,13 @@ public final class Fci implements GraphSearch {
      * @param n2 The ending node of the paths.
      * @return A list of uncovered partially directed paths from n1 to n2.
      */
-    private List<List<Node>> getUcPdPaths(Node n1, Node n2) {
-        List<List<Node>> ucPdPaths = new LinkedList();
+    private List <List <Node>> getUcPdPaths(Node n1, Node n2) {
+        List <List <Node>> ucPdPaths = new LinkedList();
 
-        List<Node> soFar = new LinkedList();
+        List <Node> soFar = new LinkedList();
         soFar.add(n1);
 
-        List<Node> adjacencies = graph.getAdjacentNodes(n1);
+        List <Node> adjacencies = graph.getAdjacentNodes(n1);
         for (Node curr : adjacencies) {
             getUcPdPsHelper(curr, soFar, n2, ucPdPaths);
         }
@@ -878,8 +878,8 @@ public final class Fci implements GraphSearch {
      * @param end       The node to finish the paths at.
      * @param ucPdPaths The current list of uncovered p.d. paths.
      */
-    private void getUcPdPsHelper(Node curr, List<Node> soFar, Node end,
-                                 List<List<Node>> ucPdPaths) {
+    private void getUcPdPsHelper(Node curr, List <Node> soFar, Node end,
+                                 List <List <Node>> ucPdPaths) {
 
         if (soFar.contains(curr)) return;
 
@@ -898,10 +898,10 @@ public final class Fci implements GraphSearch {
 
         if (curr.equals(end)) {
             // We've reached the goal! Save soFar as a path.
-            ucPdPaths.add(new LinkedList<Node>(soFar));
+            ucPdPaths.add(new LinkedList <Node>(soFar));
         } else {
             // Otherwise, try each node adjacent to the current one.
-            List<Node> adjacents = graph.getAdjacentNodes(curr);
+            List <Node> adjacents = graph.getAdjacentNodes(curr);
             for (Node next : adjacents) {
                 getUcPdPsHelper(next, soFar, end, ucPdPaths);
             }
@@ -920,11 +920,11 @@ public final class Fci implements GraphSearch {
      * @param n2 The ending node of the paths.
      * @return A list of uncovered circle paths between n1 and n2.
      */
-    private List<List<Node>> getUcCirclePaths(Node n1, Node n2) {
-        List<List<Node>> ucCirclePaths = new LinkedList<List<Node>>();
-        List<List<Node>> ucPdPaths = getUcPdPaths(n1, n2);
+    private List <List <Node>> getUcCirclePaths(Node n1, Node n2) {
+        List <List <Node>> ucCirclePaths = new LinkedList <List <Node>>();
+        List <List <Node>> ucPdPaths = getUcPdPaths(n1, n2);
 
-        for (List<Node> path : ucPdPaths) {
+        for (List <Node> path : ucPdPaths) {
             for (int i = 0; i < path.size() - 1; i++) {
                 Node j = path.get(i);
                 Node sj = path.get(i + 1);
@@ -955,7 +955,7 @@ public final class Fci implements GraphSearch {
      * @return Whether or not R8 was successfully applied.
      */
     private boolean ruleR8(Node a, Node c) {
-        List<Node> intoCArrows = graph.getNodesInTo(c, Endpoint.ARROW);
+        List <Node> intoCArrows = graph.getNodesInTo(c, Endpoint.ARROW);
 
         for (Node b : intoCArrows) {
             // We have B*->C.
@@ -992,9 +992,9 @@ public final class Fci implements GraphSearch {
      * @return Whether or not R9 was succesfully applied.
      */
     private boolean ruleR9(Node a, Node c) {
-        List<List<Node>> ucPdPsToC = getUcPdPaths(a, c);
+        List <List <Node>> ucPdPsToC = getUcPdPaths(a, c);
 
-        for (List<Node> u : ucPdPsToC) {
+        for (List <Node> u : ucPdPsToC) {
             Node b = u.get(1); // TODO do we need to check if b is c?
             if (graph.isAdjacentTo(b, c)) continue;
             if (b == c) continue;
@@ -1023,7 +1023,7 @@ public final class Fci implements GraphSearch {
      * @return Whether or not R10 was successfully applied.
      */
     private boolean ruleR10(Node a, Node c) {
-        List<Node> intoCArrows = graph.getNodesInTo(c, Endpoint.ARROW);
+        List <Node> intoCArrows = graph.getNodesInTo(c, Endpoint.ARROW);
 
         for (Node b : intoCArrows) {
             if (b == a) continue;
@@ -1038,11 +1038,11 @@ public final class Fci implements GraphSearch {
                 // We know Ao->C and B-->C<--D.
                 // TODO do we need to check if d is b?  I think so--jdramsey--added code.
 
-                List<List<Node>> ucPdPsToB = getUcPdPaths(a, b);
-                List<List<Node>> ucPdPsToD = getUcPdPaths(a, d);
-                for (List<Node> u1 : ucPdPsToB) {
+                List <List <Node>> ucPdPsToB = getUcPdPaths(a, b);
+                List <List <Node>> ucPdPsToD = getUcPdPaths(a, d);
+                for (List <Node> u1 : ucPdPsToB) {
                     Node m = u1.get(1);
-                    for (List<Node> u2 : ucPdPsToD) {
+                    for (List <Node> u2 : ucPdPsToD) {
                         Node n = u2.get(1);
 
                         if (m.equals(n)) continue; // TODO use ==?
@@ -1065,11 +1065,11 @@ public final class Fci implements GraphSearch {
     /**
      * Orients according to background knowledge
      */
-    private void fciOrientbk(Knowledge bk, Graph graph, List<Node> variables) {
+    private void fciOrientbk(Knowledge bk, Graph graph, List <Node> variables) {
         logger.log("info", "Starting BK Orientation.");
 
-        for (Iterator<KnowledgeEdge> it =
-                bk.forbiddenEdgesIterator(); it.hasNext();) {
+        for (Iterator <KnowledgeEdge> it =
+             bk.forbiddenEdgesIterator(); it.hasNext(); ) {
             KnowledgeEdge edge = it.next();
 
             //match strings to variables in the graph.
@@ -1090,8 +1090,8 @@ public final class Fci implements GraphSearch {
             logger.log("knowledgeOrientation", SearchLogUtils.edgeOrientedMsg("Knowledge", graph.getEdge(from, to)));
         }
 
-        for (Iterator<KnowledgeEdge> it =
-                bk.requiredEdgesIterator(); it.hasNext();) {
+        for (Iterator <KnowledgeEdge> it =
+             bk.requiredEdgesIterator(); it.hasNext(); ) {
             KnowledgeEdge edge = it.next();
 
             //match strings to variables in this graph

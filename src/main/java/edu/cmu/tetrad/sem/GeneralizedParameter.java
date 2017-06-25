@@ -52,7 +52,7 @@ public final class GeneralizedParameter implements TetradSerializable {
     //================================CONSTRUCTORS=======================//
 
     /**
-     * @param name  The name of the parameter.
+     * @param name The name of the parameter.
      */
     public GeneralizedParameter(String name) {
         if (name == null) {
@@ -79,12 +79,12 @@ public final class GeneralizedParameter implements TetradSerializable {
     }
 
     @Override
-	public int hashCode() {
+    public int hashCode() {
         return name.hashCode();
     }
 
     @Override
-	public boolean equals(Object o) {
+    public boolean equals(Object o) {
         if (!(o instanceof GeneralizedParameter)) {
             return false;
         }
@@ -98,8 +98,8 @@ public final class GeneralizedParameter implements TetradSerializable {
      * @return a string representation for this parameter.
      */
     @Override
-	public String toString() {
-        return "<" + this.name +  ">";
+    public String toString() {
+        return "<" + this.name + ">";
     }
 
     /**

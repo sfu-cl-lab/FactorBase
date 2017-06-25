@@ -29,7 +29,6 @@ import java.io.ObjectInputStream;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.rmi.MarshalledObject;
-import java.util.*;
 
 /**
  * <p>Represents a node in a session for a model in a particular class. The sets
@@ -124,7 +123,7 @@ public class SessionNode implements TetradSerializable {
      *
      * @serial Cannot be null.
      */
-    private Map<Class, Params> paramMap = new HashMap<Class, Params>();
+    private Map <Class, Params> paramMap = new HashMap <Class, Params>();
 
     /**
      * The set of parents of this node--a Set of SessionNodes. Must be kept in
@@ -132,7 +131,7 @@ public class SessionNode implements TetradSerializable {
      *
      * @serial Cannot be null.
      */
-    private Set<SessionNode> parents = new HashSet<SessionNode>();
+    private Set <SessionNode> parents = new HashSet <SessionNode>();
 
     /**
      * The set of children of this node--a Set of SessionNodes. Must be kept in
@@ -140,7 +139,7 @@ public class SessionNode implements TetradSerializable {
      *
      * @serial Cannot be null.
      */
-    private Set<SessionNode> children = new HashSet<SessionNode>();
+    private Set <SessionNode> children = new HashSet <SessionNode>();
 
     /**
      * True iff the next edge should not be added. (Included for GUI user
@@ -218,7 +217,7 @@ public class SessionNode implements TetradSerializable {
      *                     session node.
      */
     public SessionNode(String boxType, String displayName,
-            Class[] modelClasses) {
+                       Class[] modelClasses) {
         setBoxType(boxType);
         setDisplayName(displayName);
 
@@ -273,7 +272,7 @@ public class SessionNode implements TetradSerializable {
 
         // Construct a list of the parents of this node
         // (SessionNode's) together with the new putative parent.
-        List<SessionNode> newParents = new ArrayList<SessionNode>(this.parents);
+        List <SessionNode> newParents = new ArrayList <SessionNode>(this.parents);
         newParents.add(parent);
 
         for (Class modelClass : this.modelClasses) {
@@ -299,8 +298,7 @@ public class SessionNode implements TetradSerializable {
                     parent.addSessionListener(getSessionHandler());
                     getSessionSupport().fireParentAdded(parent, this);
                     return true;
-                }
-                else {
+                } else {
                     this.parents.add(parent);
                     parent.addChild(this);
                     parent.addSessionListener(getSessionHandler());
@@ -330,7 +328,7 @@ public class SessionNode implements TetradSerializable {
 
         // Construct a list of the parents of this node
         // (SessionNode's) together with the new putative parent.
-        List<SessionNode> newParents = new ArrayList<SessionNode>(this.parents);
+        List <SessionNode> newParents = new ArrayList <SessionNode>(this.parents);
         newParents.add(parent);
 
         for (Class modelClass : this.modelClasses) {
@@ -356,8 +354,7 @@ public class SessionNode implements TetradSerializable {
                     parent.addSessionListener(getSessionHandler());
                     getSessionSupport().fireParentAdded(parent, this);
                     return true;
-                }
-                else {
+                } else {
 
                     // Allows nextEdgeAllowed to be set to false if the next
                     // edge should not be added.
@@ -375,8 +372,7 @@ public class SessionNode implements TetradSerializable {
                         // Destroys model & downstream models.
                         destroyModel();
                         return true;
-                    }
-                    else {
+                    } else {
                         return false;
                     }
                 }
@@ -405,8 +401,8 @@ public class SessionNode implements TetradSerializable {
     /**
      * Returns the set of parents.
      */
-    public Set<SessionNode> getParents() {
-        return new HashSet<SessionNode>(this.parents);
+    public Set <SessionNode> getParents() {
+        return new HashSet <SessionNode>(this.parents);
     }
 
     /**
@@ -460,8 +456,8 @@ public class SessionNode implements TetradSerializable {
     /**
      * Returns the set of children.
      */
-    public Set<SessionNode> getChildren() {
-        return new HashSet<SessionNode>(this.children);
+    public Set <SessionNode> getChildren() {
+        return new HashSet <SessionNode>(this.children);
     }
 
     /**
@@ -486,15 +482,13 @@ public class SessionNode implements TetradSerializable {
             if (lastModelClass != null) {
                 try {
                     createModel(this.lastModelClass, simulation);
-                }
-                catch (Exception e) {
+                } catch (Exception e) {
 
                     // Allows creation of models downstream to continue
                     // once BayesPM is changed to SemPm... jdramsey 3/30/2005
                     getSessionSupport().fireModelUnclear(this);
                 }
-            }
-            else {
+            } else {
                 getSessionSupport().fireModelUnclear(this);
             }
         }
@@ -525,17 +519,17 @@ public class SessionNode implements TetradSerializable {
         this.loggerConfig = getLoggerConfig(modelClass);
         TetradLogger.getInstance().setTetradLoggerConfig(loggerConfig);
         TetradLogger.getInstance().log("info", "\n========LOGGING " + getDisplayName()
-            + "\n");
+                + "\n");
 
         // Collect up the parentModels from the parents. If any model is
         // null, throw an exception.
-        List<Object> parentModels = listParentModels();
+        List <Object> parentModels = listParentModels();
 
         // If param not null, add it to the list of parentModels.
         Object param = getParam(modelClass);
         this.model = null;
 
-        List<Object> expandedModels = new ArrayList<Object>(parentModels);
+        List <Object> expandedModels = new ArrayList <Object>(parentModels);
 
         if (oldModel != null && (!(oldModel instanceof DoNotAddOldModel) || modelClass.isAssignableFrom(DoNotAddOldModel.class))) {
             expandedModels.add(oldModel);
@@ -548,7 +542,7 @@ public class SessionNode implements TetradSerializable {
         createModelUsingArguments(modelClass, expandedModels);
 
         if (this.model == null) {
-            expandedModels = new ArrayList<Object>(parentModels);
+            expandedModels = new ArrayList <Object>(parentModels);
 
             if (param != null) {
                 expandedModels.add(param);
@@ -680,8 +674,8 @@ public class SessionNode implements TetradSerializable {
      * using the parent models as arguments to some constructor in that class.
      */
     public Class[] getConsistentModelClasses() {
-        List<Class> classes = new ArrayList<Class>();
-        List<SessionNode> parents = new ArrayList<SessionNode>(this.parents);
+        List <Class> classes = new ArrayList <Class>();
+        List <SessionNode> parents = new ArrayList <SessionNode>(this.parents);
         Class[][] parentModelClasses = new Class[parents.size()][1];
 
         // Construct the parent model classes; they must all be
@@ -692,8 +686,7 @@ public class SessionNode implements TetradSerializable {
 
             if (model != null) {
                 parentModelClasses[i][0] = model.getClass();
-            }
-            else {
+            } else {
                 return null;
             }
         }
@@ -761,9 +754,9 @@ public class SessionNode implements TetradSerializable {
      */
     public void resetToFreshlyCreated() {
         if (!isFreshlyCreated()) {
-            Set<SessionNode> _parents = new HashSet<SessionNode>(this.parents);
-            Set<SessionNode> _children =
-                    new HashSet<SessionNode>(this.children);
+            Set <SessionNode> _parents = new HashSet <SessionNode>(this.parents);
+            Set <SessionNode> _children =
+                    new HashSet <SessionNode>(this.children);
 
             for (SessionNode _parent : _parents) {
                 removeParent(_parent);
@@ -775,8 +768,8 @@ public class SessionNode implements TetradSerializable {
 
             destroyModel();
 
-            this.parents = new HashSet<SessionNode>();
-            this.children = new HashSet<SessionNode>();
+            this.parents = new HashSet <SessionNode>();
+            this.children = new HashSet <SessionNode>();
             this.sessionSupport = null;
             this.sessionHandler = null;
         }
@@ -831,9 +824,9 @@ public class SessionNode implements TetradSerializable {
         }
 
         // Check equality of possible model classes.
-        Set<Class> set1 = new HashSet<Class>(Arrays.asList(getModelClasses()));
-        Set<Class> set2 =
-                new HashSet<Class>(Arrays.asList(node.getModelClasses()));
+        Set <Class> set1 = new HashSet <Class>(Arrays.asList(getModelClasses()));
+        Set <Class> set2 =
+                new HashSet <Class>(Arrays.asList(node.getModelClasses()));
 
         if (!set1.equals(set2)) {
             return false;
@@ -853,8 +846,7 @@ public class SessionNode implements TetradSerializable {
                     return false;
                 }
             }
-        }
-        else if ((arr1 == null) && (arr2 != null)) {
+        } else if ((arr1 == null) && (arr2 != null)) {
             return false;
         }
 //        else if ((arr1 != null) && (arr2 != null)) {
@@ -867,13 +859,9 @@ public class SessionNode implements TetradSerializable {
 
         if ((model1 == null) && (model2 != null)) {
             return false;
-        }
-        else if ((model1 != null) && (model2 == null)) {
+        } else if ((model1 != null) && (model2 == null)) {
             return false;
-        }
-        else
-        if ((model1 != null) /*&& (model2 != null)*/ && !model1.equals(model2))
-        {
+        } else if ((model1 != null) /*&& (model2 != null)*/ && !model1.equals(model2)) {
             return false;
         }
 
@@ -959,7 +947,7 @@ public class SessionNode implements TetradSerializable {
     /**
      * Gets the parameter object for the givem model class.
      */
-    public Params  getParam(Class modelClass) {
+    public Params getParam(Class modelClass) {
         return paramMap.get(modelClass);
     }
 
@@ -978,7 +966,7 @@ public class SessionNode implements TetradSerializable {
     }
 
     public Object[] getModelConstructorArguments(Class modelClass) {
-        List<Object> parentModels = getParentModels();
+        List <Object> parentModels = getParentModels();
         parentModels.add(getParam(modelClass));
         Constructor[] constructors = modelClass.getConstructors();
 
@@ -998,17 +986,8 @@ public class SessionNode implements TetradSerializable {
      * Prints out the name of the session node.
      */
     @Override
-	public String toString() {
+    public String toString() {
         return this.getBoxType();
-    }
-
-    /**
-     * True iff the next edge should not be added. (Included for GUI user
-     * control.) Reset to true every time an edge is added; edge adds must be
-     * disallowed individually. To disallow the next edge add, set to false.
-     */
-    public void setNextEdgeAddAllowed(boolean nextEdgeAddAllowed) {
-        this.nextEdgeAddAllowed = nextEdgeAddAllowed;
     }
 
     public boolean existsParameterizedConstructor(Class modelClass) {
@@ -1030,11 +1009,9 @@ public class SessionNode implements TetradSerializable {
             }
 
             return false;
-        }
-        catch (RuntimeException e) {
+        } catch (RuntimeException e) {
             throw e;
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             throw new RuntimeException("Could not construct model.", e);
         }
     }
@@ -1053,8 +1030,8 @@ public class SessionNode implements TetradSerializable {
 
     /**
      * @return true if the cloning operation was successful, false if not. If
-     *         the cloning operation was not successful, the model will not have
-     *         been altered.
+     * the cloning operation was not successful, the model will not have
+     * been altered.
      */
     public boolean useClonedModel() {
         try {
@@ -1063,7 +1040,7 @@ public class SessionNode implements TetradSerializable {
             }
 
             SessionModel temp = model;
-            this.model = new MarshalledObject<SessionModel>(model).get();
+            this.model = new MarshalledObject <SessionModel>(model).get();
             this.model.setName(getDisplayName());
 
             if (this.model instanceof ParamsResettable &&
@@ -1074,8 +1051,7 @@ public class SessionNode implements TetradSerializable {
 
             this.savedModel = temp;
             return true;
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             e.printStackTrace();
             return false;
         }
@@ -1092,18 +1068,12 @@ public class SessionNode implements TetradSerializable {
         this.savedModel = null;
     }
 
-    //=====================PACKAGE PROTECTED METHODS=====================//
-
-    //===================================================================//
-    // Note: Leave these method package protected for unit testing.      //
-    //===================================================================//
-
     /**
      * Determines whether a given model class is consistent with the models
      * contained in the given List of nodes, in the sense that the model class
      * has a constructor that can take the models of the nodes as arguments.
      */
-    boolean isConsistentModelClass(Class<Type1> modelClass, List nodes) {
+    boolean isConsistentModelClass(Class <Type1> modelClass, List nodes) {
 
         // Put all of the model classes of the nodes into a single
         // two-dimensional array. At the same time, construct an int[]
@@ -1119,6 +1089,12 @@ public class SessionNode implements TetradSerializable {
 
         return isConsistentModelClass(modelClass, nodeClasses);
     }
+
+    //=====================PACKAGE PROTECTED METHODS=====================//
+
+    //===================================================================//
+    // Note: Leave these method package protected for unit testing.      //
+    //===================================================================//
 
     /**
      * <p>Tests whether the model class has an argument that takes all of the
@@ -1139,8 +1115,8 @@ public class SessionNode implements TetradSerializable {
         loop:
         for (Constructor constructor : constructors) {
             Class[] parameterTypes = constructor.getParameterTypes();
-            List<Class> remainingParameterTypes =
-                    new ArrayList<Class>(Arrays.asList(parameterTypes));
+            List <Class> remainingParameterTypes =
+                    new ArrayList <Class>(Arrays.asList(parameterTypes));
 
             loop2:
             for (Class argumentType : argumentTypes) {
@@ -1149,8 +1125,7 @@ public class SessionNode implements TetradSerializable {
 
                 if (type == null) {
                     continue loop;
-                }
-                else {
+                } else {
                     remainingParameterTypes.remove(type);
                 }
             }
@@ -1266,14 +1241,14 @@ public class SessionNode implements TetradSerializable {
         return this.sessionHandler;
     }
 
-    //==============================PRIVATE METHODS=======================//
-
     /**
      * Returns true iff the given node is parent of this node.
      */
     private boolean containsParent(SessionNode parent) {
         return this.parents.contains(parent);
     }
+
+    //==============================PRIVATE METHODS=======================//
 
     /**
      * Returns the parameter types used to construct the model.
@@ -1291,16 +1266,24 @@ public class SessionNode implements TetradSerializable {
         return nextEdgeAddAllowed;
     }
 
-    private List<Object> getParentModels() {
-        List<Object> models = new ArrayList<Object>();
+    /**
+     * True iff the next edge should not be added. (Included for GUI user
+     * control.) Reset to true every time an edge is added; edge adds must be
+     * disallowed individually. To disallow the next edge add, set to false.
+     */
+    public void setNextEdgeAddAllowed(boolean nextEdgeAddAllowed) {
+        this.nextEdgeAddAllowed = nextEdgeAddAllowed;
+    }
+
+    private List <Object> getParentModels() {
+        List <Object> models = new ArrayList <Object>();
 
         for (SessionNode node : this.parents) {
             SessionModel model = node.getModel();
 
             if (model != null) {
                 models.add(model);
-            }
-            else {
+            } else {
                 return null;
             }
         }
@@ -1308,8 +1291,8 @@ public class SessionNode implements TetradSerializable {
         return models;
     }
 
-    private List<Object> listParentModels() {
-        List<Object> models = new ArrayList<Object>();
+    private List <Object> listParentModels() {
+        List <Object> models = new ArrayList <Object>();
 
         for (SessionNode node : this.parents) {
             Object model = node.getModel();
@@ -1348,17 +1331,14 @@ public class SessionNode implements TetradSerializable {
                 try {
                     this.model = (SessionModel) constructor.newInstance(arguments);
                     this.model.setName(getDisplayName());
-                }
-                catch (InstantiationException e) {
+                } catch (InstantiationException e) {
                     throw e;
-                }
-                catch (IllegalAccessException e) {
+                } catch (IllegalAccessException e) {
                     throw e;
-                }
-                catch (InvocationTargetException e) {
+                } catch (InvocationTargetException e) {
                     String packagePath = modelClass.getName();
                     int begin = packagePath.lastIndexOf('.') + 1;
-                    String name =  packagePath.substring(begin, packagePath.length());
+                    String name = packagePath.substring(begin, packagePath.length());
 
                     if (e.getTargetException() instanceof ThreadDeath) {
                         e.printStackTrace();
@@ -1386,7 +1366,7 @@ public class SessionNode implements TetradSerializable {
      * parentClasses.length - 1.
      */
     private boolean isConsistentModelClass(Class modelClass,
-            Class[][] parentClasses) {
+                                           Class[][] parentClasses) {
 
         // Test whether for some combination of the model classes
         // for the parent nodes there is some model class for this
@@ -1421,8 +1401,8 @@ public class SessionNode implements TetradSerializable {
         return false;
     }
 
-    private Class findMatchingType(List<Class> parameterTypes,
-            Class argumentType) {
+    private Class findMatchingType(List <Class> parameterTypes,
+                                   Class argumentType) {
         for (Class type : parameterTypes) {
             if (type.isAssignableFrom(argumentType)) {
                 return type;
@@ -1433,7 +1413,7 @@ public class SessionNode implements TetradSerializable {
     }
 
     private List removeNulls(List objects) {
-        List<Object> _objects = new ArrayList<Object>();
+        List <Object> _objects = new ArrayList <Object>();
 
         for (Object o : objects) {
             if (o != null) {
@@ -1453,8 +1433,8 @@ public class SessionNode implements TetradSerializable {
         }
 
         // Collect up the model types from the parents.
-        List<Class<? extends Object>> list1 =
-                new ArrayList<Class<? extends Object>>();
+        List <Class <? extends Object>> list1 =
+                new ArrayList <Class <? extends Object>>();
 
         for (SessionNode node : this.parents) {
             Object model = node.getModel();
@@ -1465,7 +1445,7 @@ public class SessionNode implements TetradSerializable {
         }
 
         // Make a second list of the stored model param types.
-        List<Class> list2 = Arrays.asList(this.modelParamTypes);
+        List <Class> list2 = Arrays.asList(this.modelParamTypes);
 
         // If the lists aren't equal, destroy the model.
         if (!list1.contains(list2) || !list2.contains(list1)) {
@@ -1505,47 +1485,6 @@ public class SessionNode implements TetradSerializable {
 
         if (getModel() != null) {
             getModel().setName(displayName);
-        }
-    }
-
-    /**
-     * Handles <code>SessionEvent</code>s. Hides the handling of these from the
-     * API.
-     */
-    private class SessionHandler extends SessionAdapter {
-
-        /**
-         * When a model is destroyed from a node this is listening to and this
-         * destroys one of the arguments used to create the model, then the
-         * model of this node has to be destroyed.
-         */
-        @Override
-		public void modelDestroyed(SessionEvent event) {
-            reassessModel();
-        }
-
-        /**
-         * When a new execution is begun of a simulation study, this event is
-         * sent downstream so that certain parameter objects can reset
-         * themselves.
-         */
-        @Override
-		public void executionStarted(SessionEvent event) {
-
-            // Restart the current param object if necessary.
-            Object model = getModel();
-
-            if (model != null) {
-                Object param = getParam(model.getClass());
-
-                if (param instanceof ExecutionRestarter) {
-                    ExecutionRestarter restarter = (ExecutionRestarter) param;
-                    restarter.newExecution();
-                }
-            }
-
-            // Pass the message along.
-            getSessionSupport().fireSessionEvent(event);
         }
     }
 
@@ -1592,6 +1531,47 @@ public class SessionNode implements TetradSerializable {
 
         if (repetition < 1) {
             throw new IllegalStateException();
+        }
+    }
+
+    /**
+     * Handles <code>SessionEvent</code>s. Hides the handling of these from the
+     * API.
+     */
+    private class SessionHandler extends SessionAdapter {
+
+        /**
+         * When a model is destroyed from a node this is listening to and this
+         * destroys one of the arguments used to create the model, then the
+         * model of this node has to be destroyed.
+         */
+        @Override
+        public void modelDestroyed(SessionEvent event) {
+            reassessModel();
+        }
+
+        /**
+         * When a new execution is begun of a simulation study, this event is
+         * sent downstream so that certain parameter objects can reset
+         * themselves.
+         */
+        @Override
+        public void executionStarted(SessionEvent event) {
+
+            // Restart the current param object if necessary.
+            Object model = getModel();
+
+            if (model != null) {
+                Object param = getParam(model.getClass());
+
+                if (param instanceof ExecutionRestarter) {
+                    ExecutionRestarter restarter = (ExecutionRestarter) param;
+                    restarter.newExecution();
+                }
+            }
+
+            // Pass the message along.
+            getSessionSupport().fireSessionEvent(event);
         }
     }
 }

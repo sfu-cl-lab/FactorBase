@@ -7,259 +7,258 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintStream;
-import java.sql.*;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 
 public class ReadXML {
 
-	class Node {
-		String name;
-		ArrayList<String> attribute;
-		ArrayList<String> parents;
-		boolean isParent;
+    protected Connection DBConnection;
+    protected ArrayList <TableXML> tables;
+    protected Statement cmd;
+    private HashMap <String, Node> nodes;
+    public ReadXML() {
+        tables = new ArrayList <TableXML>();
+        nodes = new HashMap <String, Node>();
+        try {
+            DriverManager.registerDriver(new com.mysql.jdbc.Driver());
+        } catch (SQLException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+    }
 
-		Node(String s) {
-			name = s;
-			attribute = new ArrayList<String>();
-			parents = new ArrayList<String>();
-			isParent = false;
-		}
+    public static void main(String[] args) throws Exception {
+        ReadXML read = new ReadXML();
 
-		public void setIsParent(boolean b) {
-			isParent = b;
-		}
+        String schema = "";
+        String dbURL = "jdbc:mysql://kripke.cs.sfu.ca/:3306/";
+        String dbUser = "sfu";
+        String dbPassword = "";
+        if (args.length == 1) {
+            schema = args[0];
 
-		public boolean isParent() {
-			return isParent;
-		}
+        } else if (args.length == 4) {
+            schema = args[0];
+            dbURL = args[1];
+            dbUser = args[2];
+            dbPassword = args[3];
+        } else {
+            System.out
+                    .println("argument: dataset name <database connection><databse user><database password>");
+            System.exit(1);
+        }
 
-		public String getName() {
-			return name;
-		}
+        read.setConnection(dbURL + schema, dbUser, dbPassword);
+        read.initialize();
 
-		public void addAttribute(String a) {
-			if (!a.contains("_id"))
-				a = "+" + a.toLowerCase();
-			attribute.add(a);
-		}
+        PrintStream out = new PrintStream(new FileOutputStream("relation.xml"));
 
-		public ArrayList<String> getAttList() {
-			return attribute;
-		}
+        read.ConvertToXML(out);
+        // out2.println("\n// rules after moralization\n");
+        // read.moralization(out2);
+    }
 
-		public void addParent(String a) {
-			parents.add(a);
-		}
+    public void setConnection(String url, String userID, String passWord) {
+        try {
+            DBConnection = DriverManager.getConnection(url,
+                    userID, passWord);
+        } catch (SQLException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+    }
 
-		public ArrayList<String> getParents() {
-			return parents;
-		}
+    public void initialize() throws SQLException {
+        global.WorkingDirectory = global.schema;
+        global.XMLFile = global.schema + "/relation.xml";
+        db.getInstance().reconnect();
+        setConnection(global.dbURL + global.schema, global.dbUser,
+                global.dbPassword);
+        cmd = DBConnection.createStatement();
+        ResultSet queriedTables = cmd.executeQuery("show tables");
+        // get the table names
+        while (queriedTables.next()) {
+            TableXML tempTable = new TableXML(queriedTables.getString(1));
+            tables.add(tempTable);
+        }
+        queriedTables.close();
 
-		public String print() {
-			String result = this.getName() + "(";
-			int i = 0;
+        // get detailed table info
+        for (Iterator <TableXML> i = tables.iterator(); i.hasNext(); ) {
+            TableXML oneTable = i.next();
+            ResultSet tableQuery = cmd.executeQuery("show columns from "
+                    + oneTable.getName());
+            while (tableQuery.next()) {
+                TableXML.KeyType keyType;
+                if (tableQuery.getString("KEY").equals("PRI")) {
+                    keyType = TableXML.KeyType.PRIMARY;
+                } else if (tableQuery.getString("KEY").equals("MUL")) {
+                    keyType = TableXML.KeyType.FOREIGH;
+                } else {
+                    keyType = TableXML.KeyType.NONE;
+                }
+                oneTable.addKey(tableQuery.getString("Field"), keyType);
+            }
+            tableQuery.close();
+            // delete the xml file, if exists
 
-			for (; i < attribute.size() - 1; i++) {
-				result = result
-						.concat(attribute.get(i).substring(0, 3) + "1, ");
-			}
-			result = result.concat(attribute.get(i).substring(0, 3) + "1)");
-			return result;
-		}
-	}
+        }
+        try {
+            File f = new File(global.WorkingDirectory);
+            f.mkdir();
+            File fi = new File(global.XMLFile);
+            if (fi.exists()) {
+                boolean success = f.delete();
+                if (!success) {
+                    throw new IllegalArgumentException(
+                            "Delete: deletion failed");
+                }
+            }
+            PrintStream out = new PrintStream(new FileOutputStream(
+                    global.XMLFile));
+            ConvertToXML(out);
 
-	protected Connection DBConnection;
-	protected ArrayList<TableXML> tables;
-	private HashMap<String, Node> nodes;
-	protected Statement cmd;
 
-	public ReadXML() {
-		tables = new ArrayList<TableXML>();
-		nodes = new HashMap<String, Node>();
-		try {
-			DriverManager.registerDriver(new com.mysql.jdbc.Driver());
-		} catch (SQLException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-	}
+        } catch (Exception e) {
 
-	public void setConnection(String url, String userID, String passWord) {
-		try {
-			DBConnection = DriverManager.getConnection(url,
-					userID, passWord);
-		} catch (SQLException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-	}
+        }
+    }
 
-	public void initialize() throws SQLException {
-		global.WorkingDirectory = global.schema;
-		global.XMLFile = global.schema + "/relation.xml";
-		db.getInstance().reconnect();
-		setConnection(global.dbURL + global.schema, global.dbUser,
-				global.dbPassword);
-		cmd = DBConnection.createStatement();
-		ResultSet queriedTables = cmd.executeQuery("show tables");
-		// get the table names
-		while (queriedTables.next()) {
-			TableXML tempTable = new TableXML(queriedTables.getString(1));
-			tables.add(tempTable);
-		}
-		queriedTables.close();
+    public void ConvertToXML(PrintStream output) throws SQLException,
+            IOException {
+        // do two rounds of parsing
+        // first just find the entity name, and the corresponding entity id
+        // second round write the real xml
+        // clear the output stream
 
-		// get detailed table info
-		for (Iterator<TableXML> i = tables.iterator(); i.hasNext();) {
-			TableXML oneTable = i.next();
-			ResultSet tableQuery = cmd.executeQuery("show columns from "
-					+ oneTable.getName());
-			while (tableQuery.next()) {
-				TableXML.KeyType keyType;
-				if (tableQuery.getString("KEY").equals("PRI")) {
-					keyType = TableXML.KeyType.PRIMARY;
-				} else if (tableQuery.getString("KEY").equals("MUL")) {
-					keyType = TableXML.KeyType.FOREIGH;
-				} else {
-					keyType = TableXML.KeyType.NONE;
-				}
-				oneTable.addKey(tableQuery.getString("Field"), keyType);
-			}
-			tableQuery.close();
-			// delete the xml file, if exists
-			
-			}
-		try {
-			File f = new File(global.WorkingDirectory);
-			f.mkdir();
-			File fi = new File(global.XMLFile);
-			if (fi.exists()) {
-				boolean success = f.delete();
-				if (!success){
-					throw new IllegalArgumentException(
-						"Delete: deletion failed");}
-			}
-				PrintStream out = new PrintStream(new FileOutputStream(
-						global.XMLFile));
-				ConvertToXML(out);
-			
+        // output xml header
+        output.println("<relationships>");
 
-		} catch (Exception e) {
+        HashMap <String, String> entities = new HashMap <String, String>();
+        // first round, store entity id name and table name
+        // in the meantime,output the entity part of the xml
+        for (Iterator <TableXML> i = tables.iterator(); i.hasNext(); ) {
+            TableXML oneTable = i.next();
+            ArrayList <String> primarykeys = oneTable.getPrimaryKeys();
+            if (!primarykeys.isEmpty()) {
+                String primaryKey = primarykeys.get(0);
+                entities.put(primaryKey, oneTable.getName());
 
-		}
-	}
+                // compose entity part of xml
+                ArrayList <String> otherKeys = oneTable.getOtherKeys();
+                output.println("<entity>");
+                output.print("<entity_name>");
+                output.print(oneTable.getName());
+                output.println("</entity_name>");
+                output.print("<entity_id>");
+                output.print(primaryKey);
+                output.println("</entity_id>");
 
-	public void ConvertToXML(PrintStream output) throws SQLException,
-			IOException {
-		// do two rounds of parsing
-		// first just find the entity name, and the corresponding entity id
-		// second round write the real xml
-		// clear the output stream
+                if (!otherKeys.isEmpty()) {
+                    for (int j = 0; j < otherKeys.size(); j++) {
+                        String otherKey = otherKeys.get(j);
+                        output.print("<entity_att>");
+                        output.print(otherKey);
+                        output.println("</entity_att>");
+                    }
+                }
 
-		// output xml header
-		output.println("<relationships>");
+                output.println("</entity>");
+            }
+        }
 
-		HashMap<String, String> entities = new HashMap<String, String>();
-		// first round, store entity id name and table name
-		// in the meantime,output the entity part of the xml
-		for (Iterator<TableXML> i = tables.iterator(); i.hasNext();) {
-			TableXML oneTable = i.next();
-			ArrayList<String> primarykeys = oneTable.getPrimaryKeys();
-			if (!primarykeys.isEmpty()) {
-				String primaryKey = primarykeys.get(0);
-				entities.put(primaryKey, oneTable.getName());
+        // second iteration, deal with relationship tables
+        for (Iterator <TableXML> i = tables.iterator(); i.hasNext(); ) {
+            TableXML oneTable = i.next();
+            ArrayList <String> foreignKeys = oneTable.getForeignKeys();
+            ArrayList <String> otherKeys = oneTable.getOtherKeys();
 
-				// compose entity part of xml
-				ArrayList<String> otherKeys = oneTable.getOtherKeys();
-				output.println("<entity>");
-				output.print("<entity_name>");
-				output.print(oneTable.getName());
-				output.println("</entity_name>");
-				output.print("<entity_id>");
-				output.print(primaryKey);
-				output.println("</entity_id>");
+            // table with foreign keys are treated as relationship tables
+            if (!foreignKeys.isEmpty()) {
+                output.println("<relation>");
+                output.print("<name>");
+                output.print(oneTable.getName());
+                output.println("</name>");
 
-				if (!otherKeys.isEmpty()) {
-					for (int j = 0; j < otherKeys.size(); j++) {
-						String otherKey = otherKeys.get(j);
-						output.print("<entity_att>");
-						output.print(otherKey);
-						output.println("</entity_att>");
-					}
-				}
+                for (int j = 0; j < foreignKeys.size(); j++) {
+                    String foreighKey = foreignKeys.get(j);
+                    output.print("<ref_entity>");
+                    output.print(entities.get(foreighKey));
+                    output.println("</ref_entity>");
+                }
 
-				output.println("</entity>");
-			}
-		}
+                if (!otherKeys.isEmpty()) {
+                    for (int j = 0; j < otherKeys.size(); j++) {
+                        String otherKey = otherKeys.get(j);
+                        output.print("<rel_att>");
+                        output.print(otherKey);
+                        output.println("</rel_att>");
+                    }
+                }
 
-		// second iteration, deal with relationship tables
-		for (Iterator<TableXML> i = tables.iterator(); i.hasNext();) {
-			TableXML oneTable = i.next();
-			ArrayList<String> foreignKeys = oneTable.getForeignKeys();
-			ArrayList<String> otherKeys = oneTable.getOtherKeys();
+                output.println("</relation>");
+            }
+        }
+        // output xml footer
+        output.print("</relationships>");
+        output.flush();
+        output.close();
+    }
 
-			// table with foreign keys are treated as relationship tables
-			if (!foreignKeys.isEmpty()) {
-				output.println("<relation>");
-				output.print("<name>");
-				output.print(oneTable.getName());
-				output.println("</name>");
+    class Node {
+        String name;
+        ArrayList <String> attribute;
+        ArrayList <String> parents;
+        boolean isParent;
 
-				for (int j = 0; j < foreignKeys.size(); j++) {
-					String foreighKey = foreignKeys.get(j);
-					output.print("<ref_entity>");
-					output.print(entities.get(foreighKey));
-					output.println("</ref_entity>");
-				}
+        Node(String s) {
+            name = s;
+            attribute = new ArrayList <String>();
+            parents = new ArrayList <String>();
+            isParent = false;
+        }
 
-				if (!otherKeys.isEmpty()) {
-					for (int j = 0; j < otherKeys.size(); j++) {
-						String otherKey = otherKeys.get(j);
-						output.print("<rel_att>");
-						output.print(otherKey);
-						output.println("</rel_att>");
-					}
-				}
+        public void setIsParent(boolean b) {
+            isParent = b;
+        }
 
-				output.println("</relation>");
-			}
-		}
-		// output xml footer
-		output.print("</relationships>");
-		output.flush();
-		output.close();
-	}
+        public boolean isParent() {
+            return isParent;
+        }
 
-	public static void main(String[] args) throws Exception {
-		ReadXML read = new ReadXML();
+        public String getName() {
+            return name;
+        }
 
-		String schema = "";
-		String dbURL = "jdbc:mysql://kripke.cs.sfu.ca/:3306/";
-		String dbUser = "sfu";
-		String dbPassword = "";
-		if (args.length == 1) {
-			schema = args[0];
+        public void addAttribute(String a) {
+            if (!a.contains("_id"))
+                a = "+" + a.toLowerCase();
+            attribute.add(a);
+        }
 
-		} else if (args.length == 4) {
-			schema = args[0];
-			dbURL = args[1];
-			dbUser = args[2];
-			dbPassword = args[3];
-		} else {
-			System.out
-					.println("argument: dataset name <database connection><databse user><database password>");
-			System.exit(1);
-		}
+        public ArrayList <String> getAttList() {
+            return attribute;
+        }
 
-		read.setConnection(dbURL + schema, dbUser, dbPassword);
-		read.initialize();
+        public void addParent(String a) {
+            parents.add(a);
+        }
 
-		PrintStream out = new PrintStream(new FileOutputStream("relation.xml"));
+        public ArrayList <String> getParents() {
+            return parents;
+        }
 
-		read.ConvertToXML(out);
-		// out2.println("\n// rules after moralization\n");
-		// read.moralization(out2);
-	}
+        public String print() {
+            String result = this.getName() + "(";
+            int i = 0;
+
+            for (; i < attribute.size() - 1; i++) {
+                result = result
+                        .concat(attribute.get(i).substring(0, 3) + "1, ");
+            }
+            result = result.concat(attribute.get(i).substring(0, 3) + "1)");
+            return result;
+        }
+    }
 }

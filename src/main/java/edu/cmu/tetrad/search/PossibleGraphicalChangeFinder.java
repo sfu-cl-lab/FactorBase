@@ -44,12 +44,12 @@ class PossibleGraphicalChangeFinder {
     /**
      * The separation sets.
      */
-    private List<List<Node>> separations;
+    private List <List <Node>> separations;
 
     /**
      * Constructs the finder given the paths that must be blocked.
      */
-    public PossibleGraphicalChangeFinder(Graph pag, Collection<Collection<Node>> separations) {
+    public PossibleGraphicalChangeFinder(Graph pag, Collection <Collection <Node>> separations) {
         if (pag == null) {
             throw new NullPointerException("The given pag must not be null.");
         }
@@ -57,9 +57,9 @@ class PossibleGraphicalChangeFinder {
             throw new NullPointerException("The given separation sets must not be null.");
         }
         this.pag = pag;
-        this.separations = new ArrayList<List<Node>>();
-        for (Collection<Node> sep : separations) {
-            this.separations.add(new ArrayList<Node>(sep));
+        this.separations = new ArrayList <List <Node>>();
+        for (Collection <Node> sep : separations) {
+            this.separations.add(new ArrayList <Node>(sep));
         }
     }
 
@@ -68,8 +68,8 @@ class PossibleGraphicalChangeFinder {
      * Returns the minimal set of graphical changes that block the given path (relative to the pag and separations given
      * at consturction time).
      */
-    public List<GraphicalChange> findGraphicalChanges(PossibleDConnectingPath path) {
-        List<Node> nodes = path.getPath();
+    public List <GraphicalChange> findGraphicalChanges(PossibleDConnectingPath path) {
+        List <Node> nodes = path.getPath();
 
         return null;
     }
@@ -97,7 +97,7 @@ class PossibleGraphicalChangeFinder {
 
 
         @Override
-		public void apply(Graph g) {
+        public void apply(Graph g) {
             Node x = triple.getX();
             Node y = triple.getY();
             Node z = triple.getZ();
@@ -131,7 +131,7 @@ class PossibleGraphicalChangeFinder {
 
 
         @Override
-		public void apply(Graph pag) {
+        public void apply(Graph pag) {
 //            pag should be a PAG.
             Node x = triple.getX();
             Node y = triple.getY();
@@ -162,7 +162,7 @@ class PossibleGraphicalChangeFinder {
         }
 
         @Override
-		public void apply(Graph g) {
+        public void apply(Graph g) {
             if (g.containsEdge(edge)) {
                 g.removeEdge(edge);
             }

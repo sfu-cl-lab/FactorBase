@@ -62,7 +62,7 @@ public final class MlBayesEstimator {
 
         // Create a subset of the data set with the variables of the IM, in
         // the order of the IM.
-        List<Node> variables = estimatedIm.getVariables();
+        List <Node> variables = estimatedIm.getVariables();
         DataSet columnDataSet2 = dataSet.subsetColumns(variables);
         this.reorderedDataSetDiscrete = columnDataSet2;
         DiscreteProbs discreteProbs = new DataSetProbs(columnDataSet2);
@@ -84,7 +84,7 @@ public final class MlBayesEstimator {
                 int[] parentValues = estimatedIm.getParentValues(node, row);
 
                 for (int col = 0; col < numCols; col++) {
-                                             
+
                     // Remove values from the proposition in various ways; if
                     // a combination exists in the end, calculate a contitional
                     // probability.
@@ -108,8 +108,7 @@ public final class MlBayesEstimator {
                     if (condition.existsCombination()) {
                         double p = discreteProbs.getConditionalProb(assertion, condition);
                         estimatedIm.setProbability(node, row, col, p);
-                    }
-                    else {
+                    } else {
                         estimatedIm.setProbability(node, row, col, Double.NaN);
                     }
                 }

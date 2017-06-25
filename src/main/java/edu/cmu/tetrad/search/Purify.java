@@ -29,8 +29,6 @@ import edu.cmu.tetrad.util.ChoiceGenerator;
 import edu.cmu.tetrad.util.MatrixUtils;
 import edu.cmu.tetrad.util.TetradLogger;
 
-import java.util.*;
-
 /**
  * Purify is a implementation of the automated purification methods described on CPS and the report "Learning
  * Measurement Models" CMU-CALD-03-100.
@@ -54,29 +52,81 @@ import java.util.*;
  */
 
 public class Purify {
-    private boolean outputMessage;
-
     /**
-     * Data storage
+     * ---------------------------------------------------------------------------------------------------------------
+     * TETRAD-BASED PURIFY2 </p> - using tetrad constraints - Second variation: this method checks for each pair (X, Y)
+     * if there is another pair (W, Z) such that all three tetrads hold in (X, Y, W, Z). If not, this pair is marked as
+     * impure. This is more likely to leave true impurities in the estimated graph, but on the other hand it tends to
+     * remove less true pure indicators. We also do not use all variables as the domain of (W, Z): only those in the
+     * given partition, in order to reduce the number of false positives. In my opinion, tetradBasedPurify2 is a better
+     * compromise thatn tetradBasedPurify1, but one might want to test it with a larger variety of graphical structures
+     * and sample size. </p> -- Ricardo Silva
      */
-    private CorrelationMatrix correlationMatrix;
-    private DataSet dataSet;
-    private Clusters clusters;
-    private int constraintSearchVariation = 0;
-    private List forbiddenList;
-    private int numVars;
-    private TetradTest tetradTest;
 
-    /**
-     * The logger for this class. The config needs to be set.
-     */
-    private TetradLogger logger = TetradLogger.getInstance();
-    private List<Node> variables;
+    private final int PURE = 0;
+    private final int IMPURE = 1;
+    private final int UNDEFINED = 2;
+    double Cyy[][], Cyz[][], Czz[][], bestCyy[][], bestCyz[][], bestCzz[][];
+    double covErrors[][], oldCovErrors[][], sampleCovErrors[][], betas[][], oldBetas[][];
+    double betasLat[][], varErrorLatent[];
+    double omega[][], omegaI[], parentsResidualsCovar[][][], iResidualsCovar[], selectedInverseOmega[][][], auxInverseOmega[][][];
+    int spouses[][], nSpouses[], parents[][], parentsLat[][];
+    double parentsCov[][][], parentsChildCov[][], parentsLatCov[][][], parentsChildLatCov[][];
+    double pseudoParentsCov[][][], pseudoParentsChildCov[][];
 
 
     /*********************************************************
      * INITIALIZATION                                                                                        o
      *********************************************************/
+    boolean parentsL[][];
+    int numObserved, numLatent, clusterId[];
+    Hashtable observableNames, latentNames;
+    SemGraph purePartitionGraph;
+    Graph basicGraph;
+    ICovarianceMatrix covarianceMatrix;
+    boolean correlatedErrors[][], latentParent[][], observedParent[][];
+    List latentNodes, measuredNodes;
+    SemIm currentSemIm;
+    boolean modifiedGraph;
+    boolean extraDebugPrint = false;
+    private boolean outputMessage;
+    /**
+     * Data storage
+     */
+    private CorrelationMatrix correlationMatrix;
+    private DataSet dataSet;
+
+    /*private void printImpurities(int graph[][]) {
+        printlnMessage("*** IMPURITIES:");
+        for (int i = 0; i < numV - 1; i++)
+            for (int j = i + 1; j < numV; j++)
+                    //if (graph[i][j] == EDGE_GRAY || graph[i][j] == EDGE_YELLOW)
+                    //if (graph[i][j] == EDGE_BLUE)
+                printlnMessage(labels[i] + " x " + labels[j] + ": " + graph[i][j]);
+    }*/
+
+    /*private void printRelations(int graph[][]) {
+        printlnMessage("*** RELATIONS:");
+        for (int i = 0; i < numV - 1; i++)
+            for (int j = i + 1; j < numV; j++)
+                printlnMessage(labels[i] + " x " + labels[j] + ": " + graph[i][j]);
+    }*/
+    private Clusters clusters;
+    private int constraintSearchVariation = 0;
+    private List forbiddenList;
+
+    //private void printlnMessage(boolean flag) {
+    //    if (outputMessage) {
+    //        System.out.println(flag);
+    //    }
+    //}
+    private int numVars;
+    private TetradTest tetradTest;
+    /**
+     * The logger for this class. The config needs to be set.
+     */
+    private TetradLogger logger = TetradLogger.getInstance();
+    private List <Node> variables;
 
     /**
      * Constructor Purify
@@ -104,6 +154,7 @@ public class Purify {
         this.variables = correlationMatrix.getVariables();
     }
 
+
     public Purify(DataSet dataSet, double sig, TestType testType,
                   Clusters clusters) {
         if (DataUtils.containsMissingValue(dataSet)) {
@@ -128,142 +179,6 @@ public class Purify {
         initAlgorithm(-1., TestType.NONE, knowledge);
 
         this.variables = tetradTest.getVariables();
-    }
-
-    public void setForbiddenList(List forbiddenList) {
-        this.forbiddenList = forbiddenList;
-    }
-
-    private void initAlgorithm(double sig, TestType testType, Clusters clusters) {
-        this.clusters = clusters;
-        this.forbiddenList = null;
-        if (this.tetradTest == null) {
-            if (correlationMatrix != null) {
-
-                // Should type these ones.
-                TestType type = testType;
-
-                if (testType == TestType.TETRAD_BOLLEN) {
-                    tetradTest = new ContinuousTetradTest(dataSet, type, sig);
-                } else {
-                    tetradTest = new ContinuousTetradTest(correlationMatrix,
-                            type, sig);
-                }
-            } else {
-                tetradTest = new DiscreteTetradTest(dataSet, sig);
-            }
-        }
-        numVars = tetradTest.getVarNames().length;
-        outputMessage = true;
-    }
-
-    public void setConstraintSearchVariation(int type) {
-        this.constraintSearchVariation = type;
-    }
-
-    public void setOutputMessage(boolean outputMessage) {
-        this.outputMessage = outputMessage;
-    }
-
-    /**
-     * ****************************************************** SEARCH INTERFACE *******************************************************
-     */
-
-    public Graph search() {
-        Graph graph = getResultGraph();
-        this.logger.log("graph", "\nReturning this graph: " + graph);
-        return graph;
-    }
-
-    private Graph getResultGraph() {
-        printlnMessage("\n**************Starting Purify search!!!*************\n");
-
-//        if (tetradTest instanceof DiscreteTetradTest) {
-//            List pureClusters;
-//            if (constraintSearchVariation == 0) {
-//                pureClusters = tetradBasedPurify(getClusters());
-//            } else {
-//                pureClusters = tetradBasedPurify2(getClusters());
-//            }
-//            return convertSearchGraph(pureClusters);
-//        } else
-        {
-            TestType type = ((ContinuousTetradTest) this.tetradTest).getTestType();
-//            type = TestType.TETRAD_BASED;
-            type = null;
-
-            if (type == TestType.TETRAD_BASED) {
-                IPurify purifier = new PurifyTetradBased(tetradTest);
-                List<List<Node>> partition2 = purifier.purify(ClusterUtils.convertIntToList(getClusters(), getVariables()));
-                List<int[]> pureClusters = ClusterUtils.convertListToInt(partition2, getVariables());
-                return ClusterUtils.convertSearchGraph(pureClusters, tetradTest.getVarNames());
-//                return convertSearchGraph(pureClusters);
-//                List pureClusters = tetradBasedPurify(getClusters());
-//                return convertSearchGraph(pureClusters);
-            }
-            if (type == TestType.TETRAD_BASED2) {
-                IPurify purifier = new PurifyTetradBased2(tetradTest);
-                List<List<Node>> partition2 = purifier.purify(ClusterUtils.convertIntToList(getClusters(), getVariables()));
-                List<int[]> pureClusters = ClusterUtils.convertListToInt(partition2, getVariables());
-                return ClusterUtils.convertSearchGraph(pureClusters, tetradTest.getVarNames());
-//                return convertSearchGraph(pureClusters);
-//                List pureClusters = tetradBasedPurify2(getClusters());
-//                return convertSearchGraph(pureClusters);
-            }
-            if (type == TestType.GAUSSIAN_SCORE || type == TestType.GAUSSIAN_SCORE_MARKS) {
-                SemGraph semGraph = scoreBasedPurify(getClusters());
-                return convertSearchGraph(semGraph);
-            } else if (type == TestType.GAUSSIAN_SCORE_ITERATE) {
-                SemGraph semGraphI = scoreBasedPurifyIterate(getClusters());
-                return convertSearchGraph(semGraphI);
-            } else if (type == TestType.GAUSSIAN_PVALUE) {
-                SemGraph semGraph2 = pvalueBasedPurify(getClusters());
-                return convertSearchGraph(semGraph2);
-            } else if (type == TestType.NONE) {
-                SemGraph semGraph3 = dummyPurification(getClusters());
-                return convertSearchGraph(semGraph3);
-            } else {
-                List pureClusters;
-//                if (constraintSearchVariation == 0) {
-                IPurify purifier = new PurifyTetradBasedD(tetradTest);
-                List<List<Node>> partition2 = purifier.purify(ClusterUtils.convertIntToList(getClusters(), tetradTest.getVariables()));
-                pureClusters = ClusterUtils.convertListToInt(partition2, tetradTest.getVariables());
-//                    pureClusters = tetradBasedPurify(getClusters());
-//                }
-//                else {
-//                    pureClusters = tetradBasedPurify2(getClusters());
-//                }
-                return ClusterUtils.convertSearchGraph(pureClusters, tetradTest.getVarNames());
-            }
-        }
-    }
-
-    private List<Node> getVariables() {
-        return this.variables;
-    }
-
-    private List<int[]> getClusters() {
-        List clusters = new ArrayList();
-        String varNames[] = tetradTest.getVarNames();
-        for (int i = 0; i < this.clusters.getNumClusters(); i++) {
-            List clusterS = this.clusters.getCluster(i);
-
-            int cluster[] = new int[clusterS.size()];
-            Iterator it = clusterS.iterator();
-            int count = 0;
-            while (it.hasNext()) {
-                String nextName = (String) it.next();
-                for (int j = 0; j < varNames.length; j++) {
-                    if (varNames[j].equals(nextName)) {
-                        cluster[count++] = j;
-                        break;
-                    }
-                }
-            }
-            clusters.add(cluster);
-        }
-
-        return clusters;
     }
 
     public static Graph convertSearchGraph(SemGraph input) {
@@ -334,6 +249,144 @@ public class Purify {
         return output;
     }
 
+    // The number of variables in cluster that have not been eliminated.
+
+    public void setForbiddenList(List forbiddenList) {
+        this.forbiddenList = forbiddenList;
+    }
+
+    private void initAlgorithm(double sig, TestType testType, Clusters clusters) {
+        this.clusters = clusters;
+        this.forbiddenList = null;
+        if (this.tetradTest == null) {
+            if (correlationMatrix != null) {
+
+                // Should type these ones.
+                TestType type = testType;
+
+                if (testType == TestType.TETRAD_BOLLEN) {
+                    tetradTest = new ContinuousTetradTest(dataSet, type, sig);
+                } else {
+                    tetradTest = new ContinuousTetradTest(correlationMatrix,
+                            type, sig);
+                }
+            } else {
+                tetradTest = new DiscreteTetradTest(dataSet, sig);
+            }
+        }
+        numVars = tetradTest.getVarNames().length;
+        outputMessage = true;
+    }
+
+    public void setConstraintSearchVariation(int type) {
+        this.constraintSearchVariation = type;
+    }
+
+    public void setOutputMessage(boolean outputMessage) {
+        this.outputMessage = outputMessage;
+    }
+
+    /**
+     * ****************************************************** SEARCH INTERFACE *******************************************************
+     */
+
+    public Graph search() {
+        Graph graph = getResultGraph();
+        this.logger.log("graph", "\nReturning this graph: " + graph);
+        return graph;
+    }
+
+    private Graph getResultGraph() {
+        printlnMessage("\n**************Starting Purify search!!!*************\n");
+
+//        if (tetradTest instanceof DiscreteTetradTest) {
+//            List pureClusters;
+//            if (constraintSearchVariation == 0) {
+//                pureClusters = tetradBasedPurify(getClusters());
+//            } else {
+//                pureClusters = tetradBasedPurify2(getClusters());
+//            }
+//            return convertSearchGraph(pureClusters);
+//        } else
+        {
+            TestType type = ((ContinuousTetradTest) this.tetradTest).getTestType();
+//            type = TestType.TETRAD_BASED;
+            type = null;
+
+            if (type == TestType.TETRAD_BASED) {
+                IPurify purifier = new PurifyTetradBased(tetradTest);
+                List <List <Node>> partition2 = purifier.purify(ClusterUtils.convertIntToList(getClusters(), getVariables()));
+                List <int[]> pureClusters = ClusterUtils.convertListToInt(partition2, getVariables());
+                return ClusterUtils.convertSearchGraph(pureClusters, tetradTest.getVarNames());
+//                return convertSearchGraph(pureClusters);
+//                List pureClusters = tetradBasedPurify(getClusters());
+//                return convertSearchGraph(pureClusters);
+            }
+            if (type == TestType.TETRAD_BASED2) {
+                IPurify purifier = new PurifyTetradBased2(tetradTest);
+                List <List <Node>> partition2 = purifier.purify(ClusterUtils.convertIntToList(getClusters(), getVariables()));
+                List <int[]> pureClusters = ClusterUtils.convertListToInt(partition2, getVariables());
+                return ClusterUtils.convertSearchGraph(pureClusters, tetradTest.getVarNames());
+//                return convertSearchGraph(pureClusters);
+//                List pureClusters = tetradBasedPurify2(getClusters());
+//                return convertSearchGraph(pureClusters);
+            }
+            if (type == TestType.GAUSSIAN_SCORE || type == TestType.GAUSSIAN_SCORE_MARKS) {
+                SemGraph semGraph = scoreBasedPurify(getClusters());
+                return convertSearchGraph(semGraph);
+            } else if (type == TestType.GAUSSIAN_SCORE_ITERATE) {
+                SemGraph semGraphI = scoreBasedPurifyIterate(getClusters());
+                return convertSearchGraph(semGraphI);
+            } else if (type == TestType.GAUSSIAN_PVALUE) {
+                SemGraph semGraph2 = pvalueBasedPurify(getClusters());
+                return convertSearchGraph(semGraph2);
+            } else if (type == TestType.NONE) {
+                SemGraph semGraph3 = dummyPurification(getClusters());
+                return convertSearchGraph(semGraph3);
+            } else {
+                List pureClusters;
+//                if (constraintSearchVariation == 0) {
+                IPurify purifier = new PurifyTetradBasedD(tetradTest);
+                List <List <Node>> partition2 = purifier.purify(ClusterUtils.convertIntToList(getClusters(), tetradTest.getVariables()));
+                pureClusters = ClusterUtils.convertListToInt(partition2, tetradTest.getVariables());
+//                    pureClusters = tetradBasedPurify(getClusters());
+//                }
+//                else {
+//                    pureClusters = tetradBasedPurify2(getClusters());
+//                }
+                return ClusterUtils.convertSearchGraph(pureClusters, tetradTest.getVarNames());
+            }
+        }
+    }
+
+    private List <Node> getVariables() {
+        return this.variables;
+    }
+
+    private List <int[]> getClusters() {
+        List clusters = new ArrayList();
+        String varNames[] = tetradTest.getVarNames();
+        for (int i = 0; i < this.clusters.getNumClusters(); i++) {
+            List clusterS = this.clusters.getCluster(i);
+
+            int cluster[] = new int[clusterS.size()];
+            Iterator it = clusterS.iterator();
+            int count = 0;
+            while (it.hasNext()) {
+                String nextName = (String) it.next();
+                for (int j = 0; j < varNames.length; j++) {
+                    if (varNames[j].equals(nextName)) {
+                        cluster[count++] = j;
+                        break;
+                    }
+                }
+            }
+            clusters.add(cluster);
+        }
+
+        return clusters;
+    }
+
     /**
      * ****************************************************** DEBUG UTILITIES *******************************************************
      */
@@ -345,6 +398,13 @@ public class Purify {
             printCluster(c);
         }
     }
+
+//     SCORE-BASED PURIFY </p> - using BIC score function and Structural EM for
+//     search. Probabilistic model is Gaussian. - search operator consists only
+//     of adding a bi-directed edge between pairs of error variables - after
+//     such pairs are found, an heuristic is applied to eliminate one member of
+//     each pair - this methods tends to be much slower than the "tetradBased"
+//     ones.
 
     private void printCluster(int c[]) {
         String sorted[] = new String[c.length];
@@ -370,22 +430,6 @@ public class Purify {
         printlnMessage();
     }
 
-    /*private void printImpurities(int graph[][]) {
-        printlnMessage("*** IMPURITIES:");
-        for (int i = 0; i < numV - 1; i++)
-            for (int j = i + 1; j < numV; j++)
-                    //if (graph[i][j] == EDGE_GRAY || graph[i][j] == EDGE_YELLOW)
-                    //if (graph[i][j] == EDGE_BLUE)
-                printlnMessage(labels[i] + " x " + labels[j] + ": " + graph[i][j]);
-    }*/
-
-    /*private void printRelations(int graph[][]) {
-        printlnMessage("*** RELATIONS:");
-        for (int i = 0; i < numV - 1; i++)
-            for (int j = i + 1; j < numV; j++)
-                printlnMessage(labels[i] + " x " + labels[j] + ": " + graph[i][j]);
-    }*/
-
     private void printMessage(String message) {
         if (outputMessage) {
             System.out.print(message);
@@ -403,12 +447,6 @@ public class Purify {
             System.out.println();
         }
     }
-
-    //private void printlnMessage(boolean flag) {
-    //    if (outputMessage) {
-    //        System.out.println(flag);
-    //    }
-    //}
 
     private int sizeCluster(List cluster) {
         int total = 0;
@@ -480,7 +518,7 @@ public class Purify {
                 new double[clusterSize][clusterSize][clusterSize][clusterSize][3];
         int numNotEliminated = numNotEliminated(cluster, eliminated);
 
-        List<Double> allPValues = new ArrayList<Double>();
+        List <Double> allPValues = new ArrayList <Double>();
         int numImpurities = 0;
 
         Set failures[] = new Set[clusterSize];
@@ -629,13 +667,13 @@ public class Purify {
 
     private void intraConstructPhase2(int _cluster[], boolean eliminated[],
                                       String clusterName) {
-        List<Integer> cluster = new ArrayList<Integer>();
+        List <Integer> cluster = new ArrayList <Integer>();
         for (int i : _cluster) cluster.add(i);
 
         int numNotEliminated = numNotEliminated2(cluster, eliminated);
         int numImpurities = 0;
 
-        List<Double> allPValues = listPValues(cluster, eliminated, Double.MAX_VALUE);
+        List <Double> allPValues = listPValues(cluster, eliminated, Double.MAX_VALUE);
         if (allPValues.size() == 0) return;
 
         Collections.sort(allPValues);
@@ -671,7 +709,7 @@ public class Purify {
                 if (eliminated[i]) continue;
 
                 eliminated[i] = true;
-                List<Double> pValues = listPValues(cluster, eliminated, cutoff);
+                List <Double> pValues = listPValues(cluster, eliminated, cutoff);
 
                 if (pValues.size() > min) {
                     min = pValues.size();
@@ -687,10 +725,10 @@ public class Purify {
         }
     }
 
-    private List<Double> listPValues(List<Integer> cluster, boolean[] eliminated, double cutoff) {
-        if (cluster.size() < 4) return new ArrayList<Double>();
+    private List <Double> listPValues(List <Integer> cluster, boolean[] eliminated, double cutoff) {
+        if (cluster.size() < 4) return new ArrayList <Double>();
 
-        List<Double> pValues = new ArrayList<Double>();
+        List <Double> pValues = new ArrayList <Double>();
         ChoiceGenerator gen = new ChoiceGenerator(cluster.size(), 4);
         int[] choice;
 
@@ -729,7 +767,6 @@ public class Purify {
         return pValues;
     }
 
-
     /**
      * Marks for deletion nodes that are part of some tetrad constraint between two clusters that does not hold
      * according to a statistical test. </p> False discovery rates will be used to adjust for multiple hypothesis
@@ -739,9 +776,9 @@ public class Purify {
      * @param eliminated
      */
 
-    private void crossConstructPhase(List<int[]> partition, boolean eliminated[]) {
+    private void crossConstructPhase(List <int[]> partition, boolean eliminated[]) {
         int numImpurities = 0;
-        List<Double> allPValues = new ArrayList<Double>();
+        List <Double> allPValues = new ArrayList <Double>();
 
         Set failures[][] = new Set[partition.size()][];
         for (int i = 0; i < partition.size(); i++) {
@@ -977,8 +1014,8 @@ public class Purify {
         }
     }
 
-    private void crossConstructPhase2(List<int[]> partition, boolean eliminated[]) {
-        List<Double> allPValues = countCrossConstructPValues(partition, eliminated, Double.MAX_VALUE);
+    private void crossConstructPhase2(List <int[]> partition, boolean eliminated[]) {
+        List <Double> allPValues = countCrossConstructPValues(partition, eliminated, Double.MAX_VALUE);
 
         if (allPValues.isEmpty()) return;
 
@@ -1005,7 +1042,7 @@ public class Purify {
         while (numImpurities > 0) {
             int min = Integer.MAX_VALUE;
             int minIndex = -1;
-            List<Integer> minCluster = null;
+            List <Integer> minCluster = null;
 
             for (int p = 0; p < partition.size(); p++) {
                 int cluster[] = partition.get(p);
@@ -1015,14 +1052,14 @@ public class Purify {
                     }
 
                     eliminated[i] = true;
-                    List<Integer> _cluster = new ArrayList<Integer>();
+                    List <Integer> _cluster = new ArrayList <Integer>();
                     for (int j : cluster) _cluster.add(j);
-                    List<Double> pValues = listPValues(_cluster, eliminated, cutoff);
+                    List <Double> pValues = listPValues(_cluster, eliminated, cutoff);
 
                     if (pValues.size() > min) {
                         min = pValues.size();
                         minIndex = i;
-                        minCluster = new ArrayList<Integer>(minCluster);
+                        minCluster = new ArrayList <Integer>(minCluster);
                         numImpurities = min;
                     }
                 }
@@ -1036,8 +1073,8 @@ public class Purify {
         }
     }
 
-    private List<Double> countCrossConstructPValues(List<int[]> partition, boolean[] eliminated, double cutoff) {
-        List<Double> allPValues = new ArrayList<Double>();
+    private List <Double> countCrossConstructPValues(List <int[]> partition, boolean[] eliminated, double cutoff) {
+        List <Double> allPValues = new ArrayList <Double>();
 
         for (int p1 = 0; p1 < partition.size(); p1++) {
             for (int p2 = p1 + 1; p2 < partition.size(); p2++) {
@@ -1051,7 +1088,7 @@ public class Purify {
 
                     while ((choice1 = gen1.next()) != null) {
                         while ((choice2 = gen2.next()) != null) {
-                            List<Integer> crossCluster = new ArrayList<Integer>();
+                            List <Integer> crossCluster = new ArrayList <Integer>();
                             for (int i : choice1) crossCluster.add(cluster1[i]);
                             for (int i : choice2) crossCluster.add(cluster2[i]);
                             allPValues.addAll(listPValues(crossCluster, eliminated, cutoff));
@@ -1066,7 +1103,7 @@ public class Purify {
 
                     while ((choice1 = gen1.next()) != null) {
                         while ((choice2 = gen2.next()) != null) {
-                            List<Integer> crossCluster = new ArrayList<Integer>();
+                            List <Integer> crossCluster = new ArrayList <Integer>();
                             for (int i : choice1) crossCluster.add(cluster1[i]);
                             for (int i : choice2) crossCluster.add(cluster2[i]);
                             allPValues.addAll(listPValues(crossCluster, eliminated, cutoff));
@@ -1079,8 +1116,6 @@ public class Purify {
         return allPValues;
     }
 
-    // The number of variables in cluster that have not been eliminated.
-
     private int numNotEliminated(int[] cluster, boolean[] eliminated) {
         int n1 = 0;
         for (int i = 0; i < cluster.length; i++) {
@@ -1091,7 +1126,7 @@ public class Purify {
         return n1;
     }
 
-    private int numNotEliminated2(List<Integer> cluster, boolean[] eliminated) {
+    private int numNotEliminated2(List <Integer> cluster, boolean[] eliminated) {
         int n1 = 0;
         for (int i : cluster) {
             if (!eliminated[i]) {
@@ -1119,21 +1154,6 @@ public class Purify {
         }
         return solution;
     }
-
-    /**
-     * ---------------------------------------------------------------------------------------------------------------
-     * TETRAD-BASED PURIFY2 </p> - using tetrad constraints - Second variation: this method checks for each pair (X, Y)
-     * if there is another pair (W, Z) such that all three tetrads hold in (X, Y, W, Z). If not, this pair is marked as
-     * impure. This is more likely to leave true impurities in the estimated graph, but on the other hand it tends to
-     * remove less true pure indicators. We also do not use all variables as the domain of (W, Z): only those in the
-     * given partition, in order to reduce the number of false positives. In my opinion, tetradBasedPurify2 is a better
-     * compromise thatn tetradBasedPurify1, but one might want to test it with a larger variety of graphical structures
-     * and sample size. </p> -- Ricardo Silva
-     */
-
-    private final int PURE = 0;
-    private final int IMPURE = 1;
-    private final int UNDEFINED = 2;
 
     private List tetradBasedPurify2(List partition) {
         boolean impurities[][] = tetradBasedMarkImpurities(partition);
@@ -1325,35 +1345,6 @@ public class Purify {
         SemGraph bestGraph = this.purePartitionGraph;
         return bestGraph;
     }
-
-//     SCORE-BASED PURIFY </p> - using BIC score function and Structural EM for
-//     search. Probabilistic model is Gaussian. - search operator consists only
-//     of adding a bi-directed edge between pairs of error variables - after
-//     such pairs are found, an heuristic is applied to eliminate one member of
-//     each pair - this methods tends to be much slower than the "tetradBased"
-//     ones.
-
-    double Cyy[][], Cyz[][], Czz[][], bestCyy[][], bestCyz[][], bestCzz[][];
-    double covErrors[][], oldCovErrors[][], sampleCovErrors[][], betas[][], oldBetas[][];
-    double betasLat[][], varErrorLatent[];
-    double omega[][], omegaI[], parentsResidualsCovar[][][], iResidualsCovar[], selectedInverseOmega[][][], auxInverseOmega[][][];
-    int spouses[][], nSpouses[], parents[][], parentsLat[][];
-    double parentsCov[][][], parentsChildCov[][], parentsLatCov[][][], parentsChildLatCov[][];
-    double pseudoParentsCov[][][], pseudoParentsChildCov[][];
-    boolean parentsL[][];
-
-    int numObserved, numLatent, clusterId[];
-    Hashtable observableNames, latentNames;
-    SemGraph purePartitionGraph;
-    Graph basicGraph;
-    ICovarianceMatrix covarianceMatrix;
-    boolean correlatedErrors[][], latentParent[][], observedParent[][];
-    List latentNodes, measuredNodes;
-    SemIm currentSemIm;
-    boolean modifiedGraph;
-
-
-    boolean extraDebugPrint = false;
 
     private SemGraph scoreBasedPurify(List partition) {
         structuralEmInitialization(partition);
@@ -1739,7 +1730,7 @@ public class Purify {
                         new int[semMag.getParents(node).size() - 1];
                 int count = 0;
                 for (Iterator it =
-                             semMag.getParents(node).iterator(); it.hasNext(); ) {
+                     semMag.getParents(node).iterator(); it.hasNext(); ) {
                     Node parent = (Node) it.next();
                     if (parent.getNodeType() == NodeType.LATENT) {
                         this.parentsLat[i][count++] =
@@ -1787,7 +1778,7 @@ public class Purify {
             this.parentsL[i] = new boolean[semMag.getParents(node).size() - 1];
             int count = 0;
             for (Iterator it =
-                         semMag.getParents(node).iterator(); it.hasNext(); ) {
+                 semMag.getParents(node).iterator(); it.hasNext(); ) {
                 Node parent = (Node) it.next();
                 if (parent.getNodeType() == NodeType.LATENT) {
                     this.parents[i][count] =
@@ -1974,8 +1965,8 @@ public class Purify {
                 MatrixUtils.inverse(MatrixUtils.subtract(identityI, lambdaI));
         double indImpliedCovar[][] = MatrixUtils.product(MatrixUtils.product(
                 iMinusI, MatrixUtils.sum(MatrixUtils.product(
-                MatrixUtils.product(lambdaL, latentImpliedCovar),
-                MatrixUtils.transpose(lambdaL)), tau)),
+                        MatrixUtils.product(lambdaL, latentImpliedCovar),
+                        MatrixUtils.transpose(lambdaL)), tau)),
                 MatrixUtils.transpose(iMinusI));
         double loadingLatentCovar[][] = MatrixUtils.product(iMinusI,
                 MatrixUtils.product(lambdaL, latentImpliedCovar));
@@ -3041,8 +3032,8 @@ public class Purify {
                     semIm.setParamValue(node, node, this.varErrorLatent[i]);
                 } else {
                     for (Iterator it =
-                                 semIm.getSemPm().getGraph().getParents(node)
-                                         .iterator(); it.hasNext(); ) {
+                         semIm.getSemPm().getGraph().getParents(node)
+                                 .iterator(); it.hasNext(); ) {
                         Node nextParent = (Node) it.next();
                         if (nextParent.getNodeType() == NodeType.ERROR) {
                             semIm.setParamValue(nextParent, nextParent,

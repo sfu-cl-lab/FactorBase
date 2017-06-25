@@ -61,6 +61,73 @@ public final class TestSemXml extends TestCase {
         System.out.println(semIm2);
     }
 
+    /**
+     * Tests to make sure that a particular file produced by the renderer on 6/26/04 remains parsable. VERY IMPORTANT
+     * THIS DOES NOT BREAK!!!
+     */
+//    public void testLoadFromFile() {
+//        try {
+//            Builder builder = new Builder();
+//            Document document =
+//                    builder.build(new File("sample_data/parsableSemNet.xml"));
+//            printDocument(document);
+//
+//            SemXmlParser parser = new SemXmlParser();
+//            SemIm bayesIm = parser.getSemIm(document.getRootElement());
+//            System.out.println(bayesIm);
+//        }
+//        catch (ParsingException e) {
+//            e.printStackTrace();
+//            fail("The file referred to cannot be parsed as a SEM IM." +
+//                    " The file referred to MUST LOAD!! PLEASE FIX IMMEDIATELY!!!" +
+//                    " (Ask Joe Ramsey jdramsey@andrew.cmu.edu for details.");
+//        }
+//        catch (IOException e) {
+//            e.printStackTrace();
+//            fail("The file referred to cannot be opened (or doesn't exist). " +
+//                    "Maybe the working directory is not set correctly.");
+//        }
+//    }
+    private static SemIm sampleSemIm1() {
+        Graph graph = GraphUtils.randomDag(5, 5, true);
+        SemPm pm = new SemPm(graph);
+        SemIm im = new SemIm(pm);
+        return im;
+    }
+
+    /**
+     * Prints an arbitrary XML element to System.out.
+     *
+     * @param element the element to print.
+     */
+    private static void printElement(Element element) {
+        printDocument(new Document(element));
+    }
+
+    private static void printDocument(Document document) {
+        Serializer serializer = new Serializer(System.out);
+
+        serializer.setLineSeparator("\n");
+        serializer.setIndent(2);
+
+        try {
+            serializer.write(document);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    /**
+     * This method uses reflection to collect up all of the test methods from this class and return them to the test
+     * runner.
+     */
+    public static Test suite() {
+
+        // Edit the name of the class in the parens to match the name
+        // of this class.
+        return new TestSuite(TestSemXml.class);
+    }
+
     public void testRoundtrip2() {
         SemIm semIm = sampleSemIm1();
         Element element = SemXmlRenderer.getElement(semIm);
@@ -89,75 +156,6 @@ public final class TestSemXml extends TestCase {
 
         System.out.println(semIm2.getSemPm().getGraph());
         System.out.println(semIm2);
-    }
-
-    /**
-     * Tests to make sure that a particular file produced by the renderer on 6/26/04 remains parsable. VERY IMPORTANT
-     * THIS DOES NOT BREAK!!!
-     */
-//    public void testLoadFromFile() {
-//        try {
-//            Builder builder = new Builder();
-//            Document document =
-//                    builder.build(new File("sample_data/parsableSemNet.xml"));
-//            printDocument(document);
-//
-//            SemXmlParser parser = new SemXmlParser();
-//            SemIm bayesIm = parser.getSemIm(document.getRootElement());
-//            System.out.println(bayesIm);
-//        }
-//        catch (ParsingException e) {
-//            e.printStackTrace();
-//            fail("The file referred to cannot be parsed as a SEM IM." +
-//                    " The file referred to MUST LOAD!! PLEASE FIX IMMEDIATELY!!!" +
-//                    " (Ask Joe Ramsey jdramsey@andrew.cmu.edu for details.");
-//        }
-//        catch (IOException e) {
-//            e.printStackTrace();
-//            fail("The file referred to cannot be opened (or doesn't exist). " +
-//                    "Maybe the working directory is not set correctly.");
-//        }
-//    }
-
-    private static SemIm sampleSemIm1() {
-        Graph graph = GraphUtils.randomDag(5, 5, true);
-        SemPm pm = new SemPm(graph);
-        SemIm im = new SemIm(pm);
-        return im;
-    }
-
-    /**
-     * Prints an arbitrary XML element to System.out.
-     *
-     * @param element the element to print.
-     */
-    private static void printElement(Element element) {
-        printDocument(new Document(element));
-    }
-
-    private static void printDocument(Document document) {
-        Serializer serializer = new Serializer(System.out);
-
-        serializer.setLineSeparator("\n");
-        serializer.setIndent(2);
-
-        try {
-            serializer.write(document);
-        }
-        catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    /**
-     * This method uses reflection to collect up all of the test methods from this class and return them to the test
-     * runner.
-     */
-    public static Test suite() {
-
-        // Edit the name of the class in the parens to match the name
-        // of this class.
-        return new TestSuite(TestSemXml.class);
     }
 }
 

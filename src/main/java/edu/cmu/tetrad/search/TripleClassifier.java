@@ -36,8 +36,8 @@ public interface TripleClassifier {
 
     Graph getGraph();
 
-    List<String> getTriplesClassificationTypes();
+    List <String> getTriplesClassificationTypes();
 
-    List<List<Triple>> getTriplesLists(Node node);
+    List <List <Triple>> getTriplesLists(Node node);
 }
 

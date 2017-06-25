@@ -60,11 +60,46 @@ public final class TestCovarianceMatrix extends TestCase {
         super(name);
     }
 
+    public static void testPositiveDefinite() {
+        String[] varNames = new String[]{"X1", "X2", "X3"};
+        double[][] mUpper = new double[][]{{1.0}, {.3, 1.0}, {0.8, -.2, 1.0}};
+
+        DoubleMatrix2D m =
+                new DenseDoubleMatrix2D(mUpper.length, mUpper.length);
+
+        for (int i = 0; i < mUpper.length; i++) {
+            for (int j = 0; j < mUpper.length; j++) {
+                if (j <= i) {
+                    m.set(i, j, mUpper[i][j]);
+                } else {
+                    m.set(i, j, mUpper[j][i]);
+                }
+            }
+        }
+
+        new CovarianceMatrix(DataUtils.createContinuousVariables(varNames), m, 30);
+    }
+
+    public static void testEditing() {
+
+    }
+
+    /**
+     * This method uses reflection to collect up all of the test methods from
+     * this class and return them to the test runner.
+     */
+    public static Test suite() {
+
+        // Edit the name of the class in the parens to match the name
+        // of this class.
+        return new TestSuite(TestCovarianceMatrix.class);
+    }
+
     /**
      * Tests construction.
      */
     public void testConstruction() {
-        List<Node> variables = new LinkedList<Node>();
+        List <Node> variables = new LinkedList <Node>();
 
         for (int i = 0; i < 5; i++) {
             ContinuousVariable var = new ContinuousVariable("X" + i);
@@ -90,42 +125,6 @@ public final class TestCovarianceMatrix extends TestCase {
         ICovarianceMatrix cov3 = new CovarianceMatrixOnTheFly(dataSet, true);
 
         System.out.println("cov3 = " + cov3);
-    }
-
-    public static void testPositiveDefinite() {
-        String[] varNames = new String[]{"X1", "X2", "X3"};
-        double[][] mUpper = new double[][]{{1.0}, {.3, 1.0}, {0.8, -.2, 1.0}};
-
-        DoubleMatrix2D m =
-                new DenseDoubleMatrix2D(mUpper.length, mUpper.length);
-
-        for (int i = 0; i < mUpper.length; i++) {
-            for (int j = 0; j < mUpper.length; j++) {
-                if (j <= i) {
-                    m.set(i, j, mUpper[i][j]);
-                }
-                else {
-                    m.set(i, j, mUpper[j][i]);
-                }
-            }
-        }
-
-        new CovarianceMatrix(DataUtils.createContinuousVariables(varNames), m, 30);
-    }
-
-    public static void testEditing() {
-
-    }
-
-    /**
-     * This method uses reflection to collect up all of the test methods from
-     * this class and return them to the test runner.
-     */
-    public static Test suite() {
-
-        // Edit the name of the class in the parens to match the name
-        // of this class.
-        return new TestSuite(TestCovarianceMatrix.class);
     }
 }
 

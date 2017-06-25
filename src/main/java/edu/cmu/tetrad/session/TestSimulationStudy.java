@@ -46,6 +46,17 @@ public class TestSimulationStudy extends TestCase {
         super(name);
     }
 
+    /**
+     * This method uses reflection to collect up all of the test methods from
+     * this class and return them to the test runner.
+     */
+    public static Test suite() {
+
+        // Edit the name of the class in the parens to match the name
+        // of this class.
+        return new TestSuite(TestSimulationStudy.class);
+    }
+
     public void testPlaceholder() {
         // This test is here so that there will be at least one test in this
         // class until the testExecutionPath method is fixed.
@@ -105,7 +116,7 @@ public class TestSimulationStudy extends TestCase {
 
         session.addSessionListener(new SessionAdapter() {
             @Override
-			public void modelCreated(SessionEvent e) {
+            public void modelCreated(SessionEvent e) {
                 SessionNode node = e.getNode();
                 incrementCreationCount(node);
             }
@@ -137,17 +148,6 @@ public class TestSimulationStudy extends TestCase {
     public void initCreations(List nodes) {
         this.nodes = new ArrayList(nodes);
         this.creations = new int[nodes.size()];
-    }
-
-    /**
-     * This method uses reflection to collect up all of the test methods from
-     * this class and return them to the test runner.
-     */
-    public static Test suite() {
-
-        // Edit the name of the class in the parens to match the name
-        // of this class.
-        return new TestSuite(TestSimulationStudy.class);
     }
 }
 

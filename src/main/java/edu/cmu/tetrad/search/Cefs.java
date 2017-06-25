@@ -28,7 +28,6 @@ import edu.cmu.tetrad.util.NumberFormatUtil;
 import edu.cmu.tetrad.util.TetradLogger;
 
 import java.text.NumberFormat;
-import java.util.*;
 
 /**
  * Searches for a pattern representing all of the Markov blankets for a given target T consistent with the given
@@ -47,7 +46,7 @@ public final class Cefs {
     /**
      * The list of variables being searched over. Must contain the target.
      */
-    private List<Node> variables;
+    private List <Node> variables;
 
     /**
      * The target variable.
@@ -84,7 +83,7 @@ public final class Cefs {
     /**
      * The set of nodes that edges should not be drawn to in the addDepthZeroAssociates method.
      */
-    private Set<Node> visited;
+    private Set <Node> visited;
 
     /**
      * Elapsed time for the last run of the algorithm.
@@ -105,22 +104,22 @@ public final class Cefs {
     /**
      * The list of all unshielded triples.
      */
-    private Set<Triple> allTriples;
+    private Set <Triple> allTriples;
 
     /**
      * Set of unshielded colliders from the triple orientation step.
      */
-    private Set<Triple> colliderTriples;
+    private Set <Triple> colliderTriples;
 
     /**
      * Set of unshielded noncolliders from the triple orientation step.
      */
-    private Set<Triple> noncolliderTriples;
+    private Set <Triple> noncolliderTriples;
 
     /**
      * Set of ambiguous unshielded triples.
      */
-    private Set<Triple> ambiguousTriples;
+    private Set <Triple> ambiguousTriples;
 
     /**
      * The most recently returned graph.
@@ -168,6 +167,25 @@ public final class Cefs {
 
     //===============================PUBLIC METHODS=======================//
 
+    private static List <Node> asList(int[] indices, List <Node> nodes) {
+        List <Node> list = new LinkedList <Node>();
+
+        for (int i : indices) {
+            list.add(nodes.get(i));
+        }
+
+        return list;
+    }
+
+    private static boolean isArrowpointAllowed1(Node from, Node to,
+                                                Knowledge knowledge) {
+        if (knowledge == null) {
+            return true;
+        }
+
+        return !knowledge.edgeRequired(to.toString(), from.toString()) &&
+                !knowledge.edgeForbidden(from.toString(), to.toString());
+    }
 
     public boolean isAggressivelyPreventCycles() {
         return aggressivelyPreventCycles;
@@ -177,7 +195,6 @@ public final class Cefs {
         this.aggressivelyPreventCycles = aggressivelyPreventCycles;
     }
 
-
     /**
      * Searches for the MB Pattern for the given target.
      *
@@ -186,10 +203,10 @@ public final class Cefs {
     public Graph search(String targetName) {
         long start = System.currentTimeMillis();
         this.numIndependenceTests = 0;
-        this.allTriples = new HashSet<Triple>();
-        this.ambiguousTriples = new HashSet<Triple>();
-        this.colliderTriples = new HashSet<Triple>();
-        this.noncolliderTriples = new HashSet<Triple>();
+        this.allTriples = new HashSet <Triple>();
+        this.ambiguousTriples = new HashSet <Triple>();
+        this.colliderTriples = new HashSet <Triple>();
+        this.noncolliderTriples = new HashSet <Triple>();
 
         if (targetName == null) {
             throw new IllegalArgumentException(
@@ -216,7 +233,7 @@ public final class Cefs {
         // remove it by conditioning on nodes adjacent to v2. Once an edge
         // is removed, it should not be re-added to the graph.
         // jdramsey 8/6/04
-        this.visited = new HashSet<Node>();
+        this.visited = new HashSet <Node>();
 
         // Step 1. Get associates for the target.
         TetradLogger.getInstance().log("info", "BEGINNING step 1 (prune target).");
@@ -260,7 +277,7 @@ public final class Cefs {
 
         SearchGraphUtils.pcOrientbk(knowledge, graph, graph.getNodes());
 
-        List<Node> _visited = new LinkedList<Node>(getVisited());
+        List <Node> _visited = new LinkedList <Node>(getVisited());
         orientUnshieldedTriples(knowledge, graph, getTest(), getDepth(), _visited);
 
         MeekRules meekRules = new MeekRules();
@@ -306,21 +323,21 @@ public final class Cefs {
     /**
      * Returns the set of triples identified as ambiguous by the CPC algorithm during the most recent search.
      */
-    public Set<Triple> getAmbiguousTriples() {
-        return new HashSet<Triple>(ambiguousTriples);
+    public Set <Triple> getAmbiguousTriples() {
+        return new HashSet <Triple>(ambiguousTriples);
     }
 
     /**
      * Returns the set of triples identified as colliders by the CPC algorithm during the most recent search.
      */
-    public Set<Triple> getColliderTriples() {
+    public Set <Triple> getColliderTriples() {
         return colliderTriples;
     }
 
     /**
      * Returns the set of triples identified as noncolliders by the CPC algorithm during the most recent search.
      */
-    public Set<Triple> getNoncolliderTriples() {
+    public Set <Triple> getNoncolliderTriples() {
         return noncolliderTriples;
     }
 
@@ -376,9 +393,9 @@ public final class Cefs {
     /**
      * Returns just the Markov blanket (not the Markov blanket DAG).
      */
-    public List<Node> findMb(String targetName) {
+    public List <Node> findMb(String targetName) {
         Graph graph = search(targetName);
-        List<Node> nodes = graph.getNodes();
+        List <Node> nodes = graph.getNodes();
         nodes.remove(target);
         return nodes;
     }
@@ -397,6 +414,8 @@ public final class Cefs {
         return knowledge;
     }
 
+    //================================PRIVATE METHODS====================//
+
     /**
      * Sets knowledge, to which the algorithm is in fact sensitive.
      */
@@ -408,9 +427,7 @@ public final class Cefs {
         return graph;
     }
 
-    //================================PRIVATE METHODS====================//
-
-    private Set<Node> getVisited() {
+    private Set <Node> getVisited() {
         return visited;
     }
 
@@ -435,7 +452,7 @@ public final class Cefs {
                 continue;
             }
 
-            if (!independent(v, w, new LinkedList<Node>()) && !edgeForbidden(v, w)) {
+            if (!independent(v, w, new LinkedList <Node>()) && !edgeForbidden(v, w)) {
                 addEdge(graph, w, v);
                 numAssociated++;
             }
@@ -465,12 +482,12 @@ public final class Cefs {
 
         // Otherwise, try removing all other edges adjacent node node. Return
         // true if more edges could be removed at the next depth.
-        List<Node> a = new LinkedList<Node>(graph.getAdjacentNodes(node));
+        List <Node> a = new LinkedList <Node>(graph.getAdjacentNodes(node));
 
         NEXT_EDGE:
         for (Node y : a) {
-            List<Node> adjNode =
-                    new LinkedList<Node>(graph.getAdjacentNodes(node));
+            List <Node> adjNode =
+                    new LinkedList <Node>(graph.getAdjacentNodes(node));
             adjNode.remove(y);
             adjNode = possibleParents(node, adjNode);
 
@@ -482,7 +499,7 @@ public final class Cefs {
             int[] choice;
 
             while ((choice = cg.next()) != null) {
-                List<Node> condSet = GraphUtils.asList(choice, adjNode);
+                List <Node> condSet = GraphUtils.asList(choice, adjNode);
 
                 if (independent(node, y, condSet) && !edgeRequired(node, y)) {
                     graph.removeEdge(node, y);
@@ -514,7 +531,7 @@ public final class Cefs {
         this.resultGraph = graph;
     }
 
-    private boolean independent(Node v, Node w, List<Node> z) {
+    private boolean independent(Node v, Node w, List <Node> z) {
         boolean independent = getTest().isIndependent(v, w, z);
 
         if (independent) {
@@ -578,19 +595,19 @@ public final class Cefs {
     }
 
     private void orientUnshieldedTriples(Knowledge knowledge, Graph graph,
-                                         IndependenceTest test, int depth, List<Node> nodes) {
+                                         IndependenceTest test, int depth, List <Node> nodes) {
         TetradLogger.getInstance().log("info", "Starting Collider Orientation:");
 
-        colliderTriples = new HashSet<Triple>();
-        noncolliderTriples = new HashSet<Triple>();
-        ambiguousTriples = new HashSet<Triple>();
+        colliderTriples = new HashSet <Triple>();
+        noncolliderTriples = new HashSet <Triple>();
+        ambiguousTriples = new HashSet <Triple>();
 
         if (nodes == null) {
             nodes = graph.getNodes();
         }
 
         for (Node y : nodes) {
-            List<Node> adjacentNodes = graph.getAdjacentNodes(y);
+            List <Node> adjacentNodes = graph.getAdjacentNodes(y);
 
             if (adjacentNodes.size() < 2) {
                 continue;
@@ -639,10 +656,10 @@ public final class Cefs {
         boolean existsSepsetContainingY = false;
         boolean existsSepsetNotContainingY = false;
 
-        Set<Node> __nodes = new HashSet<Node>(graph.getAdjacentNodes(x));
+        Set <Node> __nodes = new HashSet <Node>(graph.getAdjacentNodes(x));
         __nodes.remove(z);
 
-        List<Node> _nodes = new LinkedList<Node>(__nodes);
+        List <Node> _nodes = new LinkedList <Node>(__nodes);
 //        TetradLogger.getInstance().log("details", "Adjacents for " + x + "--" + y + "--" + z + " = " + _nodes);
 
         int _depth = depth;
@@ -656,7 +673,7 @@ public final class Cefs {
             int[] choice;
 
             while ((choice = cg.next()) != null) {
-                List<Node> condSet = asList(choice, _nodes);
+                List <Node> condSet = asList(choice, _nodes);
 
                 if (test.isIndependent(x, z, condSet)) {
                     if (condSet.contains(y)) {
@@ -668,10 +685,10 @@ public final class Cefs {
             }
         }
 
-        __nodes = new HashSet<Node>(graph.getAdjacentNodes(z));
+        __nodes = new HashSet <Node>(graph.getAdjacentNodes(z));
         __nodes.remove(x);
 
-        _nodes = new LinkedList<Node>(__nodes);
+        _nodes = new LinkedList <Node>(__nodes);
 //        TetradLogger.getInstance().log("details", "Adjacents for " + x + "--" + y + "--" + z + " = " + _nodes);
 
         _depth = depth;
@@ -685,7 +702,7 @@ public final class Cefs {
             int[] choice;
 
             while ((choice = cg.next()) != null) {
-                List<Node> condSet = asList(choice, _nodes);
+                List <Node> condSet = asList(choice, _nodes);
 
                 if (test.isIndependent(x, z, condSet)) {
                     if (condSet.contains(y)) {
@@ -719,8 +736,8 @@ public final class Cefs {
     /**
      * Removes from adjx any that cannot be parents of x given the background knowledge.
      */
-    private List<Node> possibleParents(Node node, List<Node> adjNode) {
-        List<Node> possibleParents = new LinkedList<Node>();
+    private List <Node> possibleParents(Node node, List <Node> adjNode) {
+        List <Node> possibleParents = new LinkedList <Node>();
         String _x = node.getName();
 
         for (Node z : adjNode) {
@@ -742,29 +759,9 @@ public final class Cefs {
         return !knowledge.edgeForbidden(z, x) && !knowledge.edgeRequired(x, z);
     }
 
-    private static List<Node> asList(int[] indices, List<Node> nodes) {
-        List<Node> list = new LinkedList<Node>();
-
-        for (int i : indices) {
-            list.add(nodes.get(i));
-        }
-
-        return list;
-    }
-
     private boolean colliderAllowed(Node x, Node y, Node z, Knowledge knowledge) {
         return isArrowpointAllowed1(x, y, knowledge) &&
                 isArrowpointAllowed1(z, y, knowledge);
-    }
-
-    private static boolean isArrowpointAllowed1(Node from, Node to,
-                                                Knowledge knowledge) {
-        if (knowledge == null) {
-            return true;
-        }
-
-        return !knowledge.edgeRequired(to.toString(), from.toString()) &&
-                !knowledge.edgeForbidden(from.toString(), to.toString());
     }
 
     //==============================CLASSES==============================//

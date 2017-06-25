@@ -45,10 +45,10 @@ public class FactorAnalysis {
     public ICovarianceMatrix covarianceMatrix;
     public CorrelationMatrix correlationMatrix;
 
-// method-specific fields that get used
-    public Vector<Double> dValues;
-    public Vector<DoubleMatrix2D> factorLoadingVectors;
-    public Vector<DoubleMatrix2D> residualMatrices;
+    // method-specific fields that get used
+    public Vector <Double> dValues;
+    public Vector <DoubleMatrix2D> factorLoadingVectors;
+    public Vector <DoubleMatrix2D> residualMatrices;
 
 
     public FactorAnalysis(ICovarianceMatrix covarianceMatrix) {
@@ -87,12 +87,17 @@ public class FactorAnalysis {
      * for more variance than the original, which is strange.
      */
 
-    public void unity(CorrelationMatrix r) {
-        DoubleMatrix2D residual = r.getMatrix();
-
-        for (int i = 0; i < residual.columns(); i++) {
-            residual.set(i, i, 1);
+    public static DenseDoubleMatrix2D diag(DoubleMatrix2D matrix) {
+        //System.out.println(matrix);
+        DenseDoubleMatrix2D diagonal = new DenseDoubleMatrix2D(matrix.columns(), matrix.columns());
+        for (int i = 0; i < matrix.columns(); i++) {
+            for (int j = 0; j < matrix.columns(); j++) {
+                if (i == j) diagonal.set(j, i, matrix.get(i, i));
+                else diagonal.set(j, i, 0);
+            }
         }
+        //System.out.println(diagonal);
+        return diagonal;
     }
 
     /*
@@ -104,18 +109,8 @@ public class FactorAnalysis {
      * Tends to produce smaller numbers of factors than the unity method.
      */
 
-    public void largestNonDiagonalMagnitude(CorrelationMatrix r) {
-        DoubleMatrix2D residual = r.getMatrix();
-
-        for (int i = 0; i < residual.columns(); i++) {
-            double max = 0;
-            for (int j = 0; j < residual.columns(); j++) {
-                if (i == j) continue;
-                double temp = Math.abs(residual.get(j, i));
-                if (temp > max) max = temp;
-            }
-            residual.set(i, i, max);
-        }
+    public static DenseDoubleMatrix2D diag(DataSet dataSet) {
+        return diag(dataSet.getDoubleData());
     }
 
     //================= FACTORING METHODS =================//
@@ -267,45 +262,8 @@ public class FactorAnalysis {
      *
      */
 
-    public DenseDoubleMatrix2D successiveResidual() {
-        this.factorLoadingVectors = new Vector<DoubleMatrix2D>();
-        this.residualMatrices = new Vector<DoubleMatrix2D>();
-        this.dValues = new Vector<Double>();
-
-        this.residualMatrices.add(correlationMatrix.getMatrix());
-
-        DenseDoubleMatrix2D unitVector = new DenseDoubleMatrix2D(correlationMatrix.getMatrix().rows(), 1);
-        for (int i = 0; i < unitVector.rows(); i++) {
-            unitVector.set(i, 0, 1);
-        }
-
-        //find the first factor loading vector
-        successiveResidualHelper(residualMatrices.lastElement(), unitVector);
-
-        int failSafe = 0;
-
-        while (vectorSum(dValues) / trace(correlationMatrix.getMatrix()) < .99) {
-            //calculate new residual matrix
-            DoubleMatrix2D residual = matrixSubtract(residualMatrices.lastElement(),
-                    matrixMult(factorLoadingVectors.lastElement(),
-                            transpose(factorLoadingVectors.lastElement())));
-            residualMatrices.add(residual);
-            if (!successiveResidualHelper(residualMatrices.lastElement(), unitVector)) break;
-
-            failSafe++;
-            if (failSafe > 500) break;
-        }
-
-        DenseDoubleMatrix2D result = new DenseDoubleMatrix2D(correlationMatrix.getMatrix().rows(),
-                factorLoadingVectors.size());
-
-        for (int i = 0; i < result.rows(); i++) {
-            for (int j = 0; j < result.columns(); j++) {
-                result.set(i, j, factorLoadingVectors.get(j).get(i, 0));
-            }
-        }
-
-        return result;
+    public static DenseDoubleMatrix2D diag(ICovarianceMatrix covMatrix) {
+        return diag(covMatrix.getMatrix());
     }
 
     /*
@@ -345,41 +303,8 @@ public class FactorAnalysis {
      *
      */
 
-    public boolean successiveResidualHelper(DoubleMatrix2D residual, DoubleMatrix2D approximationVector) {
-        DoubleMatrix2D uVector = matrixMult(residual, approximationVector);
-        DoubleMatrix2D lVector = matrixMult(transpose(approximationVector), uVector);
-        double dScalar = Math.sqrt(lVector.get(0, 0));
-        DenseDoubleMatrix2D aVector = matrixDiv(dScalar, uVector);
-
-        Vector factorLoadings = new Vector();
-        Vector uVectors = new Vector();
-        Vector dScalars = new Vector();
-
-        factorLoadings.add(aVector);
-        uVectors.add(uVector);
-        dScalars.add(dScalar);
-
-        for (int i = 0; i < 100; i++) {
-            DoubleMatrix2D oldFactorLoading = (DenseDoubleMatrix2D) factorLoadings.lastElement();
-            DoubleMatrix2D newUVector = matrixMult(residual, (DenseDoubleMatrix2D) factorLoadings.lastElement());
-            uVectors.add(newUVector);
-            DoubleMatrix2D newLScalar = matrixMult(transpose(oldFactorLoading), newUVector);
-            double newDScalar = Math.sqrt(newLScalar.get(0, 0));
-
-            dScalars.add(newDScalar);
-            DenseDoubleMatrix2D newFactorLoading = matrixDiv(newDScalar, newUVector);
-            factorLoadings.add(newFactorLoading);
-
-            if (Math.abs((newDScalar / (Double) dScalars.get(dScalars.size() - 2)) - 1) < .00001) {
-                break;
-            }
-        }
-
-        if ((Double) dScalars.lastElement() < 1) return false;
-
-        this.dValues.add((Double) dScalars.lastElement());
-        this.factorLoadingVectors.add((DenseDoubleMatrix2D) factorLoadings.lastElement());
-        return true;
+    public static DenseDoubleMatrix2D diag(CorrelationMatrix corMatrix) {
+        return diag(corMatrix.getMatrix());
     }
 
     //================= MATRIX FUNCTIONS =================//
@@ -388,35 +313,6 @@ public class FactorAnalysis {
      * Returns a vector that runs along the diagonal of the supplied 2D matrix.
      * If the matrix is not a square matrix, then it compiles what WOULD be the
      * diagonal if it were, starting from the upper-left corner.
-     */
-
-    public static DenseDoubleMatrix2D diag(DoubleMatrix2D matrix) {
-        //System.out.println(matrix);
-        DenseDoubleMatrix2D diagonal = new DenseDoubleMatrix2D(matrix.columns(), matrix.columns());
-        for (int i = 0; i < matrix.columns(); i++) {
-            for (int j = 0; j < matrix.columns(); j++) {
-                if (i == j) diagonal.set(j, i, matrix.get(i, i));
-                else diagonal.set(j, i, 0);
-            }
-        }
-        //System.out.println(diagonal);
-        return diagonal;
-    }
-
-    public static DenseDoubleMatrix2D diag(DataSet dataSet) {
-        return diag(dataSet.getDoubleData());
-    }
-
-    public static DenseDoubleMatrix2D diag(ICovarianceMatrix covMatrix) {
-        return diag(covMatrix.getMatrix());
-    }
-
-    public static DenseDoubleMatrix2D diag(CorrelationMatrix corMatrix) {
-        return diag(corMatrix.getMatrix());
-    }
-
-    /*
-     * Subtracts b from a.
      */
 
     public static DoubleMatrix2D matrixSubtract(DoubleMatrix2D a, DoubleMatrix2D b) {
@@ -430,10 +326,6 @@ public class FactorAnalysis {
         }
         return result;
     }
-
-    /*
-     * Calculates (a * b)
-     */
 
     public static DoubleMatrix2D matrixMult(DoubleMatrix2D a, DoubleMatrix2D b) {
         if (a.columns() != b.rows()) return null;
@@ -482,6 +374,10 @@ public class FactorAnalysis {
         return result;
     }
 
+    /*
+     * Subtracts b from a.
+     */
+
     public static DenseDoubleMatrix2D matrixDiv(double scalar, DoubleMatrix2D a) {
         DenseDoubleMatrix2D result = new DenseDoubleMatrix2D(a.rows(), a.columns());
         //System.out.println("About to divide " + a + " by " + scalar);
@@ -496,6 +392,10 @@ public class FactorAnalysis {
 
         return result;
     }
+
+    /*
+     * Calculates (a * b)
+     */
 
     public static DoubleMatrix2D transpose(DoubleMatrix2D a) {
         //System.out.println("About to transpose:");
@@ -522,17 +422,14 @@ public class FactorAnalysis {
         return result;
     }
 
-    public static double vectorSum(Vector<Double> vector) {
+    public static double vectorSum(Vector <Double> vector) {
         double sum = 0;
         for (int i = 0; i < vector.size(); i++) sum += vector.get(i);
         return sum;
     }
 
-    //designed for normalizing a vector.
-    //as usual, vectors are treated as matrices to simplify operations elsewhere
-
     public static DoubleMatrix2D normalizeRows(DoubleMatrix2D matrix) {
-        Vector<DoubleMatrix2D> normalizedRows = new Vector<DoubleMatrix2D>();
+        Vector <DoubleMatrix2D> normalizedRows = new Vector <DoubleMatrix2D>();
         for (int i = 0; i < matrix.rows(); i++) {
             DoubleMatrix1D vector = matrix.viewRow(i);
             DenseDoubleMatrix2D colVector = new DenseDoubleMatrix2D(matrix.columns(), 1);
@@ -553,8 +450,6 @@ public class FactorAnalysis {
         return result;
     }
 
-    //works on column vectors
-
     public static DoubleMatrix2D normalizeVector(DoubleMatrix2D vector) {
         double scalar = Math.sqrt(matrixMult(transpose(vector), vector).get(0, 0));
         return matrixDiv(scalar, vector);
@@ -574,9 +469,9 @@ public class FactorAnalysis {
         if (factorLoadingMatrix.columns() == 1)
             return factorLoadingMatrix;
 
-        Vector<DoubleMatrix2D> residuals = new Vector<DoubleMatrix2D>();
-        Vector<DoubleMatrix2D> rotatedFactorVectors = new Vector<DoubleMatrix2D>();
-        Vector<DoubleMatrix2D> vVectors = new Vector<DoubleMatrix2D>();
+        Vector <DoubleMatrix2D> residuals = new Vector <DoubleMatrix2D>();
+        Vector <DoubleMatrix2D> rotatedFactorVectors = new Vector <DoubleMatrix2D>();
+        Vector <DoubleMatrix2D> vVectors = new Vector <DoubleMatrix2D>();
 
         DoubleMatrix2D normalizedFactorLoadings = normalizeRows(factorLoadingMatrix);
         residuals.add(normalizedFactorLoadings);
@@ -620,9 +515,9 @@ public class FactorAnalysis {
                 }
             }
 
-            Vector<DoubleMatrix2D> hVectors = new Vector<DoubleMatrix2D>();
-            Vector<DoubleMatrix2D> bVectors = new Vector<DoubleMatrix2D>();
-            Vector<Double> alphas = new Vector<Double>();
+            Vector <DoubleMatrix2D> hVectors = new Vector <DoubleMatrix2D>();
+            Vector <DoubleMatrix2D> bVectors = new Vector <DoubleMatrix2D>();
+            Vector <Double> alphas = new Vector <Double>();
 
             hVectors.add(new DenseDoubleMatrix2D(residuals.lastElement().columns(), 1));
             DoubleMatrix1D rowFromFactorLoading = residuals.lastElement().viewRow(lIndex);
@@ -677,6 +572,111 @@ public class FactorAnalysis {
         }
 
         return result;
+    }
+
+    //designed for normalizing a vector.
+    //as usual, vectors are treated as matrices to simplify operations elsewhere
+
+    public void unity(CorrelationMatrix r) {
+        DoubleMatrix2D residual = r.getMatrix();
+
+        for (int i = 0; i < residual.columns(); i++) {
+            residual.set(i, i, 1);
+        }
+    }
+
+    //works on column vectors
+
+    public void largestNonDiagonalMagnitude(CorrelationMatrix r) {
+        DoubleMatrix2D residual = r.getMatrix();
+
+        for (int i = 0; i < residual.columns(); i++) {
+            double max = 0;
+            for (int j = 0; j < residual.columns(); j++) {
+                if (i == j) continue;
+                double temp = Math.abs(residual.get(j, i));
+                if (temp > max) max = temp;
+            }
+            residual.set(i, i, max);
+        }
+    }
+
+    public DenseDoubleMatrix2D successiveResidual() {
+        this.factorLoadingVectors = new Vector <DoubleMatrix2D>();
+        this.residualMatrices = new Vector <DoubleMatrix2D>();
+        this.dValues = new Vector <Double>();
+
+        this.residualMatrices.add(correlationMatrix.getMatrix());
+
+        DenseDoubleMatrix2D unitVector = new DenseDoubleMatrix2D(correlationMatrix.getMatrix().rows(), 1);
+        for (int i = 0; i < unitVector.rows(); i++) {
+            unitVector.set(i, 0, 1);
+        }
+
+        //find the first factor loading vector
+        successiveResidualHelper(residualMatrices.lastElement(), unitVector);
+
+        int failSafe = 0;
+
+        while (vectorSum(dValues) / trace(correlationMatrix.getMatrix()) < .99) {
+            //calculate new residual matrix
+            DoubleMatrix2D residual = matrixSubtract(residualMatrices.lastElement(),
+                    matrixMult(factorLoadingVectors.lastElement(),
+                            transpose(factorLoadingVectors.lastElement())));
+            residualMatrices.add(residual);
+            if (!successiveResidualHelper(residualMatrices.lastElement(), unitVector)) break;
+
+            failSafe++;
+            if (failSafe > 500) break;
+        }
+
+        DenseDoubleMatrix2D result = new DenseDoubleMatrix2D(correlationMatrix.getMatrix().rows(),
+                factorLoadingVectors.size());
+
+        for (int i = 0; i < result.rows(); i++) {
+            for (int j = 0; j < result.columns(); j++) {
+                result.set(i, j, factorLoadingVectors.get(j).get(i, 0));
+            }
+        }
+
+        return result;
+    }
+
+    public boolean successiveResidualHelper(DoubleMatrix2D residual, DoubleMatrix2D approximationVector) {
+        DoubleMatrix2D uVector = matrixMult(residual, approximationVector);
+        DoubleMatrix2D lVector = matrixMult(transpose(approximationVector), uVector);
+        double dScalar = Math.sqrt(lVector.get(0, 0));
+        DenseDoubleMatrix2D aVector = matrixDiv(dScalar, uVector);
+
+        Vector factorLoadings = new Vector();
+        Vector uVectors = new Vector();
+        Vector dScalars = new Vector();
+
+        factorLoadings.add(aVector);
+        uVectors.add(uVector);
+        dScalars.add(dScalar);
+
+        for (int i = 0; i < 100; i++) {
+            DoubleMatrix2D oldFactorLoading = (DenseDoubleMatrix2D) factorLoadings.lastElement();
+            DoubleMatrix2D newUVector = matrixMult(residual, (DenseDoubleMatrix2D) factorLoadings.lastElement());
+            uVectors.add(newUVector);
+            DoubleMatrix2D newLScalar = matrixMult(transpose(oldFactorLoading), newUVector);
+            double newDScalar = Math.sqrt(newLScalar.get(0, 0));
+
+            dScalars.add(newDScalar);
+            DenseDoubleMatrix2D newFactorLoading = matrixDiv(newDScalar, newUVector);
+            factorLoadings.add(newFactorLoading);
+
+            if (Math.abs((newDScalar / (Double) dScalars.get(dScalars.size() - 2)) - 1) < .00001) {
+                break;
+            }
+        }
+
+        if ((Double) dScalars.lastElement() < 1) return false;
+
+        this.dValues.add((Double) dScalars.lastElement());
+        this.factorLoadingVectors.add((DenseDoubleMatrix2D) factorLoadings.lastElement());
+        return true;
     }
 }
 

@@ -67,7 +67,7 @@ public class SemOptimizerNrPowell implements SemOptimizer {
      * from Numerical Recipes by adjusting the parameters of the Sem.
      */
     @Override
-	public void optimize(SemIm semIm) {
+    public void optimize(SemIm semIm) {
         new SemOptimizerEm().optimize(semIm);
         SemOptimizerNrPowell.FittingFunction fcn = new SemOptimizerNrPowell.SemFittingFunction(semIm);
         int n = fcn.getNumParameters();
@@ -94,7 +94,7 @@ public class SemOptimizerNrPowell implements SemOptimizer {
      * @param fcn  The fitting function to be minimized.
      */
     private void powell(double[] p, double[][] xi, int n, double ftol,
-            int[] iter, double[] fret, SemOptimizerNrPowell.FittingFunction fcn) {
+                        int[] iter, double[] fret, SemOptimizerNrPowell.FittingFunction fcn) {
 
         double TINY = 1.0E-25;
         int ITMAX = 200;
@@ -171,7 +171,7 @@ public class SemOptimizerNrPowell implements SemOptimizer {
      * See <i>Numerical Recipes in C</i> for an explanation of this method.
      */
     private void linmin(double[] p, double xi[], int n, double[] fret,
-            SemOptimizerNrPowell.FittingFunction fcn) {
+                        SemOptimizerNrPowell.FittingFunction fcn) {
 
         int j;
         double xx, xmin, bx, ax;
@@ -225,7 +225,7 @@ public class SemOptimizerNrPowell implements SemOptimizer {
      * See <i>Numerical Recipes in C</i> for an explanation of this method.
      */
     private double f1dim(double x, int ncom, double pcom[], double xicom[],
-            SemOptimizerNrPowell.FittingFunction fcn) {
+                         SemOptimizerNrPowell.FittingFunction fcn) {
         double[] xt = new double[ncom];
         for (int j = 0; j < ncom; j++) {
             xt[j] = pcom[j] + x * xicom[j];
@@ -237,7 +237,7 @@ public class SemOptimizerNrPowell implements SemOptimizer {
      * See <i>Numerical Recipes in C</i> for an explanation of this method.
      */
     private void mnbrak(double args[], int ncom, double pcom[], double xicom[],
-            SemOptimizerNrPowell.FittingFunction fcn) {
+                        SemOptimizerNrPowell.FittingFunction fcn) {
 
         double ulim, u, r, q, fu, dum;
         double GOLD = 1.618034;
@@ -291,8 +291,7 @@ public class SemOptimizerNrPowell implements SemOptimizer {
                     args[5] = fc;
 
                     return;
-                }
-                else if (fu > fb) {
+                } else if (fu > fb) {
                     cx = u;
                     fc = fu;
                     args[0] = ax;
@@ -307,8 +306,7 @@ public class SemOptimizerNrPowell implements SemOptimizer {
 
                 u = cx + GOLD * (cx - bx);
                 fu = f1dim(u, ncom, pcom, xicom, fcn);
-            }
-            else if ((cx - u) * (u - ulim) > 0.0) {
+            } else if ((cx - u) * (u - ulim) > 0.0) {
                 fu = f1dim(u, ncom, pcom, xicom, fcn);
 
                 if (fu < fc) {
@@ -319,12 +317,10 @@ public class SemOptimizerNrPowell implements SemOptimizer {
                     fc = fu;
                     fu = f1dim(u, ncom, pcom, xicom, fcn);
                 }
-            }
-            else if ((u - ulim) * (ulim - cx) >= 0.0) {
+            } else if ((u - ulim) * (ulim - cx) >= 0.0) {
                 u = ulim;
                 fu = f1dim(u, ncom, pcom, xicom, fcn);
-            }
-            else {
+            } else {
                 u = cx + GOLD * (cx - bx);
                 fu = f1dim(u, ncom, pcom, xicom, fcn);
             }
@@ -349,7 +345,7 @@ public class SemOptimizerNrPowell implements SemOptimizer {
      * See <i>Numerical Recipes in C</i> for an explanation of this method.
      */
     private double brent(double args[], int ncom, double pcom[], double xicom[],
-            SemOptimizerNrPowell. FittingFunction fcn) {
+                         SemOptimizerNrPowell.FittingFunction fcn) {
 
         int iter;
         double a, b, d, etemp, fu, fv, fw, fx, p, q, r, tol1, tol2, u, v, w, x, xm;
@@ -402,8 +398,7 @@ public class SemOptimizerNrPowell implements SemOptimizer {
                         (p <= q * (x - a)) || (p >= q * (b - x))) {
                     e = ((x >= xm) ? a - x : b - x);
                     d = CGOLD * e;
-                }
-                else {
+                } else {
                     d = p / q;
                     u = x + d;
 
@@ -412,8 +407,7 @@ public class SemOptimizerNrPowell implements SemOptimizer {
                                 tol1));
                     }
                 }
-            }
-            else {
+            } else {
                 e = ((x >= xm) ? a - x : b - x);
                 d = CGOLD * e;
             }
@@ -426,8 +420,7 @@ public class SemOptimizerNrPowell implements SemOptimizer {
             if (fu <= fx) {
                 if (u >= x) {
                     a = x;
-                }
-                else {
+                } else {
                     b = x;
                 }
 
@@ -437,12 +430,10 @@ public class SemOptimizerNrPowell implements SemOptimizer {
                 fv = fw;
                 fw = fx;
                 fx = fu;
-            }
-            else {
+            } else {
                 if (u < x) {
                     a = u;
-                }
-                else {
+                } else {
                     b = u;
                 }
 
@@ -451,8 +442,7 @@ public class SemOptimizerNrPowell implements SemOptimizer {
                     w = u;
                     fv = fw;
                     fw = fu;
-                }
-                else if ((fu <= fv) || (v == x) || (v == w)) {
+                } else if ((fu <= fv) || (v == x) || (v == w)) {
                     v = u;
                     fv = fu;
                 }
@@ -510,7 +500,7 @@ public class SemOptimizerNrPowell implements SemOptimizer {
          * to parameter values.
          */
         @Override
-		public double evaluate(double[] parameters) {
+        public double evaluate(double[] parameters) {
             sem.setFreeParamValues(parameters);
 
             double fml = sem.getFml();
@@ -530,7 +520,7 @@ public class SemOptimizerNrPowell implements SemOptimizer {
          * interface.
          */
         @Override
-		public int getNumParameters() {
+        public int getNumParameters() {
             return this.sem.getNumFreeParams();
         }
     }

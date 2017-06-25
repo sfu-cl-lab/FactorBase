@@ -35,6 +35,10 @@ public class TestRegressionOld extends TestCase {
         super(name);
     }
 
+    public static Test suite() {
+        return new TestSuite(TestRegressionOld.class);
+    }
+
     public void testSimpleRegression() {
         /*
         //A Simple regression of 1 variable on another by Joe Ramsey probably
@@ -88,10 +92,6 @@ public class TestRegressionOld extends TestCase {
         assertEquals(0.0014, coeffs[3], 0.0002);
         assertEquals(-0.318, coeffs[4], 0.001);
         assertEquals(0.0002, coeffs[5], 0.00005);
-    }
-
-    public static Test suite() {
-        return new TestSuite(TestRegressionOld.class);
     }
 }
 

@@ -33,8 +33,6 @@ import edu.cmu.tetrad.util.MatrixUtils;
 import edu.cmu.tetrad.util.ProbUtils;
 import edu.cmu.tetrad.util.TetradLogger;
 
-import java.util.*;
-
 /**
  * Implements different tests of tetrad constraints: using Wishart's test (CPS, Wishart 1928); Bollen's test (Bollen,
  * 1990) or a more computationally intensive test that fits one/two factor Gaussian models. These tests are the core
@@ -51,12 +49,13 @@ import java.util.*;
  */
 
 public final class ContinuousTetradTest implements TetradTest {
+    BollenTingTetradTest bollenTingTest;
     private double sig;
     private double sig1;
     private double sig2;
     private double sig3;
     private double prob[];
-//    private double fourthMM[][][][];
+    //    private double fourthMM[][][][];
     private boolean bvalues[], outputMessage;
     private ICovarianceMatrix covMatrix;
     private CorrelationMatrix corrMatrix;
@@ -68,9 +67,8 @@ public final class ContinuousTetradTest implements TetradTest {
     private TwoFactorsEstimator twoFactorsEst4, twoFactorsEst5, twoFactorsEst6;
     private boolean modeX = false;
     private double bufferMatrix[][];
-//    private Map<Tetrad, Double> tetradDifference;
-    private List<Node> variables;
-    BollenTingTetradTest bollenTingTest;
+    //    private Map<Tetrad, Double> tetradDifference;
+    private List <Node> variables;
 
     public ContinuousTetradTest(DataSet dataSet, TestType sigTestType,
                                 double sig) {
@@ -148,12 +146,12 @@ public final class ContinuousTetradTest implements TetradTest {
     }
 
     @Override
-	public double getSignificance() {
+    public double getSignificance() {
         return this.sig;
     }
 
     @Override
-	public void setSignificance(double sig) {
+    public void setSignificance(double sig) {
         this.sig = sig;
         this.sig1 = sig / 3.;
         this.sig2 = 2. * sig / 3.;
@@ -161,7 +159,7 @@ public final class ContinuousTetradTest implements TetradTest {
     }
 
     @Override
-	public DataSet getDataSet() {
+    public DataSet getDataSet() {
         return this.dataSet;
     }
 
@@ -181,13 +179,17 @@ public final class ContinuousTetradTest implements TetradTest {
         return corrMatrix;
     }
 
+    public void setCovMatrix(ICovarianceMatrix covMatrix) {
+        this.covMatrix = covMatrix;
+    }
+
     @Override
-	public String[] getVarNames() {
+    public String[] getVarNames() {
         return this.corrMatrix.getVariableNames().toArray(new String[0]);
     }
 
     @Override
-	public List<Node> getVariables() {
+    public List <Node> getVariables() {
         if (this.variables == null) {
             if (dataSet != null) {
                 this.variables = dataSet.getVariables();
@@ -206,6 +208,12 @@ public final class ContinuousTetradTest implements TetradTest {
     public void setTestType(TestType sigTestType) {
         this.sigTestType = sigTestType;
     }
+
+    /**
+     * Note: this implementation could be more optimized. This is the
+     * simplest way of computing this corrMatrix, and will take exactly
+     * sampleSize * (corrMatrix.getSize() ^ 4) steps.
+     */
 
     private void initialization() {
         sampleSize = corrMatrix.getSampleSize();
@@ -227,18 +235,12 @@ public final class ContinuousTetradTest implements TetradTest {
     }
 
     /**
-     * Note: this implementation could be more optimized. This is the
-     * simplest way of computing this corrMatrix, and will take exactly
-     * sampleSize * (corrMatrix.getSize() ^ 4) steps.
-     */
-
-    /**
      * Sample scores: the real deal. The way by which significance is tested will vary from case to case. We are also
      * using false discovery rate to make a mild adjustment in the p-values.
      */
 
     @Override
-	public int tetradScore(int v1, int v2, int v3, int v4) {
+    public int tetradScore(int v1, int v2, int v3, int v4) {
         evalTetradDifferences(v1, v2, v3, v4);
         for (int i = 0; i < 3; i++) {
             bvalues[i] = (prob[i] >= sig);
@@ -285,7 +287,7 @@ public final class ContinuousTetradTest implements TetradTest {
      */
 
     @Override
-	public boolean tetradScore1(int v1, int v2, int v3, int v4) {
+    public boolean tetradScore1(int v1, int v2, int v3, int v4) {
         /*if (tetradHolds(v1, v3, v4, v2) != tetradHolds(v4, v2, v1, v3)) {
             System.out.println("!");
             modeX = true;
@@ -304,7 +306,7 @@ public final class ContinuousTetradTest implements TetradTest {
      */
 
     @Override
-	public boolean tetradScore3(int v1, int v2, int v3, int v4) {
+    public boolean tetradScore3(int v1, int v2, int v3, int v4) {
         if (sigTestType != TestType.GAUSSIAN_FACTOR) {
             return tetradScore(v1, v2, v3, v4) == 3;
         } else {
@@ -313,27 +315,27 @@ public final class ContinuousTetradTest implements TetradTest {
     }
 
     @Override
-	public boolean tetradHolds(int v1, int v2, int v3, int v4) {
+    public boolean tetradHolds(int v1, int v2, int v3, int v4) {
         evalTetradDifference(v1, v2, v3, v4);
         bvalues[0] = (prob[0] >= sig);
         return prob[0] >= sig;
     }
 
     @Override
-	public double tetradPValue(int v1, int v2, int v3, int v4) {
+    public double tetradPValue(int v1, int v2, int v3, int v4) {
         evalTetradDifference(v1, v2, v3, v4);
         return prob[0];
     }
 
     @Override
-	public double tetradPValue(int i1, int j1, int k1, int l1, int i2, int j2, int k2, int l2) {
+    public double tetradPValue(int i1, int j1, int k1, int l1, int i2, int j2, int k2, int l2) {
         evalTetradDifference(i1, j1, k1, l1, i2, j2, k2, l2);
         return prob[0];
     }
 
-
-    /** --------------------------------------------------------------------------
-     *  PRIVATE METHODS
+    /**
+     * --------------------------------------------------------------------------
+     * PRIVATE METHODS
      */
 
 //    /**
@@ -402,7 +404,6 @@ public final class ContinuousTetradTest implements TetradTest {
 //        printlnMessage("Done with fourth moments");
 //        return fourthMM;
 //    }
-
     private void evalTetradDifferences(int i, int j, int k, int l) {
         switch (sigTestType) {
             case TETRAD_BASED:
@@ -442,7 +443,6 @@ public final class ContinuousTetradTest implements TetradTest {
     private void evalTetradDifference(int i1, int j1, int k1, int l1, int i2, int j2, int k2, int l2) {
         wishartEvalTetradDifference(i1, j1, k1, l1, i2, j2, k2, l2);
     }
-
 
     /**
      * The asymptotic Wishart test for multivariate normal variables. See Wishart (1928).
@@ -640,8 +640,7 @@ public final class ContinuousTetradTest implements TetradTest {
         if (bollenTingTest == null) {
             if (dataSet != null) {
                 bollenTingTest = new BollenTingTetradTest(dataSet);
-            }
-            else {
+            } else {
                 bollenTingTest = new BollenTingTetradTest(covMatrix);
             }
         }
@@ -659,48 +658,6 @@ public final class ContinuousTetradTest implements TetradTest {
 
         bollenTingTest.calcChiSquare(new Tetrad(ci, ck, cl, cj));
         prob[2] = bollenTingTest.getPValue();
-    }
-
-
-    private void bollenEvalTetradDifference(int i, int j, int k, int l) {
-//        double TAUijkl;
-//        double ratio;
-//
-//        TAUijkl = getCovMatrix().getValue(i, j) * getCovMatrix().getValue(k, l) -
-//                getCovMatrix().getValue(i, k) * getCovMatrix().getValue(j, l);
-//
-//        double bt = bollenTetradStatistic(i, j, k, l);
-//
-//        ratio = TAUijkl / Math.sqrt(bt);
-//
-//        if (ratio > 0.0) {
-//            ratio = -ratio;
-//        }
-//
-//        prob[0] = 2.0 * ProbUtils.normalCdf(ratio);
-
-        Node ci = getVariables().get(i);
-        Node cj = getVariables().get(j);
-        Node ck = getVariables().get(k);
-        Node cl = getVariables().get(l);
-
-        if (bollenTingTest == null) {
-            if (dataSet != null) {
-                bollenTingTest = new BollenTingTetradTest(dataSet);
-            }
-            else {
-                bollenTingTest = new BollenTingTetradTest(covMatrix);
-            }
-        }
-
-        bollenTingTest.calcChiSquare(new Tetrad(ci, cj, ck, cl));
-        prob[0] = bollenTingTest.getPValue();
-
-        TetradLogger.getInstance().log("tetrads", new Tetrad(variables.get(i),
-                variables.get(j), variables.get(k), variables.get(l)).toString()
-                + " = 0, p = " + prob[0]);
-
-
     }
 
 //    private double bollenTetradStatistic(int t1, int t2, int t3, int t4) {
@@ -744,6 +701,46 @@ public final class ContinuousTetradTest implements TetradTest {
 //        return stat;
 //    }
 
+    private void bollenEvalTetradDifference(int i, int j, int k, int l) {
+//        double TAUijkl;
+//        double ratio;
+//
+//        TAUijkl = getCovMatrix().getValue(i, j) * getCovMatrix().getValue(k, l) -
+//                getCovMatrix().getValue(i, k) * getCovMatrix().getValue(j, l);
+//
+//        double bt = bollenTetradStatistic(i, j, k, l);
+//
+//        ratio = TAUijkl / Math.sqrt(bt);
+//
+//        if (ratio > 0.0) {
+//            ratio = -ratio;
+//        }
+//
+//        prob[0] = 2.0 * ProbUtils.normalCdf(ratio);
+
+        Node ci = getVariables().get(i);
+        Node cj = getVariables().get(j);
+        Node ck = getVariables().get(k);
+        Node cl = getVariables().get(l);
+
+        if (bollenTingTest == null) {
+            if (dataSet != null) {
+                bollenTingTest = new BollenTingTetradTest(dataSet);
+            } else {
+                bollenTingTest = new BollenTingTetradTest(covMatrix);
+            }
+        }
+
+        bollenTingTest.calcChiSquare(new Tetrad(ci, cj, ck, cl));
+        prob[0] = bollenTingTest.getPValue();
+
+        TetradLogger.getInstance().log("tetrads", new Tetrad(variables.get(i),
+                variables.get(j), variables.get(k), variables.get(l)).toString()
+                + " = 0, p = " + prob[0]);
+
+
+    }
+
     void printMessage(String message) {
         if (outputMessage) {
             System.out.print(message);
@@ -768,10 +765,6 @@ public final class ContinuousTetradTest implements TetradTest {
         }
     }
 
-    public void setCovMatrix(ICovarianceMatrix covMatrix) {
-        this.covMatrix = covMatrix;
-    }
-
     public void setBollenTest(BollenTingTetradTest bollenTingTest) {
         this.bollenTingTest = bollenTingTest;
     }
@@ -780,6 +773,90 @@ public final class ContinuousTetradTest implements TetradTest {
      * This class is a easy, fast way of reusing one-factor models for
      * significance testing
      */
+
+    @Override
+    public boolean oneFactorTest(int v1, int v2, int v3, int v4) {
+        int indices[] = {v1, v2, v3, v4};
+        oneFactorEst4.init(indices);
+        return oneFactorEst4.isSignificant();
+    }
+
+    @Override
+    public boolean oneFactorTest(int v1, int v2, int v3, int v4, int v5) {
+        int indices[] = {v1, v2, v3, v4, v5};
+        oneFactorEst5.init(indices);
+        return oneFactorEst5.isSignificant();
+    }
+
+    @Override
+    public boolean oneFactorTest(int v1, int v2, int v3, int v4, int v5,
+                                 int v6) {
+        int indices[] = {v1, v2, v3, v4, v5, v6};
+        oneFactorEst6.init(indices);
+        return oneFactorEst6.isSignificant();
+    }
+
+    @Override
+    public boolean twoFactorTest(int v1, int v2, int v3, int v4) {
+        int indices[] = {v1, v2, v3, v4};
+        twoFactorsEst4.init(indices, 2);
+        return twoFactorsEst4.isSignificant();
+    }
+
+    @Override
+    public boolean twoFactorTest(int v1, int v2, int v3, int v4, int v5) {
+        int indices[] = {v1, v2, v3, v4, v5};
+        twoFactorsEst5.init(indices, 3);
+        return twoFactorsEst5.isSignificant();
+    }
+
+    @Override
+    public boolean twoFactorTest(int v1, int v2, int v3, int v4, int v5,
+                                 int v6) {
+        int indices[] = {v1, v2, v3, v4, v5, v6};
+        twoFactorsEst6.init(indices, 3);
+        return twoFactorsEst6.isSignificant();
+    }
+
+    public int tempTetradScore(int v1, int v2, int v3, int v4) {
+        evalTetradDifferences(v1, v2, v3, v4);
+        System.out.println(prob[0]);
+        System.out.println(prob[1]);
+        System.out.println(prob[2]);
+        for (int i = 0; i < 3; i++) {
+            bvalues[i] = (prob[i] >= sig);
+        }
+        //Order p-values for FDR (false discovery rate) decision
+        double tempProb;
+        if (prob[1] < prob[0] && prob[1] < prob[2]) {
+            tempProb = prob[0];
+            prob[0] = prob[1];
+            prob[1] = tempProb;
+        } else if (prob[2] < prob[0] && prob[2] < prob[0]) {
+            tempProb = prob[0];
+            prob[0] = prob[2];
+            prob[2] = tempProb;
+        }
+        if (prob[2] < prob[1]) {
+            tempProb = prob[1];
+            prob[1] = prob[2];
+            prob[2] = tempProb;
+        }
+        if (prob[2] <= sig3) {
+            return 0;
+        }
+        if (prob[1] <= sig2) {
+            return 1;
+        }
+        if (prob[0] <= sig1) {
+            //This is the case of 2 tetrad constraints holding, which is
+            //a logical impossibility. On a future version we may come up with
+            //better, more powerful ways of deciding what to do. Right now,
+            //the default is to do just as follows:
+            return 3;
+        }
+        return 3;
+    }
 
     abstract class SimpleFactorEstimator {
         ICovarianceMatrix sampleCov, subSampleCov;
@@ -851,7 +928,7 @@ public final class ContinuousTetradTest implements TetradTest {
         }
 
         @Override
-		protected SemPm buildSemPm(int[] values) {
+        protected SemPm buildSemPm(int[] values) {
             Graph graph = new EdgeListGraph();
             Node latent = new GraphNode("__l");
             latent.setNodeType(NodeType.LATENT);
@@ -883,7 +960,7 @@ public final class ContinuousTetradTest implements TetradTest {
         }
 
         @Override
-		protected SemPm buildSemPm(int[] values) {
+        protected SemPm buildSemPm(int[] values) {
             Graph graph = new EdgeListGraph();
             Node latent1 = new GraphNode("__l1");
             Node latent2 = new GraphNode("__l2");
@@ -904,90 +981,6 @@ public final class ContinuousTetradTest implements TetradTest {
             semPm = new SemPm(graph);
             return semPm;
         }
-    }
-
-    @Override
-	public boolean oneFactorTest(int v1, int v2, int v3, int v4) {
-        int indices[] = {v1, v2, v3, v4};
-        oneFactorEst4.init(indices);
-        return oneFactorEst4.isSignificant();
-    }
-
-    @Override
-	public boolean oneFactorTest(int v1, int v2, int v3, int v4, int v5) {
-        int indices[] = {v1, v2, v3, v4, v5};
-        oneFactorEst5.init(indices);
-        return oneFactorEst5.isSignificant();
-    }
-
-    @Override
-	public boolean oneFactorTest(int v1, int v2, int v3, int v4, int v5,
-                                 int v6) {
-        int indices[] = {v1, v2, v3, v4, v5, v6};
-        oneFactorEst6.init(indices);
-        return oneFactorEst6.isSignificant();
-    }
-
-    @Override
-	public boolean twoFactorTest(int v1, int v2, int v3, int v4) {
-        int indices[] = {v1, v2, v3, v4};
-        twoFactorsEst4.init(indices, 2);
-        return twoFactorsEst4.isSignificant();
-    }
-
-    @Override
-	public boolean twoFactorTest(int v1, int v2, int v3, int v4, int v5) {
-        int indices[] = {v1, v2, v3, v4, v5};
-        twoFactorsEst5.init(indices, 3);
-        return twoFactorsEst5.isSignificant();
-    }
-
-    @Override
-	public boolean twoFactorTest(int v1, int v2, int v3, int v4, int v5,
-                                 int v6) {
-        int indices[] = {v1, v2, v3, v4, v5, v6};
-        twoFactorsEst6.init(indices, 3);
-        return twoFactorsEst6.isSignificant();
-    }
-
-    public int tempTetradScore(int v1, int v2, int v3, int v4) {
-        evalTetradDifferences(v1, v2, v3, v4);
-        System.out.println(prob[0]);
-        System.out.println(prob[1]);
-        System.out.println(prob[2]);
-        for (int i = 0; i < 3; i++) {
-            bvalues[i] = (prob[i] >= sig);
-        }
-        //Order p-values for FDR (false discovery rate) decision
-        double tempProb;
-        if (prob[1] < prob[0] && prob[1] < prob[2]) {
-            tempProb = prob[0];
-            prob[0] = prob[1];
-            prob[1] = tempProb;
-        } else if (prob[2] < prob[0] && prob[2] < prob[0]) {
-            tempProb = prob[0];
-            prob[0] = prob[2];
-            prob[2] = tempProb;
-        }
-        if (prob[2] < prob[1]) {
-            tempProb = prob[1];
-            prob[1] = prob[2];
-            prob[2] = tempProb;
-        }
-        if (prob[2] <= sig3) {
-            return 0;
-        }
-        if (prob[1] <= sig2) {
-            return 1;
-        }
-        if (prob[0] <= sig1) {
-            //This is the case of 2 tetrad constraints holding, which is
-            //a logical impossibility. On a future version we may come up with
-            //better, more powerful ways of deciding what to do. Right now,
-            //the default is to do just as follows:
-            return 3;
-        }
-        return 3;
     }
 
 }

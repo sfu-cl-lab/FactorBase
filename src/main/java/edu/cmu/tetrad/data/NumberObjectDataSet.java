@@ -31,7 +31,6 @@ import edu.cmu.tetrad.util.TetradSerializable;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.text.NumberFormat;
-import java.util.*;
 
 
 /**
@@ -83,16 +82,7 @@ import java.util.*;
 public final class NumberObjectDataSet
         implements DataSet, TetradSerializable {
     static final long serialVersionUID = 23L;
-    private Map<String, String> columnToTooltip;
-    @Override
-	public Map<String, String> getColumnToTooltip() {
-		return columnToTooltip;
-	}
-
-	@Override
-	public void setColumnToTooltip(Map<String, String> columnToTooltip) {
-		this.columnToTooltip = columnToTooltip;
-	}
+    private Map <String, String> columnToTooltip;
     /**
      * The name of the data model. This is not used internally; it is only here
      * in case an external class wants this dataset to have a name.
@@ -100,15 +90,13 @@ public final class NumberObjectDataSet
      * @serial
      */
     private String name;
-
     /**
      * The list of variables. These correspond columnwise to the columns of
      * <code>data</code>.
      *
      * @serial
      */
-    private List<Node> variables = new ArrayList<Node>();
-
+    private List <Node> variables = new ArrayList <Node>();
     /**
      * The container storing the data. Rows are cases; columns are variables.
      * The order of columns is coordinated with the order of variables in
@@ -117,22 +105,19 @@ public final class NumberObjectDataSet
      * @serial
      */
     private Number[][] data;
-
     /**
      * The set of selected variables.
      *
      * @serial
      */
-    private Set<Node> selection = new HashSet<Node>();
-
+    private Set <Node> selection = new HashSet <Node>();
     /**
      * Case ID's. These are strings associated with some or all of the cases of
      * the dataset.
      *
      * @serial
      */
-    private Map<Integer, String> caseIds = new HashMap<Integer, String>();
-
+    private Map <Integer, String> caseIds = new HashMap <Integer, String>();
     /**
      * A map from cases to case multipliers. If a case is not in the domain of
      * this map, its case multiplier is by default 1. This is the number of
@@ -141,15 +126,13 @@ public final class NumberObjectDataSet
      *
      * @serial
      */
-    private Map<Integer, Integer> multipliers = new HashMap<Integer, Integer>();
-
+    private Map <Integer, Integer> multipliers = new HashMap <Integer, Integer>();
     /**
      * The knowledge associated with this data.
      *
      * @serial
      */
     private Knowledge knowledge = new Knowledge();
-
     /**
      * True iff the column should adjust the discrete variable to accomodate new
      * categories added, false if new categories should be rejected.
@@ -158,28 +141,24 @@ public final class NumberObjectDataSet
      * @deprecated Replaced by corresponding field on DiscreteVariable.
      */
     @Deprecated
-	private boolean newCategoriesAccomodated = true;
-
+    private boolean newCategoriesAccomodated = true;
     /**
      * The number formatter used for printing out continuous values.
      */
     private transient NumberFormat nf;
-
     /**
      * The character used as a delimiter when the dataset is printed.
      */
     private char outputDelimiter = '\t';
-
-    //============================CONSTRUCTORS==========================//
 
     /**
      * Constructs a data set with the given number of rows (cases) and the given
      * list of variables. The number of columns will be equal to the number of
      * cases.
      */
-    public NumberObjectDataSet(int rows, List<Node> variables) {
+    public NumberObjectDataSet(int rows, List <Node> variables) {
         data = new Number[rows][variables.size()];
-        this.variables = new LinkedList<Node>(variables);
+        this.variables = new LinkedList <Node>(variables);
 
         for (int i = 0; i < rows; i++) {
             for (int j = 0; j < variables.size(); j++) {
@@ -188,7 +167,7 @@ public final class NumberObjectDataSet
         }
     }
 
-    public NumberObjectDataSet(Number[][] data, List<Node> variables) {
+    public NumberObjectDataSet(Number[][] data, List <Node> variables) {
         for (Number[] _data : data) {
             if (_data.length != variables.size()) {
                 throw new IllegalArgumentException("All rows must have a number " +
@@ -200,13 +179,15 @@ public final class NumberObjectDataSet
         this.variables = variables;
     }
 
+    //============================CONSTRUCTORS==========================//
+
     /**
      * Makes of copy of the given data set. TODO Might consider making the
      * argument a RectangularDataSet instead.
      */
     public NumberObjectDataSet(NumberObjectDataSet dataSet) {
         name = dataSet.name;
-        variables = new LinkedList<Node>(dataSet.variables);
+        variables = new LinkedList <Node>(dataSet.variables);
 
         data = new Number[dataSet.data.length][dataSet.data[0].length];
 
@@ -214,12 +195,11 @@ public final class NumberObjectDataSet
             System.arraycopy(dataSet.data[i], 0, data[i], 0, dataSet.data[0].length);
         }
 
-        selection = new HashSet<Node>(dataSet.selection);
-        multipliers = new HashMap<Integer, Integer>(dataSet.multipliers);
+        selection = new HashSet <Node>(dataSet.selection);
+        multipliers = new HashMap <Integer, Integer>(dataSet.multipliers);
         knowledge = new Knowledge(dataSet.knowledge);
         newCategoriesAccomodated = dataSet.newCategoriesAccomodated;
     }
-
 
     /**
      * Generates a simple exemplar of this class to test serialization.
@@ -228,16 +208,70 @@ public final class NumberObjectDataSet
      * @see edu.cmu.tetradapp.util.TetradSerializableUtils
      */
     public static NumberObjectDataSet serializableInstance() {
-        return new NumberObjectDataSet(0, new LinkedList<Node>());
+        return new NumberObjectDataSet(0, new LinkedList <Node>());
+    }
+
+    /**
+     * Adds semantic checks to the default deserialization method. This method
+     * must have the standard signature for a readObject method, and the body of
+     * the method must begin with "s.defaultReadObject();". Other than that, any
+     * semantic checks can be specified and do not need to stay the same from
+     * version to version. A readObject method of this form may be added to any
+     * class, even if Tetrad sessions were previously saved out using a version
+     * of the class that didn't include it. (That's what the
+     * "s.defaultReadObject();" is for. See J. Bloch, Effective Java, for help.
+     *
+     * @throws java.io.IOException
+     * @throws ClassNotFoundException
+     */
+    private static void readObject(ObjectInputStream s)
+            throws IOException, ClassNotFoundException {
+        s.defaultReadObject();
+    }
+
+    /**
+     * Attempts to translate <code>element</code> into a double value, returning
+     * it if successful, otherwise throwing an exception. To be successful, the
+     * object must be either a Number or a String.
+     *
+     * @throws IllegalArgumentException if the translation cannot be made. The
+     *                                  reason is in the message.
+     */
+    private static double getValueFromObjectContinuous(Object element) {
+        if ("*".equals(element) || "".equals(element)) {
+            return ContinuousVariable.getDoubleMissingValue();
+        } else if (element instanceof Number) {
+            return ((Number) element).doubleValue();
+        } else if (element instanceof String) {
+            try {
+                return Double.parseDouble((String) element);
+            } catch (NumberFormatException e) {
+                return ContinuousVariable.getDoubleMissingValue();
+            }
+        } else {
+            throw new IllegalArgumentException(
+                    "The argument 'element' must be " +
+                            "either a Number or a String.");
+        }
     }
 
     //============================PUBLIC METHODS========================//
+
+    @Override
+    public Map <String, String> getColumnToTooltip() {
+        return columnToTooltip;
+    }
+
+    @Override
+    public void setColumnToTooltip(Map <String, String> columnToTooltip) {
+        this.columnToTooltip = columnToTooltip;
+    }
 
     /**
      * Gets the name of the data set.
      */
     @Override
-	public final String getName() {
+    public final String getName() {
         return this.name;
     }
 
@@ -245,7 +279,7 @@ public final class NumberObjectDataSet
      * Sets the name of the data set.
      */
     @Override
-	public final void setName(String name) {
+    public final void setName(String name) {
         if (name == null) {
             throw new NullPointerException("Name must not be null.");
         }
@@ -256,7 +290,7 @@ public final class NumberObjectDataSet
      * Returns the number of variables in the data set.
      */
     @Override
-	public final int getNumColumns() {
+    public final int getNumColumns() {
         return variables.size();
     }
 
@@ -265,7 +299,7 @@ public final class NumberObjectDataSet
      * maximum of the number of rows in the list of wrapped columns.
      */
     @Override
-	public final int getNumRows() {
+    public final int getNumRows() {
         return data.length;
     }
 
@@ -277,7 +311,7 @@ public final class NumberObjectDataSet
      * @param column The index of the variable.
      */
     @Override
-	public final void setInt(int row, int column, int value) {
+    public final void setInt(int row, int column, int value) {
         Node variable = getVariable(column);
 
         if (!(variable instanceof DiscreteVariable)) {
@@ -303,8 +337,7 @@ public final class NumberObjectDataSet
 
         try {
             setIntPrivate(row, column, value);
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             if (row < 0 || column < 0) {
                 throw new IllegalArgumentException(
                         "Row and column must be >= 0.");
@@ -325,7 +358,7 @@ public final class NumberObjectDataSet
      * @param column The index of the variable.
      */
     @Override
-	public final void setDouble(int row, int column, double value) {
+    public final void setDouble(int row, int column, double value) {
         if (!(getVariable(column) instanceof ContinuousVariable)) {
             throw new IllegalArgumentException(
                     "Can only set ints for discrete columns: " + getVariable(column));
@@ -333,8 +366,7 @@ public final class NumberObjectDataSet
 
         try {
             data[row][column] = value;
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             if (row < 0 || column < 0) {
                 throw new IllegalArgumentException(
                         "Row and column must be >= 0.");
@@ -357,7 +389,7 @@ public final class NumberObjectDataSet
      * @param col The index of the variable.
      */
     @Override
-	public final Object getObject(int row, int col) {
+    public final Object getObject(int row, int col) {
         Object variable = getVariable(col);
 
         if (variable instanceof ContinuousVariable) {
@@ -386,7 +418,7 @@ public final class NumberObjectDataSet
      * @param col The index of the variable.
      */
     @Override
-	public final void setObject(int row, int col, Object value) {
+    public final void setObject(int row, int col, Object value) {
         Object variable = getVariable(col);
 
         if (variable instanceof ContinuousVariable) {
@@ -405,9 +437,9 @@ public final class NumberObjectDataSet
      * Returns the indices of the currently selected variables.
      */
     @Override
-	public final int[] getSelectedIndices() {
-        List<Node> variables = getVariables();
-        Set<Node> selection = getSelection();
+    public final int[] getSelectedIndices() {
+        List <Node> variables = getVariables();
+        Set <Node> selection = getSelection();
 
         int[] indices = new int[selection.size()];
 
@@ -424,19 +456,20 @@ public final class NumberObjectDataSet
     /**
      * Returns the set of currently selected variables.
      */
-    public final Set<Node> getSelectedVariables() {
-        return new HashSet<Node>(selection);
+    public final Set <Node> getSelectedVariables() {
+        return new HashSet <Node>(selection);
     }
 
     /**
      * Adds the given variable to the data set, increasing the number of
      * columns by one, moving columns i >= <code>index</code> to column i + 1,
      * and inserting a column of missing values at column i.
+     *
      * @throws IllegalArgumentException if the variable already exists in the
-     * dataset.
+     *                                  dataset.
      */
     @Override
-	public final void addVariable(Node variable) {
+    public final void addVariable(Node variable) {
         if (variables.contains(variable)) {
             throw new IllegalArgumentException("Expecting a new variable: " + variable);
         }
@@ -457,7 +490,7 @@ public final class NumberObjectDataSet
      * and inserting a column of missing values at column i.
      */
     @Override
-	public final void addVariable(int index, Node variable) {
+    public final void addVariable(int index, Node variable) {
         if (variables.contains(variable)) {
             throw new IllegalArgumentException("Expecting a new variable.");
         }
@@ -493,7 +526,7 @@ public final class NumberObjectDataSet
      * Returns the variable at the given column.
      */
     @Override
-	public final Node getVariable(int col) {
+    public final Node getVariable(int col) {
         return variables.get(col);
     }
 
@@ -502,7 +535,7 @@ public final class NumberObjectDataSet
      * this by calling getVariables().indexOf(variable).
      */
     @Override
-	public final int getColumn(Node variable) {
+    public final int getColumn(Node variable) {
         return variables.indexOf(variable);
     }
 
@@ -513,7 +546,7 @@ public final class NumberObjectDataSet
      * @throws IllegalArgumentException if the given change is not supported.
      */
     @Override
-	@SuppressWarnings({"ConstantConditions"})
+    @SuppressWarnings({"ConstantConditions"})
     public final void changeVariable(Node from, Node to) {
         if (!(from instanceof DiscreteVariable &&
                 to instanceof DiscreteVariable)) {
@@ -526,7 +559,7 @@ public final class NumberObjectDataSet
 
         int col = variables.indexOf(_from);
 
-        List<String> oldCategories = _from.getCategories();
+        List <String> oldCategories = _from.getCategories();
         List newCategories = _to.getCategories();
 
         int[] indexArray = new int[oldCategories.size()];
@@ -544,8 +577,7 @@ public final class NumberObjectDataSet
             int newIndex = 0;
             try {
                 newIndex = indexArray[value];
-            }
-            catch (Exception e) {
+            } catch (Exception e) {
                 e.printStackTrace();
             }
 
@@ -563,7 +595,7 @@ public final class NumberObjectDataSet
      * Returns the variable with the given name.
      */
     @Override
-	public final Node getVariable(String varName) {
+    public final Node getVariable(String varName) {
         for (Node variable1 : variables) {
             if (variable1.getName().equals(varName)) {
                 return variable1;
@@ -578,17 +610,16 @@ public final class NumberObjectDataSet
      * of their columns.
      */
     @Override
-	public final List<Node> getVariables() {
-        return new LinkedList<Node>(variables);
+    public final List <Node> getVariables() {
+        return new LinkedList <Node>(variables);
     }
-
 
     /**
      * Returns a copy of the knowledge associated with this data set. (Cannot be
      * null.)
      */
     @Override
-	public final Knowledge getKnowledge() {
+    public final Knowledge getKnowledge() {
         return new Knowledge(this.knowledge);
     }
 
@@ -596,7 +627,7 @@ public final class NumberObjectDataSet
      * Sets knowledge to be associated with this data set. May not be null.
      */
     @Override
-	public final void setKnowledge(Knowledge knowledge) {
+    public final void setKnowledge(Knowledge knowledge) {
         if (knowledge == null) {
             throw new NullPointerException();
         }
@@ -609,9 +640,9 @@ public final class NumberObjectDataSet
      * of their columns.
      */
     @Override
-	public final List<String> getVariableNames() {
-        List<Node> vars = getVariables();
-        List<String> names = new ArrayList<String>();
+    public final List <String> getVariableNames() {
+        List <Node> vars = getVariables();
+        List <String> names = new ArrayList <String>();
 
         for (Node variable : vars) {
             String name = variable.getName();
@@ -626,7 +657,7 @@ public final class NumberObjectDataSet
      * 'selected' is false.
      */
     @Override
-	public final void setSelected(Node variable, boolean selected) {
+    public final void setSelected(Node variable, boolean selected) {
         if (selected) {
             if (variables.contains(variable)) {
                 getSelection().add(variable);
@@ -642,7 +673,7 @@ public final class NumberObjectDataSet
      * Marks all variables as deselected.
      */
     @Override
-	public final void clearSelection() {
+    public final void clearSelection() {
         getSelection().clear();
     }
 
@@ -652,7 +683,7 @@ public final class NumberObjectDataSet
      * missing values.
      */
     @Override
-	public void ensureRows(int rows) {
+    public void ensureRows(int rows) {
         if (rows > getNumRows()) {
             resize(rows, getNumColumns());
         }
@@ -664,7 +695,7 @@ public final class NumberObjectDataSet
      * The new columns will be filled with missing values.
      */
     @Override
-	public void ensureColumns(int columns, List<String> excludedVariableNames) {
+    public void ensureColumns(int columns, List <String> excludedVariableNames) {
         for (int col = getNumColumns(); col < columns; col++) {
             int i = 0;
             String _name;
@@ -684,7 +715,7 @@ public final class NumberObjectDataSet
      * Returns true iff the given column has been marked as selected.
      */
     @Override
-	public final boolean isSelected(Node variable) {
+    public final boolean isSelected(Node variable) {
         return getSelection().contains(variable);
     }
 
@@ -693,7 +724,7 @@ public final class NumberObjectDataSet
      * number of columns by one.
      */
     @Override
-	public final void removeColumn(int index) {
+    public final void removeColumn(int index) {
         if (index < 0 || index >= variables.size()) {
             throw new IllegalArgumentException(
                     "Not a column in this data set: " + index);
@@ -738,7 +769,7 @@ public final class NumberObjectDataSet
      * the number of columns by one.
      */
     @Override
-	public final void removeColumn(Node variable) {
+    public final void removeColumn(Node variable) {
         int index = variables.indexOf(variable);
 
         if (index != -1) {
@@ -753,13 +784,13 @@ public final class NumberObjectDataSet
      * variables in this DataSet.
      */
     @Override
-	public final DataSet subsetColumns(List<Node> vars) {
+    public final DataSet subsetColumns(List <Node> vars) {
 //        if (vars.isEmpty()) {
 //            throw new IllegalArgumentException("Subset must not be empty.");
 //        }
 
         if (!(getVariables().containsAll(vars))) {
-            List<Node> missingVars = new ArrayList<Node>(vars);
+            List <Node> missingVars = new ArrayList <Node>(vars);
             missingVars.removeAll(getVariables());
 
             throw new IllegalArgumentException(
@@ -780,13 +811,13 @@ public final class NumberObjectDataSet
 
         Number[][] _data = viewSelection(rows, cols);
 
-        NumberObjectDataSet _dataSet = new NumberObjectDataSet(0, new LinkedList<Node>());
+        NumberObjectDataSet _dataSet = new NumberObjectDataSet(0, new LinkedList <Node>());
         _dataSet.data = _data;
 
 //        _dataSet.name = name + "_copy";
         _dataSet.variables = vars;
-        _dataSet.selection = new HashSet<Node>();
-        _dataSet.multipliers = new HashMap<Integer, Integer>(multipliers);
+        _dataSet.selection = new HashSet <Node>();
+        _dataSet.multipliers = new HashMap <Integer, Integer>(multipliers);
 
         // Might have to delete some knowledge.
         _dataSet.knowledge = new Knowledge(knowledge);
@@ -798,7 +829,7 @@ public final class NumberObjectDataSet
      * Returns true if case multipliers are being used for this data set.
      */
     @Override
-	public final boolean isMulipliersCollapsed() {
+    public final boolean isMulipliersCollapsed() {
         return !getMultipliers().keySet().isEmpty();
     }
 
@@ -808,7 +839,7 @@ public final class NumberObjectDataSet
      * effectively contains n copies of that case.
      */
     @Override
-	public final int getMultiplier(int caseNumber) {
+    public final int getMultiplier(int caseNumber) {
         Integer multiplierInt = getMultipliers().get(caseNumber);
         return multiplierInt == null ? 1 : multiplierInt;
     }
@@ -819,7 +850,7 @@ public final class NumberObjectDataSet
      * @throws IllegalArgumentException if the given case ID is already used.
      */
     @Override
-	public final void setCaseId(int caseNumber, String id) {
+    public final void setCaseId(int caseNumber, String id) {
         if (id == null) {
             caseIds.remove(caseNumber);
         } else if (caseIds.values().contains(id)) {
@@ -834,7 +865,7 @@ public final class NumberObjectDataSet
      * Returns the case ID for the given case number.
      */
     @Override
-	public final String getCaseId(int caseNumber) {
+    public final String getCaseId(int caseNumber) {
         return caseIds.get(caseNumber);
     }
 
@@ -844,7 +875,7 @@ public final class NumberObjectDataSet
      * and continuous.)
      */
     @Override
-	public final boolean isContinuous() {
+    public final boolean isContinuous() {
         for (int i = 0; i < getNumColumns(); i++) {
             Node variable = variables.get(i);
 
@@ -862,7 +893,7 @@ public final class NumberObjectDataSet
      * continuous.)
      */
     @Override
-	public final boolean isDiscrete() {
+    public final boolean isDiscrete() {
         for (int i = 0; i < getNumColumns(); i++) {
             Node column = variables.get(i);
 
@@ -879,7 +910,7 @@ public final class NumberObjectDataSet
      * least one continuous column and one discrete columnn.
      */
     @Override
-	public final boolean isMixed() {
+    public final boolean isMixed() {
         int numContinuous = 0;
         int numDiscrete = 0;
 
@@ -910,7 +941,7 @@ public final class NumberObjectDataSet
      * first.
      */
     @Override
-	public final DoubleMatrix2D getCorrelationMatrix() {
+    public final DoubleMatrix2D getCorrelationMatrix() {
         if (!isContinuous()) {
             throw new IllegalStateException("Not a continuous data set.");
         }
@@ -943,7 +974,7 @@ public final class NumberObjectDataSet
      * first.
      */
     @Override
-	public final DoubleMatrix2D getCovarianceMatrix() {
+    public final DoubleMatrix2D getCovarianceMatrix() {
         if (!isContinuous()) {
             throw new IllegalStateException("Not a continuous data set.");
         }
@@ -972,13 +1003,12 @@ public final class NumberObjectDataSet
      * integer, or DiscreteVariable.MISSING_VALUE if the value is missing.
      */
     @Override
-	public final int getInt(int row, int column) {
+    public final int getInt(int row, int column) {
         Number value = data[row][column];
 
         if (value == null) {
             return DiscreteVariable.MISSING_VALUE;
-        }
-        else {
+        } else {
             return value.intValue();
         }
     }
@@ -990,13 +1020,12 @@ public final class NumberObjectDataSet
      * returned.
      */
     @Override
-	public final double getDouble(int row, int column) {
+    public final double getDouble(int row, int column) {
         Number value = data[row][column];
 
         if (value == null) {
             return ContinuousVariable.getDoubleMissingValue();
-        }
-        else {
+        } else {
             return value.doubleValue();
         }
     }
@@ -1036,9 +1065,9 @@ public final class NumberObjectDataSet
      * @see DataWriter
      */
     @Override
-	public final String toString() {
+    public final String toString() {
         StringBuilder buf = new StringBuilder();
-        List<Node> variables = getVariables();
+        List <Node> variables = getVariables();
 
         buf.append("\n");
 
@@ -1121,7 +1150,7 @@ public final class NumberObjectDataSet
      * @see #isMulipliersCollapsed()
      */
     @Override
-	public final DoubleMatrix2D getDoubleData() {
+    public final DoubleMatrix2D getDoubleData() {
         DoubleMatrix2D copy = new DenseDoubleMatrix2D(data.length, data[0].length);
 
         for (int i = 0; i < data.length; i++) {
@@ -1138,9 +1167,9 @@ public final class NumberObjectDataSet
      * index i, for i = 0 to indices.length - 1. (Moved over from Purify.)
      */
     @Override
-	public final DataSet subsetColumns(int indices[]) {
-        List<Node> variables = getVariables();
-        List<Node> _variables = new LinkedList<Node>();
+    public final DataSet subsetColumns(int indices[]) {
+        List <Node> variables = getVariables();
+        List <Node> _variables = new LinkedList <Node>();
 
         for (int index : indices) {
             _variables.add(variables.get(index));
@@ -1154,14 +1183,14 @@ public final class NumberObjectDataSet
 
         Number[][] _data = viewSelection(rows, indices);
 
-        NumberObjectDataSet _dataSet = new NumberObjectDataSet(0, new LinkedList<Node>());
+        NumberObjectDataSet _dataSet = new NumberObjectDataSet(0, new LinkedList <Node>());
         _dataSet.data = _data;
 
 //        _dataSet.name = name + "_copy";
         _dataSet.name = name;
         _dataSet.variables = _variables;
-        _dataSet.selection = new HashSet<Node>();
-        _dataSet.multipliers = new HashMap<Integer, Integer>(multipliers);
+        _dataSet.selection = new HashSet <Node>();
+        _dataSet.multipliers = new HashMap <Integer, Integer>(multipliers);
 
         // Might have to delete some knowledge.
         _dataSet.knowledge = new Knowledge(knowledge);
@@ -1169,7 +1198,7 @@ public final class NumberObjectDataSet
     }
 
     @Override
-	public final DataSet subsetRows(int rows[]) {
+    public final DataSet subsetRows(int rows[]) {
         int cols[] = new int[this.data[0].length];
 
         for (int i = 0; i < cols.length; i++) {
@@ -1194,7 +1223,7 @@ public final class NumberObjectDataSet
      * Shifts the given column
      */
     @Override
-	public final void shiftColumnDown(int row, int col, int numRowsShifted) {
+    public final void shiftColumnDown(int row, int col, int numRowsShifted) {
 
         if (row >= getNumRows() || col >= getNumColumns()) {
             throw new IllegalArgumentException("Out of range:  row = " + row + " col = " + col);
@@ -1225,7 +1254,7 @@ public final class NumberObjectDataSet
      * Removes the given columns from the data set.
      */
     @Override
-	public final void removeCols(int[] cols) {
+    public final void removeCols(int[] cols) {
 
         // TODO Check sanity of values in cols.
         int[] rows = new int[data.length];
@@ -1243,7 +1272,7 @@ public final class NumberObjectDataSet
             }
         }
 
-        List<Node> retainedVars = new LinkedList<Node>();
+        List <Node> retainedVars = new LinkedList <Node>();
 
         for (int retainedCol : retainedCols) {
             retainedVars.add(variables.get(retainedCol));
@@ -1253,8 +1282,8 @@ public final class NumberObjectDataSet
 
         data = _data;
         variables = retainedVars;
-        selection = new HashSet<Node>();
-        multipliers = new HashMap<Integer, Integer>(multipliers);
+        selection = new HashSet <Node>();
+        multipliers = new HashMap <Integer, Integer>(multipliers);
         knowledge = new Knowledge(
                 knowledge); // Might have to delete some knowledge.
     }
@@ -1263,7 +1292,7 @@ public final class NumberObjectDataSet
      * Removes the given rows from the data set.
      */
     @Override
-	public final void removeRows(int[] selectedRows) {
+    public final void removeRows(int[] selectedRows) {
 
         // TODO Check sanity of values in cols.
         int[] cols = new int[data[0].length];
@@ -1282,8 +1311,8 @@ public final class NumberObjectDataSet
         }
 
         data = viewSelection(retainedRows, cols);
-        selection = new HashSet<Node>();
-        multipliers = new HashMap<Integer, Integer>(multipliers);
+        selection = new HashSet <Node>();
+        multipliers = new HashMap <Integer, Integer>(multipliers);
         knowledge = new Knowledge(
                 knowledge); // Might have to delete some knowledge.
     }
@@ -1294,7 +1323,7 @@ public final class NumberObjectDataSet
      * equal, when rendered using the number format at <code>NumberFormatUtil.getInstance().getNumberFormat()</code>.
      */
     @Override
-	public final boolean equals(Object obj) {
+    public final boolean equals(Object obj) {
         NumberFormat nf = NumberFormatUtil.getInstance().getNumberFormat();
 
         if (obj == this) {
@@ -1351,8 +1380,8 @@ public final class NumberObjectDataSet
      * @deprecated This is set in DiscreteVariable now.
      */
     @Deprecated
-	@Override
-	public boolean isNewCategoriesAccomodated() {
+    @Override
+    public boolean isNewCategoriesAccomodated() {
         return this.newCategoriesAccomodated;
     }
 
@@ -1362,19 +1391,10 @@ public final class NumberObjectDataSet
      * @deprecated This is set in DiscreteVariable now.
      */
     @Deprecated
-	@Override
-	public final void setNewCategoriesAccomodated(
+    @Override
+    public final void setNewCategoriesAccomodated(
             boolean newCategoriesAccomodated) {
         this.newCategoriesAccomodated = newCategoriesAccomodated;
-    }
-
-    @Override
-	public void setNumberFormat(NumberFormat nf) {
-        if (nf == null) {
-            throw new NullPointerException();
-        }
-
-        this.nf = nf;
     }
 
     /**
@@ -1384,16 +1404,18 @@ public final class NumberObjectDataSet
      * @see #toString
      */
     @Override
-	public void setOutputDelimiter(Character character) {
+    public void setOutputDelimiter(Character character) {
         this.outputDelimiter = character;
     }
+
+    //===============================PRIVATE METHODS=====================//
 
     /**
      * Randomly permutes the rows of the dataset.
      */
     @Override
-	public void permuteRows() {
-        List<Integer> permutation = new ArrayList<Integer>();
+    public void permuteRows() {
+        List <Integer> permutation = new ArrayList <Integer>();
 
         for (int i = 0; i < getNumRows(); i++) {
             permutation.add(i);
@@ -1411,8 +1433,6 @@ public final class NumberObjectDataSet
 
         this.data = data2;
     }
-
-    //===============================PRIVATE METHODS=====================//
 
     private void setIntPrivate(int row, int col, int value) {
         if (value == -99) {
@@ -1450,63 +1470,18 @@ public final class NumberObjectDataSet
     /**
      * Returns the set of case multipliers..
      */
-    private Map<Integer, Integer> getMultipliers() {
+    private Map <Integer, Integer> getMultipliers() {
         return multipliers;
-    }
-
-    /**
-     * Adds semantic checks to the default deserialization method. This method
-     * must have the standard signature for a readObject method, and the body of
-     * the method must begin with "s.defaultReadObject();". Other than that, any
-     * semantic checks can be specified and do not need to stay the same from
-     * version to version. A readObject method of this form may be added to any
-     * class, even if Tetrad sessions were previously saved out using a version
-     * of the class that didn't include it. (That's what the
-     * "s.defaultReadObject();" is for. See J. Bloch, Effective Java, for help.
-     *
-     * @throws java.io.IOException
-     * @throws ClassNotFoundException
-     */
-    private static void readObject(ObjectInputStream s)
-            throws IOException, ClassNotFoundException {
-        s.defaultReadObject();
     }
 
     /**
      * Returns the set of selected nodes, creating a new set if necessary.
      */
-    private Set<Node> getSelection() {
+    private Set <Node> getSelection() {
         if (selection == null) {
-            selection = new HashSet<Node>();
+            selection = new HashSet <Node>();
         }
         return selection;
-    }
-
-    /**
-     * Attempts to translate <code>element</code> into a double value, returning
-     * it if successful, otherwise throwing an exception. To be successful, the
-     * object must be either a Number or a String.
-     *
-     * @throws IllegalArgumentException if the translation cannot be made. The
-     *                                  reason is in the message.
-     */
-    private static double getValueFromObjectContinuous(Object element) {
-        if ("*".equals(element) || "".equals(element)) {
-            return ContinuousVariable.getDoubleMissingValue();
-        } else if (element instanceof Number) {
-            return ((Number) element).doubleValue();
-        } else if (element instanceof String) {
-            try {
-                return Double.parseDouble((String) element);
-            }
-            catch (NumberFormatException e) {
-                return ContinuousVariable.getDoubleMissingValue();
-            }
-        } else {
-            throw new IllegalArgumentException(
-                    "The argument 'element' must be " +
-                            "either a Number or a String.");
-        }
     }
 
     /**
@@ -1598,10 +1573,10 @@ public final class NumberObjectDataSet
             throw new NullPointerException();
         }
 
-        List<String> categories = variable.getCategories();
+        List <String> categories = variable.getCategories();
 
         if (!categories.contains(category)) {
-            List<String> newCategories = new LinkedList<String>(categories);
+            List <String> newCategories = new LinkedList <String>(categories);
             newCategories.add(category);
             DiscreteVariable newVariable =
                     new DiscreteVariable(variable.getName(), newCategories);
@@ -1634,9 +1609,9 @@ public final class NumberObjectDataSet
      */
     private void adjustCategories(DiscreteVariable variable,
                                   int numCategories) {
-        List<String> categories =
-                new LinkedList<String>(variable.getCategories());
-        List<String> newCategories = new LinkedList<String>(categories);
+        List <String> categories =
+                new LinkedList <String>(variable.getCategories());
+        List <String> newCategories = new LinkedList <String>(categories);
 
         if (categories.size() > numCategories) {
             for (int i = variable.getCategories().size() - 1;
@@ -1675,6 +1650,14 @@ public final class NumberObjectDataSet
         return nf;
     }
 
+    @Override
+    public void setNumberFormat(NumberFormat nf) {
+        if (nf == null) {
+            throw new NullPointerException();
+        }
+
+        this.nf = nf;
+    }
 
     /**
      * Returns the index of the last row of the data that does not consist

@@ -31,7 +31,6 @@ import edu.cmu.tetrad.util.TetradLogger;
 
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
-import java.util.*;
 
 /**
  * Improves the P value of a SEM IM by adding, removing, or reversing single edges.
@@ -40,13 +39,13 @@ import java.util.*;
  */
 
 public final class PValueImprover5 {
+    private final NumberFormat nf = new DecimalFormat("0.0#########");
     private DataSet dataSet;
     private Knowledge knowledge = new Knowledge();
     private Graph graph;
     private double alpha = 0.05;
     private double highPValueAlpha = 0.05;
-    private final NumberFormat nf = new DecimalFormat("0.0#########");
-    private Set<GraphWithPValue> significantModels = new HashSet<GraphWithPValue>();
+    private Set <GraphWithPValue> significantModels = new HashSet <GraphWithPValue>();
     private Graph trueModel;
     private SemIm originalSemIm;
     private SemIm newSemIm;
@@ -96,6 +95,10 @@ public final class PValueImprover5 {
         this.scorer = new DagScorer(dataSet);
     }
 
+    public PValueImprover5() {
+        super();
+    }
+
     public Graph search() {
 //        Graph bestGraph = SearchGraphUtils.patternForDag(new EdgeListGraph(getGraph()));
         Graph bestGraph = SearchGraphUtils.dagFromPattern(getGraph());
@@ -138,7 +141,7 @@ public final class PValueImprover5 {
                 System.out.println("Trying to increase score above " + alpha);
             }
 
-            List<Move> moves = new ArrayList<Move>();
+            List <Move> moves = new ArrayList <Move>();
             moves.addAll(getAddMoves(bestGraph));
             moves.addAll(getRedirectMoves(bestGraph));
 //            moves.addAll(getSwapMoves(bestGraph));
@@ -219,7 +222,7 @@ public final class PValueImprover5 {
                 System.out.println("Trying to increase score above " + alpha + " same df");
             }
 
-            List<Move> moves = new ArrayList<Move>();
+            List <Move> moves = new ArrayList <Move>();
 //            moves.addAll(getAddMoves(bestGraph));
             moves.addAll(getRedirectMoves(bestGraph));
             moves.addAll(getSwapMoves(bestGraph));
@@ -315,7 +318,7 @@ public final class PValueImprover5 {
                 System.out.println("Trying to decrease score to just above " + alpha);
             }
 
-            List<Move> moves = new ArrayList<Move>();
+            List <Move> moves = new ArrayList <Move>();
             moves.addAll(getRemoveMoves(bestGraph));
             moves.addAll(getRedirectMoves(bestGraph));
 //            moves.addAll(getDoubleRemoveMoves(bestGraph));
@@ -396,10 +399,6 @@ public final class PValueImprover5 {
         }
     }
 
-    public PValueImprover5() {
-        super();
-    }
-
     public Graph removeHighPValueEdges(Graph bestGraph) {
         boolean changed = true;
 
@@ -476,11 +475,11 @@ public final class PValueImprover5 {
         return firstEdge;
     }
 
-    private List<Move> getAddMoves(Graph graph) {
-        List<Move> moves = new ArrayList<Move>();
+    private List <Move> getAddMoves(Graph graph) {
+        List <Move> moves = new ArrayList <Move>();
 
         // Add moves:
-        List<Node> nodes = graph.getNodes();
+        List <Node> nodes = graph.getNodes();
 
         for (int i = 0; i < nodes.size(); i++) {
             for (int j = 0; j < nodes.size(); j++) {
@@ -506,8 +505,8 @@ public final class PValueImprover5 {
         return moves;
     }
 
-    private List<Move> getRemoveMoves(Graph graph) {
-        List<Move> moves = new ArrayList<Move>();
+    private List <Move> getRemoveMoves(Graph graph) {
+        List <Move> moves = new ArrayList <Move>();
 
         // Remove moves:
         for (Edge edge : graph.getEdges()) {
@@ -517,8 +516,8 @@ public final class PValueImprover5 {
         return moves;
     }
 
-    private List<Move> getRedirectMoves(Graph graph) {
-        List<Move> moves = new ArrayList<Move>();
+    private List <Move> getRedirectMoves(Graph graph) {
+        List <Move> moves = new ArrayList <Move>();
 
         // Reverse moves:
         for (Edge edge : graph.getEdges()) {
@@ -544,21 +543,21 @@ public final class PValueImprover5 {
         return moves;
     }
 
-    private List<Move> getAddColliderMoves(Graph graph) {
+    private List <Move> getAddColliderMoves(Graph graph) {
 //         Make collider moves:
 
-        List<Move> moves = new ArrayList<Move>();
+        List <Move> moves = new ArrayList <Move>();
 
         for (Node b : graph.getNodes()) {
             if (graph.getAdjacentNodes(b).isEmpty()) {
-                List<Node> nodes = graph.getAdjacentNodes(b);
+                List <Node> nodes = graph.getAdjacentNodes(b);
 
                 if (nodes.size() >= 2) {
                     ChoiceGenerator gen = new ChoiceGenerator(nodes.size(), 2);
                     int[] choice;
 
                     while ((choice = gen.next()) != null) {
-                        List<Node> _nodes = GraphUtils.asList(choice, nodes);
+                        List <Node> _nodes = GraphUtils.asList(choice, nodes);
                         Node a = _nodes.get(0);
                         Node c = _nodes.get(1);
 
@@ -584,11 +583,11 @@ public final class PValueImprover5 {
         return moves;
     }
 
-    private List<Move> getSwapMoves(Graph graph) {
-        List<Move> moves = new ArrayList<Move>();
+    private List <Move> getSwapMoves(Graph graph) {
+        List <Move> moves = new ArrayList <Move>();
 
         for (Node b : graph.getNodes()) {
-            List<Node> adj = graph.getAdjacentNodes(b);
+            List <Node> adj = graph.getAdjacentNodes(b);
 
             if (adj.size() < 2) continue;
 
@@ -596,7 +595,7 @@ public final class PValueImprover5 {
             int[] choice;
 
             while ((choice = gen.next()) != null) {
-                List<Node> set = GraphUtils.asList(choice, adj);
+                List <Node> set = GraphUtils.asList(choice, adj);
 
                 Node a = set.get(0);
                 Node c = set.get(1);
@@ -614,11 +613,11 @@ public final class PValueImprover5 {
         return moves;
     }
 
-    private List<Move> getRemoveTriangleMoves(Graph graph) {
-        List<Move> moves = new ArrayList<Move>();
+    private List <Move> getRemoveTriangleMoves(Graph graph) {
+        List <Move> moves = new ArrayList <Move>();
 
         for (Node b : graph.getNodes()) {
-            List<Node> adj = graph.getAdjacentNodes(b);
+            List <Node> adj = graph.getAdjacentNodes(b);
 
             if (adj.size() < 2) continue;
 
@@ -626,7 +625,7 @@ public final class PValueImprover5 {
             int[] choice;
 
             while ((choice = gen.next()) != null) {
-                List<Node> set = GraphUtils.asList(choice, adj);
+                List <Node> set = GraphUtils.asList(choice, adj);
 
                 Node a = set.get(0);
                 Node c = set.get(1);
@@ -650,11 +649,11 @@ public final class PValueImprover5 {
         return moves;
     }
 
-    private List<Move> getRemoveColliderMoves(Graph graph) {
-        List<Move> moves = new ArrayList<Move>();
+    private List <Move> getRemoveColliderMoves(Graph graph) {
+        List <Move> moves = new ArrayList <Move>();
 
         for (Node b : graph.getNodes()) {
-            List<Node> adj = graph.getAdjacentNodes(b);
+            List <Node> adj = graph.getAdjacentNodes(b);
 
             if (adj.size() < 2) continue;
 
@@ -662,7 +661,7 @@ public final class PValueImprover5 {
             int[] choice;
 
             while ((choice = gen.next()) != null) {
-                List<Node> set = GraphUtils.asList(choice, adj);
+                List <Node> set = GraphUtils.asList(choice, adj);
 
                 Node a = set.get(0);
                 Node c = set.get(1);
@@ -679,9 +678,9 @@ public final class PValueImprover5 {
         return moves;
     }
 
-    private List<Move> getDoubleRemoveMoves(Graph graph) {
-        List<Move> moves = new ArrayList<Move>();
-        List<Edge> edges = graph.getEdges();
+    private List <Move> getDoubleRemoveMoves(Graph graph) {
+        List <Move> moves = new ArrayList <Move>();
+        List <Edge> edges = graph.getEdges();
 
         // Remove moves:
         for (int i = 0; i < edges.size(); i++) {
@@ -721,82 +720,11 @@ public final class PValueImprover5 {
         this.checkingCycles = checkingCycles;
     }
 
-    private static class Move {
-        public enum Type {
-            ADD, REMOVE, REDIRECT, ADD_COLLIDER, REMOVE_COLLIDER, SWAP, DOUBLE_REMOVE;
-        }
-
-        private Edge edge;
-        private Edge secondEdge;
-        private Type type;
-
-        public Move(Edge edge, Type type) {
-            this.edge = edge;
-            this.type = type;
-        }
-
-        public Move(Edge edge, Edge secondEdge, Type type) {
-            this.edge = edge;
-            this.secondEdge = secondEdge;
-            this.type = type;
-        }
-
-        public Edge getFirstEdge() {
-            return this.edge;
-        }
-
-        public Edge getSecondEdge() {
-            return secondEdge;
-        }
-
-        public Type getType() {
-            return this.type;
-        }
-
-        @Override
-		public String toString() {
-            String s = (secondEdge != null) ? (secondEdge + ", ") : "";
-            return "<" + edge + ", " + s + type + ">";
-
-        }
-    }
-
-
     private void saveModelIfSignificant(Graph graph) {
         double pValue = scoreGraph(graph).getPValue();
 
         if (pValue > getAlpha()) {
             getSignificantModels().add(new GraphWithPValue(graph, pValue));
-        }
-    }
-
-    public static class GraphWithPValue {
-        private Graph graph;
-        private double pValue;
-
-        public GraphWithPValue(Graph graph, double pValue) {
-            this.graph = graph;
-            this.pValue = pValue;
-        }
-
-        public Graph getGraph() {
-            return graph;
-        }
-
-        public double getPValue() {
-            return pValue;
-        }
-
-        @Override
-		public int hashCode() {
-            return 17 * graph.hashCode();
-        }
-
-        @Override
-		public boolean equals(Object o) {
-            if (o == null) return false;
-            GraphWithPValue p = (GraphWithPValue) o;
-            return (p.graph.equals(graph));
         }
     }
 
@@ -830,10 +758,6 @@ public final class PValueImprover5 {
         return new Score(scorer);
     }
 
-    public void setKnowledge(Knowledge knowledge) {
-        this.knowledge = knowledge;
-    }
-
     public Graph getTrueModel() {
         return trueModel;
     }
@@ -854,105 +778,12 @@ public final class PValueImprover5 {
         return knowledge;
     }
 
-    public Set<GraphWithPValue> getSignificantModels() {
-        return significantModels;
+    public void setKnowledge(Knowledge knowledge) {
+        this.knowledge = knowledge;
     }
 
-    public static class Score {
-        private Scorer scorer;
-        private double pValue;
-        private double fml;
-        private double chisq;
-        private double bic;
-        private double aic;
-        private int dof;
-        private ICovarianceMatrix cov;
-
-        private ICovarianceMatrix impliedMatrix;
-
-        public Score(Scorer scorer) {
-            this.scorer = scorer;
-            this.pValue = scorer.getPValue();
-            this.fml = scorer.getFml();
-            this.chisq = scorer.getChiSquare();
-            this.bic = scorer.getBicScore();
-            this.aic = scorer.getAicScore();
-            this.dof = scorer.getDof();
-        }
-
-        private Score() {
-            this.scorer = null;
-            this.pValue = 0.0;
-            this.fml = Double.POSITIVE_INFINITY;
-            this.chisq = 0.0;
-        }
-
-        public SemIm getEstimatedSem() {
-            return scorer.getEstSem();
-        }
-
-        public double getPValue() {
-            return pValue;
-        }
-
-        public double getScore() {
-//            double fml = estimatedSem.getFml();
-//            int freeParams = estimatedSem.getNumFreeParams();
-//            int sampleSize = estimatedSem.getSampleSize();
-//            return -(sampleSize - 1) * fml - (freeParams * Math.log(sampleSize));
-//            return -getChisq();
-
-//            if (getMaxEdgeP() > 0.05) {
-//                return Double.NEGATIVE_INFINITY;
-//            }
-
-//            return -fml;
-//            return -chisq;
-            return -bic;
-//            return -aic;
-        }
-
-        public double getFml() {
-            return fml;
-        }
-
-//        public double getChisq() {
-//            return chisq;
-//        }
-
-//        public double getMaxEdgeP() {
-//            double maxP = Double.NEGATIVE_INFINITY;
-//
-//            for (Parameter param : estimatedSem.getSemPm().getParameters()) {
-//                if (param.getType() != ParamType.COEF) {
-//                    continue;
-//                }
-//                double p = this.estimatedSem.getPValue(param, 10000);
-//                if (p > maxP) maxP = p;
-//            }
-//
-//            return maxP;
-//        }
-
-        public static Score negativeInfinity() {
-            return new Score();
-        }
-
-        public int getDof() {
-            return dof;
-        }
-
-        public ICovarianceMatrix getCovarianceMatrix() {
-            return cov;
-        }
-
-        public ICovarianceMatrix getImpliedMatrix() {
-            return impliedMatrix;
-        }
-
-        public double getChiSquare() {
-            return chisq;
-        }
+    public Set <GraphWithPValue> getSignificantModels() {
+        return significantModels;
     }
 
     /**
@@ -1001,6 +832,172 @@ public final class PValueImprover5 {
         int getNumParameters();
     }
 
+    private static class Move {
+        private Edge edge;
+        private Edge secondEdge;
+        private Type type;
+        public Move(Edge edge, Type type) {
+            this.edge = edge;
+            this.type = type;
+        }
+
+        public Move(Edge edge, Edge secondEdge, Type type) {
+            this.edge = edge;
+            this.secondEdge = secondEdge;
+            this.type = type;
+        }
+
+        public Edge getFirstEdge() {
+            return this.edge;
+        }
+
+        public Edge getSecondEdge() {
+            return secondEdge;
+        }
+
+        public Type getType() {
+            return this.type;
+        }
+
+        @Override
+        public String toString() {
+            String s = (secondEdge != null) ? (secondEdge + ", ") : "";
+            return "<" + edge + ", " + s + type + ">";
+
+        }
+
+        public enum Type {
+            ADD, REMOVE, REDIRECT, ADD_COLLIDER, REMOVE_COLLIDER, SWAP, DOUBLE_REMOVE;
+        }
+    }
+
+    public static class GraphWithPValue {
+        private Graph graph;
+        private double pValue;
+
+        public GraphWithPValue(Graph graph, double pValue) {
+            this.graph = graph;
+            this.pValue = pValue;
+        }
+
+        public Graph getGraph() {
+            return graph;
+        }
+
+        public double getPValue() {
+            return pValue;
+        }
+
+        @Override
+        public int hashCode() {
+            return 17 * graph.hashCode();
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (o == null) return false;
+            GraphWithPValue p = (GraphWithPValue) o;
+            return (p.graph.equals(graph));
+        }
+    }
+
+    public static class Score {
+        private Scorer scorer;
+        private double pValue;
+        private double fml;
+        private double chisq;
+        private double bic;
+        private double aic;
+        private int dof;
+        private ICovarianceMatrix cov;
+
+        private ICovarianceMatrix impliedMatrix;
+
+        public Score(Scorer scorer) {
+            this.scorer = scorer;
+            this.pValue = scorer.getPValue();
+            this.fml = scorer.getFml();
+            this.chisq = scorer.getChiSquare();
+            this.bic = scorer.getBicScore();
+            this.aic = scorer.getAicScore();
+            this.dof = scorer.getDof();
+        }
+
+        private Score() {
+            this.scorer = null;
+            this.pValue = 0.0;
+            this.fml = Double.POSITIVE_INFINITY;
+            this.chisq = 0.0;
+        }
+
+        public static Score negativeInfinity() {
+            return new Score();
+        }
+
+        public SemIm getEstimatedSem() {
+            return scorer.getEstSem();
+        }
+
+        public double getPValue() {
+            return pValue;
+        }
+
+        public double getScore() {
+//            double fml = estimatedSem.getFml();
+//            int freeParams = estimatedSem.getNumFreeParams();
+//            int sampleSize = estimatedSem.getSampleSize();
+//            return -(sampleSize - 1) * fml - (freeParams * Math.log(sampleSize));
+//            return -getChisq();
+
+//            if (getMaxEdgeP() > 0.05) {
+//                return Double.NEGATIVE_INFINITY;
+//            }
+
+//            return -fml;
+//            return -chisq;
+            return -bic;
+//            return -aic;
+        }
+
+//        public double getChisq() {
+//            return chisq;
+//        }
+
+//        public double getMaxEdgeP() {
+//            double maxP = Double.NEGATIVE_INFINITY;
+//
+//            for (Parameter param : estimatedSem.getSemPm().getParameters()) {
+//                if (param.getType() != ParamType.COEF) {
+//                    continue;
+//                }
+//                double p = this.estimatedSem.getPValue(param, 10000);
+//                if (p > maxP) maxP = p;
+//            }
+//
+//            return maxP;
+//        }
+
+        public double getFml() {
+            return fml;
+        }
+
+        public int getDof() {
+            return dof;
+        }
+
+        public ICovarianceMatrix getCovarianceMatrix() {
+            return cov;
+        }
+
+        public ICovarianceMatrix getImpliedMatrix() {
+            return impliedMatrix;
+        }
+
+        public double getChiSquare() {
+            return chisq;
+        }
+    }
+
     /**
      * Wraps a Sem for purposes of calculating its fitting function for given parameter values.
      *
@@ -1025,7 +1022,7 @@ public final class PValueImprover5 {
          * These values are mapped to parameter values.
          */
         @Override
-		public double evaluate(double[] parameters) {
+        public double evaluate(double[] parameters) {
             sem.setFreeParamValues(parameters);
 
             // This needs to be FML-- see Bollen p. 109.
@@ -1036,7 +1033,7 @@ public final class PValueImprover5 {
          * Returns the number of arguments. Required by the MultivariateFunction interface.
          */
         @Override
-		public int getNumParameters() {
+        public int getNumParameters() {
             return this.sem.getNumFreeParams();
         }
     }

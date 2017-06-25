@@ -52,7 +52,7 @@ public final class IndTestChiSquare implements IndependenceTest {
     /**
      * The variables in the discrete data sets for which conditional independence judgements are desired.
      */
-    private final List<Node> variables;
+    private final List <Node> variables;
 
     /**
      * The dataset of discrete variables.
@@ -103,7 +103,7 @@ public final class IndTestChiSquare implements IndependenceTest {
         // variables themselves in a List.
         this.dataSet = dataSet;
 
-        this.variables = new ArrayList<Node>(dataSet.getVariables());
+        this.variables = new ArrayList <Node>(dataSet.getVariables());
 
         int[] numVals = new int[this.variables.size()];
 
@@ -119,7 +119,7 @@ public final class IndTestChiSquare implements IndependenceTest {
      * Creates a new IndTestChiSquare for a subset of the nodes.
      */
     @Override
-	public IndependenceTest indTestSubset(List<Node> nodes) {
+    public IndependenceTest indTestSubset(List <Node> nodes) {
         if (nodes.isEmpty()) {
             throw new IllegalArgumentException("Subset may not be empty.");
         }
@@ -169,7 +169,7 @@ public final class IndTestChiSquare implements IndependenceTest {
      * Returns the p value associated with the most recent call of isIndependent.
      */
     @Override
-	public double getPValue() {
+    public double getPValue() {
         return pValue;
     }
 
@@ -182,7 +182,7 @@ public final class IndTestChiSquare implements IndependenceTest {
      * @return true iff x _||_ y | z.
      */
     @Override
-	public boolean isIndependent(Node x, Node y, List<Node> z) {
+    public boolean isIndependent(Node x, Node y, List <Node> z) {
         NumberFormat nf = NumberFormatUtil.getInstance().getNumberFormat();
 
         if (z == null) {
@@ -245,19 +245,19 @@ public final class IndTestChiSquare implements IndependenceTest {
     }
 
     @Override
-	public boolean isIndependent(Node x, Node y, Node... z) {
-        List<Node> zList = Arrays.asList(z);
+    public boolean isIndependent(Node x, Node y, Node... z) {
+        List <Node> zList = Arrays.asList(z);
         return isIndependent(x, y, zList);
     }
 
     @Override
-	public boolean isDependent(Node x, Node y, List<Node> z) {
+    public boolean isDependent(Node x, Node y, List <Node> z) {
         return !isIndependent(x, y, z);
     }
 
     @Override
-	public boolean isDependent(Node x, Node y, Node... z) {
-        List<Node> zList = Arrays.asList(z);
+    public boolean isDependent(Node x, Node y, Node... z) {
+        List <Node> zList = Arrays.asList(z);
         return isDependent(x, y, zList);
     }
 
@@ -270,7 +270,7 @@ public final class IndTestChiSquare implements IndependenceTest {
      * @return true if it is estimated that z determines x or z determines y.
      */
     @Override
-	public boolean determines(List<Node> z, Node x1) {
+    public boolean determines(List <Node> z, Node x1) {
         if (z == null) {
             throw new NullPointerException();
         }
@@ -325,7 +325,7 @@ public final class IndTestChiSquare implements IndependenceTest {
     }
 
     @Override
-	public double getAlpha() {
+    public double getAlpha() {
         return chiSquareTest.getAlpha();
     }
 
@@ -336,7 +336,7 @@ public final class IndTestChiSquare implements IndependenceTest {
      * @param alpha the new significance level.
      */
     @Override
-	public void setAlpha(double alpha) {
+    public void setAlpha(double alpha) {
         this.chiSquareTest.setAlpha(alpha);
     }
 
@@ -345,7 +345,7 @@ public final class IndTestChiSquare implements IndependenceTest {
      * relations-- that is, all the variables in the given graph or the given data set.
      */
     @Override
-	public List<Node> getVariables() {
+    public List <Node> getVariables() {
         return Collections.unmodifiableList(variables);
     }
 
@@ -353,9 +353,9 @@ public final class IndTestChiSquare implements IndependenceTest {
      * Returns the list of variable varNames.
      */
     @Override
-	public List<String> getVariableNames() {
-        List<Node> variables = getVariables();
-        List<String> variableNames = new ArrayList<String>();
+    public List <String> getVariableNames() {
+        List <Node> variables = getVariables();
+        List <String> variableNames = new ArrayList <String>();
         for (Node variable1 : variables) {
             variableNames.add(variable1.getName());
         }
@@ -363,7 +363,7 @@ public final class IndTestChiSquare implements IndependenceTest {
     }
 
     @Override
-	public Node getVariable(String name) {
+    public Node getVariable(String name) {
         for (int i = 0; i < getVariables().size(); i++) {
             Node variable = getVariables().get(i);
             if (variable.getName().equals(name)) {
@@ -375,7 +375,7 @@ public final class IndTestChiSquare implements IndependenceTest {
     }
 
     @Override
-	public String toString() {
+    public String toString() {
         NumberFormat nf = NumberFormatUtil.getInstance().getNumberFormat();
         return "Chi Square, alpha = " + nf.format(getAlpha());
     }
@@ -389,7 +389,7 @@ public final class IndTestChiSquare implements IndependenceTest {
     }
 
     @Override
-	public DataSet getData() {
+    public DataSet getData() {
         return dataSet;
     }
 }

@@ -53,7 +53,7 @@ public final class MeasuredLatentOnly implements GraphConstraint {
      * Returns true.
      */
     @Override
-	public boolean isEdgeAddable(Edge edge, Graph graph) {
+    public boolean isEdgeAddable(Edge edge, Graph graph) {
         return true;
     }
 
@@ -61,7 +61,7 @@ public final class MeasuredLatentOnly implements GraphConstraint {
      * Returns true iff the given node is either an observed or a latent node.
      */
     @Override
-	public boolean isNodeAddable(Node node, Graph graph) {
+    public boolean isNodeAddable(Node node, Graph graph) {
         NodeType type = node.getNodeType();
         return type == NodeType.MEASURED || type == NodeType.LATENT;
     }
@@ -70,7 +70,7 @@ public final class MeasuredLatentOnly implements GraphConstraint {
      * Returns true;
      */
     @Override
-	public boolean isEdgeRemovable(Edge edge, Graph graph) {
+    public boolean isEdgeRemovable(Edge edge, Graph graph) {
         return true;
     }
 
@@ -78,7 +78,7 @@ public final class MeasuredLatentOnly implements GraphConstraint {
      * Returns true.
      */
     @Override
-	public boolean isNodeRemovable(Node node, Graph graph) {
+    public boolean isNodeRemovable(Node node, Graph graph) {
         return true;
     }
 
@@ -86,7 +86,7 @@ public final class MeasuredLatentOnly implements GraphConstraint {
      * Returns a string representation of the constraint.
      */
     @Override
-	public String toString() {
+    public String toString() {
         return "<Measured and latent nodes only.>";
     }
 }

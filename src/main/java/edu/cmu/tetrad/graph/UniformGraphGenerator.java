@@ -55,72 +55,60 @@ import java.util.List;
 public final class UniformGraphGenerator {
     public static final int ANY_DAG = 0;
     public static final int CONNECTED_DAG = 1;
-
+    /**
+     * The random source.
+     */
+    final RandomUtil randomUtil = RandomUtil.getInstance();
     /**
      * Indicates the structural assumption. May be ANY_DAG, CONNECTED_DAG.
      */
     private int structure;
-
     /**
      * The number of nodes in a graph. The default is 4.
      */
     private int numNodes;
-
     /**
      * The maximum indegree for a node in a graph. The default is 3.
      */
     private int maxInDegree;
-
     /**
      * The maximum outdegree of a node in a graph. The defualt is 3.
      */
     private int maxOutDegree;
-
     /**
      * The maximum degree of a node in a graph. The default is the maximum
      * number possible (the value -1 is used for this).
      */
     private int maxDegree;
-
     /**
      * The maximum number of edges in the graph. The default is the number of
      * nodes minus 1.
      */
     private int maxEdges;
-
     /**
      * The number of iterations for the Markov chain process.
      */
     private int numIterations;
-
     /**
      * Matrix of parents for each node. parentMatrix[i][0] indicates the number
      * of parents; parentMatrix[i][k] represents the (k-1)'th parent, k =
      * 1...max.
      */
     private int[][] parentMatrix;
-
     /**
      * Matrix of parents for each node. childMatrix[i][0] indicates the number
      * of parents; childMatrix[i][k] represents the (k-1)'th child, k =
      * 1...max.
      */
     private int[][] childMatrix;
-
     /**
      * Parent of random edge. 0 is the default parent node.
      */
     private int randomParent = 0;
-
     /**
      * Child of random edge. 0 is the default child node.
      */
     private int randomChild = 1;
-
-    /**
-     * The random source.
-     */
-    final RandomUtil randomUtil = RandomUtil.getInstance();
 //    RandomUtil randomUtil = new SeededRandomUtil(23333342L);
 
     //===============================CONSTRUCTORS==========================//
@@ -210,8 +198,7 @@ public final class UniformGraphGenerator {
             throw new IllegalArgumentException("Max indegree must be >= 1 " +
                     "when generating DAGs without the assumption of " +
                     "connectedness.");
-        }
-        else if (CONNECTED_DAG == getStructure() && getMaxInDegree() < 2) {
+        } else if (CONNECTED_DAG == getStructure() && getMaxInDegree() < 2) {
             throw new IllegalArgumentException("Max indegree must be >= 2 " +
                     "when generating DAGs under the assumption of " +
                     "connectedness.");
@@ -244,10 +231,6 @@ public final class UniformGraphGenerator {
         return maxEdges;
     }
 
-    public int getMaxPossibleEdges() {
-        return getNumNodes() * getMaxDegree() / 2;
-    }
-
     public void setMaxEdges(int maxEdges) {
         if (maxEdges < 0) {
             throw new IllegalArgumentException("Max edges must be >= 0.");
@@ -262,6 +245,10 @@ public final class UniformGraphGenerator {
         }
 
         this.maxEdges = maxEdges;
+    }
+
+    public int getMaxPossibleEdges() {
+        return getNumNodes() * getMaxDegree() / 2;
     }
 
     public int getNumIterations() {
@@ -279,11 +266,9 @@ public final class UniformGraphGenerator {
     public void generate() {
         if (ANY_DAG == getStructure()) {
             generateArbitraryDag();
-        }
-        else if (CONNECTED_DAG == getStructure()) {
+        } else if (CONNECTED_DAG == getStructure()) {
             generateConnectedDag();
-        }
-        else {
+        } else {
             throw new IllegalStateException("Unknown structure type.");
         }
     }
@@ -291,7 +276,7 @@ public final class UniformGraphGenerator {
     public Dag getDag() {
         //System.out.println("Converting to DAG");
 
-        List<Node> nodes = new ArrayList<Node>();
+        List <Node> nodes = new ArrayList <Node>();
         NumberFormat nf = NumberFormat.getInstance();
         nf.setMaximumFractionDigits(0);
 
@@ -309,12 +294,12 @@ public final class UniformGraphGenerator {
         return getDag(nodes);
     }
 
-    public Dag getDag(List<Node> nodes) {
+    public Dag getDag(List <Node> nodes) {
         if (nodes.size() != getNumNodes()) {
             throw new IllegalArgumentException("Only " + nodes.size() + " nodes were provided, but the " +
                     "simulated graph has " + getNumNodes() + ".");
         }
-        
+
         Dag dag = new Dag();
 
         for (Node node : nodes) {
@@ -353,7 +338,7 @@ public final class UniformGraphGenerator {
     }
 
     @Override
-	public String toString() {
+    public String toString() {
         StringBuilder buf = new StringBuilder();
 
         buf.append("\nStructural information for generated graph:");
@@ -391,8 +376,7 @@ public final class UniformGraphGenerator {
             if (edgeExists()) {
                 removeEdge();
                 numEdges--;
-            }
-            else {
+            } else {
                 if ((numEdges < getMaxEdges() && maxDegreeNotExceeded() &&
                         maxIndegreeNotExceeded() && maxOutdegreeNotExceeded() &&
                         isAcyclic())) {
@@ -442,18 +426,15 @@ public final class UniformGraphGenerator {
                             maxIndegreeNotExceeded() &&
                             maxOutdegreeNotExceeded() && isAcyclic()) {
                         addEdge();
-                    }
-                    else {
+                    } else {
                         reverseDirection();
                         addEdge();
                     }
-                }
-                else {
+                } else {
                     removeEdge();
                     totalEdges--;
                 }
-            }
-            else {
+            } else {
                 if (totalEdges < getMaxEdges() && maxDegreeNotExceeded() &&
                         maxIndegreeNotExceeded() && maxOutdegreeNotExceeded() &&
                         isAcyclic()) {
@@ -589,8 +570,7 @@ public final class UniformGraphGenerator {
                     if (parentMatrix[currentNode][i] != randomChild) {
                         list[lastIndex] = parentMatrix[currentNode][i];
                         lastIndex++;
-                    }
-                    else {
+                    } else {
                         noCycle = false;
                     }
                     visited[parentMatrix[currentNode][i]] = true;
@@ -663,8 +643,7 @@ public final class UniformGraphGenerator {
         int rest = rand - randomParent * (getNumNodes() - 1);
         if (rest >= randomParent) {
             randomChild = rest + 1;
-        }
-        else {
+        } else {
             randomChild = rest;
         }
     }
@@ -691,15 +670,13 @@ public final class UniformGraphGenerator {
                 (childMatrix[randomParent][0] != 1)) {
             lastNode =
                     parentMatrix[randomChild][parentMatrix[randomChild][0] - 1];
-            for (int i = (parentMatrix[randomChild][0] - 1); (i > 0 && go); i--)
-            { // remove element from parentMatrix
+            for (int i = (parentMatrix[randomChild][0] - 1); (i > 0 && go); i--) { // remove element from parentMatrix
                 atualNode = parentMatrix[randomChild][i];
                 if (atualNode != randomParent) {
                     proxNode = atualNode;
                     parentMatrix[randomChild][i] = lastNode;
                     lastNode = proxNode;
-                }
-                else {
+                } else {
                     parentMatrix[randomChild][i] = lastNode;
                     go = false;
                 }
@@ -716,8 +693,7 @@ public final class UniformGraphGenerator {
                         proxNode = atualNode;
                         childMatrix[randomParent][i] = lastNode;
                         lastNode = proxNode;
-                    }
-                    else {
+                    } else {
                         childMatrix[randomParent][i] = lastNode;
                         go = false;
                     }

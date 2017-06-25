@@ -35,15 +35,13 @@ import java.util.regex.Pattern;
  * @author Joseph Ramsey
  */
 public final class DelimiterType implements TetradSerializable {
-    static final long serialVersionUID = 23L;
-
     public static final DelimiterType WHITESPACE =
 //            new DelimiterType("Whitespace", " *[\t ] *");
             new DelimiterType("Whitespace", "\\s+");
     public static final DelimiterType TAB =
 //            new DelimiterType("Tab", " *\t *");
             new DelimiterType("Tab", "\t");
-//    public static final DelimiterType COMMA = new DelimiterType("Comma", ",");
+    //    public static final DelimiterType COMMA = new DelimiterType("Comma", ",");
     public static final DelimiterType COMMA =
 //            new DelimiterType("Comma", " *, *");
             new DelimiterType("Comma", ",");
@@ -52,16 +50,19 @@ public final class DelimiterType implements TetradSerializable {
             new DelimiterType("Comma", ":");
     public static final DelimiterType WHITESPACE_OR_COMMA =
             new DelimiterType("Comma", " *[\\t ,] *");
-
+    static final long serialVersionUID = 23L;
+    private static final DelimiterType[] TYPES = {WHITESPACE, TAB, COMMA};
+    // Declarations required for serialization.
+    private static int nextOrdinal = 0;
     /**
      * The name of this type.
      */
     private transient final String name;
-
     /**
      * The regular expression representing the delimiter.
      */
     private transient final Pattern pattern;
+    private final int ordinal = nextOrdinal++;
 
     /**
      * Protected constructor for the types; this allows for extension in case
@@ -94,14 +95,9 @@ public final class DelimiterType implements TetradSerializable {
      * Prints out the name of the type.
      */
     @Override
-	public final String toString() {
+    public final String toString() {
         return name;
     }
-
-    // Declarations required for serialization.
-    private static int nextOrdinal = 0;
-    private final int ordinal = nextOrdinal++;
-    private static final DelimiterType[] TYPES = {WHITESPACE, TAB, COMMA};
 
     final Object readResolve() throws ObjectStreamException {
         return TYPES[ordinal]; // Canonicalize.

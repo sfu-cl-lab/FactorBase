@@ -72,10 +72,21 @@ public class TestSessionSupport extends TestCase {
     }
 
     /**
+     * This method uses reflection to collect up all of the test methods from
+     * this class and return them to the test runner.
+     */
+    public static Test suite() {
+
+        // Edit the name of the class in the parens to match the name
+        // of this class.
+        return new TestSuite(TestSessionSupport.class);
+    }
+
+    /**
      * Sets up the session support object to be tested.
      */
     @Override
-	public void setUp() {
+    public void setUp() {
         this.node1 = new SessionNode(Type1.class);
         this.node2 = new SessionNode(Type2.class);
         this.session = new Session("Test");
@@ -93,7 +104,7 @@ public class TestSessionSupport extends TestCase {
              * This method is called when a node is added.
              */
             @Override
-			public void nodeAdded(SessionEvent event) {
+            public void nodeAdded(SessionEvent event) {
 
                 assertTrue(event.getType() == SessionEvent.NODE_ADDED);
                 assertTrue(getNode1() == event.getNode());
@@ -105,7 +116,7 @@ public class TestSessionSupport extends TestCase {
              * This method is called when a node is removed.
              */
             @Override
-			public void nodeRemoved(SessionEvent event) {
+            public void nodeRemoved(SessionEvent event) {
 
                 assertTrue(event.getType() == SessionEvent.NODE_REMOVED);
                 assertTrue(getNode1() == event.getNode());
@@ -117,7 +128,7 @@ public class TestSessionSupport extends TestCase {
              * This method is called when an edge is added.
              */
             @Override
-			public void parentAdded(SessionEvent event) {
+            public void parentAdded(SessionEvent event) {
 
                 assertTrue(event.getType() == SessionEvent.PARENT_ADDED);
                 assertTrue(getNode1() == event.getParent());
@@ -129,7 +140,7 @@ public class TestSessionSupport extends TestCase {
              * This method is called when an edge is removed.
              */
             @Override
-			public void parentRemoved(SessionEvent event) {
+            public void parentRemoved(SessionEvent event) {
 
                 assertTrue(event.getType() == SessionEvent.PARENT_REMOVED);
                 assertTrue(getNode1() == event.getParent());
@@ -141,7 +152,7 @@ public class TestSessionSupport extends TestCase {
              * This method is called when a model is created for a node.
              */
             @Override
-			public void modelCreated(SessionEvent event) {
+            public void modelCreated(SessionEvent event) {
 
                 assertTrue(event.getType() == SessionEvent.MODEL_CREATED);
                 assertTrue(getNode1() == event.getNode());
@@ -153,7 +164,7 @@ public class TestSessionSupport extends TestCase {
              * This method is called when a model is destroyed for a node.
              */
             @Override
-			public void modelDestroyed(SessionEvent event) {
+            public void modelDestroyed(SessionEvent event) {
 
                 assertTrue(event.getType() == SessionEvent.MODEL_DESTROYED);
                 assertTrue(getNode1() == event.getNode());
@@ -166,7 +177,7 @@ public class TestSessionSupport extends TestCase {
              * type is ambiguous.
              */
             @Override
-			public void modelUnclear(SessionEvent event) {
+            public void modelUnclear(SessionEvent event) {
 
                 assertTrue(event.getType() == SessionEvent.MODEL_UNCLEAR);
                 assertTrue(getNode1() == event.getNode());
@@ -178,7 +189,7 @@ public class TestSessionSupport extends TestCase {
              * This method is called when a node is executed manually.
              */
             @Override
-			public void executionStarted(SessionEvent event) {
+            public void executionStarted(SessionEvent event) {
                 assertTrue(event.getType() == SessionEvent.EXECUTION_STARTED);
                 assertNull(event.getParent());
                 setEvent1Received(true);
@@ -188,7 +199,7 @@ public class TestSessionSupport extends TestCase {
              * This method is called when a node is executed manually.
              */
             @Override
-			public void repetitionChanged(SessionEvent event) {
+            public void repetitionChanged(SessionEvent event) {
                 assertTrue(event.getType() == SessionEvent.REPETITION_CHANGED);
                 assertNull(event.getParent());
                 setEvent1Received(true);
@@ -198,7 +209,7 @@ public class TestSessionSupport extends TestCase {
              * This method is called when a node is executed manually.
              */
             @Override
-			public void addingEdge(SessionEvent event) {
+            public void addingEdge(SessionEvent event) {
                 assertTrue(event.getType() == SessionEvent.ADDING_EDGE);
                 assertNull(event.getParent());
                 setEvent1Received(true);
@@ -258,7 +269,7 @@ public class TestSessionSupport extends TestCase {
              * This method is called when a node is added.
              */
             @Override
-			public void nodeAdded(SessionEvent event) {
+            public void nodeAdded(SessionEvent event) {
                 System.out.println("HERE");
                 setEvent1Received(true);
             }
@@ -269,7 +280,7 @@ public class TestSessionSupport extends TestCase {
              * This method is called when a node is added.
              */
             @Override
-			public void nodeAdded(SessionEvent event) {
+            public void nodeAdded(SessionEvent event) {
                 setEvent2Received(true);
             }
         };
@@ -335,17 +346,6 @@ public class TestSessionSupport extends TestCase {
      */
     public SessionNode getNode2() {
         return this.node2;
-    }
-
-    /**
-     * This method uses reflection to collect up all of the test methods from
-     * this class and return them to the test runner.
-     */
-    public static Test suite() {
-
-        // Edit the name of the class in the parens to match the name
-        // of this class.
-        return new TestSuite(TestSessionSupport.class);
     }
 }
 

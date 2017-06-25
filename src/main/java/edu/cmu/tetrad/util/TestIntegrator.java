@@ -32,16 +32,20 @@ public class TestIntegrator extends TestCase {
         super(name);
     }
 
+    public static Test suite() {
+        return new TestSuite(TestIntegrator.class);
+    }
+
     @Override
-	public void setUp() {
+    public void setUp() {
         function = new Function() {
             @Override
-			public double valueAt(double x) {
+            public double valueAt(double x) {
                 return x;
             }
 
             @Override
-			public String toString() {
+            public String toString() {
                 return "y=x.";
             }
         };
@@ -49,12 +53,8 @@ public class TestIntegrator extends TestCase {
 
     public void testPdfIntegration() {
         assertEquals("Integrator not integrate properly under the function: " +
-                function, 0.5, Integrator.getArea(function, 0.0, 1.0, 10000),
+                        function, 0.5, Integrator.getArea(function, 0.0, 1.0, 10000),
                 0.000000001);
-    }
-
-    public static Test suite() {
-        return new TestSuite(TestIntegrator.class);
     }
 }
 

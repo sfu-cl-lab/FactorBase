@@ -41,6 +41,10 @@ public class TestIndependenceFact extends TestCase {
         super(name);
     }
 
+    public static Test suite() {
+        return new TestSuite(TestIndependenceFact.class);
+    }
+
     public void testSimpleCase() {
 
         Node x = new GraphNode("X");
@@ -62,19 +66,14 @@ public class TestIndependenceFact extends TestCase {
 
         try {
             assertEquals(fact1, fact3);
-        }
-        catch (AssertionFailedError e) {
+        } catch (AssertionFailedError e) {
             // fail.
         }
 
-        List<IndependenceFact> facts = new ArrayList<IndependenceFact>();
+        List <IndependenceFact> facts = new ArrayList <IndependenceFact>();
 
         facts.add(fact1);
 
         assertTrue(facts.contains(fact2));
-    }
-
-    public static Test suite() {
-        return new TestSuite(TestIndependenceFact.class);
     }
 }

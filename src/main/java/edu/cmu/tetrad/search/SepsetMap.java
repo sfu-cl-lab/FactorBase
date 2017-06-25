@@ -26,7 +26,6 @@ import edu.cmu.tetrad.util.TetradSerializable;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
-import java.util.*;
 
 /**
  * <p>Stores a map from pairs of nodes to separating sets--that is, for each unordered pair of nodes {node1, node2} in a
@@ -47,11 +46,11 @@ public final class SepsetMap implements TetradSerializable {
     /**
      * @serial
      */
-    private Map<Set<Node>, List<Node>> sepsets =
-            new HashMap<Set<Node>, List<Node>>();
+    private Map <Set <Node>, List <Node>> sepsets =
+            new HashMap <Set <Node>, List <Node>>();
 
-    private Map<Node, LinkedHashSet<Node>> parents = new HashMap<Node, LinkedHashSet<Node>>();
-    private Set<Set<Node>> correlations;
+    private Map <Node, LinkedHashSet <Node>> parents = new HashMap <Node, LinkedHashSet <Node>>();
+    private Set <Set <Node>> correlations;
 
     //=============================CONSTRUCTORS===========================//
 
@@ -59,7 +58,7 @@ public final class SepsetMap implements TetradSerializable {
     }
 
     public SepsetMap(SepsetMap map) {
-        this.sepsets = new HashMap<Set<Node>, List<Node>>(map.sepsets);
+        this.sepsets = new HashMap <Set <Node>, List <Node>>(map.sepsets);
     }
 
     /**
@@ -77,8 +76,8 @@ public final class SepsetMap implements TetradSerializable {
     /**
      * Sets the sepset for {x, y} to be z. Note that {x, y} is unordered.
      */
-    public void set(Node x, Node y, List<Node> z) {
-        Set<Node> pair = new HashSet<Node>(2);
+    public void set(Node x, Node y, List <Node> z) {
+        Set <Node> pair = new HashSet <Node>(2);
         pair.add(x);
         pair.add(y);
         sepsets.put(pair, z);
@@ -87,8 +86,8 @@ public final class SepsetMap implements TetradSerializable {
     /**
      * Retrieves the sepset previously set for {x, y}, or null if no such set was previously set.
      */
-    public List<Node> get(Node x, Node y) {
-        Set<Node> pair = new HashSet<Node>(2);
+    public List <Node> get(Node x, Node y) {
+        Set <Node> pair = new HashSet <Node>(2);
         pair.add(x);
         pair.add(y);
 
@@ -99,7 +98,7 @@ public final class SepsetMap implements TetradSerializable {
         return sepsets.get(pair);
     }
 
-    public void set(Node x, LinkedHashSet<Node> z) {
+    public void set(Node x, LinkedHashSet <Node> z) {
         if (parents.get(x) != null) {
             parents.get(x).addAll(z);
         } else {
@@ -107,12 +106,12 @@ public final class SepsetMap implements TetradSerializable {
         }
     }
 
-    public LinkedHashSet<Node> get(Node x) {
-        return parents.get(x) == null ? new LinkedHashSet<Node>() : parents.get(x);
+    public LinkedHashSet <Node> get(Node x) {
+        return parents.get(x) == null ? new LinkedHashSet <Node>() : parents.get(x);
     }
 
     @Override
-	public boolean equals(Object o) {
+    public boolean equals(Object o) {
         if (o == null) {
             return false;
         }
@@ -151,7 +150,7 @@ public final class SepsetMap implements TetradSerializable {
     }
 
     @Override
-	public String toString() {
+    public String toString() {
         return sepsets.toString();
     }
 
@@ -159,7 +158,7 @@ public final class SepsetMap implements TetradSerializable {
      * ( Sets the set of node pairs that are correlated. These are returned by the depth zero search of PC. This set
      * must be complete; it will be assumed that the sepset for any node pair not in this set is the empty set.
      */
-    public void setCorrelations(Set<Set<Node>> pairs) {
+    public void setCorrelations(Set <Set <Node>> pairs) {
         this.correlations = pairs;
     }
 }

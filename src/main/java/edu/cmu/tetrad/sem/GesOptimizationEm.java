@@ -41,7 +41,7 @@ import java.util.List;
 public final class GesOptimizationEm implements TetradSerializable {
     static final long serialVersionUID = 23L;
     private static final double FUNC_TOLERANCE = 1.0e-4;
-    private ArrayList<Node> nodes;
+    private ArrayList <Node> nodes;
     private int numNodes;
     private DoubleMatrix2D sampleCovar;
     private DoubleMatrix2D edgeCoef;
@@ -77,6 +77,16 @@ public final class GesOptimizationEm implements TetradSerializable {
 
     }
 
+    public GesOptimizationEm(List <Node> nodes, DoubleMatrix2D sampleCovar, int sampleSize) {
+        this.nodes = new ArrayList <Node>(nodes);
+        this.sampleSize = sampleSize;
+        this.graph = new EdgeListGraph(this.nodes);
+        this.numNodes = this.nodes.size();
+        this.sampleCovar = sampleCovar;
+        this.edgeCoef = new DenseDoubleMatrix2D(graph.getNumNodes(), graph.getNumNodes());
+        this.errorCovar = DoubleFactory2D.dense.identity(graph.getNumNodes());
+    }
+
     /**
      * Generates a simple exemplar of this class to test serialization.
      *
@@ -85,16 +95,6 @@ public final class GesOptimizationEm implements TetradSerializable {
      */
     public static SemOptimizerEm serializableInstance() {
         return new SemOptimizerEm();
-    }
-
-    public GesOptimizationEm(List<Node> nodes, DoubleMatrix2D sampleCovar, int sampleSize) {
-        this.nodes = new ArrayList<Node>(nodes);
-        this.sampleSize = sampleSize;
-        this.graph = new EdgeListGraph(this.nodes);
-        this.numNodes = this.nodes.size();
-        this.sampleCovar = sampleCovar;
-        this.edgeCoef = new DenseDoubleMatrix2D(graph.getNumNodes(), graph.getNumNodes());
-        this.errorCovar = DoubleFactory2D.dense.identity(graph.getNumNodes());
     }
 
     //=============================PUBLIC METHODS=========================//
@@ -150,7 +150,7 @@ public final class GesOptimizationEm implements TetradSerializable {
      * Fit the parameters by doing local regressions.
      */
     public void optimizeRegression() {
-        List<Node> nodes = graph.getNodes();
+        List <Node> nodes = graph.getNodes();
         Algebra algebra = new Algebra();
 
 //        TetradLogger.getInstance().log("info", "FML = " + semIm.getScore());
@@ -161,7 +161,7 @@ public final class GesOptimizationEm implements TetradSerializable {
             }
 
             int idx = nodes.indexOf(node);
-            List<Node> parents = graph.getParents(node);
+            List <Node> parents = graph.getParents(node);
             Node errorParent = node;
 
             for (int i = 0; i < parents.size(); i++) {
@@ -236,11 +236,9 @@ public final class GesOptimizationEm implements TetradSerializable {
             Node node = this.graph.getNodes().get(i);
             if (node.getNodeType() == NodeType.LATENT) {
                 this.numLatent++;
-            }
-            else if (node.getNodeType() == NodeType.MEASURED) {
+            } else if (node.getNodeType() == NodeType.MEASURED) {
                 this.numObserved++;
-            }
-            else if (node.getNodeType() == NodeType.ERROR) {
+            } else if (node.getNodeType() == NodeType.ERROR) {
                 break;
             }
         }
@@ -255,11 +253,9 @@ public final class GesOptimizationEm implements TetradSerializable {
             Node node = this.graph.getNodes().get(i);
             if (node.getNodeType() == NodeType.LATENT) {
                 this.idxLatent[countLatent++] = i;
-            }
-            else if (node.getNodeType() == NodeType.MEASURED) {
+            } else if (node.getNodeType() == NodeType.MEASURED) {
                 this.idxObserved[countObserved++] = i;
-            }
-            else if (node.getNodeType() == NodeType.ERROR) {
+            } else if (node.getNodeType() == NodeType.ERROR) {
                 break;
             }
         }
@@ -305,8 +301,7 @@ public final class GesOptimizationEm implements TetradSerializable {
                     this.parents[idx][i] =
                             this.graph.getNodes().indexOf(parents.get(i));
                 }
-            }
-            else {
+            } else {
                 this.parents[idx] = null;
             }
         }
@@ -366,8 +361,7 @@ public final class GesOptimizationEm implements TetradSerializable {
 //                        this.semIm.setParamValue(
 //                                this.graph.getNodes().get(idx2), node,
 //                                edges[i]);
-                    }
-                    catch (IllegalArgumentException e) {
+                    } catch (IllegalArgumentException e) {
                         //Dont't do anything: it is just a fixed parameter
                     }
                 }
@@ -379,8 +373,7 @@ public final class GesOptimizationEm implements TetradSerializable {
 
 //                this.semIm.setParamValue(this.errorParent[idx],
 //                        this.errorParent[idx], variance);
-            }
-            catch (IllegalArgumentException e) {
+            } catch (IllegalArgumentException e) {
                 //Don't do anything: it is just a fixed parameter
             }
         }

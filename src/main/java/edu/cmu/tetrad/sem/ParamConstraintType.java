@@ -34,33 +34,32 @@ import java.io.ObjectStreamException;
  * @author Frank Wimberly following Joe Ramsey's ParamType class.
  */
 public class ParamConstraintType implements TetradSerializable {
-    static final long serialVersionUID = 23L;
-
     /**
      * A "less than" constraint.
      */
     public static final ParamConstraintType LT = new ParamConstraintType("LT");
-
     /**
      * A "greater than" constraint.
      */
     public static final ParamConstraintType GT = new ParamConstraintType("GT");
-
     /**
      * An "equal to" constraint.
      */
     public static final ParamConstraintType EQ = new ParamConstraintType("EQ");
-
     /**
      * No constraint.
      */
     public static final ParamConstraintType NONE =
             new ParamConstraintType("NONE");
-
+    static final long serialVersionUID = 23L;
+    private static final ParamConstraintType[] TYPES = {LT, GT, EQ, NONE};
+    // Declarations required for serialization.
+    private static int NEXT_ORDINAL = 0;
     /**
      * The name of this type.
      */
     private final transient String name;
+    private final int ordinal = NEXT_ORDINAL++;
 
     /**
      * Protected constructor for the types; this allows for extension in case
@@ -84,14 +83,9 @@ public class ParamConstraintType implements TetradSerializable {
      * Prints out the name of the type.
      */
     @Override
-	public String toString() {
+    public String toString() {
         return name;
     }
-
-    // Declarations required for serialization.
-    private static int NEXT_ORDINAL = 0;
-    private final int ordinal = NEXT_ORDINAL++;
-    private static final ParamConstraintType[] TYPES = {LT, GT, EQ, NONE};
 
     Object readResolve() throws ObjectStreamException {
         return TYPES[ordinal]; // Canonicalize.

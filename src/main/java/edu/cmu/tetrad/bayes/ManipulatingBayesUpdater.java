@@ -19,7 +19,7 @@
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA //
 ///////////////////////////////////////////////////////////////////////////////
 
-package edu.cmu.tetrad.bayes;               
+package edu.cmu.tetrad.bayes;
 
 import edu.cmu.tetrad.graph.Graph;
 
@@ -55,7 +55,7 @@ public interface ManipulatingBayesUpdater extends BayesUpdater {
      * results should not longer be available.
      */
     @Override
-	void setEvidence(Evidence evidence);
+    void setEvidence(Evidence evidence);
 
     /**
      * Returns the updated Bayes IM--that is, the Bayes IM in which all
@@ -68,7 +68,7 @@ public interface ManipulatingBayesUpdater extends BayesUpdater {
      * Returns P(variable==category | evidence) where evience is getEvidence().
      */
     @Override
-	double getMarginal(int variable, int category);
+    double getMarginal(int variable, int category);
 
 }
 

@@ -107,206 +107,6 @@ public final class ApproximateUpdater implements ManipulatingBayesUpdater {
 
     //============================PUBLIC METHODS==========================//
 
-    /**
-     * Returns the Bayes instantiated model that is being updated.
-     */
-    @Override
-	public BayesIm getBayesIm() {
-        return bayesIm;
-    }
-
-    /**
-     * Returns the Bayes instantiated model after manipulations have been
-     * applied.
-     */
-    @Override
-	public BayesIm getManipulatedBayesIm() {
-        return this.manipulatedBayesIm;
-    }
-
-    /**
-     * Returns the graph for getManipulatedBayesIm().
-     */
-    @Override
-	public Graph getManipulatedGraph() {
-        return this.manipulatedBayesIm.getDag();
-    }
-
-    /**
-     * Returns the updated Bayes IM, or null if there is no updated Bayes IM.
-     */
-    @Override
-	public BayesIm getUpdatedBayesIm() {
-        return null;
-    }
-
-    /**
-     * Returns a copy of the current evidence.
-     */
-    @Override
-	public Evidence getEvidence() {
-        return new Evidence(this.evidence);
-    }
-
-    /**
-     * Sets new evidence for the next update operation.
-     */
-    @Override
-	public final void setEvidence(Evidence evidence) {
-        if (evidence == null) {
-            throw new NullPointerException();
-        }
-
-        if (!evidence.isCompatibleWith(bayesIm)) {
-            throw new IllegalArgumentException("The variables for the given " +
-                    "evidence must be compatible with the Bayes IM being updated.");
-        }
-
-        this.evidence = new Evidence(evidence);
-
-        Dag graph = bayesIm.getBayesPm().getDag();
-        Dag manipulatedGraph = createManipulatedGraph(graph);
-        BayesPm manipulatedBayesPm = createUpdatedBayesPm(manipulatedGraph);
-        this.manipulatedBayesIm = createdUpdatedBayesIm(manipulatedBayesPm);
-
-        this.counts = null;
-    }
-
-    @Override
-	public double getMarginal(int variable, int value) {
-        doUpdate();
-        int sum = 0;
-
-        for (int i = 0; i < manipulatedBayesIm.getNumColumns(variable); i++) {
-            sum += counts[variable][i];
-        }
-
-        return counts[variable][value] / (double) sum;
-    }
-
-    @Override
-	public boolean isJointMarginalSupported() {
-        return false;
-    }
-
-    /**
-     * @throws UnsupportedOperationException
-     */
-    @Override
-	public double getJointMarginal(int[] variables, int[] values) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-	public double[] calculatePriorMarginals(int nodeIndex) {
-        Evidence evidence = getEvidence();
-        setEvidence(Evidence.tautology(evidence.getVariableSource()));
-
-        double[] marginals = new double[evidence.getNumCategories(nodeIndex)];
-
-        for (int i = 0;
-                i < getBayesIm().getNumColumns(nodeIndex); i++) {
-            marginals[i] = getMarginal(nodeIndex, i);
-        }
-
-        setEvidence(evidence);
-        return marginals;
-    }
-
-    @Override
-	public double[] calculateUpdatedMarginals(int nodeIndex) {
-        double[] marginals = new double[evidence.getNumCategories(nodeIndex)];
-
-        for (int i = 0;
-                i < getBayesIm().getNumColumns(nodeIndex); i++) {
-            marginals[i] = getMarginal(nodeIndex, i);
-        }
-
-        return marginals;
-    }
-
-    /**
-     * Prints out the most recent marginal.
-     */
-    @Override
-	public String toString() {
-        return "Approximate updater, evidence = " + evidence;
-    }
-
-    //==============================PRIVATE METHODS=======================//
-
-    private void doUpdate() {
-        if (counts != null) {
-            return;
-        }
-
-        this.counts = new int[manipulatedBayesIm.getNumNodes()][];
-
-        for (int i = 0; i < manipulatedBayesIm.getNumNodes(); i++) {
-            this.counts[i] = new int[manipulatedBayesIm.getNumColumns(i)];
-        }
-
-        // Get a tier ordering and convert it to an int array.
-        Graph graph = getManipulatedGraph();
-        Dag dag = (Dag) graph;
-        List<Node> tierOrdering = dag.getTierOrdering();
-        int[] tiers = new int[tierOrdering.size()];
-
-        for (int i = 0; i < tierOrdering.size(); i++) {
-            tiers[i] =
-                    getManipulatedBayesIm().getNodeIndex(tierOrdering.get(i));
-        }
-
-        int numCounted = 0;
-
-        // Adding an "ur"-counter--if the counting procedure exceeds this many
-        // iterations, just give up. Handles the case there there simply aren't
-        // enough (say, none) legitimate combinations to count, which was
-        // leading to infinite loops. jdramsey 2/7/12
-        int numSurveyed = 0;
-
-        // Construct the sample.
-        while (numCounted < 1000 && ++ numSurveyed < 10000) {
-            int[] point = getSinglePoint(getManipulatedBayesIm(), tiers);
-
-            if (evidence.getProposition().isPermissibleCombination(point)) {
-                numCounted++;
-
-                for (int j = 0; j < getManipulatedBayesIm().getNumNodes(); j++)
-                {
-                    counts[j][point[j]]++;
-                }
-            }
-        }
-    }
-
-    private BayesIm createdUpdatedBayesIm(BayesPm updatedBayesPm) {
-        return new MlBayesIm(updatedBayesPm, bayesIm, MlBayesIm.RANDOM);
-    }
-
-    private BayesPm createUpdatedBayesPm(Dag updatedGraph) {
-        return new BayesPm(updatedGraph, bayesIm.getBayesPm());
-    }
-
-    private Dag createManipulatedGraph(Graph graph) {
-        Dag updatedGraph = new Dag(graph);
-
-        // alters graph for manipulated evidenceItems
-        for (int i = 0; i < evidence.getNumNodes(); ++i) {
-            if (evidence.isManipulated(i)) {
-                Node node = evidence.getNode(i);
-                node = updatedGraph.getNode(node.getName());
-                Collection<Node> parents = updatedGraph.getParents(node);
-
-                for (Node parent1 : parents) {
-                    updatedGraph.removeEdge(node, parent1);
-                }
-            }
-        }
-
-        return updatedGraph;
-    }
-
     private static int[] getSinglePoint(BayesIm bayesIm, int[] tiers) {
         int[] point = new int[bayesIm.getNumNodes()];
         int[] combination = new int[bayesIm.getNumNodes()];
@@ -342,6 +142,205 @@ public final class ApproximateUpdater implements ManipulatingBayesUpdater {
         }
 
         return point;
+    }
+
+    /**
+     * Returns the Bayes instantiated model that is being updated.
+     */
+    @Override
+    public BayesIm getBayesIm() {
+        return bayesIm;
+    }
+
+    /**
+     * Returns the Bayes instantiated model after manipulations have been
+     * applied.
+     */
+    @Override
+    public BayesIm getManipulatedBayesIm() {
+        return this.manipulatedBayesIm;
+    }
+
+    /**
+     * Returns the graph for getManipulatedBayesIm().
+     */
+    @Override
+    public Graph getManipulatedGraph() {
+        return this.manipulatedBayesIm.getDag();
+    }
+
+    /**
+     * Returns the updated Bayes IM, or null if there is no updated Bayes IM.
+     */
+    @Override
+    public BayesIm getUpdatedBayesIm() {
+        return null;
+    }
+
+    /**
+     * Returns a copy of the current evidence.
+     */
+    @Override
+    public Evidence getEvidence() {
+        return new Evidence(this.evidence);
+    }
+
+    /**
+     * Sets new evidence for the next update operation.
+     */
+    @Override
+    public final void setEvidence(Evidence evidence) {
+        if (evidence == null) {
+            throw new NullPointerException();
+        }
+
+        if (!evidence.isCompatibleWith(bayesIm)) {
+            throw new IllegalArgumentException("The variables for the given " +
+                    "evidence must be compatible with the Bayes IM being updated.");
+        }
+
+        this.evidence = new Evidence(evidence);
+
+        Dag graph = bayesIm.getBayesPm().getDag();
+        Dag manipulatedGraph = createManipulatedGraph(graph);
+        BayesPm manipulatedBayesPm = createUpdatedBayesPm(manipulatedGraph);
+        this.manipulatedBayesIm = createdUpdatedBayesIm(manipulatedBayesPm);
+
+        this.counts = null;
+    }
+
+    @Override
+    public double getMarginal(int variable, int value) {
+        doUpdate();
+        int sum = 0;
+
+        for (int i = 0; i < manipulatedBayesIm.getNumColumns(variable); i++) {
+            sum += counts[variable][i];
+        }
+
+        return counts[variable][value] / (double) sum;
+    }
+
+    @Override
+    public boolean isJointMarginalSupported() {
+        return false;
+    }
+
+    /**
+     * @throws UnsupportedOperationException
+     */
+    @Override
+    public double getJointMarginal(int[] variables, int[] values) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public double[] calculatePriorMarginals(int nodeIndex) {
+        Evidence evidence = getEvidence();
+        setEvidence(Evidence.tautology(evidence.getVariableSource()));
+
+        double[] marginals = new double[evidence.getNumCategories(nodeIndex)];
+
+        for (int i = 0;
+             i < getBayesIm().getNumColumns(nodeIndex); i++) {
+            marginals[i] = getMarginal(nodeIndex, i);
+        }
+
+        setEvidence(evidence);
+        return marginals;
+    }
+
+    @Override
+    public double[] calculateUpdatedMarginals(int nodeIndex) {
+        double[] marginals = new double[evidence.getNumCategories(nodeIndex)];
+
+        for (int i = 0;
+             i < getBayesIm().getNumColumns(nodeIndex); i++) {
+            marginals[i] = getMarginal(nodeIndex, i);
+        }
+
+        return marginals;
+    }
+
+    //==============================PRIVATE METHODS=======================//
+
+    /**
+     * Prints out the most recent marginal.
+     */
+    @Override
+    public String toString() {
+        return "Approximate updater, evidence = " + evidence;
+    }
+
+    private void doUpdate() {
+        if (counts != null) {
+            return;
+        }
+
+        this.counts = new int[manipulatedBayesIm.getNumNodes()][];
+
+        for (int i = 0; i < manipulatedBayesIm.getNumNodes(); i++) {
+            this.counts[i] = new int[manipulatedBayesIm.getNumColumns(i)];
+        }
+
+        // Get a tier ordering and convert it to an int array.
+        Graph graph = getManipulatedGraph();
+        Dag dag = (Dag) graph;
+        List <Node> tierOrdering = dag.getTierOrdering();
+        int[] tiers = new int[tierOrdering.size()];
+
+        for (int i = 0; i < tierOrdering.size(); i++) {
+            tiers[i] =
+                    getManipulatedBayesIm().getNodeIndex(tierOrdering.get(i));
+        }
+
+        int numCounted = 0;
+
+        // Adding an "ur"-counter--if the counting procedure exceeds this many
+        // iterations, just give up. Handles the case there there simply aren't
+        // enough (say, none) legitimate combinations to count, which was
+        // leading to infinite loops. jdramsey 2/7/12
+        int numSurveyed = 0;
+
+        // Construct the sample.
+        while (numCounted < 1000 && ++numSurveyed < 10000) {
+            int[] point = getSinglePoint(getManipulatedBayesIm(), tiers);
+
+            if (evidence.getProposition().isPermissibleCombination(point)) {
+                numCounted++;
+
+                for (int j = 0; j < getManipulatedBayesIm().getNumNodes(); j++) {
+                    counts[j][point[j]]++;
+                }
+            }
+        }
+    }
+
+    private BayesIm createdUpdatedBayesIm(BayesPm updatedBayesPm) {
+        return new MlBayesIm(updatedBayesPm, bayesIm, MlBayesIm.RANDOM);
+    }
+
+    private BayesPm createUpdatedBayesPm(Dag updatedGraph) {
+        return new BayesPm(updatedGraph, bayesIm.getBayesPm());
+    }
+
+    private Dag createManipulatedGraph(Graph graph) {
+        Dag updatedGraph = new Dag(graph);
+
+        // alters graph for manipulated evidenceItems
+        for (int i = 0; i < evidence.getNumNodes(); ++i) {
+            if (evidence.isManipulated(i)) {
+                Node node = evidence.getNode(i);
+                node = updatedGraph.getNode(node.getName());
+                Collection <Node> parents = updatedGraph.getParents(node);
+
+                for (Node parent1 : parents) {
+                    updatedGraph.removeEdge(node, parent1);
+                }
+            }
+        }
+
+        return updatedGraph;
     }
 
     /**

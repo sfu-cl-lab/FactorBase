@@ -21,9 +21,6 @@
 
 package edu.cmu.tetrad.util;
 
-import javax.swing.*;
-import java.awt.*;
-
 /**
  * Stores some utility items for displaying JOptionPane messages.
  *

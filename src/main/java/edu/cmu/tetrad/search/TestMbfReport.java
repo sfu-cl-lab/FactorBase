@@ -47,22 +47,66 @@ import java.util.LinkedList;
 import java.util.List;
 
 public class TestMbfReport extends TestCase {
-    private NumberFormat nf = NumberFormatUtil.getInstance().getNumberFormat();
-
     public static int CONTINUOUS = 0;
     public static int DISCRETE = 1;
-
     static int[][] testCrosstabs = {{487, 49}, {81, 366}};
     static int[][] testCrosstabsNew = {{38, 9, 7}, {10, 15, 14}, {5, 3, 59}};
+    private NumberFormat nf = NumberFormatUtil.getInstance().getNumberFormat();
     private PrintWriter fileOut;
 
     public TestMbfReport(String name) {
         super(name);
     }
 
+    public static void main(String[] args) {
+        new TestMbfReport("").rtestReportOutOvernightRun();
+    }
+
+    /**
+     * This method uses reflection to collect up all of the test methods from this class and return them to the test
+     * runner.
+     */
+    public static Test suite() {
+
+        // Edit the name of the class in the parens to match the name
+        // of this class.
+        return new TestSuite(TestMbfReport.class);
+    }
+
     public void testBlank() {
         // Blank to keep the automatic JUnit runner happy.
     }
+
+//    public void rtestReportOutOvernightRun2() {
+//        try {
+//            Logger logger = LogUtils.getInstance().getLogger();
+//            logger.setUseParentHandlers(false);
+//
+//
+//            double[] alphas = new double[]{0.01, 0.001, 0.0001};
+//            int[] dimensions = new int[]{500, 1000, 2000, 5000};
+//            int sampleSize = 1000;
+//            int depth = 2;
+////            String variableType = "Continuous";
+//            String variableType = "Discrete";
+//            int numTargets = 25;
+//
+//            for (double alpha : alphas) {
+//                for (int dimension : dimensions) {
+//                    doRun(alpha, dimension, sampleSize, depth, variableType,
+//                            numTargets);
+//                }
+//            }
+//
+//            doRun(0.0001, 10000, sampleSize, depth, "Continuous",
+//                    numTargets);
+//            doRun(0.01, 10000, sampleSize, depth, "Continuous",
+//                    numTargets);
+//        }
+//        catch (IOException e) {
+//            e.printStackTrace();
+//        }
+//    }
 
     public void rtestReportOut() {
         try {
@@ -88,8 +132,7 @@ public class TestMbfReport extends TestCase {
                     numTargets);
 
             fileOut.close();
-        }
-        catch (IOException e) {
+        } catch (IOException e) {
             e.printStackTrace();
         }
     }
@@ -125,42 +168,10 @@ public class TestMbfReport extends TestCase {
 
             doRun(0.01, 10000, sampleSize, 2, "Continuous",
                     numTargets);
-        }
-        catch (IOException e) {
+        } catch (IOException e) {
             e.printStackTrace();
         }
     }
-
-//    public void rtestReportOutOvernightRun2() {
-//        try {
-//            Logger logger = LogUtils.getInstance().getLogger();
-//            logger.setUseParentHandlers(false);
-//
-//
-//            double[] alphas = new double[]{0.01, 0.001, 0.0001};
-//            int[] dimensions = new int[]{500, 1000, 2000, 5000};
-//            int sampleSize = 1000;
-//            int depth = 2;
-////            String variableType = "Continuous";
-//            String variableType = "Discrete";
-//            int numTargets = 25;
-//
-//            for (double alpha : alphas) {
-//                for (int dimension : dimensions) {
-//                    doRun(alpha, dimension, sampleSize, depth, variableType,
-//                            numTargets);
-//                }
-//            }
-//
-//            doRun(0.0001, 10000, sampleSize, depth, "Continuous",
-//                    numTargets);
-//            doRun(0.01, 10000, sampleSize, depth, "Continuous",
-//                    numTargets);
-//        }
-//        catch (IOException e) {
-//            e.printStackTrace();
-//        }
-//    }
 
     private void doRun(double alpha, int dimension, int sampleSize, int depth,
                        String variableType, int numTargets) throws IOException {
@@ -224,7 +235,6 @@ public class TestMbfReport extends TestCase {
         examineRandomTargets(numTargets, randomGraph, test, depth);
     }
 
-
     private void examineDiscreteDatabase(int numTargets, int dimension,
                                          int sampleSize, double alpha, int depth) {
         printLine("TARGET\tSIZE" + "\tFP\tFN" + "\tPFP\tPFN" +
@@ -279,15 +289,15 @@ public class TestMbfReport extends TestCase {
             int cfp = getFp(gEst.getChildren(tEst), gTrue.getChildren(tTrue), targetName);
             int cfn = getFn(gEst.getChildren(tEst), gTrue.getChildren(tTrue), targetName);
 
-            List<Node> childrenEst = gEst.getChildren(tEst);
-            List<Node> pcEst = new LinkedList<Node>();
+            List <Node> childrenEst = gEst.getChildren(tEst);
+            List <Node> pcEst = new LinkedList <Node>();
 
             for (Node node : childrenEst) {
                 pcEst.addAll(gEst.getParents(node));
             }
 
-            List<Node> childrenTrue = gTrue.getChildren(tTrue);
-            List<Node> pcTrue = new LinkedList<Node>();
+            List <Node> childrenTrue = gTrue.getChildren(tTrue);
+            List <Node> pcTrue = new LinkedList <Node>();
 
             for (Node node : childrenTrue) {
                 pcTrue.addAll(gTrue.getParents(node));
@@ -307,25 +317,25 @@ public class TestMbfReport extends TestCase {
         }
     }
 
-    private int getFp(List<Node> nodesEst, List<Node> nodesTrue,
+    private int getFp(List <Node> nodesEst, List <Node> nodesTrue,
                       String targetName) {
-        List<String> truth = extractVarNames(nodesTrue, targetName);
-        List<String> est = extractVarNames(nodesEst, targetName);
-        List<String> estAndTruth = new ArrayList<String>(est);
+        List <String> truth = extractVarNames(nodesTrue, targetName);
+        List <String> est = extractVarNames(nodesEst, targetName);
+        List <String> estAndTruth = new ArrayList <String>(est);
         estAndTruth.retainAll(truth);
 
-        List<String> estFp = new ArrayList<String>(est);
+        List <String> estFp = new ArrayList <String>(est);
         estFp.removeAll(estAndTruth);
         return estFp.size();
     }
 
-    private int getFn(List<Node> nodesEst, List<Node> nodesTrue, String targetName) {
-        List<String> truth = extractVarNames(nodesTrue, targetName);
-        List<String> mbf = extractVarNames(nodesEst, targetName);
-        List<String> estAndTruth = new ArrayList<String>(mbf);
+    private int getFn(List <Node> nodesEst, List <Node> nodesTrue, String targetName) {
+        List <String> truth = extractVarNames(nodesTrue, targetName);
+        List <String> mbf = extractVarNames(nodesEst, targetName);
+        List <String> estAndTruth = new ArrayList <String>(mbf);
         estAndTruth.retainAll(truth);
 
-        List<String> estFn = new ArrayList<String>(truth);
+        List <String> estFn = new ArrayList <String>(truth);
         estFn.removeAll(estAndTruth);
         return estFn.size();
     }
@@ -347,8 +357,8 @@ public class TestMbfReport extends TestCase {
         }
     }
 
-    private List<String> extractVarNames(List<Node> nodes, String targetName) {
-        List<String> varNames = new ArrayList<String>();
+    private List <String> extractVarNames(List <Node> nodes, String targetName) {
+        List <String> varNames = new ArrayList <String>();
 
         for (Node node : nodes) {
             varNames.add(node.getName());
@@ -363,21 +373,6 @@ public class TestMbfReport extends TestCase {
         System.out.println(s);
         fileOut.println(s);
         fileOut.flush();
-    }
-
-    public static void main(String[] args) {
-        new TestMbfReport("").rtestReportOutOvernightRun();
-    }
-
-    /**
-     * This method uses reflection to collect up all of the test methods from this class and return them to the test
-     * runner.
-     */
-    public static Test suite() {
-
-        // Edit the name of the class in the parens to match the name
-        // of this class.
-        return new TestSuite(TestMbfReport.class);
     }
 }
 

@@ -31,8 +31,6 @@ import edu.cmu.tetrad.search.SepsetMap;
 import edu.cmu.tetrad.util.ChoiceGenerator;
 import edu.cmu.tetrad.util.TetradLogger;
 
-import java.util.*;
-
 /**
  * This class implements the Possible-D-Sep search step of Spirtes, et al's (1993) FCI algorithm (pp 144-145).
  * Specifically, the methods in this class perform step D. of the algorithm. </p> The algorithm implemented by this
@@ -49,7 +47,7 @@ public class PossibleDsepFci {
     private Graph graph;
     private IndependenceTest test;
 
-    private List<Node> nodes;
+    private List <Node> nodes;
     private SepsetMap sepset;
     private int depth = -1;
     private LegalPairs legalPairs;
@@ -89,7 +87,7 @@ public class PossibleDsepFci {
 
         this.graph = graph;
         this.test = test;
-        this.nodes = new LinkedList<Node>(this.graph.getNodes());
+        this.nodes = new LinkedList <Node>(this.graph.getNodes());
         this.sepset = (sepsetMap == null) ? new SepsetMap() : sepsetMap;
         this.legalPairs = new FciDsepLegalPairs(this.graph);
 
@@ -112,7 +110,7 @@ public class PossibleDsepFci {
         // in _unchecked. Note, however, that instead of using ordered
         // pairs we can just look at the union of the two
         // Possible-D-Sep sets
-        for (Edge edge : new ArrayList<Edge>(graph.getEdges())) {
+        for (Edge edge : new ArrayList <Edge>(graph.getEdges())) {
             Node node1 = edge.getNode1();
             Node node2 = edge.getNode2();
 
@@ -160,7 +158,7 @@ public class PossibleDsepFci {
     }
 
     private boolean tryRemovingUsingDsep(Node node1, Node node2, int maxPathLength) {
-        List<Node> possDsep = new LinkedList<Node>(getPossibleDsep(node1, node2, maxPathLength));
+        List <Node> possDsep = new LinkedList <Node>(getPossibleDsep(node1, node2, maxPathLength));
 
         boolean noEdgeRequired =
                 getKnowledge().noEdgeRequired(node1.getName(), node2.getName());
@@ -170,7 +168,7 @@ public class PossibleDsepFci {
         possDsep.remove(node1);
         possDsep.remove(node2);
 
-        List<Node> possParents =
+        List <Node> possParents =
                 possibleParents(node1, possDsep, getKnowledge());
 
 //        Object[] possCond = possParents.toArray();
@@ -185,14 +183,14 @@ public class PossibleDsepFci {
             ChoiceGenerator cg = new ChoiceGenerator(possParents.size(), num);
             int[] indSet;
             while ((indSet = cg.next()) != null) {
-                List<Node> condSet = GraphUtils.asList(indSet, possParents);
+                List <Node> condSet = GraphUtils.asList(indSet, possParents);
 
                 boolean independent =
                         test.isIndependent(node1, node2, condSet);
 
                 if (independent && noEdgeRequired) {
                     graph.removeEdge(node1, node2);
-                    sepset.set(node1, node2, new LinkedList<Node>(condSet));
+                    sepset.set(node1, node2, new LinkedList <Node>(condSet));
                     return true;
                 }
             }
@@ -204,9 +202,9 @@ public class PossibleDsepFci {
     /**
      * Removes from the list of nodes any that cannot be parents of x given the background knowledge.
      */
-    private List<Node> possibleParents(Node x, List<Node> nodes,
-                                       Knowledge knowledge) {
-        List<Node> possibleParents = new LinkedList<Node>();
+    private List <Node> possibleParents(Node x, List <Node> nodes,
+                                        Knowledge knowledge) {
+        List <Node> possibleParents = new LinkedList <Node>();
         String _x = x.getName();
 
         for (Node z : nodes) {
@@ -234,12 +232,12 @@ public class PossibleDsepFci {
      * 		(b) X is adjacent to Z.
      * </pre>
      */
-    private Set<Node> getPossibleDsep(Node node1, Node node2, int maxPathLength) {
-        List<Node> initialNodes = Collections.singletonList(node1);
+    private Set <Node> getPossibleDsep(Node node1, Node node2, int maxPathLength) {
+        List <Node> initialNodes = Collections.singletonList(node1);
         List c = null;
         List d = null;
 
-        Set<Node> reachable = SearchGraphUtils.getReachableNodes(initialNodes,
+        Set <Node> reachable = SearchGraphUtils.getReachableNodes(initialNodes,
                 legalPairs, c, d, graph, maxPathLength);
 
         reachable.remove(node1);

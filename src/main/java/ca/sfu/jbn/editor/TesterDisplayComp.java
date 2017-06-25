@@ -1,8 +1,5 @@
 package ca.sfu.jbn.editor;
 
-import javax.swing.*;
-import java.awt.*;
-
 /**
  * Provides a modified appearance for session nodes to be used for notes.
  *
@@ -11,24 +8,18 @@ import java.awt.*;
 public class TesterDisplayComp extends JComponent implements SessionDisplayComp {
 
     /**
-     * States whether the component is selected or not.
-     */
-    private boolean selected = false;
-
-
-    /**
      * The colors
      */
     private final static Color BORDER_COLOR = new Color(148, 152, 177);
     private final static Color BACKGROUND_COLOR = new Color(255, 255, 219);
-
-
-
+    /**
+     * States whether the component is selected or not.
+     */
+    private boolean selected = false;
     /**
      * The Jlable that contains the name
      */
     private JLabel name = new JLabel("Tester");
-
 
 
     /**
@@ -47,7 +38,7 @@ public class TesterDisplayComp extends JComponent implements SessionDisplayComp 
      * @param g
      */
     @Override
-	public void paint(Graphics g) {
+    public void paint(Graphics g) {
         int width = getSize().width;
         int height = getSize().height;
         g.setColor(BACKGROUND_COLOR);
@@ -74,7 +65,7 @@ public class TesterDisplayComp extends JComponent implements SessionDisplayComp 
      * @param acronym
      */
     @Override
-	public void setAcronym(String acronym) {
+    public void setAcronym(String acronym) {
 
     }
 
@@ -93,7 +84,7 @@ public class TesterDisplayComp extends JComponent implements SessionDisplayComp 
      * @param selected
      */
     @Override
-	public void setSelected(boolean selected) {
+    public void setSelected(boolean selected) {
         this.selected = selected;
     }
 
@@ -103,13 +94,13 @@ public class TesterDisplayComp extends JComponent implements SessionDisplayComp 
      * @param b
      */
     @Override
-	public void setHasModel(boolean b) {
+    public void setHasModel(boolean b) {
         // Ignore.
     }
 
 
     @Override
-	public void setName(String name) {
+    public void setName(String name) {
         super.setName(name);
         this.name.setText(name);
         //buildComponents();
@@ -118,7 +109,7 @@ public class TesterDisplayComp extends JComponent implements SessionDisplayComp 
     //========================== Private methods ===============================//
 
 
-    private void buildComponents(){
+    private void buildComponents() {
         removeAll();
         setLayout(new BorderLayout());
         setBackground(BACKGROUND_COLOR);
@@ -140,7 +131,6 @@ public class TesterDisplayComp extends JComponent implements SessionDisplayComp 
         revalidate();
         repaint();
     }
-
 
 
 }

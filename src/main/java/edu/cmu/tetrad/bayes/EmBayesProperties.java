@@ -41,10 +41,6 @@ import java.util.Map;
  * @author Joseph Ramsey
  */
 public final class EmBayesProperties {
-    public static interface Estimator {
-        BayesIm estimate(BayesPm bayesPm, DataSet dataSet);
-    }
-
     private DataSet dataSet;
     private BayesPm bayesPm;
     private Graph graph;
@@ -53,7 +49,7 @@ public final class EmBayesProperties {
     private double chisq;
     private Estimator estimator = new Estimator() {
         @Override
-		public BayesIm estimate(BayesPm bayesPm, DataSet dataSet) {
+        public BayesIm estimate(BayesPm bayesPm, DataSet dataSet) {
             EmBayesEstimator estimator = new EmBayesEstimator(bayesPm, dataSet);
 //            this.dataSet = estimator.getMixedDataSet();
             estimator.getMixedDataSet();
@@ -62,53 +58,16 @@ public final class EmBayesProperties {
                 double tolerance = 0.0001;
                 estimator.maximization(tolerance);
                 return estimator.getEstimatedIm();
-            }
-            catch (IllegalArgumentException e) {
+            } catch (IllegalArgumentException e) {
                 e.printStackTrace();
                 throw new RuntimeException(
                         "Please specify the search tolerance first.");
             }
         }
     };
-
     public EmBayesProperties(DataSet dataSet, Graph graph) {
         setDataSet(dataSet);
         setGraph(graph);
-    }
-
-    public final void setGraph(Graph graph) {
-        if (graph == null) {
-            throw new NullPointerException();
-        }
-
-        List<Node> vars = dataSet.getVariables();
-        Map<String, DiscreteVariable> nodesToVars =
-                new HashMap<String, DiscreteVariable>();
-        for (int i = 0; i < dataSet.getNumColumns(); i++) {
-            DiscreteVariable var = (DiscreteVariable) vars.get(i);
-            String name = var.getName();
-            Node node = new GraphNode(name);
-            nodesToVars.put(node.getName(), var);
-        }
-
-        Dag dag = new Dag(graph);
-        BayesPm bayesPm = new BayesPm(dag);
-
-        List<Node> nodes = bayesPm.getDag().getNodes();
-
-        for (Node node1 : nodes) {
-            Node var = nodesToVars.get(node1.getName());
-
-            if (var instanceof DiscreteVariable) {
-                DiscreteVariable var2 = (DiscreteVariable) var;
-                List<String> categories = var2.getCategories();
-                bayesPm.setCategories(node1, categories);
-            }
-        }
-
-        this.graph = graph;
-        this.bayesPm = bayesPm;
-        this.blankBayesIm = new MlBayesIm(bayesPm);
     }
 
     /**
@@ -125,7 +84,7 @@ public final class EmBayesProperties {
      */
     public final double getLikelihoodRatioP() {
         Graph graph1 = getGraph();
-        List<Node> nodes = getGraph().getNodes();
+        List <Node> nodes = getGraph().getNodes();
 
         // Null hypothesis = no edges.
         Graph graph0 = new Dag();
@@ -162,7 +121,7 @@ public final class EmBayesProperties {
 
     public final double getVuongP() {
         Graph gg = getGraph();
-        List<Node> nodes = getGraph().getNodes();
+        List <Node> nodes = getGraph().getNodes();
 
         // Null hypothesis = no edges.
         Graph gf = new Dag();
@@ -232,7 +191,7 @@ public final class EmBayesProperties {
         double r = dataSet.getNumRows();
         double score = 0.0;
 
-        List<String> dataVarNames = dataSet.getVariableNames();
+        List <String> dataVarNames = dataSet.getVariableNames();
 
         for (int j = 0; j < blankBayesIm.getNumNodes(); j++) {
 
@@ -294,12 +253,10 @@ public final class EmBayesProperties {
         this.estimator = estimator;
     }
 
-    //=========================================PRIVATE METHODS===================================//
-
     private double logProbDataGivenStructure() {
         BayesIm bayesIm = this.estimator.estimate(bayesPm, dataSet);
         BayesImProbs probs = new BayesImProbs(bayesIm);
-        List<Node> variables = bayesIm.getVariables();
+        List <Node> variables = bayesIm.getVariables();
 
         System.out.println("E1 bayesIm : " + variables);
         System.out.println("E2 data set : " + dataSet.getVariables());
@@ -326,7 +283,7 @@ public final class EmBayesProperties {
     private double[] logsProbDataGivenStructure() {
         BayesIm bayesIm = this.estimator.estimate(bayesPm, dataSet);
         BayesImProbs probs = new BayesImProbs(bayesIm);
-        List<Node> variables = bayesIm.getVariables();
+        List <Node> variables = bayesIm.getVariables();
         DataSet reorderedDataSet = dataSet.subsetColumns(variables);
 
         int n = reorderedDataSet.getNumRows();
@@ -345,6 +302,8 @@ public final class EmBayesProperties {
 
         return scores;
     }
+
+    //=========================================PRIVATE METHODS===================================//
 
     private int numNonredundantParams() {
         setGraph(getGraph());
@@ -372,7 +331,42 @@ public final class EmBayesProperties {
         return graph;
     }
 
-    private int translate(int parent, List<String> dataVarNames) {
+    public final void setGraph(Graph graph) {
+        if (graph == null) {
+            throw new NullPointerException();
+        }
+
+        List <Node> vars = dataSet.getVariables();
+        Map <String, DiscreteVariable> nodesToVars =
+                new HashMap <String, DiscreteVariable>();
+        for (int i = 0; i < dataSet.getNumColumns(); i++) {
+            DiscreteVariable var = (DiscreteVariable) vars.get(i);
+            String name = var.getName();
+            Node node = new GraphNode(name);
+            nodesToVars.put(node.getName(), var);
+        }
+
+        Dag dag = new Dag(graph);
+        BayesPm bayesPm = new BayesPm(dag);
+
+        List <Node> nodes = bayesPm.getDag().getNodes();
+
+        for (Node node1 : nodes) {
+            Node var = nodesToVars.get(node1.getName());
+
+            if (var instanceof DiscreteVariable) {
+                DiscreteVariable var2 = (DiscreteVariable) var;
+                List <String> categories = var2.getCategories();
+                bayesPm.setCategories(node1, categories);
+            }
+        }
+
+        this.graph = graph;
+        this.bayesPm = bayesPm;
+        this.blankBayesIm = new MlBayesIm(bayesPm);
+    }
+
+    private int translate(int parent, List <String> dataVarNames) {
         String imName = blankBayesIm.getNode(parent).getName();
         return dataVarNames.indexOf(imName);
     }
@@ -393,6 +387,10 @@ public final class EmBayesProperties {
         this.chisq = Double.NaN;
 
         this.dataSet = dataSet;
+    }
+
+    public static interface Estimator {
+        BayesIm estimate(BayesPm bayesPm, DataSet dataSet);
     }
 
 }

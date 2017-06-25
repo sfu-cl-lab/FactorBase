@@ -38,13 +38,6 @@ public final class TestDelimiterType extends TestCase {
         super(name);
     }
 
-    public final void testTypes() {
-        assertTrue("Tab".equals(DelimiterType.TAB.toString()));
-        assertTrue("Whitespace".equals(DelimiterType.WHITESPACE.toString()));
-        assertTrue("Comma".equals(DelimiterType.COMMA.toString()));
-        assertTrue(!(DelimiterType.TAB.equals(DelimiterType.WHITESPACE)));
-    }
-
     /**
      * This method uses reflection to collect up all of the test methods from
      * this class and return them to the test runner.
@@ -54,6 +47,13 @@ public final class TestDelimiterType extends TestCase {
         // Edit the name of the class in the parens to match the name
         // of this class.
         return new TestSuite(TestDelimiterType.class);
+    }
+
+    public final void testTypes() {
+        assertTrue("Tab".equals(DelimiterType.TAB.toString()));
+        assertTrue("Whitespace".equals(DelimiterType.WHITESPACE.toString()));
+        assertTrue("Comma".equals(DelimiterType.COMMA.toString()));
+        assertTrue(!(DelimiterType.TAB.equals(DelimiterType.WHITESPACE)));
     }
 }
 

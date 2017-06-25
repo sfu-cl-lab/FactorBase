@@ -52,7 +52,7 @@ public final class LargeSemSimulator {
      * Used for some linear algebra calculations.
      */
     private transient Algebra algebra;
-    private List<Node> variableNodes;
+    private List <Node> variableNodes;
     private Graph graph;
 
     //=============================CONSTRUCTORS============================//
@@ -112,8 +112,8 @@ public final class LargeSemSimulator {
      * various values--could be improved).
      */
     public DataSet simulateDataAcyclic(int sampleSize) {
-        List<Node> variables = new LinkedList<Node>();
-        List<Node> variableNodes = getVariableNodes();
+        List <Node> variables = new LinkedList <Node>();
+        List <Node> variableNodes = getVariableNodes();
 
         // Make an empty data set.
         for (Node node : variableNodes) {
@@ -130,8 +130,8 @@ public final class LargeSemSimulator {
     }
 
     public DataSet simulateDataAcyclic(DataSet dataSet) {
-        List<Node> variables = new LinkedList<Node>();
-        List<Node> variableNodes = getVariableNodes();
+        List <Node> variables = new LinkedList <Node>();
+        List <Node> variableNodes = getVariableNodes();
 
         for (int i = 0; i < dataSet.getNumColumns(); i++) {
             ContinuousVariable var = (ContinuousVariable) dataSet.getVariable(i);
@@ -143,15 +143,15 @@ public final class LargeSemSimulator {
         return dataSet;
     }
 
-    private void constructSimulation(List<Node> variableNodes,
-                                     List<Node> variables, int sampleSize,
+    private void constructSimulation(List <Node> variableNodes,
+                                     List <Node> variables, int sampleSize,
                                      DataSet dataSet) {
         // Create some index arrays to hopefully speed up the simulation.
         Graph graph = getGraph();
-        List<Node> tierOrdering = graph.getTierOrdering();
+        List <Node> tierOrdering = graph.getTierOrdering();
 
         int[] tierIndices = new int[variableNodes.size()];
-                                                                             
+
         for (int i = 0; i < tierIndices.length; i++) {
             tierIndices[i] = variableNodes.indexOf(tierOrdering.get(i));
         }
@@ -162,7 +162,7 @@ public final class LargeSemSimulator {
             Node node = variableNodes.get(i);
             List parents = graph.getParents(node);
 
-            for (Iterator j = parents.iterator(); j.hasNext();) {
+            for (Iterator j = parents.iterator(); j.hasNext(); ) {
                 Node _node = (Node) j.next();
 
                 if (_node.getNodeType() == NodeType.ERROR) {
@@ -189,7 +189,7 @@ public final class LargeSemSimulator {
             for (int i = 0; i < tierOrdering.size(); i++) {
                 int col = tierIndices[i];
                 double value = RandomUtil.getInstance().nextNormal(0, 1) *
-                                errCovar.get(col, col);
+                        errCovar.get(col, col);
 
                 for (int j = 0; j < _parents[col].length; j++) {
                     int parent = _parents[col][j];
@@ -238,7 +238,7 @@ public final class LargeSemSimulator {
         return errCovar.get(index, index);
     }
 
-    private List<Node> getVariableNodes() {
+    private List <Node> getVariableNodes() {
         return variableNodes;
     }
 

@@ -31,11 +31,11 @@ import java.util.List;
 
 /**
  * Created by IntelliJ IDEA.
-* User: jdramsey
-* Date: Feb 22, 2010
-* Time: 3:44:11 PM
-* To change this template use File | Settings | File Templates.
-*/
+ * User: jdramsey
+ * Date: Feb 22, 2010
+ * Time: 3:44:11 PM
+ * To change this template use File | Settings | File Templates.
+ */
 public class CrossValidation {
 
     /**
@@ -67,15 +67,15 @@ public class CrossValidation {
      * Shuffled list of random indices used to construct training and
      * validation datasets.
      */
-    private List<Integer> chunks = new ArrayList<Integer>();
+    private List <Integer> chunks = new ArrayList <Integer>();
 
     /**
      * Class constructor.
      *
-     * @param ds	The dataset on which cross-validation processes.
-     * @param k		The number of cross-validation chunks/slices.
+     * @param ds The dataset on which cross-validation processes.
+     * @param k  The number of cross-validation chunks/slices.
      */
-    public CrossValidation(DataSet ds, int k){
+    public CrossValidation(DataSet ds, int k) {
 
         // initialize variables
         this.dataSet = ds;
@@ -85,10 +85,10 @@ public class CrossValidation {
         // randomly partition data
         int rows = dataSet.getNumRows();
 
-        for (int i = 0; i<(rows); i+=k){
-            for (int j = 0; j < k; j++){
-                if (i+j < rows){
-                    chunks.add(j+1);
+        for (int i = 0; i < (rows); i += k) {
+            for (int j = 0; j < k; j++) {
+                if (i + j < rows) {
+                    chunks.add(j + 1);
                 }
             }
         }
@@ -100,10 +100,10 @@ public class CrossValidation {
     /**
      * Tells if cross-validation can iterate to the next k.
      *
-     * @return 		Returns a boolean value indicating if more
-     * 				chunks can be processed.
+     * @return Returns a boolean value indicating if more
+     * chunks can be processed.
      */
-    public boolean hasNext(){
+    public boolean hasNext() {
 
         return (curk < k);
 
@@ -112,27 +112,27 @@ public class CrossValidation {
     /**
      * Constructs training and validation datasets for current k.
      */
-    public void nextIteration (){
+    public void nextIteration() {
 
-        List<Node> vars = dataSet.getVariables();
+        List <Node> vars = dataSet.getVariables();
         DoubleMatrix2D data = dataSet.getDoubleData();
 
         int rows = dataSet.getNumRows();
         int cols = dataSet.getNumColumns();
 
-        int targetRows = rows/k;
-        if (curk <= rows%k) targetRows ++;
+        int targetRows = rows / k;
+        if (curk <= rows % k) targetRows++;
 
         double[][] vd = new double[targetRows][cols];
-        double[][] td = new double[rows-targetRows][cols];
+        double[][] td = new double[rows - targetRows][cols];
 
         int v = 0;
-        for (int i = 0; i<rows; i++){
-            if (chunks.get(i) == curk){
-                for (int j = 0; j<cols; j++) vd[v][j] = data.get(i,j);
+        for (int i = 0; i < rows; i++) {
+            if (chunks.get(i) == curk) {
+                for (int j = 0; j < cols; j++) vd[v][j] = data.get(i, j);
                 v++;
             } else {
-                for (int j = 0; j<cols; j++) td[i-v][j] = data.get(i,j);
+                for (int j = 0; j < cols; j++) td[i - v][j] = data.get(i, j);
             }
         }
 
@@ -149,20 +149,20 @@ public class CrossValidation {
     /**
      * Get training DataSet.
      *
-     * @return		Returns the dataset containing the
-     * 				current k's training data
+     * @return Returns the dataset containing the
+     * current k's training data
      */
-    public DataSet getTrainingData(){
+    public DataSet getTrainingData() {
         return tDataSet;
     }
 
     /**
      * Get validation DataSet.
      *
-     * @return		Returns the dataset containing the
-     * 				current k's validation data
+     * @return Returns the dataset containing the
+     * current k's validation data
      */
-    public DataSet getValidationData(){
+    public DataSet getValidationData() {
         return vDataSet;
     }
 

@@ -34,7 +34,7 @@ import edu.cmu.tetrad.data.DataSet;
  */
 public final class RegressionInterpolator implements DataFilter {
     @Override
-	public DataSet filter(DataSet dataSet) {
+    public DataSet filter(DataSet dataSet) {
         DataSet d1 = new ColtDataSet((ColtDataSet) dataSet);
         DataSet d2 = new ColtDataSet((ColtDataSet) dataSet);
         d2 = new MeanInterpolator().filter(d2);

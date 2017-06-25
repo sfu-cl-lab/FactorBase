@@ -47,22 +47,22 @@ public class BDeuScore implements LocalDiscreteScore {
     }
 
     @Override
-	public double localScore(int i, int parents[]) {
-    	//System.out.println("zqian##########Entering BDeuScore.localScore() .");
-    //	System.out.println(" for Node " + i +" and it's parents ");
+    public double localScore(int i, int parents[]) {
+        //System.out.println("zqian##########Entering BDeuScore.localScore() .");
+        //	System.out.println(" for Node " + i +" and it's parents ");
 //    	for (int temp=0; temp<parents.length;temp ++){
 //    		System.out.print(parents[temp] +",");
 //    	}
-   // 	System.out.println("");
- //   	System.out.println("check if already computed or not.");
+        // 	System.out.println("");
+        //   	System.out.println("check if already computed or not.");
         double oldScore = localScoreCache.get(i, parents);
-  //  	System.out.println("zqian##########Entering BDeuScore.localScore().localScoreCache.get(i, parents), oldScore: "+ i + ", "+parents+", "+ oldScore);
+        //  	System.out.println("zqian##########Entering BDeuScore.localScore().localScoreCache.get(i, parents), oldScore: "+ i + ", "+parents+", "+ oldScore);
 
         if (!Double.isNaN(oldScore)) {
-  //      	System.out.println("using the old Score ");
+            //      	System.out.println("using the old Score ");
             return oldScore;
         }
-   //     System.out.println("zqian########## computing the NEW score ");
+        //     System.out.println("zqian########## computing the NEW score ");
         // Number of categories for i.
         int r = numCategories(i);
 
@@ -72,16 +72,16 @@ public class BDeuScore implements LocalDiscreteScore {
         for (int p = 0; p < parents.length; p++) {
             dims[p] = numCategories(parents[p]);
         }
-       
+
         // Number of parent states.
         int q = 1;
         for (int p = 0; p < parents.length; p++) {
             q *= dims[p];
         }
-   //     System.out.println("q "+ q);
+        //     System.out.println("q "+ q);
         // Conditional cell counts of data for i given parents(i).
         long n_ijk[][] = new long[q][r];
-      //  int n_ij[] = new int[q];
+        //  int n_ij[] = new int[q];
         long n_ij[] = new long[q]; // change data type from int to long, zqian
 //        long n_ijk1[][] = new long[q][r];
         int values[] = new int[parents.length];
@@ -108,21 +108,21 @@ public class BDeuScore implements LocalDiscreteScore {
 
             //Oct 9th,2013 zqian            
      /*       for (int m = 0; m < dataSet().getMultiplier(n); m++){ // case expander May 1st, @zqian
-             	n_ijk[getRowIndex(dims, values)][childValue]++;
-             	}      */      
-     
-             n_ijk[getRowIndex(dims, values)][childValue] = n_ijk[getRowIndex(dims, values)][childValue] +  dataSet().getMultiplier(n);
+                 n_ijk[getRowIndex(dims, values)][childValue]++;
+             	}      */
+
+            n_ijk[getRowIndex(dims, values)][childValue] = n_ijk[getRowIndex(dims, values)][childValue] + dataSet().getMultiplier(n);
         }
-        
-      //  System.out.println("n_ijk is done");
+
+        //  System.out.println("n_ijk is done");
         // Row sums.
         for (int j = 0; j < q; j++) {
             for (int k = 0; k < r; k++) {
                 n_ij[j] += n_ijk[j][k];
             }
         }
-     //   System.out.println("n_ij is done");
-        
+        //   System.out.println("n_ij is done");
+
         //Finally, compute the score
         double score = (r - 1) * q * Math.log(getStructurePrior());
 
@@ -136,16 +136,16 @@ public class BDeuScore implements LocalDiscreteScore {
         score += q * ProbUtils.lngamma(getSamplePrior() / q);
         score -= (r * q) * ProbUtils.lngamma(getSamplePrior() / (r * q));
 //        score -= r * ProbUtils.lngamma(getSamplePrior() / (r * q));
-  //      System.out.println("score is done");
-        
+        //      System.out.println("score is done");
+
         localScoreCache.add(i, parents, score);
-    	//System.out.println("####Entering BDeuScore.localScore().localScoreCache.add(i, parents, score): "+ i + ", "+parents+", "+ score);
-    
+        //System.out.println("####Entering BDeuScore.localScore().localScoreCache.add(i, parents, score): "+ i + ", "+parents+", "+ score);
+
         return score;
     }
 
     @Override
-	public DataSet getDataSet() {
+    public DataSet getDataSet() {
         return dataSet;
     }
 
@@ -174,17 +174,17 @@ public class BDeuScore implements LocalDiscreteScore {
         return structurePrior;
     }
 
+    @Override
+    public void setStructurePrior(double structurePrior) {
+        this.structurePrior = structurePrior;
+    }
+
     public double getSamplePrior() {
         return samplePrior;
     }
 
     @Override
-	public void setStructurePrior(double structurePrior) {
-        this.structurePrior = structurePrior;
-    }
-
-    @Override
-	public void setSamplePrior(double samplePrior) {
+    public void setSamplePrior(double samplePrior) {
         this.samplePrior = samplePrior;
     }
 }

@@ -90,7 +90,7 @@ public final class Session implements TetradSerializable {
      *
      * @serial Can't be null.
      */
-    private List<SessionNode> nodes = new LinkedList<SessionNode>();
+    private List <SessionNode> nodes = new LinkedList <SessionNode>();
 
     /**
      * Notes when the model has changed. Should be false at time of
@@ -136,6 +136,13 @@ public final class Session implements TetradSerializable {
     //===========================PUBLIC METHODS===========================//
 
     /**
+     * Gets the name.
+     */
+    public String getName() {
+        return this.name;
+    }
+
+    /**
      * Sets the name.
      */
     public final void setName(String name) {
@@ -144,13 +151,6 @@ public final class Session implements TetradSerializable {
         }
 
         this.name = name;
-    }
-
-    /**
-     * Gets the name.
-     */
-    public String getName() {
-        return this.name;
     }
 
     /**
@@ -198,7 +198,7 @@ public final class Session implements TetradSerializable {
      * list are removed. Also, any listeners that are not SessionNodes are
      * removed from each node.
      */
-    public void addNodeList(List<SessionNode> nodes) {
+    public void addNodeList(List <SessionNode> nodes) {
 
         if (nodes == null) {
             throw new NullPointerException(
@@ -250,8 +250,7 @@ public final class Session implements TetradSerializable {
             nodes.remove(node);
             node.removeSessionListener(getSessionHandler());
             getSessionSupport().fireNodeRemoved(node);
-        }
-        else {
+        } else {
             throw new IllegalArgumentException(
                     "Node doesn't exist in" + "graph: " + node);
         }
@@ -260,8 +259,8 @@ public final class Session implements TetradSerializable {
     /**
      * Returns the current set of session nodes.
      */
-    public Set<SessionNode> getNodes() {
-        return new HashSet<SessionNode>(nodes);
+    public Set <SessionNode> getNodes() {
+        return new HashSet <SessionNode>(nodes);
     }
 
     /**
@@ -270,7 +269,7 @@ public final class Session implements TetradSerializable {
     public void clearNodes() {
 
         // Use the removeNode method to make sure events are fired.
-        Set<SessionNode> _nodes = new HashSet<SessionNode>(this.nodes);
+        Set <SessionNode> _nodes = new HashSet <SessionNode>(this.nodes);
 
         for (SessionNode node : _nodes) {
             removeNode(node);
@@ -363,76 +362,6 @@ public final class Session implements TetradSerializable {
     //=========================== MEMBER CLASSES =========================//
 
     /**
-     * Handles <code>SessionEvent</code>s. Hides the handling of these from the
-     * API.
-     */
-    private class SessionHandler extends SessionAdapter {
-
-        /**
-         * This method is called when a node is added.
-         */
-        @Override
-		public void nodeAdded(SessionEvent event) {
-            getSessionSupport().fireSessionEvent(event);
-            setSessionChanged(true);
-        }
-
-        /**
-         * This method is called when a node is removed.
-         */
-        @Override
-		public void nodeRemoved(SessionEvent event) {
-            getSessionSupport().fireSessionEvent(event);
-            setSessionChanged(true);
-        }
-
-        /**
-         * This method is called when a parent is added.
-         */
-        @Override
-		public void parentAdded(SessionEvent event) {
-            getSessionSupport().fireSessionEvent(event);
-            setSessionChanged(true);
-        }
-
-        /**
-         * This method is called when a parent is removed.
-         */
-        @Override
-		public void parentRemoved(SessionEvent event) {
-            getSessionSupport().fireSessionEvent(event);
-            setSessionChanged(true);
-        }
-
-        /**
-         * This method is called when a model is created for a node.
-         */
-        @Override
-		public void modelCreated(SessionEvent event) {
-            getSessionSupport().fireSessionEvent(event);
-            setSessionChanged(true);
-        }
-
-        /**
-         * This method is called when a model is destroyed for a node.
-         */
-        @Override
-		public void modelDestroyed(SessionEvent event) {
-            getSessionSupport().fireSessionEvent(event);
-            setSessionChanged(true);
-        }
-
-        /**
-         * Relays addingEdge events up the chain, without changing their
-         * source.
-         */
-        @Override
-		public void addingEdge(SessionEvent event) {
-            getSessionSupport().fireSessionEvent(event, false);
-        }
-    }
-
-    /**
      * Adds semantic checks to the default deserialization method. This method
      * must have the standard signature for a readObject method, and the body of
      * the method must begin with "s.defaultReadObject();". Other than that, any
@@ -459,6 +388,76 @@ public final class Session implements TetradSerializable {
 
         sessionChanged = false;
         newSession = false;
+    }
+
+    /**
+     * Handles <code>SessionEvent</code>s. Hides the handling of these from the
+     * API.
+     */
+    private class SessionHandler extends SessionAdapter {
+
+        /**
+         * This method is called when a node is added.
+         */
+        @Override
+        public void nodeAdded(SessionEvent event) {
+            getSessionSupport().fireSessionEvent(event);
+            setSessionChanged(true);
+        }
+
+        /**
+         * This method is called when a node is removed.
+         */
+        @Override
+        public void nodeRemoved(SessionEvent event) {
+            getSessionSupport().fireSessionEvent(event);
+            setSessionChanged(true);
+        }
+
+        /**
+         * This method is called when a parent is added.
+         */
+        @Override
+        public void parentAdded(SessionEvent event) {
+            getSessionSupport().fireSessionEvent(event);
+            setSessionChanged(true);
+        }
+
+        /**
+         * This method is called when a parent is removed.
+         */
+        @Override
+        public void parentRemoved(SessionEvent event) {
+            getSessionSupport().fireSessionEvent(event);
+            setSessionChanged(true);
+        }
+
+        /**
+         * This method is called when a model is created for a node.
+         */
+        @Override
+        public void modelCreated(SessionEvent event) {
+            getSessionSupport().fireSessionEvent(event);
+            setSessionChanged(true);
+        }
+
+        /**
+         * This method is called when a model is destroyed for a node.
+         */
+        @Override
+        public void modelDestroyed(SessionEvent event) {
+            getSessionSupport().fireSessionEvent(event);
+            setSessionChanged(true);
+        }
+
+        /**
+         * Relays addingEdge events up the chain, without changing their
+         * source.
+         */
+        @Override
+        public void addingEdge(SessionEvent event) {
+            getSessionSupport().fireSessionEvent(event, false);
+        }
     }
 }
 

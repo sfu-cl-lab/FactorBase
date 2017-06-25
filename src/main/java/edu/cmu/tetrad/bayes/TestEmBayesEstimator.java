@@ -37,21 +37,6 @@ public final class TestEmBayesEstimator extends TestCase {
         super(name);
     }
 
-
-    @Override
-	public void setUp() {
-        TetradLogger.getInstance().addOutputStream(System.out);
-        TetradLogger.getInstance().setForceLog(true);
-    }
-
-
-    @Override
-	public void tearDown() {
-        TetradLogger.getInstance().setForceLog(false);
-        TetradLogger.getInstance().removeOutputStream(System.out);
-    }
-
-
     public static void testEstimate1() {
 
         Dag graph = new Dag();
@@ -93,6 +78,29 @@ public final class TestEmBayesEstimator extends TestCase {
         System.out.println(estimatedIm);
     }
 
+    /**
+     * This method uses reflection to collect up all of the test methods from
+     * this class and return them to the test runner.
+     */
+    public static Test suite() {
+
+        // Edit the name of the class in the parens to match the name
+        // of this class.                                                                       7
+        return new TestSuite(TestEmBayesEstimator.class);
+    }
+
+    @Override
+    public void setUp() {
+        TetradLogger.getInstance().addOutputStream(System.out);
+        TetradLogger.getInstance().setForceLog(true);
+    }
+
+    @Override
+    public void tearDown() {
+        TetradLogger.getInstance().setForceLog(false);
+        TetradLogger.getInstance().removeOutputStream(System.out);
+    }
+
     public void test2() {
         Dag graph = new Dag();
 
@@ -123,17 +131,6 @@ public final class TestEmBayesEstimator extends TestCase {
 
         System.out.println(estimator.getEstimatedIm());
 
-    }
-
-    /**
-     * This method uses reflection to collect up all of the test methods from
-     * this class and return them to the test runner.
-     */
-    public static Test suite() {
-
-        // Edit the name of the class in the parens to match the name
-        // of this class.                                                                       7
-        return new TestSuite(TestEmBayesEstimator.class);
     }
 }
 

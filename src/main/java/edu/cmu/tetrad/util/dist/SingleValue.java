@@ -59,7 +59,7 @@ public class SingleValue implements Distribution {
     }
 
     @Override
-	public void setParameter(int index, double value) {
+    public void setParameter(int index, double value) {
         if (index == 0) {
             this.value = value;
         } else {
@@ -68,7 +68,7 @@ public class SingleValue implements Distribution {
     }
 
     @Override
-	public double getParameter(int index) {
+    public double getParameter(int index) {
         if (index == 0) {
             return this.value;
         } else {
@@ -77,7 +77,7 @@ public class SingleValue implements Distribution {
     }
 
     @Override
-	public String getParameterName(int index) {
+    public String getParameterName(int index) {
         if (index == 0) {
             return "Value";
         } else {
@@ -86,7 +86,7 @@ public class SingleValue implements Distribution {
     }
 
     @Override
-	public int getNumParameters() {
+    public int getNumParameters() {
         return 1;
     }
 
@@ -96,12 +96,12 @@ public class SingleValue implements Distribution {
      * Returns the value that was set.
      */
     @Override
-	public double nextRandom() {
+    public double nextRandom() {
         return getValue();
     }
 
     @Override
-	public String toString() {
+    public String toString() {
         return "[" + getValue() + "]";
     }
 
@@ -111,7 +111,7 @@ public class SingleValue implements Distribution {
 
 
     @Override
-	public String getName() {
+    public String getName() {
         return "Single Value";
     }
 }

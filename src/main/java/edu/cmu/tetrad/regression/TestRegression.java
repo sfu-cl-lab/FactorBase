@@ -53,8 +53,12 @@ public class TestRegression extends TestCase {
         super(name);
     }
 
+    public static Test suite() {
+        return new TestSuite(TestRegression.class);
+    }
+
     @Override
-	public void setUp() {
+    public void setUp() {
         RandomUtil.getInstance().setSeed(342233L);
         Graph graph = GraphUtils.randomDag(5, 0, 5, 3, 3, 3, false);
         SemPm pm = new SemPm(graph);
@@ -67,10 +71,10 @@ public class TestRegression extends TestCase {
      * At one point, this was the answer being returned.
      */
     public void testTabular() {
-        List<Node> nodes = data.getVariables();
+        List <Node> nodes = data.getVariables();
 
         Node target = nodes.get(0);
-        List<Node> regressors = new ArrayList<Node>();
+        List <Node> regressors = new ArrayList <Node>();
 
         for (int i = 1; i < nodes.size(); i++) {
             regressors.add(nodes.get(i));
@@ -94,10 +98,10 @@ public class TestRegression extends TestCase {
      */
     public void testCovariance() {
         ICovarianceMatrix cov = new CovarianceMatrix(data);
-        List<Node> nodes = cov.getVariables();
+        List <Node> nodes = cov.getVariables();
 
         Node target = nodes.get(0);
-        List<Node> regressors = new ArrayList<Node>();
+        List <Node> regressors = new ArrayList <Node>();
 
         for (int i = 1; i < nodes.size(); i++) {
             regressors.add(nodes.get(i));
@@ -131,8 +135,7 @@ public class TestRegression extends TestCase {
             }
 
             return writer.toCharArray();
-        }
-        catch (IOException e) {
+        } catch (IOException e) {
             throw new RuntimeException(e);
         }
     }
@@ -156,10 +159,6 @@ public class TestRegression extends TestCase {
 
         DataSet data = reader.parseTabular(chars);
         return data;
-    }
-
-    public static Test suite() {
-        return new TestSuite(TestRegression.class);
     }
 }
 

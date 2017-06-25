@@ -135,7 +135,7 @@ public final class SemEvidence implements TetradSerializable {
     }
 
     public int getNodeIndex(String nodeName) {
-        List<Node> nodes = semIm.getSemPm().getVariableNodes();
+        List <Node> nodes = semIm.getSemPm().getVariableNodes();
 
         for (int i = 0; i < nodes.size(); i++) {
             Node node = nodes.get(i);
@@ -149,7 +149,7 @@ public final class SemEvidence implements TetradSerializable {
     }
 
     public int getNodeIndex(Node node) {
-        List<Node> nodes = semIm.getSemPm().getVariableNodes();
+        List <Node> nodes = semIm.getSemPm().getVariableNodes();
 
         for (int i = 0; i < nodes.size(); i++) {
             Node _node = nodes.get(i);
@@ -183,8 +183,8 @@ public final class SemEvidence implements TetradSerializable {
     }
 
     @Override
-	public String toString() {
-        List<Node> nodes = semIm.getVariableNodes();
+    public String toString() {
+        List <Node> nodes = semIm.getVariableNodes();
         StringBuilder buf = new StringBuilder();
         buf.append("\nEvidence: ");
 
@@ -204,9 +204,9 @@ public final class SemEvidence implements TetradSerializable {
     /**
      * Returns the variable for which there is evidence.
      */
-    public List<Node> getNodesInEvidence() {
-        List<Node> nodes = semIm.getVariableNodes();
-        List<Node> nodesInEvidence = new ArrayList<Node>();
+    public List <Node> getNodesInEvidence() {
+        List <Node> nodes = semIm.getVariableNodes();
+        List <Node> nodesInEvidence = new ArrayList <Node>();
 
         for (int i = 0; i < nodes.size(); i++) {
             if (!Double.isNaN(proposition.getValue(i))) {
@@ -218,7 +218,7 @@ public final class SemEvidence implements TetradSerializable {
     }
 
     @Override
-	public boolean equals(Object o) {
+    public boolean equals(Object o) {
         if (o == null) {
             return false;
         }
@@ -237,7 +237,7 @@ public final class SemEvidence implements TetradSerializable {
     }
 
     @Override
-	public int hashCode() {
+    public int hashCode() {
         int hashCode = 37;
         hashCode = 19 * hashCode + semIm.hashCode();
         hashCode = 19 * hashCode + proposition.hashCode();

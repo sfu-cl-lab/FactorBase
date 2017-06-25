@@ -46,8 +46,8 @@ final class BayesUtils {
      *                                  data by the same name does not have a
      *                                  subset of its categories.
      */
-    public static void ensureVarsInData(List<Node> pmVars,
-            DataSet dataSet) {
+    public static void ensureVarsInData(List <Node> pmVars,
+                                        DataSet dataSet) {
         for (Node pmVar1 : pmVars) {
             DiscreteVariable pmVar = (DiscreteVariable) pmVar1;
             String name = pmVar.getName();
@@ -58,21 +58,19 @@ final class BayesUtils {
                 throw new IllegalArgumentException("Variable " + pmVar + " was not in the data.");
             }
 
-            List<String> pmCategories = pmVar.getCategories();
-            List<String> dataCategories = from.getCategories();
+            List <String> pmCategories = pmVar.getCategories();
+            List <String> dataCategories = from.getCategories();
 
             if (pmCategories.equals(dataCategories)) {
                 // continue.
-            }
-            else if (pmCategories.containsAll(dataCategories)) {
+            } else if (pmCategories.containsAll(dataCategories)) {
                 DiscreteVariable to = new DiscreteVariable(pmVar);
                 dataSet.changeVariable(from, to);
-            }
-            else {
+            } else {
 //                throw new IllegalArgumentException("The variable named " +
 //                        name + " has more categories in the data than in " +
 //                        "the model.");
-                
+
                 throw new IllegalArgumentException("Variable '" + name + "' " +
                         "has more categories in the data than in the model." +
                         "\n\tIn the model, the categories are: " + pmCategories + "." +

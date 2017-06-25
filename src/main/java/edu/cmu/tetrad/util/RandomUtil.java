@@ -80,57 +80,12 @@ public class RandomUtil {
 //        engine = new MyRandomEngine(seed);
     }
 
-    private static class MyRandomEngine extends RandomEngine {
-        private Random random;
-
-        public MyRandomEngine(long seed) {
-            this.random = new Random(seed);
-        }
-
-        @Override
-        public double apply(double v) {
-            return nextDouble();
-        }
-
-        @Override
-        public int apply(int i) {
-            return nextInt();
-        }
-
-        @Override
-        public double nextDouble() {
-            return random.nextDouble();
-        }
-
-        @Override
-        public float nextFloat() {
-            return random.nextFloat();
-        }
-
-        @Override
-        public long nextLong() {
-            return random.nextLong();
-        }
-
-        @Override
-        public double raw() {
-            return nextDouble();
-        }
-
-        @Override
-		public int nextInt() {
-            return random.nextInt();
-        }
-    }
-
     /**
      * @return the singleton instance of this class.
      */
     public static RandomUtil getInstance() {
         return INSTANCE;
     }
-
-    //=======================================PUBLIC METHODS=================================//
 
     /**
      * Returns an integer in the range 0 to n - 1, inclusive.
@@ -146,12 +101,13 @@ public class RandomUtil {
 //        return uniform.nextIntFromTo(0, n - 1);
     }
 
+    //=======================================PUBLIC METHODS=================================//
+
     public double nextDouble() {
         return new Uniform(0, 1, engine).nextDouble();
     }
 
     /**
-     * 
      * Returns a random double from U(low, high).
      *
      * @param low  Ibid.
@@ -366,6 +322,49 @@ public class RandomUtil {
      */
     public double nextHyperbolic(double alpha, double gamma) {
         return new Hyperbolic(alpha, gamma, engine).nextDouble();
+    }
+
+    private static class MyRandomEngine extends RandomEngine {
+        private Random random;
+
+        public MyRandomEngine(long seed) {
+            this.random = new Random(seed);
+        }
+
+        @Override
+        public double apply(double v) {
+            return nextDouble();
+        }
+
+        @Override
+        public int apply(int i) {
+            return nextInt();
+        }
+
+        @Override
+        public double nextDouble() {
+            return random.nextDouble();
+        }
+
+        @Override
+        public float nextFloat() {
+            return random.nextFloat();
+        }
+
+        @Override
+        public long nextLong() {
+            return random.nextLong();
+        }
+
+        @Override
+        public double raw() {
+            return nextDouble();
+        }
+
+        @Override
+        public int nextInt() {
+            return random.nextInt();
+        }
     }
 }
 

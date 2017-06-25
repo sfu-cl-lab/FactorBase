@@ -81,6 +81,16 @@ public class Sem2DistributionMapping implements Sem2Mapping, TetradSerializable 
     }
 
     /**
+     * Returns the value of the parameter.
+     *
+     * @return the value of the parameter.
+     */
+    @Override
+    public double getValue() {
+        return distribution.getParameter(index);
+    }
+
+    /**
      * Sets the value of the parameter.
      *
      * @param x The value to be set.
@@ -88,18 +98,8 @@ public class Sem2DistributionMapping implements Sem2Mapping, TetradSerializable 
      *                                  value.
      */
     @Override
-	public void setValue(double x) {
+    public void setValue(double x) {
         distribution.setParameter(index, x);
-    }
-
-    /**
-     * Returns the value of the parameter.
-     *
-     * @return the value of the parameter.
-     */
-    @Override
-	public double getValue() {
-        return distribution.getParameter(index);
     }
 
     /**
@@ -108,7 +108,7 @@ public class Sem2DistributionMapping implements Sem2Mapping, TetradSerializable 
      * @return the parameter from the PM.
      */
     @Override
-	public Parameter getParameter() {
+    public Parameter getParameter() {
         return parameter;
     }
 }

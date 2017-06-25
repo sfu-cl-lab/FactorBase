@@ -56,6 +56,10 @@ public class TestIndTestFisherZD extends TestCase {
         super(name);
     }
 
+    public static Test suite() {
+        return new TestSuite(TestIndTestFisherZD.class);
+    }
+
     public void testIsIndependent() {
         Graph graph = constructGraph();
         SemPm semPm = new SemPm(graph);
@@ -70,11 +74,11 @@ public class TestIndTestFisherZD extends TestCase {
 //        System.out.println(MatrixUtils.toString(data));
 
         IndTestFisherZGeneralizedInverse test = new IndTestFisherZGeneralizedInverse(dataSet, 0.05);
-        List<Node> v = test.getVariables();
+        List <Node> v = test.getVariables();
 
         Node xVar = v.get(0);
         Node yVar = v.get(2);
-        List<Node> zList = new ArrayList<Node>();
+        List <Node> zList = new ArrayList <Node>();
 //        zList.add(v.get(1));
 //        zList.add(v.get(2));
 
@@ -152,7 +156,7 @@ public class TestIndTestFisherZD extends TestCase {
             Node x4 = new ContinuousVariable("X4");
             Node x6 = new ContinuousVariable("X6");
 
-            List<Node> variables = new LinkedList<Node>();
+            List <Node> variables = new LinkedList <Node>();
             variables.add(x2);
             variables.add(x4);
             variables.add(x6);
@@ -211,10 +215,6 @@ public class TestIndTestFisherZD extends TestCase {
             System.out.print(independent);
             System.out.println();
         }
-    }
-
-    public static Test suite() {
-        return new TestSuite(TestIndTestFisherZD.class);
     }
 }
 

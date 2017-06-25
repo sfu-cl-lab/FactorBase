@@ -41,29 +41,29 @@ import java.util.List;
  * "to" node (ie 1 o-> 2)
  */
 public class GraphChange {
-    private List<Edge> removes;
-    private List<Triple> colliders;
-    private List<Triple> nonColliders;
-    private List<NodePair> orients;
+    private List <Edge> removes;
+    private List <Triple> colliders;
+    private List <Triple> nonColliders;
+    private List <NodePair> orients;
 
     /**
      * Default constructor, holds no changes.
      */
     public GraphChange() {
-        removes = new ArrayList<Edge>();
-        colliders = new ArrayList<Triple>();
-        nonColliders = new ArrayList<Triple>();
-        orients = new ArrayList<NodePair>();
+        removes = new ArrayList <Edge>();
+        colliders = new ArrayList <Triple>();
+        nonColliders = new ArrayList <Triple>();
+        orients = new ArrayList <NodePair>();
     }
 
     /**
      * Copy constructor.
      */
     public GraphChange(GraphChange source) {
-        removes = new ArrayList<Edge>(source.removes);
-        colliders = new ArrayList<Triple>(source.colliders);
-        nonColliders = new ArrayList<Triple>(source.nonColliders);
-        orients = new ArrayList<NodePair>(source.orients);
+        removes = new ArrayList <Edge>(source.removes);
+        colliders = new ArrayList <Triple>(source.colliders);
+        nonColliders = new ArrayList <Triple>(source.nonColliders);
+        orients = new ArrayList <NodePair>(source.orients);
     }
 
 
@@ -132,7 +132,7 @@ public class GraphChange {
             if (!output.removeEdge(e))
                 return null;
 
-        Collection<OrderedNodePair> allOrients = makePairs(colliders);
+        Collection <OrderedNodePair> allOrients = makePairs(colliders);
         allOrients.addAll(pairToOrdered(orients));
 
         for (OrderedNodePair or : allOrients) {
@@ -197,7 +197,7 @@ public class GraphChange {
      * Anly outputs ops which have elements, not empty structures.
      */
     @Override
-	public String toString() {
+    public String toString() {
         String ret = "[ ";
 //        ret = "\n" + super.toString();
         if (!removes.isEmpty())
@@ -215,28 +215,28 @@ public class GraphChange {
     /**
      * Return colliders
      */
-    public List<Triple> getColliders() {
+    public List <Triple> getColliders() {
         return colliders;
     }
 
     /**
      * Return noncolliders
      */
-    public List<Triple> getNoncolliders() {
+    public List <Triple> getNoncolliders() {
         return nonColliders;
     }
 
     /**
      * Return removes
      */
-    public List<Edge> getRemoves() {
+    public List <Edge> getRemoves() {
         return removes;
     }
 
     /**
      * Return orients
      */
-    public List<NodePair> getOrients() {
+    public List <NodePair> getOrients() {
         return orients;
     }
 
@@ -246,7 +246,7 @@ public class GraphChange {
      * strucs of GraphChange gc, then this "equals" gc
      */
     @Override
-	public boolean equals(Object other) {
+    public boolean equals(Object other) {
         if (!(other instanceof GraphChange))
             return false;
         GraphChange otherGC = (GraphChange) other;
@@ -262,7 +262,7 @@ public class GraphChange {
 
 
     @Override
-	public int hashCode() {
+    public int hashCode() {
         int hash = 1;
         hash *= 17 * removes.hashCode();
         hash *= 19 * colliders.hashCode();
@@ -279,8 +279,8 @@ public class GraphChange {
      * <p/>
      * /** creates OrderedNodePairs out of given List. For use in consistent and applyTo
      */
-    private Collection<OrderedNodePair> makePairs(List<Triple> input) {
-        HashSet<OrderedNodePair> outputPairs = new HashSet<OrderedNodePair>();
+    private Collection <OrderedNodePair> makePairs(List <Triple> input) {
+        HashSet <OrderedNodePair> outputPairs = new HashSet <OrderedNodePair>();
         for (Triple trip : input) {
             Node y = trip.getY();
             outputPairs.add(new OrderedNodePair(trip.getX(), y));
@@ -292,8 +292,8 @@ public class GraphChange {
     /**
      * Creates a List of OrderedNodePairs from a datastructure of NodePairs.
      */
-    private Collection<OrderedNodePair> pairToOrdered(List<NodePair> orig) {
-        List<OrderedNodePair> ordered = new ArrayList<OrderedNodePair>(orig.size());
+    private Collection <OrderedNodePair> pairToOrdered(List <NodePair> orig) {
+        List <OrderedNodePair> ordered = new ArrayList <OrderedNodePair>(orig.size());
 
         for (NodePair p : orig) {
             ordered.add(new OrderedNodePair(p.getFirst(), p.getSecond()));
@@ -307,7 +307,7 @@ public class GraphChange {
      * all the way down through the datastructures to make entirely new objects for everything
      */
     private Graph makeNewEdges(Graph graph) {
-        List<Edge> origEdges = graph.getEdges();
+        List <Edge> origEdges = graph.getEdges();
 
         for (Edge e : origEdges) {
             Edge newEdge = new Edge(e.getNode1(), e.getNode2(),
@@ -331,7 +331,7 @@ public class GraphChange {
         }
 
         @Override
-		public boolean equals(Object o) {
+        public boolean equals(Object o) {
             if (o == this) {
                 return true;
             }

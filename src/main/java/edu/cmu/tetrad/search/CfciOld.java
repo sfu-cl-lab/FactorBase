@@ -27,8 +27,6 @@ import edu.cmu.tetrad.graph.*;
 import edu.cmu.tetrad.util.ChoiceGenerator;
 import edu.cmu.tetrad.util.TetradLogger;
 
-import java.util.*;
-
 /**
  * Implements the Conservative FCI algorithm. This is an (as yet undocumented) algorithm in which FCI is modified to use
  * conservative orientation rules as motivated by the CPC algorithm.
@@ -76,27 +74,100 @@ public final class CfciOld {
     /**
      * The list of all unshielded triples.
      */
-    private Set<Triple> allTriples;
+    private Set <Triple> allTriples;
 
     /**
      * Set of unshielded colliders from the triple orientation step.
      */
-    private Set<Triple> colliderTriples;
+    private Set <Triple> colliderTriples;
 
     /**
      * Set of unshielded noncolliders from the triple orientation step.
      */
-    private Set<Triple> noncolliderTriples;
+    private Set <Triple> noncolliderTriples;
 
     /**
      * Set of ambiguous unshielded triples.
      */
-    private Set<Triple> ambiguousTriples;
+    private Set <Triple> ambiguousTriples;
 
     /**
      * The logger for this class. The config needs to be set.
      */
     private TetradLogger logger = TetradLogger.getInstance();
+
+    /**
+     * Constructs a new FCI search for the given independence test and background knowledge.
+     */
+    public CfciOld(IndependenceTest independenceTest) {
+        if (independenceTest == null || knowledge == null) {
+            throw new NullPointerException();
+        }
+
+        this.independenceTest = independenceTest;
+    }
+
+    private static List <Node> asList(int[] indices, List <Node> nodes) {
+        List <Node> list = new LinkedList <Node>();
+
+        for (int i : indices) {
+            list.add(nodes.get(i));
+        }
+
+        return list;
+    }
+
+    //============================CONSTRUCTORS============================//
+
+    /**
+     * Orients according to background knowledge
+     */
+    private static void fciOrientbk(Knowledge bk, Graph graph, List <Node> variables) {
+        for (Iterator <KnowledgeEdge> it =
+             bk.forbiddenEdgesIterator(); it.hasNext(); ) {
+            KnowledgeEdge edge = it.next();
+
+            //match strings to variables in the graph.
+            Node from = SearchGraphUtils.translate(edge.getFrom(), variables);
+            Node to = SearchGraphUtils.translate(edge.getTo(), variables);
+
+            if (from == null || to == null) {
+                continue;
+            }
+
+            if (graph.getEdge(from, to) == null) {
+                continue;
+            }
+
+            // Orient to*->from
+            graph.setEndpoint(to, from, Endpoint.ARROW);
+            TetradLogger.getInstance().log("knowledgeOrientation", SearchLogUtils.edgeOrientedMsg("Required by knowledge", graph.getEdge(from, to)));
+        }
+
+        for (Iterator <KnowledgeEdge> it =
+             bk.requiredEdgesIterator(); it.hasNext(); ) {
+            KnowledgeEdge edge = it.next();
+
+            //match strings to variables in this graph
+            Node from = SearchGraphUtils.translate(edge.getFrom(), variables);
+            Node to = SearchGraphUtils.translate(edge.getTo(), variables);
+
+            if (from == null || to == null) {
+                continue;
+            }
+
+            if (graph.getEdge(from, to) == null) {
+                continue;
+            }
+
+            // Orient from-->to
+            graph.setEndpoint(from, to, Endpoint.ARROW);
+            graph.setEndpoint(to, from, Endpoint.TAIL);
+            TetradLogger.getInstance().log("knowledgeOrientation", SearchLogUtils.edgeOrientedMsg("Required by knowledge", graph.getEdge(from, to)));
+        }
+    }
+
+    //========================PUBLIC METHODS==========================//
 
     /**
      * Returns the maximum size of conditioning sets for independence tests.
@@ -122,44 +193,31 @@ public final class CfciOld {
         this.depth = depth;
     }
 
-    //============================CONSTRUCTORS============================//
-
-    /**
-     * Constructs a new FCI search for the given independence test and background knowledge.
-     */
-    public CfciOld(IndependenceTest independenceTest) {
-        if (independenceTest == null || knowledge == null) {
-            throw new NullPointerException();
-        }
-
-        this.independenceTest = independenceTest;
+    public Set <Triple> getColliderTriples() {
+        return new HashSet <Triple>(colliderTriples);
     }
 
-    //========================PUBLIC METHODS==========================//
-
-    public Set<Triple> getColliderTriples() {
-        return new HashSet<Triple>(colliderTriples);
+    public Set <Triple> getNoncolliderTriples() {
+        return new HashSet <Triple>(noncolliderTriples);
     }
 
-    public Set<Triple> getNoncolliderTriples() {
-        return new HashSet<Triple>(noncolliderTriples);
-    }
-
-    public Set<Triple> getAmbiguousTriples() {
-        return new HashSet<Triple>(ambiguousTriples);
+    public Set <Triple> getAmbiguousTriples() {
+        return new HashSet <Triple>(ambiguousTriples);
     }
 
     private Knowledge getKnowledge() {
         return knowledge;
     }
 
+    public void setKnowledge(Knowledge knowledge) {
+        this.knowledge = knowledge;
+    }
+
     private Graph getGraph() {
         return graph;
     }
 
-    public void setKnowledge(Knowledge knowledge) {
-        this.knowledge = knowledge;
-    }
+    //===========================PRIVATE METHODS=========================//
 
     public long getElapsedTime() {
         return this.elapsedTime;
@@ -173,12 +231,12 @@ public final class CfciOld {
         TetradLogger.getInstance().log("info", "Starting CFCI algorithm.");
         TetradLogger.getInstance().log("info", "Independence test = " + independenceTest + ".");
 
-        List<Node> variables = independenceTest.getVariables();
-        List<Node> nodes = new LinkedList<Node>();
-        allTriples = new HashSet<Triple>();
-        this.ambiguousTriples = new HashSet<Triple>();
-        this.colliderTriples = new HashSet<Triple>();
-        this.noncolliderTriples = new HashSet<Triple>();
+        List <Node> variables = independenceTest.getVariables();
+        List <Node> nodes = new LinkedList <Node>();
+        allTriples = new HashSet <Triple>();
+        this.ambiguousTriples = new HashSet <Triple>();
+        this.colliderTriples = new HashSet <Triple>();
+        this.noncolliderTriples = new HashSet <Triple>();
 
         for (Node variable : variables) {
             nodes.add(variable);
@@ -268,8 +326,6 @@ public final class CfciOld {
         return getGraph();
     }
 
-    //===========================PRIVATE METHODS=========================//
-
     private SepsetMap getSepset() {
         return sepset;
     }
@@ -277,12 +333,12 @@ public final class CfciOld {
     private void orientUnshieldedTriples(
             IndependenceTest test, int depth) {
         TetradLogger.getInstance().log("info", "Starting Collider Orientation:");
-        colliderTriples = new HashSet<Triple>();
-        noncolliderTriples = new HashSet<Triple>();
-        ambiguousTriples = new HashSet<Triple>();
+        colliderTriples = new HashSet <Triple>();
+        noncolliderTriples = new HashSet <Triple>();
+        ambiguousTriples = new HashSet <Triple>();
 
         for (Node y : getGraph().getNodes()) {
-            List<Node> adjacentNodes = getGraph().getAdjacentNodes(y);
+            List <Node> adjacentNodes = getGraph().getAdjacentNodes(y);
 
             if (adjacentNodes.size() < 2) {
                 continue;
@@ -331,10 +387,10 @@ public final class CfciOld {
         boolean existsSepsetContainingY = false;
         boolean existsSepsetNotContainingY = false;
 
-        Set<Node> __nodes = new HashSet<Node>(this.getGraph().getAdjacentNodes(x));
+        Set <Node> __nodes = new HashSet <Node>(this.getGraph().getAdjacentNodes(x));
         __nodes.remove(z);
 
-        List<Node> _nodes = new LinkedList<Node>(__nodes);
+        List <Node> _nodes = new LinkedList <Node>(__nodes);
 //        TetradLogger.getInstance().log("details", "Adjacents for " + x + "--" + y + "--" + z + " = " + _nodes);
 
         int _depth = depth;
@@ -348,7 +404,7 @@ public final class CfciOld {
             int[] choice;
 
             while ((choice = cg.next()) != null) {
-                List<Node> condSet = asList(choice, _nodes);
+                List <Node> condSet = asList(choice, _nodes);
 
                 if (test.isIndependent(x, z, condSet)) {
                     if (condSet.contains(y)) {
@@ -360,10 +416,10 @@ public final class CfciOld {
             }
         }
 
-        __nodes = new HashSet<Node>(this.getGraph().getAdjacentNodes(z));
+        __nodes = new HashSet <Node>(this.getGraph().getAdjacentNodes(z));
         __nodes.remove(x);
 
-        _nodes = new LinkedList<Node>(__nodes);
+        _nodes = new LinkedList <Node>(__nodes);
 //        TetradLogger.getInstance().log("details", "Adjacents for " + x + "--" + y + "--" + z + " = " + _nodes);
 
         _depth = depth;
@@ -377,7 +433,7 @@ public final class CfciOld {
             int[] choice;
 
             while ((choice = cg.next()) != null) {
-                List<Node> condSet = asList(choice, _nodes);
+                List <Node> condSet = asList(choice, _nodes);
 
                 if (test.isIndependent(x, z, condSet)) {
                     if (condSet.contains(y)) {
@@ -392,7 +448,7 @@ public final class CfciOld {
         // Note: Unless sepsets are being collected during fas, most likely
         // this will be null. (Only sepsets found during possible dsep search
         // will be here.)
-        List<Node> condSet = getSepset().get(x, z);
+        List <Node> condSet = getSepset().get(x, z);
 
         if (condSet != null) {
             if (condSet.contains(y)) {
@@ -411,16 +467,6 @@ public final class CfciOld {
         }
     }
 
-    private static List<Node> asList(int[] indices, List<Node> nodes) {
-        List<Node> list = new LinkedList<Node>();
-
-        for (int i : indices) {
-            list.add(nodes.get(i));
-        }
-
-        return list;
-    }
-
     private void doFinalOrientation() {
         while (changeFlag) {
             changeFlag = false;
@@ -431,66 +477,18 @@ public final class CfciOld {
     }
 
     /**
-     * Orients according to background knowledge
-     */
-    private static void fciOrientbk(Knowledge bk, Graph graph, List<Node> variables) {
-        for (Iterator<KnowledgeEdge> it =
-                bk.forbiddenEdgesIterator(); it.hasNext();) {
-            KnowledgeEdge edge = it.next();
-
-            //match strings to variables in the graph.
-            Node from = SearchGraphUtils.translate(edge.getFrom(), variables);
-            Node to = SearchGraphUtils.translate(edge.getTo(), variables);
-
-            if (from == null || to == null) {
-                continue;
-            }
-
-            if (graph.getEdge(from, to) == null) {
-                continue;
-            }
-
-            // Orient to*->from
-            graph.setEndpoint(to, from, Endpoint.ARROW);
-            TetradLogger.getInstance().log("knowledgeOrientation", SearchLogUtils.edgeOrientedMsg("Required by knowledge", graph.getEdge(from, to)));
-        }
-
-        for (Iterator<KnowledgeEdge> it =
-                bk.requiredEdgesIterator(); it.hasNext();) {
-            KnowledgeEdge edge = it.next();
-
-            //match strings to variables in this graph
-            Node from = SearchGraphUtils.translate(edge.getFrom(), variables);
-            Node to = SearchGraphUtils.translate(edge.getTo(), variables);
-
-            if (from == null || to == null) {
-                continue;
-            }
-
-            if (graph.getEdge(from, to) == null) {
-                continue;
-            }
-
-            // Orient from-->to
-            graph.setEndpoint(from, to, Endpoint.ARROW);
-            graph.setEndpoint(to, from, Endpoint.TAIL);
-            TetradLogger.getInstance().log("knowledgeOrientation", SearchLogUtils.edgeOrientedMsg("Required by knowledge", graph.getEdge(from, to)));
-        }
-    }
-
-    /**
      * Implements the double-triangle orientation rule, which states that if D*-oB, A*->B<-*C and A*-*D*-*C is a
      * noncollider, then D*->B.
      */
     private void doubleTriangle() {
-        List<Node> nodes = getGraph().getNodes();
+        List <Node> nodes = getGraph().getNodes();
         for (Node B : nodes) {
-            List<Node> intoBArrows = getGraph().getNodesInTo(B, Endpoint.ARROW);
-            List<Node> intoBCircles = getGraph().getNodesInTo(B, Endpoint.CIRCLE);
+            List <Node> intoBArrows = getGraph().getNodesInTo(B, Endpoint.ARROW);
+            List <Node> intoBCircles = getGraph().getNodesInTo(B, Endpoint.CIRCLE);
 
             //possible A's and C's are those with arrows into B
-            List<Node> possA = new LinkedList<Node>(intoBArrows);
-            List<Node> possC = new LinkedList<Node>(intoBArrows);
+            List <Node> possA = new LinkedList <Node>(intoBArrows);
+            List <Node> possC = new LinkedList <Node>(intoBArrows);
 
             //possible D's are those with circles into B
             for (Node d : intoBCircles) {
@@ -529,10 +527,10 @@ public final class CfciOld {
     // triples multiple times per iteration of doFinalOrientation.
 
     private void awayFromColliderAncestorCycle() {
-        List<Node> nodes = getGraph().getNodes();
+        List <Node> nodes = getGraph().getNodes();
 
         for (Node b : nodes) {
-            List<Node> adj = getGraph().getAdjacentNodes(b);
+            List <Node> adj = getGraph().getAdjacentNodes(b);
 
             if (adj.size() < 2) {
                 continue;
@@ -607,19 +605,19 @@ public final class CfciOld {
      * </pre>
      */
     private void discrimPaths() {
-        List<Node> nodes = getGraph().getNodes();
+        List <Node> nodes = getGraph().getNodes();
 
         for (Node b : nodes) {
 
             //potential A and C candidate pairs are only those
             // that look like this:   A<-oBo->C  or  A<->Bo->C
 
-            List<Node> possAandC = getGraph().getNodesOutTo(b, Endpoint.ARROW);
-            List<Node> possA = new LinkedList<Node>(possAandC);
+            List <Node> possAandC = getGraph().getNodesOutTo(b, Endpoint.ARROW);
+            List <Node> possA = new LinkedList <Node>(possAandC);
 
             //keep arrows and circles
             possA.removeAll(getGraph().getNodesInTo(b, Endpoint.TAIL));
-            List<Node> possC = new LinkedList<Node>(possAandC);
+            List <Node> possC = new LinkedList <Node>(possAandC);
 
             //keep only circles
             possC.retainAll(getGraph().getNodesInTo(b, Endpoint.CIRCLE));
@@ -630,7 +628,7 @@ public final class CfciOld {
                         continue;
                     }
 
-                    LinkedList<Node> reachable = new LinkedList<Node>();
+                    LinkedList <Node> reachable = new LinkedList <Node>();
                     reachable.add(a);
                     reachablePathFind(a, b, c, reachable);
                 }
@@ -644,11 +642,11 @@ public final class CfciOld {
      * a DDP consists of colliders that are parents of c.
      */
     private void reachablePathFind(Node a, Node b, Node c,
-                                   LinkedList<Node> reachable) {
-        Set<Node> cParents = new HashSet<Node>(getGraph().getParents(c));
+                                   LinkedList <Node> reachable) {
+        Set <Node> cParents = new HashSet <Node>(getGraph().getParents(c));
 
         //needed to avoid cycles in failure case
-        Set<Node> visited = new HashSet<Node>();
+        Set <Node> visited = new HashSet <Node>();
         visited.add(b);
         visited.add(c);
 
@@ -660,7 +658,7 @@ public final class CfciOld {
             visited.add(x);
 
             // Possible DDP path endpoints.
-            List<Node> intoX = getGraph().getNodesInTo(x, Endpoint.ARROW);
+            List <Node> intoX = getGraph().getNodesInTo(x, Endpoint.ARROW);
             intoX.removeAll(visited);
 
             for (Node node : intoX) {

@@ -112,11 +112,33 @@ public class MbClassify implements DiscreteClassifier {
             int maxMissing = Integer.parseInt(maxMissingString);
 
             setup(train, test, targetString, alpha, depth, prior, maxMissing);
-        }
-        catch (IOException e) {
+        } catch (IOException e) {
             throw new RuntimeException(e);
         }
     }
+
+    /**
+     * Runs MbClassify using command-line arguments. The syntax is:
+     * <pre>
+     * java MbClassify train.dat test.dat target alpha depth
+     * </pre>
+     *
+     * @param args train.dat test.dat alpha depth dirichlet_prior max_missing
+     */
+    public static void main(String[] args) {
+        String trainPath = args[0];
+        String testPath = args[1];
+        String targetString = args[2];
+        String alphaString = args[3];
+        String depthString = args[4];
+        String priorString = args[5];
+        String maxMissingString = args[6];
+
+        new MbClassify(trainPath, testPath, targetString, alphaString, depthString,
+                priorString, maxMissingString);
+    }
+
+    //============================PUBLIC METHODS=========================//
 
     private void setup(DataSet train, DataSet test, String target, double alpha,
                        int depth, double prior, int maxMissing) {
@@ -136,8 +158,6 @@ public class MbClassify implements DiscreteClassifier {
         }
     }
 
-    //============================PUBLIC METHODS=========================//
-
     /**
      * Classifies the test data by Bayesian updating. The procedure is as follows. First, MBFS is run on the training
      * data to estimate an MB pattern. Bidirected edges are removed; an MB DAG G is selected from the pattern that
@@ -156,14 +176,14 @@ public class MbClassify implements DiscreteClassifier {
      * @return The classifications.
      */
     @Override
-	public int[] classify() {
+    public int[] classify() {
         IndependenceTest indTest = new IndTestChiSquare(train, alpha);
 
         Mbfs search = new Mbfs(indTest, depth);
         search.setDepth(depth);
 //        Hiton search = new Hiton(indTest, depth);
 //        Mmmb search = new Mmmb(indTest, depth);
-        List<Node> mbPlusTarget = search.findMb(target);
+        List <Node> mbPlusTarget = search.findMb(target);
         mbPlusTarget.add(train.getVariable(target));
 
         DataSet subset = train.subsetColumns(mbPlusTarget);
@@ -195,7 +215,7 @@ public class MbClassify implements DiscreteClassifier {
         TetradLogger.getInstance().log("details", "\nClassification using selected MB DAG:");
 
         NumberFormat nf = NumberFormatUtil.getInstance().getNumberFormat();
-        List<Node> mbNodes = selectedDag.getNodes();
+        List <Node> mbNodes = selectedDag.getNodes();
 
         //The Markov blanket nodes will correspond to a subset of the variables
         //in the training dataset.  Find the subset dataset.
@@ -232,7 +252,7 @@ public class MbClassify implements DiscreteClassifier {
         Arrays.fill(estimatedCategories, -1);
 
         //The variables in the dataset.
-        List<Node> varsClassify = testSubset.getVariables();
+        List <Node> varsClassify = testSubset.getVariables();
 
         //For each case in the dataset to be classified compute the estimated
         //value of the target variable and increment the appropriate element
@@ -390,7 +410,7 @@ public class MbClassify implements DiscreteClassifier {
      * Returns the cross-tabulation from the classify method. The classify method must be run first.
      */
     @Override
-	public int[][] crossTabulation() {
+    public int[][] crossTabulation() {
         return crossTabulation;
     }
 
@@ -398,29 +418,8 @@ public class MbClassify implements DiscreteClassifier {
      * Returns the percent correct from the classify method. The classify method must be run first.
      */
     @Override
-	public double getPercentCorrect() {
+    public double getPercentCorrect() {
         return percentCorrect;
-    }
-
-    /**
-     * Runs MbClassify using command-line arguments. The syntax is:
-     * <pre>
-     * java MbClassify train.dat test.dat target alpha depth
-     * </pre>
-     *
-     * @param args train.dat test.dat alpha depth dirichlet_prior max_missing
-     */
-    public static void main(String[] args) {
-        String trainPath = args[0];
-        String testPath = args[1];
-        String targetString = args[2];
-        String alphaString = args[3];
-        String depthString = args[4];
-        String priorString = args[5];
-        String maxMissingString = args[6];
-
-        new MbClassify(trainPath, testPath, targetString, alphaString, depthString,
-                priorString, maxMissingString);
     }
 }
 

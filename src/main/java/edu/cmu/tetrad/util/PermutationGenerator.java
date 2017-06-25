@@ -91,59 +91,6 @@ public final class PermutationGenerator {
     }
 
     /**
-     * Returns the next combination in the series, or null if the series is
-     * finished.  The array that is produced should not be altered by the user,
-     * as it is reused by the choice generator.
-     * <p/>
-     * If the number of items chosen is zero, numObjects zero-length array will be
-     * returned once, with null after that.
-     * <p/>
-     * The array that is returned is reused, but modifying it will not change
-     * the sequence of choices returned.
-     *
-     * @return the next combination in the series, or null if the series is
-     *         finished.
-     */
-    public int[] next() {
-        if (choiceReturned == null) {
-            choiceReturned = new int[getNumObjects()];
-            System.arraycopy(choiceLocal, 0, choiceReturned, 0, numObjects);
-            begun = true;
-            return choiceReturned;
-        }
-
-        int i = getNumObjects() - 1;
-
-        // Scan from the right for the first index whose value is less than
-        // its expected maximum (i + diff) and perform the fill() operation
-        // at that index.
-        while (--i > -1) {
-            LinkedList<Integer> h = new LinkedList<Integer>();
-
-            for (int j = i; j < choiceLocal.length; j++) {
-                h.add(choiceLocal[j]);
-            }
-
-            Collections.sort(h);
-
-            if (this.choiceLocal[i] < h.getLast()) {
-                fill(i, h);
-                begun = true;
-                System.arraycopy(choiceLocal, 0, choiceReturned, 0, numObjects);
-                return choiceReturned;
-            }
-        }
-
-        if (this.begun) {
-            return null;
-        } else {
-            begun = true;
-            System.arraycopy(choiceLocal, 0, choiceReturned, 0, numObjects);
-            return choiceReturned;
-        }
-    }
-
-    /**
      * This static method will print the series of combinations for numObjects choose b
      * to System.out.
      *
@@ -175,6 +122,59 @@ public final class PermutationGenerator {
     }
 
     /**
+     * Returns the next combination in the series, or null if the series is
+     * finished.  The array that is produced should not be altered by the user,
+     * as it is reused by the choice generator.
+     * <p/>
+     * If the number of items chosen is zero, numObjects zero-length array will be
+     * returned once, with null after that.
+     * <p/>
+     * The array that is returned is reused, but modifying it will not change
+     * the sequence of choices returned.
+     *
+     * @return the next combination in the series, or null if the series is
+     * finished.
+     */
+    public int[] next() {
+        if (choiceReturned == null) {
+            choiceReturned = new int[getNumObjects()];
+            System.arraycopy(choiceLocal, 0, choiceReturned, 0, numObjects);
+            begun = true;
+            return choiceReturned;
+        }
+
+        int i = getNumObjects() - 1;
+
+        // Scan from the right for the first index whose value is less than
+        // its expected maximum (i + diff) and perform the fill() operation
+        // at that index.
+        while (--i > -1) {
+            LinkedList <Integer> h = new LinkedList <Integer>();
+
+            for (int j = i; j < choiceLocal.length; j++) {
+                h.add(choiceLocal[j]);
+            }
+
+            Collections.sort(h);
+
+            if (this.choiceLocal[i] < h.getLast()) {
+                fill(i, h);
+                begun = true;
+                System.arraycopy(choiceLocal, 0, choiceReturned, 0, numObjects);
+                return choiceReturned;
+            }
+        }
+
+        if (this.begun) {
+            return null;
+        } else {
+            begun = true;
+            System.arraycopy(choiceLocal, 0, choiceReturned, 0, numObjects);
+            return choiceReturned;
+        }
+    }
+
+    /**
      * @return the number of objects being chosen from.
      */
     int getNumObjects() {
@@ -186,10 +186,10 @@ public final class PermutationGenerator {
      * with successive integers starting with choice[index] + 1.
      *
      * @param index the index to begin this incrementing operation.
-     * @param h the list of integers at index or later.
+     * @param h     the list of integers at index or later.
      */
-    private void fill(int index, LinkedList<Integer> h) {
-        h = new LinkedList<Integer>(h);
+    private void fill(int index, LinkedList <Integer> h) {
+        h = new LinkedList <Integer>(h);
         int t = h.indexOf(this.choiceLocal[index]);
         Integer newVal = h.get(t + 1);
         this.choiceLocal[index] = newVal;

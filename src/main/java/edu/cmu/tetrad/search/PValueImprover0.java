@@ -30,7 +30,6 @@ import edu.cmu.tetrad.util.TetradLogger;
 
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
-import java.util.*;
 
 /**
  * Improves the P value of a SEM IM by adding, removing, or reversing single edges.
@@ -39,13 +38,13 @@ import java.util.*;
  */
 
 public final class PValueImprover0 {
+    private final NumberFormat nf = new DecimalFormat("0.0#########");
     private DataSet dataSet;
     private Knowledge knowledge;
     private Graph graph;
     private double alpha = 0.05;
     private double highPValueAlpha = 0.05;
-    private final NumberFormat nf = new DecimalFormat("0.0#########");
-    private Set<GraphWithPValue> significantModels = new HashSet<GraphWithPValue>();
+    private Set <GraphWithPValue> significantModels = new HashSet <GraphWithPValue>();
     private Graph trueModel;
     private SemIm originalSemIm;
     private SemIm newSemIm;
@@ -69,6 +68,110 @@ public final class PValueImprover0 {
         this.graph = graph;
         this.dataSet = data;
         this.dataSet = data;
+    }
+
+    public PValueImprover0() {
+        super();
+    }
+
+    /**
+     * Test if the candidate deletion is a valid operation (Theorem 17 from Chickering, 2002).
+     */
+    private static boolean validDelete(Node x, Node y, Set <Node> h,
+                                       Graph graph) {
+        List <Node> naYXH = findNaYX(x, y, graph);
+        naYXH.removeAll(h);
+        return isClique(naYXH, graph);
+    }
+
+    /**
+     * Get all nodes that are connected to Y by an undirected edge and not adjacent to X.
+     */
+    private static List <Node> getTNeighbors(Node x, Node y, Graph graph) {
+        List <Node> tNeighbors = new LinkedList <Node>(graph.getAdjacentNodes(y));
+        tNeighbors.removeAll(graph.getAdjacentNodes(x));
+
+        for (int i = tNeighbors.size() - 1; i >= 0; i--) {
+            Node z = tNeighbors.get(i);
+            Edge edge = graph.getEdge(y, z);
+
+            if (!Edges.isUndirectedEdge(edge)) {
+                tNeighbors.remove(z);
+            }
+        }
+
+        return tNeighbors;
+    }
+
+    /**
+     * Get all nodes that are connected to Y by an undirected edge and adjacent to X
+     */
+    private static List <Node> getHNeighbors(Node x, Node y, Graph graph) {
+        List <Node> hNeighbors = new LinkedList <Node>(graph.getAdjacentNodes(y));
+        hNeighbors.retainAll(graph.getAdjacentNodes(x));
+
+        for (int i = hNeighbors.size() - 1; i >= 0; i--) {
+            Node z = hNeighbors.get(i);
+            Edge edge = graph.getEdge(y, z);
+
+            if (!Edges.isUndirectedEdge(edge)) {
+                hNeighbors.remove(z);
+            }
+        }
+
+        return hNeighbors;
+    }
+
+    /**
+     * Find all nodes that are connected to Y by an undirected edge that are adjacent to X (that is, by undirected or
+     * directed edge) NOTE: very inefficient implementation, since the current library does not allow access to the
+     * adjacency list/matrix of the graph.
+     */
+    private static List <Node> findNaYX(Node x, Node y, Graph graph) {
+        List <Node> naYX = new LinkedList <Node>(graph.getAdjacentNodes(y));
+        naYX.retainAll(graph.getAdjacentNodes(x));
+
+        for (int i = 0; i < naYX.size(); i++) {
+            Node z = naYX.get(i);
+            Edge edge = graph.getEdge(y, z);
+
+            if (!Edges.isUndirectedEdge(edge)) {
+                naYX.remove(z);
+            }
+        }
+
+        return naYX;
+    }
+
+    /**
+     * Returns true iif the given set forms a clique in the given graph.
+     */
+    private static boolean isClique(List <Node> set, Graph graph) {
+        List <Node> setv = new LinkedList <Node>(set);
+        for (int i = 0; i < setv.size() - 1; i++) {
+            for (int j = i + 1; j < setv.size(); j++) {
+                if (!graph.isAdjacentTo(setv.get(i), setv.get(j))) {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
+    private static List <Set <Node>> powerSet(List <Node> nodes) {
+        List <Set <Node>> subsets = new ArrayList <Set <Node>>();
+        int total = (int) Math.pow(2, nodes.size());
+        for (int i = 0; i < total; i++) {
+            Set <Node> newSet = new HashSet <Node>();
+            String selection = Integer.toBinaryString(i);
+            for (int j = selection.length() - 1; j >= 0; j--) {
+                if (selection.charAt(j) == '1') {
+                    newSet.add(nodes.get(selection.length() - j - 1));
+                }
+            }
+            subsets.add(newSet);
+        }
+        return subsets;
     }
 
     public Graph search() {
@@ -105,7 +208,7 @@ public final class PValueImprover0 {
         while (scoreGraph(bestGraph).getPValue() < alpha) {
             System.out.println("Begin increase score loop");
 
-            List<Move> moves = getMoves(bestGraph);
+            List <Move> moves = getMoves(bestGraph);
 
             bestMove = null;
 
@@ -175,7 +278,7 @@ public final class PValueImprover0 {
         while (true) {
             System.out.println("Begin decrease score loop");
 
-            List<Move> moves = getMoves(bestGraph);
+            List <Move> moves = getMoves(bestGraph);
             bestMove = null;
             bestScore = Double.NEGATIVE_INFINITY;
             double bestPValue = Double.NEGATIVE_INFINITY;
@@ -240,11 +343,6 @@ public final class PValueImprover0 {
         }
     }
 
-
-    public PValueImprover0() {
-        super();
-    }
-
     private void removeHighPValueEdges(Graph bestGraph) {
         boolean changed = true;
 
@@ -293,11 +391,11 @@ public final class PValueImprover0 {
         return edge;
     }
 
-    private List<Move> getMoves(Graph graph) {
-        List<Move> moves = new ArrayList<Move>();
+    private List <Move> getMoves(Graph graph) {
+        List <Move> moves = new ArrayList <Move>();
 
         // Add moves:
-        List<Node> nodes = graph.getNodes();
+        List <Node> nodes = graph.getNodes();
 
         for (int i = 0; i < nodes.size(); i++) {
             for (int j = 0; j < nodes.size(); j++) {
@@ -341,7 +439,7 @@ public final class PValueImprover0 {
 
 //         Make collider moves:
         for (Node node : graph.getNodes()) {
-            List<Node> adj = graph.getAdjacentNodes(node);
+            List <Node> adj = graph.getAdjacentNodes(node);
 
             if (adj.size() < 2) continue;
 
@@ -349,7 +447,7 @@ public final class PValueImprover0 {
             int[] choice;
 
             while ((choice = gen.next()) != null) {
-                List<Node> set = GraphUtils.asList(choice, adj);
+                List <Node> set = GraphUtils.asList(choice, adj);
 
                 Edge edge1 = Edges.directedEdge(set.get(0), node);
                 Edge edge2 = Edges.directedEdge(set.get(1), node);
@@ -431,82 +529,11 @@ public final class PValueImprover0 {
         this.highPValueAlpha = highPValueAlpha;
     }
 
-    private static class Move {
-        public enum Type {
-            ADD, REMOVE, REDIRECT, COLLIDER
-        }
-
-        private Edge edge;
-        private Edge secondEdge;
-        private Type type;
-
-        public Move(Edge edge, Type type) {
-            this.edge = edge;
-            this.type = type;
-        }
-
-        public Move(Edge edge, Edge secondEdge, Type type) {
-            this.edge = edge;
-            this.secondEdge = secondEdge;
-            this.type = type;
-        }
-
-        public Edge getEdge() {
-            return this.edge;
-        }
-
-        public Edge getSecondEdge() {
-            return secondEdge;
-        }
-
-        public Type getType() {
-            return this.type;
-        }
-
-        @Override
-		public String toString() {
-            String s = (secondEdge != null) ? (secondEdge + ", ") : "";
-            return "<" + edge + ", " + s + type + ">";
-
-        }
-    }
-
-
     private void saveModelIfSignificant(Graph graph) {
         double pValue = scoreGraph(graph).getPValue();
 
         if (pValue > alpha) {
             getSignificantModels().add(new GraphWithPValue(graph, pValue));
-        }
-    }
-
-    public static class GraphWithPValue {
-        private Graph graph;
-        private double pValue;
-
-        public GraphWithPValue(Graph graph, double pValue) {
-            this.graph = graph;
-            this.pValue = pValue;
-        }
-
-        public Graph getGraph() {
-            return graph;
-        }
-
-        public double getPValue() {
-            return pValue;
-        }
-
-        @Override
-		public int hashCode() {
-            return 17 * graph.hashCode();
-        }
-
-        @Override
-		public boolean equals(Object o) {
-            if (o == null) return false;
-            GraphWithPValue p = (GraphWithPValue) o;
-            return (p.graph.equals(graph));
         }
     }
 
@@ -523,6 +550,12 @@ public final class PValueImprover0 {
         SemIm estimatedSem = semEstimator.getEstimatedSem();
         return new Score(estimatedSem);
     }
+
+
+    /*
+    * Do an actual insertion
+    * (Definition 12 from Chickering, 2002).
+    **/
 
     public Score scoreDag(Graph dag) {
         SemPm semPm = new SemPm(dag);
@@ -564,11 +597,11 @@ public final class PValueImprover0 {
         TetradLogger.getInstance().log("info", "Initial Score = " + nf.format(bestScore));
 
         Node x, y;
-        Set<Node> t = new HashSet<Node>();
+        Set <Node> t = new HashSet <Node>();
 
         do {
             x = y = null;
-            List<Node> nodes = graph.getNodes();
+            List <Node> nodes = graph.getNodes();
             Collections.shuffle(nodes);
 
             for (int i = 0; i < nodes.size(); i++) {
@@ -588,10 +621,10 @@ public final class PValueImprover0 {
                         continue;
                     }
 
-                    List<Node> tNeighbors = getTNeighbors(_x, _y, graph);
-                    List<Set<Node>> tSubsets = powerSet(tNeighbors);
+                    List <Node> tNeighbors = getTNeighbors(_x, _y, graph);
+                    List <Set <Node>> tSubsets = powerSet(tNeighbors);
 
-                    for (Set<Node> tSubset : tSubsets) {
+                    for (Set <Node> tSubset : tSubsets) {
 
                         if (!validSetByKnowledge(_x, _y, tSubset, true)) {
                             continue;
@@ -647,10 +680,10 @@ public final class PValueImprover0 {
         double score = initialScore;
         double bestScore = score;
         Node x, y;
-        Set<Node> t = new HashSet<Node>();
+        Set <Node> t = new HashSet <Node>();
         do {
             x = y = null;
-            List<Edge> graphEdges = graph.getEdges();
+            List <Edge> graphEdges = graph.getEdges();
             Collections.shuffle(graphEdges);
 
             for (Edge edge : graphEdges) {
@@ -668,10 +701,10 @@ public final class PValueImprover0 {
                     continue;
                 }
 
-                List<Node> hNeighbors = getHNeighbors(_x, _y, graph);
-                List<Set<Node>> hSubsets = powerSet(hNeighbors);
+                List <Node> hNeighbors = getHNeighbors(_x, _y, graph);
+                List <Set <Node>> hSubsets = powerSet(hNeighbors);
 
-                for (Set<Node> hSubset : hSubsets) {
+                for (Set <Node> hSubset : hSubsets) {
                     if (!validSetByKnowledge(_x, _y, hSubset, false)) {
                         continue;
                     }
@@ -718,13 +751,12 @@ public final class PValueImprover0 {
         return score;
     }
 
-
     /*
-    * Do an actual insertion
-    * (Definition 12 from Chickering, 2002).
+    * Test if the candidate insertion is a valid operation
+    * (Theorem 15 from Chickering, 2002).
     **/
 
-    private void tryInsert(Node x, Node y, Set<Node> subset, Graph graph, double score, boolean log) {
+    private void tryInsert(Node x, Node y, Set <Node> subset, Graph graph, double score, boolean log) {
         Edge trueEdge = null;
         Graph trueGraph = null;
 
@@ -756,7 +788,7 @@ public final class PValueImprover0 {
     /**
      * Do an actual deletion (Definition 13 from Chickering, 2002).
      */
-    private void tryDelete(Node x, Node y, Set<Node> subset, Graph graph, double score, boolean log) {
+    private void tryDelete(Node x, Node y, Set <Node> subset, Graph graph, double score, boolean log) {
         graph.removeEdge(x, y);
 
         for (Node h : subset) {
@@ -784,7 +816,7 @@ public final class PValueImprover0 {
         }
     }
 
-    private void insert(Node x, Node y, Set<Node> subset, Graph graph, double score, boolean log) {
+    private void insert(Node x, Node y, Set <Node> subset, Graph graph, double score, boolean log) {
         Edge trueEdge = null;
         Graph trueGraph = null;
 
@@ -827,7 +859,7 @@ public final class PValueImprover0 {
     /**
      * Do an actual deletion (Definition 13 from Chickering, 2002).
      */
-    private void delete(Node x, Node y, Set<Node> subset, Graph graph, double score, boolean log) {
+    private void delete(Node x, Node y, Set <Node> subset, Graph graph, double score, boolean log) {
 
         if (log) {
             Edge oldEdge = graph.getEdge(x, y);
@@ -863,96 +895,22 @@ public final class PValueImprover0 {
         }
     }
 
-    /*
-    * Test if the candidate insertion is a valid operation
-    * (Theorem 15 from Chickering, 2002).
-    **/
-
-    private boolean validInsert(Node x, Node y, Set<Node> subset, Graph graph) {
-        List<Node> naYXT = new LinkedList<Node>(subset);
+    private boolean validInsert(Node x, Node y, Set <Node> subset, Graph graph) {
+        List <Node> naYXT = new LinkedList <Node>(subset);
         naYXT.addAll(findNaYX(x, y, graph));
 
         if (!isClique(naYXT, graph)) {
             return false;
         }
 
-        if (!isSemiDirectedBlocked(x, y, naYXT, graph, new HashSet<Node>())) {
+        if (!isSemiDirectedBlocked(x, y, naYXT, graph, new HashSet <Node>())) {
             return false;
         }
 
         return true;
     }
 
-    /**
-     * Test if the candidate deletion is a valid operation (Theorem 17 from Chickering, 2002).
-     */
-    private static boolean validDelete(Node x, Node y, Set<Node> h,
-                                       Graph graph) {
-        List<Node> naYXH = findNaYX(x, y, graph);
-        naYXH.removeAll(h);
-        return isClique(naYXH, graph);
-    }
-
-    /**
-     * Get all nodes that are connected to Y by an undirected edge and not adjacent to X.
-     */
-    private static List<Node> getTNeighbors(Node x, Node y, Graph graph) {
-        List<Node> tNeighbors = new LinkedList<Node>(graph.getAdjacentNodes(y));
-        tNeighbors.removeAll(graph.getAdjacentNodes(x));
-
-        for (int i = tNeighbors.size() - 1; i >= 0; i--) {
-            Node z = tNeighbors.get(i);
-            Edge edge = graph.getEdge(y, z);
-
-            if (!Edges.isUndirectedEdge(edge)) {
-                tNeighbors.remove(z);
-            }
-        }
-
-        return tNeighbors;
-    }
-
-    /**
-     * Get all nodes that are connected to Y by an undirected edge and adjacent to X
-     */
-    private static List<Node> getHNeighbors(Node x, Node y, Graph graph) {
-        List<Node> hNeighbors = new LinkedList<Node>(graph.getAdjacentNodes(y));
-        hNeighbors.retainAll(graph.getAdjacentNodes(x));
-
-        for (int i = hNeighbors.size() - 1; i >= 0; i--) {
-            Node z = hNeighbors.get(i);
-            Edge edge = graph.getEdge(y, z);
-
-            if (!Edges.isUndirectedEdge(edge)) {
-                hNeighbors.remove(z);
-            }
-        }
-
-        return hNeighbors;
-    }
-
-    /**
-     * Find all nodes that are connected to Y by an undirected edge that are adjacent to X (that is, by undirected or
-     * directed edge) NOTE: very inefficient implementation, since the current library does not allow access to the
-     * adjacency list/matrix of the graph.
-     */
-    private static List<Node> findNaYX(Node x, Node y, Graph graph) {
-        List<Node> naYX = new LinkedList<Node>(graph.getAdjacentNodes(y));
-        naYX.retainAll(graph.getAdjacentNodes(x));
-
-        for (int i = 0; i < naYX.size(); i++) {
-            Node z = naYX.get(i);
-            Edge edge = graph.getEdge(y, z);
-
-            if (!Edges.isUndirectedEdge(edge)) {
-                naYX.remove(z);
-            }
-        }
-
-        return naYX;
-    }
-
-    private boolean validSetByKnowledge(Node x, Node y, Set<Node> subset,
+    private boolean validSetByKnowledge(Node x, Node y, Set <Node> subset,
                                         boolean insertMode) {
         if (insertMode) {
             for (Node aSubset : subset) {
@@ -976,12 +934,12 @@ public final class PValueImprover0 {
         return true;
     }
 
-    private double scoreGraphChange(Node y, Set<Node> parents1,
-                                    Set<Node> parents2, Graph graph) {
+    private double scoreGraphChange(Node y, Set <Node> parents1,
+                                    Set <Node> parents2, Graph graph) {
         graph = SearchGraphUtils.dagFromPattern(graph);
 
-        List<Node> currentParents = graph.getParents(y);
-        List<Node> currentChildren = graph.getChildren(y);
+        List <Node> currentParents = graph.getParents(y);
+        List <Node> currentChildren = graph.getChildren(y);
 
         for (Node node : currentParents) {
             graph.removeEdge(node, y);
@@ -1027,25 +985,10 @@ public final class PValueImprover0 {
     }
 
     /**
-     * Returns true iif the given set forms a clique in the given graph.
-     */
-    private static boolean isClique(List<Node> set, Graph graph) {
-        List<Node> setv = new LinkedList<Node>(set);
-        for (int i = 0; i < setv.size() - 1; i++) {
-            for (int j = i + 1; j < setv.size(); j++) {
-                if (!graph.isAdjacentTo(setv.get(i), setv.get(j))) {
-                    return false;
-                }
-            }
-        }
-        return true;
-    }
-
-    /**
      * Verifies if every semidirected path from y to x contains a node in naYXT.
      */
-    private boolean isSemiDirectedBlocked(Node x, Node y, List<Node> naYXT,
-                                          Graph graph, Set<Node> marked) {
+    private boolean isSemiDirectedBlocked(Node x, Node y, List <Node> naYXT,
+                                          Graph graph, Set <Node> marked) {
         if (naYXT.contains(y)) {
             return true;
         }
@@ -1072,23 +1015,6 @@ public final class PValueImprover0 {
 
         return true;
     }
-
-    private static List<Set<Node>> powerSet(List<Node> nodes) {
-        List<Set<Node>> subsets = new ArrayList<Set<Node>>();
-        int total = (int) Math.pow(2, nodes.size());
-        for (int i = 0; i < total; i++) {
-            Set<Node> newSet = new HashSet<Node>();
-            String selection = Integer.toBinaryString(i);
-            for (int j = selection.length() - 1; j >= 0; j--) {
-                if (selection.charAt(j) == '1') {
-                    newSet.add(nodes.get(selection.length() - j - 1));
-                }
-            }
-            subsets.add(newSet);
-        }
-        return subsets;
-    }
-
 
     /**
      * Completes a pattern that was modified by an insertion/deletion operator Based on the algorithm described on
@@ -1117,7 +1043,7 @@ public final class PValueImprover0 {
 
     private void addRequiredEdges(Graph graph) {
         // Add required edges.
-        List<Node> nodes = graph.getNodes();
+        List <Node> nodes = graph.getNodes();
 
         for (int i = 0; i < nodes.size(); i++) {
             for (int j = 0; j < nodes.size(); j++) {
@@ -1130,10 +1056,6 @@ public final class PValueImprover0 {
                 }
             }
         }
-    }
-
-    public void setKnowledge(Knowledge knowledge) {
-        this.knowledge = knowledge;
     }
 
     public Graph getTrueModel() {
@@ -1156,77 +1078,12 @@ public final class PValueImprover0 {
         return knowledge;
     }
 
-    public Set<GraphWithPValue> getSignificantModels() {
-        return significantModels;
+    public void setKnowledge(Knowledge knowledge) {
+        this.knowledge = knowledge;
     }
 
-    public static class Score {
-        private SemIm estimatedSem;
-        private double pValue;
-        private double fml;
-        private double chisq;
-
-        public Score(SemIm estimatedSem) {
-            this.estimatedSem = estimatedSem;
-            this.pValue = estimatedSem.getPValue();
-            this.fml = estimatedSem.getFml();
-            this.chisq = estimatedSem.getChiSquare();
-        }
-
-        private Score() {
-            this.estimatedSem = null;
-            this.pValue = 0.0;
-            this.fml = Double.POSITIVE_INFINITY;
-            this.chisq = 0.0;
-        }
-
-        public SemIm getEstimatedSem() {
-            return estimatedSem;
-        }
-
-        public double getPValue() {
-            return pValue;
-        }
-
-        public double getScore() {
-//            double fml = estimatedSem.getFml();
-//            int freeParams = estimatedSem.getNumFreeParams();
-//            int sampleSize = estimatedSem.getSampleSize();
-//            return -(sampleSize - 1) * fml - (freeParams * Math.log(sampleSize));
-//            return -getChisq();
-
-//            if (getMaxEdgeP() > 0.05) {
-//                return Double.NEGATIVE_INFINITY;
-//            }
-
-            return -fml;
-        }
-
-        public double getFml() {
-            return fml;
-        }
-
-        public double getChisq() {
-            return chisq;
-        }
-
-        public double getMaxEdgeP() {
-            double maxP = Double.NEGATIVE_INFINITY;
-
-            for (Parameter param : estimatedSem.getSemPm().getParameters()) {
-                if (param.getType() != ParamType.COEF) {
-                    continue;
-                }
-                double p = this.estimatedSem.getPValue(param, 10000);
-                if (p > maxP) maxP = p;
-            }
-
-            return maxP;
-        }
-
-        public static Score negativeInfinity() {
-            return new Score();
-        }
+    public Set <GraphWithPValue> getSignificantModels() {
+        return significantModels;
     }
 
     /**
@@ -1275,6 +1132,144 @@ public final class PValueImprover0 {
         int getNumParameters();
     }
 
+    private static class Move {
+        private Edge edge;
+        private Edge secondEdge;
+        private Type type;
+        public Move(Edge edge, Type type) {
+            this.edge = edge;
+            this.type = type;
+        }
+
+        public Move(Edge edge, Edge secondEdge, Type type) {
+            this.edge = edge;
+            this.secondEdge = secondEdge;
+            this.type = type;
+        }
+
+        public Edge getEdge() {
+            return this.edge;
+        }
+
+        public Edge getSecondEdge() {
+            return secondEdge;
+        }
+
+        public Type getType() {
+            return this.type;
+        }
+
+        @Override
+        public String toString() {
+            String s = (secondEdge != null) ? (secondEdge + ", ") : "";
+            return "<" + edge + ", " + s + type + ">";
+
+        }
+
+        public enum Type {
+            ADD, REMOVE, REDIRECT, COLLIDER
+        }
+    }
+
+    public static class GraphWithPValue {
+        private Graph graph;
+        private double pValue;
+
+        public GraphWithPValue(Graph graph, double pValue) {
+            this.graph = graph;
+            this.pValue = pValue;
+        }
+
+        public Graph getGraph() {
+            return graph;
+        }
+
+        public double getPValue() {
+            return pValue;
+        }
+
+        @Override
+        public int hashCode() {
+            return 17 * graph.hashCode();
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (o == null) return false;
+            GraphWithPValue p = (GraphWithPValue) o;
+            return (p.graph.equals(graph));
+        }
+    }
+
+    public static class Score {
+        private SemIm estimatedSem;
+        private double pValue;
+        private double fml;
+        private double chisq;
+
+        public Score(SemIm estimatedSem) {
+            this.estimatedSem = estimatedSem;
+            this.pValue = estimatedSem.getPValue();
+            this.fml = estimatedSem.getFml();
+            this.chisq = estimatedSem.getChiSquare();
+        }
+
+        private Score() {
+            this.estimatedSem = null;
+            this.pValue = 0.0;
+            this.fml = Double.POSITIVE_INFINITY;
+            this.chisq = 0.0;
+        }
+
+        public static Score negativeInfinity() {
+            return new Score();
+        }
+
+        public SemIm getEstimatedSem() {
+            return estimatedSem;
+        }
+
+        public double getPValue() {
+            return pValue;
+        }
+
+        public double getScore() {
+//            double fml = estimatedSem.getFml();
+//            int freeParams = estimatedSem.getNumFreeParams();
+//            int sampleSize = estimatedSem.getSampleSize();
+//            return -(sampleSize - 1) * fml - (freeParams * Math.log(sampleSize));
+//            return -getChisq();
+
+//            if (getMaxEdgeP() > 0.05) {
+//                return Double.NEGATIVE_INFINITY;
+//            }
+
+            return -fml;
+        }
+
+        public double getFml() {
+            return fml;
+        }
+
+        public double getChisq() {
+            return chisq;
+        }
+
+        public double getMaxEdgeP() {
+            double maxP = Double.NEGATIVE_INFINITY;
+
+            for (Parameter param : estimatedSem.getSemPm().getParameters()) {
+                if (param.getType() != ParamType.COEF) {
+                    continue;
+                }
+                double p = this.estimatedSem.getPValue(param, 10000);
+                if (p > maxP) maxP = p;
+            }
+
+            return maxP;
+        }
+    }
+
     /**
      * Wraps a Sem for purposes of calculating its fitting function for given parameter values.
      *
@@ -1299,7 +1294,7 @@ public final class PValueImprover0 {
          * These values are mapped to parameter values.
          */
         @Override
-		public double evaluate(double[] parameters) {
+        public double evaluate(double[] parameters) {
             sem.setFreeParamValues(parameters);
 
             // This needs to be FML-- see Bollen p. 109.
@@ -1310,7 +1305,7 @@ public final class PValueImprover0 {
          * Returns the number of arguments. Required by the MultivariateFunction interface.
          */
         @Override
-		public int getNumParameters() {
+        public int getNumParameters() {
             return this.sem.getNumFreeParams();
         }
     }

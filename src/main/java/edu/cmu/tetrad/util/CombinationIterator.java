@@ -57,7 +57,7 @@ public class CombinationIterator implements Iterator {
      * by the next() method.
      */
     @Override
-	public boolean hasNext() {
+    public boolean hasNext() {
         return hasNext;
     }
 
@@ -65,7 +65,7 @@ public class CombinationIterator implements Iterator {
      * Returns an int[] array with the next combination.
      */
     @Override
-	public Object next() {
+    public Object next() {
         int[] clone = new int[numValues];
         System.arraycopy(values, 0, clone, 0, numValues);
 
@@ -92,7 +92,7 @@ public class CombinationIterator implements Iterator {
      * @throws UnsupportedOperationException
      */
     @Override
-	public void remove() {
+    public void remove() {
         throw new UnsupportedOperationException();
     }
 }

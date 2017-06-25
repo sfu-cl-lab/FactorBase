@@ -32,16 +32,18 @@ import java.io.ObjectStreamException;
  * @author Joseph Ramsey
  */
 public final class Endpoint implements TetradSerializable {
-    static final long serialVersionUID = 23L;
-
     public static final Endpoint TAIL = new Endpoint("Tail");
     public static final Endpoint ARROW = new Endpoint("Arrow");
     public static final Endpoint CIRCLE = new Endpoint("Circle");
-
+    static final long serialVersionUID = 23L;
+    private static final Endpoint[] TYPES = {TAIL, ARROW, CIRCLE};
+    // Declarations required for serialization.
+    private static int nextOrdinal = 0;
     /**
      * The name of this type.
      */
     private final transient String name;
+    private final int ordinal = nextOrdinal++;
 
     /**
      * Protected constructor for the types; this allows for extension in case
@@ -65,14 +67,9 @@ public final class Endpoint implements TetradSerializable {
      * Prints out the name of the type.
      */
     @Override
-	public String toString() {
+    public String toString() {
         return name;
     }
-
-    // Declarations required for serialization.
-    private static int nextOrdinal = 0;
-    private final int ordinal = nextOrdinal++;
-    private static final Endpoint[] TYPES = {TAIL, ARROW, CIRCLE};
 
     Object readResolve() throws ObjectStreamException {
         return TYPES[ordinal]; // Canonicalize.

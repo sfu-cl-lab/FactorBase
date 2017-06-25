@@ -32,15 +32,16 @@ import java.util.List;
 
 /**
  * Implements a really simple idea for building pure clusters, just using the Purify algorithm.
+ *
  * @author Joseph Ramsey
  */
 public class BuildPureClusters3 {
+    private static final int MAX_CLIQUE_TRIALS = 50;
     private DataSet dataSet;
     private ICovarianceMatrix cov;
-    private List<Node> variables;
+    private List <Node> variables;
     private TetradTest test;
     private double alpha;
-    private static final int MAX_CLIQUE_TRIALS = 50;
     private IndependenceTest indTest;
     private boolean depthOne = false;
     private EdgeListGraph depthOneGraph;
@@ -62,29 +63,29 @@ public class BuildPureClusters3 {
 
     public Graph search() {
         IPurify purify = new PurifyTetradBasedD(test);
-        List<Node> variables = new ArrayList<Node>(this.variables);
-        List<List<Node>> clustering = new ArrayList<List<Node>>();
-        List<Node> disgards;
-        List<Node> _disgards;
+        List <Node> variables = new ArrayList <Node>(this.variables);
+        List <List <Node>> clustering = new ArrayList <List <Node>>();
+        List <Node> disgards;
+        List <Node> _disgards;
 
         do {
             _disgards = calculateDisgards(clustering, variables);
             clustering.add(_disgards);
             clustering = purify.purify(clustering);
             disgards = calculateDisgards(clustering, variables);
-        } while (!new HashSet<Node>(disgards).equals(new HashSet<Node>(_disgards)));
+        } while (!new HashSet <Node>(disgards).equals(new HashSet <Node>(_disgards)));
 
         Graph graph = new EdgeListGraph();
 
-        for (List<Node> cluster : new ArrayList<List<Node>>(clustering)) {
+        for (List <Node> cluster : new ArrayList <List <Node>>(clustering)) {
             if (cluster.size() < 3) {
                 clustering.remove(cluster);
             }
         }
 
         for (int i = 0; i < clustering.size(); i++) {
-            List<Node> cluster = clustering.get(i);
-            Node latent = new GraphNode("_L" + (i+1));
+            List <Node> cluster = clustering.get(i);
+            Node latent = new GraphNode("_L" + (i + 1));
             latent.setNodeType(NodeType.LATENT);
             graph.addNode(latent);
 
@@ -98,12 +99,12 @@ public class BuildPureClusters3 {
 
     }
 
-    private List<Node> calculateDisgards(List<List<Node>> clustering, List<Node> variables) {
-        List<Node> disgards = new ArrayList<Node>();
+    private List <Node> calculateDisgards(List <List <Node>> clustering, List <Node> variables) {
+        List <Node> disgards = new ArrayList <Node>();
 
         NODE:
         for (Node node : variables) {
-            for (List<Node> cluster : clustering) {
+            for (List <Node> cluster : clustering) {
                 if (cluster.contains(node)) {
                     continue NODE;
                 }

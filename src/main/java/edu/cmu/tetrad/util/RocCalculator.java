@@ -121,7 +121,7 @@ public class RocCalculator {
 
         OrderedPairInt p0 = new OrderedPairInt(0, 0);
         OrderedPairInt pPrime;
-        List<OrderedPairInt> plot = new LinkedList<OrderedPairInt>();
+        List <OrderedPairInt> plot = new LinkedList <OrderedPairInt>();
         plot.add(p0);
         int numPairs = scoreCatPairs.length;
 
@@ -238,7 +238,7 @@ public class RocCalculator {
         }
 
         @Override
-		public int compareTo(Object other) {
+        public int compareTo(Object other) {
             if (getScore() < ((ScoreCategoryPair) other).getScore()) {
                 return -1;
             } else if (getScore() == ((ScoreCategoryPair) other).getScore()) {

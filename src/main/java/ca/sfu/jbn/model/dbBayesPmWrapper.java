@@ -36,26 +36,24 @@ import java.io.ObjectInputStream;
  *          2006) $
  */
 public class dbBayesPmWrapper extends BayesPmWrapper implements SessionModel, GraphSource {
-  
 
-	public dbBayesPmWrapper(AlgorithmRunner wrapper, DataWrapper dataWrapper) {
-		super(wrapper, dataWrapper);
-		// TODO Auto-generated constructor stub
-	}
 
-	static final long serialVersionUID = 23L;
-
+    static final long serialVersionUID = 23L;
     /**
      * @serial Can be null.
      */
     private String name;
-
     /**
      * The wrapped BayesPm.
      *
      * @serial Cannot be null.
      */
     private BayesPm bayesPm;
+
+    public dbBayesPmWrapper(AlgorithmRunner wrapper, DataWrapper dataWrapper) {
+        super(wrapper, dataWrapper);
+        // TODO Auto-generated constructor stub
+    }
 
     //==============================CONSTRUCTORS=========================//
 
@@ -66,9 +64,8 @@ public class dbBayesPmWrapper extends BayesPmWrapper implements SessionModel, Gr
 
 
     //=============================PUBLIC METHODS========================//
-
     @Override
-	public BayesPm getBayesPm() {
+    public BayesPm getBayesPm() {
         return this.bayesPm;
     }
 
@@ -95,23 +92,23 @@ public class dbBayesPmWrapper extends BayesPmWrapper implements SessionModel, Gr
     }
 
     @Override
-	public Graph getGraph() {
+    public Graph getGraph() {
         return bayesPm.getDag();
     }
 
     @Override
-	public String getName() {
+    public String getName() {
         return name;
     }
 
     @Override
-	public void setName(String name) {
+    public void setName(String name) {
         this.name = name;
     }
 
     //================================= Private Methods ==================================//
 
-    private void log(BayesPm pm){
+    private void log(BayesPm pm) {
         TetradLogger.getInstance().setTetradLoggerConfigForModel(dbBayesPmWrapper.class);
         TetradLogger.getInstance().info("PM type = Bayes");
         TetradLogger.getInstance().log("pm", pm.toString());

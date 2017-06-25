@@ -32,7 +32,6 @@ import edu.cmu.tetrad.util.TetradLogger;
 
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
-import java.util.*;
 
 /**
  * Improves the P value of a SEM IM by adding, removing, or reversing single edges.
@@ -41,14 +40,14 @@ import java.util.*;
  */
 
 public final class PValueImprover4 implements PValueImprover {
+    private final NumberFormat nf = new DecimalFormat("0.0#########");
     private DataSet dataSet = null;
     private CovarianceMatrix cov = null;
     private Knowledge knowledge = new Knowledge();
     private Graph graph;
     private double alpha = 0.05;
     private double highPValueAlpha = 0.05;
-    private final NumberFormat nf = new DecimalFormat("0.0#########");
-    private Set<GraphWithPValue> significantModels = new LinkedHashSet<GraphWithPValue>();
+    private Set <GraphWithPValue> significantModels = new LinkedHashSet <GraphWithPValue>();
     private Graph trueModel;
     private SemIm originalSemIm;
     private SemIm newSemIm;
@@ -112,8 +111,12 @@ public final class PValueImprover4 implements PValueImprover {
         this.scorer = new DagScorer(cov);
     }
 
+    public PValueImprover4() {
+        super();
+    }
+
     @Override
-	public Graph search() {
+    public Graph search() {
         EdgeListGraph _graph = new EdgeListGraph(getGraph());
         addRequiredEdges(_graph);
         Graph bestGraph = SearchGraphUtils.dagFromPattern(_graph);
@@ -147,13 +150,12 @@ public final class PValueImprover4 implements PValueImprover {
         return bestGraph;
     }
 
-
     private Graph increaseScoreLoop(Graph bestGraph, double alpha) {
         System.out.println("Increase score loop2");
 
         double initialDof = scoreGraph(getGraph()).getScore();
 
-        Map<Graph, Double> S = new LinkedHashMap<Graph, Double>();
+        Map <Graph, Double> S = new LinkedHashMap <Graph, Double>();
         S.put(bestGraph, initialDof);
         boolean changed = true;
         Graph graph;
@@ -162,10 +164,10 @@ public final class PValueImprover4 implements PValueImprover {
         while (changed) {
             changed = false;
 
-            Map<Graph, Double> SPrime = new LinkedHashMap<Graph, Double>(S);
+            Map <Graph, Double> SPrime = new LinkedHashMap <Graph, Double>(S);
 
             for (Graph s : SPrime.keySet()) {
-                List<Move> moves = new ArrayList<Move>();
+                List <Move> moves = new ArrayList <Move>();
                 moves.addAll(getAddMoves(s));
                 moves.addAll(getRedirectMoves(s));
 
@@ -220,24 +222,23 @@ public final class PValueImprover4 implements PValueImprover {
         return maximumScore(S);
     }
 
-
     private Graph increaseDfLoop(Graph bestGraph, double alpha) {
         System.out.println("Increase df loop");
 
         Score score1 = scoreGraph(getGraph());
         int initialDof = score1.getDof();
 
-        Map<Graph, Integer> S = new LinkedHashMap<Graph, Integer>();
+        Map <Graph, Integer> S = new LinkedHashMap <Graph, Integer>();
         S.put(bestGraph, initialDof);
         boolean changed = true;
 
         while (changed) {
             changed = false;
 
-            Map<Graph, Integer> SPrime = new LinkedHashMap<Graph, Integer>(S);
+            Map <Graph, Integer> SPrime = new LinkedHashMap <Graph, Integer>(S);
 
             for (Graph s : SPrime.keySet()) {
-                List<Move> moves = new ArrayList<Move>();
+                List <Move> moves = new ArrayList <Move>();
                 moves.addAll(getRemoveMoves(s));
                 moves.addAll(getRedirectMoves(s));
 
@@ -287,7 +288,7 @@ public final class PValueImprover4 implements PValueImprover {
         return this.graph;
     }
 
-    private Graph maximum(Map<Graph, Integer> s) {
+    private Graph maximum(Map <Graph, Integer> s) {
         int maxDof = Integer.MIN_VALUE;
         Graph maxGraph = null;
 
@@ -301,7 +302,7 @@ public final class PValueImprover4 implements PValueImprover {
         return maxGraph;
     }
 
-    private void removeMinimalDof(Map<Graph, Integer> s) {
+    private void removeMinimalDof(Map <Graph, Integer> s) {
         int minDof = Integer.MAX_VALUE;
         Graph minGraph = null;
 
@@ -315,7 +316,7 @@ public final class PValueImprover4 implements PValueImprover {
         s.remove(minGraph);
     }
 
-    private boolean increasesScore(Map<Graph, Double> s, double score) {
+    private boolean increasesScore(Map <Graph, Double> s, double score) {
         double minScore = Double.MAX_VALUE;
 
         for (Graph graph : s.keySet()) {
@@ -327,7 +328,7 @@ public final class PValueImprover4 implements PValueImprover {
         return score > minScore;
     }
 
-    private Graph maximumScore(Map<Graph, Double> s) {
+    private Graph maximumScore(Map <Graph, Double> s) {
         double maxScore = Double.NEGATIVE_INFINITY;
         Graph maxGraph = null;
 
@@ -347,7 +348,7 @@ public final class PValueImprover4 implements PValueImprover {
         return maxGraph;
     }
 
-    private void removeMinimalScore(Map<Graph, Double> s) {
+    private void removeMinimalScore(Map <Graph, Double> s) {
         double minScore = Integer.MAX_VALUE;
         Graph minGraph = null;
 
@@ -361,7 +362,7 @@ public final class PValueImprover4 implements PValueImprover {
         s.remove(minGraph);
     }
 
-    private double minimalScore(Map<Graph, Double> s) {
+    private double minimalScore(Map <Graph, Double> s) {
         double minScore = Integer.MAX_VALUE;
 
         for (Graph graph : s.keySet()) {
@@ -373,7 +374,7 @@ public final class PValueImprover4 implements PValueImprover {
         return minScore;
     }
 
-    private boolean increasesDof(Map<Graph, Integer> s, int dof) {
+    private boolean increasesDof(Map <Graph, Integer> s, int dof) {
         int minDof = Integer.MAX_VALUE;
 
         for (Graph graph : s.keySet()) {
@@ -383,11 +384,6 @@ public final class PValueImprover4 implements PValueImprover {
         }
 
         return dof > minDof;
-    }
-
-
-    public PValueImprover4() {
-        super();
     }
 
     public Graph removeZeroEdges(Graph bestGraph) {
@@ -489,11 +485,11 @@ public final class PValueImprover4 implements PValueImprover {
         return firstEdge;
     }
 
-    private List<Move> getAddMoves(Graph graph) {
-        List<Move> moves = new ArrayList<Move>();
+    private List <Move> getAddMoves(Graph graph) {
+        List <Move> moves = new ArrayList <Move>();
 
         // Add moves:
-        List<Node> nodes = graph.getNodes();
+        List <Node> nodes = graph.getNodes();
         Collections.sort(nodes);
 
         for (int i = 0; i < nodes.size(); i++) {
@@ -524,11 +520,11 @@ public final class PValueImprover4 implements PValueImprover {
         return moves;
     }
 
-    private List<Move> getRemoveMoves(Graph graph) {
-        List<Move> moves = new ArrayList<Move>();
+    private List <Move> getRemoveMoves(Graph graph) {
+        List <Move> moves = new ArrayList <Move>();
 
         // Remove moves:
-        List<Edge> edges = graph.getEdges();
+        List <Edge> edges = graph.getEdges();
         Collections.sort(edges);
 
         for (Edge edge : edges) {
@@ -545,11 +541,11 @@ public final class PValueImprover4 implements PValueImprover {
         return moves;
     }
 
-    private List<Move> getRedirectMoves(Graph graph) {
-        List<Move> moves = new ArrayList<Move>();
+    private List <Move> getRedirectMoves(Graph graph) {
+        List <Move> moves = new ArrayList <Move>();
 
         // Reverse moves:
-        List<Edge> edges = graph.getEdges();
+        List <Edge> edges = graph.getEdges();
         Collections.sort(edges);
 
         for (Edge edge : edges) {
@@ -573,21 +569,21 @@ public final class PValueImprover4 implements PValueImprover {
         return moves;
     }
 
-    private List<Move> getAddColliderMoves(Graph graph) {
+    private List <Move> getAddColliderMoves(Graph graph) {
 //         Make collider moves:
 
-        List<Move> moves = new ArrayList<Move>();
+        List <Move> moves = new ArrayList <Move>();
 
         for (Node b : graph.getNodes()) {
             if (graph.getAdjacentNodes(b).isEmpty()) {
-                List<Node> nodes = graph.getAdjacentNodes(b);
+                List <Node> nodes = graph.getAdjacentNodes(b);
 
                 if (nodes.size() >= 2) {
                     ChoiceGenerator gen = new ChoiceGenerator(nodes.size(), 2);
                     int[] choice;
 
                     while ((choice = gen.next()) != null) {
-                        List<Node> _nodes = GraphUtils.asList(choice, nodes);
+                        List <Node> _nodes = GraphUtils.asList(choice, nodes);
                         Node a = _nodes.get(0);
                         Node c = _nodes.get(1);
 
@@ -613,11 +609,11 @@ public final class PValueImprover4 implements PValueImprover {
         return moves;
     }
 
-    private List<Move> getSwapMoves(Graph graph) {
-        List<Move> moves = new ArrayList<Move>();
+    private List <Move> getSwapMoves(Graph graph) {
+        List <Move> moves = new ArrayList <Move>();
 
         for (Node b : graph.getNodes()) {
-            List<Node> adj = graph.getAdjacentNodes(b);
+            List <Node> adj = graph.getAdjacentNodes(b);
 
             if (adj.size() < 2) continue;
 
@@ -625,7 +621,7 @@ public final class PValueImprover4 implements PValueImprover {
             int[] choice;
 
             while ((choice = gen.next()) != null) {
-                List<Node> set = GraphUtils.asList(choice, adj);
+                List <Node> set = GraphUtils.asList(choice, adj);
 
                 Node a = set.get(0);
                 Node c = set.get(1);
@@ -643,11 +639,11 @@ public final class PValueImprover4 implements PValueImprover {
         return moves;
     }
 
-    private List<Move> getRemoveTriangleMoves(Graph graph) {
-        List<Move> moves = new ArrayList<Move>();
+    private List <Move> getRemoveTriangleMoves(Graph graph) {
+        List <Move> moves = new ArrayList <Move>();
 
         for (Node b : graph.getNodes()) {
-            List<Node> adj = graph.getAdjacentNodes(b);
+            List <Node> adj = graph.getAdjacentNodes(b);
 
             if (adj.size() < 2) continue;
 
@@ -655,7 +651,7 @@ public final class PValueImprover4 implements PValueImprover {
             int[] choice;
 
             while ((choice = gen.next()) != null) {
-                List<Node> set = GraphUtils.asList(choice, adj);
+                List <Node> set = GraphUtils.asList(choice, adj);
 
                 Node a = set.get(0);
                 Node c = set.get(1);
@@ -679,11 +675,11 @@ public final class PValueImprover4 implements PValueImprover {
         return moves;
     }
 
-    private List<Move> getRemoveColliderMoves(Graph graph) {
-        List<Move> moves = new ArrayList<Move>();
+    private List <Move> getRemoveColliderMoves(Graph graph) {
+        List <Move> moves = new ArrayList <Move>();
 
         for (Node b : graph.getNodes()) {
-            List<Node> adj = graph.getAdjacentNodes(b);
+            List <Node> adj = graph.getAdjacentNodes(b);
 
             if (adj.size() < 2) continue;
 
@@ -691,7 +687,7 @@ public final class PValueImprover4 implements PValueImprover {
             int[] choice;
 
             while ((choice = gen.next()) != null) {
-                List<Node> set = GraphUtils.asList(choice, adj);
+                List <Node> set = GraphUtils.asList(choice, adj);
 
                 Node a = set.get(0);
                 Node c = set.get(1);
@@ -708,9 +704,9 @@ public final class PValueImprover4 implements PValueImprover {
         return moves;
     }
 
-    private List<Move> getDoubleRemoveMoves(Graph graph) {
-        List<Move> moves = new ArrayList<Move>();
-        List<Edge> edges = graph.getEdges();
+    private List <Move> getDoubleRemoveMoves(Graph graph) {
+        List <Move> moves = new ArrayList <Move>();
+        List <Edge> edges = graph.getEdges();
 
         // Remove moves:
         for (int i = 0; i < edges.size(); i++) {
@@ -727,12 +723,12 @@ public final class PValueImprover4 implements PValueImprover {
     }
 
     @Override
-	public SemIm getOriginalSemIm() {
+    public SemIm getOriginalSemIm() {
         return originalSemIm;
     }
 
     @Override
-	public SemIm getNewSemIm() {
+    public SemIm getNewSemIm() {
         return newSemIm;
     }
 
@@ -741,7 +737,7 @@ public final class PValueImprover4 implements PValueImprover {
     }
 
     @Override
-	public void setHighPValueAlpha(double highPValueAlpha) {
+    public void setHighPValueAlpha(double highPValueAlpha) {
         this.highPValueAlpha = highPValueAlpha;
     }
 
@@ -765,82 +761,11 @@ public final class PValueImprover4 implements PValueImprover {
         this.shuffleMoves = shuffleMoves;
     }
 
-    private static class Move {
-        public enum Type {
-            ADD, REMOVE, REDIRECT, ADD_COLLIDER, REMOVE_COLLIDER, SWAP, DOUBLE_REMOVE;
-        }
-
-        private Edge edge;
-        private Edge secondEdge;
-        private Type type;
-
-        public Move(Edge edge, Type type) {
-            this.edge = edge;
-            this.type = type;
-        }
-
-        public Move(Edge edge, Edge secondEdge, Type type) {
-            this.edge = edge;
-            this.secondEdge = secondEdge;
-            this.type = type;
-        }
-
-        public Edge getFirstEdge() {
-            return this.edge;
-        }
-
-        public Edge getSecondEdge() {
-            return secondEdge;
-        }
-
-        public Type getType() {
-            return this.type;
-        }
-
-        @Override
-		public String toString() {
-            String s = (secondEdge != null) ? (secondEdge + ", ") : "";
-            return "<" + edge + ", " + s + type + ">";
-
-        }
-    }
-
-
     private void saveModelIfSignificant(Graph graph) {
         double pValue = scoreGraph(graph).getPValue();
 
         if (pValue > getAlpha()) {
             getSignificantModels().add(new GraphWithPValue(graph, pValue));
-        }
-    }
-
-    public static class GraphWithPValue {
-        private Graph graph;
-        private double pValue;
-
-        public GraphWithPValue(Graph graph, double pValue) {
-            this.graph = graph;
-            this.pValue = pValue;
-        }
-
-        public Graph getGraph() {
-            return graph;
-        }
-
-        public double getPValue() {
-            return pValue;
-        }
-
-        @Override
-		public int hashCode() {
-            return 17 * graph.hashCode();
-        }
-
-        @Override
-		public boolean equals(Object o) {
-            if (o == null) return false;
-            GraphWithPValue p = (GraphWithPValue) o;
-            return (p.graph.equals(graph));
         }
     }
 
@@ -867,21 +792,12 @@ public final class PValueImprover4 implements PValueImprover {
         return new Score(scorer);
     }
 
-    @Override
-	public void setKnowledge(Knowledge knowledge) {
-        this.knowledge = knowledge;
-
-        if (knowledge.isViolatedBy(graph)) {
-            throw new IllegalArgumentException("Graph violates knowledge.");
-        }
-    }
-
     public Graph getTrueModel() {
         return trueModel;
     }
 
     @Override
-	public void setTrueModel(Graph trueModel) {
+    public void setTrueModel(Graph trueModel) {
         this.trueModel = trueModel;
     }
 
@@ -890,12 +806,12 @@ public final class PValueImprover4 implements PValueImprover {
     }
 
     @Override
-	public void setAlpha(double alpha) {
+    public void setAlpha(double alpha) {
         this.alpha = alpha;
     }
 
     @Override
-	public void setBeamWidth(int beamWidth) {
+    public void setBeamWidth(int beamWidth) {
         if (beamWidth < 1) throw new IllegalArgumentException();
         this.beamWidth = beamWidth;
     }
@@ -904,18 +820,27 @@ public final class PValueImprover4 implements PValueImprover {
         return knowledge;
     }
 
-    public Set<GraphWithPValue> getSignificantModels() {
+    @Override
+    public void setKnowledge(Knowledge knowledge) {
+        this.knowledge = knowledge;
+
+        if (knowledge.isViolatedBy(graph)) {
+            throw new IllegalArgumentException("Graph violates knowledge.");
+        }
+    }
+
+    public Set <GraphWithPValue> getSignificantModels() {
         return significantModels;
     }
 
     private void addRequiredEdges(Graph graph) {
-        for (Iterator<KnowledgeEdge> it =
-                this.getKnowledge().requiredEdgesIterator(); it.hasNext();) {
+        for (Iterator <KnowledgeEdge> it =
+             this.getKnowledge().requiredEdgesIterator(); it.hasNext(); ) {
             KnowledgeEdge next = it.next();
             String a = next.getFrom();
             String b = next.getTo();
             Node nodeA = null, nodeB = null;
-            Iterator<Node> itn = graph.getNodes().iterator();
+            Iterator <Node> itn = graph.getNodes().iterator();
             while (itn.hasNext() && (nodeA == null || nodeB == null)) {
                 Node nextNode = itn.next();
                 if (nextNode.getName().equals(a)) {
@@ -931,13 +856,13 @@ public final class PValueImprover4 implements PValueImprover {
                 TetradLogger.getInstance().log("insertedEdges", "Adding edge by knowledge: " + graph.getEdge(nodeA, nodeB));
             }
         }
-        for (Iterator<KnowledgeEdge> it =
-                getKnowledge().forbiddenEdgesIterator(); it.hasNext();) {
+        for (Iterator <KnowledgeEdge> it =
+             getKnowledge().forbiddenEdgesIterator(); it.hasNext(); ) {
             KnowledgeEdge next = it.next();
             String a = next.getFrom();
             String b = next.getTo();
             Node nodeA = null, nodeB = null;
-            Iterator<Node> itn = graph.getNodes().iterator();
+            Iterator <Node> itn = graph.getNodes().iterator();
             while (itn.hasNext() && (nodeA == null || nodeB == null)) {
                 Node nextNode = itn.next();
                 if (nextNode.getName().equals(a)) {
@@ -955,72 +880,6 @@ public final class PValueImprover4 implements PValueImprover {
                     TetradLogger.getInstance().log("insertedEdges", "Adding edge by knowledge: " + graph.getEdge(nodeB, nodeA));
                 }
             }
-        }
-    }
-
-    public static class Score {
-        private Scorer scorer;
-        private double pValue;
-        private double fml;
-        private double chisq;
-        private double bic;
-        private double aic;
-        private double kic;
-        private int dof;
-
-        public Score(Scorer scorer) {
-            this.scorer = scorer;
-
-            this.pValue = scorer.getPValue();
-            this.fml = scorer.getFml();
-            this.chisq = scorer.getChiSquare();
-            this.bic = scorer.getBicScore();
-            this.aic = scorer.getAicScore();
-            this.kic = scorer.getKicScore();
-            this.dof = scorer.getDof();
-        }
-
-        private Score() {
-            this.scorer = null;
-            this.pValue = 0.0;
-            this.fml = Double.POSITIVE_INFINITY;
-            this.chisq = 0.0;
-        }
-
-        public SemIm getEstimatedSem() {
-            return scorer.getEstSem();
-        }
-
-        public double getPValue() {
-            return pValue;
-        }
-
-        public double getScore() {
-//            return -fml;
-//            return -chisq;
-//            return -bic;
-            return -aic;
-//            return -kic;
-        }
-
-        public double getFml() {
-            return fml;
-        }
-
-        public static Score negativeInfinity() {
-            return new Score();
-        }
-
-        public int getDof() {
-            return dof;
-        }
-
-        public double getChiSquare() {
-            return chisq;
-        }
-
-        public double getBic() {
-            return bic;
         }
     }
 
@@ -1070,6 +929,141 @@ public final class PValueImprover4 implements PValueImprover {
         int getNumParameters();
     }
 
+    private static class Move {
+        private Edge edge;
+        private Edge secondEdge;
+        private Type type;
+        public Move(Edge edge, Type type) {
+            this.edge = edge;
+            this.type = type;
+        }
+
+        public Move(Edge edge, Edge secondEdge, Type type) {
+            this.edge = edge;
+            this.secondEdge = secondEdge;
+            this.type = type;
+        }
+
+        public Edge getFirstEdge() {
+            return this.edge;
+        }
+
+        public Edge getSecondEdge() {
+            return secondEdge;
+        }
+
+        public Type getType() {
+            return this.type;
+        }
+
+        @Override
+        public String toString() {
+            String s = (secondEdge != null) ? (secondEdge + ", ") : "";
+            return "<" + edge + ", " + s + type + ">";
+
+        }
+
+        public enum Type {
+            ADD, REMOVE, REDIRECT, ADD_COLLIDER, REMOVE_COLLIDER, SWAP, DOUBLE_REMOVE;
+        }
+    }
+
+    public static class GraphWithPValue {
+        private Graph graph;
+        private double pValue;
+
+        public GraphWithPValue(Graph graph, double pValue) {
+            this.graph = graph;
+            this.pValue = pValue;
+        }
+
+        public Graph getGraph() {
+            return graph;
+        }
+
+        public double getPValue() {
+            return pValue;
+        }
+
+        @Override
+        public int hashCode() {
+            return 17 * graph.hashCode();
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (o == null) return false;
+            GraphWithPValue p = (GraphWithPValue) o;
+            return (p.graph.equals(graph));
+        }
+    }
+
+    public static class Score {
+        private Scorer scorer;
+        private double pValue;
+        private double fml;
+        private double chisq;
+        private double bic;
+        private double aic;
+        private double kic;
+        private int dof;
+
+        public Score(Scorer scorer) {
+            this.scorer = scorer;
+
+            this.pValue = scorer.getPValue();
+            this.fml = scorer.getFml();
+            this.chisq = scorer.getChiSquare();
+            this.bic = scorer.getBicScore();
+            this.aic = scorer.getAicScore();
+            this.kic = scorer.getKicScore();
+            this.dof = scorer.getDof();
+        }
+
+        private Score() {
+            this.scorer = null;
+            this.pValue = 0.0;
+            this.fml = Double.POSITIVE_INFINITY;
+            this.chisq = 0.0;
+        }
+
+        public static Score negativeInfinity() {
+            return new Score();
+        }
+
+        public SemIm getEstimatedSem() {
+            return scorer.getEstSem();
+        }
+
+        public double getPValue() {
+            return pValue;
+        }
+
+        public double getScore() {
+//            return -fml;
+//            return -chisq;
+//            return -bic;
+            return -aic;
+//            return -kic;
+        }
+
+        public double getFml() {
+            return fml;
+        }
+
+        public int getDof() {
+            return dof;
+        }
+
+        public double getChiSquare() {
+            return chisq;
+        }
+
+        public double getBic() {
+            return bic;
+        }
+    }
+
     /**
      * Wraps a Sem for purposes of calculating its fitting function for given parameter values.
      *
@@ -1094,7 +1088,7 @@ public final class PValueImprover4 implements PValueImprover {
          * These values are mapped to parameter values.
          */
         @Override
-		public double evaluate(double[] parameters) {
+        public double evaluate(double[] parameters) {
             sem.setFreeParamValues(parameters);
 
             // This needs to be FML-- see Bollen p. 109.
@@ -1105,7 +1099,7 @@ public final class PValueImprover4 implements PValueImprover {
          * Returns the number of arguments. Required by the MultivariateFunction interface.
          */
         @Override
-		public int getNumParameters() {
+        public int getNumParameters() {
             return this.sem.getNumFreeParams();
         }
     }

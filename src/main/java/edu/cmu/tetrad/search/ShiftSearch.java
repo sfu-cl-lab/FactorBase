@@ -40,7 +40,7 @@ import java.util.List;
  */
 public class ShiftSearch {
 
-    private List<DataSet> dataSets;
+    private List <DataSet> dataSets;
 
     private int maxShift = 2;
     private Knowledge knowledge = new Knowledge();
@@ -50,11 +50,11 @@ public class ShiftSearch {
     private boolean scheduleStop = false;
     private boolean forwardSearch;
 
-    public ShiftSearch(List<DataSet> dataSets) {
+    public ShiftSearch(List <DataSet> dataSets) {
         this(dataSets, null);
     }
 
-    public ShiftSearch(List<DataSet> dataSets, Graph measuredDag) {
+    public ShiftSearch(List <DataSet> dataSets, Graph measuredDag) {
         this.dataSets = dataSets;
     }
 
@@ -64,7 +64,7 @@ public class ShiftSearch {
         }
 
         int numVars = dataSets.get(0).getNumColumns();
-        List<Node> nodes = dataSets.get(0).getVariables();
+        List <Node> nodes = dataSets.get(0).getVariables();
         int[] shifts;
         int[] bestshifts = new int[numVars];
         int maxNumRows = dataSets.get(0).getNumRows() - maxShift;
@@ -103,7 +103,7 @@ public class ShiftSearch {
                     _z /= getMaxShift();
                 }
 
-                List<DataSet> _shiftedDataSets = getShiftedDataSets(shifts, maxNumRows);
+                List <DataSet> _shiftedDataSets = getShiftedDataSets(shifts, maxNumRows);
                 double _b = getAvgBic(_shiftedDataSets);
 
                 if (_b < 0.999 * b) {
@@ -122,7 +122,7 @@ public class ShiftSearch {
         return bestshifts;
     }
 
-    private void printShifts(int[] shifts, double b, List<Node> nodes) {
+    private void printShifts(int[] shifts, double b, List <Node> nodes) {
         StringBuilder buf = new StringBuilder();
 
         for (int i = 0; i < shifts.length; i++) {
@@ -142,8 +142,8 @@ public class ShiftSearch {
         }
     }
 
-    private List<DataSet> getShiftedDataSets(int[] shifts, int maxNumRows) {
-        List<DataSet> shiftedDataSets2 = new ArrayList<DataSet>();
+    private List <DataSet> getShiftedDataSets(int[] shifts, int maxNumRows) {
+        List <DataSet> shiftedDataSets2 = new ArrayList <DataSet>();
 
         for (DataSet dataSet : dataSets) {
             DataSet shiftedData = TimeSeriesUtils.createShiftedData(dataSet, shifts);
@@ -155,8 +155,8 @@ public class ShiftSearch {
 //        return shiftedDataSets2;
     }
 
-    private List<DataSet> truncateDataSets(List<DataSet> dataSets, int topMargin, int bottomMargin) {
-        List<DataSet> truncatedData = new ArrayList<DataSet>();
+    private List <DataSet> truncateDataSets(List <DataSet> dataSets, int topMargin, int bottomMargin) {
+        List <DataSet> truncatedData = new ArrayList <DataSet>();
 
         for (DataSet dataSet : dataSets) {
             DoubleMatrix2D mat = dataSet.getDoubleData();
@@ -167,8 +167,8 @@ public class ShiftSearch {
         return truncatedData;
     }
 
-    private List<DataSet> ensureNumRows(List<DataSet> dataSets, int numRows) {
-        List<DataSet> truncatedData = new ArrayList<DataSet>();
+    private List <DataSet> ensureNumRows(List <DataSet> dataSets, int numRows) {
+        List <DataSet> truncatedData = new ArrayList <DataSet>();
 
         for (DataSet dataSet : dataSets) {
             DoubleMatrix2D mat = dataSet.getDoubleData();
@@ -179,7 +179,7 @@ public class ShiftSearch {
         return truncatedData;
     }
 
-    private double getAvgBic(List<DataSet> dataSets) {
+    private double getAvgBic(List <DataSet> dataSets) {
         Images3 images = new Images3(dataSets);
         images.setPenaltyDiscount(c);
         images.setKnowledge(knowledge);

@@ -30,17 +30,15 @@ import edu.cmu.tetrad.sem.SemIm;
 import edu.cmu.tetrad.sem.SemPm;
 import edu.cmu.tetrad.util.MatrixUtils;
 
-import java.util.*;
-
 /**
  * Created by IntelliJ IDEA. User: josephramsey Date: May 17, 2010 Time: 6:17:53 PM To change this template use File |
  * Settings | File Templates.
  */
 public class PurifyScoreBased implements IPurify {
-    private boolean outputMessage = true;
-    private TetradTest tetradTest;
-    private int numVars;
-    private List forbiddenList;
+    double Cyy[][], Cyz[][], Czz[][], bestCyy[][], bestCyz[][], bestCzz[][];
+    double covErrors[][], oldCovErrors[][], sampleCovErrors[][], betas[][], oldBetas[][];
+    double betasLat[][], varErrorLatent[];
+    double omega[][], omegaI[], parentsResidualsCovar[][][], iResidualsCovar[], selectedInverseOmega[][][], auxInverseOmega[][][];
 
 //     SCORE-BASED PURIFY </p> - using BIC score function and Structural EM for
 //     search. Probabilistic model is Gaussian. - search operator consists only
@@ -48,16 +46,10 @@ public class PurifyScoreBased implements IPurify {
 //     such pairs are found, an heuristic is applied to eliminate one member of
 //     each pair - this methods tends to be much slower than the "tetradBased"
 //     ones.
-
-    double Cyy[][], Cyz[][], Czz[][], bestCyy[][], bestCyz[][], bestCzz[][];
-    double covErrors[][], oldCovErrors[][], sampleCovErrors[][], betas[][], oldBetas[][];
-    double betasLat[][], varErrorLatent[];
-    double omega[][], omegaI[], parentsResidualsCovar[][][], iResidualsCovar[], selectedInverseOmega[][][], auxInverseOmega[][][];
     int spouses[][], nSpouses[], parents[][], parentsLat[][];
     double parentsCov[][][], parentsChildCov[][], parentsLatCov[][][], parentsChildLatCov[][];
     double pseudoParentsCov[][][], pseudoParentsChildCov[][];
     boolean parentsL[][];
-
     int numObserved, numLatent, clusterId[];
     Hashtable observableNames, latentNames;
     SemGraph purePartitionGraph;
@@ -67,9 +59,11 @@ public class PurifyScoreBased implements IPurify {
     List latentNodes, measuredNodes;
     SemIm currentSemIm;
     boolean modifiedGraph;
-
-
     boolean extraDebugPrint = false;
+    private boolean outputMessage = true;
+    private TetradTest tetradTest;
+    private int numVars;
+    private List forbiddenList;
 
     public PurifyScoreBased(TetradTest tetradTest) {
         this.tetradTest = tetradTest;
@@ -77,9 +71,9 @@ public class PurifyScoreBased implements IPurify {
     }
 
     @Override
-	public List<List<Node>> purify(List<List<Node>> partition) {
+    public List <List <Node>> purify(List <List <Node>> partition) {
         System.out.println("*** " + partition);
-        List<int[]> _partition = convertListToInt(partition);
+        List <int[]> _partition = convertListToInt(partition);
 
         printIntPartition(_partition);
 
@@ -88,11 +82,11 @@ public class PurifyScoreBased implements IPurify {
 
         Clusters clusters = MimUtils.convertToClusters(_graph);
 
-        List<int[]> _partition1 = new ArrayList<int[]>();
-        List<Node> nodes = tetradTest.getVariables();
+        List <int[]> _partition1 = new ArrayList <int[]>();
+        List <Node> nodes = tetradTest.getVariables();
 
         for (int i = 0; i < clusters.getNumClusters(); i++) {
-            List<String> cluster = clusters.getCluster(i);
+            List <String> cluster = clusters.getCluster(i);
             int[] _cluster = new int[cluster.size()];
             for (int j = 0; j < cluster.size(); j++) {
                 for (int k = 0; k < nodes.size(); k++) {
@@ -106,7 +100,7 @@ public class PurifyScoreBased implements IPurify {
             _partition1.add(_cluster);
         }
 
-        List<int[]> _partition2 = _partition1;
+        List <int[]> _partition2 = _partition1;
 
         printClustering(_partition2);
 
@@ -114,11 +108,11 @@ public class PurifyScoreBased implements IPurify {
     }
 
     @Override
-	public void setTrueGraph(Graph mim) {
+    public void setTrueGraph(Graph mim) {
         throw new UnsupportedOperationException();
     }
 
-    private void printIntPartition(List<int[]> partition) {
+    private void printIntPartition(List <int[]> partition) {
         for (int i = 0; i < partition.size(); i++) {
             int[] cluster = partition.get(i);
             System.out.print(i + ": ");
@@ -132,12 +126,12 @@ public class PurifyScoreBased implements IPurify {
         System.out.println();
     }
 
-    private List<int[]> convertListToInt(List<List<Node>> partition) {
-        List<Node> nodes = tetradTest.getVariables();
-        List<int[]> _partition = new ArrayList<int[]>();
+    private List <int[]> convertListToInt(List <List <Node>> partition) {
+        List <Node> nodes = tetradTest.getVariables();
+        List <int[]> _partition = new ArrayList <int[]>();
 
         for (int i = 0; i < partition.size(); i++) {
-            List<Node> cluster = partition.get(i);
+            List <Node> cluster = partition.get(i);
             int[] _cluster = new int[cluster.size()];
 
             for (int j = 0; j < cluster.size(); j++) {
@@ -154,13 +148,13 @@ public class PurifyScoreBased implements IPurify {
         return _partition;
     }
 
-    private List<List<Node>> convertIntToList(List<int[]> partition) {
-        List<Node> nodes = tetradTest.getVariables();
-        List<List<Node>> _partition = new ArrayList<List<Node>>();
+    private List <List <Node>> convertIntToList(List <int[]> partition) {
+        List <Node> nodes = tetradTest.getVariables();
+        List <List <Node>> _partition = new ArrayList <List <Node>>();
 
         for (int i = 0; i < partition.size(); i++) {
             int[] cluster = partition.get(i);
-            List<Node> _cluster = new ArrayList<Node>();
+            List <Node> _cluster = new ArrayList <Node>();
 
             for (int j = 0; j < cluster.length; j++) {
                 _cluster.add(nodes.get(cluster[j]));
@@ -282,7 +276,7 @@ public class PurifyScoreBased implements IPurify {
                     bestGraph.getNode(this.measuredNodes.get(i).toString()));
             if (parents.size() > 1) {
                 boolean latent_found = false;
-                for (Iterator it = parents.iterator(); it.hasNext();) {
+                for (Iterator it = parents.iterator(); it.hasNext(); ) {
                     Node parent = (Node) it.next();
                     if (parent.getNodeType() == NodeType.LATENT) {
                         if (latent_found) {
@@ -560,7 +554,7 @@ public class PurifyScoreBased implements IPurify {
                         new int[semMag.getParents(node).size() - 1];
                 int count = 0;
                 for (Iterator it =
-                        semMag.getParents(node).iterator(); it.hasNext();) {
+                     semMag.getParents(node).iterator(); it.hasNext(); ) {
                     Node parent = (Node) it.next();
                     if (parent.getNodeType() == NodeType.LATENT) {
                         this.parentsLat[i][count++] =
@@ -582,7 +576,7 @@ public class PurifyScoreBased implements IPurify {
                 correlatedErrors[i][j] = false;
             }
         }
-        for (Iterator it = semMag.getEdges().iterator(); it.hasNext();) {
+        for (Iterator it = semMag.getEdges().iterator(); it.hasNext(); ) {
             Edge nextEdge = (Edge) it.next();
             if (nextEdge.getEndpoint1() == Endpoint.ARROW &&
                     nextEdge.getEndpoint2() == Endpoint.ARROW) {
@@ -608,7 +602,7 @@ public class PurifyScoreBased implements IPurify {
             this.parentsL[i] = new boolean[semMag.getParents(node).size() - 1];
             int count = 0;
             for (Iterator it =
-                    semMag.getParents(node).iterator(); it.hasNext();) {
+                 semMag.getParents(node).iterator(); it.hasNext(); ) {
                 Node parent = (Node) it.next();
                 if (parent.getNodeType() == NodeType.LATENT) {
                     this.parents[i][count] =
@@ -934,7 +928,7 @@ public class PurifyScoreBased implements IPurify {
                 this.covErrors[i][j] = 0.;
             }
         }
-        for (Iterator it = semIm.getFreeParameters().iterator(); it.hasNext();) {
+        for (Iterator it = semIm.getFreeParameters().iterator(); it.hasNext(); ) {
             Parameter nextP = (Parameter) it.next();
             if (nextP.getType() == ParamType.COEF) {
                 Node node1 = nextP.getNodeA();
@@ -1570,8 +1564,8 @@ public class PurifyScoreBased implements IPurify {
                     semIm.setParamValue(node, node, this.varErrorLatent[i]);
                 } else {
                     for (Iterator it =
-                            semIm.getSemPm().getGraph().getParents(node)
-                                    .iterator(); it.hasNext();) {
+                         semIm.getSemPm().getGraph().getParents(node)
+                                 .iterator(); it.hasNext(); ) {
                         Node nextParent = (Node) it.next();
                         if (nextParent.getNodeType() == NodeType.ERROR) {
                             semIm.setParamValue(nextParent, nextParent,
@@ -1598,8 +1592,7 @@ public class PurifyScoreBased implements IPurify {
 
             return -semIm.getTruncLL() - 0.5 * semIm.getNumFreeParams() *
                     Math.log(this.covarianceMatrix.getSampleSize());
-        }
-        catch (java.lang.IllegalArgumentException e) {
+        } catch (java.lang.IllegalArgumentException e) {
             System.out.println("** Warning: " + e.toString());
             return -Double.MAX_VALUE;
         }
@@ -1916,7 +1909,7 @@ public class PurifyScoreBased implements IPurify {
         if (this.forbiddenList == null) {
             return false;
         }
-        for (Iterator it = this.forbiddenList.iterator(); it.hasNext();) {
+        for (Iterator it = this.forbiddenList.iterator(); it.hasNext(); ) {
             Set nextPair = (Set) it.next();
             if (nextPair.contains(name1) && nextPair.contains(name2)) {
                 return true;

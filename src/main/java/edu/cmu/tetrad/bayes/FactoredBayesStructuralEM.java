@@ -29,8 +29,6 @@ import edu.cmu.tetrad.graph.Graph;
 import edu.cmu.tetrad.graph.Node;
 import edu.cmu.tetrad.util.TetradLogger;
 
-import java.util.*;
-
 /**
  * <p>Implements the procedure Factored-Bayesian-SEM found on page 6 of "The
  * Bayesian Structural EM Algorithm" by Nir Friedman.</p> <p>The initial
@@ -61,10 +59,8 @@ public final class FactoredBayesStructuralEM {
 
     private final BayesPm bayesPmM0;
     private final DataSet dataSet;
-    private double tolerance;
-
     private final int[] ncategories;
-
+    private double tolerance;
     private double resultScore = -1;
     private Graph resultGraph = new EdgeListGraph();
 
@@ -78,7 +74,7 @@ public final class FactoredBayesStructuralEM {
         this.dataSet = dataSet;
         this.bayesPmM0 = bayesPmM0;
 
-        List<Node> datasetVars = dataSet.getVariables();
+        List <Node> datasetVars = dataSet.getVariables();
         this.ncategories = new int[datasetVars.size()];
 
         // Store the number of categories for each variable in an array which will be used
@@ -251,6 +247,27 @@ public final class FactoredBayesStructuralEM {
     //        return bayesPmMn;
     //    }
 
+    private static double factorScoreMD(Dag dag, BdeMetricCache bdeMetricCache,
+                                        BayesPm bayesPm, BayesIm bayesIm) {
+        List <Node> nodes = dag.getNodes();
+        //double score = 1.0;
+
+        double score = 0.0;   //Fast test 11/29/04
+
+        for (Node node1 : nodes) {
+            List <Node> parents = dag.getParents(node1);
+            Set <Node> parentsSet = new HashSet <Node>(parents);
+            double fScore = bdeMetricCache.scoreLnGam(node1, parentsSet,
+                    bayesPm, bayesIm);
+
+            //Debug print:
+            TetradLogger.getInstance().log("details", "Score for factor " + node1.getName() + " = " + fScore);
+
+            score += fScore;
+        }
+        return score;
+    }
+
     /**
      * Sets maximum time for iterations
      */
@@ -305,8 +322,7 @@ public final class FactoredBayesStructuralEM {
         }
         try {
             tithread.join();
-        }
-        catch (InterruptedException e) {
+        } catch (InterruptedException e) {
         }
 
         bdeMetricCache = ti.bdeMetricCache;
@@ -334,6 +350,27 @@ public final class FactoredBayesStructuralEM {
     public int returnIterations() {
         return totaliterations;
     }
+
+//    private static double factorScore(Dag dag, BdeMetricCache bdeMetricCache) {
+//        List nodes = dag.getNodes();
+//        double score = 1.0;
+//        for (Iterator itn = nodes.iterator(); itn.hasNext();) {
+//            Node node = (Node) itn.next();
+//            List parents = dag.getParents(node);
+//            Set parentsSet = new HashSet(parents);
+//
+//            //The null values of the last two arguments causes the score method
+//            //which doesn't handle missing data and latent variables.
+//            score += bdeMetricCache.scoreLnGam(node, parentsSet, null, null);
+//        }
+//        return score;
+//    }
+
+    /*
+     * This scoring method uses factor caching and the log gamma scoring function that
+     * handles missing data and latent variables.  The Bayes PM contains a graph which
+     * indicates which variables are latent.
+     */
 
     public void scoreTest() {
         TetradLogger.getInstance().log("details", "scoreTest");
@@ -378,7 +415,7 @@ public final class FactoredBayesStructuralEM {
 
         bdeMetricCache = new BdeMetricCache(dataSet, bayesPmTest0);
 
-        List<Node> nodes0 = dag0.getNodes();
+        List <Node> nodes0 = dag0.getNodes();
 
         for (Node aNodes0 : nodes0) {
             double[][] counts0 = bdeMetricCache.getObservedCounts(aNodes0,
@@ -414,7 +451,7 @@ public final class FactoredBayesStructuralEM {
 
         bdeMetricCache = new BdeMetricCache(dataSet, bayesPmTest1);
 
-        List<Node> nodes1 = dag0.getNodes();
+        List <Node> nodes1 = dag0.getNodes();
 
         for (Node aNodes1 : nodes1) {
 
@@ -435,48 +472,6 @@ public final class FactoredBayesStructuralEM {
         TetradLogger.getInstance().log("details", "Score of X1-->L1 for L1,X1,X2,X3 (no edges) = " + score1);
 
 
-    }
-
-//    private static double factorScore(Dag dag, BdeMetricCache bdeMetricCache) {
-//        List nodes = dag.getNodes();
-//        double score = 1.0;
-//        for (Iterator itn = nodes.iterator(); itn.hasNext();) {
-//            Node node = (Node) itn.next();
-//            List parents = dag.getParents(node);
-//            Set parentsSet = new HashSet(parents);
-//
-//            //The null values of the last two arguments causes the score method
-//            //which doesn't handle missing data and latent variables.
-//            score += bdeMetricCache.scoreLnGam(node, parentsSet, null, null);
-//        }
-//        return score;
-//    }
-
-    /*
-     * This scoring method uses factor caching and the log gamma scoring function that
-     * handles missing data and latent variables.  The Bayes PM contains a graph which
-     * indicates which variables are latent.
-     */
-
-    private static double factorScoreMD(Dag dag, BdeMetricCache bdeMetricCache,
-                                        BayesPm bayesPm, BayesIm bayesIm) {
-        List<Node> nodes = dag.getNodes();
-        //double score = 1.0;
-
-        double score = 0.0;   //Fast test 11/29/04
-
-        for (Node node1 : nodes) {
-            List<Node> parents = dag.getParents(node1);
-            Set<Node> parentsSet = new HashSet<Node>(parents);
-            double fScore = bdeMetricCache.scoreLnGam(node1, parentsSet,
-                    bayesPm, bayesIm);
-
-            //Debug print:
-            TetradLogger.getInstance().log("details", "Score for factor " + node1.getName() + " = " + fScore);
-
-            score += fScore;
-        }
-        return score;
     }
 
     public DataSet getDataSet() {
@@ -516,7 +511,7 @@ public final class FactoredBayesStructuralEM {
         }
 
         @Override
-		public void run() {
+        public void run() {
             while (!bayesPmMnplus1.equals(bayesPmMn)) {
 
                 if (System.currentTimeMillis() - this.start > timeout && timeout > 0) {
@@ -528,7 +523,7 @@ public final class FactoredBayesStructuralEM {
 
                 bayesPmMn = bayesPmMnplus1;
                 TetradLogger.getInstance().log("details", "In Factored Bayes Struct EM Iteration number " +
-                                iteration);
+                        iteration);
 
                 //Compute the MAP parameters for Mn given o.
                 TetradLogger.getInstance().log("details", "Starting EM Bayes estimator to get MAP parameters of Mn");
@@ -543,7 +538,7 @@ public final class FactoredBayesStructuralEM {
                 //Perform search over models...
                 Graph graphMn = bayesPmMn.getDag();
                 Dag dagMn = new Dag(graphMn);
-                List<Graph> models = ModelGenerator.generate(graphMn);
+                List <Graph> models = ModelGenerator.generate(graphMn);
 
                 //double bestScore = 0.0;
                 //Initialize bestScore to the score of bayesPmMn
@@ -597,7 +592,7 @@ public final class FactoredBayesStructuralEM {
 
                 TetradLogger.getInstance().log("details", "In iteration:  " + iteration);
                 TetradLogger.getInstance().log("details", "bestScore, oldBestScore " + bestScore + " " +
-                                oldBestScore);
+                        oldBestScore);
                 EdgeListGraph edgesBest =
                         new EdgeListGraph(bayesPmMnplus1.getDag());
                 TetradLogger.getInstance().log("details", "Graph of model:  \n" + edgesBest);

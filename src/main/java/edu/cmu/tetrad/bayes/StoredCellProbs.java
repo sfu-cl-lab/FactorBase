@@ -41,13 +41,13 @@ import java.util.Set;
  * @author Joseph Ramsey
  */
 public final class StoredCellProbs implements DiscreteProbs {
-    private List<Node> variables;
+    private List <Node> variables;
     private int[] parentDims;
     private double[] probs;
 
     //============================CONSTRUCTORS============================//
 
-    private StoredCellProbs(List<Node> variables) {
+    private StoredCellProbs(List <Node> variables) {
         if (variables == null) {
             throw new NullPointerException();
         }
@@ -64,7 +64,7 @@ public final class StoredCellProbs implements DiscreteProbs {
         }
 
         this.variables = Collections.unmodifiableList(variables);
-        Set<Object> variableSet = new HashSet<Object>(this.variables);
+        Set <Object> variableSet = new HashSet <Object>(this.variables);
         if (variableSet.size() < this.variables.size()) {
             throw new IllegalArgumentException("Duplicate variable.");
         }
@@ -85,7 +85,7 @@ public final class StoredCellProbs implements DiscreteProbs {
         this.probs = new double[numCells];
     }
 
-    public static StoredCellProbs createRandomCellTable(List<Node> variables) {
+    public static StoredCellProbs createRandomCellTable(List <Node> variables) {
         StoredCellProbs cellProbs = new StoredCellProbs(variables);
 
         double sum = 0.0;
@@ -123,18 +123,35 @@ public final class StoredCellProbs implements DiscreteProbs {
 
     //=============================PUBLIC METHODS=========================//
 
+    private static boolean hasNextValue(Proposition proposition, int variable,
+                                        int curIndex) {
+        return nextValue(proposition, variable, curIndex) != -1;
+    }
+
+    private static int nextValue(Proposition proposition, int variable,
+                                 int curIndex) {
+        for (int i = curIndex + 1;
+             i < proposition.getNumCategories(variable); i++) {
+            if (proposition.isAllowed(variable, i)) {
+                return i;
+            }
+        }
+
+        return -1;
+    }
+
     /**
      * Returns the probability for the given cell, specified as a particular
      * combination of variable values, for the list of variables (in order)
      * returned by get
      */
     @Override
-	public double getCellProb(int[] variableValues) {
+    public double getCellProb(int[] variableValues) {
         return probs[getOffset(variableValues)];
     }
 
     @Override
-	public double getProb(Proposition assertion) {
+    public double getProb(Proposition assertion) {
 
         // Initialize to 0's.
         int[] variableValues = new int[assertion.getNumVariables()];
@@ -156,8 +173,7 @@ public final class StoredCellProbs implements DiscreteProbs {
                     for (int j = i + 1; j < assertion.getNumVariables(); j++) {
                         if (hasNextValue(assertion, j, -1)) {
                             variableValues[j] = nextValue(assertion, j, -1);
-                        }
-                        else {
+                        } else {
                             break loop;
                         }
                     }
@@ -173,26 +189,9 @@ public final class StoredCellProbs implements DiscreteProbs {
         return p;
     }
 
-    private static boolean hasNextValue(Proposition proposition, int variable,
-            int curIndex) {
-        return nextValue(proposition, variable, curIndex) != -1;
-    }
-
-    private static int nextValue(Proposition proposition, int variable,
-            int curIndex) {
-        for (int i = curIndex + 1;
-                i < proposition.getNumCategories(variable); i++) {
-            if (proposition.isAllowed(variable, i)) {
-                return i;
-            }
-        }
-
-        return -1;
-    }
-
     @Override
-	public double getConditionalProb(Proposition assertion,
-            Proposition condition) {
+    public double getConditionalProb(Proposition assertion,
+                                     Proposition condition) {
         if (assertion.getVariableSource() != condition.getVariableSource()) {
             throw new IllegalArgumentException(
                     "Assertion and condition must be " +
@@ -220,8 +219,7 @@ public final class StoredCellProbs implements DiscreteProbs {
                     for (int j = i + 1; j < condition.getNumVariables(); j++) {
                         if (hasNextValue(condition, j, -1)) {
                             variableValues[j] = nextValue(condition, j, -1);
-                        }
-                        else {
+                        } else {
                             break loop;
                         }
                     }
@@ -252,17 +250,17 @@ public final class StoredCellProbs implements DiscreteProbs {
     }
 
     @Override
-	public boolean isMissingValueCaseFound() {
+    public boolean isMissingValueCaseFound() {
         return false;
     }
 
     @Override
-	public List<Node> getVariables() {
+    public List <Node> getVariables() {
         return this.variables;
     }
 
     @Override
-	public String toString() {
+    public String toString() {
         StringBuilder buf = new StringBuilder();
         NumberFormat nf = NumberFormatUtil.getInstance().getNumberFormat();
 
@@ -314,7 +312,7 @@ public final class StoredCellProbs implements DiscreteProbs {
      * Only the first n values are used.
      *
      * @return the row in the table for the given node and combination of parent
-     *         values.
+     * values.
      */
     private int getOffset(int[] values) {
         int[] dim = getParentDims();

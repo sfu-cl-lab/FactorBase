@@ -42,11 +42,12 @@ public final class Evidence implements TetradSerializable {
 
     /**
      * Unused field. Keep to avoid breaking serialization.
+     *
      * @serial
      * @deprecated
      */
     @Deprecated
-	private BayesIm bayesIm;
+    private BayesIm bayesIm;
 
     /**
      * A proposition stating what we know for each variable.
@@ -175,7 +176,7 @@ public final class Evidence implements TetradSerializable {
     }
 
     @Override
-	public String toString() {
+    public String toString() {
         StringBuilder buf = new StringBuilder();
 
         buf.append("\nEvidence:");
@@ -203,8 +204,8 @@ public final class Evidence implements TetradSerializable {
     /**
      * Returns the variable for which there is evidence.
      */
-    public List<Node> getVariablesInEvidence() {
-        List<Node> nodes = new ArrayList<Node>();
+    public List <Node> getVariablesInEvidence() {
+        List <Node> nodes = new ArrayList <Node>();
         for (int i = 0; i < getNumNodes(); i++) {
             if (proposition.getSingleCategory(i) != -1) {
                 nodes.add(getNode(i));
@@ -224,14 +225,14 @@ public final class Evidence implements TetradSerializable {
      * equal to those of the given variable source.
      */
     public boolean isCompatibleWith(VariableSource variableSource) {
-        List<Node> variables1 = getVariableSource().getVariables();
-        List<Node> variables2 = variableSource.getVariables();
+        List <Node> variables1 = getVariableSource().getVariables();
+        List <Node> variables2 = variableSource.getVariables();
 
         return variables1.equals(variables2);
     }
 
     @Override
-	public boolean equals(Object o) {
+    public boolean equals(Object o) {
         if (o == null) {
             return false;
         }
@@ -247,7 +248,7 @@ public final class Evidence implements TetradSerializable {
     }
 
     @Override
-	public int hashCode() {
+    public int hashCode() {
         int hashCode = 37;
         hashCode = 19 * hashCode + proposition.hashCode();
         hashCode = 19 * hashCode + manipulation.hashCode();

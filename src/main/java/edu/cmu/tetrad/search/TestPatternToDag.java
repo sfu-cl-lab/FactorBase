@@ -36,6 +36,10 @@ public class TestPatternToDag extends TestCase {
         super(name);
     }
 
+    public static Test suite() {
+        return new TestSuite(TestPatternToDag.class);
+    }
+
     public void testChickeringAlgorithm() {
 
         Node A = new GraphNode("A");
@@ -81,10 +85,6 @@ public class TestPatternToDag extends TestCase {
 
         System.out.println("Result 2:  ");
         System.out.println(dag2);
-    }
-
-    public static Test suite() {
-        return new TestSuite(TestPatternToDag.class);
     }
 }
 

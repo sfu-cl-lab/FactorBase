@@ -89,7 +89,7 @@ public class Tetrad {
     }
 
     @Override
-	public int hashCode() {
+    public int hashCode() {
 //        int hash = i.hashCode();
 //        hash += 17 * hash + j.hashCode();
 //        hash += 17 * hash + k.hashCode();
@@ -102,7 +102,7 @@ public class Tetrad {
     }
 
     @Override
-	public boolean equals(Object o) {
+    public boolean equals(Object o) {
         if (o == null) return false;
         Tetrad tetrad = (Tetrad) o;
         return (i == tetrad.i && j == tetrad.j && k == tetrad.k && l == tetrad.l)
@@ -116,11 +116,10 @@ public class Tetrad {
     }
 
     @Override
-	public String toString() {
+    public String toString() {
         if (Double.isNaN(pValue)) {
-            return "s("+i+","+j+")*s("+k+","+l+")-s("+i+","+k+")*s("+j+","+l+")";
-        }
-        else {
+            return "s(" + i + "," + j + ")*s(" + k + "," + l + ")-s(" + i + "," + k + ")*s(" + j + "," + l + ")";
+        } else {
             return "<" + i + ", " + j + ", " + k + ", " + l + ", " + nf.format(pValue) + ">";
         }
     }
@@ -129,8 +128,8 @@ public class Tetrad {
         return pValue;
     }
 
-    public Set<Node> getNodes() {
-        Set<Node> nodes = new HashSet<Node>();
+    public Set <Node> getNodes() {
+        Set <Node> nodes = new HashSet <Node>();
         nodes.add(i);
         nodes.add(j);
         nodes.add(k);

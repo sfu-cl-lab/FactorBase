@@ -37,7 +37,7 @@ import java.util.List;
  * @author Joseph Ramsey jdramsey@andrew.cmu.edu
  * @see DataModel
  */
-public final class DataModelList extends AbstractList<DataModel>
+public final class DataModelList extends AbstractList <DataModel>
         implements DataModel, TetradSerializable {
     static final long serialVersionUID = 23L;
 
@@ -46,7 +46,7 @@ public final class DataModelList extends AbstractList<DataModel>
      *
      * @serial
      */
-    private List<DataModel> modelList = new LinkedList<DataModel>();
+    private List <DataModel> modelList = new LinkedList <DataModel>();
 
     /**
      * The selected model (may be null).
@@ -80,12 +80,11 @@ public final class DataModelList extends AbstractList<DataModel>
 
         try {
             throw new NullPointerException();
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
 
-        this.modelList = new ArrayList<DataModel>(dataModelList);
+        this.modelList = new ArrayList <DataModel>(dataModelList);
         this.selectedModel = dataModelList.selectedModel;
         this.name = dataModelList.name;
         this.knowledge = new Knowledge(dataModelList.knowledge);
@@ -109,7 +108,7 @@ public final class DataModelList extends AbstractList<DataModel>
      * @return this model, as an Object.
      */
     @Override
-	public DataModel get(int index) {
+    public DataModel get(int index) {
         return modelList.get(index);
     }
 
@@ -117,22 +116,22 @@ public final class DataModelList extends AbstractList<DataModel>
      * Returns the size of the current list. Required for AbstractList.
      */
     @Override
-	public int size() {
+    public int size() {
         return modelList.size();
     }
 
     @Override
-	public List<Node> getVariables() {
+    public List <Node> getVariables() {
         return getSelectedModel().getVariables();
     }
 
     @Override
-	public Knowledge getKnowledge() {
+    public Knowledge getKnowledge() {
         return new Knowledge(this.knowledge);
     }
 
     @Override
-	public void setKnowledge(Knowledge knowledge) {
+    public void setKnowledge(Knowledge knowledge) {
         if (knowledge == null) {
             throw new NullPointerException();
         }
@@ -144,7 +143,7 @@ public final class DataModelList extends AbstractList<DataModel>
      * Returns the list of variable names for columns, in order.
      */
     @Override
-	public List<String> getVariableNames() {
+    public List <String> getVariableNames() {
         return getSelectedModel().getVariableNames();
     }
 
@@ -157,7 +156,7 @@ public final class DataModelList extends AbstractList<DataModel>
      *                DataModel.)
      */
     @Override
-	public void add(int index, DataModel element) {
+    public void add(int index, DataModel element) {
         modelList.add(index, element);
     }
 
@@ -169,7 +168,7 @@ public final class DataModelList extends AbstractList<DataModel>
      * @return the DataModel just removed.
      */
     @Override
-	public DataModel remove(int index) {
+    public DataModel remove(int index) {
         DataModel removedObject = this.modelList.remove(index);
 
         if (removedObject == this.selectedModel) {
@@ -186,11 +185,9 @@ public final class DataModelList extends AbstractList<DataModel>
     public DataModel getSelectedModel() {
         if (this.selectedModel != null) {
             return this.selectedModel;
-        }
-        else if (this.modelList.size() > 0) {
+        } else if (this.modelList.size() > 0) {
             return this.modelList.get(0);
-        }
-        else {
+        } else {
             return null;
         }
     }
@@ -211,7 +208,7 @@ public final class DataModelList extends AbstractList<DataModel>
      * Gets the name of the data model list.
      */
     @Override
-	public String getName() {
+    public String getName() {
         return name;
     }
 
@@ -219,7 +216,7 @@ public final class DataModelList extends AbstractList<DataModel>
      * Sets the name of the data model list..
      */
     @Override
-	public void setName(String name) {
+    public void setName(String name) {
         this.name = name;
     }
 
@@ -227,7 +224,7 @@ public final class DataModelList extends AbstractList<DataModel>
      * Returns a string representation of the data model list.
      */
     @Override
-	public String toString() {
+    public String toString() {
         StringBuilder buf = new StringBuilder();
         buf.append("Data Model List <");
         for (Object aModelList : modelList) {
@@ -238,14 +235,14 @@ public final class DataModelList extends AbstractList<DataModel>
     }
 
     @Override
-	public int hashCode() {
+    public int hashCode() {
         int hashcode = 17;
         hashcode += 17 * name.hashCode();
         return hashcode;
     }
 
     @Override
-	public boolean equals(Object o) {
+    public boolean equals(Object o) {
         if (o == null) {
             return false;
         }

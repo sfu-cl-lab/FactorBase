@@ -56,7 +56,7 @@ public class SemOptimizerScattershot implements SemOptimizer {
      * from Numerical Recipes by adjusting the parameters of the Sem.
      */
     @Override
-	public void optimize(SemIm semIm) {
+    public void optimize(SemIm semIm) {
         if (DataUtils.containsMissingValue(semIm.getSampleCovar())) {
             throw new IllegalArgumentException("Please remove or impute missing values.");
         }
@@ -258,6 +258,10 @@ public class SemOptimizerScattershot implements SemOptimizer {
         return true;
     }
 
+    private RandomUtil getRandom() {
+        return RandomUtil.getInstance();
+    }
+
     /**
      * Evaluates a fitting function for an array of parameters.
      *
@@ -303,7 +307,7 @@ public class SemOptimizerScattershot implements SemOptimizer {
          * to parameter values.
          */
         @Override
-		public double evaluate(double[] parameters) {
+        public double evaluate(double[] parameters) {
             sem.setFreeParamValues(parameters);
 
             double fml = sem.getFml();
@@ -320,13 +324,9 @@ public class SemOptimizerScattershot implements SemOptimizer {
          * interface.
          */
         @Override
-		public int getNumParameters() {
+        public int getNumParameters() {
             return this.sem.getNumFreeParams();
         }
-    }
-
-    private RandomUtil getRandom() {
-        return RandomUtil.getInstance();
     }
 }
 

@@ -22,7 +22,7 @@ public class TesterModel implements SessionModel {
     private String name;
 
     public TesterModel() {
-        
+
     }
 
     /**
@@ -44,12 +44,12 @@ public class TesterModel implements SessionModel {
     }
 
     @Override
-	public void setName(String name) {
-        this.name = name;
+    public String getName() {
+        return this.name;
     }
 
     @Override
-	public String getName() {
-        return this.name;
+    public void setName(String name) {
+        this.name = name;
     }
 }

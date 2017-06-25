@@ -107,50 +107,6 @@ public final class ContinuousVariable extends AbstractVariable
     //==============================PUBLIC METHODS======================//
 
     /**
-     * Checks the value to make sure it's a legitimate value for this
-     * column.
-     *
-     * @param value the value to check.
-     * @return true iff the value is legitimate.
-     */
-    @Override
-	public boolean checkValue(final Object value) {
-        if (value instanceof Double) {
-            return true;
-        }
-        else if (value instanceof String) {
-            try {
-                Double.parseDouble((String) value);
-                return true;
-            }
-            catch (Exception e) {
-                return false;
-            }
-        }
-        else {
-            throw new IllegalArgumentException();
-        }
-    }
-
-    @Override
-	public Node like(String name) {
-        ContinuousVariable continuousVariable = new ContinuousVariable(name);
-        continuousVariable.setNodeType(getNodeType());
-        return continuousVariable;
-    }
-
-    /**
-     * Returns the double value that represents missing data for this
-     * variable, wrapped in a Double.  The default is Double.NaN.
-     *
-     * @return the missing value marker, wrapped as a Double.
-     */
-    @Override
-	public Object getMissingValueMarker() {
-        return MISSING_VALUE;
-    }
-
-    /**
      * Returns the double value that represents missing data for this
      * variable. The default is Double.NaN.
      *
@@ -166,10 +122,51 @@ public final class ContinuousVariable extends AbstractVariable
      * @param value the Object to test--should be a wrapped version of the
      *              missing value marker.
      * @return true iff it really is a wrapped version of the missing value
-     *         marker.
+     * marker.
      */
     public static boolean isDoubleMissingValue(double value) {
         return Double.isNaN(value);
+    }
+
+    /**
+     * Checks the value to make sure it's a legitimate value for this
+     * column.
+     *
+     * @param value the value to check.
+     * @return true iff the value is legitimate.
+     */
+    @Override
+    public boolean checkValue(final Object value) {
+        if (value instanceof Double) {
+            return true;
+        } else if (value instanceof String) {
+            try {
+                Double.parseDouble((String) value);
+                return true;
+            } catch (Exception e) {
+                return false;
+            }
+        } else {
+            throw new IllegalArgumentException();
+        }
+    }
+
+    @Override
+    public Node like(String name) {
+        ContinuousVariable continuousVariable = new ContinuousVariable(name);
+        continuousVariable.setNodeType(getNodeType());
+        return continuousVariable;
+    }
+
+    /**
+     * Returns the double value that represents missing data for this
+     * variable, wrapped in a Double.  The default is Double.NaN.
+     *
+     * @return the missing value marker, wrapped as a Double.
+     */
+    @Override
+    public Object getMissingValueMarker() {
+        return MISSING_VALUE;
     }
 
     /**
@@ -178,10 +175,10 @@ public final class ContinuousVariable extends AbstractVariable
      * @param value the Object to test--should be a wrapped version of the
      *              missing value marker.
      * @return true iff it really is a wrapped version of the missing value
-     *         marker.
+     * marker.
      */
     @Override
-	public boolean isMissingValue(Object value) {
+    public boolean isMissingValue(Object value) {
         if (value instanceof Double) {
             double doubleValue = (Double) value;
             return Double.isNaN(doubleValue);
@@ -191,7 +188,7 @@ public final class ContinuousVariable extends AbstractVariable
     }
 
     @Override
-	public int hashCode() {
+    public int hashCode() {
         int hashCode = 63;
         hashCode = 17 * hashCode + getName().hashCode();
         hashCode = 19 * hashCode + getNodeType().hashCode();
@@ -204,7 +201,7 @@ public final class ContinuousVariable extends AbstractVariable
      */
     // The identity of a node can't be changed by changing its name.
     @Override
-	public boolean equals(Object o) {
+    public boolean equals(Object o) {
         if (o == null) {
             return false;
         }
@@ -223,12 +220,12 @@ public final class ContinuousVariable extends AbstractVariable
     }
 
     @Override
-	public NodeType getNodeType() {
+    public NodeType getNodeType() {
         return nodeType;
     }
 
     @Override
-	public void setNodeType(NodeType nodeType) {
+    public void setNodeType(NodeType nodeType) {
         this.nodeType = nodeType;
     }
 
@@ -236,7 +233,7 @@ public final class ContinuousVariable extends AbstractVariable
      * Returns the x coordinate of the center of the node.
      */
     @Override
-	public int getCenterX() {
+    public int getCenterX() {
         return this.centerX;
     }
 
@@ -244,7 +241,7 @@ public final class ContinuousVariable extends AbstractVariable
      * Sets the x coordinate of the center of this node.
      */
     @Override
-	public void setCenterX(int centerX) {
+    public void setCenterX(int centerX) {
         this.centerX = centerX;
     }
 
@@ -252,7 +249,7 @@ public final class ContinuousVariable extends AbstractVariable
      * Returns the y coordinate of the center of the node.
      */
     @Override
-	public int getCenterY() {
+    public int getCenterY() {
         return this.centerY;
     }
 
@@ -260,7 +257,7 @@ public final class ContinuousVariable extends AbstractVariable
      * Sets the y coordinate of the center of this node.
      */
     @Override
-	public void setCenterY(int centerY) {
+    public void setCenterY(int centerY) {
         this.centerY = centerY;
     }
 
@@ -268,7 +265,7 @@ public final class ContinuousVariable extends AbstractVariable
      * Sets the (x, y) coordinates of the center of this node.
      */
     @Override
-	public void setCenter(int centerX, int centerY) {
+    public void setCenter(int centerX, int centerY) {
         setCenterX(centerX);
         setCenterY(centerY);
     }
@@ -277,7 +274,7 @@ public final class ContinuousVariable extends AbstractVariable
      * Adds a property change listener.
      */
     @Override
-	public void addPropertyChangeListener(PropertyChangeListener l) {
+    public void addPropertyChangeListener(PropertyChangeListener l) {
         getPcs().addPropertyChangeListener(l);
     }
 

@@ -100,7 +100,7 @@ public final class Underline implements TetradSerializable {
     }
 
     @Override
-	public String toString() {
+    public String toString() {
         return "  " + first + " " + second + " " + third;
     }
 

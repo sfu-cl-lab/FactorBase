@@ -466,7 +466,7 @@ public final class MatrixUtils {
      *                 variance of i; off-diagonal errCovar(i, j) are covariance parameters
      *                 that are specified in the model. All other matrix entries are zero.
      * @return The implied covariance matrix, which is the covariance matrix
-     *         over the measured variables that is implied by all the given information.
+     * over the measured variables that is implied by all the given information.
      * @throws IllegalArgumentException if edgeCoef or errCovar contains an
      *                                  undefined value (Double.NaN).
      */
@@ -502,9 +502,9 @@ public final class MatrixUtils {
         DoubleMatrix2D m3;
 
         try {
-		    m3 = new Algebra(1e-30).inverse(m1);
+            m3 = new Algebra(1e-30).inverse(m1);
         } catch (Exception e) {
-    		m3 = MatrixUtils.ginverse(m1);
+            m3 = MatrixUtils.ginverse(m1);
         }
 
         // ((I - B) ^ -1)'
@@ -985,8 +985,7 @@ public final class MatrixUtils {
 
         try {
             inv = new DenseMatrix(m.solve(I, AI));
-        }
-        catch (MatrixSingularException e) {
+        } catch (MatrixSingularException e) {
             throw new RuntimeException("Singular matrix.", e);
         }
 

@@ -50,6 +50,17 @@ public class TestCcd extends TestCase {
     }
 
     /**
+     * This method uses reflection to collect up all of the test methods from this class and return them to the test
+     * runner.
+     */
+    public static Test suite() {
+
+        // Edit the name of the class in the parens to match the name
+        // of this class.
+        return new TestSuite(TestCcd.class);
+    }
+
+    /**
      * From "CcdTester".
      */
     public void testCcd() {
@@ -65,41 +76,36 @@ public class TestCcd extends TestCase {
             graph.addNode(b);
             graph.addNode(x);
             graph.addNode(y);
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             fail("Cant add nodes");
         }
 
         try {
             graph.addDirectedEdge(a, x);
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             fail("Cant add edge A to X");
         }
 
         try {
             graph.addDirectedEdge(b, y);
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             fail("Cant add edge B to Y");
         }
 
         try {
             graph.addDirectedEdge(x, y);
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             fail("Cant add edge X to Y");
         }
 
         try {
             graph.addDirectedEdge(y, x);
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             fail("Cant add edge Y to X");
         }
 
         IndependenceTest test = new IndTestDSep(graph);
-        List<Node> listOfVars = test.getVariables();
+        List <Node> listOfVars = test.getVariables();
 
         System.out.println("FIRST CASE");
         System.out.println("List of vars:  ");
@@ -199,56 +205,49 @@ public class TestCcd extends TestCase {
             graph.addNode(c);
             graph.addNode(d);
             graph.addNode(e);
-        }
-        catch (Exception ex) {
+        } catch (Exception ex) {
             fail("Cant add nodes");
         }
 
         try {
             graph.addDirectedEdge(a, b);
-        }
-        catch (Exception ex) {
+        } catch (Exception ex) {
             fail("Cant add edge A to B");
         }
 
         try {
             graph.addDirectedEdge(b, c);
-        }
-        catch (Exception ex) {
+        } catch (Exception ex) {
             fail("Cant add edge B to C");
         }
 
         try {
             graph.addDirectedEdge(c, b);
-        }
-        catch (Exception ex) {
+        } catch (Exception ex) {
             fail("Cant add edge C to B");
         }
 
         try {
             graph.addDirectedEdge(c, d);
-        }
-        catch (Exception ex) {
+        } catch (Exception ex) {
             fail("Cant add edge C to D");
         }
 
         try {
             graph.addDirectedEdge(d, c);
-        }
-        catch (Exception ex) {
+        } catch (Exception ex) {
             fail("Cant add edge D to C");
         }
 
         try {
             graph.addDirectedEdge(e, d);
-        }
-        catch (Exception ex) {
+        } catch (Exception ex) {
             fail("Cant add edge E to D");
         }
 
         IndependenceTest test = new IndTestDSep(graph);
 
-        List<Node> listOfVars = test.getVariables();
+        List <Node> listOfVars = test.getVariables();
 
         System.out.println("SECOND CASE");
         System.out.println("List of vars:  ");
@@ -318,7 +317,6 @@ public class TestCcd extends TestCase {
 
     }
 
-
     public void testRandom() {
 //        RandomUtil.getInstance().setSeed(502938L);
 
@@ -335,17 +333,6 @@ public class TestCcd extends TestCase {
         Graph pag = ccd.search();
 
         System.out.println(pag);
-    }
-
-    /**
-     * This method uses reflection to collect up all of the test methods from this class and return them to the test
-     * runner.
-     */
-    public static Test suite() {
-
-        // Edit the name of the class in the parens to match the name
-        // of this class.
-        return new TestSuite(TestCcd.class);
     }
 }
 

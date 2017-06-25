@@ -88,7 +88,7 @@ public final class KnowledgeEdge implements TetradSerializable {
      * Reteurns true if (from1, to1) == (from2, to2).
      */
     @Override
-	public final boolean equals(Object object) {
+    public final boolean equals(Object object) {
         if (object == null) {
             return false;
         }
@@ -105,13 +105,13 @@ public final class KnowledgeEdge implements TetradSerializable {
      * Returns a good hashcode.
      */
     @Override
-	public final int hashCode() {
+    public final int hashCode() {
         int hashCode = 31 + from.hashCode();
         return 37 * hashCode + to.hashCode();
     }
 
     @Override
-	public String toString() {
+    public String toString() {
         return from + "-->" + to;
     }
 

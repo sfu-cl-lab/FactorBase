@@ -32,8 +32,6 @@ import edu.cmu.tetrad.search.SepsetMapDci;
 import edu.cmu.tetrad.util.ChoiceGenerator;
 import edu.cmu.tetrad.util.TetradLogger;
 
-import java.util.*;
-
 /**
  * Implements a modified version of the the "fast adjacency search" for use in the Distributed Causal Inference (DCI)
  * algorithm. This version accepts an independence test for a particular dataset and a supergraph containing varialbes
@@ -57,7 +55,7 @@ public class FasDci {
     /**
      * The variables in the dataset.
      */
-    private Set<Node> variables = new HashSet<Node>();
+    private Set <Node> variables = new HashSet <Node>();
 
     /**
      * The independence tests for each dataset. This should be appropriate to the data.
@@ -88,12 +86,12 @@ public class FasDci {
     /**
      * If resolving independencies, the sets of variables in each "Marginal" dataset
      */
-    private List<Set<Node>> marginalVars;
+    private List <Set <Node>> marginalVars;
 
     /**
      * If resolving independenceis, the set of independence tests for other datasets
      */
-    private List<IndependenceTest> independenceTests;
+    private List <IndependenceTest> independenceTests;
 
     /**
      * Independencies known prior to the search
@@ -127,8 +125,8 @@ public class FasDci {
      * Constructs a new FastAdjacencySearch for DCI with independence test pooling to resolve inconsistencies.
      */
     public FasDci(Graph graph, IndependenceTest independenceTest,
-                  ResolveSepsets.Method method, List<Set<Node>> marginalVars,
-                  List<IndependenceTest> independenceTests,
+                  ResolveSepsets.Method method, List <Set <Node>> marginalVars,
+                  List <IndependenceTest> independenceTests,
                   SepsetMapDci knownIndependencies, SepsetMapDci knownAssociations) {
         this.graph = graph;
         this.independenceTest = independenceTest;
@@ -155,7 +153,7 @@ public class FasDci {
     public SepsetMapDci search() {
         this.logger.log("info", "Starting Fast Adjacency Search (DCI).");
         // Remove edges forbidden both ways.
-        List<Edge> edges = graph.getEdges();
+        List <Edge> edges = graph.getEdges();
 
 //        logger.log("info", "Edges: " + edges);
 
@@ -244,9 +242,9 @@ public class FasDci {
     /**
      * Removes from the list of nodes any that cannot be parents of x given the background knowledge.
      */
-    private List<Node> possibleParents(Node x, List<Node> adjx,
-                                       Knowledge knowledge) {
-        List<Node> possibleParents = new LinkedList<Node>();
+    private List <Node> possibleParents(Node x, List <Node> adjx,
+                                        Knowledge knowledge) {
+        List <Node> possibleParents = new LinkedList <Node>();
         String _x = x.getName();
 
         for (Node z : adjx) {
@@ -284,7 +282,7 @@ public class FasDci {
         boolean more = false;
 
         for (Node x : variables) {
-            List<Node> b = new LinkedList<Node>();
+            List <Node> b = new LinkedList <Node>();
             for (Node node : graph.getAdjacentNodes(x)) {
                 if (variables.contains(node)) {
                     b.add(node);
@@ -295,9 +293,9 @@ public class FasDci {
             for (Node y : b) {
 
                 // This is the standard algorithm, without the v1 bias.
-                List<Node> adjx = new ArrayList<Node>(b);
+                List <Node> adjx = new ArrayList <Node>(b);
                 adjx.remove(y);
-                List<Node> ppx = possibleParents(x, adjx, knowledge);
+                List <Node> ppx = possibleParents(x, adjx, knowledge);
 
 //                System.out.println("Possible parents for removing " + x + " --- " + y + " are " + ppx);
 
@@ -309,12 +307,12 @@ public class FasDci {
                     int[] choice;
 
                     while ((choice = cg.next()) != null) {
-                        List<Node> condSet = GraphUtils.asList(choice, ppx);
+                        List <Node> condSet = GraphUtils.asList(choice, ppx);
 
                         boolean independent = false;
                         boolean known = false;
                         if (knownIndependencies != null && knownIndependencies.get(x, y) != null) {
-                            for (List<Node> set : knownIndependencies.getSet(x, y)) {
+                            for (List <Node> set : knownIndependencies.getSet(x, y)) {
                                 if (set.containsAll(condSet) && set.size() == condSet.size()) {
                                     independent = true;
                                     known = true;
@@ -323,7 +321,7 @@ public class FasDci {
                             }
                         }
                         if (knownAssociations != null && knownAssociations.get(x, y) != null) {
-                            for (List<Node> set : knownAssociations.getSet(x, y)) {
+                            for (List <Node> set : knownAssociations.getSet(x, y)) {
                                 if (set.containsAll(condSet) && set.size() == condSet.size()) {
                                     independent = false;
                                     known = true;
@@ -334,9 +332,9 @@ public class FasDci {
                         if (!known) {
                             independent = independenceTest.isIndependent(x, y, condSet);
                             if (method != null) {
-                                List<IndependenceTest> testsWithVars = new ArrayList<IndependenceTest>();
+                                List <IndependenceTest> testsWithVars = new ArrayList <IndependenceTest>();
                                 for (int k = 0; k < marginalVars.size(); k++) {
-                                    Set<Node> marginalSet = marginalVars.get(k);
+                                    Set <Node> marginalSet = marginalVars.get(k);
                                     if (marginalSet.contains(x) && marginalSet.contains(y) &&
                                             marginalSet.containsAll(condSet)) {
                                         testsWithVars.add(independenceTests.get(k));
@@ -360,14 +358,14 @@ public class FasDci {
                         if (independent && noEdgeRequired) {
 //                            Edge edge = graph.getEdge(x, y);
                             graph.removeEdge(x, y);
-                            sepset.set(x, y, new LinkedList<Node>(condSet));
+                            sepset.set(x, y, new LinkedList <Node>(condSet));
                             continue nextEdge;
                         }
                     }
                 }
             }
 
-            List<Node> currentAdjNodes = new ArrayList();
+            List <Node> currentAdjNodes = new ArrayList();
             for (Node node : graph.getAdjacentNodes(x)) {
                 if (variables.contains(node)) {
                     currentAdjNodes.add(node);

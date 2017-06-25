@@ -37,11 +37,11 @@ import java.util.List;
  * @author Joe Ramsey
  */
 public class PurifyTetradBased implements IPurify {
+    boolean doFdr = false;
+    boolean listTetrads = false;
     private boolean outputMessage = true;
     private TetradTest tetradTest;
     private int numVars;
-    boolean doFdr = false;
-    boolean listTetrads = false;
 
     public PurifyTetradBased(TetradTest tetradTest) {
         this.tetradTest = tetradTest;
@@ -49,14 +49,14 @@ public class PurifyTetradBased implements IPurify {
     }
 
     @Override
-	public List<List<Node>> purify(List<List<Node>> clustering) {
+    public List <List <Node>> purify(List <List <Node>> clustering) {
         System.out.println("*** " + clustering);
-        List<int[]> _clustering = convertListToInt(clustering);
+        List <int[]> _clustering = convertListToInt(clustering);
 
         System.out.println("&&&");
         printIntPartition(_clustering);
 
-        List<int[]> _clustering2 = purify2(_clustering);
+        List <int[]> _clustering2 = purify2(_clustering);
 
         System.out.println("%%%");
         printIntPartition(_clustering2);
@@ -65,11 +65,11 @@ public class PurifyTetradBased implements IPurify {
     }
 
     @Override
-	public void setTrueGraph(Graph mim) {
+    public void setTrueGraph(Graph mim) {
         throw new UnsupportedOperationException();
     }
 
-    private void printIntPartition(List<int[]> clustering) {
+    private void printIntPartition(List <int[]> clustering) {
         for (int i = 0; i < clustering.size(); i++) {
             int[] cluster = clustering.get(i);
             System.out.print(i + ": ");
@@ -83,12 +83,12 @@ public class PurifyTetradBased implements IPurify {
         System.out.println();
     }
 
-    private List<int[]> convertListToInt(List<List<Node>> clustering) {
-        List<Node> nodes = tetradTest.getVariables();
-        List<int[]> _clustering = new ArrayList<int[]>();
+    private List <int[]> convertListToInt(List <List <Node>> clustering) {
+        List <Node> nodes = tetradTest.getVariables();
+        List <int[]> _clustering = new ArrayList <int[]>();
 
         for (int i = 0; i < clustering.size(); i++) {
-            List<Node> cluster = clustering.get(i);
+            List <Node> cluster = clustering.get(i);
             int[] _cluster = new int[cluster.size()];
 
             for (int j = 0; j < cluster.size(); j++) {
@@ -105,13 +105,13 @@ public class PurifyTetradBased implements IPurify {
         return _clustering;
     }
 
-    private List<List<Node>> convertIntToList(List<int[]> clustering) {
-        List<Node> nodes = tetradTest.getVariables();
-        List<List<Node>> _clustering = new ArrayList<List<Node>>();
+    private List <List <Node>> convertIntToList(List <int[]> clustering) {
+        List <Node> nodes = tetradTest.getVariables();
+        List <List <Node>> _clustering = new ArrayList <List <Node>>();
 
         for (int i = 0; i < clustering.size(); i++) {
             int[] cluster = clustering.get(i);
-            List<Node> _cluster = new ArrayList<Node>();
+            List <Node> _cluster = new ArrayList <Node>();
 
             for (int j = 0; j < cluster.length; j++) {
                 _cluster.add(nodes.get(cluster[j]));
@@ -146,7 +146,7 @@ public class PurifyTetradBased implements IPurify {
         printlnMessage("INTRA-CONSTRUCT PHASE.");
         printlnMessage("----------------------");
         printlnMessage();
-        for (Iterator it = clustering.iterator(); it.hasNext();) {
+        for (Iterator it = clustering.iterator(); it.hasNext(); ) {
             intraConstructPhase2((int[]) it.next(), eliminated);
         }
         printlnMessage();
@@ -168,12 +168,12 @@ public class PurifyTetradBased implements IPurify {
     }
 
     private void intraConstructPhase2(int _cluster[], boolean eliminated[]) {
-        List<Integer> cluster = new ArrayList<Integer>();
+        List <Integer> cluster = new ArrayList <Integer>();
         for (int i : _cluster) cluster.add(i);
         double cutoff = tetradTest.getSignificance();
 
         if (doFdr) {
-            List<Double> allPValues = new ArrayList<Double>(listPValues(cluster, eliminated, Double.MAX_VALUE));
+            List <Double> allPValues = new ArrayList <Double>(listPValues(cluster, eliminated, Double.MAX_VALUE));
             System.out.println("# p values for this cluster: " + allPValues.size());
             Collections.sort(allPValues);
 
@@ -189,7 +189,7 @@ public class PurifyTetradBased implements IPurify {
             System.out.println("FDR cutoff = " + cutoff);
         }
 
-        List<Double> pValues2 = listPValues(cluster, eliminated, cutoff);
+        List <Double> pValues2 = listPValues(cluster, eliminated, cutoff);
 
         if (pValues2 == null) {
             System.out.println("Nothing to count.");
@@ -207,13 +207,13 @@ public class PurifyTetradBased implements IPurify {
 
             int min = Integer.MAX_VALUE;
             int minIndex = -1;
-            List<Integer> minList = new ArrayList<Integer>();
+            List <Integer> minList = new ArrayList <Integer>();
 
             for (int i : cluster) {
                 if (eliminated[i]) continue;
 
                 eliminated[i] = true;
-                List<Double> pValues = listPValues(cluster, eliminated, cutoff);
+                List <Double> pValues = listPValues(cluster, eliminated, cutoff);
 
                 if (pValues == null) {
                     eliminated[i] = false;
@@ -229,7 +229,7 @@ public class PurifyTetradBased implements IPurify {
                     min = pValues.size();
                     minIndex = i;
                     numImpurities = min;
-                    minList = new ArrayList<Integer>();
+                    minList = new ArrayList <Integer>();
                     minList.add(i);
                 } else if (pValues.size() == min) {
                     minList.add(i);
@@ -258,11 +258,11 @@ public class PurifyTetradBased implements IPurify {
         }
     }
 
-    private void crossConstructPhase2(List<int[]> clustering, boolean eliminated[]) {
+    private void crossConstructPhase2(List <int[]> clustering, boolean eliminated[]) {
         double cutoff = tetradTest.getSignificance();
 
         if (doFdr) {
-            List<Double> allPValues = new ArrayList<Double>(listCrossConstructPValues(clustering, eliminated, Double.MAX_VALUE));
+            List <Double> allPValues = new ArrayList <Double>(listCrossConstructPValues(clustering, eliminated, Double.MAX_VALUE));
             System.out.println("Num p values cross clusters: " + allPValues.size());
 
             if (allPValues.isEmpty()) return;
@@ -282,7 +282,7 @@ public class PurifyTetradBased implements IPurify {
             System.out.println("cutoff = " + cutoff);
         }
 
-        List<Double> pValues = listCrossConstructPValues(clustering, eliminated, cutoff);
+        List <Double> pValues = listCrossConstructPValues(clustering, eliminated, cutoff);
 
         if (pValues == null) {
             System.out.println("Nothing to count.");
@@ -297,13 +297,13 @@ public class PurifyTetradBased implements IPurify {
 
             int min = Integer.MAX_VALUE;
             int minIndex = -1;
-            List<Integer> minList = new ArrayList<Integer>();
+            List <Integer> minList = new ArrayList <Integer>();
 
             for (int i = 0; i < eliminated.length; i++) {
                 if (eliminated[i]) continue;
 
                 eliminated[i] = true;
-                List<Double> pValuesCrossConstruct = listCrossConstructPValues(clustering, eliminated, cutoff);
+                List <Double> pValuesCrossConstruct = listCrossConstructPValues(clustering, eliminated, cutoff);
 
                 if (pValuesCrossConstruct == null) {
                     eliminated[i] = false;
@@ -318,7 +318,7 @@ public class PurifyTetradBased implements IPurify {
                     min = pValuesCrossConstruct.size();
                     minIndex = i;
                     numImpurities = min;
-                    minList = new ArrayList<Integer>();
+                    minList = new ArrayList <Integer>();
                     minList.add(i);
                 } else if (pValuesCrossConstruct.size() == min) {
                     minList.add(i);
@@ -343,8 +343,8 @@ public class PurifyTetradBased implements IPurify {
         printClustering(clustering, eliminated);
     }
 
-    private List<Double> listCrossConstructPValues(List<int[]> clustering, boolean[] eliminated, double cutoff) {
-        List<Double> allPValues = new ArrayList<Double>();
+    private List <Double> listCrossConstructPValues(List <int[]> clustering, boolean[] eliminated, double cutoff) {
+        List <Double> allPValues = new ArrayList <Double>();
         boolean countable = false;
 
         for (int p1 = 0; p1 < clustering.size(); p1++) {
@@ -361,10 +361,10 @@ public class PurifyTetradBased implements IPurify {
                         int[] choice2;
 
                         while ((choice2 = gen2.next()) != null) {
-                            List<Integer> crossCluster = new ArrayList<Integer>();
+                            List <Integer> crossCluster = new ArrayList <Integer>();
                             for (int i : choice1) crossCluster.add(cluster1[i]);
                             for (int i : choice2) crossCluster.add(cluster2[i]);
-                            List<Double> pValues = listPValues(crossCluster, eliminated, cutoff);
+                            List <Double> pValues = listPValues(crossCluster, eliminated, cutoff);
 
                             if (pValues != null) {
                                 countable = true;
@@ -383,10 +383,10 @@ public class PurifyTetradBased implements IPurify {
                         int[] choice2;
 
                         while ((choice2 = gen2.next()) != null) {
-                            List<Integer> crossCluster = new ArrayList<Integer>();
+                            List <Integer> crossCluster = new ArrayList <Integer>();
                             for (int i : choice1) crossCluster.add(cluster2[i]);
                             for (int i : choice2) crossCluster.add(cluster1[i]);
-                            List<Double> pValues = listPValues(crossCluster, eliminated, cutoff);
+                            List <Double> pValues = listPValues(crossCluster, eliminated, cutoff);
 
                             if (pValues != null) {
                                 countable = true;
@@ -405,11 +405,11 @@ public class PurifyTetradBased implements IPurify {
                         int[] choice2;
 
                         while ((choice2 = gen2.next()) != null) {
-                            List<Integer> crossCluster = new ArrayList<Integer>();
+                            List <Integer> crossCluster = new ArrayList <Integer>();
                             for (int i : choice1) crossCluster.add(cluster1[i]);
                             for (int i : choice2) crossCluster.add(cluster2[i]);
 
-                            List<Double> pValues = listPValues2by2(crossCluster, eliminated, cutoff);
+                            List <Double> pValues = listPValues2by2(crossCluster, eliminated, cutoff);
 
                             if (pValues != null) {
                                 countable = true;
@@ -425,11 +425,11 @@ public class PurifyTetradBased implements IPurify {
     }
 
 
-    private List<Double> listPValues(List<Integer> cluster, boolean[] eliminated, double cutoff) {
+    private List <Double> listPValues(List <Integer> cluster, boolean[] eliminated, double cutoff) {
         if (cluster.size() < 4) return null;
         boolean countable = false;
 
-        List<Double> pValues = new ArrayList<Double>();
+        List <Double> pValues = new ArrayList <Double>();
         ChoiceGenerator gen = new ChoiceGenerator(cluster.size(), 4);
         int[] choice;
 
@@ -480,10 +480,10 @@ public class PurifyTetradBased implements IPurify {
         }
     }
 
-    private List<Double> listPValues2by2(List<Integer> cluster, boolean[] eliminated, double cutoff) {
-        if (cluster.size() < 4) return new ArrayList<Double>();
+    private List <Double> listPValues2by2(List <Integer> cluster, boolean[] eliminated, double cutoff) {
+        if (cluster.size() < 4) return new ArrayList <Double>();
 
-        List<Double> pValues = new ArrayList<Double>();
+        List <Double> pValues = new ArrayList <Double>();
 
         int x = cluster.get(0);
         int z = cluster.get(1);

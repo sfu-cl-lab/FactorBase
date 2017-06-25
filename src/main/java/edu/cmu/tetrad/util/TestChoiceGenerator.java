@@ -37,6 +37,10 @@ public class TestChoiceGenerator extends TestCase {
         super(name);
     }
 
+    public static Test suite() {
+        return new TestSuite(TestChoiceGenerator.class);
+    }
+
     /**
      * Prints all of the choices for the given a and b.
      */
@@ -88,10 +92,6 @@ public class TestChoiceGenerator extends TestCase {
                 }
             }
         }
-    }
-
-    public static Test suite() {
-        return new TestSuite(TestChoiceGenerator.class);
     }
 }
 

@@ -52,7 +52,7 @@ public interface DataModel
      * Renders the data model as as String.
      */
     @Override
-	String toString();
+    String toString();
 }
 
 

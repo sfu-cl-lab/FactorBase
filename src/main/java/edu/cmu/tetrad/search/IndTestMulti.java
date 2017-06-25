@@ -26,8 +26,6 @@ import edu.cmu.tetrad.graph.Node;
 import edu.cmu.tetrad.search.ResolveSepsets;
 import edu.cmu.tetrad.util.TetradLogger;
 
-import java.util.*;
-
 /**
  * Pools together a set of independence tests using a specified methods
  *
@@ -39,12 +37,12 @@ public final class IndTestMulti implements IndependenceTest {
     /**
      * The variables of the covariance matrix, in order. (Unmodifiable list.)
      */
-    private final List<Node> variables;
+    private final List <Node> variables;
 
     /**
      * The independence test associated with each data set.
      */
-    private List<IndependenceTest> independenceTests;
+    private List <IndependenceTest> independenceTests;
 
     /**
      * Pooling method
@@ -53,8 +51,8 @@ public final class IndTestMulti implements IndependenceTest {
 
     //==========================CONSTRUCTORS=============================//
 
-    public IndTestMulti(List<IndependenceTest> independenceTests, ResolveSepsets.Method method) {
-        Set<String> nodeNames = new HashSet<String>();
+    public IndTestMulti(List <IndependenceTest> independenceTests, ResolveSepsets.Method method) {
+        Set <String> nodeNames = new HashSet <String>();
         for (IndependenceTest independenceTest : independenceTests) {
             nodeNames.addAll(independenceTest.getVariableNames());
         }
@@ -69,7 +67,7 @@ public final class IndTestMulti implements IndependenceTest {
     //==========================PUBLIC METHODS=============================//
 
     @Override
-	public IndependenceTest indTestSubset(List<Node> vars) {
+    public IndependenceTest indTestSubset(List <Node> vars) {
         throw new UnsupportedOperationException();
     }
 
@@ -83,7 +81,7 @@ public final class IndTestMulti implements IndependenceTest {
      * @throws RuntimeException if a matrix singularity is encountered.
      */
     @Override
-	public boolean isIndependent(Node x, Node y, List<Node> z) {
+    public boolean isIndependent(Node x, Node y, List <Node> z) {
         boolean independent = ResolveSepsets.isIndependentPooled(method, independenceTests, x, y, z);
 
         if (independent) {
@@ -96,21 +94,21 @@ public final class IndTestMulti implements IndependenceTest {
     }
 
     @Override
-	public boolean isIndependent(Node x, Node y, Node... z) {
-        List<Node> zList = Arrays.asList(z);
+    public boolean isIndependent(Node x, Node y, Node... z) {
+        List <Node> zList = Arrays.asList(z);
         boolean independent = isIndependent(x, y, zList);
 
         return independent;
     }
 
     @Override
-	public boolean isDependent(Node x, Node y, List<Node> z) {
+    public boolean isDependent(Node x, Node y, List <Node> z) {
         return !isIndependent(x, y, z);
     }
 
     @Override
-	public boolean isDependent(Node x, Node y, Node... z) {
-        List<Node> zList = Arrays.asList(z);
+    public boolean isDependent(Node x, Node y, Node... z) {
+        List <Node> zList = Arrays.asList(z);
         return isDependent(x, y, zList);
     }
 
@@ -118,15 +116,7 @@ public final class IndTestMulti implements IndependenceTest {
      * @throws UnsupportedOperationException
      */
     @Override
-	public double getPValue() {
-        throw new UnsupportedOperationException();
-    }
-
-    /**
-     * @throws UnsupportedOperationException
-     */
-    @Override
-	public void setAlpha(double alpha) {
+    public double getPValue() {
         throw new UnsupportedOperationException();
     }
 
@@ -134,7 +124,15 @@ public final class IndTestMulti implements IndependenceTest {
      * Gets the current significance level.
      */
     @Override
-	public double getAlpha() {
+    public double getAlpha() {
+        throw new UnsupportedOperationException();
+    }
+
+    /**
+     * @throws UnsupportedOperationException
+     */
+    @Override
+    public void setAlpha(double alpha) {
         throw new UnsupportedOperationException();
     }
 
@@ -143,7 +141,7 @@ public final class IndTestMulti implements IndependenceTest {
      * relations-- that is, all the variables in the given graph or the given data set.
      */
     @Override
-	public List<Node> getVariables() {
+    public List <Node> getVariables() {
         return this.variables;
     }
 
@@ -151,7 +149,7 @@ public final class IndTestMulti implements IndependenceTest {
      * Returns the variable with the given name.
      */
     @Override
-	public Node getVariable(String name) {
+    public Node getVariable(String name) {
         for (int i = 0; i < getVariables().size(); i++) {
             Node variable = getVariables().get(i);
             if (variable.getName().equals(name)) {
@@ -166,9 +164,9 @@ public final class IndTestMulti implements IndependenceTest {
      * Returns the list of variable varNames.
      */
     @Override
-	public List<String> getVariableNames() {
-        List<Node> variables = getVariables();
-        List<String> variableNames = new ArrayList<String>();
+    public List <String> getVariableNames() {
+        List <Node> variables = getVariables();
+        List <String> variableNames = new ArrayList <String>();
         for (Node variable1 : variables) {
             variableNames.add(variable1.getName());
         }
@@ -179,7 +177,7 @@ public final class IndTestMulti implements IndependenceTest {
      * @throws UnsupportedOperationException
      */
     @Override
-	public boolean determines(List z, Node x) throws UnsupportedOperationException {
+    public boolean determines(List z, Node x) throws UnsupportedOperationException {
         throw new UnsupportedOperationException();
     }
 
@@ -187,7 +185,7 @@ public final class IndTestMulti implements IndependenceTest {
      * @throw UnsupportedOperationException
      */
     @Override
-	public DataSet getData() {
+    public DataSet getData() {
         throw new UnsupportedOperationException();
     }
 
@@ -209,7 +207,7 @@ public final class IndTestMulti implements IndependenceTest {
      * Returns a string representation of this test.
      */
     @Override
-	public String toString() {
+    public String toString() {
         return "Pooled Independence Test:  alpha = " + independenceTests.get(0).getAlpha();
     }
 }

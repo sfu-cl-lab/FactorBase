@@ -51,16 +51,25 @@ public class TestRicf extends TestCase {
         super(name);
     }
 
+    /**
+     * This method uses reflection to collect up all of the test methods from this class and return them to the test
+     * runner.
+     */
+    public static Test suite() {
+
+        // Edit the name of the class in the parens to match the name
+        // of this class.
+        return new TestSuite(TestRicf.class);
+    }
 
     @Override
-	public void setUp() throws Exception {
+    public void setUp() throws Exception {
         TetradLogger.getInstance().addOutputStream(System.out);
         TetradLogger.getInstance().setForceLog(true);
     }
 
-
     @Override
-	public void tearDown() {
+    public void tearDown() {
         TetradLogger.getInstance().setForceLog(false);
         TetradLogger.getInstance().removeOutputStream(System.out);
     }
@@ -236,50 +245,15 @@ public class TestRicf extends TestCase {
         graph.addUndirectedEdge(x5, x1);
         graph.addUndirectedEdge(x5, x2);
 
-        List<List<Node>> cliques = new Ricf().cliques(graph);
+        List <List <Node>> cliques = new Ricf().cliques(graph);
 
         System.out.println(cliques);
     }
 
     public void testCliques2() {
         Graph graph = GraphUtils.randomDag(8, 0, 20, 5, 5, 5, false);
-        List<List<Node>> cliques = new Ricf().cliques(graph);
+        List <List <Node>> cliques = new Ricf().cliques(graph);
         System.out.println(graph);
-        System.out.println(cliques);
-    }
-
-    /**
-     * Whittaker p. 59.
-     */
-    public void testCliques3() {
-        Graph graph = new EdgeListGraph();
-
-        ContinuousVariable x1 = new ContinuousVariable("X1");
-        ContinuousVariable x2 = new ContinuousVariable("X2");
-        ContinuousVariable x3 = new ContinuousVariable("X3");
-        ContinuousVariable x4 = new ContinuousVariable("X4");
-        ContinuousVariable x5 = new ContinuousVariable("X5");
-        ContinuousVariable x6 = new ContinuousVariable("X6");
-        ContinuousVariable x7 = new ContinuousVariable("X7");
-
-        graph.addNode(x1);
-        graph.addNode(x2);
-        graph.addNode(x3);
-        graph.addNode(x4);
-        graph.addNode(x5);
-        graph.addNode(x6);
-        graph.addNode(x7);
-
-        graph.addUndirectedEdge(x1, x2);
-        graph.addUndirectedEdge(x1, x4);
-        graph.addUndirectedEdge(x2, x3);
-        graph.addUndirectedEdge(x2, x5);
-        graph.addUndirectedEdge(x3, x5);
-        graph.addUndirectedEdge(x4, x5);
-        graph.addUndirectedEdge(x5, x6);
-
-        List<List<Node>> cliques = new Ricf().cliques(graph);
-
         System.out.println(cliques);
     }
 
@@ -333,14 +307,38 @@ public class TestRicf extends TestCase {
 //    }
 
     /**
-     * This method uses reflection to collect up all of the test methods from this class and return them to the test
-     * runner.
+     * Whittaker p. 59.
      */
-    public static Test suite() {
+    public void testCliques3() {
+        Graph graph = new EdgeListGraph();
 
-        // Edit the name of the class in the parens to match the name
-        // of this class.
-        return new TestSuite(TestRicf.class);
+        ContinuousVariable x1 = new ContinuousVariable("X1");
+        ContinuousVariable x2 = new ContinuousVariable("X2");
+        ContinuousVariable x3 = new ContinuousVariable("X3");
+        ContinuousVariable x4 = new ContinuousVariable("X4");
+        ContinuousVariable x5 = new ContinuousVariable("X5");
+        ContinuousVariable x6 = new ContinuousVariable("X6");
+        ContinuousVariable x7 = new ContinuousVariable("X7");
+
+        graph.addNode(x1);
+        graph.addNode(x2);
+        graph.addNode(x3);
+        graph.addNode(x4);
+        graph.addNode(x5);
+        graph.addNode(x6);
+        graph.addNode(x7);
+
+        graph.addUndirectedEdge(x1, x2);
+        graph.addUndirectedEdge(x1, x4);
+        graph.addUndirectedEdge(x2, x3);
+        graph.addUndirectedEdge(x2, x5);
+        graph.addUndirectedEdge(x3, x5);
+        graph.addUndirectedEdge(x4, x5);
+        graph.addUndirectedEdge(x5, x6);
+
+        List <List <Node>> cliques = new Ricf().cliques(graph);
+
+        System.out.println(cliques);
     }
 }
 

@@ -35,7 +35,6 @@ import edu.cmu.tetrad.util.StatUtils;
 import java.rmi.MarshalledObject;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
-import java.util.*;
 
 /**
  * Some static utility methods for dealing with data sets.
@@ -48,20 +47,20 @@ public final class DataUtils {
     public static void copyColumn(Node node, DataSet source, DataSet dest) {
         int sourceColumn = source.getColumn(node);
         int destColumn = dest.getColumn(node);
-        if(sourceColumn < 0){
+        if (sourceColumn < 0) {
             throw new NullPointerException("The given node was not in the source dataset");
         }
-        if(destColumn < 0){
+        if (destColumn < 0) {
             throw new NullPointerException("The given node was not in the destination dataset");
         }
         int sourceRows = source.getNumRows();
         int destRows = dest.getNumRows();
         if (node instanceof ContinuousVariable) {
             for (int i = 0; i < destRows && i < sourceRows; i++) {
-               dest.setDouble(i, destColumn, source.getDouble(i, sourceColumn));
+                dest.setDouble(i, destColumn, source.getDouble(i, sourceColumn));
             }
         } else if (node instanceof DiscreteVariable) {
-            for(int i = 0; i<destRows && i < sourceRows; i++){
+            for (int i = 0; i < destRows && i < sourceRows; i++) {
                 dest.setInt(i, destColumn, source.getInt(i, sourceColumn));
             }
         } else {
@@ -72,7 +71,8 @@ public final class DataUtils {
 
     /**
      * States whether the given column of the given data set is binary.
-     * @param data Ibid.
+     *
+     * @param data   Ibid.
      * @param column Ibid.
      * @return true iff the column is binary.
      */
@@ -105,12 +105,13 @@ public final class DataUtils {
      * <code>source1</code> are found in <code>source2</code>. A variable from
      * <code>source1</code> is found in <code>source2</code> if it is equal to a
      * variable in <code>source2</code>.
+     *
      * @param source1 The first variable source.
      * @param source2 The second variable source. (See the interface.)
      */
     public static void ensureVariablesExist(VariableSource source1,
                                             VariableSource source2) {
-        List<Node> variablesNotFound = source1.getVariables();
+        List <Node> variablesNotFound = source1.getVariables();
         variablesNotFound.removeAll(source2.getVariables());
 
         if (!variablesNotFound.isEmpty()) {
@@ -125,6 +126,7 @@ public final class DataUtils {
     /**
      * Returns the default category for index i. (The default category should
      * ALWAYS be obtained by calling this method.)
+     *
      * @param index Ond plus the given index.
      */
     public static String defaultCategory(int index) {
@@ -140,8 +142,9 @@ public final class DataUtils {
      * This method will be useful in generating datasets which can be used to
      * test algorithms that handle missing data and/or latent variables. </p>
      * Author:  Frank Wimberly
+     *
      * @param inData The data to which random missing data is to be added.
-     * @param probs The probability of adding missing data to each column.
+     * @param probs  The probability of adding missing data to each column.
      * @return The new data sets with missing data added.
      */
     public static DataSet addMissingData(
@@ -150,8 +153,7 @@ public final class DataUtils {
 
         try {
             outData = (DataSet) new MarshalledObject(inData).get();
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             throw new RuntimeException(e);
         }
 
@@ -187,7 +189,7 @@ public final class DataUtils {
      * instances.
      */
     public static DataSet continuousSerializableInstance() {
-        List<Node> variables = new LinkedList<Node>();
+        List <Node> variables = new LinkedList <Node>();
         variables.add(new ContinuousVariable("X"));
         ColtDataSet dataSet = new ColtDataSet(10, variables);
 
@@ -204,7 +206,7 @@ public final class DataUtils {
      * A discrete data set used to construct some other serializable instances.
      */
     public static DataSet discreteSerializableInstance() {
-        List<Node> variables = new LinkedList<Node>();
+        List <Node> variables = new LinkedList <Node>();
         variables.add(new DiscreteVariable("X", 2));
         DataSet dataSet = new ColtDataSet(2, variables);
         dataSet.setInt(0, 0, 0);
@@ -243,8 +245,8 @@ public final class DataUtils {
             if (node instanceof DiscreteVariable) {
                 for (int i = 0; i < data.getNumRows(); i++) {
                     if (data.getInt(i, j) == DiscreteVariable.MISSING_VALUE) {
-                    	System.out.println("data.getInt(i, j) + :"+i+", "+j+","+data.getInt(i, j));//zqian Nov 19 2013
-                    	System.out.println("data.getNumRows() + :"+data.getNumRows());
+                        System.out.println("data.getInt(i, j) + :" + i + ", " + j + "," + data.getInt(i, j));//zqian Nov 19 2013
+                        System.out.println("data.getNumRows() + :" + data.getNumRows());
                         return true;
                     }
                 }
@@ -273,7 +275,7 @@ public final class DataUtils {
             double norm = 0.0;
 
             for (int i = 0; i < data.rows(); i++) {
-                double v = data2.get(i, j);                                         
+                double v = data2.get(i, j);
                 norm += v * v;
             }
 
@@ -349,15 +351,15 @@ public final class DataUtils {
         return data2;
     }
 
-    public static List<DataSet> standardizeData(List<DataSet> dataList) {
-        List<DataSet> dataSets = new ArrayList<DataSet>();
+    public static List <DataSet> standardizeData(List <DataSet> dataList) {
+        List <DataSet> dataSets = new ArrayList <DataSet>();
 
         for (DataSet dataSet : dataList) {
             dataSets.add(dataSet);
         }
 
-        List<DataSet> inList = dataSets;
-        List<DataSet> outList = new ArrayList<DataSet>();
+        List <DataSet> inList = dataSets;
+        List <DataSet> outList = new ArrayList <DataSet>();
 
         for (DataModel model : inList) {
             if (!(model instanceof DataSet)) {
@@ -371,10 +373,10 @@ public final class DataUtils {
             }
 
             DoubleMatrix2D data2 = DataUtils.standardizeData(dataSet.getDoubleData());
-            List<Node> list = dataSet.getVariables();
-            List<Node> list2 = new ArrayList<Node>();
+            List <Node> list = dataSet.getVariables();
+            List <Node> list2 = new ArrayList <Node>();
 
-            for (Node node: list) {
+            for (Node node : list) {
                 list2.add(node);
             }
 
@@ -386,8 +388,8 @@ public final class DataUtils {
     }
 
     public static DataSet standardizeData(DataSet dataSet) {
-        List<DataSet> dataSets = Collections.singletonList(dataSet);
-        List<DataSet> outList = standardizeData(dataSets);
+        List <DataSet> dataSets = Collections.singletonList(dataSet);
+        List <DataSet> outList = standardizeData(dataSets);
         return outList.get(0);
     }
 
@@ -411,15 +413,15 @@ public final class DataUtils {
         return data2;
     }
 
-    public static List<DataSet> centerData(List<DataSet> dataList) {
-        List<DataSet> dataSets = new ArrayList<DataSet>();
+    public static List <DataSet> centerData(List <DataSet> dataList) {
+        List <DataSet> dataSets = new ArrayList <DataSet>();
 
         for (DataSet dataSet : dataList) {
             dataSets.add(dataSet);
         }
 
-        List<DataSet> inList = dataSets;
-        List<DataSet> outList = new ArrayList<DataSet>();
+        List <DataSet> inList = dataSets;
+        List <DataSet> outList = new ArrayList <DataSet>();
 
         for (DataModel model : inList) {
             if (!(model instanceof DataSet)) {
@@ -433,10 +435,10 @@ public final class DataUtils {
             }
 
             DoubleMatrix2D data2 = DataUtils.centerData(dataSet.getDoubleData());
-            List<Node> list = dataSet.getVariables();
-            List<Node> list2 = new ArrayList<Node>();
+            List <Node> list = dataSet.getVariables();
+            List <Node> list2 = new ArrayList <Node>();
 
-            for (Node node: list) {
+            for (Node node : list) {
                 list2.add(node);
             }
 
@@ -447,7 +449,7 @@ public final class DataUtils {
         return outList;
     }
 
-    
+
     public static DataSet discretize(DataSet dataSet, int numCategories, boolean variablesCopied) {
         Discretizer discretizer = new Discretizer(dataSet);
         discretizer.setVariablesCopied(variablesCopied);
@@ -464,20 +466,20 @@ public final class DataUtils {
      */
     public static DiscretizationSpec getEqualFreqDiscretizationSpec(int numCategories, double[] data) {
         double[] breakpoints = Discretizer.getEqualFrequencyBreakPoints(data, numCategories);
-        List<String> cats = defaultCategories(numCategories);
+        List <String> cats = defaultCategories(numCategories);
         return new ContinuousDiscretizationSpec(breakpoints, cats);
     }
 
-    public static List<String> defaultCategories(int numCategories) {
-        List<String> categories = new LinkedList<String>();
+    public static List <String> defaultCategories(int numCategories) {
+        List <String> categories = new LinkedList <String>();
         for (int i = 0; i < numCategories; i++) {
             categories.add(defaultCategory(i));
         }
         return categories;
     }
 
-    public static List<Node> createContinuousVariables(String[] varNames) {
-        List<Node> variables = new LinkedList<Node>();
+    public static List <Node> createContinuousVariables(String[] varNames) {
+        List <Node> variables = new LinkedList <Node>();
 
         for (String varName : varNames) {
             variables.add(new ContinuousVariable(varName));
@@ -489,7 +491,7 @@ public final class DataUtils {
     /**
      * Returns the submatrix of m with variables in the order of the x variables.
      */
-    public static DoubleMatrix2D subMatrix(ICovarianceMatrix m, Node x, Node y, List<Node> z) {
+    public static DoubleMatrix2D subMatrix(ICovarianceMatrix m, Node x, Node y, List <Node> z) {
         if (x == null) {
             throw new NullPointerException();
         }
@@ -508,7 +510,7 @@ public final class DataUtils {
             }
         }
 
-        List<Node> variables = m.getVariables();
+        List <Node> variables = m.getVariables();
         DoubleMatrix2D _covMatrix = m.getMatrix();
 
         // Create index array for the given variables.
@@ -535,7 +537,7 @@ public final class DataUtils {
     /**
      * Returns the submatrix of m with variables in the order of the x variables.
      */
-    public static DoubleMatrix2D subMatrix(DoubleMatrix2D m, List<Node> variables, Node x, Node y, List<Node> z) {
+    public static DoubleMatrix2D subMatrix(DoubleMatrix2D m, List <Node> variables, Node x, Node y, List <Node> z) {
         if (x == null) {
             throw new NullPointerException();
         }
@@ -580,7 +582,7 @@ public final class DataUtils {
     /**
      * Returns the submatrix of m with variables in the order of the x variables.
      */
-    public static DoubleMatrix2D subMatrix(DoubleMatrix2D m, Map<Node, Integer> indexMap, Node x, Node y, List<Node> z) {
+    public static DoubleMatrix2D subMatrix(DoubleMatrix2D m, Map <Node, Integer> indexMap, Node x, Node y, List <Node> z) {
         if (x == null) {
             throw new NullPointerException();
         }
@@ -625,6 +627,7 @@ public final class DataUtils {
 
     /**
      * Returns a new data sets, copying the given on but with the columns shuffled.
+     *
      * @param dataSet The data set to shuffle.
      * @return Ibid.
      */
@@ -633,7 +636,7 @@ public final class DataUtils {
 
         numVariables = dataSet.getNumColumns();
 
-        List<Integer> indicesList = new ArrayList<Integer>();
+        List <Integer> indicesList = new ArrayList <Integer>();
         for (int i = 0; i < numVariables; i++) indicesList.add(i);
         Collections.shuffle(indicesList);
 
@@ -648,13 +651,12 @@ public final class DataUtils {
 
     public static DataSet convertNumericalDiscreteToContinuous(
             DataSet dataSet) throws NumberFormatException {
-        List<Node> variables = new ArrayList<Node>();
+        List <Node> variables = new ArrayList <Node>();
 
         for (Node variable : dataSet.getVariables()) {
             if (variable instanceof ContinuousVariable) {
                 variables.add(variable);
-            }
-            else {
+            } else {
                 variables.add(new ContinuousVariable(variable.getName()));
             }
         }
@@ -669,8 +671,7 @@ public final class DataUtils {
                 for (int i = 0; i < dataSet.getNumRows(); i++) {
                     continuousData.setDouble(i, j, dataSet.getDouble(i, j));
                 }
-            }
-            else {
+            } else {
                 DiscreteVariable discreteVariable = (DiscreteVariable) variable;
 
                 for (int i = 0; i < dataSet.getNumRows(); i++) {
@@ -680,11 +681,10 @@ public final class DataUtils {
 
                     if (catName.equals("*")) {
                         value = Double.NaN;
-                    }
-                    else {
+                    } else {
                         value = Double.parseDouble(catName);
                     }
-                    
+
                     continuousData.setDouble(i, j, value);
                 }
             }
@@ -694,27 +694,27 @@ public final class DataUtils {
     }
 
     public static DataSet concatenateData(DataSet dataSet1, DataSet dataSet2) {
-        List<Node> vars1 = dataSet1.getVariables();
-        List<Node> vars2 = dataSet2.getVariables();
-        Map<String, Integer> varMap2 = new HashMap<String, Integer>();
-        for (int i=0; i<vars2.size(); i++) {
+        List <Node> vars1 = dataSet1.getVariables();
+        List <Node> vars2 = dataSet2.getVariables();
+        Map <String, Integer> varMap2 = new HashMap <String, Integer>();
+        for (int i = 0; i < vars2.size(); i++) {
             varMap2.put(vars2.get(i).getName(), i);
         }
         int rows1 = dataSet1.getNumRows();
         int rows2 = dataSet2.getNumRows();
         int cols1 = dataSet1.getNumColumns();
 
-        DoubleMatrix2D concatMatrix = new DenseDoubleMatrix2D(rows1+rows2, cols1);
+        DoubleMatrix2D concatMatrix = new DenseDoubleMatrix2D(rows1 + rows2, cols1);
         DoubleMatrix2D matrix1 = dataSet1.getDoubleData();
         DoubleMatrix2D matrix2 = dataSet2.getDoubleData();
 
-        for (int i=0; i<vars1.size(); i++) {
+        for (int i = 0; i < vars1.size(); i++) {
             int var2 = varMap2.get(vars1.get(i).getName());
-            for (int j=0; j<rows1; j++)  {
+            for (int j = 0; j < rows1; j++) {
                 concatMatrix.set(j, i, matrix1.get(j, i));
             }
-            for (int j=0; j<rows2; j++)  {
-                concatMatrix.set(j+rows1, i, matrix2.get(j, var2));
+            for (int j = 0; j < rows2; j++) {
+                concatMatrix.set(j + rows1, i, matrix2.get(j, var2));
             }
         }
 
@@ -723,14 +723,13 @@ public final class DataUtils {
         return concatData;
     }
 
-    public static DataSet concatenateDataSets(List<DataSet> dataSets) {
+    public static DataSet concatenateDataSets(List <DataSet> dataSets) {
         DataSet concatenated = null;
 
         for (DataSet dataSet : dataSets) {
             if (concatenated == null) {
                 concatenated = dataSet;
-            }
-            else {
+            } else {
                 concatenated = concatenateData(concatenated, dataSet);
             }
         }
@@ -738,8 +737,8 @@ public final class DataUtils {
         return concatenated;
     }
 
-    public static DataSet concatenateDataNoChecks(List<DataSet> datasets) {
-        List<Node> vars1 = datasets.get(0).getVariables();
+    public static DataSet concatenateDataNoChecks(List <DataSet> datasets) {
+        List <Node> vars1 = datasets.get(0).getVariables();
         int cols = vars1.size();
         int rows = 0;
         for (DataSet dataset : datasets) {
@@ -751,8 +750,8 @@ public final class DataUtils {
         int index = 0;
 
         for (DataSet dataset : datasets) {
-            for (int i=0; i<dataset.getNumRows(); i++) {
-                for (int j=0; j<cols; j++)  {
+            for (int i = 0; i < dataset.getNumRows(); i++) {
+                for (int j = 0; j < cols; j++) {
                     concatMatrix.set(index, j, dataset.getDouble(i, j));
                 }
                 index++;
@@ -766,7 +765,7 @@ public final class DataUtils {
 
 
     public static DataSet concatenateDiscreteData(DataSet dataSet1, DataSet dataSet2) {
-        List<Node> vars = dataSet1.getVariables();
+        List <Node> vars = dataSet1.getVariables();
         int rows1 = dataSet1.getNumRows();
         int rows2 = dataSet2.getNumRows();
         DataSet concatData = new ColtDataSet(rows1 + rows2, vars);
@@ -774,12 +773,12 @@ public final class DataUtils {
         for (Node var : vars) {
             int var1 = dataSet1.getColumn(dataSet1.getVariable(var.toString()));
             int varc = concatData.getColumn(concatData.getVariable(var.toString()));
-            for (int i=0; i<rows1; i++)  {
+            for (int i = 0; i < rows1; i++) {
                 concatData.setInt(i, varc, dataSet1.getInt(i, var1));
             }
             int var2 = dataSet2.getColumn(dataSet2.getVariable(var.toString()));
-            for (int i=0; i<rows2; i++)  {
-                concatData.setInt(i+rows1, varc, dataSet2.getInt(i, var2));
+            for (int i = 0; i < rows2; i++) {
+                concatData.setInt(i + rows1, varc, dataSet2.getInt(i, var2));
             }
         }
 
@@ -826,7 +825,7 @@ public final class DataUtils {
     }
 
     public static DataSet restrictToMeasured(DataSet fullDataSet) {
-        List<Node> measuredVars = new ArrayList<Node>();
+        List <Node> measuredVars = new ArrayList <Node>();
 
         for (Node node : fullDataSet.getVariables()) {
             if (node.getNodeType() == NodeType.MEASURED) {
@@ -876,6 +875,7 @@ public final class DataUtils {
 
     /**
      * Returns a simulation from the given covariance matrix, zero means.
+     *
      * @param cov The variables and covariance matrix over the variables.
      * @return The simulated data.
      */
@@ -883,7 +883,7 @@ public final class DataUtils {
         System.out.println(cov);
         int sampleSize = cov.getSampleSize();
 
-        List<Node> variables = cov.getVariables();
+        List <Node> variables = cov.getVariables();
         DataSet dataSet = new ColtDataSet(sampleSize, variables);
         DoubleMatrix2D _cov = cov.getMatrix().copy();
 
@@ -932,7 +932,7 @@ public final class DataUtils {
         return dataSet;
     }
 
-    public static ColtDataSet makeDataSet(DoubleMatrix2D inVectors, List<Node> nodes) {
+    public static ColtDataSet makeDataSet(DoubleMatrix2D inVectors, List <Node> nodes) {
 
         if (nodes == null) { //make up variable names
         }
@@ -943,7 +943,7 @@ public final class DataUtils {
             new Exception("dimensions don't match!").printStackTrace();
         }
         //create new Continuous variables passing the node to the constructor
-        Vector<Node> variables = new Vector<Node>();
+        Vector <Node> variables = new Vector <Node>();
         for (Node node : nodes)
             variables.add(new ContinuousVariable(node.getName()));
         ColtDataSet data = ColtDataSet.makeContinuousData(variables, inVectors);

@@ -48,7 +48,7 @@ public final class TestBayesPm extends TestCase {
         Dag dag = new Dag(graph);
         BayesPm bayesPm = new BayesPm(dag, 3, 3);
 
-        List<Node> nodes = dag.getNodes();
+        List <Node> nodes = dag.getNodes();
 
         for (Node node1 : nodes) {
             assertEquals(3, bayesPm.getNumCategories(node1));
@@ -59,7 +59,7 @@ public final class TestBayesPm extends TestCase {
         Graph graph = GraphConverter.convert("X1-->X2,X1-->X3,X2-->X4,X3-->X4");
         Dag dag = new Dag(graph);
         BayesPm bayesPm = new BayesPm(dag, 2, 5);
-        List<Node> nodes = dag.getNodes();
+        List <Node> nodes = dag.getNodes();
 
         for (Node node1 : nodes) {
             int numValues = bayesPm.getNumCategories(node1);

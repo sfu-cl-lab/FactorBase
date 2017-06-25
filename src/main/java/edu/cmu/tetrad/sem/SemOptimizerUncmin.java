@@ -54,7 +54,7 @@ public class SemOptimizerUncmin implements SemOptimizer {
     //============================PUBLIC METHODS=========================//
 
     @Override
-	public void optimize(SemIm semIm) {
+    public void optimize(SemIm semIm) {
         if (semIm == null) {
             throw new NullPointerException("SemIm must not be null.");
         }
@@ -118,7 +118,7 @@ public class SemOptimizerUncmin implements SemOptimizer {
         }
 
         @Override
-		public double f_to_minimize(double params1Ind[]) {
+        public double f_to_minimize(double params1Ind[]) {
             System.arraycopy(params1Ind, 1, params0Ind(), 0,
                     sem().getNumFreeParams());
             sem().setFreeParamValues(params0Ind());
@@ -134,11 +134,11 @@ public class SemOptimizerUncmin implements SemOptimizer {
         }
 
         @Override
-		public void gradient(double x[], double g[]) {
+        public void gradient(double x[], double g[]) {
         }
 
         @Override
-		public void hessian(double x[], double h[][]) {
+        public void hessian(double x[], double h[][]) {
         }
 
         private double[] params0Ind() {

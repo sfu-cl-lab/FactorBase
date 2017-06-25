@@ -64,7 +64,7 @@ public class ChiSquare implements Distribution {
     }
 
     @Override
-	public void setParameter(int index, double value) {
+    public void setParameter(int index, double value) {
         if (index == 0 && value >= 0.0) {
             df = value;
         } else {
@@ -73,7 +73,7 @@ public class ChiSquare implements Distribution {
     }
 
     @Override
-	public double getParameter(int index) {
+    public double getParameter(int index) {
         if (index == 0) {
             return df;
         } else {
@@ -82,7 +82,7 @@ public class ChiSquare implements Distribution {
     }
 
     @Override
-	public String getParameterName(int index) {
+    public String getParameterName(int index) {
         if (index == 0) {
             return "DF";
         } else {
@@ -91,22 +91,22 @@ public class ChiSquare implements Distribution {
     }
 
     @Override
-	public int getNumParameters() {
+    public int getNumParameters() {
         return 1;
     }
 
     @Override
-	public String getName() {
+    public String getName() {
         return "Chi Square";
     }
 
     @Override
-	public double nextRandom() {
+    public double nextRandom() {
         return RandomUtil.getInstance().nextChiSquare(df);
     }
 
     @Override
-	public String toString() {
+    public String toString() {
         return "ChiSquare(" + df + ")";
     }
 

@@ -44,6 +44,7 @@ public class Beta implements Distribution {
 
     /**
      * Ibid.
+     *
      * @param alpha Ibid.
      * @param beta  Ibid.
      */
@@ -54,6 +55,7 @@ public class Beta implements Distribution {
 
     /**
      * Generates a simple exemplar of this class to test serialization.
+     *
      * @see edu.cmu.TestSerialization
      * @see edu.cmu.tetradapp.util.TetradSerializableUtils
      */
@@ -66,7 +68,7 @@ public class Beta implements Distribution {
      * See interface.
      */
     @Override
-	public double nextRandom() {
+    public double nextRandom() {
         return RandomUtil.getInstance().nextBeta(alpha, beta);
     }
 
@@ -74,7 +76,7 @@ public class Beta implements Distribution {
      * The order of parameters is alpha = 0, beta = 1.
      */
     @Override
-	public void setParameter(int index, double value) {
+    public void setParameter(int index, double value) {
         if (index == 0) {
             alpha = value;
         } else if (index == 1 && value >= 0) {
@@ -88,7 +90,7 @@ public class Beta implements Distribution {
      * The order of parameters is alpha = 0, beta = 1.
      */
     @Override
-	public double getParameter(int index) {
+    public double getParameter(int index) {
         if (index == 0) {
             return alpha;
         } else if (index == 1) {
@@ -102,7 +104,7 @@ public class Beta implements Distribution {
      * The order of parameters is alpha = 0, beta = 1.
      */
     @Override
-	public String getParameterName(int index) {
+    public String getParameterName(int index) {
         if (index == 0) {
             return "Alpha";
         } else if (index == 1) {
@@ -114,10 +116,11 @@ public class Beta implements Distribution {
 
     /**
      * Uh, there are 2 parameters...
+     *
      * @return Ibid.
      */
     @Override
-	public int getNumParameters() {
+    public int getNumParameters() {
         return 2;
     }
 
@@ -125,7 +128,7 @@ public class Beta implements Distribution {
      * Please don't make me say it...
      */
     @Override
-	public String getName() {
+    public String getName() {
         return "Beta";
     }
 
@@ -133,7 +136,7 @@ public class Beta implements Distribution {
      * A string representation of the distribution.
      */
     @Override
-	public String toString() {
+    public String toString() {
         return "B(" + alpha + ", " + beta + ")";
     }
 }

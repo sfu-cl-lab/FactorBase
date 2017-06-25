@@ -37,117 +37,111 @@ import java.io.ObjectInputStream;
  * @version $Revision: 6039 $ $Date: 2005-05-23 15:53:09 -0400 (Mon, 23 May
  *          2005) $
  */
-public class dbDagWrapper extends DagWrapper{
- 
+public class dbDagWrapper extends DagWrapper {
 
-	public dbDagWrapper(BayesEstimatorWrapper wrapper) {
-		super(wrapper);
-		// TODO Auto-generated constructor stub
-		//System.out.println("HI! dbDagWrapper constr");
-		
-		dag=wrapper.getEstimatedBayesIm().getBayesPm().getDag();
-				
-		for(Node x : dag.getNodes()){
-			//System.out.println("Node is "+x.getName());
-			int flag =0;
-			
-			
-			for(Object t : Parser.getInstance().getRel_att()){
-				//System.out.println("t is "+t.toString());
-				if (t.toString().contains(x.getName())) flag=1;
-			}
-			
-			for(Object t : Parser.getInstance().getEntity_att()){
-				//System.out.println("t is "+t.toString());
-				if (t.toString().contains(x.getName())) flag=2;
-			}
-			
-			if (x.getName().contains("B(")){
-				flag=3;
-			}
-			
-			if (flag==1){
-				String tableName = Parser.getInstance().getTableOfField(x.getName());
-				x.setName(x.getName()+"(");
-				for(Object s : Parser.getInstance().getRefEntities(tableName)){
-					//System.out.println("S is "+s.toString());
-					x.setName(x.getName()+s.toString().toUpperCase().charAt(0)+",");
-				}
-				x.setName(x.getName().substring(0,x.getName().length()-1)+")");
-			}
-			else if(flag==2){
-				String tableName = Parser.getInstance().getTableOfField(x.getName());
-				x.setName(x.getName()+"(");
-				for(Object s : Parser.getInstance().getEntityPrimaryKey(tableName)){
-					//System.out.println("S is "+s.toString());
-					x.setName(x.getName()+s.toString().toUpperCase().charAt(0)+",");
-				
-				}
-				x.setName(x.getName().substring(0,x.getName().length()-1)+")");
-			}
-			else if(flag==3){
-				String st = x.getName();
-				String tableName = st.substring(st.indexOf("(")+1,st.indexOf(")"));
-				x.setName("B_"+tableName);
-				//System.out.println("relation table name:"+tableName);
-				x.setName(x.getName()+"(");
-				for(Object s : Parser.getInstance().getRefEntities(tableName)){
-					//System.out.println("S is "+s.toString());
-					x.setName(x.getName()+s.toString().toUpperCase().charAt(0)+",");
-				
-				}
-				x.setName(x.getName().substring(0,x.getName().length()-1)+")");
-			}
-			
-			
-			if(x.getName().contains("dummy")){
-				//System.out.println("Find Dummy!");
-				x.setName(x.getName().replace("dummy", "aux"));
-			}
 
-		}
-		
-		
-	}
-
-	static final long serialVersionUID = 23L;
-
+    static final long serialVersionUID = 23L;
     /**
      * @serial Can be null.
      */
     private String name;
-
     /**
      * @serial Cannot be null.
      */
     private Dag dag;
 
+    public dbDagWrapper(BayesEstimatorWrapper wrapper) {
+        super(wrapper);
+        // TODO Auto-generated constructor stub
+        //System.out.println("HI! dbDagWrapper constr");
+
+        dag = wrapper.getEstimatedBayesIm().getBayesPm().getDag();
+
+        for (Node x : dag.getNodes()) {
+            //System.out.println("Node is "+x.getName());
+            int flag = 0;
+
+
+            for (Object t : Parser.getInstance().getRel_att()) {
+                //System.out.println("t is "+t.toString());
+                if (t.toString().contains(x.getName())) flag = 1;
+            }
+
+            for (Object t : Parser.getInstance().getEntity_att()) {
+                //System.out.println("t is "+t.toString());
+                if (t.toString().contains(x.getName())) flag = 2;
+            }
+
+            if (x.getName().contains("B(")) {
+                flag = 3;
+            }
+
+            if (flag == 1) {
+                String tableName = Parser.getInstance().getTableOfField(x.getName());
+                x.setName(x.getName() + "(");
+                for (Object s : Parser.getInstance().getRefEntities(tableName)) {
+                    //System.out.println("S is "+s.toString());
+                    x.setName(x.getName() + s.toString().toUpperCase().charAt(0) + ",");
+                }
+                x.setName(x.getName().substring(0, x.getName().length() - 1) + ")");
+            } else if (flag == 2) {
+                String tableName = Parser.getInstance().getTableOfField(x.getName());
+                x.setName(x.getName() + "(");
+                for (Object s : Parser.getInstance().getEntityPrimaryKey(tableName)) {
+                    //System.out.println("S is "+s.toString());
+                    x.setName(x.getName() + s.toString().toUpperCase().charAt(0) + ",");
+
+                }
+                x.setName(x.getName().substring(0, x.getName().length() - 1) + ")");
+            } else if (flag == 3) {
+                String st = x.getName();
+                String tableName = st.substring(st.indexOf("(") + 1, st.indexOf(")"));
+                x.setName("B_" + tableName);
+                //System.out.println("relation table name:"+tableName);
+                x.setName(x.getName() + "(");
+                for (Object s : Parser.getInstance().getRefEntities(tableName)) {
+                    //System.out.println("S is "+s.toString());
+                    x.setName(x.getName() + s.toString().toUpperCase().charAt(0) + ",");
+
+                }
+                x.setName(x.getName().substring(0, x.getName().length() - 1) + ")");
+            }
+
+
+            if (x.getName().contains("dummy")) {
+                //System.out.println("Find Dummy!");
+                x.setName(x.getName().replace("dummy", "aux"));
+            }
+
+        }
+
+
+    }
+
     //=============================CONSTRUCTORS==========================//
 
-     
 
     //================================PUBLIC METHODS=======================//
 
     @Override
-	public Dag getDag() {
+    public Dag getDag() {
         return dag;
     }
 
     @Override
-	public void setDag(Dag graph) {
+    public void setDag(Dag graph) {
         this.dag = graph;
     }
 
     //============================PRIVATE METHODS========================//
 
 
-    private void log(){
+    private void log() {
         TetradLogger.getInstance().setTetradLoggerConfigForModel(dbDagWrapper.class);
         TetradLogger.getInstance().info("Graph type = DAG");
         TetradLogger.getInstance().log("graph", "Graph = " + dag);
         TetradLogger.getInstance().reset();
     }
-
 
 
     private void createRandomDag(GraphParams params) {
@@ -180,17 +174,17 @@ public class dbDagWrapper extends DagWrapper{
     }
 
     @Override
-	public Graph getGraph() {
+    public Graph getGraph() {
         return dag;
     }
 
     @Override
-	public String getName() {
+    public String getName() {
         return name;
     }
 
     @Override
-	public void setName(String name) {
+    public void setName(String name) {
         this.name = name;
     }
 }

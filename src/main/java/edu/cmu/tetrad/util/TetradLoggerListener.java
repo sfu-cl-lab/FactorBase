@@ -47,8 +47,5 @@ public interface TetradLoggerListener {
     public void configurationDeactived(TetradLoggerEvent evt);
 
 
-
-    
-
 }
 

@@ -45,39 +45,23 @@ public class TestLargeSemSimulator extends TestCase {
         super(name);
     }
 
+    /**
+     * This method uses reflection to collect up all of the test methods from
+     * this class and return them to the test runner.
+     */
+    public static Test suite() {
+
+        // Edit the name of the class in the parens to match the name
+        // of this class.
+        return new TestSuite(TestLargeSemSimulator.class);
+    }
+
     public void test1() {
         Dag graph = constructGraph1();
         LargeSemSimulator simulator = new LargeSemSimulator(graph);
         DataSet dataset = simulator.simulateDataAcyclic(10);
 
         System.out.println(dataset);
-    }
-
-    private Dag constructGraph1() {
-        Dag graph = new Dag();
-
-        Node x1 = new GraphNode("X1");
-        Node x2 = new GraphNode("X2");
-        Node x3 = new GraphNode("X3");
-        Node x4 = new GraphNode("X4");
-        Node x5 = new GraphNode("X5");
-
-        x1.setNodeType(NodeType.LATENT);
-        x2.setNodeType(NodeType.LATENT);
-
-        graph.addNode(x1);
-        graph.addNode(x2);
-        graph.addNode(x3);
-        graph.addNode(x4);
-        graph.addNode(x5);
-
-        graph.addDirectedEdge(x1, x2);
-        graph.addDirectedEdge(x2, x3);
-        graph.addDirectedEdge(x3, x4);
-        graph.addDirectedEdge(x1, x4);
-        graph.addDirectedEdge(x4, x5);
-
-        return graph;
     }
 
 //    private Graph constructGraph2() {
@@ -104,15 +88,31 @@ public class TestLargeSemSimulator extends TestCase {
 //        return graph;
 //    }
 
-    /**
-     * This method uses reflection to collect up all of the test methods from
-     * this class and return them to the test runner.
-     */
-    public static Test suite() {
+    private Dag constructGraph1() {
+        Dag graph = new Dag();
 
-        // Edit the name of the class in the parens to match the name
-        // of this class.
-        return new TestSuite(TestLargeSemSimulator.class);
+        Node x1 = new GraphNode("X1");
+        Node x2 = new GraphNode("X2");
+        Node x3 = new GraphNode("X3");
+        Node x4 = new GraphNode("X4");
+        Node x5 = new GraphNode("X5");
+
+        x1.setNodeType(NodeType.LATENT);
+        x2.setNodeType(NodeType.LATENT);
+
+        graph.addNode(x1);
+        graph.addNode(x2);
+        graph.addNode(x3);
+        graph.addNode(x4);
+        graph.addNode(x5);
+
+        graph.addDirectedEdge(x1, x2);
+        graph.addDirectedEdge(x2, x3);
+        graph.addDirectedEdge(x3, x4);
+        graph.addDirectedEdge(x1, x4);
+        graph.addDirectedEdge(x4, x5);
+
+        return graph;
     }
 }
 

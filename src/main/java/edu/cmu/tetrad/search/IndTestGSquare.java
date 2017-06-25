@@ -45,46 +45,39 @@ import java.util.List;
 public final class IndTestGSquare implements IndependenceTest {
 
     /**
+     * The standard number formatter for Tetrad.
+     */
+    private static NumberFormat nf = NumberFormatUtil.getInstance().getNumberFormat();
+    /**
      * The G Square tester.
      */
     private GSquareTest gSquareTest;
-
     /**
      * The variables in the discrete data sets or which conditional independence judgements are desired.
      */
-    private List<Node> variables;
-
+    private List <Node> variables;
     /**
      * The dataset of discrete variables.
      */
     private DataSet dataSet;
-
     /**
      * The significance level for the test.
      */
     private double alpha;
-
     /**
      * The G Square value associted with a particular call of isIndependent. Set in that method and not in the
      * constructor.
      */
     private double gSquare;
-
     /**
      * The p value associated with the most recent call of isIndependent.
      */
     private double pValue;
-
     /**
      * The lower bound of percentages of observation of some category in the data, given some particular combination of
      * values of conditioning variables, that counts as 'determining."
      */
     private double determinationP = 0.99;
-
-    /**
-     * The standard number formatter for Tetrad.
-     */
-    private static NumberFormat nf = NumberFormatUtil.getInstance().getNumberFormat();
 
     /**
      * Constructs a new independence checker to check conditional independence facts for discrete data using a g square
@@ -109,7 +102,7 @@ public final class IndTestGSquare implements IndependenceTest {
         this.dataSet = dataSet;
         this.alpha = alpha;
 
-        this.variables = new ArrayList<Node>(dataSet.getVariables());
+        this.variables = new ArrayList <Node>(dataSet.getVariables());
 
         int[] numVals = new int[this.variables.size()];
 
@@ -125,7 +118,7 @@ public final class IndTestGSquare implements IndependenceTest {
      * Creates a new IndTestGSquare for a subset of the variables.
      */
     @Override
-	public IndependenceTest indTestSubset(List vars) {
+    public IndependenceTest indTestSubset(List vars) {
         if (vars.isEmpty()) {
             throw new IllegalArgumentException("Subset may not be empty.");
         }
@@ -158,7 +151,7 @@ public final class IndTestGSquare implements IndependenceTest {
      * Returns the p value associated with the most recent call of isIndependent.
      */
     @Override
-	public double getPValue() {
+    public double getPValue() {
         return pValue;
     }
 
@@ -171,7 +164,7 @@ public final class IndTestGSquare implements IndependenceTest {
      * @return true iff x _||_ y | z.
      */
     @Override
-	public boolean isIndependent(Node x, Node y, List<Node> z) {
+    public boolean isIndependent(Node x, Node y, List <Node> z) {
         if (x == null) {
             throw new NullPointerException();
         }
@@ -237,20 +230,30 @@ public final class IndTestGSquare implements IndependenceTest {
     }
 
     @Override
-	public boolean isIndependent(Node x, Node y, Node... z) {
-        List<Node> zList = Arrays.asList(z);
+    public boolean isIndependent(Node x, Node y, Node... z) {
+        List <Node> zList = Arrays.asList(z);
         return isIndependent(x, y, zList);
     }
 
     @Override
-	public boolean isDependent(Node x, Node y, List<Node> z) {
+    public boolean isDependent(Node x, Node y, List <Node> z) {
         return !isIndependent(x, y, z);
     }
 
     @Override
-	public boolean isDependent(Node x, Node y, Node... z) {
-        List<Node> zList = Arrays.asList(z);
+    public boolean isDependent(Node x, Node y, Node... z) {
+        List <Node> zList = Arrays.asList(z);
         return isDependent(x, y, zList);
+    }
+
+    /**
+     * Gets the current significance level.
+     *
+     * @return this number.
+     */
+    @Override
+    public double getAlpha() {
+        return this.gSquareTest.getAlpha();
     }
 
     /**
@@ -260,18 +263,8 @@ public final class IndTestGSquare implements IndependenceTest {
      * @param alpha the new significance level.
      */
     @Override
-	public void setAlpha(double alpha) {
+    public void setAlpha(double alpha) {
         this.gSquareTest.setAlpha(alpha);
-    }
-
-    /**
-     * Gets the current significance level.
-     *
-     * @return this number.
-     */
-    @Override
-	public double getAlpha() {
-        return this.gSquareTest.getAlpha();
     }
 
     /**
@@ -279,7 +272,7 @@ public final class IndTestGSquare implements IndependenceTest {
      * relations-- that is, all the variables in the given graph or the given data set.
      */
     @Override
-	public List<Node> getVariables() {
+    public List <Node> getVariables() {
         return Collections.unmodifiableList(variables);
     }
 
@@ -287,9 +280,9 @@ public final class IndTestGSquare implements IndependenceTest {
      * Returns the list of variable varNames.
      */
     @Override
-	public List<String> getVariableNames() {
-        List<Node> variables = getVariables();
-        List<String> variableNames = new ArrayList<String>();
+    public List <String> getVariableNames() {
+        List <Node> variables = getVariables();
+        List <String> variableNames = new ArrayList <String>();
         for (Node variable1 : variables) {
             variableNames.add(variable1.getName());
         }
@@ -297,7 +290,7 @@ public final class IndTestGSquare implements IndependenceTest {
     }
 
     @Override
-	public Node getVariable(String name) {
+    public Node getVariable(String name) {
         for (int i = 0; i < getVariables().size(); i++) {
             Node variable = getVariables().get(i);
             if (variable.getName().equals(name)) {
@@ -309,7 +302,7 @@ public final class IndTestGSquare implements IndependenceTest {
     }
 
     @Override
-	public String toString() {
+    public String toString() {
         return "G Square, alpha = " + nf.format(getAlpha());
     }
 
@@ -322,7 +315,7 @@ public final class IndTestGSquare implements IndependenceTest {
      * @return true if it is estimated that z determines x or z determines y.
      */
     @Override
-	public boolean determines(List<Node> z, Node x1) {
+    public boolean determines(List <Node> z, Node x1) {
         if (z == null) {
             throw new NullPointerException();
         }
@@ -385,7 +378,7 @@ public final class IndTestGSquare implements IndependenceTest {
     }
 
     @Override
-	public DataSet getData() {
+    public DataSet getData() {
         return dataSet;
     }
 }

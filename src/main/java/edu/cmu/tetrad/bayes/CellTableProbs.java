@@ -36,18 +36,16 @@ import java.util.List;
 public final class CellTableProbs implements DiscreteProbs {
 
     /**
-     * The data set that this is a cell count table for.
-     */
-    private DataSet dataSet;
-
-    /**
      * An array whose length is the number of dimensions of the cell and whose
      * contents, for each value dims[i], are the numbers of values for each
      * i'th dimension. Each of these dimensions must be an integer greater than
      * zero.
      */
     private final int[] dims;
-
+    /**
+     * The data set that this is a cell count table for.
+     */
+    private DataSet dataSet;
     /**
      * A single-dimension array containing all of the cells of the table. Must
      * be at least long enough to contain data for each cell allowed for by the
@@ -125,12 +123,29 @@ public final class CellTableProbs implements DiscreteProbs {
 
     //===========================PUBLIC METHODS=========================//
 
+    private static boolean hasNextValue(Proposition proposition, int variable,
+                                        int curIndex) {
+        return nextValue(proposition, variable, curIndex) != -1;
+    }
+
+    private static int nextValue(Proposition proposition, int variable,
+                                 int curIndex) {
+        for (int i = curIndex + 1;
+             i < proposition.getNumCategories(variable); i++) {
+            if (proposition.isAllowed(variable, i)) {
+                return i;
+            }
+        }
+
+        return -1;
+    }
+
     /**
      * Returns the estimated probability for the given cell. The order of the
      * variable values is the order of the variables in getVariable().
      */
     @Override
-	public double getCellProb(int[] variableValues) {
+    public double getCellProb(int[] variableValues) {
         int cellIndex = getCellIndex(variableValues);
         int cellCount = cells[cellIndex];
         return cellCount / (double) numPoints;
@@ -140,7 +155,7 @@ public final class CellTableProbs implements DiscreteProbs {
      * Returns the estimated probability of the given proposition.
      */
     @Override
-	public double getProb(Proposition assertion) {
+    public double getProb(Proposition assertion) {
 
         // Initialize to 0's.
         int[] variableValues = new int[assertion.getNumVariables()];
@@ -162,8 +177,7 @@ public final class CellTableProbs implements DiscreteProbs {
                     for (int j = i + 1; j < assertion.getNumVariables(); j++) {
                         if (hasNextValue(assertion, j, -1)) {
                             variableValues[j] = nextValue(assertion, j, -1);
-                        }
-                        else {
+                        } else {
                             break loop;
                         }
                     }
@@ -185,16 +199,16 @@ public final class CellTableProbs implements DiscreteProbs {
      * conditional on the given condition.
      */
     @Override
-	public double getConditionalProb(Proposition assertion,
-            Proposition condition) {
+    public double getConditionalProb(Proposition assertion,
+                                     Proposition condition) {
         if (assertion.getVariableSource() != condition.getVariableSource()) {
             throw new IllegalArgumentException(
                     "Assertion and condition must be " +
                             "for the same Bayes IM.");
         }
 
-        List<Node> assertionVars = assertion.getVariableSource().getVariables();
-        List<Node> dataVars = dataSet.getVariables();
+        List <Node> assertionVars = assertion.getVariableSource().getVariables();
+        List <Node> dataVars = dataSet.getVariables();
 
         if (!assertionVars.equals(dataVars)) {
             throw new IllegalArgumentException(
@@ -224,8 +238,7 @@ public final class CellTableProbs implements DiscreteProbs {
                     for (int j = i + 1; j < condition.getNumVariables(); j++) {
                         if (hasNextValue(condition, j, -1)) {
                             variableValues[j] = nextValue(condition, j, -1);
-                        }
-                        else {
+                        } else {
                             break loop;
                         }
                     }
@@ -269,9 +282,11 @@ public final class CellTableProbs implements DiscreteProbs {
      * probabilities for.
      */
     @Override
-	public List<Node> getVariables() {
+    public List <Node> getVariables() {
         return null;
     }
+
+    //===========================PRIVATE METHODS===========================//
 
     /**
      * True iff bounds checking is performed on variable values indices.
@@ -287,8 +302,6 @@ public final class CellTableProbs implements DiscreteProbs {
         this.boundsEnforced = boundsEnforced;
     }
 
-    //===========================PRIVATE METHODS===========================//
-
     /**
      * Returns the index in the cells array for the cell at the given
      * coordinates.
@@ -297,7 +310,7 @@ public final class CellTableProbs implements DiscreteProbs {
      *               than the number of possible value for the corresponding
      *               dimension in the table. (Enforced.)
      * @return the row in the table for the given node and combination of parent
-     *         values.
+     * values.
      */
     private int getCellIndex(int[] coords) {
         int cellIndex = 0;
@@ -331,25 +344,8 @@ public final class CellTableProbs implements DiscreteProbs {
         return cellIndex;
     }
 
-    private static boolean hasNextValue(Proposition proposition, int variable,
-            int curIndex) {
-        return nextValue(proposition, variable, curIndex) != -1;
-    }
-
-    private static int nextValue(Proposition proposition, int variable,
-            int curIndex) {
-        for (int i = curIndex + 1;
-                i < proposition.getNumCategories(variable); i++) {
-            if (proposition.isAllowed(variable, i)) {
-                return i;
-            }
-        }
-
-        return -1;
-    }
-
     @Override
-	public boolean isMissingValueCaseFound() {
+    public boolean isMissingValueCaseFound() {
         return missingValueCaseFound;
     }
 }

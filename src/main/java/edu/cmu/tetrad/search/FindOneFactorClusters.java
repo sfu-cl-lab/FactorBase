@@ -26,8 +26,6 @@ import edu.cmu.tetrad.data.ICovarianceMatrix;
 import edu.cmu.tetrad.graph.*;
 import edu.cmu.tetrad.util.ChoiceGenerator;
 
-import java.util.*;
-
 
 /**
  * Implements FindOneFactorCluster by Erich Kummerfeld (adaptation of a two factor
@@ -38,7 +36,7 @@ import java.util.*;
 public class FindOneFactorClusters {
 
     // The list of all variables.
-    private List<Node> variables;
+    private List <Node> variables;
 
     // The tetrad test--using Ricardo's. Used only for Wishart.
     private TetradTest test;
@@ -80,19 +78,19 @@ public class FindOneFactorClusters {
     }
 
     public Graph search() {
-        Set<Set<Integer>> allClusters = getClusters();
+        Set <Set <Integer>> allClusters = getClusters();
         return convertToGraph(allClusters);
     }
 
     public Graph search2() {
-        Set<Set<Integer>> allClusters = getClusters();
+        Set <Set <Integer>> allClusters = getClusters();
         return convertToGraph(allClusters);
     }
 
     //========================================PRIVATE METHODS====================================//
 
     // This is the main algorithm.
-    private Set<Set<Integer>> getClusters() {
+    private Set <Set <Integer>> getClusters() {
 
         System.out.println("Running PC adjacency search...");
         Graph graph = new EdgeListGraph(variables);
@@ -104,23 +102,23 @@ public class FindOneFactorClusters {
 
         System.out.println(graph);
 
-        List<Integer> _variables = new ArrayList<Integer>();
+        List <Integer> _variables = new ArrayList <Integer>();
         for (int i = 0; i < variables.size(); i++) _variables.add(i);
 
-        Set<Set<Integer>> pureClusters = findPureClusters(_variables, graph);
-        Set<Set<Integer>> mixedClusters = findMixedClusters(_variables, unionPure(pureClusters), graph);
-        Set<Set<Integer>> allClusters = new HashSet<Set<Integer>>(pureClusters);
+        Set <Set <Integer>> pureClusters = findPureClusters(_variables, graph);
+        Set <Set <Integer>> mixedClusters = findMixedClusters(_variables, unionPure(pureClusters), graph);
+        Set <Set <Integer>> allClusters = new HashSet <Set <Integer>>(pureClusters);
         allClusters.addAll(mixedClusters);
         return allClusters;
 
     }
 
     // Finds clusters of size 4 or higher.
-    private Set<Set<Integer>> findPureClusters(List<Integer> _variables, Graph graph) {
+    private Set <Set <Integer>> findPureClusters(List <Integer> _variables, Graph graph) {
         System.out.println("Original variables = " + variables);
 
-        Set<Set<Integer>> clusters = new HashSet<Set<Integer>>();
-        List<Integer> allVariables = new ArrayList<Integer>();
+        Set <Set <Integer>> clusters = new HashSet <Set <Integer>>();
+        List <Integer> allVariables = new ArrayList <Integer>();
         for (int i = 0; i < this.variables.size(); i++) allVariables.add(i);
 
         VARIABLES:
@@ -130,7 +128,7 @@ public class FindOneFactorClusters {
             for (int x : _variables) {
                 Node nodeX = variables.get(x);
 
-                List<Node> adjX = graph.getAdjacentNodes(nodeX);
+                List <Node> adjX = graph.getAdjacentNodes(nodeX);
 
                 if (adjX.size() < 3) {
                     continue;
@@ -148,7 +146,7 @@ public class FindOneFactorClusters {
                     int w = variables.indexOf(nodeW);
                     int z = variables.indexOf(nodeZ);
 
-                    Set<Integer> cluster = quartet(x, y, z, w);
+                    Set <Integer> cluster = quartet(x, y, z, w);
 
                     if (!clique(cluster, graph)) {
                         continue;
@@ -162,7 +160,7 @@ public class FindOneFactorClusters {
                         for (int o : _variables) {
                             if (cluster.contains(o)) continue;
                             cluster.add(o);
-                            List<Integer> _cluster = new ArrayList<Integer>(cluster);
+                            List <Integer> _cluster = new ArrayList <Integer>(cluster);
 
                             if (!allVariablesDependent(cluster)) {
                                 cluster.remove(o);
@@ -179,7 +177,7 @@ public class FindOneFactorClusters {
                                 int z2 = _cluster.get(choice2[2]);
                                 int w2 = _cluster.get(choice2[3]);
 
-                                Set<Integer> quartet = quartet(x2, y2, z2, w2);
+                                Set <Integer> quartet = quartet(x2, y2, z2, w2);
 
                                 // Optimizes for large clusters.
                                 if (quartet.contains(o)) {
@@ -213,8 +211,8 @@ public class FindOneFactorClusters {
     }
 
     //  Finds clusters of size 3.
-    private Set<Set<Integer>> findMixedClusters(List<Integer> remaining, Set<Integer> unionPure, Graph graph) {
-        Set<Set<Integer>> threeClusters = new HashSet<Set<Integer>>();
+    private Set <Set <Integer>> findMixedClusters(List <Integer> remaining, Set <Integer> unionPure, Graph graph) {
+        Set <Set <Integer>> threeClusters = new HashSet <Set <Integer>>();
 
         REMAINING:
         while (true) {
@@ -228,7 +226,7 @@ public class FindOneFactorClusters {
                 int z = remaining.get(choice[1]);
                 int w = remaining.get(choice[2]);
 
-                Set<Integer> cluster = new HashSet<Integer>();
+                Set <Integer> cluster = new HashSet <Integer>();
                 cluster.add(y);
                 cluster.add(z);
                 cluster.add(w);
@@ -245,7 +243,7 @@ public class FindOneFactorClusters {
                 boolean allX = true;
 
                 for (int x : unionPure) {
-                    Set<Integer> _cluster = new HashSet<Integer>(cluster);
+                    Set <Integer> _cluster = new HashSet <Integer>(cluster);
                     _cluster.add(x);
 
                     if (!quartetVanishes(_cluster)) {
@@ -271,8 +269,8 @@ public class FindOneFactorClusters {
         return threeClusters;
     }
 
-    private boolean clique(Set<Integer> cluster, Graph graph) {
-        List<Integer> _cluster = new ArrayList<Integer>(cluster);
+    private boolean clique(Set <Integer> cluster, Graph graph) {
+        List <Integer> _cluster = new ArrayList <Integer>(cluster);
 
         for (int i = 0; i < cluster.size(); i++) {
             for (int j = i + 1; j < cluster.size(); j++) {
@@ -288,8 +286,8 @@ public class FindOneFactorClusters {
         return true;
     }
 
-    private boolean allVariablesDependent(Set<Integer> cluster) {
-        List<Integer> _cluster = new ArrayList<Integer>(cluster);
+    private boolean allVariablesDependent(Set <Integer> cluster) {
+        List <Integer> _cluster = new ArrayList <Integer>(cluster);
 
         for (int i = 0; i < _cluster.size(); i++) {
             for (int j = i + 1; j < _cluster.size(); j++) {
@@ -308,8 +306,8 @@ public class FindOneFactorClusters {
         return true;
     }
 
-    private List<Node> variablesForIndices(Set<Integer> cluster) {
-        List<Node> _cluster = new ArrayList<Node>();
+    private List <Node> variablesForIndices(Set <Integer> cluster) {
+        List <Node> _cluster = new ArrayList <Node>();
 
         for (int c : cluster) {
             _cluster.add(variables.get(c));
@@ -321,13 +319,13 @@ public class FindOneFactorClusters {
     }
 
 
-    private boolean pure(Set<Integer> quartet, List<Integer> variables) {
+    private boolean pure(Set <Integer> quartet, List <Integer> variables) {
         if (quartetVanishes(quartet)) {
             for (int o : variables) {
                 if (quartet.contains(o)) continue;
 
                 for (int p : quartet) {
-                    Set<Integer> _quartet = new HashSet<Integer>(quartet);
+                    Set <Integer> _quartet = new HashSet <Integer>(quartet);
                     _quartet.remove(p);
                     _quartet.add(o);
 
@@ -343,8 +341,8 @@ public class FindOneFactorClusters {
         return false;
     }
 
-    private Set<Integer> quartet(int x, int y, int z, int w) {
-        Set<Integer> set = new HashSet<Integer>();
+    private Set <Integer> quartet(int x, int y, int z, int w) {
+        Set <Integer> set = new HashSet <Integer>();
         set.add(x);
         set.add(y);
         set.add(z);
@@ -356,10 +354,10 @@ public class FindOneFactorClusters {
         return set;
     }
 
-    private boolean quartetVanishes(Set<Integer> quartet) {
+    private boolean quartetVanishes(Set <Integer> quartet) {
         if (quartet.size() != 4) throw new IllegalArgumentException("Expecting a quartet, size = " + quartet.size());
 
-        Iterator<Integer> iter = quartet.iterator();
+        Iterator <Integer> iter = quartet.iterator();
         int x = iter.next();
         int y = iter.next();
         int z = iter.next();
@@ -379,10 +377,10 @@ public class FindOneFactorClusters {
         }
     }
 
-    private Graph convertSearchGraphNodes(Set<Set<Node>> clusters) {
+    private Graph convertSearchGraphNodes(Set <Set <Node>> clusters) {
         Graph graph = new EdgeListGraph(variables);
 
-        List<Node> latents = new ArrayList<Node>();
+        List <Node> latents = new ArrayList <Node>();
         for (int i = 0; i < clusters.size(); i++) {
             Node latent = new GraphNode(MimBuild.LATENT_PREFIX + (i + 1));
             latent.setNodeType(NodeType.LATENT);
@@ -390,7 +388,7 @@ public class FindOneFactorClusters {
             graph.addNode(latent);
         }
 
-        List<Set<Node>> _clusters = new ArrayList<Set<Node>>(clusters);
+        List <Set <Node>> _clusters = new ArrayList <Set <Node>>(clusters);
 
         for (int i = 0; i < latents.size(); i++) {
             for (Node node : _clusters.get(i)) {
@@ -402,11 +400,11 @@ public class FindOneFactorClusters {
         return graph;
     }
 
-    private Graph convertToGraph(Set<Set<Integer>> allClusters) {
-        Set<Set<Node>> _clustering = new HashSet<Set<Node>>();
+    private Graph convertToGraph(Set <Set <Integer>> allClusters) {
+        Set <Set <Node>> _clustering = new HashSet <Set <Node>>();
 
-        for (Set<Integer> cluster : allClusters) {
-            Set<Node> nodes = new HashSet<Node>();
+        for (Set <Integer> cluster : allClusters) {
+            Set <Node> nodes = new HashSet <Node>();
 
             for (int i : cluster) {
                 nodes.add(variables.get(i));
@@ -418,10 +416,10 @@ public class FindOneFactorClusters {
         return convertSearchGraphNodes(_clustering);
     }
 
-    private Set<Integer> unionPure(Set<Set<Integer>> pureClusters) {
-        Set<Integer> unionPure = new HashSet<Integer>();
+    private Set <Integer> unionPure(Set <Set <Integer>> pureClusters) {
+        Set <Integer> unionPure = new HashSet <Integer>();
 
-        for (Set<Integer> cluster : pureClusters) {
+        for (Set <Integer> cluster : pureClusters) {
             unionPure.addAll(cluster);
         }
 

@@ -34,22 +34,23 @@ import edu.cmu.tetrad.graph.Node;
 public class CodedFunction implements ConnectionFunction {
     private Node[] inputs;
 
-    public CodedFunction(Node...inputs) {
+    public CodedFunction(Node... inputs) {
         this.inputs = inputs;
     }
 
     @Override
-	public Node[] getInputNodes() {
+    public Node[] getInputNodes() {
         return inputs;
     }
 
     /**
      * Returns the function value. The order of the input values must be the
      * same as the order of the input nodes.
+     *
      * @return Double.NaN, if not overridden.
      */
     @Override
-	public double valueAt(double...inputValues) {
+    public double valueAt(double... inputValues) {
         if (inputValues == null) {
             throw new NullPointerException();
         }

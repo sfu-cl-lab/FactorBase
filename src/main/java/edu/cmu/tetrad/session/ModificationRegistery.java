@@ -21,7 +21,6 @@
 
 package edu.cmu.tetrad.session;
 
-import javax.swing.*;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.util.HashMap;
@@ -37,15 +36,15 @@ import java.util.Set;
  * @author Joseph Ramsey
  */
 public final class ModificationRegistery {
-    private static final Set<Object> EDITED_MODELS = new HashSet<Object>();
-    private static final Map<JComponent,SessionNode> EDITORS_TO_SESSION_NODES = new HashMap<JComponent, SessionNode>();
-    private static final Map<JComponent,PropertyChangeListener> EDITORS_TO_LISTENERS = new HashMap<JComponent, PropertyChangeListener>();
+    private static final Set <Object> EDITED_MODELS = new HashSet <Object>();
+    private static final Map <JComponent, SessionNode> EDITORS_TO_SESSION_NODES = new HashMap <JComponent, SessionNode>();
+    private static final Map <JComponent, PropertyChangeListener> EDITORS_TO_LISTENERS = new HashMap <JComponent, PropertyChangeListener>();
 
     /**
      * Registers an editor which could modify model.
      */
     public static void registerEditor(SessionNode sessionNode,
-            JComponent editor) {
+                                      JComponent editor) {
         if (editor == null) {
             throw new NullPointerException();
         }
@@ -62,7 +61,7 @@ public final class ModificationRegistery {
 
         PropertyChangeListener listener = new PropertyChangeListener() {
             @Override
-			public void propertyChange(PropertyChangeEvent evt) {
+            public void propertyChange(PropertyChangeEvent evt) {
                 if ("modelChanged".equals(evt.getPropertyName())) {
                     JComponent editor = (JComponent) evt.getSource();
                     Object sessionNode = EDITORS_TO_SESSION_NODES.get(editor);

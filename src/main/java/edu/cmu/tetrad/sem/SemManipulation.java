@@ -148,7 +148,7 @@ public final class SemManipulation implements TetradSerializable {
     }
 
     @Override
-	public String toString() {
+    public String toString() {
         StringBuilder buf = new StringBuilder();
 
         buf.append("\nManipulation:");
@@ -163,7 +163,7 @@ public final class SemManipulation implements TetradSerializable {
     }
 
     @Override
-	public boolean equals(Object o) {
+    public boolean equals(Object o) {
         if (o == null) {
             return false;
         }
@@ -184,7 +184,7 @@ public final class SemManipulation implements TetradSerializable {
     }
 
     @Override
-	public int hashCode() {
+    public int hashCode() {
         int hashCode = 37;
         hashCode = 19 * hashCode + semIm.hashCode();
         hashCode = 19 * hashCode + manipulated.hashCode();

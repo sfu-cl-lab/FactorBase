@@ -30,6 +30,10 @@ public class TestCombinationGenerator extends TestCase {
         super(name);
     }
 
+    public static Test suite() {
+        return new TestSuite(TestCombinationGenerator.class);
+    }
+
     public void test1() {
         CombinationGenerator.testPrint(new int[]{5, 3});
     }
@@ -40,10 +44,6 @@ public class TestCombinationGenerator extends TestCase {
 
     public void test3() {
         CombinationGenerator.testPrint(new int[]{2, 3, 4});
-    }
-
-    public static Test suite() {
-        return new TestSuite(TestCombinationGenerator.class);
     }
 }
 

@@ -95,7 +95,7 @@ public class AndersonDarlingTest {
      * Returns the A^2* statistic, which is the A^2 statistic adjusted
      * heuristically for sample size.
      */
-    public double getASquaredStar() {                      
+    public double getASquaredStar() {
         return aSquaredStar;
     }
 
@@ -159,7 +159,7 @@ public class AndersonDarlingTest {
             p = 1 - Math.exp(-13.436 + 101.14 * aa - 223.73 * aa * aa);
         } else if (aa < 0.34) {
             p = 1 - Math.exp(-8.318 + 42.796 * aa - 59.938 * aa * aa);
-        } else if (aa < 0.6) {                                  
+        } else if (aa < 0.6) {
             p = Math.exp(0.9177 - 4.279 * aa - 1.38 * aa * aa);
         } else {
             p = Math.exp(1.2937 - 5.709 * aa + 0.0186 * aa * aa);
@@ -177,7 +177,7 @@ public class AndersonDarlingTest {
     }
 
     private double[] leaveOutNaN(double[] data) {
-        List<Double> _leaveOutMissing = new ArrayList<Double>();
+        List <Double> _leaveOutMissing = new ArrayList <Double>();
 
         for (int i = 0; i < data.length; i++) {
             if (!Double.isNaN(data[i])) {

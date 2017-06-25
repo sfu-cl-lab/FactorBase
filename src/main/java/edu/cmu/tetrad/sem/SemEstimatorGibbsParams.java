@@ -49,7 +49,7 @@ public final class SemEstimatorGibbsParams implements TetradSerializable {
      *
      */
     public SemEstimatorGibbsParams(SemIm startIm, boolean flatPrior,
-            double stretch, int numIterations) {
+                                   double stretch, int numIterations) {
 
         // note that seed is never used... just as well to get rid of it?
 
@@ -102,14 +102,13 @@ public final class SemEstimatorGibbsParams implements TetradSerializable {
         this.numIterations = numIterations;
     }
 
-    public void setFlatPrior(boolean flatPrior) {
-        this.flatPrior = flatPrior;
-    }
-
     public boolean isFlatPrior() {
         return flatPrior;
     }
 
+    public void setFlatPrior(boolean flatPrior) {
+        this.flatPrior = flatPrior;
+    }
 
     /**
      * Adds semantic checks to the default deserialization method. This method

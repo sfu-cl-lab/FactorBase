@@ -50,12 +50,14 @@ class ParamComparison {
      * Indicates that the first parameter is less than or equal to the second.
      */
     public static final ParamComparison LE = new ParamComparison("LE");
-
+    private static final ParamComparison[] TYPES = {NC, LT, EQ, LE};
+    // Declarations required for serialization.
+    private static int nextOrdinal = 0;
     /**
      * The name of this type.
      */
     private final transient String name;
-
+    private final int ordinal = nextOrdinal++;
     /**
      * Protected constructor for the types; this allows for extension in case
      * anyone wants to add formula types.
@@ -68,14 +70,9 @@ class ParamComparison {
      * Prints out the name of the type.
      */
     @Override
-	public String toString() {
+    public String toString() {
         return name;
     }
-
-    // Declarations required for serialization.
-    private static int nextOrdinal = 0;
-    private final int ordinal = nextOrdinal++;
-    private static final ParamComparison[] TYPES = {NC, LT, EQ, LE};
 
     Object readResolve() throws ObjectStreamException {
         return TYPES[ordinal]; // Canonicalize.

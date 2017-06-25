@@ -22,7 +22,6 @@
 package edu.cmu.tetrad.graph;
 
 import java.beans.PropertyChangeListener;
-import java.util.*;
 
 /**
  * Implements a graph allowing nodes in the current time lag to have parents
@@ -35,9 +34,19 @@ public class LagGraph implements Graph {
     static final long serialVersionUID = 23L;
 
     private Dag graph = new Dag();
-    private List<String> variables = new ArrayList<String>();
+    private List <String> variables = new ArrayList <String>();
     private int numLags = 0;
-    private Map<String, List<Node>> laggedVariables = new HashMap<String, List<Node>>();
+    private Map <String, List <Node>> laggedVariables = new HashMap <String, List <Node>>();
+
+    /**
+     * Generates a simple exemplar of this class to test serialization.
+     *
+     * @see edu.cmu.TestSerialization
+     * @see edu.cmu.tetradapp.util.TetradSerializableUtils
+     */
+    public static LagGraph serializableInstance() {
+        return new LagGraph();
+    }
 
     // New methods.
     public boolean addVariable(String variable) {
@@ -52,10 +61,10 @@ public class LagGraph implements Graph {
         }
 
         variables.add(variable);
-        laggedVariables.put(variable, new ArrayList<Node>());
+        laggedVariables.put(variable, new ArrayList <Node>());
 
         for (String node : variables) {
-            List<Node> _lags = laggedVariables.get(node);
+            List <Node> _lags = laggedVariables.get(node);
             GraphNode _newNode = new GraphNode(node + "." + _lags.size());
             _lags.add(_newNode);
             _newNode.setCenter(5, 5);
@@ -63,16 +72,6 @@ public class LagGraph implements Graph {
         }
 
         return true;
-    }
-
-    /**
-     * Generates a simple exemplar of this class to test serialization.
-     *
-     * @see edu.cmu.TestSerialization
-     * @see edu.cmu.tetradapp.util.TetradSerializableUtils
-     */
-    public static LagGraph serializableInstance() {
-        return new LagGraph();
     }
 
     public boolean removeVariable(Node node) {
@@ -95,477 +94,476 @@ public class LagGraph implements Graph {
     }
 
 
-
     // Modified methods from graph.
     @Override
-	public boolean addDirectedEdge(Node node1, Node node2) {
+    public boolean addDirectedEdge(Node node1, Node node2) {
         return getGraph().addDirectedEdge(node1, node2);
     }
 
     @Override
-	public boolean addNode(Node node) {
+    public boolean addNode(Node node) {
         throw new UnsupportedOperationException();
     }
 
     // Wrapped methods from graph.
 
     @Override
-	public boolean addBidirectedEdge(Node node1, Node node2) {
+    public boolean addBidirectedEdge(Node node1, Node node2) {
         throw new UnsupportedOperationException();
     }
 
     @Override
-	public boolean addUndirectedEdge(Node node1, Node node2) {
+    public boolean addUndirectedEdge(Node node1, Node node2) {
         throw new UnsupportedOperationException();
     }
 
     @Override
-	public boolean addNondirectedEdge(Node node1, Node node2) {
+    public boolean addNondirectedEdge(Node node1, Node node2) {
         throw new UnsupportedOperationException();
     }
 
     @Override
-	public boolean addPartiallyOrientedEdge(Node node1, Node node2) {
+    public boolean addPartiallyOrientedEdge(Node node1, Node node2) {
         throw new UnsupportedOperationException();
     }
 
     @Override
-	public boolean addEdge(Edge edge) {
+    public boolean addEdge(Edge edge) {
         throw new UnsupportedOperationException();
     }
 
     @Override
-	public boolean addGraphConstraint(GraphConstraint gc) {
+    public boolean addGraphConstraint(GraphConstraint gc) {
         throw new UnsupportedOperationException();
     }
 
     @Override
-	public void addPropertyChangeListener(PropertyChangeListener e) {
+    public void addPropertyChangeListener(PropertyChangeListener e) {
         getGraph().addPropertyChangeListener(e);
     }
 
     @Override
-	public void clear() {
+    public void clear() {
         getGraph().clear();
     }
 
     @Override
-	public boolean containsEdge(Edge edge) {
+    public boolean containsEdge(Edge edge) {
         return getGraph().containsEdge(edge);
     }
 
     @Override
-	public boolean containsNode(Node node) {
+    public boolean containsNode(Node node) {
         return getGraph().containsNode(node);
     }
 
     @Override
-	public boolean existsDirectedCycle() {
+    public boolean existsDirectedCycle() {
         return getGraph().existsDirectedCycle();
     }
 
     @Override
-	public boolean existsDirectedPathFromTo(Node node1, Node node2) {
+    public boolean existsDirectedPathFromTo(Node node1, Node node2) {
         return getGraph().existsDirectedPathFromTo(node1, node2);
     }
 
     @Override
-	public boolean existsUndirectedPathFromTo(Node node1, Node node2) {
+    public boolean existsUndirectedPathFromTo(Node node1, Node node2) {
         return getGraph().existsUndirectedPathFromTo(node1, node2);
     }
 
     @Override
-	public boolean existsSemiDirectedPathFromTo(Node node1, Set<Node> nodes) {
+    public boolean existsSemiDirectedPathFromTo(Node node1, Set <Node> nodes) {
         return getGraph().existsSemiDirectedPathFromTo(node1, nodes);
     }
 
     @Override
-	public boolean existsInducingPath(Node node1, Node node2, Set<Node> observedNodes, Set<Node> conditioningNodes) {
+    public boolean existsInducingPath(Node node1, Node node2, Set <Node> observedNodes, Set <Node> conditioningNodes) {
         return existsInducingPath(node1, node2, observedNodes, conditioningNodes);
     }
 
     @Override
-	public boolean existsTrek(Node node1, Node node2) {
+    public boolean existsTrek(Node node1, Node node2) {
         return existsTrek(node1, node2);
     }
 
     @Override
-	public void fullyConnect(Endpoint endpoint) {
+    public void fullyConnect(Endpoint endpoint) {
         throw new UnsupportedOperationException();
     }
 
     @Override
-	public void reorientAllWith(Endpoint endpoint) {
+    public void reorientAllWith(Endpoint endpoint) {
         getGraph().reorientAllWith(endpoint);
     }
 
     @Override
-	public List<Node> getAdjacentNodes(Node node) {
+    public List <Node> getAdjacentNodes(Node node) {
         return getGraph().getAdjacentNodes(node);
     }
 
     @Override
-	public List<Node> getAncestors(List<Node> nodes) {
+    public List <Node> getAncestors(List <Node> nodes) {
         return getGraph().getAncestors(nodes);
     }
 
     @Override
-	public List<Node> getChildren(Node node) {
+    public List <Node> getChildren(Node node) {
         return getGraph().getChildren(node);
     }
 
     @Override
-	public int getConnectivity() {
+    public int getConnectivity() {
         return getGraph().getConnectivity();
     }
 
     @Override
-	public List<Node> getDescendants(List<Node> nodes) {
+    public List <Node> getDescendants(List <Node> nodes) {
         return getGraph().getDescendants(nodes);
     }
 
     @Override
-	public Edge getEdge(Node node1, Node node2) {
+    public Edge getEdge(Node node1, Node node2) {
         return getGraph().getEdge(node1, node2);
     }
 
     @Override
-	public Edge getDirectedEdge(Node node1, Node node2) {
+    public Edge getDirectedEdge(Node node1, Node node2) {
         return getGraph().getDirectedEdge(node1, node2);
     }
 
     @Override
-	public List<Edge> getEdges(Node node) {
+    public List <Edge> getEdges(Node node) {
         return getGraph().getEdges(node);
     }
 
     @Override
-	public List<Edge> getEdges(Node node1, Node node2) {
+    public List <Edge> getEdges(Node node1, Node node2) {
         return getGraph().getEdges(node1, node2);
     }
 
     @Override
-	public List<Edge> getEdges() {
+    public List <Edge> getEdges() {
         return getGraph().getEdges();
     }
 
     @Override
-	public Endpoint getEndpoint(Node node1, Node node2) {
+    public Endpoint getEndpoint(Node node1, Node node2) {
         return getGraph().getEndpoint(node1, node2);
     }
 
     @Override
-	public Endpoint[][] getEndpointMatrix() {
+    public Endpoint[][] getEndpointMatrix() {
         return getGraph().getEndpointMatrix();
     }
 
     @Override
-	public List<GraphConstraint> getGraphConstraints() {
+    public List <GraphConstraint> getGraphConstraints() {
         return getGraph().getGraphConstraints();
     }
 
     @Override
-	public int getIndegree(Node node) {
+    public int getIndegree(Node node) {
         return getGraph().getIndegree(node);
     }
 
     @Override
-	public Node getNode(String name) {
+    public Node getNode(String name) {
         return getGraph().getNode(name);
     }
 
     @Override
-	public List<Node> getNodes() {
+    public List <Node> getNodes() {
         return getGraph().getNodes();
     }
 
     @Override
-	public List<String> getNodeNames() {
+    public List <String> getNodeNames() {
         return getGraph().getNodeNames();
     }
 
     @Override
-	public int getNumEdges() {
+    public int getNumEdges() {
         return getGraph().getNumEdges();
     }
 
     @Override
-	public int getNumEdges(Node node) {
+    public int getNumEdges(Node node) {
         return getGraph().getNumEdges(node);
     }
 
     @Override
-	public int getNumNodes() {
+    public int getNumNodes() {
         return getGraph().getNumNodes();
     }
 
     @Override
-	public int getOutdegree(Node node) {
+    public int getOutdegree(Node node) {
         return getGraph().getOutdegree(node);
     }
 
     @Override
-	public List<Node> getParents(Node node) {
+    public List <Node> getParents(Node node) {
         return getGraph().getParents(node);
     }
 
     @Override
-	public boolean isAdjacentTo(Node node1, Node node2) {
+    public boolean isAdjacentTo(Node node1, Node node2) {
         return getGraph().isAdjacentTo(node1, node2);
     }
 
     @Override
-	public boolean isAncestorOf(Node node1, Node node2) {
+    public boolean isAncestorOf(Node node1, Node node2) {
         return getGraph().isAncestorOf(node1, node2);
     }
 
     @Override
-	public boolean possibleAncestor(Node node1, Node node2) {
+    public boolean possibleAncestor(Node node1, Node node2) {
         return getGraph().possibleAncestor(node1, node2);
     }
 
     @Override
-	public boolean isChildOf(Node node1, Node node2) {
+    public boolean isChildOf(Node node1, Node node2) {
         return getGraph().isChildOf(node2, node2);
     }
 
     @Override
-	public boolean isParentOf(Node node1, Node node2) {
+    public boolean isParentOf(Node node1, Node node2) {
         return getGraph().isParentOf(node1, node2);
     }
 
     @Override
-	public boolean isProperAncestorOf(Node node1, Node node2) {
+    public boolean isProperAncestorOf(Node node1, Node node2) {
         return getGraph().isProperAncestorOf(node1, node2);
     }
 
     @Override
-	public boolean isProperDescendentOf(Node node1, Node node2) {
+    public boolean isProperDescendentOf(Node node1, Node node2) {
         return getGraph().isProperDescendentOf(node1, node2);
     }
 
     @Override
-	public boolean isDescendentOf(Node node1, Node node2) {
+    public boolean isDescendentOf(Node node1, Node node2) {
         return getGraph().isDescendentOf(node1, node2);
     }
 
     @Override
-	public boolean defNonDescendent(Node node1, Node node2) {
+    public boolean defNonDescendent(Node node1, Node node2) {
         return getGraph().defNonDescendent(node1, node2);
     }
 
     @Override
-	public boolean isDefNoncollider(Node node1, Node node2, Node node3) {
+    public boolean isDefNoncollider(Node node1, Node node2, Node node3) {
         return getGraph().isDefNoncollider(node1, node2, node3);
     }
 
     @Override
-	public boolean isDefCollider(Node node1, Node node2, Node node3) {
+    public boolean isDefCollider(Node node1, Node node2, Node node3) {
         return getGraph().isDefCollider(node1, node2, node3);
     }
 
     @Override
-	public boolean isDConnectedTo(Node node1, Node node2, List<Node> z) {
+    public boolean isDConnectedTo(Node node1, Node node2, List <Node> z) {
         return getGraph().isDConnectedTo(node1, node2, z);
     }
 
     @Override
-	public boolean isDSeparatedFrom(Node node1, Node node2, List<Node> z) {
+    public boolean isDSeparatedFrom(Node node1, Node node2, List <Node> z) {
         return getGraph().isDSeparatedFrom(node1, node2, z);
     }
 
     @Override
-	public boolean possDConnectedTo(Node node1, Node node2, List<Node> z) {
+    public boolean possDConnectedTo(Node node1, Node node2, List <Node> z) {
         return getGraph().possDConnectedTo(node1, node2, z);
     }
 
     @Override
-	public boolean isDirectedFromTo(Node node1, Node node2) {
+    public boolean isDirectedFromTo(Node node1, Node node2) {
         return getGraph().isDirectedFromTo(node1, node2);
     }
 
     @Override
-	public boolean isUndirectedFromTo(Node node1, Node node2) {
+    public boolean isUndirectedFromTo(Node node1, Node node2) {
         return getGraph().isUndirectedFromTo(node1, node2);
     }
 
     @Override
-	public boolean defVisible(Edge edge) {
+    public boolean defVisible(Edge edge) {
         return getGraph().defVisible(edge);
     }
 
     @Override
-	public boolean isExogenous(Node node) {
+    public boolean isExogenous(Node node) {
         return getGraph().isExogenous(node);
     }
 
     @Override
-	public List<Node> getNodesInTo(Node node, Endpoint n) {
+    public List <Node> getNodesInTo(Node node, Endpoint n) {
         return getGraph().getNodesInTo(node, n);
     }
 
     @Override
-	public List<Node> getNodesOutTo(Node node, Endpoint n) {
+    public List <Node> getNodesOutTo(Node node, Endpoint n) {
         return getGraph().getNodesOutTo(node, n);
     }
 
     @Override
-	public boolean removeEdge(Edge edge) {
+    public boolean removeEdge(Edge edge) {
         return getGraph().removeEdge(edge);
     }
 
     @Override
-	public boolean removeEdge(Node node1, Node node2) {
+    public boolean removeEdge(Node node1, Node node2) {
         return getGraph().removeEdge(node1, node2);
     }
 
     @Override
-	public boolean removeEdges(Node node1, Node node2) {
+    public boolean removeEdges(Node node1, Node node2) {
         return getGraph().removeEdges(node1, node2);
     }
 
     @Override
-	public boolean removeEdges(List<Edge> edges) {
+    public boolean removeEdges(List <Edge> edges) {
         return getGraph().removeEdges(edges);
     }
 
     @Override
-	public boolean removeNode(Node node) {
+    public boolean removeNode(Node node) {
         return getGraph().removeNode(node);
     }
 
     @Override
-	public boolean removeNodes(List<Node> nodes) {
+    public boolean removeNodes(List <Node> nodes) {
         return getGraph().removeNodes(nodes);
     }
 
     @Override
-	public boolean setEndpoint(Node from, Node to, Endpoint endPoint) {
+    public boolean setEndpoint(Node from, Node to, Endpoint endPoint) {
         return getGraph().setEndpoint(from, to, endPoint);
     }
 
     @Override
-	public boolean isGraphConstraintsChecked() {
+    public boolean isGraphConstraintsChecked() {
         return getGraph().isGraphConstraintsChecked();
     }
 
     @Override
-	public void setGraphConstraintsChecked(boolean checked) {
+    public void setGraphConstraintsChecked(boolean checked) {
         getGraph().setGraphConstraintsChecked(checked);
     }
 
     @Override
-	public Graph subgraph(List<Node> nodes) {
+    public Graph subgraph(List <Node> nodes) {
         return getGraph().subgraph(nodes);
     }
 
     @Override
-	public void transferNodesAndEdges(Graph graph) throws IllegalArgumentException {
+    public void transferNodesAndEdges(Graph graph) throws IllegalArgumentException {
         this.getGraph().transferNodesAndEdges(graph);
     }
 
     @Override
-	public Set<Triple> getAmbiguousTriples() {
+    public Set <Triple> getAmbiguousTriples() {
         return getGraph().getAmbiguousTriples();
     }
 
     @Override
-	public Set<Triple> getUnderLines() {
-        return getGraph().getUnderLines();
-    }
-
-    @Override
-	public Set<Triple> getDottedUnderlines() {
-        return getGraph().getDottedUnderlines();
-    }
-
-    @Override
-	public boolean isAmbiguousTriple(Node x, Node y, Node z) {
-        return getGraph().isAmbiguousTriple(x, y, z);
-    }
-
-    @Override
-	public boolean isUnderlineTriple(Node x, Node y, Node z) {
-        return getGraph().isUnderlineTriple(x, y, z);
-    }
-
-    @Override
-	public boolean isDottedUnderlineTriple(Node x, Node y, Node z) {
-        return getGraph().isDottedUnderlineTriple(x, y, z);
-    }
-
-    @Override
-	public void addAmbiguousTriple(Node x, Node y, Node Z) {
-        getGraph().addAmbiguousTriple(x, y, Z);
-    }
-
-    @Override
-	public void addUnderlineTriple(Node x, Node y, Node Z) {
-        getGraph().addUnderlineTriple(x, y, Z);
-    }
-
-    @Override
-	public void addDottedUnderlineTriple(Node x, Node y, Node Z) {
-        getGraph().addDottedUnderlineTriple(x, y, Z);
-    }
-
-    @Override
-	public void removeAmbiguousTriple(Node x, Node y, Node z) {
-        getGraph().removeAmbiguousTriple(x, y, z);
-    }
-
-    @Override
-	public void removeUnderlineTriple(Node x, Node y, Node z) {
-        getGraph().removeUnderlineTriple(x, y, z);
-    }
-
-    @Override
-	public void removeDottedUnderlineTriple(Node x, Node y, Node z) {
-        getGraph().removeDottedUnderlineTriple(x, y, z);
-    }
-
-    @Override
-	public void setAmbiguousTriples(Set<Triple> triples) {
+    public void setAmbiguousTriples(Set <Triple> triples) {
         getGraph().setAmbiguousTriples(triples);
     }
 
     @Override
-	public void setUnderLineTriples(Set<Triple> triples) {
+    public Set <Triple> getUnderLines() {
+        return getGraph().getUnderLines();
+    }
+
+    @Override
+    public Set <Triple> getDottedUnderlines() {
+        return getGraph().getDottedUnderlines();
+    }
+
+    @Override
+    public boolean isAmbiguousTriple(Node x, Node y, Node z) {
+        return getGraph().isAmbiguousTriple(x, y, z);
+    }
+
+    @Override
+    public boolean isUnderlineTriple(Node x, Node y, Node z) {
+        return getGraph().isUnderlineTriple(x, y, z);
+    }
+
+    @Override
+    public boolean isDottedUnderlineTriple(Node x, Node y, Node z) {
+        return getGraph().isDottedUnderlineTriple(x, y, z);
+    }
+
+    @Override
+    public void addAmbiguousTriple(Node x, Node y, Node Z) {
+        getGraph().addAmbiguousTriple(x, y, Z);
+    }
+
+    @Override
+    public void addUnderlineTriple(Node x, Node y, Node Z) {
+        getGraph().addUnderlineTriple(x, y, Z);
+    }
+
+    @Override
+    public void addDottedUnderlineTriple(Node x, Node y, Node Z) {
+        getGraph().addDottedUnderlineTriple(x, y, Z);
+    }
+
+    @Override
+    public void removeAmbiguousTriple(Node x, Node y, Node z) {
+        getGraph().removeAmbiguousTriple(x, y, z);
+    }
+
+    @Override
+    public void removeUnderlineTriple(Node x, Node y, Node z) {
+        getGraph().removeUnderlineTriple(x, y, z);
+    }
+
+    @Override
+    public void removeDottedUnderlineTriple(Node x, Node y, Node z) {
+        getGraph().removeDottedUnderlineTriple(x, y, z);
+    }
+
+    @Override
+    public void setUnderLineTriples(Set <Triple> triples) {
         getGraph().setUnderLineTriples(triples);
     }
 
     @Override
-	public void setDottedUnderLineTriples(Set<Triple> triples) {
+    public void setDottedUnderLineTriples(Set <Triple> triples) {
         getGraph().setDottedUnderLineTriples(triples);
     }
 
     @Override
-	public List<Node> getTierOrdering() {
+    public List <Node> getTierOrdering() {
         return getGraph().getTierOrdering();
     }
 
     @Override
-	public void setHighlighted(Edge edge, boolean highlighted) {
+    public void setHighlighted(Edge edge, boolean highlighted) {
         getGraph().setHighlighted(edge, highlighted);
     }
 
     @Override
-	public boolean isHighlighted(Edge edge) {
+    public boolean isHighlighted(Edge edge) {
         return getGraph().isHighlighted(edge);
     }
 
     @Override
-	public boolean isParameterizable(Node node) {
+    public boolean isParameterizable(Node node) {
         return getGraph().isParameterizable(node);
     }
 
     @Override
-	public boolean isTimeLagModel() {
+    public boolean isTimeLagModel() {
         return false;
     }
 
     @Override
-	public TimeLagGraph getTimeLagGraph() {
+    public TimeLagGraph getTimeLagGraph() {
         return null;
     }
 

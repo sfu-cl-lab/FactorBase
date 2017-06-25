@@ -38,13 +38,13 @@ import java.util.List;
 public final class BootstrapSampler {
 
 
-   // private TetradLogger logger = TetradLogger.getInstance();
+    // private TetradLogger logger = TetradLogger.getInstance();
 
 
     /**
      * Constructs a sample that does not do any logging.
      */
-    public BootstrapSampler(){
+    public BootstrapSampler() {
 
     }
 
@@ -65,13 +65,13 @@ public final class BootstrapSampler {
         if (dataSet.getNumRows() < 1) {
             throw new IllegalArgumentException("Dataset must contain samples.");
         }
-     //   this.logger.log("sampleSize", String.valueOf(newSampleSize));
+        //   this.logger.log("sampleSize", String.valueOf(newSampleSize));
         //Number of samples in input dataset
         int oldSampleSize = dataSet.getNumRows();
         int ncols = dataSet.getNumColumns();
 
         DataSet newDataSet = new ColtDataSet(newSampleSize, dataSet.getVariables());
-        List<Integer> indices = new ArrayList<Integer>();
+        List <Integer> indices = new ArrayList <Integer>();
 
         // Without replacement.
 
@@ -119,7 +119,7 @@ public final class BootstrapSampler {
 //        }
 
 
-    //    this.logger.flush();
+        //    this.logger.flush();
 
         newDataSet.setKnowledge(new Knowledge(dataSet.getKnowledge()));
 

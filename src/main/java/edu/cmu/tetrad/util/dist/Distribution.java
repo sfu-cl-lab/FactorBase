@@ -36,18 +36,21 @@ public interface Distribution extends TetradSerializable {
 
     /**
      * Returns the number of parameters.
+     *
      * @return Ibid.
      */
     int getNumParameters();
 
     /**
      * Returns the name of the distribution.
+     *
      * @return Ibid.
      */
     String getName();
 
     /**
      * Sets the index'th parameter to the given value.
+     *
      * @param index Ibid. Must be >= 0 and < # parameters.
      * @param value Ibid.
      */
@@ -55,6 +58,7 @@ public interface Distribution extends TetradSerializable {
 
     /**
      * Returns the value of the index'th parameter.
+     *
      * @param index Ibid. Muist be <= 0 and < # parameters.
      * @return The Ibid.
      */
@@ -62,6 +66,7 @@ public interface Distribution extends TetradSerializable {
 
     /**
      * The name of the index'th parameter, for display purposes.
+     *
      * @param index Ibid. Must be >= 0 and < # parameters.
      * @return Ibid.
      */
@@ -69,6 +74,7 @@ public interface Distribution extends TetradSerializable {
 
     /**
      * Returns a new random value drawn from the underlying distribution.
+     *
      * @return Ibid.
      */
     double nextRandom();

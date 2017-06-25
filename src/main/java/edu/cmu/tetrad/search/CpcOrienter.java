@@ -74,22 +74,22 @@ public final class CpcOrienter implements Reorienter {
     /**
      * The list of all unshielded triples.
      */
-    private Set<Triple> allTriples;
+    private Set <Triple> allTriples;
 
     /**
      * Set of unshielded colliders from the triple orientation step.
      */
-    private Set<Triple> colliderTriples;
+    private Set <Triple> colliderTriples;
 
     /**
      * Set of unshielded noncolliders from the triple orientation step.
      */
-    private Set<Triple> noncolliderTriples;
+    private Set <Triple> noncolliderTriples;
 
     /**
      * Set of ambiguous unshielded triples.
      */
-    private Set<Triple> ambiguousTriples;
+    private Set <Triple> ambiguousTriples;
 
     //=============================CONSTRUCTORS==========================//
 
@@ -108,6 +108,26 @@ public final class CpcOrienter implements Reorienter {
 
     //==============================PUBLIC METHODS========================//
 
+    private static List <Node> asList(int[] indices, List <Node> nodes) {
+        List <Node> list = new LinkedList <Node>();
+
+        for (int i : indices) {
+            list.add(nodes.get(i));
+        }
+
+        return list;
+    }
+
+    private static boolean isArrowpointAllowed1(Node from, Node to,
+                                                Knowledge knowledge) {
+        if (knowledge == null) {
+            return true;
+        }
+
+        return !knowledge.edgeRequired(to.toString(), from.toString()) &&
+                !knowledge.edgeForbidden(from.toString(), to.toString());
+    }
+
     private IndependenceTest getIndependenceTest() {
         return independenceTest;
     }
@@ -117,7 +137,7 @@ public final class CpcOrienter implements Reorienter {
     }
 
     @Override
-	public void setKnowledge(Knowledge knowledge) {
+    public void setKnowledge(Knowledge knowledge) {
         if (knowledge == null) {
             throw new NullPointerException();
         }
@@ -149,15 +169,15 @@ public final class CpcOrienter implements Reorienter {
         return allTriples.size();
     }
 
-    public Set<Triple> getAmbiguousTriples() {
-        return new HashSet<Triple>(ambiguousTriples);
+    public Set <Triple> getAmbiguousTriples() {
+        return new HashSet <Triple>(ambiguousTriples);
     }
 
-    public Set<Triple> getColliderTriples() {
+    public Set <Triple> getColliderTriples() {
         return colliderTriples;
     }
 
-    public Set<Triple> getNoncolliderTriples() {
+    public Set <Triple> getNoncolliderTriples() {
         return noncolliderTriples;
     }
 
@@ -165,14 +185,14 @@ public final class CpcOrienter implements Reorienter {
      * Runs PC on just the given variable, all of which must be in the domain of the independence test.
      */
     @Override
-	public void orient(Graph graph) {
+    public void orient(Graph graph) {
         TetradLogger.getInstance().log("info", "Starting CPC algorithm.");
         TetradLogger.getInstance().log("info", "Independence test = " + independenceTest + ".");
         long startTime = System.currentTimeMillis();
-        this.allTriples = new HashSet<Triple>();
-        this.ambiguousTriples = new HashSet<Triple>();
-        this.colliderTriples = new HashSet<Triple>();
-        this.noncolliderTriples = new HashSet<Triple>();
+        this.allTriples = new HashSet <Triple>();
+        this.ambiguousTriples = new HashSet <Triple>();
+        this.colliderTriples = new HashSet <Triple>();
+        this.noncolliderTriples = new HashSet <Triple>();
 
         if (getIndependenceTest() == null) {
             throw new NullPointerException();
@@ -188,7 +208,7 @@ public final class CpcOrienter implements Reorienter {
 //        graph.fullyConnect(Endpoint.TAIL);
 
         this.graph = graph;
-        List<Edge> edges = graph.getEdges();
+        List <Edge> edges = graph.getEdges();
 
         for (Edge edge : edges) {
             graph.removeEdge(edge);
@@ -232,6 +252,8 @@ public final class CpcOrienter implements Reorienter {
 //        return graph;
     }
 
+    //==========================PRIVATE METHODS===========================//
+
     private void logTriples() {
         TetradLogger.getInstance().log("info", "\nCollider triples judged from sepsets:");
 
@@ -252,7 +274,6 @@ public final class CpcOrienter implements Reorienter {
             TetradLogger.getInstance().log("ambiguous", "Ambiguous: " + triple);
         }
     }
-
 
     public final Graph orientationForGraph(Dag trueGraph) {
         Graph graph = new EdgeListGraph(independenceTest.getVariables());
@@ -276,19 +297,17 @@ public final class CpcOrienter implements Reorienter {
         return graph;
     }
 
-    //==========================PRIVATE METHODS===========================//
-
     @SuppressWarnings({"SameParameterValue"})
     private void orientUnshieldedTriples(Knowledge knowledge,
                                          IndependenceTest test, int depth) {
         TetradLogger.getInstance().log("info", "Starting Collider Orientation:");
 
-        colliderTriples = new HashSet<Triple>();
-        noncolliderTriples = new HashSet<Triple>();
-        ambiguousTriples = new HashSet<Triple>();
+        colliderTriples = new HashSet <Triple>();
+        noncolliderTriples = new HashSet <Triple>();
+        ambiguousTriples = new HashSet <Triple>();
 
         for (Node y : graph.getNodes()) {
-            List<Node> adjacentNodes = graph.getAdjacentNodes(y);
+            List <Node> adjacentNodes = graph.getAdjacentNodes(y);
 
             if (adjacentNodes.size() < 2) {
                 continue;
@@ -343,10 +362,10 @@ public final class CpcOrienter implements Reorienter {
         boolean existsSepsetContainingY = false;
         boolean existsSepsetNotContainingY = false;
 
-        Set<Node> __nodes = new HashSet<Node>(this.graph.getAdjacentNodes(x));
+        Set <Node> __nodes = new HashSet <Node>(this.graph.getAdjacentNodes(x));
         __nodes.remove(z);
 
-        List<Node> _nodes = new LinkedList<Node>(__nodes);
+        List <Node> _nodes = new LinkedList <Node>(__nodes);
         TetradLogger.getInstance().log("adjacencies",
                 "Adjacents for " + x + "--" + y + "--" + z + " = " + _nodes);
 
@@ -361,7 +380,7 @@ public final class CpcOrienter implements Reorienter {
             int[] choice;
 
             while ((choice = cg.next()) != null) {
-                List<Node> condSet = CpcOrienter.asList(choice, _nodes);
+                List <Node> condSet = CpcOrienter.asList(choice, _nodes);
 
                 if (test.isIndependent(x, z, condSet)) {
                     if (condSet.contains(y)) {
@@ -373,10 +392,10 @@ public final class CpcOrienter implements Reorienter {
             }
         }
 
-        __nodes = new HashSet<Node>(this.graph.getAdjacentNodes(z));
+        __nodes = new HashSet <Node>(this.graph.getAdjacentNodes(z));
         __nodes.remove(x);
 
-        _nodes = new LinkedList<Node>(__nodes);
+        _nodes = new LinkedList <Node>(__nodes);
         TetradLogger.getInstance().log("adjacencies",
                 "Adjacents for " + x + "--" + y + "--" + z + " = " + _nodes);
 
@@ -391,7 +410,7 @@ public final class CpcOrienter implements Reorienter {
             int[] choice;
 
             while ((choice = cg.next()) != null) {
-                List<Node> condSet = CpcOrienter.asList(choice, _nodes);
+                List <Node> condSet = CpcOrienter.asList(choice, _nodes);
 
                 if (test.isIndependent(x, z, condSet)) {
                     if (condSet.contains(y)) {
@@ -428,26 +447,6 @@ public final class CpcOrienter implements Reorienter {
         } else {
             return CpcOrienter.TripleType.COLLIDER;
         }
-    }
-
-    private static List<Node> asList(int[] indices, List<Node> nodes) {
-        List<Node> list = new LinkedList<Node>();
-
-        for (int i : indices) {
-            list.add(nodes.get(i));
-        }
-
-        return list;
-    }
-
-    private static boolean isArrowpointAllowed1(Node from, Node to,
-                                                Knowledge knowledge) {
-        if (knowledge == null) {
-            return true;
-        }
-
-        return !knowledge.edgeRequired(to.toString(), from.toString()) &&
-                !knowledge.edgeForbidden(from.toString(), to.toString());
     }
 
     //==============================CLASSES==============================//

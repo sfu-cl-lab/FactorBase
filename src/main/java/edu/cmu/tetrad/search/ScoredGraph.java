@@ -53,12 +53,12 @@ public class ScoredGraph implements Comparable, TetradSerializable {
     }
 
     @Override
-	public int hashCode() {
+    public int hashCode() {
         return score.hashCode();
     }
 
     @Override
-	public boolean equals(Object o) {
+    public boolean equals(Object o) {
         ScoredGraph _scoredGraph = (ScoredGraph) o;
 
         if (!score.equals(_scoredGraph.getScore())) {
@@ -73,7 +73,7 @@ public class ScoredGraph implements Comparable, TetradSerializable {
     }
 
     @Override
-	public int compareTo(Object o) {
+    public int compareTo(Object o) {
         Double thisScore = getScore();
         Double otherScore = ((ScoredGraph) o).getScore();
         return thisScore.compareTo(otherScore);

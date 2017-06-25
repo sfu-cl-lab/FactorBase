@@ -32,7 +32,6 @@ import edu.cmu.tetrad.util.TetradLogger;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.text.NumberFormat;
-import java.util.*;
 
 
 /**
@@ -49,76 +48,62 @@ import java.util.*;
 public final class StagedGes implements GraphSearch, GraphScorer {
 
     /**
+     * For formatting printed numbers.
+     */
+    private final NumberFormat nf = NumberFormatUtil.getInstance().getNumberFormat();
+    /**
+     * For linear algebra.
+     */
+    private final Algebra algebra = new Algebra();
+    /**
+     * Caches scores for discrete search.
+     */
+    private final LocalScoreCache localScoreCache = new LocalScoreCache();
+    /**
      * The data set, various variable subsets of which are to be scored.
      */
     private DataSet dataSet;
-
     /**
      * The correlation matrix for the data set.
      */
     private DoubleMatrix2D variances;
-
     /**
      * Sample size, either from the data set or from the variances.
      */
     private int sampleSize;
-
     /**
      * Specification of forbidden and required edges.
      */
     private Knowledge knowledge = new Knowledge();
-
     /**
      * For discrete data scoring, the structure prior.
      */
     private double structurePrior;
-
     /**
      * For discrete data scoring, the sample prior.
      */
     private double samplePrior;
-
     /**
      * Map from variables to their column indices in the data set.
      */
-    private HashMap<Node, Integer> hashIndices;
-
+    private HashMap <Node, Integer> hashIndices;
     /**
      * Array of variable names from the data set, in order.
      */
     private String varNames[];
-
     /**
      * List of variables in the data set, in order.
      */
-    private List<Node> variables;
-
+    private List <Node> variables;
     /**
      * True iff the data set is discrete.
      */
     private boolean discrete;
-
     /**
      * The true graph, if known. If this is provided, asterisks will be printed out next to false positive added edges
      * (that is, edges added that aren't adjacencies in the true graph).
      */
     private Graph trueGraph;
-
-    /**
-     * For formatting printed numbers.
-     */
-    private final NumberFormat nf = NumberFormatUtil.getInstance().getNumberFormat();
-
-    /**
-     * For linear algebra.
-     */
-    private final Algebra algebra = new Algebra();
-
-    /**
-     * Caches scores for discrete search.
-     */
-    private final LocalScoreCache localScoreCache = new LocalScoreCache();
-
     /**
      * Elapsed time of the most recent search.
      */
@@ -133,7 +118,7 @@ public final class StagedGes implements GraphSearch, GraphScorer {
     /**
      * Listeners for graph change events.
      */
-    private transient List<PropertyChangeListener> listeners;
+    private transient List <PropertyChangeListener> listeners;
 
     /**
      * Penalty discount--the BIC penalty is multiplied by this (for continuous variables).
@@ -158,7 +143,7 @@ public final class StagedGes implements GraphSearch, GraphScorer {
     /**
      * The top n graphs found by the algorithm, where n is <code>numPatternsToStore</code>.
      */
-    private SortedSet<ScoredGraph> topGraphs = new TreeSet<ScoredGraph>();
+    private SortedSet <ScoredGraph> topGraphs = new TreeSet <ScoredGraph>();
 
     /**
      * The number of top patterns to store.
@@ -187,6 +172,114 @@ public final class StagedGes implements GraphSearch, GraphScorer {
 
     //==========================PUBLIC METHODS==========================//
 
+    /**
+     * Get all nodes that are connected to Y by an undirected edge and not adjacent to X.
+     */
+    private static List <Node> getTNeighbors(Node x, Node y, Graph graph) {
+        List <Node> tNeighbors = new LinkedList <Node>(graph.getAdjacentNodes(y));
+        tNeighbors.removeAll(graph.getAdjacentNodes(x));
+
+        for (int i = tNeighbors.size() - 1; i >= 0; i--) {
+            Node z = tNeighbors.get(i);
+            Edge edge = graph.getEdge(y, z);
+
+            if (!Edges.isUndirectedEdge(edge)) {
+                tNeighbors.remove(z);
+            }
+        }
+
+        return tNeighbors;
+    }
+
+    /**
+     * Get all nodes that are connected to Y by an undirected edge and adjacent to X
+     */
+    private static List <Node> getHNeighbors(Node x, Node y, Graph graph) {
+        List <Node> hNeighbors = new LinkedList <Node>(graph.getAdjacentNodes(y));
+        hNeighbors.retainAll(graph.getAdjacentNodes(x));
+
+        for (int i = hNeighbors.size() - 1; i >= 0; i--) {
+            Node z = hNeighbors.get(i);
+            Edge edge = graph.getEdge(y, z);
+
+            if (!Edges.isUndirectedEdge(edge)) {
+                hNeighbors.remove(z);
+            }
+        }
+
+        return hNeighbors;
+    }
+
+    /**
+     * Test if the candidate deletion is a valid operation (Theorem 17 from Chickering, 2002).
+     */
+    private static boolean validDelete(Node x, Node y, Set <Node> h,
+                                       Graph graph) {
+        List <Node> naYXH = findNaYX(x, y, graph);
+        naYXH.removeAll(h);
+        return isClique(naYXH, graph);
+    }
+
+    /**
+     * Find all nodes that are connected to Y by an undirected edge that are adjacent to X (that is, by undirected or
+     * directed edge) NOTE: very inefficient implementation, since the current library does not allow access to the
+     * adjacency list/matrix of the graph.
+     */
+    private static List <Node> findNaYX(Node x, Node y, Graph graph) {
+        List <Node> naYX = new LinkedList <Node>(graph.getAdjacentNodes(y));
+        naYX.retainAll(graph.getAdjacentNodes(x));
+
+        for (int i = 0; i < naYX.size(); i++) {
+            Node z = naYX.get(i);
+            Edge edge = graph.getEdge(y, z);
+
+            if (!Edges.isUndirectedEdge(edge)) {
+                naYX.remove(z);
+            }
+        }
+
+        return naYX;
+    }
+
+    /**
+     * Returns true iif the given set forms a clique in the given graph.
+     */
+    private static boolean isClique(List <Node> set, Graph graph) {
+        List <Node> setv = new LinkedList <Node>(set);
+        for (int i = 0; i < setv.size() - 1; i++) {
+            for (int j = i + 1; j < setv.size(); j++) {
+                if (!graph.isAdjacentTo(setv.get(i), setv.get(j))) {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
+    private static List <Set <Node>> powerSet(List <Node> nodes) {
+        List <Set <Node>> subsets = new ArrayList <Set <Node>>();
+        int total = (int) Math.pow(2, nodes.size());
+        for (int i = 0; i < total; i++) {
+            Set <Node> newSet = new HashSet <Node>();
+            String selection = Integer.toBinaryString(i);
+            for (int j = selection.length() - 1; j >= 0; j--) {
+                if (selection.charAt(j) == '1') {
+                    newSet.add(nodes.get(selection.length() - j - 1));
+                }
+            }
+            subsets.add(newSet);
+        }
+        return subsets;
+    }
+
+    private static int getRowIndex(int dim[], int[] values) {
+        int rowIndex = 0;
+        for (int i = 0; i < dim.length; i++) {
+            rowIndex *= dim[i];
+            rowIndex += values[i];
+        }
+        return rowIndex;
+    }
 
     public boolean isAggressivelyPreventCycles() {
         return this.aggressivelyPreventCycles;
@@ -203,7 +296,7 @@ public final class StagedGes implements GraphSearch, GraphScorer {
      * @return the resulting Pattern.
      */
     @Override
-	public Graph search() {
+    public Graph search() {
         long startTime = System.currentTimeMillis();
 
         // Check for missing values.
@@ -219,7 +312,7 @@ public final class StagedGes implements GraphSearch, GraphScorer {
         }
 
 
-        Graph graph = new EdgeListGraph(new LinkedList<Node>(getVariables()));
+        Graph graph = new EdgeListGraph(new LinkedList <Node>(getVariables()));
         fireGraphChange(graph);
         buildIndexing(graph);
         addRequiredEdges(graph);
@@ -271,7 +364,7 @@ public final class StagedGes implements GraphSearch, GraphScorer {
 //        return graph;
     }
 
-    public Graph search(List<Node> nodes) {
+    public Graph search(List <Node> nodes) {
         long startTime = System.currentTimeMillis();
         localScoreCache.clear();
 
@@ -317,22 +410,8 @@ public final class StagedGes implements GraphSearch, GraphScorer {
         this.knowledge = knowledge;
     }
 
-    public void setStructurePrior(double structurePrior) {
-        if (discreteScore != null) {
-            discreteScore.setStructurePrior(structurePrior);
-        }
-        this.structurePrior = structurePrior;
-    }
-
-    public void setSamplePrior(double samplePrior) {
-        if (discreteScore != null) {
-            discreteScore.setSamplePrior(samplePrior);
-        }
-        this.samplePrior = samplePrior;
-    }
-
     @Override
-	public long getElapsedTime() {
+    public long getElapsedTime() {
         return elapsedTime;
     }
 
@@ -367,6 +446,8 @@ public final class StagedGes implements GraphSearch, GraphScorer {
         this.maxNumEdges = maxNumEdges;
     }
 
+    //===========================PRIVATE METHODS========================//
+
     public void setTrueGraph(Graph trueGraph) {
         this.trueGraph = trueGraph;
     }
@@ -375,7 +456,7 @@ public final class StagedGes implements GraphSearch, GraphScorer {
         return scoreGraph(dag);
     }
 
-    public SortedSet<ScoredGraph> getTopGraphs() {
+    public SortedSet <ScoredGraph> getTopGraphs() {
         return topGraphs;
     }
 
@@ -391,8 +472,6 @@ public final class StagedGes implements GraphSearch, GraphScorer {
         this.numPatternsToStore = numPatternsToStore;
     }
 
-    //===========================PRIVATE METHODS========================//
-
     private void initialize(double samplePrior, double structurePrior) {
         setStructurePrior(structurePrior);
         setSamplePrior(samplePrior);
@@ -404,7 +483,7 @@ public final class StagedGes implements GraphSearch, GraphScorer {
      * @param graph The graph in the state prior to the forward equivalence search.
      * @param score The score in the state prior to the forward equivalence search
      * @return the score in the state after the forward equivelance search. Note that the graph is changed as a
-     *         side-effect to its state after the forward equivelance search.
+     * side-effect to its state after the forward equivelance search.
      */
     private double fes(Graph graph, double score) {
         TetradLogger.getInstance().log("info", "** FORWARD EQUIVALENCE SEARCH");
@@ -412,11 +491,11 @@ public final class StagedGes implements GraphSearch, GraphScorer {
         TetradLogger.getInstance().log("info", "Initial Score = " + nf.format(bestScore));
 
         Node x, y;
-        Set<Node> t = new HashSet<Node>();
+        Set <Node> t = new HashSet <Node>();
 
         do {
             x = y = null;
-            List<Node> nodes = graph.getNodes();
+            List <Node> nodes = graph.getNodes();
 
             for (int i = 0; i < nodes.size(); i++) {
                 Node _x = nodes.get(i);
@@ -435,10 +514,10 @@ public final class StagedGes implements GraphSearch, GraphScorer {
                         continue;
                     }
 
-                    List<Node> tNeighbors = getTNeighbors(_x, _y, graph);
-                    List<Set<Node>> tSubsets = powerSet(tNeighbors);
+                    List <Node> tNeighbors = getTNeighbors(_x, _y, graph);
+                    List <Set <Node>> tSubsets = powerSet(tNeighbors);
 
-                    for (Set<Node> tSubset : tSubsets) {
+                    for (Set <Node> tSubset : tSubsets) {
 
                         if (!validSetByKnowledge(_x, _y, tSubset, true)) {
                             continue;
@@ -488,6 +567,11 @@ public final class StagedGes implements GraphSearch, GraphScorer {
         return score;
     }
 
+    /*
+    * Do an actual insertion
+    * (Definition 12 from Chickering, 2002).
+    **/
+
     /**
      * Backward equivalence search.
      */
@@ -497,10 +581,10 @@ public final class StagedGes implements GraphSearch, GraphScorer {
         double score = initialScore;
         double bestScore = score;
         Node x, y;
-        Set<Node> t = new HashSet<Node>();
+        Set <Node> t = new HashSet <Node>();
         do {
             x = y = null;
-            List<Edge> graphEdges = graph.getEdges();
+            List <Edge> graphEdges = graph.getEdges();
 //            List<Edge> edges = new ArrayList<Edge>();
 //
 //            for (Edge edge : graphEdges) {
@@ -533,10 +617,10 @@ public final class StagedGes implements GraphSearch, GraphScorer {
                     continue;
                 }
 
-                List<Node> hNeighbors = getHNeighbors(_x, _y, graph);
-                List<Set<Node>> hSubsets = powerSet(hNeighbors);
+                List <Node> hNeighbors = getHNeighbors(_x, _y, graph);
+                List <Set <Node>> hSubsets = powerSet(hNeighbors);
 
-                for (Set<Node> hSubset : hSubsets) {
+                for (Set <Node> hSubset : hSubsets) {
                     if (!validSetByKnowledge(_x, _y, hSubset, false)) {
                         continue;
                     }
@@ -586,47 +670,9 @@ public final class StagedGes implements GraphSearch, GraphScorer {
     }
 
     /**
-     * Get all nodes that are connected to Y by an undirected edge and not adjacent to X.
-     */
-    private static List<Node> getTNeighbors(Node x, Node y, Graph graph) {
-        List<Node> tNeighbors = new LinkedList<Node>(graph.getAdjacentNodes(y));
-        tNeighbors.removeAll(graph.getAdjacentNodes(x));
-
-        for (int i = tNeighbors.size() - 1; i >= 0; i--) {
-            Node z = tNeighbors.get(i);
-            Edge edge = graph.getEdge(y, z);
-
-            if (!Edges.isUndirectedEdge(edge)) {
-                tNeighbors.remove(z);
-            }
-        }
-
-        return tNeighbors;
-    }
-
-    /**
-     * Get all nodes that are connected to Y by an undirected edge and adjacent to X
-     */
-    private static List<Node> getHNeighbors(Node x, Node y, Graph graph) {
-        List<Node> hNeighbors = new LinkedList<Node>(graph.getAdjacentNodes(y));
-        hNeighbors.retainAll(graph.getAdjacentNodes(x));
-
-        for (int i = hNeighbors.size() - 1; i >= 0; i--) {
-            Node z = hNeighbors.get(i);
-            Edge edge = graph.getEdge(y, z);
-
-            if (!Edges.isUndirectedEdge(edge)) {
-                hNeighbors.remove(z);
-            }
-        }
-
-        return hNeighbors;
-    }
-
-    /**
      * Evaluate the Insert(X, Y, T) operator (Definition 12 from Chickering, 2002).
      */
-    private double insertEval(Node x, Node y, Set<Node> t, Graph graph) {
+    private double insertEval(Node x, Node y, Set <Node> t, Graph graph) {
 
         // set1 contains x; set2 does not.
 //        Set<Node> set1 = new HashSet<Node>(findNaYX(x, y, graph));
@@ -636,19 +682,24 @@ public final class StagedGes implements GraphSearch, GraphScorer {
 //        set1.add(x);
 //        double scoreChange = scoreGraphChange(y, set1, set2);
 
-        Set<Node> set2 = new HashSet<Node>(findNaYX(x, y, graph));
+        Set <Node> set2 = new HashSet <Node>(findNaYX(x, y, graph));
         set2.addAll(t);
         set2.addAll(graph.getParents(y));
-        Set<Node> set1 = new HashSet<Node>(set2);
+        Set <Node> set1 = new HashSet <Node>(set2);
         set1.add(x);
 
         return scoreGraphChange(y, set1, set2);
     }
 
+    /*
+     * Test if the candidate insertion is a valid operation
+     * (Theorem 15 from Chickering, 2002).
+     **/
+
     /**
      * Evaluate the Delete(X, Y, T) operator (Definition 12 from Chickering, 2002).
      */
-    private double deleteEval(Node x, Node y, Set<Node> h, Graph graph) {
+    private double deleteEval(Node x, Node y, Set <Node> h, Graph graph) {
 
         // set2 contains x; set1 does not.
 //        Set<Node> set1 = new HashSet<Node>(findNaYX(x, y, graph));
@@ -659,21 +710,16 @@ public final class StagedGes implements GraphSearch, GraphScorer {
 //        set2.add(x);
 //        double scoreChange = scoreGraphChange(y, set1, set2);
 
-        Set<Node> set2 = new HashSet<Node>(findNaYX(x, y, graph));
+        Set <Node> set2 = new HashSet <Node>(findNaYX(x, y, graph));
         set2.removeAll(h);
         set2.addAll(graph.getParents(y));
-        Set<Node> set1 = new HashSet<Node>(set2);
+        Set <Node> set1 = new HashSet <Node>(set2);
         set1.remove(x);
 
         return scoreGraphChange(y, set1, set2);
     }
 
-    /*
-    * Do an actual insertion
-    * (Definition 12 from Chickering, 2002).
-    **/
-
-    private void insert(Node x, Node y, Set<Node> subset, Graph graph, double score, boolean log) {
+    private void insert(Node x, Node y, Set <Node> subset, Graph graph, double score, boolean log) {
         Edge trueEdge = null;
 
         if (trueGraph != null) {
@@ -708,10 +754,12 @@ public final class StagedGes implements GraphSearch, GraphScorer {
         }
     }
 
+    //---Background knowledge methods.
+
     /**
      * Do an actual deletion (Definition 13 from Chickering, 2002).
      */
-    private void delete(Node x, Node y, Set<Node> subset, Graph graph, double score, boolean log) {
+    private void delete(Node x, Node y, Set <Node> subset, Graph graph, double score, boolean log) {
 
         if (log) {
             Edge oldEdge = graph.getEdge(x, y);
@@ -747,46 +795,31 @@ public final class StagedGes implements GraphSearch, GraphScorer {
         }
     }
 
-    /*
-     * Test if the candidate insertion is a valid operation
-     * (Theorem 15 from Chickering, 2002).
-     **/
-
-    private boolean validInsert(Node x, Node y, Set<Node> subset, Graph graph) {
-        List<Node> naYXT = new LinkedList<Node>(subset);
+    private boolean validInsert(Node x, Node y, Set <Node> subset, Graph graph) {
+        List <Node> naYXT = new LinkedList <Node>(subset);
         naYXT.addAll(findNaYX(x, y, graph));
 
         if (!isClique(naYXT, graph)) {
             return false;
         }
 
-        if (!isSemiDirectedBlocked(x, y, naYXT, graph, new HashSet<Node>())) {
+        if (!isSemiDirectedBlocked(x, y, naYXT, graph, new HashSet <Node>())) {
             return false;
         }
 
         return true;
     }
 
-    /**
-     * Test if the candidate deletion is a valid operation (Theorem 17 from Chickering, 2002).
-     */
-    private static boolean validDelete(Node x, Node y, Set<Node> h,
-                                       Graph graph) {
-        List<Node> naYXH = findNaYX(x, y, graph);
-        naYXH.removeAll(h);
-        return isClique(naYXH, graph);
-    }
-
-    //---Background knowledge methods.
+    //--Auxiliary methods.
 
     private void addRequiredEdges(Graph graph) {
-        for (Iterator<KnowledgeEdge> it =
-                this.getKnowledge().requiredEdgesIterator(); it.hasNext();) {
+        for (Iterator <KnowledgeEdge> it =
+             this.getKnowledge().requiredEdgesIterator(); it.hasNext(); ) {
             KnowledgeEdge next = it.next();
             String a = next.getFrom();
             String b = next.getTo();
             Node nodeA = null, nodeB = null;
-            Iterator<Node> itn = graph.getNodes().iterator();
+            Iterator <Node> itn = graph.getNodes().iterator();
             while (itn.hasNext() && (nodeA == null || nodeB == null)) {
                 Node nextNode = itn.next();
                 if (nextNode.getName().equals(a)) {
@@ -802,13 +835,13 @@ public final class StagedGes implements GraphSearch, GraphScorer {
                 TetradLogger.getInstance().log("insertedEdges", "Adding edge by knowledge: " + graph.getEdge(nodeA, nodeB));
             }
         }
-        for (Iterator<KnowledgeEdge> it =
-                getKnowledge().forbiddenEdgesIterator(); it.hasNext();) {
+        for (Iterator <KnowledgeEdge> it =
+             getKnowledge().forbiddenEdgesIterator(); it.hasNext(); ) {
             KnowledgeEdge next = it.next();
             String a = next.getFrom();
             String b = next.getTo();
             Node nodeA = null, nodeB = null;
-            Iterator<Node> itn = graph.getNodes().iterator();
+            Iterator <Node> itn = graph.getNodes().iterator();
             while (itn.hasNext() && (nodeA == null || nodeB == null)) {
                 Node nextNode = itn.next();
                 if (nextNode.getName().equals(a)) {
@@ -834,7 +867,7 @@ public final class StagedGes implements GraphSearch, GraphScorer {
      * direction according to prior knowledge. If some orientation is forbidden in the subset, the whole subset is
      * forbidden.
      */
-    private boolean validSetByKnowledge(Node x, Node y, Set<Node> subset,
+    private boolean validSetByKnowledge(Node x, Node y, Set <Node> subset,
                                         boolean insertMode) {
         if (insertMode) {
             for (Node aSubset : subset) {
@@ -858,49 +891,11 @@ public final class StagedGes implements GraphSearch, GraphScorer {
         return true;
     }
 
-    //--Auxiliary methods.
-
-    /**
-     * Find all nodes that are connected to Y by an undirected edge that are adjacent to X (that is, by undirected or
-     * directed edge) NOTE: very inefficient implementation, since the current library does not allow access to the
-     * adjacency list/matrix of the graph.
-     */
-    private static List<Node> findNaYX(Node x, Node y, Graph graph) {
-        List<Node> naYX = new LinkedList<Node>(graph.getAdjacentNodes(y));
-        naYX.retainAll(graph.getAdjacentNodes(x));
-
-        for (int i = 0; i < naYX.size(); i++) {
-            Node z = naYX.get(i);
-            Edge edge = graph.getEdge(y, z);
-
-            if (!Edges.isUndirectedEdge(edge)) {
-                naYX.remove(z);
-            }
-        }
-
-        return naYX;
-    }
-
-    /**
-     * Returns true iif the given set forms a clique in the given graph.
-     */
-    private static boolean isClique(List<Node> set, Graph graph) {
-        List<Node> setv = new LinkedList<Node>(set);
-        for (int i = 0; i < setv.size() - 1; i++) {
-            for (int j = i + 1; j < setv.size(); j++) {
-                if (!graph.isAdjacentTo(setv.get(i), setv.get(j))) {
-                    return false;
-                }
-            }
-        }
-        return true;
-    }
-
     /**
      * Verifies if every semidirected path from y to x contains a node in naYXT.
      */
-    private boolean isSemiDirectedBlocked(Node x, Node y, List<Node> naYXT,
-                                          Graph graph, Set<Node> marked) {
+    private boolean isSemiDirectedBlocked(Node x, Node y, List <Node> naYXT,
+                                          Graph graph, Set <Node> marked) {
         if (naYXT.contains(y)) {
             return true;
         }
@@ -928,23 +923,6 @@ public final class StagedGes implements GraphSearch, GraphScorer {
         return true;
     }
 
-    private static List<Set<Node>> powerSet(List<Node> nodes) {
-        List<Set<Node>> subsets = new ArrayList<Set<Node>>();
-        int total = (int) Math.pow(2, nodes.size());
-        for (int i = 0; i < total; i++) {
-            Set<Node> newSet = new HashSet<Node>();
-            String selection = Integer.toBinaryString(i);
-            for (int j = selection.length() - 1; j >= 0; j--) {
-                if (selection.charAt(j) == '1') {
-                    newSet.add(nodes.get(selection.length() - j - 1));
-                }
-            }
-            subsets.add(newSet);
-        }
-        return subsets;
-    }
-
-
     /**
      * Completes a pattern that was modified by an insertion/deletion operator Based on the algorithm described on
      * Appendix C of (Chickering, 2002).
@@ -971,7 +949,7 @@ public final class StagedGes implements GraphSearch, GraphScorer {
     }
 
     private void setDataSet(DataSet dataSet) {
-        List<String> _varNames = dataSet.getVariableNames();
+        List <String> _varNames = dataSet.getVariableNames();
 
         this.varNames = _varNames.toArray(new String[0]);
         this.variables = dataSet.getVariables();
@@ -988,7 +966,7 @@ public final class StagedGes implements GraphSearch, GraphScorer {
 
     private void setCorrMatrix(ICovarianceMatrix covarianceMatrix) {
         this.variances = covarianceMatrix.getMatrix();
-        List<String> _varNames = covarianceMatrix.getVariableNames();
+        List <String> _varNames = covarianceMatrix.getVariableNames();
 
         this.varNames = _varNames.toArray(new String[0]);
         this.variables = covarianceMatrix.getVariables();
@@ -996,7 +974,7 @@ public final class StagedGes implements GraphSearch, GraphScorer {
     }
 
     private void buildIndexing(Graph graph) {
-        this.hashIndices = new HashMap<Node, Integer>();
+        this.hashIndices = new HashMap <Node, Integer>();
         for (Node next : graph.getNodes()) {
             for (int i = 0; i < this.varNames.length; i++) {
                 if (this.varNames[i].equals(next.getName())) {
@@ -1007,24 +985,13 @@ public final class StagedGes implements GraphSearch, GraphScorer {
         }
     }
 
-    private static int getRowIndex(int dim[], int[] values) {
-        int rowIndex = 0;
-        for (int i = 0; i < dim.length; i++) {
-            rowIndex *= dim[i];
-            rowIndex += values[i];
-        }
-        return rowIndex;
-    }
-
-    //===========================SCORING METHODS===========================//
-
     @Override
-	public double scoreGraph(Graph graph) {
+    public double scoreGraph(Graph graph) {
         Graph dag = SearchGraphUtils.dagFromPattern(graph);
         double score = 0.;
 
         for (Node next : dag.getNodes()) {
-            Collection<Node> parents = dag.getParents(next);
+            Collection <Node> parents = dag.getParents(next);
             int nextIndex = -1;
             for (int i = 0; i < getVariables().size(); i++) {
                 if (this.varNames[i].equals(next.getName())) {
@@ -1033,7 +1000,7 @@ public final class StagedGes implements GraphSearch, GraphScorer {
                 }
             }
             int parentIndices[] = new int[parents.size()];
-            Iterator<Node> pi = parents.iterator();
+            Iterator <Node> pi = parents.iterator();
             int count = 0;
             while (pi.hasNext()) {
                 Node nextParent = pi.next();
@@ -1054,8 +1021,8 @@ public final class StagedGes implements GraphSearch, GraphScorer {
         return score;
     }
 
-    private double scoreGraphChange(Node y, Set<Node> parents1,
-                                    Set<Node> parents2) {
+    private double scoreGraphChange(Node y, Set <Node> parents1,
+                                    Set <Node> parents2) {
         int yIndex = hashIndices.get(y);
         int parentIndices1[] = new int[parents1.size()];
 
@@ -1086,6 +1053,8 @@ public final class StagedGes implements GraphSearch, GraphScorer {
             return score1 - score2;
         }
     }
+
+    //===========================SCORING METHODS===========================//
 
     /**
      * Compute the local BDeu score of (i, parents(i)). See (Chickering, 2002).
@@ -1171,6 +1140,62 @@ public final class StagedGes implements GraphSearch, GraphScorer {
 //        return score;
     }
 
+    private int numCategories(int i) {
+        return ((DiscreteVariable) dataSet().getVariable(i)).getNumCategories();
+    }
+
+    /**
+     * Calculates the sample likelihood and BIC score for i given its parents in a simple SEM model.
+     */
+    private double localSemScore(int i, int[] parents) {
+
+        // Calculate the unexplained variance of i given z1,...,zn
+        // considered as a naive Bayes model.
+        double variance = getCovMatrix().get(i, i);
+        int n = sampleSize();
+        double k = parents.length + 1;
+
+        if (parents.length > 0) {
+
+            // Regress z onto i, yielding regression coefficients b.
+            DoubleMatrix2D Czz =
+                    getCovMatrix().viewSelection(parents, parents);
+            DoubleMatrix2D inverse;
+            try {
+                inverse = algebra().inverse(Czz);
+//                inverse = MatrixUtils.ginverse(Czz);
+            } catch (Exception e) {
+                StringBuilder buf = new StringBuilder();
+                buf.append("Could not invert matrix for variables: ");
+
+                for (int j = 0; j < parents.length; j++) {
+                    buf.append(variables.get(parents[j]));
+
+                    if (j < parents.length - 1) {
+                        buf.append(", ");
+                    }
+                }
+
+                throw new IllegalArgumentException(buf.toString());
+            }
+
+            DoubleMatrix1D Cyz = getCovMatrix().viewColumn(i);
+            Cyz = Cyz.viewSelection(parents);
+            DoubleMatrix1D b = algebra().mult(inverse, Cyz);
+
+            variance -= algebra().mult(Cyz, b);
+        }
+
+        double penalty = getPenaltyDiscount();
+
+        // This is the full -BIC formula.
+//        return -n * Math.log(variance) - n * Math.log(2. * Math.PI) - n / (penalty)
+//                - penalty * k * Math.log(n);
+
+        // This is the formula with contant terms for fixed n removed.
+        return -n * Math.log(variance) - penalty * k * Math.log(n);
+    }
+
 
 //    private double localDiscreteBicScore(int i, int[] parents) {
 //
@@ -1245,69 +1270,11 @@ public final class StagedGes implements GraphSearch, GraphScorer {
 //        return score - numParams / 2. * Math.log(sampleSize());
 //    }
 
-
-    private int numCategories(int i) {
-        return ((DiscreteVariable) dataSet().getVariable(i)).getNumCategories();
-    }
-
-    /**
-     * Calculates the sample likelihood and BIC score for i given its parents in a simple SEM model.
-     */
-    private double localSemScore(int i, int[] parents) {
-
-        // Calculate the unexplained variance of i given z1,...,zn
-        // considered as a naive Bayes model.
-        double variance = getCovMatrix().get(i, i);
-        int n = sampleSize();
-        double k = parents.length + 1;
-
-        if (parents.length > 0) {
-
-            // Regress z onto i, yielding regression coefficients b.
-            DoubleMatrix2D Czz =
-                    getCovMatrix().viewSelection(parents, parents);
-            DoubleMatrix2D inverse;
-            try {
-                inverse = algebra().inverse(Czz);
-//                inverse = MatrixUtils.ginverse(Czz);
-            }
-            catch (Exception e) {
-                StringBuilder buf = new StringBuilder();
-                buf.append("Could not invert matrix for variables: ");
-
-                for (int j = 0; j < parents.length; j++) {
-                    buf.append(variables.get(parents[j]));
-
-                    if (j < parents.length - 1) {
-                        buf.append(", ");
-                    }
-                }
-
-                throw new IllegalArgumentException(buf.toString());
-            }
-
-            DoubleMatrix1D Cyz = getCovMatrix().viewColumn(i);
-            Cyz = Cyz.viewSelection(parents);
-            DoubleMatrix1D b = algebra().mult(inverse, Cyz);
-
-            variance -= algebra().mult(Cyz, b);
-        }
-
-        double penalty = getPenaltyDiscount();
-
-        // This is the full -BIC formula.
-//        return -n * Math.log(variance) - n * Math.log(2. * Math.PI) - n / (penalty)
-//                - penalty * k * Math.log(n);
-
-        // This is the formula with contant terms for fixed n removed.
-        return -n * Math.log(variance) - penalty * k * Math.log(n);
-    }
-
     private int sampleSize() {
         return this.sampleSize;
     }
 
-    private List<Node> getVariables() {
+    private List <Node> getVariables() {
         return variables;
     }
 
@@ -1327,8 +1294,22 @@ public final class StagedGes implements GraphSearch, GraphScorer {
         return structurePrior;
     }
 
+    public void setStructurePrior(double structurePrior) {
+        if (discreteScore != null) {
+            discreteScore.setStructurePrior(structurePrior);
+        }
+        this.structurePrior = structurePrior;
+    }
+
     private double getSamplePrior() {
         return samplePrior;
+    }
+
+    public void setSamplePrior(double samplePrior) {
+        if (discreteScore != null) {
+            discreteScore.setSamplePrior(samplePrior);
+        }
+        this.samplePrior = samplePrior;
     }
 
     private boolean isDiscrete() {
@@ -1341,9 +1322,9 @@ public final class StagedGes implements GraphSearch, GraphScorer {
         }
     }
 
-    private List<PropertyChangeListener> getListeners() {
+    private List <PropertyChangeListener> getListeners() {
         if (listeners == null) {
-            listeners = new ArrayList<PropertyChangeListener>();
+            listeners = new ArrayList <PropertyChangeListener>();
         }
         return listeners;
     }

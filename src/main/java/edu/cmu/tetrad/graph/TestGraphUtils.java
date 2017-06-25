@@ -43,6 +43,17 @@ public final class TestGraphUtils extends TestCase {
         super(name);
     }
 
+    /**
+     * This method uses reflection to collect up all of the test methods from
+     * this class and return them to the test runner.
+     */
+    public static Test suite() {
+
+        // Edit the name of the class in the parens to match the name
+        // of this class.
+        return new TestSuite(TestGraphUtils.class);
+    }
+
     public void testCreateRandomDag() {
         //        while (true) {
         Dag dag = GraphUtils.randomDag(50, 0, 50, 4, 3, 3, false);
@@ -62,7 +73,7 @@ public final class TestGraphUtils extends TestCase {
 
                 System.out.println("Node1 = " + node1 + " Node2 = " + node2);
 
-                List<List<Node>> directedPaths = GraphUtils.directedPathsFromTo(graph, node1, node2);
+                List <List <Node>> directedPaths = GraphUtils.directedPathsFromTo(graph, node1, node2);
 
                 for (int k = 0; k < directedPaths.size(); k++) {
                     System.out.println("Path " + k + ": " + directedPaths.get(k));
@@ -83,11 +94,11 @@ public final class TestGraphUtils extends TestCase {
 
                 System.out.println("Node1 = " + node1 + " Node2 = " + node2);
 
-                List<List<Node>> treks = GraphUtils.treks(graph, node1, node2);
+                List <List <Node>> treks = GraphUtils.treks(graph, node1, node2);
 
                 for (int k = 0; k < treks.size(); k++) {
                     System.out.print("Trek " + k + ": ");
-                    List<Node> trek = treks.get(k);
+                    List <Node> trek = treks.get(k);
 
                     System.out.print(trek.get(0));
 
@@ -111,18 +122,6 @@ public final class TestGraphUtils extends TestCase {
                 }
             }
         }
-    }
-
-    public void testGraphToDot() {
-        long seed = 28583848283L;
-        RandomUtil.getInstance().setSeed(seed);
-
-        Graph g = GraphUtils.randomDag(5, 5, false);
-
-        System.out.println(g);
-
-        System.out.println(GraphUtils.graphToDot(g));
-
     }
 
     //    public void rtestMaxPathLength() {
@@ -203,15 +202,16 @@ public final class TestGraphUtils extends TestCase {
     //                ", average = " + ave + ", avenumedges = " + totK / (double) numTests);
     //    }
 
-    /**
-     * This method uses reflection to collect up all of the test methods from
-     * this class and return them to the test runner.
-     */
-    public static Test suite() {
+    public void testGraphToDot() {
+        long seed = 28583848283L;
+        RandomUtil.getInstance().setSeed(seed);
 
-        // Edit the name of the class in the parens to match the name
-        // of this class.
-        return new TestSuite(TestGraphUtils.class);
+        Graph g = GraphUtils.randomDag(5, 5, false);
+
+        System.out.println(g);
+
+        System.out.println(GraphUtils.graphToDot(g));
+
     }
 }
 

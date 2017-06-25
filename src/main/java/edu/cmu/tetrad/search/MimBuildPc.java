@@ -49,7 +49,7 @@ import java.util.List;
 public final class MimBuildPc {
     public static final String LATENT_PREFIX = "_L";
 
-    private List<Node> latents;
+    private List <Node> latents;
     private IndTestMimBuild indTest;
     private Knowledge knowledge;
     private double alpha = 0.001;
@@ -61,9 +61,31 @@ public final class MimBuildPc {
     private Graph structuralModel;
 
     public MimBuildPc(IndTestMimBuild indTest, Knowledge knowledge) {
-        this.latents = new ArrayList<Node>();
+        this.latents = new ArrayList <Node>();
         this.indTest = indTest;
         this.knowledge = knowledge;
+    }
+
+    public static String[] getTestDescriptions() {
+        String tests[] = new String[2];
+        tests[0] = "Gaussian maximum likelihood";
+        tests[1] = "Two-stage least squares";
+        return tests;
+    }
+
+    public static String[] getAlgorithmDescriptions() {
+        String labels[] = new String[2];
+        labels[0] = "GES";
+        labels[1] = "PC";
+        return labels;
+    }
+
+    public static List <String> generateLatentNames(int total) {
+        List <String> output = new ArrayList <String>();
+        for (int i = 0; i < total; i++) {
+            output.add(LATENT_PREFIX + (i + 1));
+        }
+        return output;
     }
 
     public Graph search() {
@@ -82,28 +104,6 @@ public final class MimBuildPc {
             this.logger.log("graph", "\nReturning this graph: " + graph);
             return graph;
         }
-    }
-
-    public static String[] getTestDescriptions() {
-        String tests[] = new String[2];
-        tests[0] = "Gaussian maximum likelihood";
-        tests[1] = "Two-stage least squares";
-        return tests;
-    }
-
-    public static String[] getAlgorithmDescriptions() {
-        String labels[] = new String[2];
-        labels[0] = "GES";
-        labels[1] = "PC";
-        return labels;
-    }
-
-    public static List<String> generateLatentNames(int total) {
-        List<String> output = new ArrayList<String>();
-        for (int i = 0; i < total; i++) {
-            output.add(LATENT_PREFIX + (i + 1));
-        }
-        return output;
     }
 
     /**
@@ -203,7 +203,7 @@ public final class MimBuildPc {
         System.out.println("B");
 
         do {
-            List<Node> continuousVariables = DataUtils.createContinuousVariables(varNames);
+            List <Node> continuousVariables = DataUtils.createContinuousVariables(varNames);
             DenseDoubleMatrix2D oldExpectedCovariance = new DenseDoubleMatrix2D(optimizer.getExpectedCovarianceMatrix());
             int sampleSize = covMatrix.getSampleSize();
 
@@ -227,7 +227,7 @@ public final class MimBuildPc {
 
             this.structuralModel = newStructuralModel;
 
-            for (Edge edge : new ArrayList<Edge>(newStructuralModel.getEdges())) {
+            for (Edge edge : new ArrayList <Edge>(newStructuralModel.getEdges())) {
                 if (Edges.isBidirectedEdge(edge)) {
                     newStructuralModel.removeEdge(edge);
 //                    newStructuralModel.addUndirectedEdge(edge.getNode1(), edge.getNode2());
@@ -295,7 +295,7 @@ public final class MimBuildPc {
 
     private Graph getUpdatedGraph(Graph graph, Graph structuralModel) {
         Graph output = new EdgeListGraph(graph);
-        List<Edge> edgesToRemove = new ArrayList<Edge>();
+        List <Edge> edgesToRemove = new ArrayList <Edge>();
         for (Edge nextEdge : output.getEdges()) {
             if (nextEdge.getNode1().getNodeType() == NodeType.LATENT &&
                     nextEdge.getNode2().getNodeType() == NodeType.LATENT) {
@@ -333,7 +333,7 @@ public final class MimBuildPc {
 
         // Add the arrows from latents to measured variables according to
         // specific background knowledge included on the independence checker.
-        Iterator<KnowledgeEdge> it = getIndTest().getMeasurements().requiredEdgesIterator();
+        Iterator <KnowledgeEdge> it = getIndTest().getMeasurements().requiredEdgesIterator();
 
         while (it.hasNext()) {
             KnowledgeEdge edge = it.next();
@@ -353,7 +353,7 @@ public final class MimBuildPc {
          * Now connect latent variables according
          */
         int size = latents.size();
-        Iterator<Node> itl = latents.iterator();
+        Iterator <Node> itl = latents.iterator();
         Node[] nodes = new Node[size];
         int count = 0;
         while (itl.hasNext()) {

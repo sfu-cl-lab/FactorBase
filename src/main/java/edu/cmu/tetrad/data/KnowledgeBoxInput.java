@@ -27,9 +27,8 @@ import edu.cmu.tetrad.session.SessionModel;
 
 /**
  * @author kaalpurush
- *
  */
 public interface KnowledgeBoxInput extends SessionModel, VariableSource {
-	Graph getSourceGraph();
+    Graph getSourceGraph();
 }
 

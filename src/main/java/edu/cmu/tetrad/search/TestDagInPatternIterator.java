@@ -45,6 +45,17 @@ public class TestDagInPatternIterator extends TestCase {
         super(name);
     }
 
+    /**
+     * This method uses reflection to collect up all of the test methods from this class and return them to the test
+     * runner.
+     */
+    public static Test suite() {
+
+        // Edit the name of the class in the parens to match the name
+        // of this class.
+        return new TestSuite(TestDagInPatternIterator.class);
+    }
+
     public void test1() {
         Dag dag = GraphUtils.randomDag(10, 0, 10, 3, 3, 3, false);
 
@@ -152,7 +163,7 @@ public class TestDagInPatternIterator extends TestCase {
 
         Graph pattern = SearchGraphUtils.patternForDag(dag1);
         System.out.println(pattern);
-        List<Node> nodes = pattern.getNodes();
+        List <Node> nodes = pattern.getNodes();
 
         // Make random knowedge.
         int numTiers = 6;
@@ -208,17 +219,6 @@ public class TestDagInPatternIterator extends TestCase {
         }
 
         assertEquals(6, count);
-    }
-
-    /**
-     * This method uses reflection to collect up all of the test methods from this class and return them to the test
-     * runner.
-     */
-    public static Test suite() {
-
-        // Edit the name of the class in the parens to match the name
-        // of this class.
-        return new TestSuite(TestDagInPatternIterator.class);
     }
 }
 

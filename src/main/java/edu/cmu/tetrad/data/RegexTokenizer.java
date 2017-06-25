@@ -120,8 +120,7 @@ public final class RegexTokenizer {
 
             previousTokenQuoted = true;
             return token.toString();
-        }
-        else {
+        } else {
             boolean match = delimiterMatcher.find(position);
             int start = match ? delimiterMatcher.start() : chars.length();
             int end = match ? delimiterMatcher.end() : chars.length();
@@ -141,16 +140,16 @@ public final class RegexTokenizer {
      * True iff the parser should be aware of quotation marks and remove them
      * from returned strings.
      */
-    public void setQuoteSensitive(boolean quoteSensitive) {
-        this.quoteSensitive = quoteSensitive;
+    public boolean isQuoteSensitive() {
+        return quoteSensitive;
     }
 
     /**
      * True iff the parser should be aware of quotation marks and remove them
      * from returned strings.
      */
-    public boolean isQuoteSensitive() {
-        return quoteSensitive;
+    public void setQuoteSensitive(boolean quoteSensitive) {
+        this.quoteSensitive = quoteSensitive;
     }
 
     /**

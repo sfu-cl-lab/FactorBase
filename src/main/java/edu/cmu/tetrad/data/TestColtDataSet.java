@@ -45,43 +45,11 @@ public final class TestColtDataSet extends TestCase {
         super(name);
     }
 
-    public final void testContinuous() {
-        int rows = 10;
-        int cols = 5;
-        List<Node> _variables = new LinkedList<Node>();
-
-        for (int i = 0; i < cols; i++) {
-            _variables.add(new ContinuousVariable("X" + i));
-        }
-
-        DataSet dataSet = new ColtDataSet(rows, _variables);
-        RandomUtil randomUtil = RandomUtil.getInstance();
-
-        for (int i = 0; i < rows; i++) {
-            for (int j = 0; j < cols; j++) {
-                dataSet.setDouble(i, j, randomUtil.nextDouble());
-            }
-        }
-
-        System.out.println(dataSet);
-
-        List<Node> variables = dataSet.getVariables();
-        List<Node> newVars = new LinkedList<Node>();
-        newVars.add(variables.get(2));
-        newVars.add(variables.get(4));
-
-        DataSet _dataSet = dataSet.subsetColumns(newVars);
-
-        System.out.println(_dataSet);
-
-        assertTrue(dataSet.equals(dataSet));
-    }
-
     public static void testDiscrete() {
         int rows = 10;
         int cols = 5;
 
-        List<Node> variables = new LinkedList<Node>();
+        List <Node> variables = new LinkedList <Node>();
 
         for (int i = 0; i < cols; i++) {
             DiscreteVariable variable = new DiscreteVariable("X" + i, 10);
@@ -101,7 +69,7 @@ public final class TestColtDataSet extends TestCase {
     }
 
     public static void testInitialization() {
-        List<Node> variables = new LinkedList<Node>();
+        List <Node> variables = new LinkedList <Node>();
 
         for (int i = 0; i < 5; i++) {
             DiscreteVariable variable = new DiscreteVariable("X" + i, 10);
@@ -131,9 +99,8 @@ public final class TestColtDataSet extends TestCase {
         System.out.println(dataSet);
     }
 
-
     public static void testMixed() {
-        List<Node> variables = new LinkedList<Node>();
+        List <Node> variables = new LinkedList <Node>();
 
         DiscreteVariable x1 = new DiscreteVariable("X1");
         variables.add(x1);
@@ -150,7 +117,7 @@ public final class TestColtDataSet extends TestCase {
         int rows = 10;
         int cols = 5;
 
-        List<Node> variables = new LinkedList<Node>();
+        List <Node> variables = new LinkedList <Node>();
 
         for (int i = 0; i < cols; i++) {
             variables.add(new ContinuousVariable("X" + i));
@@ -176,12 +143,11 @@ public final class TestColtDataSet extends TestCase {
         System.out.println(dataSet);
     }
 
-
     public static void testRemoveRows() {
         int rows = 10;
         int cols = 5;
 
-        List<Node> variables = new LinkedList<Node>();
+        List <Node> variables = new LinkedList <Node>();
 
         for (int i = 0; i < cols; i++) {
             variables.add(new ContinuousVariable("X" + i));
@@ -211,7 +177,7 @@ public final class TestColtDataSet extends TestCase {
         int rows = 10;
         int cols = 5;
 
-        List<Node> variables = new LinkedList<Node>();
+        List <Node> variables = new LinkedList <Node>();
 
         for (int i = 0; i < cols; i++) {
             variables.add(new ContinuousVariable("X" + i));
@@ -264,6 +230,38 @@ public final class TestColtDataSet extends TestCase {
         // Edit the name of the class in the parens to match the name
         // of this class.
         return new TestSuite(TestColtDataSet.class);
+    }
+
+    public final void testContinuous() {
+        int rows = 10;
+        int cols = 5;
+        List <Node> _variables = new LinkedList <Node>();
+
+        for (int i = 0; i < cols; i++) {
+            _variables.add(new ContinuousVariable("X" + i));
+        }
+
+        DataSet dataSet = new ColtDataSet(rows, _variables);
+        RandomUtil randomUtil = RandomUtil.getInstance();
+
+        for (int i = 0; i < rows; i++) {
+            for (int j = 0; j < cols; j++) {
+                dataSet.setDouble(i, j, randomUtil.nextDouble());
+            }
+        }
+
+        System.out.println(dataSet);
+
+        List <Node> variables = dataSet.getVariables();
+        List <Node> newVars = new LinkedList <Node>();
+        newVars.add(variables.get(2));
+        newVars.add(variables.get(4));
+
+        DataSet _dataSet = dataSet.subsetColumns(newVars);
+
+        System.out.println(_dataSet);
+
+        assertTrue(dataSet.equals(dataSet));
     }
 }
 

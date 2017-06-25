@@ -26,8 +26,6 @@ import edu.cmu.tetrad.graph.*;
 import edu.cmu.tetrad.util.ChoiceGenerator;
 import edu.cmu.tetrad.util.TetradLogger;
 
-import java.util.*;
-
 /**
  * This class provides the datastructures and methods for carrying out the Cyclic Causal Discovery algorithm (CCD)
  * described by Thomas Richardson and Peter Spirtes in Chapter 7 of Computation, Causation, & Discovery by Glymour and
@@ -41,7 +39,7 @@ public final class Ccd implements GraphSearch {
     private IndependenceTest test;
     private int depth = -1;
     private Knowledge knowledge;
-    private List<Node> nodes;
+    private List <Node> nodes;
 
     /**
      * The logger for this class. The config needs to be set.
@@ -60,7 +58,7 @@ public final class Ccd implements GraphSearch {
     public Ccd(IndependenceTest test, Knowledge knowledge) {
         this.knowledge = knowledge;
         this.test = test;
-        this.nodes = new LinkedList<Node>(test.getVariables());
+        this.nodes = new LinkedList <Node>(test.getVariables());
         Collections.shuffle(nodes);
     }
 
@@ -76,6 +74,93 @@ public final class Ccd implements GraphSearch {
     }
 
     /**
+     * Returns true if b is a collider between a and c in the GaSearchGraph phi; returns false otherwise.
+     */
+    private static boolean isCollider(Graph phi, Node a, Node b, Node c) {
+        return !(phi.getEndpoint(a, b) != Endpoint.ARROW ||
+                phi.getEndpoint(b, a) != Endpoint.TAIL ||
+                phi.getEndpoint(c, b) != Endpoint.ARROW ||
+                phi.getEndpoint(b, c) != Endpoint.TAIL);
+
+    }
+
+    /**
+     * For a given GaSearchGraph phi and for a given set of sepsets, each of which is associated with a pair of vertices
+     * A and C, computes and returns the set Local(phi,A)\(SepSet<A,C> union {B,C}).
+     */
+    private static Set <Node> countLocalMinusSep(Graph phi, SepsetMap sepset,
+                                                 List <Node>[] loc, Node anode,
+                                                 Node bnode, Node cnode) {
+        List <Node> nodes = phi.getNodes();
+        int a = nodes.indexOf(anode);
+        Set <Node> localMinusSep = new HashSet <Node>();
+
+        localMinusSep.addAll(loc[a]);
+        localMinusSep.removeAll(sepset.get(anode, cnode));
+        localMinusSep.remove(bnode);
+        localMinusSep.remove(cnode);
+
+        return localMinusSep;
+    }
+
+    /**
+     * Computes and returns the size (cardinality) of the largest set of the form Local(phi,A)\(SepSet<A,C> union {B,C})
+     * where B is a collider between A and C and where A and C are not adjacent.  A, B and C should not be a dotted
+     * underline triple.
+     */
+    private static int maxCountLocalMinusSep(Graph phi, SepsetMap sep,
+                                             List <Node>[] loc,
+                                             Graph graph) {
+        List <Node> nodes = phi.getNodes();
+        int num = nodes.size();
+
+        int maxCount = -1;
+
+        for (int a = 0; a < num; a++) {
+            Node anode = nodes.get(a);
+
+            for (int c = a + 1; c < num; c++) {
+                if (c == a) {
+                    continue;
+                }
+                Node cnode = nodes.get(c);
+                if (phi.isAdjacentTo(anode, cnode)) {
+                    continue;
+                }
+
+                for (int b = 0; b < num; b++) {
+                    if (b == a || b == c) {
+                        continue;
+                    }
+                    Node bnode = nodes.get(b);
+                    //Want B to be a collider between A and C but not for
+                    //A, B, and C to be an underline triple.
+                    if (phi.isUnderlineTriple(anode, bnode, cnode)) {
+                        continue;
+                    }
+                    //Is B a collider between A and C?
+                    if (!isCollider(phi, anode, bnode, cnode)) {
+                        continue;
+                    }
+
+                    //int count =
+                    //        countLocalMinusSep(phi, sep, loc, anode, bnode, cnode);
+                    //
+                    Set <Node> localMinusSep = countLocalMinusSep(phi, sep, loc,
+                            anode, bnode, cnode);
+                    int count = localMinusSep.size();
+
+                    if (count > maxCount) {
+                        maxCount = count;
+                    }
+                }
+            }
+        }
+
+        return maxCount;
+    }
+
+    /**
      * The search method assumes that the IndependenceTest provided to the constructor is a conditional independence
      * oracle for the SEM (or Bayes network) which describes the causal structure of the population. The method returns
      * a PAG instantiated as a Tetrad GaSearchGraph which represents the equivalence class of digraphs which are
@@ -84,14 +169,14 @@ public final class Ccd implements GraphSearch {
      * underlines of the PAG.
      */
     @Override
-	public Graph search() {
+    public Graph search() {
         TetradLogger.getInstance().log("info", "Starting CCD algorithm.");
         TetradLogger.getInstance().log("info", "Independence test = " + test);
         TetradLogger.getInstance().log("info", "Depth = " + depth);
 
-        Graph phi = new EdgeListGraph(new LinkedList<Node>(nodes));
+        Graph phi = new EdgeListGraph(new LinkedList <Node>(nodes));
 
-        Map<Triple, List<Node>> supSepset = new HashMap<Triple, List<Node>>();
+        Map <Triple, List <Node>> supSepset = new HashMap <Triple, List <Node>>();
 
         //Step A
         TetradLogger.getInstance().log("info", "\nStep A");
@@ -131,7 +216,7 @@ public final class Ccd implements GraphSearch {
         for (Node bnode : nodes) {
 
             //Set of nodes adjacent to B
-            List<Node> adjB = phi.getAdjacentNodes(bnode);
+            List <Node> adjB = phi.getAdjacentNodes(bnode);
 
             if (adjB.size() < 2) {
                 continue;
@@ -213,7 +298,7 @@ public final class Ccd implements GraphSearch {
                     }
 
                     //...X is not in sepset<A, Y>...
-                    List<Node> _sepset = sepsets.get(anode, ynode);
+                    List <Node> _sepset = sepsets.get(anode, ynode);
 
                     if ((_sepset.contains(xnode))) {
                         continue;
@@ -251,7 +336,7 @@ public final class Ccd implements GraphSearch {
         List[] local = new ArrayList[nodes.size()];
         for (int v = 0; v < nodes.size(); v++) {
             Node vnode = nodes.get(v);
-            local[v] = new ArrayList<Node>();
+            local[v] = new ArrayList <Node>();
 
             //Is X p-adjacent to V in phi?
             for (int x = 0; x < nodes.size(); x++) {
@@ -318,7 +403,7 @@ public final class Ccd implements GraphSearch {
 
                         //Compute the number of elements (count)
                         //in Local(phi,A)\(sepset<A,C> union {B,C})
-                        Set<Node> localMinusSep = countLocalMinusSep(phi,
+                        Set <Node> localMinusSep = countLocalMinusSep(phi,
                                 sepsets, local, anode, bnode, cnode);
                         int count = localMinusSep.size();
 
@@ -337,7 +422,7 @@ public final class Ccd implements GraphSearch {
                         int[] choice;
 
                         while ((choice = generator.next()) != null) {
-                            Set<Node> setT = new LinkedHashSet<Node>();
+                            Set <Node> setT = new LinkedHashSet <Node>();
                             for (int i = 0; i < m; i++) {
                                 setT.add((Node) v[choice[i]]);
                             }
@@ -345,7 +430,7 @@ public final class Ccd implements GraphSearch {
                             setT.add(bnode);
                             setT.addAll(sepsets.get(nodes.get(a), nodes.get(c)));
 
-                            List<Node> listT = new ArrayList<Node>(setT);
+                            List <Node> listT = new ArrayList <Node>(setT);
 
                             //Note:  B is a collider between A and C (see above).
                             //If anode and cnode are d-separated given T union
@@ -490,10 +575,10 @@ public final class Ccd implements GraphSearch {
                             continue;
                         }
 
-                        Set<Node> supSepUnionD = new LinkedHashSet<Node>();
+                        Set <Node> supSepUnionD = new LinkedHashSet <Node>();
                         supSepUnionD.add(nodeD);
                         supSepUnionD.addAll(supSepset.get(new Triple(nodeA, nodeB, nodeC)));
-                        List<Node> listSupSepUnionD = new ArrayList<Node>(supSepUnionD);
+                        List <Node> listSupSepUnionD = new ArrayList <Node>(supSepUnionD);
 
                         //If A and C are a pair of vertices d-connected given
                         //SupSepset<A,B,C> union {D} then orient Bo-oD or B-oD
@@ -526,98 +611,10 @@ public final class Ccd implements GraphSearch {
     }
 
     @Override
-	public long getElapsedTime() {
+    public long getElapsedTime() {
 
         return 0;
     }
-
-    /**
-     * Returns true if b is a collider between a and c in the GaSearchGraph phi; returns false otherwise.
-     */
-    private static boolean isCollider(Graph phi, Node a, Node b, Node c) {
-        return !(phi.getEndpoint(a, b) != Endpoint.ARROW ||
-                phi.getEndpoint(b, a) != Endpoint.TAIL ||
-                phi.getEndpoint(c, b) != Endpoint.ARROW ||
-                phi.getEndpoint(b, c) != Endpoint.TAIL);
-
-    }
-
-    /**
-     * For a given GaSearchGraph phi and for a given set of sepsets, each of which is associated with a pair of vertices
-     * A and C, computes and returns the set Local(phi,A)\(SepSet<A,C> union {B,C}).
-     */
-    private static Set<Node> countLocalMinusSep(Graph phi, SepsetMap sepset,
-                                                List<Node>[] loc, Node anode,
-                                                Node bnode, Node cnode) {
-        List<Node> nodes = phi.getNodes();
-        int a = nodes.indexOf(anode);
-        Set<Node> localMinusSep = new HashSet<Node>();
-
-        localMinusSep.addAll(loc[a]);
-        localMinusSep.removeAll(sepset.get(anode, cnode));
-        localMinusSep.remove(bnode);
-        localMinusSep.remove(cnode);
-
-        return localMinusSep;
-    }
-
-    /**
-     * Computes and returns the size (cardinality) of the largest set of the form Local(phi,A)\(SepSet<A,C> union {B,C})
-     * where B is a collider between A and C and where A and C are not adjacent.  A, B and C should not be a dotted
-     * underline triple.
-     */
-    private static int maxCountLocalMinusSep(Graph phi, SepsetMap sep,
-                                             List<Node>[] loc,
-                                             Graph graph) {
-        List<Node> nodes = phi.getNodes();
-        int num = nodes.size();
-
-        int maxCount = -1;
-
-        for (int a = 0; a < num; a++) {
-            Node anode = nodes.get(a);
-
-            for (int c = a + 1; c < num; c++) {
-                if (c == a) {
-                    continue;
-                }
-                Node cnode = nodes.get(c);
-                if (phi.isAdjacentTo(anode, cnode)) {
-                    continue;
-                }
-
-                for (int b = 0; b < num; b++) {
-                    if (b == a || b == c) {
-                        continue;
-                    }
-                    Node bnode = nodes.get(b);
-                    //Want B to be a collider between A and C but not for
-                    //A, B, and C to be an underline triple.
-                    if (phi.isUnderlineTriple(anode, bnode, cnode)) {
-                        continue;
-                    }
-                    //Is B a collider between A and C?
-                    if (!isCollider(phi, anode, bnode, cnode)) {
-                        continue;
-                    }
-
-                    //int count =
-                    //        countLocalMinusSep(phi, sep, loc, anode, bnode, cnode);
-                    //
-                    Set<Node> localMinusSep = countLocalMinusSep(phi, sep, loc,
-                            anode, bnode, cnode);
-                    int count = localMinusSep.size();
-
-                    if (count > maxCount) {
-                        maxCount = count;
-                    }
-                }
-            }
-        }
-
-        return maxCount;
-    }
-
 
     public Knowledge getKnowledge() {
         return knowledge;

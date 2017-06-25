@@ -51,17 +51,17 @@ public class VonMises implements Distribution {
     }
 
     @Override
-	public int getNumParameters() {
+    public int getNumParameters() {
         return 1;
     }
 
     @Override
-	public String getName() {
+    public String getName() {
         return "Von Mises";
     }
 
     @Override
-	public void setParameter(int index, double value) {
+    public void setParameter(int index, double value) {
         if (index == 0) {
             freedom = value;
         }
@@ -70,7 +70,7 @@ public class VonMises implements Distribution {
     }
 
     @Override
-	public double getParameter(int index) {
+    public double getParameter(int index) {
         if (index == 0) {
             return freedom;
         }
@@ -79,17 +79,17 @@ public class VonMises implements Distribution {
     }
 
     @Override
-	public String getParameterName(int index) {
+    public String getParameterName(int index) {
         return "Freedom";
     }
 
     @Override
-	public double nextRandom() {
+    public double nextRandom() {
         return RandomUtil.getInstance().nextVonMises(freedom);
     }
 
     @Override
-	public String toString() {
+    public String toString() {
         return "vonMises(" + freedom + ")";
     }
 }

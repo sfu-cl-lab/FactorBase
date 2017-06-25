@@ -25,8 +25,9 @@ import edu.cmu.tetrad.util.RandomUtil;
 
 /**
  * Created by IntelliJ IDEA. User: jdramsey Date: Jan 15, 2008 Time: 5:05:28 PM
-* To change this template use File | Settings | File Templates.
-*/
+ * To change this template use File | Settings | File Templates.
+ */
+
 /**
  * Wraps a chi square distribution for purposes of drawing random samples.
  * Methods are provided to allow parameters to be manipulated in an interface.
@@ -75,30 +76,26 @@ public class MixtureOfGaussians implements Distribution {
     }
 
     @Override
-	public int getNumParameters() {
+    public int getNumParameters() {
         return 5;
     }
 
     @Override
-	public String getName() {
+    public String getName() {
         return "Mixture of Gaussians";
     }
 
     @Override
-	public void setParameter(int index, double value) {
+    public void setParameter(int index, double value) {
         if (index == 0) {
             a = value;
-        }
-        else if (index == 1) {
+        } else if (index == 1) {
             mean1 = value;
-        }
-        else if (index == 2) {
+        } else if (index == 2) {
             sd1 = value;
-        }
-        else if (index == 3) {
+        } else if (index == 3) {
             mean2 = value;
-        }
-        else if (index == 5) {
+        } else if (index == 5) {
             sd2 = value;
         }
 
@@ -106,20 +103,16 @@ public class MixtureOfGaussians implements Distribution {
     }
 
     @Override
-	public double getParameter(int index) {
+    public double getParameter(int index) {
         if (index == 0) {
             return a;
-        }
-        else if (index == 1) {
+        } else if (index == 1) {
             return mean1;
-        }
-        else if (index == 2) {
+        } else if (index == 2) {
             return sd1;
-        }
-        else if (index == 3) {
+        } else if (index == 3) {
             return mean2;
-        }
-        else if (index == 5) {
+        } else if (index == 5) {
             return sd2;
         }
 
@@ -127,20 +120,16 @@ public class MixtureOfGaussians implements Distribution {
     }
 
     @Override
-	public String getParameterName(int index) {
+    public String getParameterName(int index) {
         if (index == 0) {
             return "Ratio";
-        }
-        else if (index == 1) {
+        } else if (index == 1) {
             return "Mean 1";
-        }
-        else if (index == 2) {
+        } else if (index == 2) {
             return "Standard Deviation 1";
-        }
-        else if (index == 3) {
+        } else if (index == 3) {
             return "Mean 2";
-        }
-        else if (index == 5) {
+        } else if (index == 5) {
             return "Standard Deviation 2";
         }
 
@@ -148,7 +137,7 @@ public class MixtureOfGaussians implements Distribution {
     }
 
     @Override
-	public double nextRandom() {
+    public double nextRandom() {
         double r = RandomUtil.getInstance().nextDouble();
 
         if (r < a) {
@@ -159,7 +148,7 @@ public class MixtureOfGaussians implements Distribution {
     }
 
     @Override
-	public String toString() {
+    public String toString() {
         return "MixtureOfGaussians(" + a + ", " + mean1 + ", " + sd1 + ", " + mean2 + ", " + sd2 + ")";
     }
 }

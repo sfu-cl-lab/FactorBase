@@ -25,8 +25,9 @@ import edu.cmu.tetrad.util.RandomUtil;
 
 /**
  * Created by IntelliJ IDEA. User: jdramsey Date: Jan 15, 2008 Time: 5:06:35 PM
-* To change this template use File | Settings | File Templates.
-*/
+ * To change this template use File | Settings | File Templates.
+ */
+
 /**
  * Wraps a chi square distribution for purposes of drawing random samples.
  * Methods are provided to allow parameters to be manipulated in an interface.
@@ -59,21 +60,20 @@ public class Hyperbolic implements Distribution {
     }
 
     @Override
-	public int getNumParameters() {
+    public int getNumParameters() {
         return 2;
     }
 
     @Override
-	public String getName() {
+    public String getName() {
         return "Hyperbolic";
     }
 
     @Override
-	public void setParameter(int index, double value) {
+    public void setParameter(int index, double value) {
         if (index == 0) {
             alpha = value;
-        }
-        else if (index == 1) {
+        } else if (index == 1) {
             gamma = value;
         }
 
@@ -81,11 +81,10 @@ public class Hyperbolic implements Distribution {
     }
 
     @Override
-	public double getParameter(int index) {
+    public double getParameter(int index) {
         if (index == 0) {
             return alpha;
-        }
-        else if (index == 1) {
+        } else if (index == 1) {
             return gamma;
         }
 
@@ -93,11 +92,10 @@ public class Hyperbolic implements Distribution {
     }
 
     @Override
-	public String getParameterName(int index) {
+    public String getParameterName(int index) {
         if (index == 0) {
             return "Alpha";
-        }
-        else if (index == 1) {
+        } else if (index == 1) {
             return "Gamma";
         }
 
@@ -105,12 +103,12 @@ public class Hyperbolic implements Distribution {
     }
 
     @Override
-	public double nextRandom() {
+    public double nextRandom() {
         return RandomUtil.getInstance().nextHyperbolic(alpha, gamma);
     }
 
     @Override
-	public String toString() {
+    public String toString() {
         return "Hyperbolic(" + alpha + ", " + gamma + ")";
     }
 }

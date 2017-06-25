@@ -37,8 +37,6 @@ import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
 
-import java.io.*;
-
 /**
  * Tests data loaders against sample files.
  *
@@ -49,8 +47,21 @@ public class TestDataLoadersRoundtrip extends TestCase {
         super(name);
     }
 
+    /**
+     * This method uses reflection to collect up all of the test methods from
+     * this class and return them to
+     * <p>
+     * the test runner.
+     */
+    public static Test suite() {
+
+        // Edit the name of the class in the parens to match the name
+        // of this class.
+        return new TestSuite(TestDataLoadersRoundtrip.class);
+    }
+
     @Override
-	public void setUp() {
+    public void setUp() {
         RandomUtil.getInstance().setSeed(302040392L);
 
         File file = new File("test_data");
@@ -83,8 +94,7 @@ public class TestDataLoadersRoundtrip extends TestCase {
             System.out.println(dataSet);
             System.out.println(_dataSet);
             assertTrue(dataSet.equals(_dataSet));
-        }
-        catch (IOException e) {
+        } catch (IOException e) {
             e.printStackTrace();
             fail();
         }
@@ -117,24 +127,10 @@ public class TestDataLoadersRoundtrip extends TestCase {
                 System.out.println(_dataSet);
                 assertTrue(dataSet.equals(_dataSet));
             }
-        }
-        catch (IOException e) {
+        } catch (IOException e) {
             e.printStackTrace();
             fail(e.getMessage());
         }
-    }
-
-    /**
-     * This method uses reflection to collect up all of the test methods from
-     * this class and return them to
-     *
-     * the test runner.
-     */
-    public static Test suite() {
-
-        // Edit the name of the class in the parens to match the name
-        // of this class.
-        return new TestSuite(TestDataLoadersRoundtrip.class);
     }
 }
 

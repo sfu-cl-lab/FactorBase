@@ -24,7 +24,6 @@ package edu.cmu.tetrad.util;
 import java.io.OutputStream;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.logging.*;
 
 /**
  * Sets up streams for logging via the Java logging API. To add a stream to the
@@ -50,8 +49,8 @@ public class LogUtils {
     /**
      * Map from streams to handlers.
      */
-    private final Map<OutputStream, StreamHandler> streams
-            = new HashMap<OutputStream, StreamHandler>();
+    private final Map <OutputStream, StreamHandler> streams
+            = new HashMap <OutputStream, StreamHandler>();
 
     //============================CONSTRUCTORS===========================//
 
@@ -92,7 +91,7 @@ public class LogUtils {
 
         SimpleFormatter formatter = new SimpleFormatter() {
             @Override
-			public synchronized String format(LogRecord record) {
+            public synchronized String format(LogRecord record) {
                 StringBuilder buf = new StringBuilder();
                 buf.append(record.getMessage());
                 buf.append("\n");

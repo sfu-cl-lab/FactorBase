@@ -57,7 +57,7 @@ public class IndTestMultinomialLogisticRegression implements IndependenceTest {
      * Returns an Independence test for a subset of the variables.
      */
     @Override
-	public IndependenceTest indTestSubset(List<Node> vars) {
+    public IndependenceTest indTestSubset(List <Node> vars) {
         throw new UnsupportedOperationException();
     }
 
@@ -67,7 +67,7 @@ public class IndTestMultinomialLogisticRegression implements IndependenceTest {
      * getVariableNames().
      */
     @Override
-	public boolean isIndependent(Node x, Node y, List<Node> z) {
+    public boolean isIndependent(Node x, Node y, List <Node> z) {
 
         if (x instanceof DiscreteVariable) {
             if (((DiscreteVariable) x).getNumCategories() > 2) {
@@ -105,7 +105,7 @@ public class IndTestMultinomialLogisticRegression implements IndependenceTest {
         }
     }
 
-    private boolean isIndependentMultinomialLogisticRegression(Node x, Node y, List<Node> z) {
+    private boolean isIndependentMultinomialLogisticRegression(Node x, Node y, List <Node> z) {
 
         if (z == null) {
             throw new NullPointerException();
@@ -119,8 +119,8 @@ public class IndTestMultinomialLogisticRegression implements IndependenceTest {
 
         // Copy data to be able to modify
         DataSet regressors = new ColtDataSet((ColtDataSet) dataSet);
-        List<String> regressorList = new ArrayList<String>();
-        List<Node> dataSetVariables = regressors.getVariables();
+        List <String> regressorList = new ArrayList <String>();
+        List <Node> dataSetVariables = regressors.getVariables();
         int targetIndex = dataSet.getVariables().indexOf(x);
 
         // Set of regressors = {y} U z
@@ -138,14 +138,14 @@ public class IndTestMultinomialLogisticRegression implements IndependenceTest {
                 regressors.removeColumn(var);
         }
 
-        List<Node> yVars = new ArrayList();
+        List <Node> yVars = new ArrayList();
 
         dataSetVariables = regressors.getVariables();   // Update the list of variables to cover dummy vars created
 
         for (Node dsVar : dataSetVariables) {           // Create dummy variables for any other discrete with numCats >2
 
             if (dsVar instanceof DiscreteVariable && ((DiscreteVariable) dsVar).getNumCategories() > 2 && (!dsVar.getName().equals(x.getName()))) {
-                List<String> varCats = ((DiscreteVariable) dsVar).getCategories();
+                List <String> varCats = ((DiscreteVariable) dsVar).getCategories();
                 varCats.remove(0);
 
                 for (String cat : varCats) {
@@ -193,16 +193,16 @@ public class IndTestMultinomialLogisticRegression implements IndependenceTest {
             }
         }
 
-        List<String> targetCats = ((DiscreteVariable) x).getCategories();
+        List <String> targetCats = ((DiscreteVariable) x).getCategories();
 
         int targetBaseCat = ((DiscreteVariable) x).getIndex(targetCats.remove(0)); // Category to test other categories against
-        List<Double> pValuesForTarget = new ArrayList(); // List of p-values for the target variables (numCats - 1)
+        List <Double> pValuesForTarget = new ArrayList(); // List of p-values for the target variables (numCats - 1)
 
         for (String cat : targetCats) {
 
             DataSet tempSet = new ColtDataSet((ColtDataSet) regressors); // Need new copy to select proper rows from
             targetIndex = tempSet.getColumn(x);                         // Update targetIndex since data set has changed
-            List<Integer> removeList = new ArrayList();                 // These rows are do not have targetIndex nor current cat index
+            List <Integer> removeList = new ArrayList();                 // These rows are do not have targetIndex nor current cat index
 
             // Remove rows where target is not one of the two categories for the current regression
             // Set to 0 or 1 otherwise
@@ -358,7 +358,7 @@ public class IndTestMultinomialLogisticRegression implements IndependenceTest {
         return indep;
     }
 
-    private boolean isIndependentLogisticRegression(Node x, Node y, List<Node> z) {
+    private boolean isIndependentLogisticRegression(Node x, Node y, List <Node> z) {
 
         if (z == null) {
             throw new NullPointerException();
@@ -372,12 +372,12 @@ public class IndTestMultinomialLogisticRegression implements IndependenceTest {
 
         DataSet regressors = new ColtDataSet((ColtDataSet) dataSet);
 
-        List<String> regressorList = new ArrayList<String>();
+        List <String> regressorList = new ArrayList <String>();
         int targetIndex = dataSet.getVariables().indexOf(x);
         regressors.removeColumn(x);
 
-        List<Node> dataSetVariables = regressors.getVariables();
-        List<Node> yVars = new ArrayList<Node>();
+        List <Node> dataSetVariables = regressors.getVariables();
+        List <Node> yVars = new ArrayList <Node>();
 
         regressorList.add(dataSet.getVariable(y.getName()).getName());
 
@@ -387,7 +387,7 @@ public class IndTestMultinomialLogisticRegression implements IndependenceTest {
 
         for (Node dsVar : dataSetVariables) { // Create dummy variables for any other discrete with numCats >2
             if (regressorList.contains(dsVar.getName()) && dsVar instanceof DiscreteVariable && ((DiscreteVariable) dsVar).getNumCategories() > 2) {
-                List<String> varCats = ((DiscreteVariable) dsVar).getCategories();
+                List <String> varCats = ((DiscreteVariable) dsVar).getCategories();
                 varCats.remove(0);
 
                 for (String cat : varCats) {
@@ -540,7 +540,7 @@ public class IndTestMultinomialLogisticRegression implements IndependenceTest {
         return indep;
     }
 
-    private boolean isIndependentRegression(Node x, Node y, List<Node> z) {
+    private boolean isIndependentRegression(Node x, Node y, List <Node> z) {
 
         if (z == null) {
             throw new NullPointerException();
@@ -554,17 +554,17 @@ public class IndTestMultinomialLogisticRegression implements IndependenceTest {
 
         DataSet regressorData = new ColtDataSet((ColtDataSet) dataSet);
 
-        List<Node> regressors = new ArrayList<Node>();
+        List <Node> regressors = new ArrayList <Node>();
         regressors.add(dataSet.getVariable(y.getName()));
 
         for (Node zVar : z) {
             regressors.add(dataSet.getVariable(zVar.getName()));
         }
 
-        List<Node> initRegressors = new ArrayList(regressors);
+        List <Node> initRegressors = new ArrayList(regressors);
         for (Node dsVar : initRegressors) { // Create dummy variables for any other discrete with numCats >2
             if (dsVar instanceof DiscreteVariable && ((DiscreteVariable) dsVar).getNumCategories() > 2) {
-                List<String> varCats = ((DiscreteVariable) dsVar).getCategories();
+                List <String> varCats = ((DiscreteVariable) dsVar).getCategories();
                 varCats.remove(0);
 
                 for (String cat : varCats) {
@@ -618,8 +618,8 @@ public class IndTestMultinomialLogisticRegression implements IndependenceTest {
 
 
     @Override
-	public boolean isIndependent(Node x, Node y, Node... z) {
-        List<Node> zList = Arrays.asList(z);
+    public boolean isIndependent(Node x, Node y, Node... z) {
+        List <Node> zList = Arrays.asList(z);
         return isIndependent(x, y, zList);
     }
 
@@ -629,13 +629,13 @@ public class IndTestMultinomialLogisticRegression implements IndependenceTest {
      * getVariableNames().
      */
     @Override
-	public boolean isDependent(Node x, Node y, List<Node> z) {
+    public boolean isDependent(Node x, Node y, List <Node> z) {
         return !this.isIndependent(x, y, z);
     }
 
     @Override
-	public boolean isDependent(Node x, Node y, Node... z) {
-        List<Node> zList = Arrays.asList(z);
+    public boolean isDependent(Node x, Node y, Node... z) {
+        List <Node> zList = Arrays.asList(z);
         return isDependent(x, y, zList);
     }
 
@@ -644,7 +644,7 @@ public class IndTestMultinomialLogisticRegression implements IndependenceTest {
      * not meaningful for tis test.
      */
     @Override
-	public double getPValue() {
+    public double getPValue() {
         return this.lastP; //STUB
     }
 
@@ -653,7 +653,7 @@ public class IndTestMultinomialLogisticRegression implements IndependenceTest {
      * relations.
      */
     @Override
-	public List<Node> getVariables() {
+    public List <Node> getVariables() {
         return dataSet.getVariables(); //STUB
     }
 
@@ -661,9 +661,9 @@ public class IndTestMultinomialLogisticRegression implements IndependenceTest {
      * Returns the list of variable varNames.
      */
     @Override
-	public List<String> getVariableNames() {
-        List<Node> variables = getVariables();
-        List<String> variableNames = new ArrayList<String>();
+    public List <String> getVariableNames() {
+        List <Node> variables = getVariables();
+        List <String> variableNames = new ArrayList <String>();
         for (Node variable1 : variables) {
             variableNames.add(variable1.getName());
         }
@@ -671,7 +671,7 @@ public class IndTestMultinomialLogisticRegression implements IndependenceTest {
     }
 
     @Override
-	public Node getVariable(String name) {
+    public Node getVariable(String name) {
         for (int i = 0; i < getVariables().size(); i++) {
             Node variable = getVariables().get(i);
             if (variable.getName().equals(name)) {
@@ -686,7 +686,7 @@ public class IndTestMultinomialLogisticRegression implements IndependenceTest {
      * Returns true if y is determined the variable in z.
      */
     @Override
-	public boolean determines(List<Node> z, Node y) {
+    public boolean determines(List <Node> z, Node y) {
         return false; //stub
     }
 
@@ -696,7 +696,7 @@ public class IndTestMultinomialLogisticRegression implements IndependenceTest {
      * @throws UnsupportedOperationException if there is no significance level.
      */
     @Override
-	public double getAlpha() {
+    public double getAlpha() {
         return this.alpha; //STUB
     }
 
@@ -704,12 +704,12 @@ public class IndTestMultinomialLogisticRegression implements IndependenceTest {
      * Sets the significance level.
      */
     @Override
-	public void setAlpha(double alpha) {
+    public void setAlpha(double alpha) {
         this.alpha = alpha;
     }
 
     @Override
-	public DataSet getData() {
+    public DataSet getData() {
         return this.dataSet;
     }
 }

@@ -49,7 +49,7 @@ public final class EmBayesEstimator {
     private DataSet mixedData;   //Contains all variables with missing value columns for
     //latents
 
-    private List<Node> allVariables;          //Variables in mixedData (observed and latents)
+    private List <Node> allVariables;          //Variables in mixedData (observed and latents)
 
     private Node[] nodes;
     private Graph graph;
@@ -114,7 +114,7 @@ public final class EmBayesEstimator {
             throw new NullPointerException();
         }
 
-        List<Node> observedVars = new ArrayList<Node>();
+        List <Node> observedVars = new ArrayList <Node>();
 
         this.bayesPm = bayesPm;
         this.dataSet = dataSet;
@@ -123,7 +123,7 @@ public final class EmBayesEstimator {
         graph = bayesPm.getDag();
         this.nodes = new Node[graph.getNumNodes()];
 
-        Iterator<Node> it = graph.getNodes().iterator();
+        Iterator <Node> it = graph.getNodes().iterator();
 
         for (int i = 0; i < this.nodes.length; i++) {
             this.nodes[i] = it.next();
@@ -149,8 +149,7 @@ public final class EmBayesEstimator {
         for (Node observedVar : observedVars) {
             try {
                 this.dataSet.getVariable(observedVar.getName());
-            }
-            catch (Exception e) {
+            } catch (Exception e) {
                 throw new IllegalArgumentException(
                         "Some observed ar in the Bayes net " +
                                 "is not in the dataset: " + observedVar);
@@ -166,6 +165,58 @@ public final class EmBayesEstimator {
     public EmBayesEstimator(BayesIm inputBayesIm, DataSet dataSet) {
         this(inputBayesIm.getBayesPm(), dataSet);
         //this.inputBayesIm = inputBayesIm;
+    }
+
+    /**
+     * This method is useful in computing all combinations of possible values of
+     * a set of variables.  The int array sizes contains the number of values
+     * (categories) of each of n variables.  For example suppose sizes = {2, 3,
+     * 4, 2, 2}. Then consider the table: 0   0 0 0 0 0 1   1 0 0 0 0 2   0 1 0
+     * 0 0 3   1 1 0 0 0 4   0 2 0 0 0 5   1 2 0 0 0 . . . 94   0 2 3 1 1 95   1
+     * 2 3 1 1 </p> In this example the method returns the 5 values
+     * corresponding to the index ind which ranges from 0 to 95. E.g.
+     * indexToValues(94, {2, 3, 4, 2, 2}, 5) = {0, 2, 3, 1, 1}
+     */
+    public static int[] indexToValues(int ind, int[] sizes) {
+        int n = sizes.length;
+        int[] rep = new int[n];
+
+        for (int i = 0; i < n; i++) {
+            rep[i] = (byte) 0;
+        }
+
+        for (int i = 0; i < n; i++) {
+            int rem = ind % sizes[i];
+            if (rem != 0) {
+                //rep[n - i - 1] = (byte) rem;
+                rep[i] = rem;
+                ind -= 1;
+            }
+            ind /= sizes[i];
+        }
+
+        return rep;
+    }
+
+    /**
+     * Inverse of the function indexToValues.  Given a set of values this method
+     * computes the corresonding index.  Hence for the example above
+     * valuesToIndex({2, 3, 4, 2, 2}, {0, 2, 3, 1, 1}, 5) = 94.
+     *
+     * @param sizes
+     * @param values
+     * @return index
+     */
+    public static int valuesToIndex(int[] sizes, int[] values) {
+        int n = sizes.length;
+        int index = values[0];
+
+        int prod = 1;
+        for (int i = 1; i < n; i++) {
+            prod *= sizes[i - 1];
+            index += values[i] * prod;
+        }
+        return index;
     }
 
     private void initialize() {
@@ -184,7 +235,7 @@ public final class EmBayesEstimator {
         //Each such column should contain missing data for each case.
 
         int numFullCases = dataSet.getNumRows();
-        List<Node> variables = new LinkedList<Node>();
+        List <Node> variables = new LinkedList <Node>();
 
         for (Node node : nodes) {
             if (node.getNodeType() == NodeType.LATENT) {
@@ -193,8 +244,7 @@ public final class EmBayesEstimator {
                         new DiscreteVariable(node.getName(), numCategories);
                 latentVar.setNodeType(NodeType.LATENT);
                 variables.add(latentVar);
-            }
-            else {
+            } else {
                 String name = bayesPm.getVariable(node).getName();
                 Node variable = dataSet.getVariable(name);
                 variables.add(variable);
@@ -208,8 +258,7 @@ public final class EmBayesEstimator {
                 for (int i = 0; i < numFullCases; i++) {
                     dsMixed.setInt(i, j, -99);
                 }
-            }
-            else {
+            } else {
                 String name = bayesPm.getVariable(nodes[j]).getName();
                 Node variable = dataSet.getVariable(name);
                 int index = dataSet.getColumn(variable);
@@ -357,8 +406,7 @@ public final class EmBayesEstimator {
                         estimatedCounts[j][0][mixedData.getInt(i, j)] += 1.0;
                         //System.out.println("Adding 1.0 to " + varName +
                         //        " row 0 category " + mixedData[j][i]);
-                    }
-                    else {
+                    } else {
                         //find marginal probability, given obs data in this case, p(v=0)
                         Evidence evidenceThisCase = Evidence.tautology(inputBayesIm);
                         boolean existsEvidence = false;
@@ -407,8 +455,7 @@ public final class EmBayesEstimator {
                 //for(int m = 0; m < ar.getNumSplits(); m++)
                 //    System.out.print("    " + m + " " + estimatedCounts[j][0][m]);
                 //System.out.println();
-            }
-            else {    //For variables with parents:
+            } else {    //For variables with parents:
                 int numRows = inputBayesIm.getNumRows(varIndex);
                 for (int row = 0; row < numRows; row++) {
                     int[] parValues =
@@ -496,8 +543,7 @@ public final class EmBayesEstimator {
                                 new int[parentVarIndices.length + 1];
 
                         parPlusChildIndices[0] = varIndex;
-                        for (int pc = 1; pc < parPlusChildIndices.length; pc++)
-                        {
+                        for (int pc = 1; pc < parPlusChildIndices.length; pc++) {
                             parPlusChildIndices[pc] = parentVarIndices[pc - 1];
                             parPlusChildValues[pc] = parValues[pc - 1];
                         }
@@ -597,8 +643,7 @@ public final class EmBayesEstimator {
                             condProbs[j][0][m]);
                 }
                 //System.out.println();
-            }
-            else {
+            } else {
 
                 for (int row = 0; row < numRows; row++) {
 //                    int[] parValues = inputBayesIm.getParentValues(varIndex,
@@ -618,8 +663,7 @@ public final class EmBayesEstimator {
                         if (estimatedCountsDenom[j][row] != 0.0) {
                             condProbs[j][row][m] = estimatedCounts[j][row][m] /
                                     estimatedCountsDenom[j][row];
-                        }
-                        else {
+                        } else {
                             condProbs[j][row][m] = Double.NaN;
                         }
                         //System.out.print("  " + condProbs[j][row][m]);
@@ -798,59 +842,6 @@ public final class EmBayesEstimator {
 
     public double[][][] getCondProbs() {
         return condProbs;
-    }
-
-
-    /**
-     * This method is useful in computing all combinations of possible values of
-     * a set of variables.  The int array sizes contains the number of values
-     * (categories) of each of n variables.  For example suppose sizes = {2, 3,
-     * 4, 2, 2}. Then consider the table: 0   0 0 0 0 0 1   1 0 0 0 0 2   0 1 0
-     * 0 0 3   1 1 0 0 0 4   0 2 0 0 0 5   1 2 0 0 0 . . . 94   0 2 3 1 1 95   1
-     * 2 3 1 1 </p> In this example the method returns the 5 values
-     * corresponding to the index ind which ranges from 0 to 95. E.g.
-     * indexToValues(94, {2, 3, 4, 2, 2}, 5) = {0, 2, 3, 1, 1}
-     */
-    public static int[] indexToValues(int ind, int[] sizes) {
-        int n = sizes.length;
-        int[] rep = new int[n];
-
-        for (int i = 0; i < n; i++) {
-            rep[i] = (byte) 0;
-        }
-
-        for (int i = 0; i < n; i++) {
-            int rem = ind % sizes[i];
-            if (rem != 0) {
-                //rep[n - i - 1] = (byte) rem;
-                rep[i] = rem;
-                ind -= 1;
-            }
-            ind /= sizes[i];
-        }
-
-        return rep;
-    }
-
-    /**
-     * Inverse of the function indexToValues.  Given a set of values this method
-     * computes the corresonding index.  Hence for the example above
-     * valuesToIndex({2, 3, 4, 2, 2}, {0, 2, 3, 1, 1}, 5) = 94.
-     *
-     * @param sizes
-     * @param values
-     * @return index
-     */
-    public static int valuesToIndex(int[] sizes, int[] values) {
-        int n = sizes.length;
-        int index = values[0];
-
-        int prod = 1;
-        for (int i = 1; i < n; i++) {
-            prod *= sizes[i - 1];
-            index += values[i] * prod;
-        }
-        return index;
     }
 
 }

@@ -43,7 +43,7 @@ public class KernelUtils {
      * @param nodes   the variables to construct the Gram matrix for
      * @return
      */
-    public static UpperSymmPackMatrix constructGramMatrix(List<Kernel> kernels, DataSet dataset, List<Node> nodes) {
+    public static UpperSymmPackMatrix constructGramMatrix(List <Kernel> kernels, DataSet dataset, List <Node> nodes) {
         int m = dataset.getNumRows();
         UpperSymmPackMatrix gram = new UpperSymmPackMatrix(m);
         for (int k = 0; k < nodes.size(); k++) {
@@ -74,7 +74,7 @@ public class KernelUtils {
      * @param nodes   the variables to construct the Gram matrix for
      * @return
      */
-    public static Matrix constructCentralizedGramMatrix(List<Kernel> kernels, DataSet dataset, List<Node> nodes) {
+    public static Matrix constructCentralizedGramMatrix(List <Kernel> kernels, DataSet dataset, List <Node> nodes) {
         int m = dataset.getNumRows();
         UpperSymmPackMatrix gram = constructGramMatrix(kernels, dataset, nodes);
         UpperSymmPackMatrix H = constructH(m);
@@ -115,7 +115,7 @@ public class KernelUtils {
      * @param nodes   the variables to construct the Gram matrix for
      * @return
      */
-    public static Matrix incompleteCholeskyGramMatrix(List<Kernel> kernels, DataSet dataset, List<Node> nodes, double precision) {
+    public static Matrix incompleteCholeskyGramMatrix(List <Kernel> kernels, DataSet dataset, List <Node> nodes, double precision) {
         if (precision <= 0) {
             throw new IllegalArgumentException("Precision must be > 0");
         }
@@ -194,7 +194,7 @@ public class KernelUtils {
 
     // evaluates tensor product for kernels
 
-    private static double evaluate(List<Kernel> kernels, DataSet dataset, List<Node> vars, int i, int j) {
+    private static double evaluate(List <Kernel> kernels, DataSet dataset, List <Node> vars, int i, int j) {
         int col = dataset.getColumn(vars.get(0));
         double keval = kernels.get(0).eval(dataset.getDouble(i, col), dataset.getDouble(j, col));
         for (int k = 1; k < vars.size(); k++) {

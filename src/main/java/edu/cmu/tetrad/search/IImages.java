@@ -42,14 +42,14 @@ public interface IImages extends GraphScorer {
 
     Graph search();
 
-    Graph search(List<Node> nodes);
+    Graph search(List <Node> nodes);
 
     Knowledge getKnowledge();
 
     void setKnowledge(Knowledge knowledge);
 
     @Override
-	double scoreGraph(Graph graph);
+    double scoreGraph(Graph graph);
 
 //    void setStructurePrior(double structurePrior);
 //
@@ -74,21 +74,21 @@ public interface IImages extends GraphScorer {
 
     double getScore(Graph dag);
 
-    SortedSet<ScoredGraph> getTopGraphs();
+    SortedSet <ScoredGraph> getTopGraphs();
 
     int getNumPatternsToStore();
 
     void setNumPatternsToStore(int numPatternsToStore);
 
-    Map<Edge, Integer> getBoostrapCounts(int numBootstraps);
+    Map <Edge, Integer> getBoostrapCounts(int numBootstraps);
 
     String bootstrapPercentagesString(int numBootstraps);
 
     String gesCountsString();
 
-    Map<Edge, Double> averageStandardizedCoefficients();
+    Map <Edge, Double> averageStandardizedCoefficients();
 
-    Map<Edge, Double> averageStandardizedCoefficients(Graph graph);
+    Map <Edge, Double> averageStandardizedCoefficients(Graph graph);
 
     String averageStandardizedCoefficientsString();
 
@@ -96,7 +96,7 @@ public interface IImages extends GraphScorer {
 
     String logEdgeBayesFactorsString(Graph dag);
 
-    Map<Edge, Double> logEdgeBayesFactors(Graph dag);
+    Map <Edge, Double> logEdgeBayesFactors(Graph dag);
 
 //    void setfCutoffP(double v);
 //

@@ -27,11 +27,12 @@ import edu.cmu.tetrad.session.SessionModel;
 
 /**
  * @author kaalpurush
- *
  */
 public interface KnowledgeBoxInput2 extends SessionModel, VariableSource {
     static final long serialVersionUID = 23L;
-	Graph getSourceGraph();
+
+    Graph getSourceGraph();
+
     Graph getResultGraph();
 }
 

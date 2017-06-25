@@ -24,8 +24,6 @@ package edu.cmu.tetrad.data;
 import edu.cmu.tetrad.graph.IndependenceFact;
 import edu.cmu.tetrad.graph.Node;
 
-import java.util.*;
-
 /**
  * Stores a list of independence facts.
  *
@@ -34,8 +32,8 @@ import java.util.*;
 public class IndependenceFacts implements DataModel {
     static final long serialVersionUID = 23L;
 
-    private SortedSet<IndependenceFact> facts = new TreeSet<IndependenceFact>();
-    private Set<IndependenceFact> unsortedFacts = new HashSet<IndependenceFact>();
+    private SortedSet <IndependenceFact> facts = new TreeSet <IndependenceFact>();
+    private Set <IndependenceFact> unsortedFacts = new HashSet <IndependenceFact>();
     private String name = "";
     private Knowledge knowledge = new Knowledge();
 
@@ -43,14 +41,9 @@ public class IndependenceFacts implements DataModel {
         // blank
     }
 
-    public void add(IndependenceFact fact) {
-        this.facts.add(fact);
-        this.unsortedFacts.add(fact);
-    }
-
     public IndependenceFacts(IndependenceFacts facts) {
         this();
-        this.facts = new TreeSet<IndependenceFact>(facts.facts);
+        this.facts = new TreeSet <IndependenceFact>(facts.facts);
     }
 
     /**
@@ -63,8 +56,13 @@ public class IndependenceFacts implements DataModel {
         return new IndependenceFacts();
     }
 
+    public void add(IndependenceFact fact) {
+        this.facts.add(fact);
+        this.unsortedFacts.add(fact);
+    }
+
     @Override
-	public String toString() {
+    public String toString() {
         StringBuilder builder = new StringBuilder();
 
         for (IndependenceFact fact : facts) {
@@ -80,34 +78,34 @@ public class IndependenceFacts implements DataModel {
     }
 
     @Override
-	public void setName(String name) {
-        this.name = name;
-    }
-
-    @Override
-	public String getName() {
+    public String getName() {
         return this.name;
     }
 
-    public boolean isIndependent(Node x, Node y, Node...z) {
+    @Override
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public boolean isIndependent(Node x, Node y, Node... z) {
         IndependenceFact fact = new IndependenceFact(x, y, z);
         return unsortedFacts.contains(fact);
     }
 
     @Override
-	public Knowledge getKnowledge() {
+    public Knowledge getKnowledge() {
         return this.knowledge;
     }
 
     @Override
-	public void setKnowledge(Knowledge knowledge) {
+    public void setKnowledge(Knowledge knowledge) {
         if (knowledge == null) throw new NullPointerException();
         this.knowledge = knowledge;
     }
 
     @Override
-	public List<Node> getVariables() {
-        Set<Node> variables = new HashSet<Node>();
+    public List <Node> getVariables() {
+        Set <Node> variables = new HashSet <Node>();
 
         for (IndependenceFact fact : facts) {
             variables.add(fact.getX());
@@ -119,13 +117,13 @@ public class IndependenceFacts implements DataModel {
         }
 
 
-        return new ArrayList<Node>(variables);
+        return new ArrayList <Node>(variables);
     }
 
     @Override
-	public List<String> getVariableNames() {
-        List<Node> variables = getVariables();
-        List<String> names = new ArrayList<String>();
+    public List <String> getVariableNames() {
+        List <Node> variables = getVariables();
+        List <String> names = new ArrayList <String>();
 
         for (Node node : variables) {
             names.add(node.getName());

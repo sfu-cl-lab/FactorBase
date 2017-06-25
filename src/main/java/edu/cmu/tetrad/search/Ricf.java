@@ -34,8 +34,6 @@ import edu.cmu.tetrad.graph.Endpoint;
 import edu.cmu.tetrad.graph.Graph;
 import edu.cmu.tetrad.graph.Node;
 
-import java.util.*;
-
 /**
  * Implements ICF as specified in Drton and Richardson (2003), Iterative Conditional Fitting for Gaussian Ancestral
  * Graph Models, using hints from previous implementations by Drton in the ggm package in R and by Silva in the Purify
@@ -65,7 +63,7 @@ public class Ricf {
             return new RicfResult(S, S, null, null, 1);
         }
 
-        List<Node> nodes = new ArrayList<Node>();
+        List <Node> nodes = new ArrayList <Node>();
 
         for (String name : covMatrix.getVariableNames()) {
             nodes.add(mag.getNode(name));
@@ -78,7 +76,7 @@ public class Ricf {
         int[] ugComp = complement(p, ug);
 
         if (ug.length > 0) {
-            List<Node> _ugNodes = new LinkedList<Node>();
+            List <Node> _ugNodes = new LinkedList <Node>();
 
             for (int i : ug) {
                 _ugNodes.add(nodes.get(i));
@@ -292,17 +290,17 @@ public class Ricf {
     /**
      * Returns an enumeration of the cliques of the given graph considered as undirected.
      */
-    public List<List<Node>> cliques(Graph graph) {
-        List<Node> nodes = graph.getNodes();
-        List<List<Node>> cliques = new ArrayList<List<Node>>();
+    public List <List <Node>> cliques(Graph graph) {
+        List <Node> nodes = graph.getNodes();
+        List <List <Node>> cliques = new ArrayList <List <Node>>();
 
         for (int i = 0; i < nodes.size(); i++) {
-            List<Node> adj = graph.getAdjacentNodes(nodes.get(i));
+            List <Node> adj = graph.getAdjacentNodes(nodes.get(i));
 
-            SortedSet<Integer> L1 = new TreeSet<Integer>();
+            SortedSet <Integer> L1 = new TreeSet <Integer>();
             L1.add(i);
 
-            SortedSet<Integer> L2 = new TreeSet<Integer>();
+            SortedSet <Integer> L2 = new TreeSet <Integer>();
 
             for (Node _adj : adj) {
                 L2.add(nodes.indexOf(_adj));
@@ -335,7 +333,7 @@ public class Ricf {
         DoubleFactory2D factory = DoubleFactory2D.dense;
         Algebra algebra = new Algebra();
 
-        List<Node> nodes = graph.getNodes();
+        List <Node> nodes = graph.getNodes();
         String[] nodeNames = new String[nodes.size()];
 
         for (int i = 0; i < nodes.size(); i++) {
@@ -351,7 +349,7 @@ public class Ricf {
         DoubleMatrix2D S = cov.getSubmatrix(nodeNames).getMatrix();
         graph = graph.subgraph(nodes);
 
-        List<List<Node>> cli = cliques(graph);
+        List <List <Node>> cli = cliques(graph);
 
         int nc = cli.size();
 
@@ -405,7 +403,7 @@ public class Ricf {
         return new FitConGraphResult(V, dev, df, it);
     }
 
-    private int[] asIndices(List<Node> clique, List<Node> nodes) {
+    private int[] asIndices(List <Node> clique, List <Node> nodes) {
         int[] a = new int[clique.size()];
 
         for (int j = 0; j < clique.size(); j++) {
@@ -466,8 +464,8 @@ public class Ricf {
     }
 
 
-    private int[] ugNodes(Graph mag, List<Node> nodes) {
-        List<Node> ugNodes = new LinkedList<Node>();
+    private int[] ugNodes(Graph mag, List <Node> nodes) {
+        List <Node> ugNodes = new LinkedList <Node>();
 
         for (Node node : nodes) {
             if (mag.getNodesInTo(node, Endpoint.ARROW).size() == 0) {
@@ -484,11 +482,11 @@ public class Ricf {
         return indices;
     }
 
-    private int[][] parentIndices(int p, Graph mag, List<Node> nodes) {
+    private int[][] parentIndices(int p, Graph mag, List <Node> nodes) {
         int[][] pars = new int[p][];
 
         for (int i = 0; i < p; i++) {
-            List<Node> parents = mag.getParents(nodes.get(i));
+            List <Node> parents = mag.getParents(nodes.get(i));
             int[] indices = new int[parents.size()];
 
             for (int j = 0; j < parents.size(); j++) {
@@ -501,15 +499,15 @@ public class Ricf {
         return pars;
     }
 
-    private int[][] spouseIndices(int p, Graph mag, List<Node> nodes) {
+    private int[][] spouseIndices(int p, Graph mag, List <Node> nodes) {
         int[][] spo = new int[p][];
 
         for (int i = 0; i < p; i++) {
-            List<Node> list1 = mag.getNodesOutTo(nodes.get(i), Endpoint.ARROW);
-            List<Node> list2 = mag.getNodesInTo(nodes.get(i), Endpoint.ARROW);
+            List <Node> list1 = mag.getNodesOutTo(nodes.get(i), Endpoint.ARROW);
+            List <Node> list2 = mag.getNodesInTo(nodes.get(i), Endpoint.ARROW);
             list1.retainAll(list2);
 
-            List<Node> list3 = new LinkedList<Node>(nodes);
+            List <Node> list3 = new LinkedList <Node>(nodes);
             list3.removeAll(list1);
 
             int[] indices = new int[list1.size()];
@@ -525,7 +523,7 @@ public class Ricf {
     }
 
 
-    private int moveLastBack(SortedSet<Integer> L1, SortedSet<Integer> L2) {
+    private int moveLastBack(SortedSet <Integer> L1, SortedSet <Integer> L2) {
         if (L1.size() == 1) {
             return -1;
         }
@@ -542,9 +540,9 @@ public class Ricf {
      * considered--i.e. L1 is being extended to the right. Nodes not greater than the most recently moved node are not
      * considered--this is a mechanism for
      */
-    private void addNodesToRight(SortedSet<Integer> L1, SortedSet<Integer> L2,
-                                 Graph graph, List<Node> nodes, int moved) {
-        for (int j : new TreeSet<Integer>(L2)) {
+    private void addNodesToRight(SortedSet <Integer> L1, SortedSet <Integer> L2,
+                                 Graph graph, List <Node> nodes, int moved) {
+        for (int j : new TreeSet <Integer>(L2)) {
             if (j > max(L1) && j > moved && addable(j, L1, graph, nodes)) {
                 L1.add(j);
                 L2.remove(j);
@@ -552,9 +550,9 @@ public class Ricf {
         }
     }
 
-    private void record(SortedSet<Integer> L1, List<List<Node>> cliques,
-                        List<Node> nodes) {
-        List<Node> clique = new LinkedList<Node>();
+    private void record(SortedSet <Integer> L1, List <List <Node>> cliques,
+                        List <Node> nodes) {
+        List <Node> clique = new LinkedList <Node>();
 
         for (int i : L1) {
             clique.add(nodes.get(i));
@@ -563,7 +561,7 @@ public class Ricf {
         cliques.add(clique);
     }
 
-    private boolean isMaximal(SortedSet<Integer> L1, SortedSet<Integer> L2, Graph graph, List<Node> nodes) {
+    private boolean isMaximal(SortedSet <Integer> L1, SortedSet <Integer> L2, Graph graph, List <Node> nodes) {
         for (int j : L2) {
             if (addable(j, L1, graph, nodes)) {
                 return false;
@@ -573,7 +571,7 @@ public class Ricf {
         return true;
     }
 
-    private int max(SortedSet<Integer> L1) {
+    private int max(SortedSet <Integer> L1) {
         int max = Integer.MIN_VALUE;
 
         for (int i : L1) {
@@ -588,7 +586,7 @@ public class Ricf {
     /**
      * Returns true if j is adjacent to all the nodes in l1.
      */
-    private boolean addable(int j, SortedSet<Integer> L1, Graph graph, List<Node> nodes) {
+    private boolean addable(int j, SortedSet <Integer> L1, Graph graph, List <Node> nodes) {
         for (int k : L1) {
             if (!graph.isAdjacentTo(nodes.get(j), nodes.get(k))) {
                 return false;
@@ -617,7 +615,7 @@ public class Ricf {
         }
 
         @Override
-		public String toString() {
+        public String toString() {
             StringBuilder buf = new StringBuilder();
 
             buf.append("\nSigma hat\n");
@@ -660,10 +658,10 @@ public class Ricf {
     }
 
     public static class FitConGraphResult {
-        private DoubleMatrix2D shat;
         double deviance;
         int df;
         int iterations;
+        private DoubleMatrix2D shat;
 
         public FitConGraphResult(DoubleMatrix2D shat, double deviance,
                                  int df, int iterations) {
@@ -674,7 +672,7 @@ public class Ricf {
         }
 
         @Override
-		public String toString() {
+        public String toString() {
             StringBuilder buf = new StringBuilder();
 
             buf.append("\nSigma hat\n");

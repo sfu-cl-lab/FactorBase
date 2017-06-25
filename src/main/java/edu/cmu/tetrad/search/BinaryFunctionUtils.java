@@ -70,7 +70,7 @@ public class BinaryFunctionUtils {
     }
 
     public long count() {
-        Set<Integer> variables = new HashSet<Integer>();
+        Set <Integer> variables = new HashSet <Integer>();
         for (int i = 0; i < numArgs; i++) variables.add(i);
         long numValidated = 0;
         long numFunctions = getNumFunctions();
@@ -84,7 +84,7 @@ public class BinaryFunctionUtils {
             }
 
             function.resetFunction(index);
-            Set<Integer> validated = new HashSet<Integer>();
+            Set <Integer> validated = new HashSet <Integer>();
 
             for (int row = 0; row < getNumRows(); row++) {
                 boolean[] vals = function.getRow(row);
@@ -127,9 +127,9 @@ public class BinaryFunctionUtils {
     }
 
     public boolean satisfiesTestPair(BinaryFunction function) {
-        Set<Integer> variables = new HashSet<Integer>();
+        Set <Integer> variables = new HashSet <Integer>();
         for (int i = 0; i < numArgs; i++) variables.add(i);
-        Set<Integer> validated = new HashSet<Integer>();
+        Set <Integer> validated = new HashSet <Integer>();
 
         for (int row = 0; row < getNumRows(); row++) {
             boolean[] vals = function.getRow(row);
@@ -155,7 +155,7 @@ public class BinaryFunctionUtils {
         return false;
     }
 
-    public List<BinaryFunction> findNontransitiveTriple() {
+    public List <BinaryFunction> findNontransitiveTriple() {
         long numFunctions = getNumFunctions();
         int n = 0;
 
@@ -190,7 +190,7 @@ public class BinaryFunctionUtils {
                     boolean transposable = equalsUnderSomePermutation(g1, g3);
 
                     if (!transposable) {
-                        LinkedList<BinaryFunction> list = new LinkedList<BinaryFunction>();
+                        LinkedList <BinaryFunction> list = new LinkedList <BinaryFunction>();
                         list.add(g1);
                         list.add(g2);
                         list.add(g3);
@@ -216,11 +216,11 @@ public class BinaryFunctionUtils {
     }
 
     public long count2() {
-        Set<Integer> variables = new HashSet<Integer>();
+        Set <Integer> variables = new HashSet <Integer>();
         for (int i = 0; i < numArgs; i++) variables.add(i);
         long numFunctions = getNumFunctions();
 
-        Set<BinaryFunction> prototypes = new HashSet<BinaryFunction>();
+        Set <BinaryFunction> prototypes = new HashSet <BinaryFunction>();
 
         for (long index = 0; index < numFunctions; index++) {
             if (index % 1000 == 0) System.out.println(index + " " + prototypes.size());
@@ -256,7 +256,7 @@ public class BinaryFunctionUtils {
 
     }
 
-    private boolean classOfSomePrototype(BinaryFunction candidate, Set<BinaryFunction> prototypes) {
+    private boolean classOfSomePrototype(BinaryFunction candidate, Set <BinaryFunction> prototypes) {
         for (BinaryFunction f3 : prototypes) {
             if (equalsUnderSomePermutation(candidate, f3)) {
                 return true;

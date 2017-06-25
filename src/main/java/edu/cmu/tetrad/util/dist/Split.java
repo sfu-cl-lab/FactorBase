@@ -34,6 +34,7 @@ import java.text.NumberFormat;
  *
  * @author Joseph Ramsey jdramsey@andrew.cmu.edu
  */
+
 /**
  * Wraps a chi square distribution for purposes of drawing random samples.
  * Methods are provided to allow parameters to be manipulated in an interface.
@@ -96,7 +97,7 @@ public class Split implements Distribution {
      * Returns a random value from [-b, -a] U [a, b].
      */
     @Override
-	public double nextRandom() {
+    public double nextRandom() {
         double c = RandomUtil.getInstance().nextDouble();
         double value = getA() + c * (getB() - getA());
 
@@ -117,19 +118,19 @@ public class Split implements Distribution {
 
 
     @Override
-	public String getName() {
+    public String getName() {
         return "Split Distribution";
     }
 
     @Override
-	public String toString() {
+    public String toString() {
         NumberFormat nf = NumberFormatUtil.getInstance().getNumberFormat();
         return "Split(" + nf.format(a) + ", " + nf.format(b) + ", " + ")";
     }
 
 
     @Override
-	public void setParameter(int index, double value) {
+    public void setParameter(int index, double value) {
         if (index == 0 && value < b) {
             a = value;
         } else if (index == 1 && value > a) {
@@ -140,7 +141,7 @@ public class Split implements Distribution {
     }
 
     @Override
-	public double getParameter(int index) {
+    public double getParameter(int index) {
         if (index == 0) {
             return a;
         } else if (index == 1) {
@@ -151,7 +152,7 @@ public class Split implements Distribution {
     }
 
     @Override
-	public String getParameterName(int index) {
+    public String getParameterName(int index) {
         if (index == 0) {
             return "Lower bound (> 0)";
         } else if (index == 1) {
@@ -162,7 +163,7 @@ public class Split implements Distribution {
     }
 
     @Override
-	public int getNumParameters() {
+    public int getNumParameters() {
         return 2;
     }
 

@@ -36,14 +36,14 @@ public interface SessionModel extends TetradSerializable {
     static final long serialVersionUID = 23L;
 
     /**
-     * Sets the name of the session model.
-     */
-    void setName(String name);
-
-    /**
      * Returns the name of the session model.
      */
     String getName();
+
+    /**
+     * Sets the name of the session model.
+     */
+    void setName(String name);
 
 }
 

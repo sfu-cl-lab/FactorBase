@@ -27,7 +27,7 @@ import edu.cmu.tetrad.util.RandomUtil;
  * Represents a lognormal distribution for purposes of sampling.
  *
  * @author Joseph Ramsey
-*/
+ */
 public class LogNormal implements Distribution {
     static final long serialVersionUID = 23L;
 
@@ -35,6 +35,10 @@ public class LogNormal implements Distribution {
 
     public LogNormal() {
         this(1);
+    }
+
+    public LogNormal(double sd) {
+        this.sd = sd;
     }
 
     /**
@@ -49,22 +53,18 @@ public class LogNormal implements Distribution {
         return new LogNormal(.5);
     }
 
-    public LogNormal(double sd) {
-        this.sd = sd;
-    }
-
     @Override
-	public int getNumParameters() {
+    public int getNumParameters() {
         return 1;
     }
 
     @Override
-	public String getName() {
+    public String getName() {
         return "LogNormal";
     }
 
     @Override
-	public void setParameter(int index, double value) {
+    public void setParameter(int index, double value) {
         if (index == 0) {
             sd = value;
         }
@@ -73,7 +73,7 @@ public class LogNormal implements Distribution {
     }
 
     @Override
-	public double getParameter(int index) {
+    public double getParameter(int index) {
         if (index == 0) {
             return sd;
         }
@@ -82,18 +82,18 @@ public class LogNormal implements Distribution {
     }
 
     @Override
-	public String getParameterName(int index) {
+    public String getParameterName(int index) {
         return "Standard Deviation";
     }
 
     @Override
-	public double nextRandom() {
+    public double nextRandom() {
         double random = RandomUtil.getInstance().nextNormal(0, sd);
         return Math.exp(random);
     }
 
     @Override
-	public String toString() {
+    public String toString() {
         return "LogNormal";
     }
 }

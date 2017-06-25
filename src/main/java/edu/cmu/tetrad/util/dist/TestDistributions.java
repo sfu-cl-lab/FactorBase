@@ -32,6 +32,10 @@ public class TestDistributions extends TestCase {
         super(name);
     }
 
+    public static Test suite() {
+        return new TestSuite(TestDistributions.class);
+    }
+
     public void testNormal() {
         Distribution normal = new Normal(10, 1);
         printSortedRandoms(normal);
@@ -54,10 +58,6 @@ public class TestDistributions extends TestCase {
         for (int i = 0; i < 100; i++) {
             System.out.println(values[i]);
         }
-    }
-
-    public static Test suite() {
-        return new TestSuite(TestDistributions.class);
     }
 }
 

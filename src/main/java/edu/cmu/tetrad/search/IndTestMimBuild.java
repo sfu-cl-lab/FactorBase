@@ -36,8 +36,6 @@ import edu.cmu.tetrad.util.ProbUtils;
 import edu.cmu.tetrad.util.RandomUtil;
 import edu.cmu.tetrad.util.TetradLogger;
 
-import java.util.*;
-
 /**
  * Checks the independence of latent variables in a measurement model by constructing estimating its parameters under
  * the special conditions illustrated by Figure 12.18 of CPS, 2nd edition. This is basically a test of the rank of the
@@ -68,11 +66,11 @@ public final class IndTestMimBuild implements IndependenceTest {
     /**
      * The variables of <code>dataSet</code>.
      */
-    private List<Node> vars;
+    private List <Node> vars;
 
     private Knowledge measurements;
 
-    private List<String> latents;
+    private List <String> latents;
 
     private SemGraph graph;
 
@@ -129,15 +127,15 @@ public final class IndTestMimBuild implements IndependenceTest {
      * Required by IndependenceTest.
      */
     @Override
-	public IndependenceTest indTestSubset(List vars) {
+    public IndependenceTest indTestSubset(List vars) {
         throw new UnsupportedOperationException();
     }
 
-    public List<String> getAllVariablesStrings() {
-        List<String> list = new LinkedList<String>();
+    public List <String> getAllVariablesStrings() {
+        List <String> list = new LinkedList <String>();
 
         KnowledgeEdge temp;
-        Iterator<KnowledgeEdge> it = measurements.requiredEdgesIterator();
+        Iterator <KnowledgeEdge> it = measurements.requiredEdgesIterator();
 
         while (it.hasNext()) {
             temp = it.next();
@@ -152,11 +150,11 @@ public final class IndTestMimBuild implements IndependenceTest {
         return list;
     }
 
-    public List<Node> getVariableList() {
-        List<String> listNames = new LinkedList<String>();
-        List<Node> outputList = new LinkedList<Node>();
+    public List <Node> getVariableList() {
+        List <String> listNames = new LinkedList <String>();
+        List <Node> outputList = new LinkedList <Node>();
 
-        Iterator<KnowledgeEdge> it = measurements.requiredEdgesIterator();
+        Iterator <KnowledgeEdge> it = measurements.requiredEdgesIterator();
         KnowledgeEdge temp;
 
         while (it.hasNext()) {
@@ -176,6 +174,11 @@ public final class IndTestMimBuild implements IndependenceTest {
         return outputList;
     }
 
+    @Override
+    public DataSet getData() {
+        return dataSet;
+    }
+
     /**
      * Method setData
      *
@@ -187,17 +190,16 @@ public final class IndTestMimBuild implements IndependenceTest {
         covMatrix = new CovarianceMatrix(dataSet);
     }
 
-    @Override
-	public DataSet getData() {
-        return dataSet;
+    public ICovarianceMatrix getCovMatrix() {
+        return covMatrix;
     }
 
     public void setCovMatrix(ICovarianceMatrix covMatrix) {
         this.covMatrix = covMatrix;
     }
 
-    public ICovarianceMatrix getCovMatrix() {
-        return covMatrix;
+    public int getNumBootstrapSamples() {
+        return numBootstrapSamples;
     }
 
     /**
@@ -205,10 +207,6 @@ public final class IndTestMimBuild implements IndependenceTest {
      */
     public void setNumBootstrapSamples(int numSamples) {
         numBootstrapSamples = numSamples;
-    }
-
-    public int getNumBootstrapSamples() {
-        return numBootstrapSamples;
     }
 
     /**
@@ -222,7 +220,7 @@ public final class IndTestMimBuild implements IndependenceTest {
         latents.clear();
         measureTable.clear();
 
-        Iterator<KnowledgeEdge> it = measurements.requiredEdgesIterator();
+        Iterator <KnowledgeEdge> it = measurements.requiredEdgesIterator();
         while (it.hasNext()) {
             KnowledgeEdge temp = it.next();
             String x = temp.getFrom(); // this the latent
@@ -267,6 +265,15 @@ public final class IndTestMimBuild implements IndependenceTest {
     }
 
     /**
+     * Gets the current significance level.
+     *
+     * @return this number.
+     */
+    public double getSignificance() {
+        return sig;
+    }
+
+    /**
      * Sets the significance level at which independence judgments should be made.  Affects the cutoff for partial
      * correlations to be considered statistically equal to zero.
      *
@@ -281,21 +288,20 @@ public final class IndTestMimBuild implements IndependenceTest {
         }
     }
 
-    /**
-     * Gets the current significance level.
-     *
-     * @return this number.
-     */
-    public double getSignificance() {
-        return sig;
-    }
-
     /*public void setIndTestType(int testType) {
 
         if (testType == MIMBUILD_MLE || testType == MIMBUILD_2SLS || testType == MIMBUILD_BOOTSTRAP)
             this.testType = testType;
         else
             throw new IllegalArgumentException("Invalid independence test.");
+    }*/
+
+    public int getAlgorithmType() {
+        return algorithmType;
+    }
+
+    /*public int getIndTestType() {
+        return testType;
     }*/
 
     public void setAlgorithmType(int algoType) {
@@ -308,14 +314,6 @@ public final class IndTestMimBuild implements IndependenceTest {
         }
     }
 
-    /*public int getIndTestType() {
-        return testType;
-    }*/
-
-    public int getAlgorithmType() {
-        return algorithmType;
-    }
-
     /**
      * Returns the list of variables over which this independence checker is capable of determinine independence
      * relations-- that is, all the variables in the given graph or the given data set.
@@ -323,7 +321,7 @@ public final class IndTestMimBuild implements IndependenceTest {
      * @return this list of variables.
      */
     @Override
-	public List<Node> getVariables() {
+    public List <Node> getVariables() {
         return Collections.unmodifiableList(vars);
     }
 
@@ -336,7 +334,7 @@ public final class IndTestMimBuild implements IndependenceTest {
      * @return true iff x _||_ y | z.
      */
     @Override
-	public boolean isIndependent(Node x, Node y, List<Node> z) {
+    public boolean isIndependent(Node x, Node y, List <Node> z) {
         //TODO: remove this
         /*int indices0[] = {0, 5, 6, 7, 10, 11};
         int indices1[] = {1, 2, 4};
@@ -403,7 +401,7 @@ public final class IndTestMimBuild implements IndependenceTest {
             return isIndependentBootstrap(x, y, z);
         }
 
-        List<String> subset = new ArrayList<String>();
+        List <String> subset = new ArrayList <String>();
 
         Node node_x, node_y, node_z[], measured;
         String z_names[] = new String[z.size()];
@@ -540,19 +538,19 @@ public final class IndTestMimBuild implements IndependenceTest {
     }
 
     @Override
-	public boolean isIndependent(Node x, Node y, Node... z) {
-        List<Node> zList = Arrays.asList(z);
+    public boolean isIndependent(Node x, Node y, Node... z) {
+        List <Node> zList = Arrays.asList(z);
         return isIndependent(x, y, zList);
     }
 
     @Override
-	public boolean isDependent(Node x, Node y, List<Node> z) {
+    public boolean isDependent(Node x, Node y, List <Node> z) {
         return !isIndependent(x, y, z);
     }
 
     @Override
-	public boolean isDependent(Node x, Node y, Node... z) {
-        List<Node> zList = Arrays.asList(z);
+    public boolean isDependent(Node x, Node y, Node... z) {
+        List <Node> zList = Arrays.asList(z);
         return isDependent(x, y, zList);
     }
 
@@ -560,7 +558,7 @@ public final class IndTestMimBuild implements IndependenceTest {
      * This is just an adaptation of the isIndependent method of IndTestCramerT
      */
 
-    public boolean isIndependentBootstrap(Node x, Node y, List<Node> z) {
+    public boolean isIndependentBootstrap(Node x, Node y, List <Node> z) {
         // Create index array for the given variables.
         int size = z.size() + 2;
         int[] indices = new int[size];
@@ -587,8 +585,7 @@ public final class IndTestMimBuild implements IndependenceTest {
             // Invert submatrix.
             try {
                 submatrix = MatrixUtils.inverse(submatrix);
-            }
-            catch (Exception e) {
+            } catch (Exception e) {
                 throw new RuntimeException(
                         "Matrix singularity detected while using correlations " +
                                 "\nto check for independence; probably due to collinearity " +
@@ -620,7 +617,7 @@ public final class IndTestMimBuild implements IndependenceTest {
      * Needed for the IndependenceTest interface.  Not meaningful here.
      */
     @Override
-	public double getPValue() {
+    public double getPValue() {
         return Double.NaN;
     }
 
@@ -628,9 +625,9 @@ public final class IndTestMimBuild implements IndependenceTest {
      * Returns the list of variable varNames.
      */
     @Override
-	public List<String> getVariableNames() {
-        List<Node> variables = getVariables();
-        List<String> variableNames = new ArrayList<String>();
+    public List <String> getVariableNames() {
+        List <Node> variables = getVariables();
+        List <String> variableNames = new ArrayList <String>();
 
         for (Node variable : variables) {
             variableNames.add(variable.getName());
@@ -640,24 +637,24 @@ public final class IndTestMimBuild implements IndependenceTest {
     }
 
     @Override
-	public boolean determines(List z, Node x1) {
+    public boolean determines(List z, Node x1) {
         throw new UnsupportedOperationException(
                 "This independence test does not " +
                         "test whether Z determines X for list Z of variable and variable X.");
     }
 
     @Override
-	public double getAlpha() {
+    public double getAlpha() {
         return sig;
     }
 
     @Override
-	public void setAlpha(double alpha) {
+    public void setAlpha(double alpha) {
         throw new UnsupportedOperationException();
     }
 
     @Override
-	public Node getVariable(String name) {
+    public Node getVariable(String name) {
         for (int i = 0; i < getVariables().size(); i++) {
             Node variable = getVariables().get(i);
 
@@ -791,12 +788,12 @@ public final class IndTestMimBuild implements IndependenceTest {
             DoubleMatrix2D implCovarC =
                     estimator.getEstimatedSem().getImplCovar();
             double implCov[][] = implCovarC.toArray();
-            Iterator<Node> vi1 = pm.getVariableNodes().iterator();
+            Iterator <Node> vi1 = pm.getVariableNodes().iterator();
             while (vi1.hasNext()) {
                 Node pmNext1 = vi1.next();
                 if (pmNext1.getNodeType() == NodeType.LATENT) {
                     int column = 0, j = 0;
-                    Iterator<Node> vi2 = pm.getVariableNodes().iterator();
+                    Iterator <Node> vi2 = pm.getVariableNodes().iterator();
                     while (vi2.hasNext()) {
                         Node pmNext2 = vi2.next();
                         if (pmNext2.getNodeType() == NodeType.LATENT) {
@@ -821,7 +818,7 @@ public final class IndTestMimBuild implements IndependenceTest {
     private void fixLatentOrder(SemPm semPm) {
         List newLatents = new ArrayList(latents.size());
 
-        Iterator<Node> it = semPm.getVariableNodes().iterator();
+        Iterator <Node> it = semPm.getVariableNodes().iterator();
         while (it.hasNext()) {
             Node pmNext = it.next();
             if (pmNext.getNodeType() == NodeType.LATENT) {
@@ -840,7 +837,7 @@ public final class IndTestMimBuild implements IndependenceTest {
     }
 
     @Override
-	public String toString() {
+    public String toString() {
         return "MimBuild independence test";
     }
 }

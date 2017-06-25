@@ -31,7 +31,6 @@ import edu.cmu.tetrad.util.ProbUtils;
 import edu.cmu.tetrad.util.TetradLogger;
 
 import java.text.NumberFormat;
-import java.util.*;
 
 /**
  * An adaptation of GES to be used as a global reorientation procedure. Original code by Ricardo Silva, cleaned up by
@@ -42,71 +41,58 @@ import java.util.*;
 public final class GesOrienter implements Reorienter {
 
     /**
+     * For linear algebra.
+     */
+    private final Algebra algebra = new Algebra();
+    /**
+     * Caches scores for discrete search.
+     */
+    private final LocalScoreCache localScoreCache = new LocalScoreCache();
+    /**
      * The data set, various variable subsets of which are to be scored.
      */
     private DataSet dataSet;
-
     /**
      * The correlation matrix for the data set.
      */
     private DoubleMatrix2D variances;
-
     /**
      * Sample size, either from the data set or from the variances.
      */
     private int sampleSize;
-
     /**
      * Specification of forbidden and required edges.
      */
     private IKnowledge knowledge = new Knowledge();
-
     /**
      * For discrete data scoring, the structure prior.
      */
     private double structurePrior;
-
     /**
      * For discrete data scoring, the sample prior.
      */
     private double samplePrior;
-
     /**
      * Map from variables to their column indices in the data set.
      */
-    private HashMap<Node, Integer> hashIndices;
-
+    private HashMap <Node, Integer> hashIndices;
     /**
      * Array of variable names from the data set, in order.
      */
     private String varNames[];
-
     /**
      * List of variables in the data set, in order.
      */
-    private List<Node> variables;
-
+    private List <Node> variables;
     /**
      * True iff the data set is discrete.
      */
     private boolean discrete;
-
     /**
      * The true graph, if known. If this is provided, asterisks will be printed out next to false positive added edges
      * (that is, edges added that aren't adjacencies in the true graph).
      */
     private Graph trueGraph;
-
-    /**
-     * For linear algebra.
-     */
-    private final Algebra algebra = new Algebra();
-
-    /**
-     * Caches scores for discrete search.
-     */
-    private final LocalScoreCache localScoreCache = new LocalScoreCache();
-
     /**
      * Elapsed time of the most recent search.
      */
@@ -147,11 +133,141 @@ public final class GesOrienter implements Reorienter {
     //==========================PUBLIC METHODS==========================//
 
     /**
+     * Get all nodes that are connected to Y by an undirected edge and not adjacent to X.
+     */
+    private static List <Node> getTNeighbors(Node x, Node y, Graph graph) {
+        List <Node> tNeighbors = new LinkedList <Node>(graph.getAdjacentNodes(y));
+        tNeighbors.removeAll(graph.getAdjacentNodes(x));
+
+        for (int i = tNeighbors.size() - 1; i >= 0; i--) {
+            Node z = tNeighbors.get(i);
+            Edge edge = graph.getEdge(y, z);
+
+            if (!Edges.isUndirectedEdge(edge)) {
+                tNeighbors.remove(z);
+            }
+        }
+
+        return tNeighbors;
+    }
+
+    /**
+     * Get all nodes that are connected to Y by an undirected edge and adjacent to X
+     */
+    private static List <Node> getHNeighbors(Node x, Node y, Graph graph) {
+        List <Node> hNeighbors = new LinkedList <Node>(graph.getAdjacentNodes(y));
+        hNeighbors.retainAll(graph.getAdjacentNodes(x));
+
+        for (int i = hNeighbors.size() - 1; i >= 0; i--) {
+            Node z = hNeighbors.get(i);
+            Edge edge = graph.getEdge(y, z);
+            if (!Edges.isUndirectedEdge(edge)) {
+                hNeighbors.remove(z);
+            }
+        }
+
+        return hNeighbors;
+    }
+
+    /**
+     * Do an actual deletion (Definition 13 from Chickering, 2002).
+     */
+    private static void delete(Node x, Node y, Set <Node> subset, Graph graph) {
+        graph.removeEdges(x, y);
+
+        for (Node aSubset : subset) {
+            if (!graph.isParentOf(aSubset, x) && !graph.isParentOf(x, aSubset)) {
+                graph.removeEdge(x, aSubset);
+                graph.addDirectedEdge(x, aSubset);
+            }
+            graph.removeEdge(y, aSubset);
+            graph.addDirectedEdge(y, aSubset);
+        }
+    }
+
+    /**
+     * Test if the candidate deletion is a valid operation (Theorem 17 from Chickering, 2002).
+     */
+    private static boolean validDelete(Node x, Node y, Set <Node> h,
+                                       Graph graph) {
+        List <Node> naYXH = GesOrienter.findNaYX(x, y, graph);
+        naYXH.removeAll(h);
+        return GesOrienter.isClique(naYXH, graph);
+    }
+
+    //===========================PRIVATE METHODS========================//
+
+    /**
+     * Find all nodes that are connected to Y by an undirected edge that are adjacent to X (that is, by undirected or
+     * directed edge) NOTE: very inefficient implementation, since the current library does not allow access to the
+     * adjacency list/matrix of the graph.
+     */
+    private static List <Node> findNaYX(Node x, Node y, Graph graph) {
+        List <Node> naYX = new LinkedList <Node>(graph.getAdjacentNodes(y));
+        naYX.retainAll(graph.getAdjacentNodes(x));
+
+        for (int i = 0; i < naYX.size(); i++) {
+            Node z = naYX.get(i);
+            Edge edge = graph.getEdge(y, z);
+
+            if (!Edges.isUndirectedEdge(edge)) {
+                naYX.remove(z);
+            }
+        }
+
+        return naYX;
+    }
+
+    /**
+     * Returns true iif the given set forms a clique in the given graph
+     */
+    private static boolean isClique(List <Node> set, Graph graph) {
+        List <Node> setv = new LinkedList <Node>(set);
+        for (int i = 0; i < setv.size() - 1; i++) {
+            for (int j = i + 1; j < setv.size(); j++) {
+                if (!graph.isAdjacentTo(setv.get(i), setv.get(j))) {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
+    private static List <Set <Node>> powerSet(List <Node> nodes) {
+        List <Set <Node>> subsets = new ArrayList <Set <Node>>();
+        int total = (int) Math.pow(2, nodes.size());
+        for (int i = 0; i < total; i++) {
+            Set <Node> newSet = new HashSet <Node>();
+            String selection = Integer.toBinaryString(i);
+            for (int j = selection.length() - 1; j >= 0; j--) {
+                if (selection.charAt(j) == '1') {
+                    newSet.add(nodes.get(selection.length() - j - 1));
+                }
+            }
+            subsets.add(newSet);
+        }
+        return subsets;
+    }
+
+    private static int getRowIndex(int dim[], int[] values) {
+        int rowIndex = 0;
+        for (int i = 0; i < dim.length; i++) {
+            rowIndex *= dim[i];
+            rowIndex += values[i];
+        }
+        return rowIndex;
+    }
+
+    private static void print(String message) {
+        TetradLogger.getInstance().log("details", message);
+    }
+
+    /**
      * Greedy equivalence search: Start from the empty graph, add edges till model is significant. Then start deleting
      * edges till a minimum is achieved.
      */
     @Override
-	public void orient(Graph graph) {
+    public void orient(Graph graph) {
 //        System.out.println("GES orientation");
         long startTime = System.currentTimeMillis();
         this.sourceGraph = new EdgeListGraph(graph);
@@ -207,7 +323,7 @@ public final class GesOrienter implements Reorienter {
 //        return graph;
     }
 
-    public Graph search(List<Node> nodes) {
+    public Graph search(List <Node> nodes) {
         long startTime = System.currentTimeMillis();
         localScoreCache.clear();
 
@@ -233,6 +349,11 @@ public final class GesOrienter implements Reorienter {
         return graph;
     }
 
+    /*
+    * Do an actual insertion
+    * (Definition 12 from Chickering, 2002).
+    **/
+
     public IKnowledge getKnowledge() {
         return knowledge;
     }
@@ -241,14 +362,17 @@ public final class GesOrienter implements Reorienter {
      * Sets the background knowledge.
      */
     @Override
-	public void setKnowledge(Knowledge knowledge) {
+    public void setKnowledge(Knowledge knowledge) {
         if (knowledge == null) {
             throw new NullPointerException("Knowledge must not be null.");
         }
         this.knowledge = knowledge;
     }
 
-    //===========================PRIVATE METHODS========================//
+    /*
+     * Test if the candidate insertion is a valid operation
+     * (Theorem 15 from Chickering, 2002).
+     **/
 
     private void initialize(double samplePrior, double structurePrior) {
         setStructurePrior(structurePrior);
@@ -266,12 +390,12 @@ public final class GesOrienter implements Reorienter {
         GesOrienter.print("Initial Score = " + nf.format(bestScore));
 
         Node x, y;
-        Set<Node> t = new HashSet<Node>();
+        Set <Node> t = new HashSet <Node>();
 
         do {
             x = y = null;
 
-            List<Edge> edges = new ArrayList<Edge>();
+            List <Edge> edges = new ArrayList <Edge>();
 
             for (Edge edge : sourceGraph.getEdges()) {
                 edges.add(Edges.undirectedEdge(edge.getNode1(), edge.getNode2()));
@@ -295,10 +419,10 @@ public final class GesOrienter implements Reorienter {
                     continue;
                 }
 
-                List<Node> tNeighbors = GesOrienter.getTNeighbors(_x, _y, graph);
-                List<Set<Node>> tSubsets = GesOrienter.powerSet(tNeighbors);
+                List <Node> tNeighbors = GesOrienter.getTNeighbors(_x, _y, graph);
+                List <Set <Node>> tSubsets = GesOrienter.powerSet(tNeighbors);
 
-                for (Set<Node> tSubset : tSubsets) {
+                for (Set <Node> tSubset : tSubsets) {
 
                     if (!validSetByKnowledge(_x, _y, tSubset, true)) {
                         continue;
@@ -334,6 +458,8 @@ public final class GesOrienter implements Reorienter {
         return score;
     }
 
+    //---Background knowledge methods.
+
     /**
      * Backward equivalence search.
      */
@@ -346,11 +472,11 @@ public final class GesOrienter implements Reorienter {
         double score = initialScore;
         double bestScore = score;
         Node x, y;
-        Set<Node> t = new HashSet<Node>();
+        Set <Node> t = new HashSet <Node>();
         do {
             x = y = null;
-            List<Edge> edges1 = graph.getEdges();
-            List<Edge> edges = new ArrayList<Edge>();
+            List <Edge> edges1 = graph.getEdges();
+            List <Edge> edges = new ArrayList <Edge>();
 
             for (Edge edge : edges1) {
                 Node _x = edge.getNode1();
@@ -372,10 +498,10 @@ public final class GesOrienter implements Reorienter {
                     continue;
                 }
 
-                List<Node> hNeighbors = GesOrienter.getHNeighbors(_x, _y, graph);
-                List<Set<Node>> hSubsets = GesOrienter.powerSet(hNeighbors);
+                List <Node> hNeighbors = GesOrienter.getHNeighbors(_x, _y, graph);
+                List <Set <Node>> hSubsets = GesOrienter.powerSet(hNeighbors);
 
-                for (Set<Node> hSubset : hSubsets) {
+                for (Set <Node> hSubset : hSubsets) {
                     if (!validSetByKnowledge(_x, _y, hSubset, false)) {
                         continue;
                     }
@@ -416,7 +542,7 @@ public final class GesOrienter implements Reorienter {
                 hNeighbors = GesOrienter.getHNeighbors(_x, _y, graph);
                 hSubsets = GesOrienter.powerSet(hNeighbors);
 
-                for (Set<Node> hSubset1 : hSubsets) {
+                for (Set <Node> hSubset1 : hSubsets) {
                     if (!validSetByKnowledge(_x, _y, hSubset1, false)) {
                         continue;
                     }
@@ -453,73 +579,33 @@ public final class GesOrienter implements Reorienter {
     }
 
     /**
-     * Get all nodes that are connected to Y by an undirected edge and not adjacent to X.
-     */
-    private static List<Node> getTNeighbors(Node x, Node y, Graph graph) {
-        List<Node> tNeighbors = new LinkedList<Node>(graph.getAdjacentNodes(y));
-        tNeighbors.removeAll(graph.getAdjacentNodes(x));
-
-        for (int i = tNeighbors.size() - 1; i >= 0; i--) {
-            Node z = tNeighbors.get(i);
-            Edge edge = graph.getEdge(y, z);
-
-            if (!Edges.isUndirectedEdge(edge)) {
-                tNeighbors.remove(z);
-            }
-        }
-
-        return tNeighbors;
-    }
-
-    /**
-     * Get all nodes that are connected to Y by an undirected edge and adjacent to X
-     */
-    private static List<Node> getHNeighbors(Node x, Node y, Graph graph) {
-        List<Node> hNeighbors = new LinkedList<Node>(graph.getAdjacentNodes(y));
-        hNeighbors.retainAll(graph.getAdjacentNodes(x));
-
-        for (int i = hNeighbors.size() - 1; i >= 0; i--) {
-            Node z = hNeighbors.get(i);
-            Edge edge = graph.getEdge(y, z);
-            if (!Edges.isUndirectedEdge(edge)) {
-                hNeighbors.remove(z);
-            }
-        }
-
-        return hNeighbors;
-    }
-
-    /**
      * Evaluate the Insert(X, Y, T) operator (Definition 12 from Chickering, 2002).
      */
-    private double insertEval(Node x, Node y, Set<Node> t, Graph graph) {
-        Set<Node> set1 = new HashSet<Node>(GesOrienter.findNaYX(x, y, graph));
+    private double insertEval(Node x, Node y, Set <Node> t, Graph graph) {
+        Set <Node> set1 = new HashSet <Node>(GesOrienter.findNaYX(x, y, graph));
         set1.addAll(t);
         set1.addAll(graph.getParents(y));
-        Set<Node> set2 = new HashSet<Node>(set1);
+        Set <Node> set2 = new HashSet <Node>(set1);
         set1.add(x);
         return scoreGraphChange(y, set1, set2);
     }
 
+    //--Auxiliary methods.
+
     /**
      * Evaluate the Delete(X, Y, T) operator (Definition 12 from Chickering, 2002).
      */
-    private double deleteEval(Node x, Node y, Set<Node> h, Graph graph) {
-        Set<Node> set1 = new HashSet<Node>(GesOrienter.findNaYX(x, y, graph));
+    private double deleteEval(Node x, Node y, Set <Node> h, Graph graph) {
+        Set <Node> set1 = new HashSet <Node>(GesOrienter.findNaYX(x, y, graph));
         set1.removeAll(h);
         set1.addAll(graph.getParents(y));
-        Set<Node> set2 = new HashSet<Node>(set1);
+        Set <Node> set2 = new HashSet <Node>(set1);
         set1.remove(x);
         set2.add(x);
         return scoreGraphChange(y, set1, set2);
     }
 
-    /*
-    * Do an actual insertion
-    * (Definition 12 from Chickering, 2002).
-    **/
-
-    private void insert(Node x, Node y, Set<Node> subset, Graph graph,
+    private void insert(Node x, Node y, Set <Node> subset, Graph graph,
                         double score) {
         NumberFormat nf = NumberFormatUtil.getInstance().getNumberFormat();
 
@@ -547,58 +633,25 @@ public final class GesOrienter implements Reorienter {
         }
     }
 
-    /**
-     * Do an actual deletion (Definition 13 from Chickering, 2002).
-     */
-    private static void delete(Node x, Node y, Set<Node> subset, Graph graph) {
-        graph.removeEdges(x, y);
-
-        for (Node aSubset : subset) {
-            if (!graph.isParentOf(aSubset, x) && !graph.isParentOf(x, aSubset)) {
-                graph.removeEdge(x, aSubset);
-                graph.addDirectedEdge(x, aSubset);
-            }
-            graph.removeEdge(y, aSubset);
-            graph.addDirectedEdge(y, aSubset);
-        }
-    }
-
-    /*
-     * Test if the candidate insertion is a valid operation
-     * (Theorem 15 from Chickering, 2002).
-     **/
-
-    private boolean validInsert(Node x, Node y, Set<Node> subset, Graph graph) {
-        List<Node> naYXT = new LinkedList<Node>(subset);
+    private boolean validInsert(Node x, Node y, Set <Node> subset, Graph graph) {
+        List <Node> naYXT = new LinkedList <Node>(subset);
         naYXT.addAll(GesOrienter.findNaYX(x, y, graph));
 
         if (!GesOrienter.isClique(naYXT, graph)) {
             return false;
         }
 
-        return isSemiDirectedBlocked(x, y, naYXT, graph, new HashSet<Node>());
+        return isSemiDirectedBlocked(x, y, naYXT, graph, new HashSet <Node>());
     }
-
-    /**
-     * Test if the candidate deletion is a valid operation (Theorem 17 from Chickering, 2002).
-     */
-    private static boolean validDelete(Node x, Node y, Set<Node> h,
-                                       Graph graph) {
-        List<Node> naYXH = GesOrienter.findNaYX(x, y, graph);
-        naYXH.removeAll(h);
-        return GesOrienter.isClique(naYXH, graph);
-    }
-
-    //---Background knowledge methods.
 
     private void addRequiredEdges(Graph graph) {
-        for (Iterator<KnowledgeEdge> it =
-                this.getKnowledge().requiredEdgesIterator(); it.hasNext();) {
+        for (Iterator <KnowledgeEdge> it =
+             this.getKnowledge().requiredEdgesIterator(); it.hasNext(); ) {
             KnowledgeEdge next = it.next();
             String a = next.getFrom();
             String b = next.getTo();
             Node nodeA = null, nodeB = null;
-            Iterator<Node> itn = graph.getNodes().iterator();
+            Iterator <Node> itn = graph.getNodes().iterator();
             while (itn.hasNext() && (nodeA == null || nodeB == null)) {
                 Node nextNode = itn.next();
                 if (nextNode.getName().equals(a)) {
@@ -613,13 +666,13 @@ public final class GesOrienter implements Reorienter {
                 graph.addDirectedEdge(nodeA, nodeB);
             }
         }
-        for (Iterator<KnowledgeEdge> it =
-                getKnowledge().forbiddenEdgesIterator(); it.hasNext();) {
+        for (Iterator <KnowledgeEdge> it =
+             getKnowledge().forbiddenEdgesIterator(); it.hasNext(); ) {
             KnowledgeEdge next = it.next();
             String a = next.getFrom();
             String b = next.getTo();
             Node nodeA = null, nodeB = null;
-            Iterator<Node> itn = graph.getNodes().iterator();
+            Iterator <Node> itn = graph.getNodes().iterator();
             while (itn.hasNext() && (nodeA == null || nodeB == null)) {
                 Node nextNode = itn.next();
                 if (nextNode.getName().equals(a)) {
@@ -645,7 +698,7 @@ public final class GesOrienter implements Reorienter {
      * direction according to prior knowledge. If some orientation is forbidden in the subset, the whole subset is
      * forbidden.
      */
-    private boolean validSetByKnowledge(Node x, Node y, Set<Node> subset,
+    private boolean validSetByKnowledge(Node x, Node y, Set <Node> subset,
                                         boolean insertMode) {
         if (insertMode) {
             for (Node aSubset : subset) {
@@ -669,49 +722,11 @@ public final class GesOrienter implements Reorienter {
         return true;
     }
 
-    //--Auxiliary methods.
-
-    /**
-     * Find all nodes that are connected to Y by an undirected edge that are adjacent to X (that is, by undirected or
-     * directed edge) NOTE: very inefficient implementation, since the current library does not allow access to the
-     * adjacency list/matrix of the graph.
-     */
-    private static List<Node> findNaYX(Node x, Node y, Graph graph) {
-        List<Node> naYX = new LinkedList<Node>(graph.getAdjacentNodes(y));
-        naYX.retainAll(graph.getAdjacentNodes(x));
-
-        for (int i = 0; i < naYX.size(); i++) {
-            Node z = naYX.get(i);
-            Edge edge = graph.getEdge(y, z);
-
-            if (!Edges.isUndirectedEdge(edge)) {
-                naYX.remove(z);
-            }
-        }
-
-        return naYX;
-    }
-
-    /**
-     * Returns true iif the given set forms a clique in the given graph
-     */
-    private static boolean isClique(List<Node> set, Graph graph) {
-        List<Node> setv = new LinkedList<Node>(set);
-        for (int i = 0; i < setv.size() - 1; i++) {
-            for (int j = i + 1; j < setv.size(); j++) {
-                if (!graph.isAdjacentTo(setv.get(i), setv.get(j))) {
-                    return false;
-                }
-            }
-        }
-        return true;
-    }
-
     /**
      * Verifies if every semidirected path from y to x contains a node in naYXT
      */
-    private boolean isSemiDirectedBlocked(Node x, Node y, List<Node> naYXT,
-                                          Graph graph, Set<Node> marked) {
+    private boolean isSemiDirectedBlocked(Node x, Node y, List <Node> naYXT,
+                                          Graph graph, Set <Node> marked) {
         if (naYXT.contains(y)) {
             return true;
         }
@@ -738,23 +753,6 @@ public final class GesOrienter implements Reorienter {
 
         return true;
     }
-
-    private static List<Set<Node>> powerSet(List<Node> nodes) {
-        List<Set<Node>> subsets = new ArrayList<Set<Node>>();
-        int total = (int) Math.pow(2, nodes.size());
-        for (int i = 0; i < total; i++) {
-            Set<Node> newSet = new HashSet<Node>();
-            String selection = Integer.toBinaryString(i);
-            for (int j = selection.length() - 1; j >= 0; j--) {
-                if (selection.charAt(j) == '1') {
-                    newSet.add(nodes.get(selection.length() - j - 1));
-                }
-            }
-            subsets.add(newSet);
-        }
-        return subsets;
-    }
-
 
     /**
      * Completes a pattern that was modified by an insertion/deletion operator Based on the algorithm described on
@@ -792,15 +790,8 @@ public final class GesOrienter implements Reorienter {
         this.sampleSize = dataSet.getNumRows();
     }
 
-    private void setCorrMatrix(CorrelationMatrix corrMatrix) {
-        this.variances = corrMatrix.getMatrix();
-        this.varNames = corrMatrix.getVariableNames().toArray(new String[0]);
-        this.variables = corrMatrix.getVariables();
-        this.sampleSize = corrMatrix.getSampleSize();
-    }
-
     private void buildIndexing(Graph graph) {
-        this.hashIndices = new HashMap<Node, Integer>();
+        this.hashIndices = new HashMap <Node, Integer>();
         for (Node next : graph.getNodes()) {
             for (int i = 0; i < this.varNames.length; i++) {
                 if (this.varNames[i].equals(next.getName())) {
@@ -811,28 +802,13 @@ public final class GesOrienter implements Reorienter {
         }
     }
 
-    private static int getRowIndex(int dim[], int[] values) {
-        int rowIndex = 0;
-        for (int i = 0; i < dim.length; i++) {
-            rowIndex *= dim[i];
-            rowIndex += values[i];
-        }
-        return rowIndex;
-    }
-
-    private static void print(String message) {
-        TetradLogger.getInstance().log("details", message);
-    }
-
-    //===========================SCORING METHODS===========================//
-
     private double scoreGraph(Graph graph) {
         Graph dag = new EdgeListGraph(graph);
         SearchGraphUtils.pdagToDag(dag);
         double score = 0.;
 
         for (Node next : dag.getNodes()) {
-            Collection<Node> parents = dag.getParents(next);
+            Collection <Node> parents = dag.getParents(next);
             int nextIndex = -1;
             for (int i = 0; i < getVariables().size(); i++) {
                 if (this.varNames[i].equals(next.getName())) {
@@ -841,7 +817,7 @@ public final class GesOrienter implements Reorienter {
                 }
             }
             int parentIndices[] = new int[parents.size()];
-            Iterator<Node> pi = parents.iterator();
+            Iterator <Node> pi = parents.iterator();
             int count = 0;
             while (pi.hasNext()) {
                 Node nextParent = pi.next();
@@ -862,8 +838,10 @@ public final class GesOrienter implements Reorienter {
         return score;
     }
 
-    private double scoreGraphChange(Node y, Set<Node> parents1,
-                                    Set<Node> parents2) {
+    //===========================SCORING METHODS===========================//
+
+    private double scoreGraphChange(Node y, Set <Node> parents1,
+                                    Set <Node> parents2) {
         int yIndex = hashIndices.get(y);
         int parentIndices1[] = new int[parents1.size()];
 
@@ -981,6 +959,10 @@ public final class GesOrienter implements Reorienter {
         return score;
     }
 
+    private int numCategories(int i) {
+        return ((DiscreteVariable) dataSet().getVariable(i)).getNumCategories();
+    }
+
 //    private double localDiscreteBicScore(int i, int[] parents) {
 //
 //        // Number of categories for i.
@@ -1054,11 +1036,6 @@ public final class GesOrienter implements Reorienter {
 //        return score - numParams / 2. * Math.log(sampleSize());
 //    }
 
-
-    private int numCategories(int i) {
-        return ((DiscreteVariable) dataSet().getVariable(i)).getNumCategories();
-    }
-
     /**
      * Calculates the sample likelihood and BIC score for i given its parents in a simple SEM model.
      */
@@ -1087,6 +1064,13 @@ public final class GesOrienter implements Reorienter {
 
         return -(m / 2.) - (m / 2.) * Math.log(variance) -
                 (d / 2.) * Math.log(m);
+    }
+
+    private int sampleSize() {
+//        System.out.println("sample size = " + sampleSize);
+        return this.sampleSize;
+
+//        return dataSet().getNumRows();
     }
 
 //    private double localSemScore2(int i, int parents[]) {
@@ -1165,19 +1149,19 @@ public final class GesOrienter implements Reorienter {
 //        return score;
 //    }
 
-    private int sampleSize() {
-//        System.out.println("sample size = " + sampleSize);
-        return this.sampleSize;
-
-//        return dataSet().getNumRows();
-    }
-
-    private List<Node> getVariables() {
+    private List <Node> getVariables() {
         return variables;
     }
 
     private DoubleMatrix2D getCorrMatrix() {
         return variances;
+    }
+
+    private void setCorrMatrix(CorrelationMatrix corrMatrix) {
+        this.variances = corrMatrix.getMatrix();
+        this.varNames = corrMatrix.getVariableNames().toArray(new String[0]);
+        this.variables = corrMatrix.getVariables();
+        this.sampleSize = corrMatrix.getSampleSize();
     }
 
     private Algebra algebra() {
@@ -1192,20 +1176,20 @@ public final class GesOrienter implements Reorienter {
         return structurePrior;
     }
 
-    private double getSamplePrior() {
-        return samplePrior;
-    }
-
-    private boolean isDiscrete() {
-        return discrete;
-    }
-
     public void setStructurePrior(double structurePrior) {
         this.structurePrior = structurePrior;
     }
 
+    private double getSamplePrior() {
+        return samplePrior;
+    }
+
     public void setSamplePrior(double samplePrior) {
         this.samplePrior = samplePrior;
+    }
+
+    private boolean isDiscrete() {
+        return discrete;
     }
 
     public long getElapsedTime() {

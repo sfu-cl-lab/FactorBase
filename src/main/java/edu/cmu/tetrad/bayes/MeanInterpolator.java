@@ -38,8 +38,8 @@ import java.util.List;
  */
 public final class MeanInterpolator implements DataFilter {
     @Override
-	public DataSet filter(DataSet dataSet) {
-        List<Node> variables = new LinkedList<Node>();
+    public DataSet filter(DataSet dataSet) {
+        List <Node> variables = new LinkedList <Node>();
 
         for (int i = 0; i < dataSet.getNumColumns(); i++) {
             Node variable = dataSet.getVariable(i);

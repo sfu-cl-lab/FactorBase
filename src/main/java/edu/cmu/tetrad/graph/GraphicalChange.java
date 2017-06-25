@@ -34,7 +34,6 @@ public interface GraphicalChange {
      */
     void apply(Graph g);
 
-    
 
 }
 

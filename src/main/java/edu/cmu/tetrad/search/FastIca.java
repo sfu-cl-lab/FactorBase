@@ -559,7 +559,7 @@ public class FastIca {
                     for (int k = 0; k < numComponents; k++) {
                         _tolerance += w1.get(k) * w.get(k);
                     }
-                                                        
+
                     _tolerance = Math.abs(Math.abs(_tolerance) - 1.0);
 
                     if (verbose) {
@@ -711,7 +711,7 @@ public class FastIca {
 
                 g_wx.assign(new DoubleFunction() {
                     @Override
-					public double apply(double v) {
+                    public double apply(double v) {
                         return alpha * (1.0 - v * v);
                     }
                 });
@@ -776,7 +776,7 @@ public class FastIca {
 
                 g_wx.assign(new DoubleFunction() {
                     @Override
-					public double apply(double v) {
+                    public double apply(double v) {
                         return (1.0 - v * v) * Math.exp(-(v * v) / 2.0);
                     }
                 });
@@ -897,7 +897,7 @@ public class FastIca {
         }
 
         @Override
-		public String toString() {
+        public String toString() {
             StringBuilder buf = new StringBuilder();
 
             buf.append("\n\nX:\n");

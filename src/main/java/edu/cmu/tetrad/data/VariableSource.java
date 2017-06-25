@@ -40,12 +40,12 @@ public interface VariableSource extends TetradSerializable {
     /**
      * Returns the list of variables associated with this object.
      */
-    List<Node> getVariables();
+    List <Node> getVariables();
 
     /**
      * Returns the variable names associated with this getVariableNames.
      */
-    List<String> getVariableNames();
+    List <String> getVariableNames();
 }
 
 

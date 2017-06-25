@@ -46,7 +46,7 @@ import java.util.List;
 public class Tsls {
     private SemPm spm;
     private SemIm semIm;
-    private List<String> fixedLoadings;
+    private List <String> fixedLoadings;
     private DataSet dataSet;
     private String nodeName;
     private double asymptLCovar[][], A_hat[];
@@ -66,7 +66,7 @@ public class Tsls {
      */
 
     public Tsls(SemPm spm, DataSet dataSet, String nm,
-                List<String> fixedLoadings) {
+                List <String> fixedLoadings) {
         initialization(spm, dataSet, nm);
         this.fixedLoadings = fixedLoadings;
     }
@@ -98,7 +98,7 @@ public class Tsls {
         return semIm;
     }
 
-    private void setFixedNodes(SemGraph semGraph, List<Node> mx1, List<Node> my1) {
+    private void setFixedNodes(SemGraph semGraph, List <Node> mx1, List <Node> my1) {
         if (fixedLoadings == null) {
             for (Node nodeA : semGraph.getNodes()) {
                 if (nodeA.getNodeType() == NodeType.ERROR) {
@@ -107,7 +107,7 @@ public class Tsls {
                 if (nodeA.getNodeType() == NodeType.LATENT) {
                     // We will choose the measurement node with fixed edge by the
                     // lexicographical order.
-                    Iterator<Node> children = semGraph.getChildren(nodeA).iterator();
+                    Iterator <Node> children = semGraph.getChildren(nodeA).iterator();
                     Node nodeB = null;
                     while (children.hasNext()) {
                         Node child = children.next();
@@ -125,7 +125,7 @@ public class Tsls {
                 }
             }
         } else {
-            Iterator<Node> it = semGraph.getNodes().iterator();
+            Iterator <Node> it = semGraph.getNodes().iterator();
             latentIteration:
             while (it.hasNext()) {
                 Node nodeA = it.next();
@@ -163,11 +163,11 @@ public class Tsls {
         // Get list of fixed measurements that will be kept fixed, and the
         // respective latent variables that are their parents.
         // "X" variables are exogenous, while "Y" variables are endogenous.
-        List<Node> ly = new LinkedList<Node>();
-        List<Node> lx = new LinkedList<Node>();
-        List<Node> my1 = new LinkedList<Node>();
-        List<Node> mx1 = new LinkedList<Node>();
-        List<Node> observed = new LinkedList<Node>();
+        List <Node> ly = new LinkedList <Node>();
+        List <Node> lx = new LinkedList <Node>();
+        List <Node> my1 = new LinkedList <Node>();
+        List <Node> mx1 = new LinkedList <Node>();
+        List <Node> observed = new LinkedList <Node>();
 
         for (Node nodeA : semGraph.getNodes()) {
             if (nodeA.getNodeType() == NodeType.ERROR) {
@@ -194,11 +194,11 @@ public class Tsls {
             }
             // Build Z, the matrix containing the data for the fixed measurements
             // associated with the parents of the current (endogenous) latent node
-            List<Node> endo_parents_m = new LinkedList<Node>();
-            List<Node> exo_parents_m = new LinkedList<Node>();
-            List<Node> endo_parents = new LinkedList<Node>();
-            List<Node> exo_parents = new LinkedList<Node>();
-            Iterator<Node> it_p = semGraph.getParents(current).iterator();
+            List <Node> endo_parents_m = new LinkedList <Node>();
+            List <Node> exo_parents_m = new LinkedList <Node>();
+            List <Node> endo_parents = new LinkedList <Node>();
+            List <Node> exo_parents = new LinkedList <Node>();
+            Iterator <Node> it_p = semGraph.getParents(current).iterator();
             lNames = new String[lx.size() + ly.size()];
             while (it_p.hasNext()) {
                 Node node = it_p.next();
@@ -260,15 +260,15 @@ public class Tsls {
             }
             // Build V, the matrix containing the data for the nonfixed measurements
             // associated with the parents of the current (endogenous) latent node
-            endo_parents_m = new LinkedList<Node>();
-            exo_parents_m = new LinkedList<Node>();
+            endo_parents_m = new LinkedList <Node>();
+            exo_parents_m = new LinkedList <Node>();
             it_p = semGraph.getParents(current).iterator();
             while (it_p.hasNext()) {
                 Node node = it_p.next();
                 if (node.getNodeType() == NodeType.ERROR) {
                     continue;
                 }
-                List<Node> other_measures = new LinkedList<Node>();
+                List <Node> other_measures = new LinkedList <Node>();
 
                 for (Node next : semGraph.getChildren(node)) {
                     if (next.getNodeType() == NodeType.MEASURED) {
@@ -403,9 +403,9 @@ public class Tsls {
                 }
                 current_latent = node;
             }
-            Iterator<Node> children =
+            Iterator <Node> children =
                     semGraph.getChildren(current_latent).iterator();
-            List<Node> other_measures = new LinkedList<Node>();
+            List <Node> other_measures = new LinkedList <Node>();
             Node fixed_measurement;
             while (children.hasNext()) {
                 Node next = children.next();

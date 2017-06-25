@@ -51,11 +51,11 @@ public final class DiscreteDiscretizationSpec implements TetradSerializable, Dis
     /**
      * @serial
      */
-    private final List<String> categories;
+    private final List <String> categories;
 
     //============================CONSTRUCTORS==========================//
 
-    public DiscreteDiscretizationSpec(int[] remap, List<String> categories) {
+    public DiscreteDiscretizationSpec(int[] remap, List <String> categories) {
         if (remap == null) {
             throw new NullPointerException();
         }
@@ -80,12 +80,12 @@ public final class DiscreteDiscretizationSpec implements TetradSerializable, Dis
      */
     public static DiscreteDiscretizationSpec serializableInstance() {
         return new DiscreteDiscretizationSpec(new int[0],
-                new ArrayList<String>());
+                new ArrayList <String>());
     }
 
     //============================PUBLIC METHODS========================//
 
-    public List<String> getCategories() {
+    public List <String> getCategories() {
         return categories;
     }
 

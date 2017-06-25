@@ -28,8 +28,6 @@ import edu.cmu.tetrad.graph.*;
 import edu.cmu.tetrad.sem.*;
 import edu.cmu.tetrad.util.StatUtils;
 
-import java.util.*;
-
 /**
  * Created by IntelliJ IDEA. User: jdramsey Date: Jun 17, 2010 Time: 9:39:48 AM To change this template use File |
  * Settings | File Templates.
@@ -38,10 +36,10 @@ public class Mimbuild2 {
     private Graph mim;
     private int minClusterSize = 1;
     private int numCovSamples = 1000;
-    private List<Node> latents;
-    private List<Node> _latents;
+    private List <Node> latents;
+    private List <Node> _latents;
     private Graph structureGraph;
-    private List<List<Node>> clustering;
+    private List <List <Node>> clustering;
     private double alpha = 1e-6;
     private Knowledge knowledge = new Knowledge();
     private ICovarianceMatrix covMatrix;
@@ -53,17 +51,17 @@ public class Mimbuild2 {
         this.mim = mim;
     }
 
-    public Graph search(List<List<Node>> clustering, DataSet data) {
+    public Graph search(List <List <Node>> clustering, DataSet data) {
         return search(clustering, null, data);
     }
 
-    public Graph search(List<List<Node>> clustering, List<String> names, DataSet data) {
+    public Graph search(List <List <Node>> clustering, List <String> names, DataSet data) {
         // Translate clustering into data variables.
 
-        List<List<Node>> _clustering = new ArrayList<List<Node>>();
+        List <List <Node>> _clustering = new ArrayList <List <Node>>();
 
-        for (List<Node> cluster : clustering) {
-            List<Node> _cluster = new ArrayList<Node>();
+        for (List <Node> cluster : clustering) {
+            List <Node> _cluster = new ArrayList <Node>();
 
             for (Node node : cluster) {
                 _cluster.add(data.getVariable(node.getName()));
@@ -77,7 +75,7 @@ public class Mimbuild2 {
 
         System.out.println("Create a latent for each cluster.");
 
-        List<Node> latents = defineLatents(clustering, names);
+        List <Node> latents = defineLatents(clustering, names);
 
         System.out.println("Zero mean data.");
 
@@ -86,9 +84,9 @@ public class Mimbuild2 {
 
         printClusterSizes(clustering);
 
-        List<Node> allNodes = new ArrayList<Node>();
+        List <Node> allNodes = new ArrayList <Node>();
 
-        for (List<Node> cluster : clustering) {
+        for (List <Node> cluster : clustering) {
             allNodes.addAll(cluster);
         }
 
@@ -97,7 +95,7 @@ public class Mimbuild2 {
 
         System.out.println("Remove small clusters.");
 
-        List<Node> _latents = removeSmallClusters(latents, clustering, getMinClusterSize());
+        List <Node> _latents = removeSmallClusters(latents, clustering, getMinClusterSize());
 
         if (clustering.isEmpty()) {
             System.out.println("There were no clusters after small clusters were removed..");
@@ -146,9 +144,9 @@ public class Mimbuild2 {
         return this.structureGraph;
     }
 
-    private List<Node> defineLatents(List<List<Node>> clustering, List<String> names) {
+    private List <Node> defineLatents(List <List <Node>> clustering, List <String> names) {
         if (names != null) {
-            List<Node> latents = new ArrayList<Node>();
+            List <Node> latents = new ArrayList <Node>();
 
             for (String name : names) {
                 Node node = new ContinuousVariable(name);
@@ -158,10 +156,10 @@ public class Mimbuild2 {
 
             return latents;
         } else {
-            List<Node> latents;
+            List <Node> latents;
 
             if (this.latents == null) {
-                latents = new ArrayList<Node>();
+                latents = new ArrayList <Node>();
 
                 for (int i = 0; i < clustering.size(); i++) {
                     Node node = new ContinuousVariable("_L" + (i + 1));
@@ -177,23 +175,23 @@ public class Mimbuild2 {
     }
 
 
-    private void printClusterSizes(List<List<Node>> clustering) {
+    private void printClusterSizes(List <List <Node>> clustering) {
         System.out.print("\nCluster sizes");
 
-        for (List<Node> cluster : clustering) {
+        for (List <Node> cluster : clustering) {
             System.out.print("\t" + cluster.size());
         }
 
         System.out.println();
     }
 
-    private void printClustering(List<List<Node>> clustering) {
+    private void printClustering(List <List <Node>> clustering) {
         for (int i = 0; i < clustering.size(); i++) {
             System.out.println("Cluster " + i + ": " + clustering.get(i));
         }
     }
 
-    private void printSubgraph(Graph mim, List<Node> nodes) {
+    private void printSubgraph(Graph mim, List <Node> nodes) {
         if (mim != null) {
             System.out.println(mim.subgraph(nodes));
         }
@@ -217,8 +215,8 @@ public class Mimbuild2 {
 //        }
     }
 
-    private List<Node> removeSmallClusters(List<Node> latents, List<List<Node>> clustering, int minimumSize) {
-        List<Node> _latents = new ArrayList<Node>(latents);
+    private List <Node> removeSmallClusters(List <Node> latents, List <List <Node>> clustering, int minimumSize) {
+        List <Node> _latents = new ArrayList <Node>(latents);
 
         for (int i = _latents.size() - 1; i >= 0; i--) {
             Collections.shuffle(clustering.get(i));
@@ -234,22 +232,22 @@ public class Mimbuild2 {
         return _latents;
     }
 
-    private Node[][] getIndicators1(List<List<Node>> clustering, DataSet data) {
+    private Node[][] getIndicators1(List <List <Node>> clustering, DataSet data) {
         Node[][] indicators = new Node[clustering.size()][];
 
         for (int i = 0; i < clustering.size(); i++) {
-            List<Node> _indicators = clustering.get(i);
+            List <Node> _indicators = clustering.get(i);
             indicators[i] = _indicators.toArray(new Node[0]);
         }
 
         return indicators;
     }
 
-    private Node[][] getIndicators2(List<List<Node>> clustering, DataSet data) {
+    private Node[][] getIndicators2(List <List <Node>> clustering, DataSet data) {
         Node[][] indicators = new Node[clustering.size()][];
 
         for (int i = 0; i < clustering.size(); i++) {
-            List<Node> _indicators = clustering.get(i);
+            List <Node> _indicators = clustering.get(i);
             indicators[i] = _indicators.toArray(new Node[0]);
         }
 
@@ -294,17 +292,17 @@ public class Mimbuild2 {
 //        return loadings;
 //    }
 
-    private double[][] getLoadings2(List<List<Node>> clustering, DataSet data) {
+    private double[][] getLoadings2(List <List <Node>> clustering, DataSet data) {
         double[][] loadings = new double[clustering.size()][];
 
 
         for (int i = 0; i < clustering.size(); i++) {
-            List<Node> cluster = clustering.get(i);
+            List <Node> cluster = clustering.get(i);
             System.out.println("Estimating loadings for cluster " + i);
 
             if (cluster.isEmpty()) throw new IllegalArgumentException("Empty cluster.");
 
-            List<Node> indicators = cluster;
+            List <Node> indicators = cluster;
             DataSet data1 = dataSubset(data, indicators);
 
             Node latent = new ContinuousVariable("L");
@@ -392,13 +390,13 @@ public class Mimbuild2 {
 //        return loadings;
 //    }
 
-    private DoubleMatrix2D getCov(DataSet data, DoubleMatrix2D _data, List<Node> latents, double[][] loadings, Node[][] indicators) {
+    private DoubleMatrix2D getCov(DataSet data, DoubleMatrix2D _data, List <Node> latents, double[][] loadings, Node[][] indicators) {
         DoubleMatrix2D cov = new DenseDoubleMatrix2D(latents.size(), latents.size());
 
         double[] vars = new double[latents.size()];
 
-        Map<Node, Integer> nodeMap = new HashMap<Node, Integer>();
-        List<Node> variables = data.getVariables();
+        Map <Node, Integer> nodeMap = new HashMap <Node, Integer>();
+        List <Node> variables = data.getVariables();
 
         for (int i = 0; i < data.getNumColumns(); i++) {
             nodeMap.put(variables.get(i), i);
@@ -424,7 +422,7 @@ public class Mimbuild2 {
     }
 
     private double var(DoubleMatrix2D _data, double[][] loadings, Node[][] indicators,
-                       Map<Node, Integer> nodeMap, int m) {
+                       Map <Node, Integer> nodeMap, int m) {
         double numerator = 0.0;
         double denominator = 0.0;
 
@@ -495,7 +493,7 @@ public class Mimbuild2 {
 //    }
 
     private double covar(DoubleMatrix2D _data, double[][] loadings, Node[][] indicators,
-                         Map<Node, Integer> nodeMap, int m, int n) {
+                         Map <Node, Integer> nodeMap, int m, int n) {
         double numerator = 0.0;
         double denominator = 0.0;
 
@@ -565,7 +563,7 @@ public class Mimbuild2 {
 //        return sum / col1.size();
 //    }
 
-    private DataSet dataSubset(DataSet data, List<Node> childrenL1) {
+    private DataSet dataSubset(DataSet data, List <Node> childrenL1) {
         DataSet data1 = data.subsetColumns(childrenL1);
         return data1;
     }
@@ -591,11 +589,11 @@ public class Mimbuild2 {
         this.numCovSamples = numCovSamples;
     }
 
-    public void setLatentsBeforeSearch(List<Node> latents) {
+    public void setLatentsBeforeSearch(List <Node> latents) {
         this.latents = latents;
     }
 
-    public List<Node> latentsAfterSearch() {
+    public List <Node> latentsAfterSearch() {
         return _latents;
     }
 
@@ -616,7 +614,7 @@ public class Mimbuild2 {
 
         for (int i = 0; i < _latents.size(); i++) {
             Node latent = _latents.get(i);
-            List<Node> measuredGuys = getClustering().get(i);
+            List <Node> measuredGuys = getClustering().get(i);
 
             for (Node measured : measuredGuys) {
                 if (!graph.containsNode(measured)) {
@@ -630,7 +628,7 @@ public class Mimbuild2 {
         return graph;
     }
 
-    public List<List<Node>> getClustering() {
+    public List <List <Node>> getClustering() {
         return clustering;
     }
 

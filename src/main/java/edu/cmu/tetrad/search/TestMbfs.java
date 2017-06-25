@@ -30,7 +30,6 @@ import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
 
-import java.io.*;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -42,20 +41,6 @@ public class TestMbfs extends TestCase {
     public TestMbfs(String name) {
         super(name);
     }
-
-    @Override
-	public void setUp() throws Exception {
-        TetradLogger.getInstance().addOutputStream(System.out);
-        TetradLogger.getInstance().setForceLog(true);
-    }
-
-
-    @Override
-	public void tearDown() {
-        TetradLogger.getInstance().setForceLog(false);
-        TetradLogger.getInstance().removeOutputStream(System.out);
-    }
-
 
     public static void testSubgraph1() {
         TetradLogger.getInstance().addOutputStream(System.out);
@@ -120,22 +105,22 @@ public class TestMbfs extends TestCase {
 
         System.out.println("INDEPENDENT GRAPH: " + dag);
 
-        List<Node> nodes = dag.getNodes();
+        List <Node> nodes = dag.getNodes();
 
         for (Node node : nodes) {
             Graph resultMb = search.search(node.getName());
             Graph trueMb = GraphUtils.markovBlanketDag(node, dag);
 
-            List<Node> resultNodes = resultMb.getNodes();
-            List<Node> trueNodes = trueMb.getNodes();
+            List <Node> resultNodes = resultMb.getNodes();
+            List <Node> trueNodes = trueMb.getNodes();
 
-            Set<String> resultNames = new HashSet<String>();
+            Set <String> resultNames = new HashSet <String>();
 
             for (Node resultNode : resultNodes) {
                 resultNames.add(resultNode.getName());
             }
 
-            Set<String> trueNames = new HashSet<String>();
+            Set <String> trueNames = new HashSet <String>();
 
             for (Node v : trueNodes) {
                 trueNames.add(v.getName());
@@ -146,7 +131,7 @@ public class TestMbfs extends TestCase {
 
             assertTrue(resultNames.equals(trueNames));
 
-            List<Edge> resultEdges = resultMb.getEdges();
+            List <Edge> resultEdges = resultMb.getEdges();
 
             for (Edge resultEdge : resultEdges) {
                 if (Edges.isDirectedEdge(resultEdge)) {
@@ -209,7 +194,7 @@ public class TestMbfs extends TestCase {
 
             // Make sure that if adj(X, Y) in the true graph that adj(X, Y)
             // in the result graph.
-            List<Edge> trueEdges = trueMb.getEdges();
+            List <Edge> trueEdges = trueMb.getEdges();
 
             for (Edge trueEdge : trueEdges) {
                 Node node1 = trueEdge.getNode1();
@@ -219,10 +204,33 @@ public class TestMbfs extends TestCase {
                 Node resultNode2 = resultMb.getNode(node2.getName());
 
                 assertTrue("Expected adjacency " + resultNode1 + "---" +
-                        resultNode2,
+                                resultNode2,
                         resultMb.isAdjacentTo(resultNode1, resultNode2));
             }
         }
+    }
+
+    /**
+     * This method uses reflection to collect up all of the test methods from this class and return them to the test
+     * runner.
+     */
+    public static Test suite() {
+
+        // Edit the name of the class in the parens to match the name
+        // of this class.
+        return new TestSuite(TestMbfs.class);
+    }
+
+    @Override
+    public void setUp() throws Exception {
+        TetradLogger.getInstance().addOutputStream(System.out);
+        TetradLogger.getInstance().setForceLog(true);
+    }
+
+    @Override
+    public void tearDown() {
+        TetradLogger.getInstance().setForceLog(false);
+        TetradLogger.getInstance().removeOutputStream(System.out);
     }
 
     public void testLoadFile() {
@@ -255,17 +263,6 @@ public class TestMbfs extends TestCase {
         } catch (IOException e) {
             e.printStackTrace();
         }
-    }
-
-    /**
-     * This method uses reflection to collect up all of the test methods from this class and return them to the test
-     * runner.
-     */
-    public static Test suite() {
-
-        // Edit the name of the class in the parens to match the name
-        // of this class.
-        return new TestSuite(TestMbfs.class);
     }
 }
 

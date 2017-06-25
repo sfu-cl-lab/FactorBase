@@ -43,6 +43,17 @@ public final class TestDag extends TestCase {
         super(name);
     }
 
+    /**
+     * This method uses reflection to collect up all of the test methods from
+     * this class and return them to the test runner.
+     */
+    public static Test suite() {
+
+        // Edit the name of the class in the parens to match the name
+        // of this class.
+        return new TestSuite(TestDag.class);
+    }
+
     public void testSearchGraph() {
         checkGraph(new Dag());
     }
@@ -76,8 +87,8 @@ public final class TestDag extends TestCase {
 
         System.out.println(graph);
 
-        List<Node> children = graph.getChildren(x1);
-        List<Node> parents = graph.getParents(x4);
+        List <Node> children = graph.getChildren(x1);
+        List <Node> parents = graph.getParents(x4);
 
         System.out.println("Children of x1 = " + children);
         System.out.println("Parents of x4 = " + parents);
@@ -103,17 +114,6 @@ public final class TestDag extends TestCase {
     private void checkCopy(Graph graph) {
         Graph graph2 = new EdgeListGraph(graph);
         assertEquals(graph, graph2);
-    }
-
-    /**
-     * This method uses reflection to collect up all of the test methods from
-     * this class and return them to the test runner.
-     */
-    public static Test suite() {
-
-        // Edit the name of the class in the parens to match the name
-        // of this class.
-        return new TestSuite(TestDag.class);
     }
 }
 

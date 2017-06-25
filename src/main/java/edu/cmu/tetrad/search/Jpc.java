@@ -27,8 +27,6 @@ import edu.cmu.tetrad.util.ChoiceGenerator;
 import edu.cmu.tetrad.util.DepthChoiceGenerator;
 import edu.cmu.tetrad.util.TetradLogger;
 
-import java.util.*;
-
 /**
  * Implements the ICPC algorithm.
  *
@@ -37,85 +35,57 @@ import java.util.*;
 public class Jpc implements GraphSearch {
     private int numAdded;
     private int numRemoved;
-
-    /**
-     * The types of underlying algorithms for JPC.
-     */
-    public enum AlgorithmType {
-        PC, CPC
-    }
-
-    public enum PathBlockingSet {
-        LARGE, SMALL
-    }
-
     private AlgorithmType algorithmType = AlgorithmType.PC;
-
     private PathBlockingSet pathBlockingSet = PathBlockingSet.LARGE;
-
     /**
      * The independence test used for the PC search.
      */
     private IndependenceTest independenceTest;
-
     /**
      * Forbidden and required edges for the search.
      */
     private Knowledge knowledge = new Knowledge();
-
     /**
      * True if cycles are to be aggressively prevented. May be expensive for large graphs (but also useful for large
      * graphs).
      */
     private boolean aggressivelyPreventCycles = false;
-
     /**
      * The maximum number of adjacencies that may ever be added to any node. (Note, the initial search may already have
      * greater degree.)
      */
     private int maxAdjacencies = 8;
-
     /**
      * The maximum number of iterations of the algorithm, in the major loop.
      */
     private int maxIterations = 20;
-
     /**
      * True if the algorithm should be started from an empty graph.
      */
     private boolean startFromEmptyGraph = false;
-
     /**
      * The maximum length of a descendant path. Descendant paths must be checked in the common collider search.
      */
     private int maxDescendantPath = 20;
-
     /**
      * An initial graph, if there is one.
      */
     private Graph initialGraph;
-
     /**
      * The constantly updated map of sepsets. This is initialized (for PC) when the algorithm starts and updated
      * whenever new sepsets are found (or not found).
      */
     private SepsetMap sepsets;
-
     /**
      * The logger for this class. The config needs to be set.
      */
     private TetradLogger logger = TetradLogger.getInstance();
-
-
     /**
      * Elapsed time of the most recent search.
      */
     private long elapsedTime;
-
     private int pcDepth = -1;
 
-
-    //=============================CONSTRUCTORS==========================//
 
     /**
      * Constructs a JPC search with the given independence oracle.
@@ -132,16 +102,28 @@ public class Jpc implements GraphSearch {
         this.independenceTest = independenceTest;
     }
 
-    //==============================PUBLIC METHODS========================//
+    private static boolean isArrowpointAllowed1(Node from, Node to,
+                                                Knowledge knowledge) {
+        if (knowledge == null) {
+            return true;
+        }
+
+        return !knowledge.edgeRequired(to.toString(), from.toString()) &&
+                !knowledge.edgeForbidden(from.toString(), to.toString());
+    }
+
+
+    //=============================CONSTRUCTORS==========================//
 
     public boolean isAggressivelyPreventCycles() {
         return this.aggressivelyPreventCycles;
     }
 
+    //==============================PUBLIC METHODS========================//
+
     public void setAggressivelyPreventCycles(boolean aggressivelyPreventCycles) {
         this.aggressivelyPreventCycles = aggressivelyPreventCycles;
     }
-
 
     public IndependenceTest getIndependenceTest() {
         return independenceTest;
@@ -160,20 +142,12 @@ public class Jpc implements GraphSearch {
     }
 
     @Override
-	public long getElapsedTime() {
+    public long getElapsedTime() {
         return elapsedTime;
     }
 
     public int getMaxAdjacencies() {
         return maxAdjacencies;
-    }
-
-    public AlgorithmType getAlgorithmType() {
-        return algorithmType;
-    }
-
-    public void setAlgorithmType(AlgorithmType algorithmType) {
-        this.algorithmType = algorithmType;
     }
 
     /**
@@ -190,15 +164,23 @@ public class Jpc implements GraphSearch {
         this.maxAdjacencies = maxAdjacencies;
     }
 
-    public List<Node> getSemidirectedDescendants(Graph graph, List<Node> nodes) {
-        HashSet<Node> descendants = new HashSet<Node>();
+    public AlgorithmType getAlgorithmType() {
+        return algorithmType;
+    }
+
+    public void setAlgorithmType(AlgorithmType algorithmType) {
+        this.algorithmType = algorithmType;
+    }
+
+    public List <Node> getSemidirectedDescendants(Graph graph, List <Node> nodes) {
+        HashSet <Node> descendants = new HashSet <Node>();
 
         for (Object node1 : nodes) {
             Node node = (Node) node1;
             collectSemidirectedDescendantsVisit(graph, node, descendants);
         }
 
-        return new LinkedList<Node>(descendants);
+        return new LinkedList <Node>(descendants);
     }
 
     public void setStartFromEmptyGraph(boolean startFromEmptyGraph) {
@@ -221,7 +203,6 @@ public class Jpc implements GraphSearch {
         if (pathBlockingSet == null) throw new NullPointerException();
         this.pathBlockingSet = pathBlockingSet;
     }
-
 
     /**
      * Runs PC starting with a fully connected graph over all of the variables in the domain of the independence test.
@@ -379,10 +360,10 @@ public class Jpc implements GraphSearch {
 //        return graph;
 //    }
     @Override
-	public Graph search() {
+    public Graph search() {
         long time1 = System.currentTimeMillis();
 
-        List<Graph> graphs = new ArrayList<Graph>();
+        List <Graph> graphs = new ArrayList <Graph>();
         IndependenceTest test = getIndependenceTest();
 
         Graph graph;
@@ -407,8 +388,8 @@ public class Jpc implements GraphSearch {
 //        System.out.println("Degree of graph = " + GraphUtils.getDegree(graph));
 
         // This makes a list of all possible edges.
-        List<Node> _changedNodes = graph.getNodes();
-        Set<Node> changedNodes = new HashSet<Node>();
+        List <Node> _changedNodes = graph.getNodes();
+        Set <Node> changedNodes = new HashSet <Node>();
 
         boolean changed = true;
         int count = -1;
@@ -447,7 +428,7 @@ public class Jpc implements GraphSearch {
                     Node x = _changedNodes.get(i);
                     Node y = _changedNodes.get(j);
 
-                    List<Node> sepsetX, sepsetY;
+                    List <Node> sepsetX, sepsetY;
 
                     if (getPathBlockingSet() == PathBlockingSet.LARGE) {
                         sepsetX = pathBlockingSet(test, graph2, x, y);
@@ -558,7 +539,7 @@ public class Jpc implements GraphSearch {
             }
 //            System.out.println("Finished comparing with previous graphs.");
 
-            _changedNodes = new ArrayList<Node>(changedNodes);
+            _changedNodes = new ArrayList <Node>(changedNodes);
             changedNodes.clear();
 
             changed = true;
@@ -572,10 +553,10 @@ public class Jpc implements GraphSearch {
         return graph;
     }
 
-    private boolean equal(List<Node> sepset1, List<Node> sepset2) {
+    private boolean equal(List <Node> sepset1, List <Node> sepset2) {
         if (sepset1 == null && sepset2 == null) {
             return true;
-        } else if (sepset1 != null && sepset2 != null && new HashSet<Node>(sepset1).equals(new HashSet<Node>(sepset2))) {
+        } else if (sepset1 != null && sepset2 != null && new HashSet <Node>(sepset1).equals(new HashSet <Node>(sepset2))) {
             return true;
         } else {
             return false;
@@ -591,13 +572,10 @@ public class Jpc implements GraphSearch {
         return graph;
     }
 
+    private List <Node> pathBlockingSet(IndependenceTest test, Graph graph, Node x, Node y) {
+        List <Node> fullSet = pathBlockingSetExcluding(graph, x, y, new HashSet <Node>());
 
-    //================================PRIVATE METHODS=======================//
-
-    private List<Node> pathBlockingSet(IndependenceTest test, Graph graph, Node x, Node y) {
-        List<Node> fullSet = pathBlockingSetExcluding(graph, x, y, new HashSet<Node>());
-
-        List<Node> commonAdjacents = graph.getAdjacentNodes(x);
+        List <Node> commonAdjacents = graph.getAdjacentNodes(x);
         commonAdjacents.retainAll(graph.getAdjacentNodes(y));
 
 //        for (Node node : new ArrayList<Node>(commonAdjacents)) {
@@ -610,10 +588,10 @@ public class Jpc implements GraphSearch {
         int[] choice;
 
         while ((choice = generator.next()) != null) {
-            Set<Node> definitelyExcluded = new HashSet<Node>(GraphUtils.asList(choice, commonAdjacents));
-            Set<Node> perhapsExcluded = new HashSet<Node>();
+            Set <Node> definitelyExcluded = new HashSet <Node>(GraphUtils.asList(choice, commonAdjacents));
+            Set <Node> perhapsExcluded = new HashSet <Node>();
 
-            for (Node node1 : new ArrayList<Node>(definitelyExcluded)) {
+            for (Node node1 : new ArrayList <Node>(definitelyExcluded)) {
 //                if (node1 == x || node1 == y) continue;
 
                 for (Node node2 : fullSet) {
@@ -635,16 +613,16 @@ public class Jpc implements GraphSearch {
                 }
             }
 
-            List<Node> _perhapsExcluded = new ArrayList<Node>(perhapsExcluded);
+            List <Node> _perhapsExcluded = new ArrayList <Node>(perhapsExcluded);
             DepthChoiceGenerator generator2 = new DepthChoiceGenerator(_perhapsExcluded.size(), _perhapsExcluded.size());
             int[] choice2;
 
             while ((choice2 = generator2.next()) != null) {
-                List<Node> perhapsExcludedSubset = GraphUtils.asList(choice2, _perhapsExcluded);
-                Set<Node> excluded = new HashSet<Node>(definitelyExcluded);
+                List <Node> perhapsExcludedSubset = GraphUtils.asList(choice2, _perhapsExcluded);
+                Set <Node> excluded = new HashSet <Node>(definitelyExcluded);
                 excluded.addAll(perhapsExcludedSubset);
 
-                List<Node> sepset = pathBlockingSetExcluding(graph, x, y, excluded);
+                List <Node> sepset = pathBlockingSetExcluding(graph, x, y, excluded);
 
                 if (test.isIndependent(x, y, sepset)) {
                     return sepset;
@@ -655,8 +633,11 @@ public class Jpc implements GraphSearch {
         return null;
     }
 
-    private List<Node> pathBlockingSetSmall(IndependenceTest test, Graph graph, Node x, Node y) {
-        List<Node> adjX = graph.getAdjacentNodes(x);
+
+    //================================PRIVATE METHODS=======================//
+
+    private List <Node> pathBlockingSetSmall(IndependenceTest test, Graph graph, Node x, Node y) {
+        List <Node> adjX = graph.getAdjacentNodes(x);
         adjX.removeAll(graph.getParents(x));
         adjX.removeAll(graph.getChildren(x));
 
@@ -664,14 +645,14 @@ public class Jpc implements GraphSearch {
         int[] choice;
 
         while ((choice = gen.next()) != null) {
-            List<Node> selection = GraphUtils.asList(choice, adjX);
-            Set<Node> sepset = new HashSet<Node>(selection);
+            List <Node> selection = GraphUtils.asList(choice, adjX);
+            Set <Node> sepset = new HashSet <Node>(selection);
             sepset.addAll(graph.getParents(x));
 
             sepset.remove(x);
             sepset.remove(y);
 
-            ArrayList<Node> sepsetList = new ArrayList<Node>(sepset);
+            ArrayList <Node> sepsetList = new ArrayList <Node>(sepset);
 
 
             if (test.isIndependent(x, y, sepsetList)) {
@@ -682,8 +663,8 @@ public class Jpc implements GraphSearch {
         return null;
     }
 
-    private List<Node> pathBlockingSetExcluding(Graph graph, Node x, Node y, Set<Node> excludedNodes) {
-        List<Node> condSet = new LinkedList<Node>();
+    private List <Node> pathBlockingSetExcluding(Graph graph, Node x, Node y, Set <Node> excludedNodes) {
+        List <Node> condSet = new LinkedList <Node>();
 
         for (Node b : graph.getAdjacentNodes(x)) {
             if (!condSet.contains(b) && !excludedNodes.contains(b)) {
@@ -744,7 +725,7 @@ public class Jpc implements GraphSearch {
 
         for (Node y : graph.getNodes()) {
 //            System.out.println("yyy " + y);
-            List<Node> adjacentNodes = graph.getAdjacentNodes(y);
+            List <Node> adjacentNodes = graph.getAdjacentNodes(y);
 
             if (adjacentNodes.size() < 2) {
                 continue;
@@ -796,19 +777,9 @@ public class Jpc implements GraphSearch {
                 isArrowpointAllowed1(z, y, knowledge);
     }
 
-    private static boolean isArrowpointAllowed1(Node from, Node to,
-                                                Knowledge knowledge) {
-        if (knowledge == null) {
-            return true;
-        }
-
-        return !knowledge.edgeRequired(to.toString(), from.toString()) &&
-                !knowledge.edgeForbidden(from.toString(), to.toString());
-    }
-
-    private void collectSemidirectedDescendantsVisit(Graph graph, Node node, Set<Node> descendants) {
+    private void collectSemidirectedDescendantsVisit(Graph graph, Node node, Set <Node> descendants) {
         descendants.add(node);
-        List<Node> children = graph.getChildren(node);
+        List <Node> children = graph.getChildren(node);
 
         if (!children.isEmpty()) {
             for (Object aChildren : children) {
@@ -821,7 +792,7 @@ public class Jpc implements GraphSearch {
     /**
      * closure under the child relation
      */
-    private void doSemidirectedChildClosureVisit(Graph graph, Node node, Set<Node> closure) {
+    private void doSemidirectedChildClosureVisit(Graph graph, Node node, Set <Node> closure) {
         if (!closure.contains(node)) {
             closure.add(node);
 
@@ -856,11 +827,11 @@ public class Jpc implements GraphSearch {
         this.initialGraph = initialGraph;
     }
 
-    public Set<Triple> getColliderTriples(Graph graph) {
-        Set<Triple> triples = new HashSet<Triple>();
+    public Set <Triple> getColliderTriples(Graph graph) {
+        Set <Triple> triples = new HashSet <Triple>();
 
         for (Node node : graph.getNodes()) {
-            List<Node> nodesInto = graph.getNodesInTo(node, Endpoint.ARROW);
+            List <Node> nodesInto = graph.getNodesInTo(node, Endpoint.ARROW);
 
             if (nodesInto.size() < 2) continue;
 
@@ -875,18 +846,16 @@ public class Jpc implements GraphSearch {
         return triples;
     }
 
-
     public boolean existsDirectedPathFromTo(Graph graph, Node node1, Node node2) {
-        return existsDirectedPathVisit(graph, node1, node2, new LinkedList<Node>());
+        return existsDirectedPathVisit(graph, node1, node2, new LinkedList <Node>());
     }
 
     public boolean existsSemidirectedPathFromTo(Graph graph, Node node1, Node node2) {
-        return existsSemiDirectedPathVisit(graph, node1, node2, new LinkedList<Node>());
+        return existsSemiDirectedPathVisit(graph, node1, node2, new LinkedList <Node>());
     }
 
-
     private boolean existsDirectedPathVisit(Graph graph, Node node1, Node node2,
-                                            LinkedList<Node> path) {
+                                            LinkedList <Node> path) {
         if (path.size() > getMaxDescendantPath()) {
             return false;
         }
@@ -927,7 +896,7 @@ public class Jpc implements GraphSearch {
      * @return true iff there is a semi-directed path from node1 to node2
      */
     private boolean existsSemiDirectedPathVisit(Graph graph, Node node1, Node node2,
-                                                LinkedList<Node> path) {
+                                                LinkedList <Node> path) {
         if (path.size() > getMaxDescendantPath()) {
             return false;
         }
@@ -964,6 +933,9 @@ public class Jpc implements GraphSearch {
         return false;
     }
 
+    public int getPcDepth() {
+        return pcDepth;
+    }
 
     public void setPcDepth(int pcDepth) {
         if (pcDepth < -1) {
@@ -973,8 +945,16 @@ public class Jpc implements GraphSearch {
         this.pcDepth = pcDepth;
     }
 
-    public int getPcDepth() {
-        return pcDepth;
+
+    /**
+     * The types of underlying algorithms for JPC.
+     */
+    public enum AlgorithmType {
+        PC, CPC
+    }
+
+    public enum PathBlockingSet {
+        LARGE, SMALL
     }
 
 }

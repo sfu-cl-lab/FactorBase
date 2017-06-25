@@ -33,7 +33,6 @@ import junit.framework.TestCase;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.PrintWriter;
-import java.util.*;
 
 /**
  * Tests the ResolveSepsets utilities.
@@ -62,6 +61,86 @@ public class TestResolveSepsets extends TestCase {
         super(name);
     }
 
+    private static List <Set <Node>> subsetsFromDag(Graph graph, int s) {
+        int sets = s;
+        int n = graph.getNumNodes();
+        List <Node> nodes = graph.getNodes();
+        List <Node> overlap = new ArrayList <Node>();
+        Set <Node> set1 = new HashSet <Node>();
+        Set <Node> set2 = new HashSet <Node>();
+        RandomUtil generator = RandomUtil.getInstance();
+        long overlapsize = Math.round(n * .6);
+        while (nodes.size() > n - overlapsize) {
+            overlap.add(nodes.remove(generator.nextInt(nodes.size())));
+        }
+        while (!nodes.isEmpty()) {
+            if (generator.nextInt(2) == 0) {
+                set1.add(nodes.remove(generator.nextInt(nodes.size())));
+            } else {
+                set2.add(nodes.remove(generator.nextInt(nodes.size())));
+            }
+        }
+        set1.addAll(overlap);
+        set2.addAll(overlap);
+        List <Set <Node>> dds = new ArrayList <Set <Node>>();
+        dds.add(set1);
+        dds.add(set2);
+        sets -= 2;
+        nodes = graph.getNodes();
+        while (sets > 0) {
+            List <Node> lastSet = new ArrayList <Node>(dds.get(dds.size() - 1));
+            Set <Node> newSet = new HashSet <Node>();
+            while (newSet.size() < overlapsize) {
+                newSet.add(lastSet.remove(generator.nextInt(lastSet.size())));
+            }
+            int averageSetSize = 0;
+            for (Set <Node> set : dds) {
+                averageSetSize += set.size();
+            }
+            averageSetSize /= dds.size();
+            for (Node node : nodes) {
+                if (!lastSet.contains(node)) {
+                    newSet.add(node);
+                }
+                if (newSet.size() >= averageSetSize) {
+                    break;
+                }
+            }
+            dds.add(newSet);
+            sets--;
+        }
+        return dds;
+    }
+
+    private static List <DataSet> missingDatasets(DataSet dataset, List <Set <Node>> missingVars) {
+        List <DataSet> datasetSet = new ArrayList <DataSet>();
+        int datapoint = 0;
+        for (Set <Node> missing : missingVars) {
+            int[] ints = new int[(dataset.getNumRows() / missingVars.size())];
+            for (int i = 0; i < (dataset.getNumRows() / missingVars.size()); i++) {
+                ints[i] = datapoint;
+                datapoint++;
+            }
+            DataSet newDataset = dataset.subsetRows(ints);
+            for (Node node : dataset.getVariables()) {
+                boolean remove = true;
+                for (Node node2 : missing) {
+                    if (node.getName().equals(node2.getName())) {
+                        remove = false;
+                        break;
+                    }
+                }
+                if (remove) {
+                    newDataset.removeColumn(node);
+                }
+            }
+            datasetSet.add(newDataset);
+        }
+        return datasetSet;
+    }
+
+    // gets random subsets nodes in a dag of specified size
+
     public void testSimulation() {
 /*        int[] d = {10,25,100};
         for (int di : d) {
@@ -73,23 +152,25 @@ public class TestResolveSepsets extends TestCase {
 */
     }
 
+    // generates missing data for ion and structural em
+
     public void discreteTest(int d) {
         Dag graph = GraphUtils.randomDag(d, 0, d, 3, 2, 1, true);
         BayesPm pm = new BayesPm(graph, 4, 4);
         BayesIm im = new MlBayesIm(pm, MlBayesIm.RANDOM);
-        List<Set<Node>> subsetsNodes = subsetsFromDag(graph, 2);
+        List <Set <Node>> subsetsNodes = subsetsFromDag(graph, 2);
 
         for (int n : nsizes) {
             DataSet dataset = im.simulateData(2 * n, false);
-            List<DataSet> missingDatasets = missingDatasets(dataset, subsetsNodes);
-            List<IndependenceTest> independenceTests = new ArrayList<IndependenceTest>();
+            List <DataSet> missingDatasets = missingDatasets(dataset, subsetsNodes);
+            List <IndependenceTest> independenceTests = new ArrayList <IndependenceTest>();
             for (DataSet missingDataset : missingDatasets) {
                 independenceTests.add(new IndTestChiSquare(missingDataset, .01));
             }
-            Map<ResolveSepsets.Method, Integer> correct = new HashMap<ResolveSepsets.Method, Integer>();
-            Map<ResolveSepsets.Method, Integer> incorrect = new HashMap<ResolveSepsets.Method, Integer>();
-            Map<ResolveSepsets.Method, Integer> independent = new HashMap<ResolveSepsets.Method, Integer>();
-            Map<ResolveSepsets.Method, Integer> associated = new HashMap<ResolveSepsets.Method, Integer>();
+            Map <ResolveSepsets.Method, Integer> correct = new HashMap <ResolveSepsets.Method, Integer>();
+            Map <ResolveSepsets.Method, Integer> incorrect = new HashMap <ResolveSepsets.Method, Integer>();
+            Map <ResolveSepsets.Method, Integer> independent = new HashMap <ResolveSepsets.Method, Integer>();
+            Map <ResolveSepsets.Method, Integer> associated = new HashMap <ResolveSepsets.Method, Integer>();
             for (ResolveSepsets.Method method : methods) {
                 correct.put(method, 0);
                 incorrect.put(method, 0);
@@ -126,8 +207,7 @@ public class TestResolveSepsets extends TestCase {
                 pincorrectWr.close();
                 paccuracyWr.close();
                 pindWr.close();
-            }
-            catch (Exception e) {
+            } catch (Exception e) {
                 throw new RuntimeException(e);
             }
         }
@@ -148,111 +228,27 @@ public class TestResolveSepsets extends TestCase {
             pincorrectWr.close();
             paccuracyWr.close();
             pindWr.close();
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             throw new RuntimeException(e);
         }
     }
 
-    // gets random subsets nodes in a dag of specified size
-
-    private static List<Set<Node>> subsetsFromDag(Graph graph, int s) {
-        int sets = s;
-        int n = graph.getNumNodes();
-        List<Node> nodes = graph.getNodes();
-        List<Node> overlap = new ArrayList<Node>();
-        Set<Node> set1 = new HashSet<Node>();
-        Set<Node> set2 = new HashSet<Node>();
-        RandomUtil generator = RandomUtil.getInstance();
-        long overlapsize = Math.round(n * .6);
-        while (nodes.size() > n - overlapsize) {
-            overlap.add(nodes.remove(generator.nextInt(nodes.size())));
-        }
-        while (!nodes.isEmpty()) {
-            if (generator.nextInt(2) == 0) {
-                set1.add(nodes.remove(generator.nextInt(nodes.size())));
-            } else {
-                set2.add(nodes.remove(generator.nextInt(nodes.size())));
-            }
-        }
-        set1.addAll(overlap);
-        set2.addAll(overlap);
-        List<Set<Node>> dds = new ArrayList<Set<Node>>();
-        dds.add(set1);
-        dds.add(set2);
-        sets -= 2;
-        nodes = graph.getNodes();
-        while (sets > 0) {
-            List<Node> lastSet = new ArrayList<Node>(dds.get(dds.size() - 1));
-            Set<Node> newSet = new HashSet<Node>();
-            while (newSet.size() < overlapsize) {
-                newSet.add(lastSet.remove(generator.nextInt(lastSet.size())));
-            }
-            int averageSetSize = 0;
-            for (Set<Node> set : dds) {
-                averageSetSize += set.size();
-            }
-            averageSetSize /= dds.size();
-            for (Node node : nodes) {
-                if (!lastSet.contains(node)) {
-                    newSet.add(node);
-                }
-                if (newSet.size() >= averageSetSize) {
-                    break;
-                }
-            }
-            dds.add(newSet);
-            sets--;
-        }
-        return dds;
-    }
-
-    // generates missing data for ion and structural em
-
-    private static List<DataSet> missingDatasets(DataSet dataset, List<Set<Node>> missingVars) {
-        List<DataSet> datasetSet = new ArrayList<DataSet>();
-        int datapoint = 0;
-        for (Set<Node> missing : missingVars) {
-            int[] ints = new int[(dataset.getNumRows() / missingVars.size())];
-            for (int i = 0; i < (dataset.getNumRows() / missingVars.size()); i++) {
-                ints[i] = datapoint;
-                datapoint++;
-            }
-            DataSet newDataset = dataset.subsetRows(ints);
-            for (Node node : dataset.getVariables()) {
-                boolean remove = true;
-                for (Node node2 : missing) {
-                    if (node.getName().equals(node2.getName())) {
-                        remove = false;
-                        break;
-                    }
-                }
-                if (remove) {
-                    newDataset.removeColumn(node);
-                }
-            }
-            datasetSet.add(newDataset);
-        }
-        return datasetSet;
-    }
-
-
-    public void tryMethods(Graph graph, List<IndependenceTest> independenceTests,
-                           Map<ResolveSepsets.Method, Integer> correct, Map<ResolveSepsets.Method, Integer> incorrect,
-                           Map<ResolveSepsets.Method, Integer> independent, Map<ResolveSepsets.Method, Integer> associated) {
-        List<SepsetMapDci> sepsets = new ArrayList<SepsetMapDci>();
-        Set<Node> allVars = new HashSet<Node>();
+    public void tryMethods(Graph graph, List <IndependenceTest> independenceTests,
+                           Map <ResolveSepsets.Method, Integer> correct, Map <ResolveSepsets.Method, Integer> incorrect,
+                           Map <ResolveSepsets.Method, Integer> independent, Map <ResolveSepsets.Method, Integer> associated) {
+        List <SepsetMapDci> sepsets = new ArrayList <SepsetMapDci>();
+        Set <Node> allVars = new HashSet <Node>();
         for (IndependenceTest independenceTest : independenceTests) {
             allVars.addAll(independenceTest.getVariables());
         }
         for (IndependenceTest independenceTest : independenceTests) {
-            Graph fullGraph = new EdgeListGraph(new ArrayList<Node>(allVars));
+            Graph fullGraph = new EdgeListGraph(new ArrayList <Node>(allVars));
             fullGraph.fullyConnect(Endpoint.CIRCLE);
             FasDci adj = new FasDci(new EdgeListGraph(fullGraph), independenceTest);
             adj.setDepth(3);
             sepsets.add(adj.search());
         }
-        List<NodePair> allPairs = ResolveSepsets.allNodePairs(new ArrayList<Node>(allVars));
+        List <NodePair> allPairs = ResolveSepsets.allNodePairs(new ArrayList <Node>(allVars));
         for (ResolveSepsets.Method method : methods) {
             SepsetMapDci resolvedInd = new SepsetMapDci();
             SepsetMapDci resolvedDep = new SepsetMapDci();
@@ -260,10 +256,10 @@ public class TestResolveSepsets extends TestCase {
             for (NodePair pair : allPairs) {
                 Node x = graph.getNode(pair.getFirst().getName());
                 Node y = graph.getNode(pair.getSecond().getName());
-                List<List<Node>> indCondSets = resolvedInd.getSet(pair.getFirst(), pair.getSecond());
+                List <List <Node>> indCondSets = resolvedInd.getSet(pair.getFirst(), pair.getSecond());
                 if (indCondSets != null) {
-                    for (List<Node> indCondSet : indCondSets) {
-                        List<Node> z = new ArrayList<Node>();
+                    for (List <Node> indCondSet : indCondSets) {
+                        List <Node> z = new ArrayList <Node>();
                         for (Node c : indCondSet) {
                             z.add(graph.getNode(c.getName()));
                         }
@@ -280,10 +276,10 @@ public class TestResolveSepsets extends TestCase {
                         }
                     }
                 }
-                List<List<Node>> depCondSets = resolvedDep.getSet(pair.getFirst(), pair.getSecond());
+                List <List <Node>> depCondSets = resolvedDep.getSet(pair.getFirst(), pair.getSecond());
                 if (depCondSets != null) {
-                    for (List<Node> depCondSet : depCondSets) {
-                        List<Node> z = new ArrayList<Node>();
+                    for (List <Node> depCondSet : depCondSets) {
+                        List <Node> z = new ArrayList <Node>();
                         for (Node c : depCondSet) {
                             z.add(graph.getNode(c.getName()));
                         }

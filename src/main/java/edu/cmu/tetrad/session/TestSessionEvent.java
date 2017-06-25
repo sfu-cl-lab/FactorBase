@@ -46,8 +46,19 @@ public class TestSessionEvent extends TestCase {
         super(name);
     }
 
+    /**
+     * This method uses reflection to collect up all of the test methods from
+     * this class and return them to the test runner.
+     */
+    public static Test suite() {
+
+        // Edit the name of the class in the parens to match the name
+        // of this class.
+        return new TestSuite(TestSessionEvent.class);
+    }
+
     @Override
-	public void setUp() {
+    public void setUp() {
         this.session = new Session("Test");
     }
 
@@ -140,17 +151,6 @@ public class TestSessionEvent extends TestCase {
         assertTrue(child == event.getChild());
         assertTrue(parent == event.getParent());
         assertEquals(SessionEvent.PARENT_REMOVED, event.getType());
-    }
-
-    /**
-     * This method uses reflection to collect up all of the test methods from
-     * this class and return them to the test runner.
-     */
-    public static Test suite() {
-
-        // Edit the name of the class in the parens to match the name
-        // of this class.
-        return new TestSuite(TestSessionEvent.class);
     }
 }
 

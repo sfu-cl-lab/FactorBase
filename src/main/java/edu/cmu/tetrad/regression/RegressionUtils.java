@@ -30,8 +30,6 @@ import edu.cmu.tetrad.graph.Dag;
 import edu.cmu.tetrad.graph.Graph;
 import edu.cmu.tetrad.graph.Node;
 
-import java.util.*;
-
 /**
  * Created by IntelliJ IDEA. User: jdramsey Date: Nov 28, 2008 Time: 11:52:24 AM
  * To change this template use File | Settings | File Templates.
@@ -52,8 +50,8 @@ public class RegressionUtils {
                 continue;
             }
 
-            List<Node> _regressors = dag.getParents(_target);
-            List<Node> regressors = new LinkedList<Node>();
+            List <Node> _regressors = dag.getParents(_target);
+            List <Node> regressors = new LinkedList <Node>();
 
             for (Node node : _regressors) {
                 regressors.add(dataSet.getVariable(node.getName()));
@@ -79,13 +77,13 @@ public class RegressionUtils {
                 throw new IllegalArgumentException("Data variable not in graph: " + target);
             }
 
-            Set<Node> _regressors = new HashSet<Node>(graph.getParents(_target));
+            Set <Node> _regressors = new HashSet <Node>(graph.getParents(_target));
             boolean changed = true;
 
             while (changed) {
                 changed = false;
 
-                for (Node node : new ArrayList<Node>(_regressors)) {
+                for (Node node : new ArrayList <Node>(_regressors)) {
                     if (_regressors.contains(node)) {
                         boolean inData = dataSet.getVariable(node.getName()) != null;
                         if (!inData) {
@@ -99,7 +97,7 @@ public class RegressionUtils {
 
             System.out.println("For " + target + " regressors are " + _regressors);
 
-            List<Node> regressors = new LinkedList<Node>();
+            List <Node> regressors = new LinkedList <Node>();
 
             for (Node node : _regressors) {
                 regressors.add(dataSet.getVariable(node.getName()));

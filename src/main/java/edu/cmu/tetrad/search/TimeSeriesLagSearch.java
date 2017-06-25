@@ -67,22 +67,22 @@ public final class TimeSeriesLagSearch implements GraphSearch {
     /**
      * The list of all unshielded triples.
      */
-    private Set<Triple> allTriples;
+    private Set <Triple> allTriples;
 
     /**
      * Set of unshielded colliders from the triple orientation step.
      */
-    private Set<Triple> colliderTriples;
+    private Set <Triple> colliderTriples;
 
     /**
      * Set of unshielded noncolliders from the triple orientation step.
      */
-    private Set<Triple> noncolliderTriples;
+    private Set <Triple> noncolliderTriples;
 
     /**
      * Set of ambiguous unshielded triples.
      */
-    private Set<Triple> ambiguousTriples;
+    private Set <Triple> ambiguousTriples;
 
     /**
      * True if cycles are to be aggressively prevented. May be expensive for large graphs (but also useful for large
@@ -106,18 +106,17 @@ public final class TimeSeriesLagSearch implements GraphSearch {
 
     //==============================PUBLIC METHODS========================//
 
+    private static boolean isArrowpointAllowed1(Node from, Node to,
+                                                Knowledge knowledge) {
+        return knowledge == null || !knowledge.edgeRequired(to.toString(), from.toString()) &&
+                !knowledge.edgeForbidden(from.toString(), to.toString());
+    }
+
     /**
      * Returns true just in case edges will not be added if they would create cycles.
      */
     public boolean isAggressivelyPreventCycles() {
         return this.aggressivelyPreventCycles;
-    }
-
-    /**
-     * Sets to true just in case edges will not be added if they would create cycles.
-     */
-    public void setAggressivelyPreventCycles(boolean aggressivelyPreventCycles) {
-        this.aggressivelyPreventCycles = aggressivelyPreventCycles;
     }
 
 //    /**
@@ -139,10 +138,17 @@ public final class TimeSeriesLagSearch implements GraphSearch {
 //    }
 
     /**
+     * Sets to true just in case edges will not be added if they would create cycles.
+     */
+    public void setAggressivelyPreventCycles(boolean aggressivelyPreventCycles) {
+        this.aggressivelyPreventCycles = aggressivelyPreventCycles;
+    }
+
+    /**
      * Returns the elapsed time of search in milliseconds, after <code>search()</code> has been run.
      */
     @Override
-	public final long getElapsedTime() {
+    public final long getElapsedTime() {
         return this.elapsedTime;
     }
 
@@ -180,32 +186,32 @@ public final class TimeSeriesLagSearch implements GraphSearch {
      * Returns the set of ambiguous triples found during the most recent run of the algorithm. Non-null after a call to
      * <code>search()</code>.
      */
-    public Set<Triple> getAmbiguousTriples() {
-        return new HashSet<Triple>(ambiguousTriples);
+    public Set <Triple> getAmbiguousTriples() {
+        return new HashSet <Triple>(ambiguousTriples);
     }
 
     /**
      * Returns the set of collider triples found during the most recent run of the algorithm. Non-null after a call to
      * <code>search()</code>.
      */
-    public Set<Triple> getColliderTriples() {
-        return new HashSet<Triple>(colliderTriples);
+    public Set <Triple> getColliderTriples() {
+        return new HashSet <Triple>(colliderTriples);
     }
 
     /**
      * Returns the set of noncollider triples found during the most recent run of the algorithm. Non-null after a call
      * to <code>search()</code>.
      */
-    public Set<Triple> getNoncolliderTriples() {
-        return new HashSet<Triple>(noncolliderTriples);
+    public Set <Triple> getNoncolliderTriples() {
+        return new HashSet <Triple>(noncolliderTriples);
     }
 
     /**
      * Returns the set of all triples found during the most recent run of the algorithm. Non-null after a call to
      * <code>search()</code>.
      */
-    public Set<Triple> getAllTriples() {
-        return new HashSet<Triple>(allTriples);
+    public Set <Triple> getAllTriples() {
+        return new HashSet <Triple>(allTriples);
     }
 
     /**
@@ -213,7 +219,7 @@ public final class TimeSeriesLagSearch implements GraphSearch {
      * See PC for caveats. The number of possible cycles and bidirected edges is far less with CPC than with PC.
      */
     @Override
-	public final Graph search() {
+    public final Graph search() {
         return search(independenceTest.getVariables());
     }
 
@@ -221,20 +227,20 @@ public final class TimeSeriesLagSearch implements GraphSearch {
      * Runs PC on just the given variable, all of which must be in the domain of the independence test. See PC for
      * caveats. The number of possible cycles and bidirected edges is far less with CPC than with PC.
      */
-    public Graph search(List<Node> nodes) {
+    public Graph search(List <Node> nodes) {
         TetradLogger.getInstance().log("info", "Starting TimeSeriesLagSearch.");
         TetradLogger.getInstance().log("info", "Independence test = " + independenceTest + ".");
         long startTime = System.currentTimeMillis();
-        this.allTriples = new HashSet<Triple>();
-        this.ambiguousTriples = new HashSet<Triple>();
-        this.colliderTriples = new HashSet<Triple>();
-        this.noncolliderTriples = new HashSet<Triple>();
+        this.allTriples = new HashSet <Triple>();
+        this.ambiguousTriples = new HashSet <Triple>();
+        this.colliderTriples = new HashSet <Triple>();
+        this.noncolliderTriples = new HashSet <Triple>();
 
         if (getIndependenceTest() == null) {
             throw new NullPointerException();
         }
 
-        List<Node> allNodes = getIndependenceTest().getVariables();
+        List <Node> allNodes = getIndependenceTest().getVariables();
         if (!allNodes.containsAll(nodes)) {
             throw new IllegalArgumentException("All of the given nodes must " +
                     "be in the domain of the independence test provided.");
@@ -275,6 +281,8 @@ public final class TimeSeriesLagSearch implements GraphSearch {
         return graph;
     }
 
+    //==========================PRIVATE METHODS===========================//
+
     /**
      * Orients the given graph using CPC orientation with the conditional independence test provided in the
      * constructor.
@@ -301,8 +309,6 @@ public final class TimeSeriesLagSearch implements GraphSearch {
 
         return graph;
     }
-
-    //==========================PRIVATE METHODS===========================//
 
     private void logTriples() {
         TetradLogger.getInstance().log("info", "\nCollider triples judged from sepsets:");
@@ -331,14 +337,14 @@ public final class TimeSeriesLagSearch implements GraphSearch {
 
 //        System.out.println("orientUnshieldedTriples 1");
 
-        colliderTriples = new HashSet<Triple>();
-        noncolliderTriples = new HashSet<Triple>();
-        ambiguousTriples = new HashSet<Triple>();
+        colliderTriples = new HashSet <Triple>();
+        noncolliderTriples = new HashSet <Triple>();
+        ambiguousTriples = new HashSet <Triple>();
 
         for (Node y : graph.getNodes()) {
 //            System.out.println("orientUnshieldedTriples 2");
 
-            List<Node> adjacentNodes = graph.getAdjacentNodes(y);
+            List <Node> adjacentNodes = graph.getAdjacentNodes(y);
 
             if (adjacentNodes.size() < 2) {
                 continue;
@@ -396,11 +402,5 @@ public final class TimeSeriesLagSearch implements GraphSearch {
     private boolean colliderAllowed(Node x, Node y, Node z, Knowledge knowledge) {
         return isArrowpointAllowed1(x, y, knowledge) &&
                 isArrowpointAllowed1(z, y, knowledge);
-    }
-
-    private static boolean isArrowpointAllowed1(Node from, Node to,
-                                                Knowledge knowledge) {
-        return knowledge == null || !knowledge.edgeRequired(to.toString(), from.toString()) &&
-                !knowledge.edgeForbidden(from.toString(), to.toString());
     }
 }

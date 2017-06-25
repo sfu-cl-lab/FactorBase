@@ -37,14 +37,8 @@ public class TestMathUtils extends TestCase {
         super(name);
     }
 
-    public void testLogistic() {
-//        for (double d = -10.; d < 10.; d+= 0.5) {
-//            System.out.println(MathUtils.logistic(d));
-//        }
-
-        assert(MathUtils.logistic(0.) == 0.);
-        assert(MathUtils.logistic(-10.) < 1.e-4);
-        assert(MathUtils.logistic(+10.) > 1. - 1.e-4);
+    public static Test suite() {
+        return new TestSuite(TestMathUtils.class);
     }
 
 //    public void testTemp() {
@@ -71,14 +65,20 @@ public class TestMathUtils extends TestCase {
 //        System.out.println(Math.log(MathUtils.bigExp(d)));
 //    }
 
+    public void testLogistic() {
+//        for (double d = -10.; d < 10.; d+= 0.5) {
+//            System.out.println(MathUtils.logistic(d));
+//        }
+
+        assert (MathUtils.logistic(0.) == 0.);
+        assert (MathUtils.logistic(-10.) < 1.e-4);
+        assert (MathUtils.logistic(+10.) > 1. - 1.e-4);
+    }
+
     public void testExpSums() {
         double d = 100.0;
 
         System.out.println(Math.exp(d + d));
         System.out.println(Math.exp(d) * Math.exp(d));
-    }
-
-    public static Test suite() {
-        return new TestSuite(TestMathUtils.class);
     }
 }

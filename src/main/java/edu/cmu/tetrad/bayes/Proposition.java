@@ -67,7 +67,7 @@ public final class Proposition implements TetradSerializable {
 
         this.variableSource = variableSource;
 
-        List<Node> variables = this.variableSource.getVariables();
+        List <Node> variables = this.variableSource.getVariables();
 
         for (Node variable : variables) {
             if (!(variable instanceof DiscreteVariable)) {
@@ -89,10 +89,6 @@ public final class Proposition implements TetradSerializable {
         setToTautology();
     }
 
-    public static Proposition tautology(VariableSource variableSource) {
-        return new Proposition(variableSource);
-    }
-
     /**
      * Copies the info out of the old proposition into a new proposition for the
      * new BayesIm.
@@ -104,8 +100,8 @@ public final class Proposition implements TetradSerializable {
             throw new NullPointerException();
         }
 
-        List<Node> variables = variableSource.getVariables();
-        List<Node> oldVariables =
+        List <Node> variables = variableSource.getVariables();
+        List <Node> oldVariables =
                 proposition.getVariableSource().getVariables();
 
         for (int i = 0; i < variables.size(); i++) {
@@ -146,6 +142,10 @@ public final class Proposition implements TetradSerializable {
             System.arraycopy(proposition.allowedCategories[i], 0,
                     allowedCategories[i], 0, allowedCategories[i].length);
         }
+    }
+
+    public static Proposition tautology(VariableSource variableSource) {
+        return new Proposition(variableSource);
     }
 
     /**
@@ -265,8 +265,7 @@ public final class Proposition implements TetradSerializable {
 
         if (count != 1) {
             return -1;
-        }
-        else {
+        } else {
             return lastEncountered;
         }
     }
@@ -312,7 +311,7 @@ public final class Proposition implements TetradSerializable {
      * variable does not exist.
      */
     public int getNodeIndex(String name) {
-        List<Node> variables = getVariableSource().getVariables();
+        List <Node> variables = getVariableSource().getVariables();
 
         for (int i = 0; i < variables.size(); i++) {
             Node variable = variables.get(i);
@@ -397,7 +396,7 @@ public final class Proposition implements TetradSerializable {
     }
 
     @Override
-	public boolean equals(Object o) {
+    public boolean equals(Object o) {
         if (o == null) {
             return false;
         }
@@ -421,7 +420,7 @@ public final class Proposition implements TetradSerializable {
     }
 
     @Override
-	public int hashCode() {
+    public int hashCode() {
         int hashCode = 37;
         hashCode = 19 * hashCode + variableSource.hashCode();
         hashCode = 19 * hashCode + allowedCategories.hashCode();
@@ -429,9 +428,9 @@ public final class Proposition implements TetradSerializable {
     }
 
     @Override
-	public String toString() {
+    public String toString() {
         StringBuilder buf = new StringBuilder();
-        List<Node> variables = getVariableSource().getVariables();
+        List <Node> variables = getVariableSource().getVariables();
 
         buf.append("\n");
 
@@ -454,8 +453,7 @@ public final class Proposition implements TetradSerializable {
                 if (i < getNumCategories(j)) {
                     boolean allowed = isAllowed(j, i);
                     buf.append(allowed ? "true" : "*   ").append("\t");
-                }
-                else {
+                } else {
                     buf.append("    \t");
                 }
             }

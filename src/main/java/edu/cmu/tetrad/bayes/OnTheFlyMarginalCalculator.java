@@ -109,7 +109,7 @@ public final class OnTheFlyMarginalCalculator
      *                should be estimated on the fly.
      */
     public OnTheFlyMarginalCalculator(BayesPm bayesPm,
-            DataSet dataSet) throws IllegalArgumentException {
+                                      DataSet dataSet) throws IllegalArgumentException {
         if (bayesPm == null) {
             throw new NullPointerException();
         }
@@ -136,7 +136,7 @@ public final class OnTheFlyMarginalCalculator
 
         // Create a subset of the data set with the variables of the IM, in
         // the order of the IM.
-        List<Node> variables = getVariables();
+        List <Node> variables = getVariables();
         this.dataSet = dataSet.subsetColumns(variables);
 
         // Create a tautologous proposition for evidence.
@@ -156,18 +156,21 @@ public final class OnTheFlyMarginalCalculator
 
     //===============================PUBLIC METHODS========================//
 
-    @Override
-	public void setEvidence(Evidence evidence) {
-        if (evidence == null) {
-            throw new NullPointerException();
+    private static boolean hasNextValue(Proposition proposition, int variable,
+                                        int currentIndex) {
+        return nextValue(proposition, variable, currentIndex) != -1;
+    }
+
+    private static int nextValue(Proposition proposition, int variable,
+                                 int currentIndex) {
+        for (int i = currentIndex + 1;
+             i < proposition.getNumCategories(variable); i++) {
+            if (proposition.isAllowed(variable, i)) {
+                return i;
+            }
         }
 
-        if (evidence.getProposition().getVariableSource() != this) {
-            throw new IllegalArgumentException("Can only take evidence for " +
-                    "this particular object; please convert the evidence.");
-        }
-
-        this.evidence = evidence;
+        return -1;
     }
 
     /**
@@ -175,7 +178,7 @@ public final class OnTheFlyMarginalCalculator
      *
      * @param node the given node.
      * @return the index for that node, or -1 if the node is not in the
-     *         BayesIm.
+     * BayesIm.
      */
     public int getNodeIndex(Node node) {
         for (int i = 0; i < nodes.length; i++) {
@@ -188,8 +191,8 @@ public final class OnTheFlyMarginalCalculator
     }
 
     @Override
-	public List<Node> getVariables() {
-        List<Node> variables = new LinkedList<Node>();
+    public List <Node> getVariables() {
+        List <Node> variables = new LinkedList <Node>();
 
         for (int i = 0; i < getNumNodes(); i++) {
             Node node = getNode(i);
@@ -200,8 +203,8 @@ public final class OnTheFlyMarginalCalculator
     }
 
     @Override
-	public List<String> getVariableNames() {
-        List<String> variableNames = new LinkedList<String>();
+    public List <String> getVariableNames() {
+        List <String> variableNames = new LinkedList <String>();
 
         for (int i = 0; i < getNumNodes(); i++) {
             Node node = getNode(i);
@@ -234,7 +237,7 @@ public final class OnTheFlyMarginalCalculator
      * given discrete data set.
      */
     @Override
-	public double getMarginal(int variable, int category) {
+    public double getMarginal(int variable, int category) {
         if (category >= getNumCategories(variable)) {
             throw new IllegalArgumentException();
         }
@@ -243,29 +246,29 @@ public final class OnTheFlyMarginalCalculator
     }
 
     @Override
-	public boolean isJointMarginalSupported() {
+    public boolean isJointMarginalSupported() {
         return false;
     }
 
     @Override
-	public double getJointMarginal(int[] variables, int[] values) {
+    public double getJointMarginal(int[] variables, int[] values) {
         throw new UnsupportedOperationException();
     }
 
     @Override
-	public BayesIm getBayesIm() {
+    public BayesIm getBayesIm() {
         throw new UnsupportedOperationException();
     }
 
     @Override
-	public double[] calculatePriorMarginals(int nodeIndex) {
+    public double[] calculatePriorMarginals(int nodeIndex) {
         Evidence evidence = getEvidence();
         setEvidence(Evidence.tautology(evidence.getVariableSource()));
 
         double[] marginals = new double[evidence.getNumCategories(nodeIndex)];
 
         for (int i = 0;
-                i < getBayesIm().getNumColumns(nodeIndex); i++) {
+             i < getBayesIm().getNumColumns(nodeIndex); i++) {
             marginals[i] = getMarginal(nodeIndex, i);
         }
 
@@ -273,19 +276,19 @@ public final class OnTheFlyMarginalCalculator
         return marginals;
     }
 
+    //=============================PRIVATE METHODS=======================//
+
     @Override
-	public double[] calculateUpdatedMarginals(int nodeIndex) {
+    public double[] calculateUpdatedMarginals(int nodeIndex) {
         double[] marginals = new double[evidence.getNumCategories(nodeIndex)];
 
         for (int i = 0;
-                i < getBayesIm().getNumColumns(nodeIndex); i++) {
+             i < getBayesIm().getNumColumns(nodeIndex); i++) {
             marginals[i] = getMarginal(nodeIndex, i);
         }
 
         return marginals;
     }
-
-    //=============================PRIVATE METHODS=======================//
 
     /**
      * Returns the underlying Bayes PM.
@@ -300,6 +303,20 @@ public final class OnTheFlyMarginalCalculator
      */
     private Evidence getEvidence() {
         return new Evidence(evidence.getProposition());
+    }
+
+    @Override
+    public void setEvidence(Evidence evidence) {
+        if (evidence == null) {
+            throw new NullPointerException();
+        }
+
+        if (evidence.getProposition().getVariableSource() != this) {
+            throw new IllegalArgumentException("Can only take evidence for " +
+                    "this particular object; please convert the evidence.");
+        }
+
+        this.evidence = evidence;
     }
 
     /**
@@ -362,51 +379,6 @@ public final class OnTheFlyMarginalCalculator
         return discreteProbs;
     }
 
-    /**
-     * Initializes the lists of parents and parent dimension for each variable.
-     */
-    private void initialize() {
-        parents = new int[this.nodes.length][];
-        parentDims = new int[this.nodes.length][];
-
-        for (int nodeIndex = 0; nodeIndex < this.nodes.length; nodeIndex++) {
-            initializeNode(nodeIndex);
-        }
-    }
-
-    /**
-     * Initializes the lists of parents and parent dimension for the given
-     * variable.
-     */
-    private void initializeNode(int nodeIndex) {
-        Node node = nodes[nodeIndex];
-
-        // Set up parents array.  Should store the parents of
-        // each node as ints in a particular order.
-        Graph graph = getBayesPm().getDag();
-        List<Node> parentList = new ArrayList<Node>(graph.getParents(node));
-        int[] parentArray = new int[parentList.size()];
-
-        for (int i = 0; i < parentList.size(); i++) {
-            parentArray[i] = getNodeIndex(parentList.get(i));
-        }
-
-        // Sort parent array.
-        Arrays.sort(parentArray);
-
-        parents[nodeIndex] = parentArray;
-
-        // Setup dimensions array for parents.
-        int[] dims = new int[parentArray.length];
-
-        for (int i = 0; i < dims.length; i++) {
-            Node parNode = nodes[parentArray[i]];
-            dims[i] = getBayesPm().getNumCategories(parNode);
-        }
-
-        parentDims[nodeIndex] = dims;
-    }
-
 //    /**
 //     * Returns the probability that the given variable has the given value,
 //     * given the evidence.
@@ -435,61 +407,16 @@ public final class OnTheFlyMarginalCalculator
 //        return p;
 //    }
 
-    private double getUpdatedMarginalFromModel(int variable, int category) {
-        Proposition evidence = getEvidence().getProposition();
-        int[] variableValues = new int[evidence.getNumVariables()];
+    /**
+     * Initializes the lists of parents and parent dimension for each variable.
+     */
+    private void initialize() {
+        parents = new int[this.nodes.length][];
+        parentDims = new int[this.nodes.length][];
 
-        for (int i = 0; i < evidence.getNumVariables(); i++) {
-            variableValues[i] = nextValue(evidence, i, -1);
+        for (int nodeIndex = 0; nodeIndex < this.nodes.length; nodeIndex++) {
+            initializeNode(nodeIndex);
         }
-
-        variableValues[variableValues.length - 1] = -1;
-        double sum = 0.0;
-
-        loop:
-        while (true) {
-            for (int i = evidence.getNumVariables() - 1; i >= 0; i--) {
-                if (hasNextValue(evidence, i, variableValues[i])) {
-                    variableValues[i] = nextValue(evidence, i, variableValues[i]);
-
-                    for (int j = i + 1; j < evidence.getNumVariables(); j++) {
-                        if (hasNextValue(evidence, j, -1)) {
-                            variableValues[j] = nextValue(evidence, j, -1);
-                        }
-                        else {
-                            break loop;
-                        }
-                    }
-
-                    double product = 1.0;
-
-                    for (int m = 0; m < getNumNodes(); m++) {
-                        Proposition assertion = Proposition.tautology(this);
-                        assertion.setCategory(variable, category);
-
-                        Proposition condition = new Proposition(evidence);
-                        int[] parents = getParents(m);
-
-                        for (int parent : parents) {
-                            condition.disallowComplement(parent,
-                                    variableValues[parent]);
-                        }
-
-                        if (condition.existsCombination()) {
-                            product *= getDiscreteProbs().getConditionalProb(
-                                    assertion, condition);
-                        }
-                    }
-
-                    sum += product;
-                    continue loop;
-                }
-            }
-
-            break;
-        }
-
-        return sum;
     }
 
 
@@ -558,21 +485,93 @@ public final class OnTheFlyMarginalCalculator
 //        return assertionTrue / conditionTrue;
 //    }
 
-    private static boolean hasNextValue(Proposition proposition, int variable,
-            int currentIndex) {
-        return nextValue(proposition, variable, currentIndex) != -1;
-    }
+    /**
+     * Initializes the lists of parents and parent dimension for the given
+     * variable.
+     */
+    private void initializeNode(int nodeIndex) {
+        Node node = nodes[nodeIndex];
 
-    private static int nextValue(Proposition proposition, int variable,
-            int currentIndex) {
-        for (int i = currentIndex + 1;
-                i < proposition.getNumCategories(variable); i++) {
-            if (proposition.isAllowed(variable, i)) {
-                return i;
-            }
+        // Set up parents array.  Should store the parents of
+        // each node as ints in a particular order.
+        Graph graph = getBayesPm().getDag();
+        List <Node> parentList = new ArrayList <Node>(graph.getParents(node));
+        int[] parentArray = new int[parentList.size()];
+
+        for (int i = 0; i < parentList.size(); i++) {
+            parentArray[i] = getNodeIndex(parentList.get(i));
         }
 
-        return -1;
+        // Sort parent array.
+        Arrays.sort(parentArray);
+
+        parents[nodeIndex] = parentArray;
+
+        // Setup dimensions array for parents.
+        int[] dims = new int[parentArray.length];
+
+        for (int i = 0; i < dims.length; i++) {
+            Node parNode = nodes[parentArray[i]];
+            dims[i] = getBayesPm().getNumCategories(parNode);
+        }
+
+        parentDims[nodeIndex] = dims;
+    }
+
+    private double getUpdatedMarginalFromModel(int variable, int category) {
+        Proposition evidence = getEvidence().getProposition();
+        int[] variableValues = new int[evidence.getNumVariables()];
+
+        for (int i = 0; i < evidence.getNumVariables(); i++) {
+            variableValues[i] = nextValue(evidence, i, -1);
+        }
+
+        variableValues[variableValues.length - 1] = -1;
+        double sum = 0.0;
+
+        loop:
+        while (true) {
+            for (int i = evidence.getNumVariables() - 1; i >= 0; i--) {
+                if (hasNextValue(evidence, i, variableValues[i])) {
+                    variableValues[i] = nextValue(evidence, i, variableValues[i]);
+
+                    for (int j = i + 1; j < evidence.getNumVariables(); j++) {
+                        if (hasNextValue(evidence, j, -1)) {
+                            variableValues[j] = nextValue(evidence, j, -1);
+                        } else {
+                            break loop;
+                        }
+                    }
+
+                    double product = 1.0;
+
+                    for (int m = 0; m < getNumNodes(); m++) {
+                        Proposition assertion = Proposition.tautology(this);
+                        assertion.setCategory(variable, category);
+
+                        Proposition condition = new Proposition(evidence);
+                        int[] parents = getParents(m);
+
+                        for (int parent : parents) {
+                            condition.disallowComplement(parent,
+                                    variableValues[parent]);
+                        }
+
+                        if (condition.existsCombination()) {
+                            product *= getDiscreteProbs().getConditionalProb(
+                                    assertion, condition);
+                        }
+                    }
+
+                    sum += product;
+                    continue loop;
+                }
+            }
+
+            break;
+        }
+
+        return sum;
     }
 
     /**

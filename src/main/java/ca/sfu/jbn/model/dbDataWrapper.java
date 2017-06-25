@@ -36,10 +36,9 @@ import edu.cmu.tetrad.graph.Node;
 import edu.cmu.tetrad.graph.NodeType;
 import edu.cmu.tetrad.session.SessionModel;
 
-import java.io.*;
 import java.sql.SQLException;
-import java.util.*;
 import java.util.ArrayList;
+
 /**
  * Wraps a DataModel as a model class for a Session, providing constructors for
  * the parents of Tetrad that are specified by Tetrad.
@@ -84,7 +83,7 @@ public class dbDataWrapper extends DataWrapper implements SessionModel, Knowledg
      *
      * @serial Can be null.
      */
-    private List<Node> knownVariables;
+    private List <Node> knownVariables;
 
     //==============================CONSTRUCTORS===========================//
 
@@ -92,127 +91,38 @@ public class dbDataWrapper extends DataWrapper implements SessionModel, Knowledg
      * Constructs a data wrapper using a new DataSet as data model.
      */
     public dbDataWrapper() {
-        setDataModel(new ColtDataSet(1, new LinkedList<Node>()));
+        setDataModel(new ColtDataSet(1, new LinkedList <Node>()));
         System.out.println("dbdataWrapper Generated");
         //global.schema="university";
         //parameterLearning();
     }
 
 
-    public void parameterLearning(String method){
-		System.out.println("Starting MLN parameter learning package on "
-				+ global.schema);
-		ReadXML sqlToXMLReader = new ReadXML();
-		try {
-			sqlToXMLReader.initialize();
-		} catch (SQLException e1) {
-			System.out.println("SQLtoXML initialization problem");
-			e1.printStackTrace();
-		}
-		// xml file is ready
-
-		ReadSQL_MLN_Files r = new ReadSQL_MLN_Files();
-		try {
-			r.initialize();
-			PrintStream out1 = new PrintStream(new FileOutputStream(
-					global.WorkingDirectory + "/" + global.schema + ".db"));
-			PrintStream out2 = new PrintStream(new FileOutputStream(
-					global.WorkingDirectory + "/" + global.schema
-					+ "_VJ_.mln"));
-			PrintStream out3 = new PrintStream(new FileOutputStream(
-					global.WorkingDirectory + "/" + global.schema
-							+ "predicate_temp.mln"));
-			
-			r.read(out1, out2,out3);
-			
-			System.out.println("DB file and MLN predicate file created");
-		} catch (SQLException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		System.out.println("Stucture learning begins");
-
-		long l = System.currentTimeMillis();
-		S_learning sLearn = new S_learning(2);
-		BayesPm bayes = sLearn.major();
-		long l2 = System.currentTimeMillis();
-		System.out
-				.print("Structure learning ends. Running time of Structure Learning(ms):   ");
-		System.out.println(l2 - l);
-
-		// start Paramter Learning
-		long l3 = System.currentTimeMillis();
-		System.out.println(" Parameter learning using Virtual joins begins");
-		ParamTet t = new ParamTet(bayes);
-		try {
-			BayesIm a = t.paramterlearning();
-		} catch (SQLException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
-		} catch (IOException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
-		}
-		long l4 = System.currentTimeMillis();
-
-		System.out
-				.print("Parameter learning using Virtual joins ends. Running time of learning(ms):  ");
-		System.out.println(l4 - l3);
-		ExportToMLN export = new ExportToMLN();
-
-		StringBuffer rules;
-		try {
-			rules = export.export(method);
-		
-		Writer output = null;
-//		File file = new File(global.WorkingDirectory + "/" + global.schema
-//				+ "_VJ_.mln");
-	
-		
-		FileOutputStream outputStream= new  FileOutputStream(global.WorkingDirectory + "/" + global.schema
-				+ "_VJ_.mln",true);
-		//	output=new BufferedWriter(new FileOoutputStream); 
-		outputStream.write(rules.toString().getBytes());
-//		output.append(rules.toString());
-			
-			System.out.println("MLN ready for use " + global.WorkingDirectory
-					+ "/" + global.schema + "_VJ_.mln"); 
-		} catch (Exception e) {
-
-		}
-
-		db.closeDB();
-    }
-    
-    
     /**
      * Copy constructor.
      *
      * @param wrapper
      */
     public dbDataWrapper(dbDataWrapper wrapper) {
-    	
-    	System.out.println("dbdataWrapper Generated from another");
-    	this.name = wrapper.name;
+
+        System.out.println("dbdataWrapper Generated from another");
+        this.name = wrapper.name;
         this.dataModelList = new DataModelList();
-        setDataModel(new ColtDataSet(1, new LinkedList<Node>()));
-        
+        setDataModel(new ColtDataSet(1, new LinkedList <Node>()));
+
         for (int i = 0; i < wrapper.dataModelList.size(); i++) {
             if (wrapper.dataModelList.get(i) instanceof RectangularDataSet) {
                 RectangularDataSet data = (RectangularDataSet) wrapper.dataModelList.get(i);
                 this.dataModelList.add(copyData(data));
             }
         }
-        
-        
-        if(wrapper.sourceGraph != null){
+
+
+        if (wrapper.sourceGraph != null) {
             this.sourceGraph = new EdgeListGraph(wrapper.sourceGraph);
         }
-        if(wrapper.knownVariables != null){
-            this.knownVariables = new ArrayList<Node>(wrapper.knownVariables);
+        if (wrapper.knownVariables != null) {
+            this.knownVariables = new ArrayList <Node>(wrapper.knownVariables);
         }
     }
 
@@ -224,13 +134,14 @@ public class dbDataWrapper extends DataWrapper implements SessionModel, Knowledg
         setDataModel(dataSet);
     }
 
+
     public dbDataWrapper(Graph graph) {
         if (graph == null) {
             throw new NullPointerException();
         }
 
-        List<Node> nodes = graph.getNodes();
-        List<Node> variables = new LinkedList<Node>();
+        List <Node> nodes = graph.getNodes();
+        List <Node> variables = new LinkedList <Node>();
 
         for (Object node1 : nodes) {
             Node node = (Node) node1;
@@ -269,101 +180,6 @@ public class dbDataWrapper extends DataWrapper implements SessionModel, Knowledg
         return new dbDataWrapper(DataUtils.discreteSerializableInstance());
     }
 
-    //==============================PUBLIC METHODS========================//
-
-    /**
-     * Returns the list of models.
-     */
-    @Override
-	public DataModelList getDataModelList() {
-        return this.dataModelList;
-    }
-
-    /**
-     * Returns the data model for this wrapper.
-     */
-    @Override
-	public DataModel getSelectedDataModel() {
-        DataModelList modelList = this.dataModelList;
-        return modelList.getSelectedModel();
-    }
-
-    /**
-     * Sets the data model.
-     */
-    @Override
-	public void setDataModel(DataModel dataModel) {
-        if (dataModel == null) {
-            dataModel = new ColtDataSet(0, new LinkedList<Node>());
-        }
-
-        if (dataModel instanceof DataModelList) {
-            this.dataModelList = (DataModelList) dataModel;
-        } else {
-            this.dataModelList = new DataModelList();
-            this.dataModelList.add(dataModel);
-        }
-    }
-
-    @Override
-	public Knowledge getKnowledge() {
-        return getSelectedDataModel().getKnowledge();
-    }
-
-    @Override
-	public void setKnowledge(Knowledge knowledge) {
-        getSelectedDataModel().setKnowledge(knowledge);
-    }
-
-    @Override
-	public List<String> getVarNames() {
-        return getSelectedDataModel().getVariableNames();
-    }
-
-    /**
-     * Returns the source workbench, if there is one.
-     */
-    @Override
-	public Graph getSourceGraph() {
-        return this.sourceGraph;
-    }
-
-    /**
-     * Returns the variable names, in order.
-     */
-    @Override
-	public List getVariables() {
-        return this.getSelectedDataModel().getVariables();
-    }
-
-    /**
-     * Sets the source graph.
-     */
-    @Override
-	public void setSourceGraph(Graph sourceGraph) {
-        this.sourceGraph = sourceGraph;
-    }
-
-    /**
-     * Sets the source graph.
-     */
-    @Override
-	public void setKnownVariables(List<Node> variables) {
-        this.knownVariables = variables;
-    }
-
-    @Override
-	public Map getDiscretizationSpecs() {
-        return discretizationSpecs;
-    }
-
-    @Override
-	public List<Node> getKnownVariables() {
-        return knownVariables;	
-    }
-
-    //=============================== Private Methods ==========================//
-
     private static DataModel copyData(RectangularDataSet data) {
         ColtDataSet newData = new ColtDataSet(data.getNumRows(), data.getVariables());
         for (int col = 0; col < data.getNumColumns(); col++) {
@@ -378,6 +194,188 @@ public class dbDataWrapper extends DataWrapper implements SessionModel, Knowledg
         return newData;
     }
 
+    //==============================PUBLIC METHODS========================//
+
+    public void parameterLearning(String method) {
+        System.out.println("Starting MLN parameter learning package on "
+                + global.schema);
+        ReadXML sqlToXMLReader = new ReadXML();
+        try {
+            sqlToXMLReader.initialize();
+        } catch (SQLException e1) {
+            System.out.println("SQLtoXML initialization problem");
+            e1.printStackTrace();
+        }
+        // xml file is ready
+
+        ReadSQL_MLN_Files r = new ReadSQL_MLN_Files();
+        try {
+            r.initialize();
+            PrintStream out1 = new PrintStream(new FileOutputStream(
+                    global.WorkingDirectory + "/" + global.schema + ".db"));
+            PrintStream out2 = new PrintStream(new FileOutputStream(
+                    global.WorkingDirectory + "/" + global.schema
+                            + "_VJ_.mln"));
+            PrintStream out3 = new PrintStream(new FileOutputStream(
+                    global.WorkingDirectory + "/" + global.schema
+                            + "predicate_temp.mln"));
+
+            r.read(out1, out2, out3);
+
+            System.out.println("DB file and MLN predicate file created");
+        } catch (SQLException e1) {
+            // TODO Auto-generated catch block
+            e1.printStackTrace();
+        } catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        System.out.println("Stucture learning begins");
+
+        long l = System.currentTimeMillis();
+        S_learning sLearn = new S_learning(2);
+        BayesPm bayes = sLearn.major();
+        long l2 = System.currentTimeMillis();
+        System.out
+                .print("Structure learning ends. Running time of Structure Learning(ms):   ");
+        System.out.println(l2 - l);
+
+        // start Paramter Learning
+        long l3 = System.currentTimeMillis();
+        System.out.println(" Parameter learning using Virtual joins begins");
+        ParamTet t = new ParamTet(bayes);
+        try {
+            BayesIm a = t.paramterlearning();
+        } catch (SQLException e1) {
+            // TODO Auto-generated catch block
+            e1.printStackTrace();
+        } catch (IOException e1) {
+            // TODO Auto-generated catch block
+            e1.printStackTrace();
+        }
+        long l4 = System.currentTimeMillis();
+
+        System.out
+                .print("Parameter learning using Virtual joins ends. Running time of learning(ms):  ");
+        System.out.println(l4 - l3);
+        ExportToMLN export = new ExportToMLN();
+
+        StringBuffer rules;
+        try {
+            rules = export.export(method);
+
+            Writer output = null;
+//		File file = new File(global.WorkingDirectory + "/" + global.schema
+//				+ "_VJ_.mln");
+
+
+            FileOutputStream outputStream = new FileOutputStream(global.WorkingDirectory + "/" + global.schema
+                    + "_VJ_.mln", true);
+            //	output=new BufferedWriter(new FileOoutputStream);
+            outputStream.write(rules.toString().getBytes());
+//		output.append(rules.toString());
+
+            System.out.println("MLN ready for use " + global.WorkingDirectory
+                    + "/" + global.schema + "_VJ_.mln");
+        } catch (Exception e) {
+
+        }
+
+        db.closeDB();
+    }
+
+    /**
+     * Returns the list of models.
+     */
+    @Override
+    public DataModelList getDataModelList() {
+        return this.dataModelList;
+    }
+
+    /**
+     * Returns the data model for this wrapper.
+     */
+    @Override
+    public DataModel getSelectedDataModel() {
+        DataModelList modelList = this.dataModelList;
+        return modelList.getSelectedModel();
+    }
+
+    /**
+     * Sets the data model.
+     */
+    @Override
+    public void setDataModel(DataModel dataModel) {
+        if (dataModel == null) {
+            dataModel = new ColtDataSet(0, new LinkedList <Node>());
+        }
+
+        if (dataModel instanceof DataModelList) {
+            this.dataModelList = (DataModelList) dataModel;
+        } else {
+            this.dataModelList = new DataModelList();
+            this.dataModelList.add(dataModel);
+        }
+    }
+
+    @Override
+    public Knowledge getKnowledge() {
+        return getSelectedDataModel().getKnowledge();
+    }
+
+    @Override
+    public void setKnowledge(Knowledge knowledge) {
+        getSelectedDataModel().setKnowledge(knowledge);
+    }
+
+    @Override
+    public List <String> getVarNames() {
+        return getSelectedDataModel().getVariableNames();
+    }
+
+    /**
+     * Returns the source workbench, if there is one.
+     */
+    @Override
+    public Graph getSourceGraph() {
+        return this.sourceGraph;
+    }
+
+    /**
+     * Sets the source graph.
+     */
+    @Override
+    public void setSourceGraph(Graph sourceGraph) {
+        this.sourceGraph = sourceGraph;
+    }
+
+    /**
+     * Returns the variable names, in order.
+     */
+    @Override
+    public List getVariables() {
+        return this.getSelectedDataModel().getVariables();
+    }
+
+    @Override
+    public Map getDiscretizationSpecs() {
+        return discretizationSpecs;
+    }
+
+    @Override
+    public List <Node> getKnownVariables() {
+        return knownVariables;
+    }
+
+    //=============================== Private Methods ==========================//
+
+    /**
+     * Sets the source graph.
+     */
+    @Override
+    public void setKnownVariables(List <Node> variables) {
+        this.knownVariables = variables;
+    }
 
     /**
      * Adds semantic checks to the default deserialization method. This method
@@ -401,17 +399,17 @@ public class dbDataWrapper extends DataWrapper implements SessionModel, Knowledg
         }
 
         if (discretizationSpecs == null) {
-           // throw new NullPointerException();
+            // throw new NullPointerException();
         }
     }
 
     @Override
-	public String getName() {
+    public String getName() {
         return name;
     }
 
     @Override
-	public void setName(String name) {
+    public void setName(String name) {
         this.name = name;
     }
 }

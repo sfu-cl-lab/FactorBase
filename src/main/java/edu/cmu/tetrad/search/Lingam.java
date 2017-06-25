@@ -38,8 +38,6 @@ import edu.cmu.tetrad.util.TetradLogger;
 import no.uib.cipr.matrix.*;
 import no.uib.cipr.matrix.Vector;
 
-import java.util.*;
-
 /**
  * Implements the LiNGAM algorithm in Shimizu, Hoyer, Hyvarinen, and Kerminen, A linear nongaussian acyclic model for
  * causal discovery, JMLR 7 (2006). Largely follows the Matlab code.
@@ -66,7 +64,7 @@ public class Lingam {
 
     public Graph search(DataSet data) {
         DoubleMatrix2D X = data.getDoubleData();
-        List<Node> nodes = data.getVariables();
+        List <Node> nodes = data.getVariables();
 
         EstimateResult result = estimate(X);
         DoubleMatrix2D bHat = pruneEdgesByResampling(X, result.getK());
@@ -216,65 +214,10 @@ public class Lingam {
         this.pruneFactor = pruneFactor;
     }
 
-    public static class EstimateResult {
-        private DoubleMatrix2D B;
-        private double[] stde;
-        private double[] ci;
-        private int[] k;
-        private DoubleMatrix2D Wout;
-
-        public EstimateResult(DoubleMatrix2D B, double[] stde, double[] ci,
-                              int[] k, DoubleMatrix2D Wout) {
-            this.B = B;
-            this.stde = stde;
-            this.ci = ci;
-            this.k = k;
-            this.Wout = Wout;
-        }
-
-        public DoubleMatrix2D getB() {
-            return B;
-        }
-
-        public double[] getStde() {
-            return stde;
-        }
-
-        public double[] getCi() {
-            return ci;
-        }
-
-        public int[] getK() {
-            return k;
-        }
-
-        public DoubleMatrix2D getWout() {
-            return Wout;
-        }
-    }
-
-    private static class StlPruneResult {
-        private DoubleMatrix2D Bestcausal;
-        private int[] causalperm;
-
-        public StlPruneResult(DoubleMatrix2D Bestcausal, int[] causalPerm) {
-            this.Bestcausal = Bestcausal;
-            this.causalperm = causalPerm;
-        }
-
-        public DoubleMatrix2D getBestcausal() {
-            return Bestcausal;
-        }
-
-        public int[] getCausalperm() {
-            return causalperm;
-        }
-    }
-
     private StlPruneResult stlPrune(DoubleMatrix2D bHat) {
         int m = bHat.rows();
 
-        LinkedList<Entry> entries = getEntries(bHat);
+        LinkedList <Entry> entries = getEntries(bHat);
 
         // Sort entries by absolute value.
         java.util.Collections.sort(entries);
@@ -311,8 +254,8 @@ public class Lingam {
         return data.viewSelection(permutation, permutation);
     }
 
-    private LinkedList<Entry> getEntries(DoubleMatrix2D mat) {
-        LinkedList<Entry> entries = new LinkedList<Entry>();
+    private LinkedList <Entry> getEntries(DoubleMatrix2D mat) {
+        LinkedList <Entry> entries = new LinkedList <Entry>();
 
         for (int i = 0; i < mat.rows(); i++) {
             for (int j = 0; j < mat.columns(); j++) {
@@ -324,38 +267,9 @@ public class Lingam {
         return entries;
     }
 
-    private static class Entry implements Comparable<Entry> {
-        private int row;
-        private int column;
-        private double value;
-
-        public Entry(int row, int col, double val) {
-            this.row = row;
-            this.column = col;
-            this.value = val;
-        }
-
-        /**
-         * Used for sorting. An entry is smaller than another if its absolute value is smaller.
-         *
-         * @see java.lang.Comparable#compareTo(java.lang.Object)
-         */
-        @Override
-		public int compareTo(Entry entry) {
-            double thisVal = Math.abs(value);
-            double entryVal = Math.abs(entry.value);
-            return (new Double(thisVal).compareTo(entryVal));
-        }
-
-        @Override
-		public String toString() {
-            return "[" + row + "," + column + "]:" + value + " ";
-        }
-    }
-
     public int[] algorithmB(DoubleMatrix2D mat) {
-        List<Integer> removedIndices = new ArrayList<Integer>();
-        List<Integer> permutation = new ArrayList<Integer>();
+        List <Integer> removedIndices = new ArrayList <Integer>();
+        List <Integer> permutation = new ArrayList <Integer>();
 
         while (removedIndices.size() < mat.rows()) {
             int allZerosRow = -1;
@@ -390,7 +304,7 @@ public class Lingam {
         return _permutation;
     }
 
-    private boolean zeroesInNewColumns(DoubleMatrix1D vec, List<Integer> removedIndices) {
+    private boolean zeroesInNewColumns(DoubleMatrix1D vec, List <Integer> removedIndices) {
         for (int i = 0; i < vec.size(); i++) {
             if (vec.get(i) != 0 && !removedIndices.contains(i)) {
                 return false;
@@ -408,7 +322,7 @@ public class Lingam {
             throw new IllegalArgumentException("Execting a permutation.");
         }
 
-        Set set = new LinkedHashSet<Integer>();
+        Set set = new LinkedHashSet <Integer>();
 
         for (int i = 0; i < k.length; i++) {
             if (k[i] >= k.length) {
@@ -429,9 +343,9 @@ public class Lingam {
         int rows = X.numRows();
         int piecesize = (int) Math.floor(cols / npieces);
 
-        List<Matrix> bpieces = new ArrayList<Matrix>();
-        List<Vector> diststdpieces = new ArrayList<Vector>();
-        List<Vector> cpieces = new ArrayList<Vector>();
+        List <Matrix> bpieces = new ArrayList <Matrix>();
+        List <Vector> diststdpieces = new ArrayList <Vector>();
+        List <Vector> cpieces = new ArrayList <Vector>();
 
         for (int p = 0; p < npieces; p++) {
 
@@ -507,8 +421,7 @@ public class Lingam {
 
             try {
                 invSqrt = new DenseMatrix(sqrt.solve(I, AI));
-            }
-            catch (MatrixSingularException e) {
+            } catch (MatrixSingularException e) {
                 throw new RuntimeException("Singular matrix.", e);
             }
 
@@ -699,5 +612,89 @@ public class Lingam {
         int series[] = new int[i2 - i1 + 1];
         for (int j = i1; j <= i2; j++) series[j - i1] = j;
         return series;
+    }
+
+    public static class EstimateResult {
+        private DoubleMatrix2D B;
+        private double[] stde;
+        private double[] ci;
+        private int[] k;
+        private DoubleMatrix2D Wout;
+
+        public EstimateResult(DoubleMatrix2D B, double[] stde, double[] ci,
+                              int[] k, DoubleMatrix2D Wout) {
+            this.B = B;
+            this.stde = stde;
+            this.ci = ci;
+            this.k = k;
+            this.Wout = Wout;
+        }
+
+        public DoubleMatrix2D getB() {
+            return B;
+        }
+
+        public double[] getStde() {
+            return stde;
+        }
+
+        public double[] getCi() {
+            return ci;
+        }
+
+        public int[] getK() {
+            return k;
+        }
+
+        public DoubleMatrix2D getWout() {
+            return Wout;
+        }
+    }
+
+    private static class StlPruneResult {
+        private DoubleMatrix2D Bestcausal;
+        private int[] causalperm;
+
+        public StlPruneResult(DoubleMatrix2D Bestcausal, int[] causalPerm) {
+            this.Bestcausal = Bestcausal;
+            this.causalperm = causalPerm;
+        }
+
+        public DoubleMatrix2D getBestcausal() {
+            return Bestcausal;
+        }
+
+        public int[] getCausalperm() {
+            return causalperm;
+        }
+    }
+
+    private static class Entry implements Comparable <Entry> {
+        private int row;
+        private int column;
+        private double value;
+
+        public Entry(int row, int col, double val) {
+            this.row = row;
+            this.column = col;
+            this.value = val;
+        }
+
+        /**
+         * Used for sorting. An entry is smaller than another if its absolute value is smaller.
+         *
+         * @see java.lang.Comparable#compareTo(java.lang.Object)
+         */
+        @Override
+        public int compareTo(Entry entry) {
+            double thisVal = Math.abs(value);
+            double entryVal = Math.abs(entry.value);
+            return (new Double(thisVal).compareTo(entryVal));
+        }
+
+        @Override
+        public String toString() {
+            return "[" + row + "," + column + "]:" + value + " ";
+        }
     }
 }

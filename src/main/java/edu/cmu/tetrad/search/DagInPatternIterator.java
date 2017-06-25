@@ -25,8 +25,6 @@ import edu.cmu.tetrad.data.IKnowledge;
 import edu.cmu.tetrad.data.Knowledge;
 import edu.cmu.tetrad.graph.*;
 
-import java.util.*;
-
 /**
  * Given a pattern, lists all of the DAGs in that pattern. In the form of an iterator--call hasNext() to see if there's
  * another one and next() to get it. next() will return null if there are no more.
@@ -39,11 +37,11 @@ public class DagInPatternIterator {
      * The stack of graphs, with annotations as to the arbitrary undirected edges chosen in them and whether or not
      * these edges have already been oriented left and/or right.
      */
-    private LinkedList<DecoratedGraph> decoratedGraphs = new LinkedList<DecoratedGraph>();
+    private LinkedList <DecoratedGraph> decoratedGraphs = new LinkedList <DecoratedGraph>();
     private Graph storedGraph;
     private boolean returnedOne = false;
     private IKnowledge knowledge = new Knowledge();
-    private LinkedList<Triple> colliders;
+    private LinkedList <Triple> colliders;
     private boolean allowNewColliders = true;
 
     public DagInPatternIterator(Graph pattern) {
@@ -98,8 +96,8 @@ public class DagInPatternIterator {
 //                    "directed and undirected edges: " + edge);
         }
 
-        HashMap<Graph, Set<Edge>> changedEdges = new HashMap<Graph, Set<Edge>>();
-        changedEdges.put(pattern, new HashSet<Edge>());
+        HashMap <Graph, Set <Edge>> changedEdges = new HashMap <Graph, Set <Edge>>();
+        changedEdges.put(pattern, new HashSet <Edge>());
 
         decoratedGraphs.add(new DecoratedGraph(pattern, getKnowledge(), changedEdges,
                 allowArbitraryOrientations));
@@ -190,14 +188,14 @@ public class DagInPatternIterator {
         private boolean triedLeft = false;
         private boolean triedRight = false;
         private IKnowledge knowledge;
-        private Map<Graph, Set<Edge>> changedEdges = new HashMap<Graph, Set<Edge>>();
+        private Map <Graph, Set <Edge>> changedEdges = new HashMap <Graph, Set <Edge>>();
         private boolean allowArbitraryOrientation = false;
 
-        public DecoratedGraph(Graph graph, IKnowledge knowledge, Map<Graph, Set<Edge>> changedEdges, boolean allowArbitraryOrientation) {
+        public DecoratedGraph(Graph graph, IKnowledge knowledge, Map <Graph, Set <Edge>> changedEdges, boolean allowArbitraryOrientation) {
             this.graph = graph;
             this.edge = findUndirectedEdge(graph);
             this.knowledge = knowledge;
-            this.setChangedEdges(new HashMap<Graph, Set<Edge>>(changedEdges));
+            this.setChangedEdges(new HashMap <Graph, Set <Edge>>(changedEdges));
             this.allowArbitraryOrientation = allowArbitraryOrientation;
         }
 
@@ -222,7 +220,7 @@ public class DagInPatternIterator {
         }
 
         @Override
-		public String toString() {
+        public String toString() {
             return graph.toString();
         }
 
@@ -261,7 +259,7 @@ public class DagInPatternIterator {
 
             if (!triedLeft && !graph.isAncestorOf(node1, node2) &&
                     !getKnowledge().edgeForbidden(node2.getName(), node1.getName())) {
-                Set<Edge> edges = new HashSet<Edge>();
+                Set <Edge> edges = new HashSet <Edge>();
 
                 Graph graph = new EdgeListGraph(this.graph);
                 graph.removeEdge(edge.getNode1(), edge.getNode2());
@@ -274,7 +272,7 @@ public class DagInPatternIterator {
 //                }
 
                 edges.add(graph.getEdge(edge.getNode2(), edge.getNode1()));
-                edges.addAll(new HashSet<Edge>(getChangedEdges().get(this.graph)));
+                edges.addAll(new HashSet <Edge>(getChangedEdges().get(this.graph)));
 
                 MeekRules meek = new MeekRules();
                 meek.setKnowledge(getKnowledge());
@@ -282,7 +280,7 @@ public class DagInPatternIterator {
                 meek.orientImplied(graph);
 
                 // Keep track of changed edges for highlighting
-                Set<Edge> changedEdges = meek.getChangedEdges().keySet();
+                Set <Edge> changedEdges = meek.getChangedEdges().keySet();
 
 //                System.out.println("Meek oriented: " + changedEdges);
 //
@@ -306,7 +304,7 @@ public class DagInPatternIterator {
 
             if (!triedRight && !graph.isAncestorOf(node2, node1) &&
                     !getKnowledge().edgeForbidden(node1.getName(), node2.getName())) {
-                Set<Edge> edges = new HashSet<Edge>();
+                Set <Edge> edges = new HashSet <Edge>();
 
 
                 Graph graph = new EdgeListGraph(this.graph);
@@ -320,7 +318,7 @@ public class DagInPatternIterator {
 //                }
 
                 edges.add(graph.getEdge(edge.getNode1(), edge.getNode2()));
-                edges.addAll(new HashSet<Edge>(getChangedEdges().get(this.graph)));
+                edges.addAll(new HashSet <Edge>(getChangedEdges().get(this.graph)));
 
                 MeekRules meek = new MeekRules();
                 meek.setKnowledge(getKnowledge());
@@ -328,7 +326,7 @@ public class DagInPatternIterator {
                 meek.orientImplied(graph);
 
                 // Keep track of changed edges for highlighting
-                Set<Edge> changedEdges = meek.getChangedEdges().keySet();
+                Set <Edge> changedEdges = meek.getChangedEdges().keySet();
 
 //                System.out.println("Meek oriented: " + changedEdges);
 //
@@ -448,11 +446,11 @@ public class DagInPatternIterator {
             return knowledge;
         }
 
-        public Map<Graph, Set<Edge>> getChangedEdges() {
+        public Map <Graph, Set <Edge>> getChangedEdges() {
             return changedEdges;
         }
 
-        public void setChangedEdges(Map<Graph, Set<Edge>> changedEdges) {
+        public void setChangedEdges(Map <Graph, Set <Edge>> changedEdges) {
             this.changedEdges = changedEdges;
         }
 

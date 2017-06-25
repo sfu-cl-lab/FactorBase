@@ -51,7 +51,7 @@ final class PossibleDsepCfci {
 
     private Graph graph;
     private IndependenceTest test;
-    private List<Node> nodes;
+    private List <Node> nodes;
 
     /**
      * This sepset collects up only the sepsets discovered by this search.
@@ -76,7 +76,7 @@ final class PossibleDsepCfci {
      * @param unfaithfulTriples
      */
     public PossibleDsepCfci(Graph graph, IndependenceTest test,
-                            Set<Triple> unfaithfulTriples) {
+                            Set <Triple> unfaithfulTriples) {
         if (graph == null) {
             throw new NullPointerException("null GaSearchGraph passed in " +
                     "PossibleDSepSearch constructor!");
@@ -88,11 +88,15 @@ final class PossibleDsepCfci {
 
         this.graph = graph;
         this.test = test;
-        this.nodes = new LinkedList<Node>(this.graph.getNodes());
+        this.nodes = new LinkedList <Node>(this.graph.getNodes());
         this.sepset = new SepsetMap();
         this.legalPairs = new FciDsepLegalPairsCfci(this.graph, unfaithfulTriples);
 
         setMaxReachablePathLength(maxReachablePathLength);
+    }
+
+    private static boolean possibleParentOf(String _z, String _x, Knowledge bk) {
+        return !(bk.edgeForbidden(_z, _x) || bk.edgeRequired(_x, _z));
     }
 
     /**
@@ -106,7 +110,7 @@ final class PossibleDsepCfci {
         for (int i = 0; i < nodes.size(); i++) {
             Node node1 = nodes.get(i);
 
-            List<Node> adj = graph.getAdjacentNodes(node1);
+            List <Node> adj = graph.getAdjacentNodes(node1);
 
             // Remove the variables that we've already looked at.
             for (int j = 0; j < i; j++) {
@@ -129,7 +133,7 @@ final class PossibleDsepCfci {
     }
 
     private boolean tryRemovingUsingDsep(Node node1, Node node2, int maxPathLength) {
-        List<Node> possDsep = new LinkedList<Node>(getPossibleDsep(node1, node2, maxPathLength));
+        List <Node> possDsep = new LinkedList <Node>(getPossibleDsep(node1, node2, maxPathLength));
 
         boolean noEdgeRequired =
                 getKnowledge().noEdgeRequired(node1.getName(), node2.getName());
@@ -139,7 +143,7 @@ final class PossibleDsepCfci {
         possDsep.remove(node1);
         possDsep.remove(node2);
 
-        List<Node> possibleParents = possibleParents(node1, possDsep, getKnowledge());
+        List <Node> possibleParents = possibleParents(node1, possDsep, getKnowledge());
         int _depth = possibleParents.size();
 
         if (getDepth() != -1 && _depth > getDepth()) {
@@ -152,7 +156,7 @@ final class PossibleDsepCfci {
             int[] indSet;
 
             while ((indSet = cg.next()) != null) {
-                List<Node> condSet = GraphUtils.asList(indSet, possibleParents);
+                List <Node> condSet = GraphUtils.asList(indSet, possibleParents);
 
                 boolean independent =
                         test.isIndependent(node1, node2, condSet);
@@ -160,7 +164,7 @@ final class PossibleDsepCfci {
                 if (independent && noEdgeRequired) {
                     System.out.println("*** DSEP removed " + graph.getEdge(node1, node2));
                     graph.removeEdge(node1, node2);
-                    List<Node> z = new LinkedList<Node>(condSet);
+                    List <Node> z = new LinkedList <Node>(condSet);
                     sepset.set(node1, node2, z);
                     return true;
                 }
@@ -173,8 +177,8 @@ final class PossibleDsepCfci {
     /**
      * Removes from the list of nodes any that cannot be parents of x given the background knowledge.
      */
-    private List<Node> possibleParents(Node x, List<Node> nodes, Knowledge knowledge) {
-        List<Node> possibleParents = new LinkedList<Node>();
+    private List <Node> possibleParents(Node x, List <Node> nodes, Knowledge knowledge) {
+        List <Node> possibleParents = new LinkedList <Node>();
         String _x = x.getName();
 
         for (Node z : nodes) {
@@ -188,10 +192,6 @@ final class PossibleDsepCfci {
         return possibleParents;
     }
 
-    private static boolean possibleParentOf(String _z, String _x, Knowledge bk) {
-        return !(bk.edgeForbidden(_z, _x) || bk.edgeRequired(_x, _z));
-    }
-
     /**
      * A variable V is in Possible-D-Sep(A,B) iff
      * <pre>
@@ -202,12 +202,12 @@ final class PossibleDsepCfci {
      * 		(b) X is adjacent to Z.
      * </pre>
      */
-    private Set<Node> getPossibleDsep(Node node1, Node node2, int maxPathLength) {
-        List<Node> initialNodes = Collections.singletonList(node1);
-        List<Node> c = null;
-        List<Node> d = null;
+    private Set <Node> getPossibleDsep(Node node1, Node node2, int maxPathLength) {
+        List <Node> initialNodes = Collections.singletonList(node1);
+        List <Node> c = null;
+        List <Node> d = null;
 
-        Set<Node> reachable = SearchGraphUtils.getReachableNodes(initialNodes,
+        Set <Node> reachable = SearchGraphUtils.getReachableNodes(initialNodes,
                 legalPairs, c, d, graph, maxPathLength);
 
         reachable.remove(node1);

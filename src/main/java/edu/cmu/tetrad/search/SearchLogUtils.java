@@ -74,7 +74,7 @@ public class SearchLogUtils {
                 ")";
     }
 
-    public static String independenceFactMsg(Node x, Node y, List<Node> condSet, double pValue) {
+    public static String independenceFactMsg(Node x, Node y, List <Node> condSet, double pValue) {
         StringBuilder sb = new StringBuilder();
 
         sb.append("Independence accepted: ");
@@ -87,7 +87,7 @@ public class SearchLogUtils {
         return sb.toString();
     }
 
-    public static String dependenceFactMsg(Node x, Node y, List<Node> condSet, double pValue) {
+    public static String dependenceFactMsg(Node x, Node y, List <Node> condSet, double pValue) {
         StringBuilder sb = new StringBuilder();
 
         sb.append("Dependent: ");
@@ -101,7 +101,7 @@ public class SearchLogUtils {
     }
 
 
-    public static String independenceFact(Node x, Node y, List<Node> condSet) {
+    public static String independenceFact(Node x, Node y, List <Node> condSet) {
         StringBuilder sb = new StringBuilder();
 
         sb.append(x.getName());

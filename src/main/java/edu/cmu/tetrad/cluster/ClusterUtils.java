@@ -34,39 +34,36 @@ import edu.cmu.tetrad.graph.*;
 import edu.cmu.tetrad.search.MimBuild;
 import edu.cmu.tetrad.util.RandomUtil;
 
-import java.io.*;
-import java.util.*;
-
 /**
  * Some general utilities for dealing with clustering input and output.
  *
  * @author Joseph Ramsey
  */
 public class ClusterUtils {
-    public static DoubleMatrix2D restrictToRows(DoubleMatrix2D data, List<Integer> rows) {
+    public static DoubleMatrix2D restrictToRows(DoubleMatrix2D data, List <Integer> rows) {
         int[] _rows = asArray(rows);
         int[] _cols = new int[data.columns()];
         for (int j = 0; j < data.columns(); j++) _cols[j] = j;
         return data.viewSelection(_rows, _cols);
     }
-                                   
-    private static int[] asArray(List<Integer> indices) {
+
+    private static int[] asArray(List <Integer> indices) {
         int[] _indices = new int[indices.size()];
         for (int i = 0; i < indices.size(); i++) _indices[i] = indices.get(i);
         return _indices;
     }
 
-    public static List<List<Integer>> convertClusterIndicesToLists(List<Integer> clusterIndices) {
+    public static List <List <Integer>> convertClusterIndicesToLists(List <Integer> clusterIndices) {
         int max = 0;
 
         for (int i = 0; i < clusterIndices.size(); i++) {
             if (clusterIndices.get(i) > max) max = clusterIndices.get(i);
         }
 
-        List<List<Integer>> clusters = new ArrayList<List<Integer>>();
+        List <List <Integer>> clusters = new ArrayList <List <Integer>>();
 
         for (int i = 0; i <= max; i++) {
-            clusters.add(new LinkedList<Integer>());
+            clusters.add(new LinkedList <Integer>());
         }
 
         for (int i = 0; i < clusterIndices.size(); i++) {
@@ -124,8 +121,8 @@ public class ClusterUtils {
     }
 
     public static PrintWriter writeOutPrototypesVertically(DoubleMatrix2D prototypes,
-                                                          String path
-                                                          ) throws FileNotFoundException {
+                                                           String path
+    ) throws FileNotFoundException {
         System.out.println("Writing prototypes to file " + path);
         File file = new File(path);
         new File(file.getParent()).mkdirs();
@@ -217,27 +214,27 @@ public class ClusterUtils {
         }
     }
 
-    public static List<Integer> getTopFractionScoreRows(DoubleMatrix1D scores, 
-                                                 double topFraction,
-                                                 DoubleMatrix2D timeSeries) {
-        List<Integer> _points = new ArrayList<Integer>();
-        final Map<Integer, Double> _values = new HashMap<Integer, Double>();
+    public static List <Integer> getTopFractionScoreRows(DoubleMatrix1D scores,
+                                                         double topFraction,
+                                                         DoubleMatrix2D timeSeries) {
+        List <Integer> _points = new ArrayList <Integer>();
+        final Map <Integer, Double> _values = new HashMap <Integer, Double>();
 
         for (int i = 0; i < timeSeries.rows(); i++) {
             _points.add(i);
             _values.put(i, scores.get(i));
         }
 
-        Collections.sort(_points, new Comparator<Integer>() {
+        Collections.sort(_points, new Comparator <Integer>() {
             @Override
-			public int compare(Integer o1, Integer o2) {
+            public int compare(Integer o1, Integer o2) {
                 double v1 = _values.get(o1);
                 double v2 = _values.get(o2);
                 return v1 < v2 ? -1 : (v1 == v2 ? 0 : 1);
             }
         });
 
-        List<Integer> points = new ArrayList<Integer>();
+        List <Integer> points = new ArrayList <Integer>();
 
         for (int i = (int) ((1.0 - topFraction) * _points.size()); i < _points.size();
              i++) {
@@ -246,10 +243,10 @@ public class ClusterUtils {
         return points;
     }
 
-    public static List<Integer> getAboveThresholdRows(DoubleMatrix1D scores,
-                                                      double cutoff,
-                                                      DoubleMatrix2D timeSeries) {
-        List<Integer> includedRows = new ArrayList<Integer>();
+    public static List <Integer> getAboveThresholdRows(DoubleMatrix1D scores,
+                                                       double cutoff,
+                                                       DoubleMatrix2D timeSeries) {
+        List <Integer> includedRows = new ArrayList <Integer>();
 
         for (int i = 0; i < timeSeries.rows(); i++) {
             double score = scores.get(i);
@@ -262,13 +259,13 @@ public class ClusterUtils {
         return includedRows;
     }
 
-    public static List<Integer> getSignificantlyChangingRows(DoubleMatrix2D data,
-                                                             int tIndex, double threshold) {
+    public static List <Integer> getSignificantlyChangingRows(DoubleMatrix2D data,
+                                                              int tIndex, double threshold) {
         if (!(tIndex >= 1 && tIndex < data.columns())) {
             throw new IllegalArgumentException("tIndex must be in range [1, " + data.columns() + "]");
         }
 
-        List<Integer> includedRows = new ArrayList<Integer>();
+        List <Integer> includedRows = new ArrayList <Integer>();
 
         for (int i = 0; i < data.rows(); i++) {
             if (Math.abs(data.get(i, tIndex - 1) - data.get(i, tIndex)) > threshold) {
@@ -280,7 +277,7 @@ public class ClusterUtils {
     }
 
     public static boolean isSignificantlyChangingUp(DoubleMatrix2D data, int i,
-                                                 int tIndex, double threshold) {
+                                                    int tIndex, double threshold) {
         if (!(tIndex >= 1 && tIndex < data.columns())) {
             throw new IllegalArgumentException("tIndex must be in range [1, " + data.columns() + "]");
         }
@@ -290,7 +287,7 @@ public class ClusterUtils {
     }
 
     public static boolean isSignificantlyChangingDown(DoubleMatrix2D data, int i,
-                                                   int tIndex, double threshold) {
+                                                      int tIndex, double threshold) {
         if (!(tIndex >= 1 && tIndex < data.columns())) {
             throw new IllegalArgumentException("tIndex must be in range [1, " + data.columns() + "]");
         }
@@ -303,15 +300,16 @@ public class ClusterUtils {
      * Returns the top fraction threshold for the entire data set--that is,
      * if all of the values in the dataset were sorted bottom to top, the
      * value the tresholds the top fraction is given.
-     * @param data A 2D real data set.
+     *
+     * @param data     A 2D real data set.
      * @param fraction A number between 0 and 1, inclusive.
      * @return The top frction threshold.
      */
     public static double getTopFactionThresholdOverall(DoubleMatrix2D data,
-                                                              double fraction) {
+                                                       double fraction) {
         int numEntries = data.rows() * data.columns();
         int numTopFraction = (int) (numEntries * fraction);
-        TreeSet<Double> set = new TreeSet<Double>();
+        TreeSet <Double> set = new TreeSet <Double>();
 
         for (int i = 0; i < data.rows(); i++) {
             for (int j = 0; j < data.columns(); j++) {
@@ -319,8 +317,7 @@ public class ClusterUtils {
 
                 if (set.size() < numTopFraction) {
                     set.add(datum);
-                }
-                else {
+                } else {
                     if (datum > set.first()) {
                         set.remove(set.first());
                         set.add(datum);
@@ -335,9 +332,9 @@ public class ClusterUtils {
     /**
      * Returns a list of view of the data corresponding to the given clusters.
      */
-    public static List<DoubleMatrix2D> getClusterViews(DoubleMatrix2D xyzData,
-                                                       List<List<Integer>> clusters) {
-        List<DoubleMatrix2D> views = new ArrayList<DoubleMatrix2D>();
+    public static List <DoubleMatrix2D> getClusterViews(DoubleMatrix2D xyzData,
+                                                        List <List <Integer>> clusters) {
+        List <DoubleMatrix2D> views = new ArrayList <DoubleMatrix2D>();
 
         int[] cols = new int[xyzData.columns()];
         for (int j = 0; j < xyzData.columns(); j++) cols[j] = j;
@@ -411,8 +408,8 @@ public class ClusterUtils {
      * point to rows in the given data set <code>xyzData</code>
      */
     public static void printXyzExtents(DoubleMatrix2D xyzData,
-                                       List<List<Integer>> clusters) {
-        List<DoubleMatrix2D> views = getClusterViews(xyzData, clusters);
+                                       List <List <Integer>> clusters) {
+        List <DoubleMatrix2D> views = getClusterViews(xyzData, clusters);
 
         for (int i = 0; i < views.size(); i++) {
             System.out.println("Cluster " + i);
@@ -454,12 +451,12 @@ public class ClusterUtils {
     }
 
     public static void writerClustersToGnuPlotFile(DoubleMatrix2D xyzData,
-                                                   List<List<Integer>> clusters,
+                                                   List <List <Integer>> clusters,
                                                    String path) throws FileNotFoundException {
         PrintWriter out = new PrintWriter(new File(path));
 
         for (int j = 0; j < clusters.size(); j++) {
-            List<Integer> cluster = clusters.get(j);
+            List <Integer> cluster = clusters.get(j);
 
             if (cluster.isEmpty()) {
                 continue;
@@ -480,15 +477,15 @@ public class ClusterUtils {
     }
 
     public static void writeClusterToGnuPlotFile(DoubleMatrix2D xyzData,
-                                                   List<List<Integer>> clusters,
-                                                   List<List<Integer>> colors,
-                                                   String path
+                                                 List <List <Integer>> clusters,
+                                                 List <List <Integer>> colors,
+                                                 String path
     ) throws FileNotFoundException {
         PrintWriter out = new PrintWriter(new File(path));
 
         for (int j = 0; j < clusters.size(); j++) {
-            List<Integer> cluster = clusters.get(j);
-            List<Integer> clusterColors = colors.get(j);
+            List <Integer> cluster = clusters.get(j);
+            List <Integer> clusterColors = colors.get(j);
 
             if (cluster.isEmpty()) {
                 continue;
@@ -534,11 +531,11 @@ public class ClusterUtils {
         return data2;
     }
 
-    public static List<int[]> convertListToInt(List<List<Node>> partition, List<Node> nodes) {
-        List<int[]> _partition = new ArrayList<int[]>();
+    public static List <int[]> convertListToInt(List <List <Node>> partition, List <Node> nodes) {
+        List <int[]> _partition = new ArrayList <int[]>();
 
         for (int i = 0; i < partition.size(); i++) {
-            List<Node> cluster = partition.get(i);
+            List <Node> cluster = partition.get(i);
             int[] _cluster = new int[cluster.size()];
 
             for (int j = 0; j < cluster.size(); j++) {
@@ -555,12 +552,12 @@ public class ClusterUtils {
         return _partition;
     }
 
-    public static List<List<Node>> convertIntToList(List<int[]> partition, List<Node> nodes) {
-        List<List<Node>> _partition = new ArrayList<List<Node>>();
+    public static List <List <Node>> convertIntToList(List <int[]> partition, List <Node> nodes) {
+        List <List <Node>> _partition = new ArrayList <List <Node>>();
 
         for (int i = 0; i < partition.size(); i++) {
             int[] cluster = partition.get(i);
-            List<Node> _cluster = new ArrayList<Node>();
+            List <Node> _cluster = new ArrayList <Node>();
 
             for (int j = 0; j < cluster.length; j++) {
                 _cluster.add(nodes.get(cluster[j]));
@@ -572,11 +569,11 @@ public class ClusterUtils {
         return _partition;
     }
 
-    public static List<List<Node>> clustersToPartition(Clusters clusters, List<Node> variables) {
-        List<List<Node>> inputPartition = new ArrayList<List<Node>>();
+    public static List <List <Node>> clustersToPartition(Clusters clusters, List <Node> variables) {
+        List <List <Node>> inputPartition = new ArrayList <List <Node>>();
 
         for (int i = 0; i < clusters.getNumClusters(); i++) {
-            List<Node> cluster = new ArrayList<Node>();
+            List <Node> cluster = new ArrayList <Node>();
 
             for (String nodeName : clusters.getCluster(i)) {
                 for (int j = 0; j < variables.size(); j++) {
@@ -592,11 +589,11 @@ public class ClusterUtils {
         return inputPartition;
     }
 
-    public static Clusters partitionToClusters(List<List<Node>> partition) {
+    public static Clusters partitionToClusters(List <List <Node>> partition) {
         Clusters clusters = new Clusters();
 
         for (int i = 0; i < partition.size(); i++) {
-            List<Node> cluster = partition.get(i);
+            List <Node> cluster = partition.get(i);
 
             for (int j = 0; j < cluster.size(); j++) {
                 clusters.addToCluster(i, cluster.get(j).getName());
@@ -606,8 +603,8 @@ public class ClusterUtils {
         return clusters;
     }
 
-    public static Graph convertSearchGraph(List<int[]> clusters, String[] varNames) {
-        List<Node> nodes = new ArrayList<Node>();
+    public static Graph convertSearchGraph(List <int[]> clusters, String[] varNames) {
+        List <Node> nodes = new ArrayList <Node>();
 
         if (clusters == null) {
             nodes.add(new GraphNode("No_model."));
@@ -624,7 +621,7 @@ public class ClusterUtils {
 //            return new EdgeListGraph(nodes);
 //        }
 
-        Set<Node> latentsSet = new HashSet<Node>();
+        Set <Node> latentsSet = new HashSet <Node>();
         for (int i = 0; i < clusters.size(); i++) {
             Node latent = new GraphNode(MimBuild.LATENT_PREFIX + (i + 1));
             latent.setNodeType(NodeType.LATENT);
@@ -672,28 +669,28 @@ public class ClusterUtils {
         return graph;
     }
 
-    public static Set<Node> getAllNodesInClusters(List<List<Node>> clustering) {
-        Set<Node> allNodes = new HashSet<Node>();
+    public static Set <Node> getAllNodesInClusters(List <List <Node>> clustering) {
+        Set <Node> allNodes = new HashSet <Node>();
 
-        for (List<Node> cluster : clustering) {
+        for (List <Node> cluster : clustering) {
             allNodes.addAll(cluster);
         }
         return allNodes;
     }
 
-    public static List<List<Node>> initializeZeroClusters(int numClusters) {
-        List<List<Node>> clustering = new ArrayList<List<Node>>();
+    public static List <List <Node>> initializeZeroClusters(int numClusters) {
+        List <List <Node>> clustering = new ArrayList <List <Node>>();
 
         for (int i = 0; i < numClusters; i++) {
-            clustering.add(new ArrayList<Node>());
+            clustering.add(new ArrayList <Node>());
         }
         return clustering;
     }
 
-    public static void addNodesToSubclusters(List<List<Node>> clustering, List<List<Node>> subclustering, int maxSize) {
+    public static void addNodesToSubclusters(List <List <Node>> clustering, List <List <Node>> subclustering, int maxSize) {
         for (int i = 0; i < clustering.size(); i++) {
-            List<Node> cluster = clustering.get(i);
-            List<Node> subcluster = subclustering.get(i);
+            List <Node> cluster = clustering.get(i);
+            List <Node> subcluster = subclustering.get(i);
             Collections.shuffle(cluster);
 
             for (Node node : cluster) {
@@ -704,11 +701,11 @@ public class ClusterUtils {
         }
     }
 
-    public static List<List<Node>> mimClustering(List<Node> latents, Graph mim, DataModel data) {
-        List<List<Node>> clustering = new ArrayList<List<Node>>();
+    public static List <List <Node>> mimClustering(List <Node> latents, Graph mim, DataModel data) {
+        List <List <Node>> clustering = new ArrayList <List <Node>>();
 
         for (Node node : latents) {
-            List<Node> adj = mim.getAdjacentNodes(node);
+            List <Node> adj = mim.getAdjacentNodes(node);
             adj.removeAll(latents);
             adj = GraphUtils.replaceNodes(adj, data.getVariables());
 
@@ -718,8 +715,8 @@ public class ClusterUtils {
 
     }
 
-    public static List<List<Node>> mimClustering(Graph mim, List<Node> variables) {
-        List<Node> latents = new ArrayList<Node>();
+    public static List <List <Node>> mimClustering(Graph mim, List <Node> variables) {
+        List <Node> latents = new ArrayList <Node>();
 
         for (Node node : mim.getNodes()) {
             if (node.getNodeType() == NodeType.LATENT) {
@@ -727,23 +724,23 @@ public class ClusterUtils {
             }
         }
 
-        List<List<Node>> clustering = new ArrayList<List<Node>>();
+        List <List <Node>> clustering = new ArrayList <List <Node>>();
 
         for (Node _latent : latents) {
-            List<Node> adj = mim.getAdjacentNodes(_latent);
+            List <Node> adj = mim.getAdjacentNodes(_latent);
             adj.removeAll(latents);
 //            adj.add(_latent);
             adj = GraphUtils.replaceNodes(adj, variables);
 
             clustering.add(adj);
         }
-        
+
         return clustering;
 
     }
 
     public static Clusters mimClusters(Graph mim) {
-        List<Node> latents = new ArrayList<Node>();
+        List <Node> latents = new ArrayList <Node>();
 
         for (Node node : mim.getNodes()) {
             if (node.getNodeType() == NodeType.LATENT) {
@@ -755,7 +752,7 @@ public class ClusterUtils {
 
         for (int i = 0; i < latents.size(); i++) {
             Node _latent = latents.get(i);
-            List<Node> adj = mim.getAdjacentNodes(_latent);
+            List <Node> adj = mim.getAdjacentNodes(_latent);
             adj.removeAll(latents);
 
             clusters.setClusterName(i, _latent.getName());
@@ -770,12 +767,12 @@ public class ClusterUtils {
 
     }
 
-    public static List<List<Node>> getClusterSelection(int maxClusterSelectionSize, DataSet data, List<List<Node>> clustering) {
-        List<List<Node>> clusterSelection = initializeZeroClusters(clustering.size());
+    public static List <List <Node>> getClusterSelection(int maxClusterSelectionSize, DataSet data, List <List <Node>> clustering) {
+        List <List <Node>> clusterSelection = initializeZeroClusters(clustering.size());
 
         addNodesToSubclusters(clustering, clusterSelection, maxClusterSelectionSize);
 
-        for (List<Node> cluster : clusterSelection) {
+        for (List <Node> cluster : clusterSelection) {
             GraphUtils.replaceNodes(cluster, data.getVariables());
         }
         return clusterSelection;

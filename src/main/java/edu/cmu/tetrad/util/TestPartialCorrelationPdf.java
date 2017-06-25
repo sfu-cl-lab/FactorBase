@@ -32,8 +32,12 @@ public class TestPartialCorrelationPdf extends TestCase {
         super(name);
     }
 
+    public static Test suite() {
+        return new TestSuite(TestPartialCorrelationPdf.class);
+    }
+
     @Override
-	public void setUp() {
+    public void setUp() {
         function = new PartialCorrelationPdf(1000, 5);
     }
 
@@ -42,10 +46,6 @@ public class TestPartialCorrelationPdf extends TestCase {
         double area = Integrator.getArea(function, -1.0, 1.0, 10000);
         double tolerance = 0.000001;
         assertEquals(message, 1.0, area, tolerance);
-    }
-
-    public static Test suite() {
-        return new TestSuite(TestPartialCorrelationPdf.class);
     }
 }
 

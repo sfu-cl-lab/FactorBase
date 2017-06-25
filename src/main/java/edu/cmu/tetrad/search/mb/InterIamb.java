@@ -41,7 +41,7 @@ public class InterIamb implements MbSearch {
     /**
      * The list of variables being searched over. Must contain the target.
      */
-    private List<Node> variables;
+    private List <Node> variables;
 
     /**
      * Constructs a new search.
@@ -58,16 +58,16 @@ public class InterIamb implements MbSearch {
     }
 
     @Override
-	public List<Node> findMb(String targetName) {
+    public List <Node> findMb(String targetName) {
         Node target = getVariableForName(targetName);
-        List<Node> cmb = new LinkedList<Node>();
+        List <Node> cmb = new LinkedList <Node>();
         boolean cont = true;
 
         // Forward phase.
         while (cont) {
             cont = false;
 
-            List<Node> remaining = new LinkedList<Node>(variables);
+            List <Node> remaining = new LinkedList <Node>(variables);
             remaining.removeAll(cmb);
             remaining.remove(target);
 
@@ -97,7 +97,7 @@ public class InterIamb implements MbSearch {
             }
 
             // Backward phase.
-            for (Node _f : new LinkedList<Node>(cmb)) {
+            for (Node _f : new LinkedList <Node>(cmb)) {
                 cmb.remove(_f);
 
                 if (independenceTest.isIndependent(_f, target, cmb)) {
@@ -128,18 +128,18 @@ public class InterIamb implements MbSearch {
         return cmb;
     }
 
-    private double associationStrength(Node v, Node target, List<Node> cmb) {
+    private double associationStrength(Node v, Node target, List <Node> cmb) {
         independenceTest.isIndependent(v, target, cmb);
         return 1.0 - independenceTest.getPValue();
     }
 
     @Override
-	public String getAlgorithmName() {
+    public String getAlgorithmName() {
         return "InterIAMB";
     }
 
     @Override
-	public int getNumIndependenceTests() {
+    public int getNumIndependenceTests() {
         return 0;
     }
 

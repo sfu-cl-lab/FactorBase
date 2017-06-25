@@ -335,7 +335,7 @@ public class FastIca {
      */
     public void setMaxIterations(int maxIterations) {
         if (maxIterations < 1) {
-            TetradLogger.getInstance().log("info","maxIterations should be positive.");
+            TetradLogger.getInstance().log("info", "maxIterations should be positive.");
         }
 
         this.maxIterations = maxIterations;
@@ -355,7 +355,7 @@ public class FastIca {
      */
     public void setTolerance(double tolerance) {
         if (!(tolerance > 0)) {
-            TetradLogger.getInstance().log("info","Tolerance should be positive.");
+            TetradLogger.getInstance().log("info", "Tolerance should be positive.");
         }
 
         this.tolerance = tolerance;
@@ -421,7 +421,7 @@ public class FastIca {
         }
 
         if (verbose) {
-            TetradLogger.getInstance(). log("info", "Centering");
+            TetradLogger.getInstance().log("info", "Centering");
         }
 
         X = scale(X, false);
@@ -433,7 +433,7 @@ public class FastIca {
         }
 
         if (verbose) {
-            TetradLogger.getInstance(). log("info", "Whitening");
+            TetradLogger.getInstance().log("info", "Whitening");
         }
 
         DoubleMatrix2D V = alg.mult(X, X.viewDice());
@@ -751,7 +751,7 @@ public class FastIca {
 
                 g_wx.assign(new DoubleFunction() {
                     @Override
-					public double apply(double v) {
+                    public double apply(double v) {
                         return alpha * (1.0 - v * v);
                     }
                 });
@@ -789,7 +789,7 @@ public class FastIca {
                 W = W1;
 
                 if (verbose) {
-                    TetradLogger.getInstance().log("fastIcaDetails","Iteration " + (it + 1) + " tol = " + _tolerance);
+                    TetradLogger.getInstance().log("fastIcaDetails", "Iteration " + (it + 1) + " tol = " + _tolerance);
                 }
 
                 it++;
@@ -816,7 +816,7 @@ public class FastIca {
 
                 g_wx.assign(new DoubleFunction() {
                     @Override
-					public double apply(double v) {
+                    public double apply(double v) {
                         return (1.0 - v * v) * Math.exp(-(v * v) / 2.0);
                     }
                 });
@@ -938,7 +938,7 @@ public class FastIca {
         }
 
         @Override
-		public String toString() {
+        public String toString() {
             StringBuilder buf = new StringBuilder();
 
             buf.append("\n\nX:\n");

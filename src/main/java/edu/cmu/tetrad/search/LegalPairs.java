@@ -41,7 +41,7 @@ public interface LegalPairs {
     /**
      * Returns true iff n1---center---n2 is a legal pair.
      */
-    boolean isLegalPair(Node x, Node y, Node z, List<Node> c, List<Node> d);
+    boolean isLegalPair(Node x, Node y, Node z, List <Node> c, List <Node> d);
 }
 
 

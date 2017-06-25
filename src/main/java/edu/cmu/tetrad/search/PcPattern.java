@@ -26,8 +26,6 @@ import edu.cmu.tetrad.graph.*;
 import edu.cmu.tetrad.util.ChoiceGenerator;
 import edu.cmu.tetrad.util.TetradLogger;
 
-import java.util.*;
-
 /**
  * Implements the PC ("Peter/Clark") algorithm, as specified in Chapter 6 of Spirtes, Glymour, and Scheines, "Causation,
  * Prediction, and Search," 2nd edition, with a modified rule set in step D due to Chris Meek. For the modified rule
@@ -85,8 +83,8 @@ public class PcPattern implements GraphSearch {
     private TetradLogger logger = TetradLogger.getInstance();
 
 
-    private Set<Triple> unshieldedColliders;
-    private Set<Triple> unshieldedNoncolliders;
+    private Set <Triple> unshieldedColliders;
+    private Set <Triple> unshieldedNoncolliders;
 
     //=============================CONSTRUCTORS==========================//
 
@@ -100,6 +98,24 @@ public class PcPattern implements GraphSearch {
 
     //==============================PUBLIC METHODS========================//
 
+    /**
+     * Checks if an arrowpoint is allowed by background knowledge.
+     */
+    private static boolean isArrowpointAllowedPattern(Node from, Node to,
+                                                      Knowledge knowledge, Graph graph) {
+        Edge edge = graph.getEdge(from, to);
+
+        if (knowledge == null) {
+            return true;
+        } else if (graph.getEndpoint(from, to) == Endpoint.ARROW
+                || graph.getEndpoint(to, from) == Endpoint.ARROW) {
+            return false;
+        } else {
+            return !knowledge.edgeRequired(to.toString(), from.toString()) &&
+                    !knowledge.edgeForbidden(from.toString(), to.toString());
+        }
+    }
+
     public boolean isAggressivelyPreventCycles() {
         return this.aggressivelyPreventCycles;
     }
@@ -107,7 +123,6 @@ public class PcPattern implements GraphSearch {
     public void setAggressivelyPreventCycles(boolean aggressivelyPreventCycles) {
         this.aggressivelyPreventCycles = aggressivelyPreventCycles;
     }
-
 
     public IndependenceTest getIndependenceTest() {
         return independenceTest;
@@ -145,19 +160,19 @@ public class PcPattern implements GraphSearch {
      * Runs PC starting with a fully connected graph over all of the variables in the domain of the independence test.
      */
     @Override
-	public Graph search() {
+    public Graph search() {
         return search(independenceTest.getVariables());
     }
 
     @Override
-	public long getElapsedTime() {
+    public long getElapsedTime() {
         return elapsedTime;
     }
 
     /**
      * Runs PC on just the given variables, all of which must be in the domain of the independence test.
      */
-    public Graph search(List<Node> nodes) {
+    public Graph search(List <Node> nodes) {
         this.logger.log("info", "Starting PC PATTERN algorithm");
         this.logger.log("info", "Independence test = " + independenceTest + ".");
 
@@ -206,11 +221,11 @@ public class PcPattern implements GraphSearch {
     }
 
     private void enumerateTriples() {
-        this.unshieldedColliders = new HashSet<Triple>();
-        this.unshieldedNoncolliders = new HashSet<Triple>();
+        this.unshieldedColliders = new HashSet <Triple>();
+        this.unshieldedNoncolliders = new HashSet <Triple>();
 
         for (Node y : graph.getNodes()) {
-            List<Node> adj = graph.getAdjacentNodes(y);
+            List <Node> adj = graph.getAdjacentNodes(y);
 
             if (adj.size() < 2) {
                 continue;
@@ -227,7 +242,7 @@ public class PcPattern implements GraphSearch {
 //                    continue;
 //                }
 
-                List<Node> nodes = sepset.get(x, z);
+                List <Node> nodes = sepset.get(x, z);
 
                 // Note that checking adj(x, z) does not suffice when knowledge
                 // has been specified.
@@ -244,11 +259,11 @@ public class PcPattern implements GraphSearch {
         }
     }
 
-    public Set<Triple> getUnshieldedColliders() {
+    public Set <Triple> getUnshieldedColliders() {
         return unshieldedColliders;
     }
 
-    public Set<Triple> getUnshieldedNoncolliders() {
+    public Set <Triple> getUnshieldedNoncolliders() {
         return unshieldedNoncolliders;
     }
 
@@ -261,10 +276,10 @@ public class PcPattern implements GraphSearch {
                                                    Knowledge knowledge, Graph graph) {
         TetradLogger.getInstance().log("info", "Starting Collider Orientation:");
 
-        List<Node> nodes = graph.getNodes();
+        List <Node> nodes = graph.getNodes();
 
         for (Node a : nodes) {
-            List<Node> adjacentNodes = graph.getAdjacentNodes(a);
+            List <Node> adjacentNodes = graph.getAdjacentNodes(a);
 
             if (adjacentNodes.size() < 2) {
                 continue;
@@ -282,7 +297,7 @@ public class PcPattern implements GraphSearch {
                     continue;
                 }
 
-                List<Node> sepset = set.get(b, c);
+                List <Node> sepset = set.get(b, c);
                 if (sepset != null && !sepset.contains(a) &&
                         isArrowpointAllowedPattern(b, a, knowledge, graph) &&
                         isArrowpointAllowedPattern(c, a, knowledge, graph) &&
@@ -297,24 +312,6 @@ public class PcPattern implements GraphSearch {
         }
 
         TetradLogger.getInstance().log("info", "Finishing Collider Orientation.");
-    }
-
-    /**
-     * Checks if an arrowpoint is allowed by background knowledge.
-     */
-    private static boolean isArrowpointAllowedPattern(Node from, Node to,
-                                                      Knowledge knowledge, Graph graph) {
-        Edge edge = graph.getEdge(from, to);
-
-        if (knowledge == null) {
-            return true;
-        } else if (graph.getEndpoint(from, to) == Endpoint.ARROW
-                || graph.getEndpoint(to, from) == Endpoint.ARROW) {
-            return false;
-        } else {
-            return !knowledge.edgeRequired(to.toString(), from.toString()) &&
-                    !knowledge.edgeForbidden(from.toString(), to.toString());
-        }
     }
 
     /**
@@ -343,20 +340,20 @@ public class PcPattern implements GraphSearch {
      * @return A path from <code>node1</code> to <code>node2</code>, or null if there is no path.
      */
     public void directablePathFromTo(Graph graph, Node node1, Node node2) {
-        directablePathVisit(graph, node1, node2, new LinkedList<Node>());
+        directablePathVisit(graph, node1, node2, new LinkedList <Node>());
     }
 
     /**
      * Returns the path of the first directed path found from node1 to node2, if any.
      */
     private void directablePathVisit(Graph graph, Node node1, Node node2,
-                                     LinkedList<Node> path) {
+                                     LinkedList <Node> path) {
         path.addLast(node1);
 //        System.out.println("PATH " + pathString(path, graph));
 //        System.out.println("EDGES " + graph.getEdges(node1));
 
 
-        for (Edge edge : new LinkedList<Edge>(graph.getEdges(node1))) {
+        for (Edge edge : new LinkedList <Edge>(graph.getEdges(node1))) {
             Node child = Edges.traverse(node1, edge);
 //            System.out.println("edge = " + edge + "child = " + child + ", node2 = " + node2);
 
@@ -402,7 +399,7 @@ public class PcPattern implements GraphSearch {
     /**
      * Returns true just in case the given undirected cycle contains a chord.
      */
-    private boolean containsChord(LinkedList<Node> path, Graph graph) {
+    private boolean containsChord(LinkedList <Node> path, Graph graph) {
         for (int i = 0; i < path.size() / 2 + 1; i++) {
             for (int j = 2; j < path.size() - 1; j++) {
                 int _j = (i + j) % path.size();
@@ -422,8 +419,8 @@ public class PcPattern implements GraphSearch {
         return false;
     }
 
-    private void orientSomeCollider(LinkedList<Node> path, Graph graph) {
-        LinkedList<Node> _path = new LinkedList<Node>(path);
+    private void orientSomeCollider(LinkedList <Node> path, Graph graph) {
+        LinkedList <Node> _path = new LinkedList <Node>(path);
         _path.add(_path.get(0));
 
         double storedP = Double.POSITIVE_INFINITY;
@@ -477,7 +474,7 @@ public class PcPattern implements GraphSearch {
                 + " along path " + pathString(path, graph));
     }
 
-    private String pathString(LinkedList<Node> path, Graph graph) {
+    private String pathString(LinkedList <Node> path, Graph graph) {
         StringBuilder buf = new StringBuilder();
 
         for (int i = 0; i < path.size() - 1; i++) {

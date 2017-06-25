@@ -55,25 +55,35 @@ public class TestMbClassify extends TestCase {
         super(name);
     }
 
+    /**
+     * This method uses reflection to collect up all of the test methods from this class and return them to the test
+     * runner.
+     */
+    public static Test suite() {
+
+        // Edit the name of the class in the parens to match the name
+        // of this class.
+        return new TestSuite(TestMbClassify.class);
+    }
+
     @Override
-	public void setUp() throws Exception {
+    public void setUp() throws Exception {
         TetradLogger.getInstance().addOutputStream(System.out);
         TetradLogger.getInstance().setForceLog(true);
     }
 
-
     @Override
-	public void tearDown() {
+    public void tearDown() {
         TetradLogger.getInstance().setForceLog(false);
         TetradLogger.getInstance().removeOutputStream(System.out);
     }
 
+    // Slow; leave out of unit test.
+    // needs comma delimiter.
+
     public void test1() {
 
     }
-
-    // Slow; leave out of unit test.
-    // needs comma delimiter.
 
     public void rtest1() {
 
@@ -97,8 +107,7 @@ public class TestMbClassify extends TestCase {
             new MbClassify(data, data, "class", alpha, depth, prior, maxMissing)
                     .classify();
 
-        }
-        catch (IOException e) {
+        } catch (IOException e) {
             throw new RuntimeException(e);
         }
     }
@@ -120,6 +129,19 @@ public class TestMbClassify extends TestCase {
         assertTrue(Arrays.equals(crossTabs[1], testCrosstabs[1]));
     }
 
+//    public void rtest4() {
+//        String train = "test_data/ticdata2000.txt";
+//        String test = "test_data/ticdata2000.txt";
+//        String variable = "x2";
+//        String alpha = "0.01";
+//        String depth = "1";
+//        String prior = "0.05";
+//        String maxMissing = "1";
+//
+//        MbClassify mbClassify = new MbClassify(train, test, variable, alpha, depth, prior, maxMissing);
+//        mbClassify.classify();
+//    }
+
     public void rtest3() {
         String train = "test_data/sampledata.txt";
         String test = "test_data/sampledata.txt";
@@ -138,19 +160,6 @@ public class TestMbClassify extends TestCase {
         assertTrue(Arrays.equals(crossTabsNew[2], testCrosstabsNew[2]));
     }
 
-//    public void rtest4() {
-//        String train = "test_data/ticdata2000.txt";
-//        String test = "test_data/ticdata2000.txt";
-//        String variable = "x2";
-//        String alpha = "0.01";
-//        String depth = "1";
-//        String prior = "0.05";
-//        String maxMissing = "1";
-//
-//        MbClassify mbClassify = new MbClassify(train, test, variable, alpha, depth, prior, maxMissing);
-//        mbClassify.classify();
-//    }
-
     public void rtest5() {
 
         String train = "test_data/ar_test_01-20-07.txt";
@@ -166,7 +175,6 @@ public class TestMbClassify extends TestCase {
         MbClassify mbClassify = new MbClassify(train, test, variable, alpha, depth, prior, maxMissing);
         mbClassify.classify();
     }
-
 
     public void makeData() {
         try {
@@ -191,7 +199,6 @@ public class TestMbClassify extends TestCase {
 
         return simulator.simulateDataAcyclic(sampleSize);
     }
-
 
     public void rtest6() {
         try {
@@ -237,7 +244,7 @@ public class TestMbClassify extends TestCase {
 //            MbFanSearch search = new MbFanSearch(indTest, depth);
 //            Graph mbPattern = search.search(target);
 
-            List<Node> mb = search.findMb(target);
+            List <Node> mb = search.findMb(target);
 
             long diff = System.currentTimeMillis() - time0;
             TetradLogger.getInstance().log("info", "Elapsed: " + diff);
@@ -259,8 +266,7 @@ public class TestMbClassify extends TestCase {
 //
 //            System.out.println(semIm);
 
-        }
-        catch (IOException e) {
+        } catch (IOException e) {
             e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
         }
 
@@ -294,13 +300,11 @@ public class TestMbClassify extends TestCase {
 //            System.out.println(mb);
 
             search.findMb(target);
-        }
-        catch (IOException e) {
+        } catch (IOException e) {
             e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
         }
 
     }
-
 
     public void rtestSimulatedClassify() {
 
@@ -382,7 +386,6 @@ public class TestMbClassify extends TestCase {
             trainAndTest(trainData, testData, target, alpha, depth);
         }
     }
-
 
     public void rCompareAlphas() {
 
@@ -527,7 +530,7 @@ public class TestMbClassify extends TestCase {
         Mbfs search = new Mbfs(test, depth);
         Graph untrimmedGraph = search.search(target.getName());
 
-        List<Node> untrimmedNodes = untrimmedGraph.getNodes();
+        List <Node> untrimmedNodes = untrimmedGraph.getNodes();
         System.out.println(untrimmedNodes.size() + " GES nodes: " + untrimmedNodes);
 
         System.out.println("=================MBF RESULT=================");
@@ -547,7 +550,7 @@ public class TestMbClassify extends TestCase {
         System.out.println("\nPattern = " + pattern);
 
         // List the MB's consistent with this pattern...
-        List<Graph> dags = MbUtils.generateMbDags(pattern, true, search.getTest(),
+        List <Graph> dags = MbUtils.generateMbDags(pattern, true, search.getTest(),
                 search.getDepth(), search.getTarget());
 
         // For each such DAG...
@@ -574,7 +577,7 @@ public class TestMbClassify extends TestCase {
         NumberFormat nf = NumberFormatUtil.getInstance().getNumberFormat();
 
         // Classify the target using training data as testing data.
-        List<Node> mbNodes = estimatedMb.getNodes();
+        List <Node> mbNodes = estimatedMb.getNodes();
 
         //The Markov blanket nodes will correspond to a subset of the variables
         //in the training dataset.  Find the subset dataset.
@@ -724,7 +727,7 @@ public class TestMbClassify extends TestCase {
         NumberFormat nf = NumberFormatUtil.getInstance().getNumberFormat();
 
         // Classify the target using training data as testing data.
-        List<Node> mbNodes = estimatedMb.getNodes();
+        List <Node> mbNodes = estimatedMb.getNodes();
 
         //The Markov blanket nodes will correspond to a subset of the variables
         //in the training dataset.  Find the subset dataset.
@@ -760,7 +763,7 @@ public class TestMbClassify extends TestCase {
         Arrays.fill(estimatedCategories, -1);
 
         //The variables in the dataset.
-        List<Node> varsClassify = testDataSubset.getVariables();
+        List <Node> varsClassify = testDataSubset.getVariables();
 
         //For each case in the dataset to be classified compute the estimated
         //value of the target variable and increment the appropriate element
@@ -862,7 +865,7 @@ public class TestMbClassify extends TestCase {
         NumberFormat nf = NumberFormatUtil.getInstance().getNumberFormat();
 
         // Classify the target using training data as testing data.
-        List<Node> mbNodes = estimatedMb.getNodes();
+        List <Node> mbNodes = estimatedMb.getNodes();
 
         //The Markov blanket nodes will correspond to a subset of the variables
         //in the training dataset.  Find the subset dataset.
@@ -1019,7 +1022,7 @@ public class TestMbClassify extends TestCase {
         NumberFormat nf = NumberFormatUtil.getInstance().getNumberFormat();
 
         // Classify the target using training data as testing data.
-        List<Node> mbNodes = estimatedMb.getNodes();
+        List <Node> mbNodes = estimatedMb.getNodes();
 
         //The Markov blanket nodes will correspond to a subset of the variables
         //in the training dataset.  Find the subset dataset.
@@ -1054,7 +1057,7 @@ public class TestMbClassify extends TestCase {
         Arrays.fill(estimatedCategories, -1);
 
         //The variables in the dataset.
-        List<Node> varsClassify = testDataSubset.getVariables();
+        List <Node> varsClassify = testDataSubset.getVariables();
 
         //For each case in the dataset to be classified compute the estimated
         //value of the target variable and increment the appropriate element
@@ -1149,8 +1152,8 @@ public class TestMbClassify extends TestCase {
 
     private Dag useVariablesFromData(Dag oldDag, DataSet dataSet) {
         Dag newDag = new Dag();
-        List<Node> oldNodes = oldDag.getNodes();
-        List<Node> newNodes = new ArrayList<Node>();
+        List <Node> oldNodes = oldDag.getNodes();
+        List <Node> newNodes = new ArrayList <Node>();
 
         for (Node oldNode : oldNodes) {
             String name = oldNode.getName();
@@ -1159,7 +1162,7 @@ public class TestMbClassify extends TestCase {
             newDag.addNode(variable);
         }
 
-        List<Edge> oldEdges = oldDag.getEdges();
+        List <Edge> oldEdges = oldDag.getEdges();
 
         for (Edge edge : oldEdges) {
             Node node1 = newNodes.get(oldNodes.indexOf(edge.getNode1()));
@@ -1171,17 +1174,6 @@ public class TestMbClassify extends TestCase {
         }
 
         return newDag;
-    }
-
-    /**
-     * This method uses reflection to collect up all of the test methods from this class and return them to the test
-     * runner.
-     */
-    public static Test suite() {
-
-        // Edit the name of the class in the parens to match the name
-        // of this class.
-        return new TestSuite(TestMbClassify.class);
     }
 }
 

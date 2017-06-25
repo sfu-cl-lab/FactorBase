@@ -1048,9 +1048,13 @@ public class TestIndTestTimeSeries extends TestCase {
         super(name);
     }
 
+    public static Test suite() {
+        return new TestSuite(TestIndTestTimeSeries.class);
+    }
+
     @Override
-	public void setUp() {
-        List<Node> vars = new ArrayList<Node>();
+    public void setUp() {
+        List <Node> vars = new ArrayList <Node>();
 
         for (String varName : varNames) {
             vars.add(new ContinuousVariable(varName));
@@ -1066,6 +1070,11 @@ public class TestIndTestTimeSeries extends TestCase {
 
         test = new IndTestTimeSeries(_data, vars);
     }
+
+//    private void printIndependence(int i, int j) {
+//        System.out.println("independent(" + i + ", " + j + ") = " +
+//                test.isIndependent(new int[]{i, j}));
+//    }
 
     public void testIsIndependent() {
         test.setNumLags(1);
@@ -1090,20 +1099,11 @@ public class TestIndTestTimeSeries extends TestCase {
         //        System.out.println(independenceTest.isIndependent(new int[]{1,3,4,5,0}));
     }
 
-//    private void printIndependence(int i, int j) {
-//        System.out.println("independent(" + i + ", " + j + ") = " +
-//                test.isIndependent(new int[]{i, j}));
-//    }
-
     public void rtestChiSquareCutoff() {
         test.setAlpha(0.05);
         assertEquals(3.84, test.chiSquareCutoff(), 0.01);
         test.setAlpha(0.01);
         assertEquals(6.63, test.chiSquareCutoff(), 0.01);
-    }
-
-    public static Test suite() {
-        return new TestSuite(TestIndTestTimeSeries.class);
     }
 }
 

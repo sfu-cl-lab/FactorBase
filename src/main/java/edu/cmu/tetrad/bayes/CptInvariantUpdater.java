@@ -113,32 +113,32 @@ public final class CptInvariantUpdater implements ManipulatingBayesUpdater {
     //============================PUBLIC METHODS==========================//
 
     @Override
-	public BayesIm getBayesIm() {
+    public BayesIm getBayesIm() {
         return this.bayesIm;
     }
 
     @Override
-	public BayesIm getManipulatedBayesIm() {
+    public BayesIm getManipulatedBayesIm() {
         return this.manipulatedBayesIm;
     }
 
     @Override
-	public Graph getManipulatedGraph() {
+    public Graph getManipulatedGraph() {
         return getManipulatedBayesIm().getDag();
     }
 
     @Override
-	public BayesIm getUpdatedBayesIm() {
+    public BayesIm getUpdatedBayesIm() {
         return this.updatedBayesIm;
     }
 
     @Override
-	public Evidence getEvidence() {
+    public Evidence getEvidence() {
         return new Evidence(this.evidence);
     }
 
     @Override
-	public void setEvidence(Evidence evidence) {
+    public void setEvidence(Evidence evidence) {
         if (evidence == null) {
             throw new NullPointerException();
         }
@@ -167,29 +167,29 @@ public final class CptInvariantUpdater implements ManipulatingBayesUpdater {
     }
 
     @Override
-	public double getMarginal(int variable, int value) {
+    public double getMarginal(int variable, int value) {
         return cptInvariantMarginalCalculator.getMarginal(variable, value);
     }
 
     @Override
-	public boolean isJointMarginalSupported() {
+    public boolean isJointMarginalSupported() {
         return false;
     }
 
     @Override
-	public double getJointMarginal(int[] variables, int[] values) {
+    public double getJointMarginal(int[] variables, int[] values) {
         throw new UnsupportedOperationException();
     }
 
     @Override
-	public double[] calculatePriorMarginals(int nodeIndex) {
+    public double[] calculatePriorMarginals(int nodeIndex) {
         Evidence evidence = getEvidence();
         setEvidence(Evidence.tautology(evidence.getVariableSource()));
 
         double[] marginals = new double[evidence.getNumCategories(nodeIndex)];
 
         for (int i = 0;
-                i < getBayesIm().getNumColumns(nodeIndex); i++) {
+             i < getBayesIm().getNumColumns(nodeIndex); i++) {
             marginals[i] = getMarginal(nodeIndex, i);
         }
 
@@ -198,11 +198,11 @@ public final class CptInvariantUpdater implements ManipulatingBayesUpdater {
     }
 
     @Override
-	public double[] calculateUpdatedMarginals(int nodeIndex) {
+    public double[] calculateUpdatedMarginals(int nodeIndex) {
         double[] marginals = new double[evidence.getNumCategories(nodeIndex)];
 
         for (int i = 0;
-                i < getBayesIm().getNumColumns(nodeIndex); i++) {
+             i < getBayesIm().getNumColumns(nodeIndex); i++) {
             marginals[i] = getMarginal(nodeIndex, i);
         }
 
@@ -213,9 +213,9 @@ public final class CptInvariantUpdater implements ManipulatingBayesUpdater {
      * Prints out the most recent marginal.
      */
     @Override
-	public String toString() {
+    public String toString() {
         return "CPT Invariant Updater, evidence = " + evidence;
-    }               
+    }
 
     //==============================PRIVATE METHODS=======================//
 
@@ -233,7 +233,7 @@ public final class CptInvariantUpdater implements ManipulatingBayesUpdater {
         for (int i = 0; i < bayesIm.getNumNodes(); ++i) {
             if (evidence.isManipulated(i)) {
                 Node node = evidence.getNode(i);
-                List<Node> parents = updatedGraph.getParents(node);
+                List <Node> parents = updatedGraph.getParents(node);
 
                 for (Node parent1 : parents) {
                     updatedGraph.removeEdge(node, parent1);

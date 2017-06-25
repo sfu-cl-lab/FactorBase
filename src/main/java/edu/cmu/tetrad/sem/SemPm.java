@@ -27,7 +27,6 @@ import edu.cmu.tetrad.util.dist.*;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
-import java.util.*;
 
 /**
  * Parametric model for Structural Equation Models.
@@ -54,43 +53,43 @@ public final class SemPm implements TetradSerializable {
      *
      * @serial Cannot be null.
      */
-    private List<Node> nodes;
+    private List <Node> nodes;
 
     /**
      * The list of Parameters (unmodifiable).
      *
      * @serial Cannot be null.
      */
-    private List<Parameter> parameters;
+    private List <Parameter> parameters;
 
     /**
      * @serial
      * @deprecated
      */
     @Deprecated
-	private List<Parameter> means;
+    private List <Parameter> means;
 
     /**
      * The list of variable nodes (unmodifiable).
      *
      * @serial Cannot be null.
      */
-    private List<Node> variableNodes;
+    private List <Node> variableNodes;
 
     /**
      * @serial Cannot be null.
      * @deprecated
      */
     @Deprecated
-	private List<Node> exogenousNodes;
+    private List <Node> exogenousNodes;
 
     /**
      * The set of parameter comparisons.
      *
      * @serial Cannot be null.
      */
-    private Map<ParameterPair, ParamComparison> paramComparisons =
-            new HashMap<ParameterPair, ParamComparison>();
+    private Map <ParameterPair, ParamComparison> paramComparisons =
+            new HashMap <ParameterPair, ParamComparison>();
 
     /**
      * The index of the most recent "T" parameter. (These are variance and
@@ -163,12 +162,12 @@ public final class SemPm implements TetradSerializable {
      */
     public SemPm(SemPm semPm) {
         this.graph = semPm.graph;
-        this.nodes = new LinkedList<Node>(semPm.nodes);
-        this.parameters = new LinkedList<Parameter>(semPm.parameters);
+        this.nodes = new LinkedList <Node>(semPm.nodes);
+        this.parameters = new LinkedList <Parameter>(semPm.parameters);
 //        this.means = new LinkedList<Parameter>(semPm.means);
-        this.variableNodes = new LinkedList<Node>(semPm.variableNodes);
+        this.variableNodes = new LinkedList <Node>(semPm.variableNodes);
 //        this.exogenousNodes = new LinkedList<Node>(semPm.exogenousNodes);
-        this.paramComparisons = new HashMap<ParameterPair, ParamComparison>(
+        this.paramComparisons = new HashMap <ParameterPair, ParamComparison>(
                 semPm.paramComparisons);
         this.tIndex = semPm.tIndex;
         this.bIndex = semPm.bIndex;
@@ -200,7 +199,7 @@ public final class SemPm implements TetradSerializable {
      * Returns a list of all the parameters, including variance, covariance,
      * coefficient, and mean parameters.
      */
-    public List<Parameter> getParameters() {
+    public List <Parameter> getParameters() {
         return this.parameters;
     }
 
@@ -208,7 +207,7 @@ public final class SemPm implements TetradSerializable {
      * Returns the list of variable nodes--that is, node that are not error
      * nodes.
      */
-    public List<Node> getVariableNodes() {
+    public List <Node> getVariableNodes() {
         return this.variableNodes;
     }
 
@@ -225,8 +224,8 @@ public final class SemPm implements TetradSerializable {
     /**
      * Returns the list of exogenous variableNodes.
      */
-    public List<Node> getErrorNodes() {
-        List<Node> errorNodes = new ArrayList<Node>();
+    public List <Node> getErrorNodes() {
+        List <Node> errorNodes = new ArrayList <Node>();
 
         for (Node node1 : this.nodes) {
             if (node1.getNodeType() == NodeType.ERROR) {
@@ -240,8 +239,8 @@ public final class SemPm implements TetradSerializable {
     /**
      * Returns the list of measured variableNodes.
      */
-    public List<Node> getMeasuredNodes() {
-        List<Node> measuredNodes = new ArrayList<Node>();
+    public List <Node> getMeasuredNodes() {
+        List <Node> measuredNodes = new ArrayList <Node>();
 
         for (Node variable : getVariableNodes()) {
             if (variable.getNodeType() == NodeType.MEASURED) {
@@ -255,8 +254,8 @@ public final class SemPm implements TetradSerializable {
     /**
      * Returns the list of latent variableNodes.
      */
-    public List<Node> getLatentNodes() {
-        List<Node> latentNodes = new ArrayList<Node>();
+    public List <Node> getLatentNodes() {
+        List <Node> latentNodes = new ArrayList <Node>();
 
         for (Node node1 : this.nodes) {
             if (node1.getNodeType() == NodeType.LATENT) {
@@ -382,8 +381,8 @@ public final class SemPm implements TetradSerializable {
      * appear in the list of nodes. (This order is fixed.)
      */
     public String[] getMeasuredVarNames() {
-        List<Node> semPmVars = getVariableNodes();
-        List<String> varNamesList = new ArrayList<String>();
+        List <Node> semPmVars = getVariableNodes();
+        List <String> varNamesList = new ArrayList <String>();
 
         for (Node semPmVar : semPmVars) {
             if (semPmVar.getNodeType() == NodeType.MEASURED) {
@@ -435,16 +434,16 @@ public final class SemPm implements TetradSerializable {
     }
 
 
-    public List<Parameter> getFreeParameters() {
-        List<Parameter> parameters = getParameters();
-        List<Parameter> freeParameters = new ArrayList<Parameter>();
+    public List <Parameter> getFreeParameters() {
+        List <Parameter> parameters = getParameters();
+        List <Parameter> freeParameters = new ArrayList <Parameter>();
 
         for (Parameter _parameter : parameters) {
             ParamType type = _parameter.getType();
 
             if (type == ParamType.VAR || type == ParamType.COVAR || type == ParamType.COEF) {
                 if (!_parameter.isFixed()) {
-                    freeParameters.add(_parameter);     
+                    freeParameters.add(_parameter);
                 }
             }
         }
@@ -460,7 +459,7 @@ public final class SemPm implements TetradSerializable {
     }
 
     @Override
-	public String toString() {
+    public String toString() {
         StringBuilder buf = new StringBuilder();
         buf.append("\nParameters:\n");
 
@@ -484,7 +483,7 @@ public final class SemPm implements TetradSerializable {
     }
 
     private void initializeVariableNodes() {
-        List<Node> varNodes = new ArrayList<Node>();
+        List <Node> varNodes = new ArrayList <Node>();
 
         for (Node node1 : this.nodes) {
             Node node = (node1);
@@ -515,13 +514,13 @@ public final class SemPm implements TetradSerializable {
         // Note that a distinction between parameterizable and non-parameterizable nodes is being added
         // to accomodate time lag graphs. jdramsey 4/14/10.
 
-        List<Parameter> parameters = new ArrayList<Parameter>();
-        List<Parameter> means = new ArrayList<Parameter>();
-        List<Edge> edges = graph.getEdges();
+        List <Parameter> parameters = new ArrayList <Parameter>();
+        List <Parameter> means = new ArrayList <Parameter>();
+        List <Edge> edges = graph.getEdges();
 
-        Collections.sort(edges, new Comparator<Edge>() {
+        Collections.sort(edges, new Comparator <Edge>() {
             @Override
-			public int compare(Edge o1, Edge o2) {
+            public int compare(Edge o1, Edge o2) {
                 int compareFirst = o1.getNode1().getName().compareTo(o2.getNode1().toString());
                 int compareSecond = o1.getNode1().getName().compareTo(o2.getNode2().toString());
 
@@ -548,7 +547,7 @@ public final class SemPm implements TetradSerializable {
             if (!SemGraph.isErrorEdge(edge) &&
                     edge.getEndpoint1() == Endpoint.TAIL &&
                     edge.getEndpoint2() == Endpoint.ARROW) {
-                if (!graph.isParameterizable(edge.getNode2()))  {
+                if (!graph.isParameterizable(edge.getNode2())) {
                     continue;
                 }
 
@@ -621,22 +620,22 @@ public final class SemPm implements TetradSerializable {
         SemGraph graph = this.graph;
         TimeLagGraph timeLagGraph = graph.getTimeLagGraph();
 
-        List<Node> lag0Nodes = timeLagGraph.getLag0Nodes();
+        List <Node> lag0Nodes = timeLagGraph.getLag0Nodes();
 
         for (Node node : lag0Nodes) {
             Parameter param = new Parameter(newTName(), ParamType.VAR, node, node);
             param.setDistribution(new Uniform(1.0, 3.0));
             parameters.add(param);
-                
+
         }
 
-        List<Parameter> parameters = new ArrayList<Parameter>();
-        List<Parameter> means = new ArrayList<Parameter>();
-        List<Edge> edges = graph.getEdges();
+        List <Parameter> parameters = new ArrayList <Parameter>();
+        List <Parameter> means = new ArrayList <Parameter>();
+        List <Edge> edges = graph.getEdges();
 
-        Collections.sort(edges, new Comparator<Edge>() {
+        Collections.sort(edges, new Comparator <Edge>() {
             @Override
-			public int compare(Edge o1, Edge o2) {
+            public int compare(Edge o1, Edge o2) {
                 int compareFirst = o1.getNode1().getName().compareTo(o2.getNode1().toString());
                 int compareSecond = o1.getNode1().getName().compareTo(o2.getNode2().toString());
 
@@ -663,7 +662,7 @@ public final class SemPm implements TetradSerializable {
             if (!SemGraph.isErrorEdge(edge) &&
                     edge.getEndpoint1() == Endpoint.TAIL &&
                     edge.getEndpoint2() == Endpoint.ARROW) {
-                if (!graph.isParameterizable(edge.getNode2()))  {
+                if (!graph.isParameterizable(edge.getNode2())) {
                     continue;
                 }
 

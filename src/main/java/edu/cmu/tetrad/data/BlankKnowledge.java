@@ -36,198 +36,198 @@ import java.util.List;
  */
 public class BlankKnowledge implements IKnowledge {
     @Override
-	public void addToTier(int tier, String var) {
+    public void addToTier(int tier, String var) {
         // no op.
     }
 
     @Override
-	public void addToTiersByVarNames(List<String> varNames) {
+    public void addToTiersByVarNames(List <String> varNames) {
         // no op./
     }
 
     @Override
-	public List<KnowledgeGroup> getKnowledgeGroups() {
-        return new ArrayList<KnowledgeGroup>();
+    public List <KnowledgeGroup> getKnowledgeGroups() {
+        return new ArrayList <KnowledgeGroup>();
     }
 
     @Override
-	public void removeKnowledgeGroup(int index) {
+    public void removeKnowledgeGroup(int index) {
         // no op
     }
 
     @Override
-	public void addKnowledgeGroup(KnowledgeGroup group) {
+    public void addKnowledgeGroup(KnowledgeGroup group) {
         // no op
     }
 
     @Override
-	public void setKnowledgeGroup(int index, KnowledgeGroup group) {
+    public void setKnowledgeGroup(int index, KnowledgeGroup group) {
         // no op.
     }
 
     @Override
-	public Iterator<KnowledgeEdge> forbiddenCommonCausesIterator() {
-        return new ArrayList<KnowledgeEdge>().iterator();
+    public Iterator <KnowledgeEdge> forbiddenCommonCausesIterator() {
+        return new ArrayList <KnowledgeEdge>().iterator();
     }
 
     @Override
-	public Iterator<KnowledgeEdge> forbiddenEdgesIterator() {
-        return new ArrayList<KnowledgeEdge>().iterator();
+    public Iterator <KnowledgeEdge> forbiddenEdgesIterator() {
+        return new ArrayList <KnowledgeEdge>().iterator();
     }
 
     @Override
-	public Iterator<KnowledgeEdge> explicitlyForbiddenEdgesIterator() {
-        return new ArrayList<KnowledgeEdge>().iterator();
+    public Iterator <KnowledgeEdge> explicitlyForbiddenEdgesIterator() {
+        return new ArrayList <KnowledgeEdge>().iterator();
     }
 
     @Override
-	public List<String> getVarsNotInTier() {
-        return new ArrayList<String>();
+    public List <String> getVarsNotInTier() {
+        return new ArrayList <String>();
     }
 
     @Override
-	public List<String> getTier(int tier) {
-        return new ArrayList<String>();
+    public List <String> getTier(int tier) {
+        return new ArrayList <String>();
     }
 
     @Override
-	public int getNumTiers() {
+    public int getNumTiers() {
         return 0;
     }
 
     @Override
-	public boolean commonCauseForbidden(String var1, String var2) {
+    public boolean commonCauseForbidden(String var1, String var2) {
         return false;
     }
 
     @Override
-	public boolean edgeExplicitlyRequired(String var1, String var2) {
+    public boolean edgeExplicitlyRequired(String var1, String var2) {
         return false;
     }
 
     @Override
-	public boolean edgeExplicitlyRequired(KnowledgeEdge edge) {
+    public boolean edgeExplicitlyRequired(KnowledgeEdge edge) {
         return false;
     }
 
     @Override
-	public boolean edgeForbidden(String var1, String var2) {
+    public boolean edgeForbidden(String var1, String var2) {
         return false;
     }
 
     @Override
-	public boolean edgeRequired(String var1, String var2) {
+    public boolean edgeRequired(String var1, String var2) {
         return false;
     }
 
     @Override
-	public boolean edgeRequiredByGroups(String var1, String var2) {
+    public boolean edgeRequiredByGroups(String var1, String var2) {
         return false;
     }
 
     @Override
-	public boolean edgeForbiddenByGroups(String var1, String var2) {
+    public boolean edgeForbiddenByGroups(String var1, String var2) {
         return false;
     }
 
     @Override
-	public boolean noEdgeRequired(String x, String y) {
+    public boolean noEdgeRequired(String x, String y) {
         return true;
     }
 
     @Override
-	public boolean isForbiddenByTiers(String var1, String var2) {
+    public boolean isForbiddenByTiers(String var1, String var2) {
         return false;
     }
 
     @Override
-	public boolean isEmpty() {
+    public boolean isEmpty() {
         return true;
     }
 
     @Override
-	public Iterator<KnowledgeEdge> requiredCommonCausesIterator() {
-        return new ArrayList<KnowledgeEdge>().iterator();
+    public Iterator <KnowledgeEdge> requiredCommonCausesIterator() {
+        return new ArrayList <KnowledgeEdge>().iterator();
     }
 
     @Override
-	public Iterator<KnowledgeEdge> requiredEdgesIterator() {
-        return new ArrayList<KnowledgeEdge>().iterator();
+    public Iterator <KnowledgeEdge> requiredEdgesIterator() {
+        return new ArrayList <KnowledgeEdge>().iterator();
     }
 
     @Override
-	public Iterator<KnowledgeEdge> explicitlyRequiredEdgesIterator() {
-        return new ArrayList<KnowledgeEdge>().iterator();
+    public Iterator <KnowledgeEdge> explicitlyRequiredEdgesIterator() {
+        return new ArrayList <KnowledgeEdge>().iterator();
     }
 
     @Override
-	public void setEdgeForbidden(String var1, String var2, boolean forbid) {
+    public void setEdgeForbidden(String var1, String var2, boolean forbid) {
         // no op
     }
 
     @Override
-	public void setEdgeRequired(String var1, String var2, boolean required) {
+    public void setEdgeRequired(String var1, String var2, boolean required) {
         // no op
     }
 
     @Override
-	public void removeFromTiers(String var) {
+    public void removeFromTiers(String var) {
         // no op
     }
 
     @Override
-	public void setTierForbiddenWithin(int tier, boolean forbidden) {
+    public void setTierForbiddenWithin(int tier, boolean forbidden) {
         // no op
     }
 
     @Override
-	public boolean isTierForbiddenWithin(int tier) {
+    public boolean isTierForbiddenWithin(int tier) {
         return false;
     }
 
     @Override
-	public int getMaxTierForbiddenWithin() {
+    public int getMaxTierForbiddenWithin() {
         return 0;
     }
 
     @Override
-	public void setDefaultToKnowledgeLayout(boolean defaultToKnowledgeLayout) {
-        // no op
-    }
-
-    @Override
-	public boolean isDefaultToKnowledgeLayout() {
+    public boolean isDefaultToKnowledgeLayout() {
         return false;
     }
 
     @Override
-	public void clear() {
+    public void setDefaultToKnowledgeLayout(boolean defaultToKnowledgeLayout) {
+        // no op
+    }
+
+    @Override
+    public void clear() {
         // no op.
     }
 
     @Override
-	public boolean isViolatedBy(Graph graph) {
+    public boolean isViolatedBy(Graph graph) {
         return false;
     }
 
     @Override
-	public void setTier(int tier, List<String> vars) {
+    public void setTier(int tier, List <String> vars) {
         // no op
     }
 
     @Override
-	public void addVariable(String varName) {
+    public void addVariable(String varName) {
         // no op
     }
 
     @Override
-	public void removeVariable(String varName) {
+    public void removeVariable(String varName) {
         // no op
     }
 
     @Override
-	public List<String> getVariables() {
-        return new ArrayList<String>();
+    public List <String> getVariables() {
+        return new ArrayList <String>();
     }
 }
 

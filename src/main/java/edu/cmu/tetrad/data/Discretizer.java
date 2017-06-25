@@ -23,8 +23,6 @@ package edu.cmu.tetrad.data;
 
 import edu.cmu.tetrad.graph.Node;
 
-import java.util.*;
-
 
 /**
  * Discretizes individual columns of discrete or continuous data. Continuous
@@ -37,8 +35,8 @@ import java.util.*;
  * @author Tyler Gibson
  */
 public class Discretizer {
+    Map <Node, DiscretizationSpec> specs;
     private DataSet sourceDataSet;
-    Map<Node, DiscretizationSpec> specs;
     private boolean variablesCopied = true;
 
     /**
@@ -48,154 +46,12 @@ public class Discretizer {
     public Discretizer(DataSet dataSet) {
         this.sourceDataSet = dataSet;
 
-        specs = new HashMap<Node, DiscretizationSpec>();
+        specs = new HashMap <Node, DiscretizationSpec>();
     }
 
-    public Discretizer(DataSet dataSet, Map<Node, DiscretizationSpec> specs) {
+    public Discretizer(DataSet dataSet, Map <Node, DiscretizationSpec> specs) {
         this.sourceDataSet = dataSet;
         this.specs = specs;
-    }
-
-    /**
-     * Sets the given node to discretized using evenaly distributed values using the
-     * given number of categories.
-     */
-    public void equalCounts(Node node, int numCategories) {
-        String name = node.getName();
-        int i = sourceDataSet.getVariables().indexOf(node);
-        double[] data = sourceDataSet.getDoubleData().viewColumn(i).toArray();
-        double[] breakpoints = Discretizer.getEqualFrequencyBreakPoints(data, numCategories);
-        List<String> categories = new DiscreteVariable(name, numCategories).getCategories();
-
-        ContinuousDiscretizationSpec spec
-                = new ContinuousDiscretizationSpec(breakpoints, categories);
-        spec.setMethod(ContinuousDiscretizationSpec.EVENLY_DISTRIBUTED_VALUES);
-
-        specs.put(node, spec);
-    }
-
-    /**
-     * Sets the given node to discretized using evenly spaced intervals using the
-     * given number of categories.
-     */
-    public void equalIntervals(Node node, int numCategories) {
-        String name = node.getName();
-        int i = sourceDataSet.getVariables().indexOf(node);
-        double[] data = sourceDataSet.getDoubleData().viewColumn(i).toArray();
-        double[] breakpoints = Discretizer.getEqualFrequencyBreakPoints(data, numCategories);
-        List<String> categories = new DiscreteVariable(name, numCategories).getCategories();
-
-        ContinuousDiscretizationSpec spec
-                = new ContinuousDiscretizationSpec(breakpoints, categories);
-        spec.setMethod(ContinuousDiscretizationSpec.EVENLY_DISTRIBUTED_INTERVALS);
-
-        specs.put(node, spec);
-    }
-
-    /**
-     * Indicates that the given variable should not be discretized.
-     */
-    public void notDiscretized(Node node) {
-        specs.remove(node);
-    }
-
-    public void setVariablesCopied(boolean unselectedVariabledCopied) {
-        this.variablesCopied = unselectedVariabledCopied;
-    }
-
-    public boolean isVariablesCopied() {
-        return this.variablesCopied;
-    }
-
-    /**
-     * Returns a new data set that has been discretized.
-     *
-     * @return - Discretized dataset.
-     */
-    public DataSet discretize() {
-        // build list of variable.s
-        List<Node> variables = new LinkedList<Node>();
-        Map<Node, Node> replacementMapping = new HashMap<Node, Node>();
-        for (int i = 0; i < sourceDataSet.getNumColumns(); i++) {
-            Node variable = sourceDataSet.getVariable(i);
-            if (variable instanceof ContinuousVariable) {
-                ContinuousDiscretizationSpec spec = (ContinuousDiscretizationSpec) specs.get(variable);
-                if (spec != null) {
-                    if (spec.getMethod() == ContinuousDiscretizationSpec.NONE) {
-                        variables.add(variable);
-                    } else {
-                        List<String> cats = spec.getCategories();
-                        DiscreteVariable var = new DiscreteVariable(variable.getName(), cats);
-                        replacementMapping.put(var, variable);
-                        variables.add(var);
-                    }
-                } else if (isVariablesCopied()) {
-                    variables.add(variable);
-                }
-            } else if (variable instanceof DiscreteVariable) {
-                DiscreteDiscretizationSpec spec = (DiscreteDiscretizationSpec) specs.get(variable);
-                if (spec != null) {
-                    List<String> cats = spec.getCategories();
-                    DiscreteVariable var = new DiscreteVariable(variable.getName(), cats);
-                    replacementMapping.put(var, variable);
-                    variables.add(var);
-                }
-            } else if (isVariablesCopied()) {
-                variables.add(variable);
-            }
-        }
-
-        // build new dataset.
-        ColtDataSet newDataSet = new ColtDataSet(sourceDataSet.getNumRows(), variables);
-        for (int i = 0; i < newDataSet.getNumColumns(); i++) {
-            Node variable = newDataSet.getVariable(i);
-            Node sourceVar = replacementMapping.get(variable);
-            if (sourceVar != null && specs.containsKey(sourceVar)) {
-                if (sourceVar instanceof ContinuousVariable) {
-                    ContinuousDiscretizationSpec spec = (ContinuousDiscretizationSpec) specs.get(sourceVar);
-                    double[] breakpoints = spec.getBreakpoints();
-                    List<String> categories = spec.getCategories();
-                    String name = variable.getName();
-
-                    double[] trimmedData = new double[newDataSet.getNumRows()];
-                    int col = newDataSet.getColumn(variable);
-
-                    for (int j = 0; j < sourceDataSet.getNumRows(); j++) {
-                        trimmedData[j] = sourceDataSet.getDouble(j, col);
-                    }
-                    Discretization discretization = discretize(trimmedData,
-                            breakpoints, name, categories);
-
-                    int _col = newDataSet.getColumn(variable);
-                    int[] _data = discretization.getData();
-                    for (int j = 0; j < _data.length; j++) {
-                        newDataSet.setInt(j, _col, _data[j]);
-                    }
-                }
-                else if (sourceVar instanceof DiscreteVariable) {
-                    DiscreteDiscretizationSpec spec = (DiscreteDiscretizationSpec) specs.get(sourceVar);
-
-                    int[] remap = spec.getRemap();
-
-                    int[] trimmedData = new int[newDataSet.getNumRows()];
-                    int col = newDataSet.getColumn(variable);
-
-                    for (int j = 0; j < sourceDataSet.getNumRows(); j++) {
-                        trimmedData[j] = sourceDataSet.getInt(j, col);
-                    }
-
-                    int _col = newDataSet.getColumn(variable);
-
-                    for (int j = 0; j < trimmedData.length; j++) {
-                        newDataSet.setInt(j, _col, remap[trimmedData[j]]);
-                    }
-                }
-
-            } else {
-                DataUtils.copyColumn(variable, sourceDataSet, newDataSet);
-            }
-        }
-        return newDataSet;
     }
 
     /**
@@ -211,7 +67,7 @@ public class Discretizer {
 
         // first sort the data.
         Arrays.sort(data);
-        List<Chunk> chunks = new ArrayList<Chunk>(data.length);
+        List <Chunk> chunks = new ArrayList <Chunk>(data.length);
         int startChunkCount = 0;
         double lastValue = data[0];
         for (int i = 0; i < data.length; i++) {
@@ -259,7 +115,6 @@ public class Discretizer {
         return breakpoints;
     }
 
-
     /**
      * Discretizes the continuous data in the given column using the specified
      * cutoffs and category names. The following scheme is used. If cutoffs[i -
@@ -281,7 +136,7 @@ public class Discretizer {
      * @return The discretized column.
      */
     public static Discretization discretize(double[] _data, double[] cutoffs,
-                                            String variableName, List<String> categories) {
+                                            String variableName, List <String> categories) {
 
         if (cutoffs == null) {
             throw new NullPointerException();
@@ -333,6 +188,147 @@ public class Discretizer {
         return new Discretization(variable, discreteData);
     }
 
+    /**
+     * Sets the given node to discretized using evenaly distributed values using the
+     * given number of categories.
+     */
+    public void equalCounts(Node node, int numCategories) {
+        String name = node.getName();
+        int i = sourceDataSet.getVariables().indexOf(node);
+        double[] data = sourceDataSet.getDoubleData().viewColumn(i).toArray();
+        double[] breakpoints = Discretizer.getEqualFrequencyBreakPoints(data, numCategories);
+        List <String> categories = new DiscreteVariable(name, numCategories).getCategories();
+
+        ContinuousDiscretizationSpec spec
+                = new ContinuousDiscretizationSpec(breakpoints, categories);
+        spec.setMethod(ContinuousDiscretizationSpec.EVENLY_DISTRIBUTED_VALUES);
+
+        specs.put(node, spec);
+    }
+
+    /**
+     * Sets the given node to discretized using evenly spaced intervals using the
+     * given number of categories.
+     */
+    public void equalIntervals(Node node, int numCategories) {
+        String name = node.getName();
+        int i = sourceDataSet.getVariables().indexOf(node);
+        double[] data = sourceDataSet.getDoubleData().viewColumn(i).toArray();
+        double[] breakpoints = Discretizer.getEqualFrequencyBreakPoints(data, numCategories);
+        List <String> categories = new DiscreteVariable(name, numCategories).getCategories();
+
+        ContinuousDiscretizationSpec spec
+                = new ContinuousDiscretizationSpec(breakpoints, categories);
+        spec.setMethod(ContinuousDiscretizationSpec.EVENLY_DISTRIBUTED_INTERVALS);
+
+        specs.put(node, spec);
+    }
+
+    /**
+     * Indicates that the given variable should not be discretized.
+     */
+    public void notDiscretized(Node node) {
+        specs.remove(node);
+    }
+
+    public boolean isVariablesCopied() {
+        return this.variablesCopied;
+    }
+
+    public void setVariablesCopied(boolean unselectedVariabledCopied) {
+        this.variablesCopied = unselectedVariabledCopied;
+    }
+
+    /**
+     * Returns a new data set that has been discretized.
+     *
+     * @return - Discretized dataset.
+     */
+    public DataSet discretize() {
+        // build list of variable.s
+        List <Node> variables = new LinkedList <Node>();
+        Map <Node, Node> replacementMapping = new HashMap <Node, Node>();
+        for (int i = 0; i < sourceDataSet.getNumColumns(); i++) {
+            Node variable = sourceDataSet.getVariable(i);
+            if (variable instanceof ContinuousVariable) {
+                ContinuousDiscretizationSpec spec = (ContinuousDiscretizationSpec) specs.get(variable);
+                if (spec != null) {
+                    if (spec.getMethod() == ContinuousDiscretizationSpec.NONE) {
+                        variables.add(variable);
+                    } else {
+                        List <String> cats = spec.getCategories();
+                        DiscreteVariable var = new DiscreteVariable(variable.getName(), cats);
+                        replacementMapping.put(var, variable);
+                        variables.add(var);
+                    }
+                } else if (isVariablesCopied()) {
+                    variables.add(variable);
+                }
+            } else if (variable instanceof DiscreteVariable) {
+                DiscreteDiscretizationSpec spec = (DiscreteDiscretizationSpec) specs.get(variable);
+                if (spec != null) {
+                    List <String> cats = spec.getCategories();
+                    DiscreteVariable var = new DiscreteVariable(variable.getName(), cats);
+                    replacementMapping.put(var, variable);
+                    variables.add(var);
+                }
+            } else if (isVariablesCopied()) {
+                variables.add(variable);
+            }
+        }
+
+        // build new dataset.
+        ColtDataSet newDataSet = new ColtDataSet(sourceDataSet.getNumRows(), variables);
+        for (int i = 0; i < newDataSet.getNumColumns(); i++) {
+            Node variable = newDataSet.getVariable(i);
+            Node sourceVar = replacementMapping.get(variable);
+            if (sourceVar != null && specs.containsKey(sourceVar)) {
+                if (sourceVar instanceof ContinuousVariable) {
+                    ContinuousDiscretizationSpec spec = (ContinuousDiscretizationSpec) specs.get(sourceVar);
+                    double[] breakpoints = spec.getBreakpoints();
+                    List <String> categories = spec.getCategories();
+                    String name = variable.getName();
+
+                    double[] trimmedData = new double[newDataSet.getNumRows()];
+                    int col = newDataSet.getColumn(variable);
+
+                    for (int j = 0; j < sourceDataSet.getNumRows(); j++) {
+                        trimmedData[j] = sourceDataSet.getDouble(j, col);
+                    }
+                    Discretization discretization = discretize(trimmedData,
+                            breakpoints, name, categories);
+
+                    int _col = newDataSet.getColumn(variable);
+                    int[] _data = discretization.getData();
+                    for (int j = 0; j < _data.length; j++) {
+                        newDataSet.setInt(j, _col, _data[j]);
+                    }
+                } else if (sourceVar instanceof DiscreteVariable) {
+                    DiscreteDiscretizationSpec spec = (DiscreteDiscretizationSpec) specs.get(sourceVar);
+
+                    int[] remap = spec.getRemap();
+
+                    int[] trimmedData = new int[newDataSet.getNumRows()];
+                    int col = newDataSet.getColumn(variable);
+
+                    for (int j = 0; j < sourceDataSet.getNumRows(); j++) {
+                        trimmedData[j] = sourceDataSet.getInt(j, col);
+                    }
+
+                    int _col = newDataSet.getColumn(variable);
+
+                    for (int j = 0; j < trimmedData.length; j++) {
+                        newDataSet.setInt(j, _col, remap[trimmedData[j]]);
+                    }
+                }
+
+            } else {
+                DataUtils.copyColumn(variable, sourceDataSet, newDataSet);
+            }
+        }
+        return newDataSet;
+    }
+
     //======================== Classes ================================//
 
     public static class Discretization {
@@ -379,7 +375,7 @@ public class Discretizer {
         }
 
         @Override
-		public final String toString() {
+        public final String toString() {
             StringBuilder buf = new StringBuilder();
             buf.append("\n\nDiscretization:");
 

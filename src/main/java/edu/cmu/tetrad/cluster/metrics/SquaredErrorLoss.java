@@ -32,7 +32,7 @@ import edu.cmu.tetrad.cluster.metrics.Dissimilarity;
  */
 public class SquaredErrorLoss implements Dissimilarity {
     @Override
-	public double dissimilarity(DoubleMatrix1D v1, DoubleMatrix1D v2) {
+    public double dissimilarity(DoubleMatrix1D v1, DoubleMatrix1D v2) {
         if (v1.size() != v2.size()) {
             throw new IllegalArgumentException("Vectors not the same length.");
         }

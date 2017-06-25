@@ -56,6 +56,16 @@ public class TestLingamPattern extends TestCase {
         super(name);
     }
 
+    /**
+     * This method uses reflection to collect up all of the test methods from this class and return them to the test
+     * runner.
+     */
+    public static Test suite() {
+
+        // Edit the name of the class in the parens to match the name
+        // of this class.
+        return new TestSuite(TestPc.class);
+    }
 
     public void test1() {
         int sampleSize = 1000;
@@ -77,7 +87,7 @@ public class TestLingamPattern extends TestCase {
 
         System.out.println("true graph = " + graph);
 
-        List<Distribution> variableDistributions = new ArrayList<Distribution>();
+        List <Distribution> variableDistributions = new ArrayList <Distribution>();
 
 //        variableDistributions.add(new Uniform(-1, 1));
         variableDistributions.add(new Normal(0, 1));
@@ -134,9 +144,9 @@ public class TestLingamPattern extends TestCase {
      * @return the simulated data set.
      */
     private DataSet simulateDataNonNormal(SemIm semIm, int sampleSize,
-                                          List<Distribution> distributions) {
-        List<Node> variables = new LinkedList<Node>();
-        List<Node> variableNodes = semIm.getSemPm().getVariableNodes();
+                                          List <Distribution> distributions) {
+        List <Node> variables = new LinkedList <Node>();
+        List <Node> variableNodes = semIm.getSemPm().getVariableNodes();
 
         for (Node node : variableNodes) {
             ContinuousVariable var = new ContinuousVariable(node.getName());
@@ -147,7 +157,7 @@ public class TestLingamPattern extends TestCase {
 
         // Create some index arrays to hopefully speed up the simulation.
         SemGraph graph = semIm.getSemPm().getGraph();
-        List<Node> tierOrdering = graph.getTierOrdering();
+        List <Node> tierOrdering = graph.getTierOrdering();
 
         int[] tierIndices = new int[variableNodes.size()];
 
@@ -159,9 +169,9 @@ public class TestLingamPattern extends TestCase {
 
         for (int i = 0; i < variableNodes.size(); i++) {
             Node node = variableNodes.get(i);
-            List<Node> parents = graph.getParents(node);
+            List <Node> parents = graph.getParents(node);
 
-            for (Iterator<Node> j = parents.iterator(); j.hasNext();) {
+            for (Iterator <Node> j = parents.iterator(); j.hasNext(); ) {
                 Node _node = j.next();
 
                 if (_node.getNodeType() == NodeType.ERROR) {
@@ -201,17 +211,5 @@ public class TestLingamPattern extends TestCase {
         }
 
         return dataSet;
-    }
-
-
-    /**
-     * This method uses reflection to collect up all of the test methods from this class and return them to the test
-     * runner.
-     */
-    public static Test suite() {
-
-        // Edit the name of the class in the parens to match the name
-        // of this class.
-        return new TestSuite(TestPc.class);
     }
 }

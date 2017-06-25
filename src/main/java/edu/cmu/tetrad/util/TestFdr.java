@@ -40,12 +40,16 @@ public class TestFdr extends TestCase {
         super(name);
     }
 
+    public static Test suite() {
+        return new TestSuite(TestFdr.class);
+    }
+
     public void testSimpleCase() {
         double[] p = new double[]{
                 .8, .01, .2, .07, .003, .9, .05, .03, .0001
         };
 
-        List<Double> pValues = new ArrayList<Double>();
+        List <Double> pValues = new ArrayList <Double>();
         for (double _p : p) pValues.add(_p);
 
         double alpha = 0.05;
@@ -67,9 +71,5 @@ public class TestFdr extends TestCase {
         cutoff = StatUtils.fdr(alpha, pValues, negativelyCorrelated);
         assertEquals(cutoff, 0.01);
 
-    }
-
-    public static Test suite() {
-        return new TestSuite(TestFdr.class);
     }
 }

@@ -33,14 +33,14 @@ public class SessionAdapter implements SessionListener {
      * Indicates that a node has been added.
      */
     @Override
-	public void nodeAdded(SessionEvent event) {
+    public void nodeAdded(SessionEvent event) {
     }
 
     /**
      * Indicates that a node has been removed.
      */
     @Override
-	public void nodeRemoved(SessionEvent event) {
+    public void nodeRemoved(SessionEvent event) {
     }
 
     /**
@@ -48,7 +48,7 @@ public class SessionAdapter implements SessionListener {
      * a child is added to the parent.
      */
     @Override
-	public void parentAdded(SessionEvent event) {
+    public void parentAdded(SessionEvent event) {
     }
 
     /**
@@ -56,21 +56,21 @@ public class SessionAdapter implements SessionListener {
      * implies a child is removed from the parent.
      */
     @Override
-	public void parentRemoved(SessionEvent event) {
+    public void parentRemoved(SessionEvent event) {
     }
 
     /**
      * Indicates that a model has been created for a node.
      */
     @Override
-	public void modelCreated(SessionEvent event) {
+    public void modelCreated(SessionEvent event) {
     }
 
     /**
      * Indicates that a model has been destroyed for a node.
      */
     @Override
-	public void modelDestroyed(SessionEvent event) {
+    public void modelDestroyed(SessionEvent event) {
     }
 
     /**
@@ -78,7 +78,7 @@ public class SessionAdapter implements SessionListener {
      * than one model consistent with the parents, so a choice has to be made.
      */
     @Override
-	public void modelUnclear(SessionEvent event) {
+    public void modelUnclear(SessionEvent event) {
     }
 
     /**
@@ -86,14 +86,14 @@ public class SessionAdapter implements SessionListener {
      * parameter objects need to be reset for every execution.
      */
     @Override
-	public void executionStarted(SessionEvent event) {
+    public void executionStarted(SessionEvent event) {
     }
 
     /**
      * Indicates that the repetition of some node has changed.
      */
     @Override
-	public void repetitionChanged(SessionEvent event) {
+    public void repetitionChanged(SessionEvent event) {
     }
 
     /**
@@ -101,7 +101,7 @@ public class SessionAdapter implements SessionListener {
      * yet).
      */
     @Override
-	public void addingEdge(SessionEvent event) {
+    public void addingEdge(SessionEvent event) {
     }
 }
 

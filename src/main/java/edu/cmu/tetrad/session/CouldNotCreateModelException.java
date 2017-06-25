@@ -40,7 +40,7 @@ public class CouldNotCreateModelException extends Exception {
     }
 
     @Override
-	public String getMessage() {
+    public String getMessage() {
         return "Couldn't create that model; perhaps one of its parents is missing.";
     }
 }

@@ -38,19 +38,17 @@ import java.util.List;
  * @author Ricardo Silva
  */
 public final class BinaryTetradTest implements TetradTest {
+    private static final double FUNC_TOLERANCE = 1.0e-4;
+    private static final double PARAM_TOLERANCE = 1.0e-3;
     private DataSet dataSet;
-//    private int rawdata1[][];
+    //    private int rawdata1[][];
     private double pis[][];      //bivariate proportions only
     private double pis4[][][][]; //probabilities over four variables
     private int counts4[][][][][][][][]; //counts over all groups of four variables
     private int values[][];
     private int indices[], sampleSize;
-
     private double prob[], tempProb, sig1, sig2, sig3, sig, stat;
     private boolean bvalues[];
-
-    private static final double FUNC_TOLERANCE = 1.0e-4;
-    private static final double PARAM_TOLERANCE = 1.0e-3;
 
     public BinaryTetradTest(DataSet dataSet, double sig) {
         this.dataSet = dataSet;
@@ -60,17 +58,17 @@ public final class BinaryTetradTest implements TetradTest {
     }
 
     @Override
-	public String[] getVarNames() {
+    public String[] getVarNames() {
         return dataSet.getVariableNames().toArray(new String[0]);
     }
 
     @Override
-	public List<Node> getVariables() {
+    public List <Node> getVariables() {
         return dataSet.getVariables();
     }
 
     @Override
-	public DataSet getDataSet() {
+    public DataSet getDataSet() {
         return this.dataSet;
     }
 
@@ -146,7 +144,7 @@ public final class BinaryTetradTest implements TetradTest {
      */
 
     @Override
-	public int tetradScore(int v1, int v2, int v3, int v4) {
+    public int tetradScore(int v1, int v2, int v3, int v4) {
         evalTetradDifferences(v1, v2, v3, v4);
         for (int i = 0; i < 3; i++) {
             bvalues[i] = (prob[i] >= sig);
@@ -186,7 +184,7 @@ public final class BinaryTetradTest implements TetradTest {
      * Tests the tetrad (v1, v3) x (v2, v4) = (v1, v4) x (v2, v3)
      */
     @Override
-	public boolean tetradScore1(int v1, int v2, int v3, int v4) {
+    public boolean tetradScore1(int v1, int v2, int v3, int v4) {
         if (tetradScore(v1, v2, v3, v4) != 1) {
             return false;
         }
@@ -194,12 +192,12 @@ public final class BinaryTetradTest implements TetradTest {
     }
 
     @Override
-	public double getSignificance() {
+    public double getSignificance() {
         return this.sig;
     }
 
     @Override
-	public void setSignificance(double sig) {
+    public void setSignificance(double sig) {
         this.sig = sig;
     }
 
@@ -207,25 +205,25 @@ public final class BinaryTetradTest implements TetradTest {
      * Tests if all tetrad constraints hold
      */
     @Override
-	public boolean tetradScore3(int v1, int v2, int v3, int v4) {
+    public boolean tetradScore3(int v1, int v2, int v3, int v4) {
         return tetradScore(v1, v2, v3, v4) == 3;
     }
 
     @Override
-	public boolean tetradHolds(int v1, int v2, int v3, int v4) {
+    public boolean tetradHolds(int v1, int v2, int v3, int v4) {
         evalTetradDifference(v1, v2, v3, v4);
         bvalues[0] = (prob[0] >= sig);
         return prob[0] >= sig;
     }
 
     @Override
-	public double tetradPValue(int v1, int v2, int v3, int v4) {
+    public double tetradPValue(int v1, int v2, int v3, int v4) {
         evalTetradDifference(v1, v2, v3, v4);
         return prob[0];
     }
 
     @Override
-	public double tetradPValue(int i1, int j1, int k1, int l1, int i2, int j2, int k2, int l2) {
+    public double tetradPValue(int i1, int j1, int k1, int l1, int i2, int j2, int k2, int l2) {
         return 0;  //To change body of implemented methods use File | Settings | File Templates.
     }
 
@@ -497,37 +495,37 @@ public final class BinaryTetradTest implements TetradTest {
     }
 
     @Override
-	public boolean oneFactorTest(int a, int b, int c, int d) {
+    public boolean oneFactorTest(int a, int b, int c, int d) {
         assert false;
         return false;
     }
 
     @Override
-	public boolean oneFactorTest(int a, int b, int c, int d, int e) {
+    public boolean oneFactorTest(int a, int b, int c, int d, int e) {
         assert false;
         return false;
     }
 
     @Override
-	public boolean oneFactorTest(int a, int b, int c, int d, int e, int f) {
+    public boolean oneFactorTest(int a, int b, int c, int d, int e, int f) {
         assert false;
         return false;
     }
 
     @Override
-	public boolean twoFactorTest(int a, int b, int c, int d) {
+    public boolean twoFactorTest(int a, int b, int c, int d) {
         assert false;
         return false;
     }
 
     @Override
-	public boolean twoFactorTest(int a, int b, int c, int d, int e) {
+    public boolean twoFactorTest(int a, int b, int c, int d, int e) {
         assert false;
         return false;
     }
 
     @Override
-	public boolean twoFactorTest(int a, int b, int c, int d, int e, int f) {
+    public boolean twoFactorTest(int a, int b, int c, int d, int e, int f) {
         assert false;
         return false;
     }
@@ -643,7 +641,7 @@ public final class BinaryTetradTest implements TetradTest {
                                         Math.pow(params[8], p1) *
                                         Math.pow(1 - params[8], 1 - p1) *
                                         Math.pow(Math.pow(params[9], p2) *
-                                                Math.pow(1 - params[9], 1 - p2),
+                                                        Math.pow(1 - params[9], 1 - p2),
                                                 1 - p1) * Math.pow(Math.pow(
                                         params[10], p2) *
                                         Math.pow(1 - params[10], 1 - p2), p1);
@@ -704,7 +702,7 @@ public final class BinaryTetradTest implements TetradTest {
                                         Math.pow(params[8], p1) *
                                         Math.pow(1 - params[8], 1 - p1) *
                                         Math.pow(Math.pow(params[9], p2) *
-                                                Math.pow(1 - params[9], 1 - p2),
+                                                        Math.pow(1 - params[9], 1 - p2),
                                                 1 - p1) * Math.pow(Math.pow(
                                         params[10], p2) *
                                         Math.pow(1 - params[10], 1 - p2), p1);
@@ -789,7 +787,7 @@ public final class BinaryTetradTest implements TetradTest {
                                         Math.pow(params[8], p1) *
                                         Math.pow(1 - params[8], 1 - p1) *
                                         Math.pow(Math.pow(params[9], p2) *
-                                                Math.pow(1 - params[9], 1 - p2),
+                                                        Math.pow(1 - params[9], 1 - p2),
                                                 1 - p1) * Math.pow(Math.pow(
                                         params[10], p2) *
                                         Math.pow(1 - params[10], 1 - p2), p1);
@@ -845,7 +843,7 @@ public final class BinaryTetradTest implements TetradTest {
                                         Math.pow(params[8], p1) *
                                         Math.pow(1 - params[8], 1 - p1) *
                                         Math.pow(Math.pow(params[9], p2) *
-                                                Math.pow(1 - params[9], 1 - p2),
+                                                        Math.pow(1 - params[9], 1 - p2),
                                                 1 - p1) * Math.pow(Math.pow(
                                         params[10], p2) *
                                         Math.pow(1 - params[10], 1 - p2), p1);
@@ -944,70 +942,6 @@ public final class BinaryTetradTest implements TetradTest {
         }
         System.arraycopy(bestParams, 0, params, 0, params.length);
         //System.out.println();
-    }
-
-    static class FittingFunction implements MFWithGradient {
-
-        /**
-         * The wrapped model.
-         */
-        private final BinaryTetradTest estimator;
-
-        /**
-         * Constructs a new PalFittingFunction for the given Sem.
-         */
-        public FittingFunction(BinaryTetradTest estimator) {
-            this.estimator = estimator;
-        }
-
-        /**
-         * Computes the maximum likelihood function value for the given argument values as given by the optimizer. These
-         * values are mapped to parameter values.
-         */
-        @Override
-		public double evaluate(final double[] argument) {
-            return this.estimator.paramsLikelihood(argument);
-        }
-
-        @Override
-		public double evaluate(final double[] argument, double gradient[]) {
-            computeGradient(argument, gradient);
-            return this.estimator.paramsLikelihood(argument);
-        }
-
-        @Override
-		public void computeGradient(final double[] argument,
-                                    double[] gradient) {
-            this.estimator.computeTwoFactorGradient(argument, gradient);
-        }
-
-        /**
-         * Returns the number of arguments. Required by the MultivariateFunction interface.
-         */
-        @Override
-		public int getNumArguments() {
-            return 11;
-        }
-
-        /**
-         * Returns the lower bound of argument n. Required by the MultivariateFunction interface.
-         */
-        @Override
-		public double getLowerBound(final int n) {
-            return 0.01;
-        }
-
-        /**
-         * Returns the upper bound of argument n. Required by the MultivariateFunction interface.
-         */
-        @Override
-		public double getUpperBound(final int n) {
-            return 0.99;
-        }
-
-        public OrthogonalHints getOrthogonalHints() {
-            return null;
-        }
     }
 
     public double testOneTetradBootstrap(int i, int j, int k, int l) {
@@ -1272,7 +1206,6 @@ public final class BinaryTetradTest implements TetradTest {
         return -Math.abs(mle) / std;
     }
 
-
     public double tetradStat(int i, int j, int k, int l) {
         double a = this.pis[i][j], b = this.pis[k][l], c = this.pis[i][k], d =
                 this.pis[j][l];
@@ -1536,10 +1469,73 @@ public final class BinaryTetradTest implements TetradTest {
         return 3;
     }
 
-
     @Override
-	public ICovarianceMatrix getCovMatrix() {
+    public ICovarianceMatrix getCovMatrix() {
         return null;
+    }
+
+    static class FittingFunction implements MFWithGradient {
+
+        /**
+         * The wrapped model.
+         */
+        private final BinaryTetradTest estimator;
+
+        /**
+         * Constructs a new PalFittingFunction for the given Sem.
+         */
+        public FittingFunction(BinaryTetradTest estimator) {
+            this.estimator = estimator;
+        }
+
+        /**
+         * Computes the maximum likelihood function value for the given argument values as given by the optimizer. These
+         * values are mapped to parameter values.
+         */
+        @Override
+        public double evaluate(final double[] argument) {
+            return this.estimator.paramsLikelihood(argument);
+        }
+
+        @Override
+        public double evaluate(final double[] argument, double gradient[]) {
+            computeGradient(argument, gradient);
+            return this.estimator.paramsLikelihood(argument);
+        }
+
+        @Override
+        public void computeGradient(final double[] argument,
+                                    double[] gradient) {
+            this.estimator.computeTwoFactorGradient(argument, gradient);
+        }
+
+        /**
+         * Returns the number of arguments. Required by the MultivariateFunction interface.
+         */
+        @Override
+        public int getNumArguments() {
+            return 11;
+        }
+
+        /**
+         * Returns the lower bound of argument n. Required by the MultivariateFunction interface.
+         */
+        @Override
+        public double getLowerBound(final int n) {
+            return 0.01;
+        }
+
+        /**
+         * Returns the upper bound of argument n. Required by the MultivariateFunction interface.
+         */
+        @Override
+        public double getUpperBound(final int n) {
+            return 0.99;
+        }
+
+        public OrthogonalHints getOrthogonalHints() {
+            return null;
+        }
     }
 }
 

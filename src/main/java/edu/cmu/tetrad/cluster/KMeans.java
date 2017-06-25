@@ -85,7 +85,7 @@ public class KMeans implements ClusteringAlgorithm {
     /**
      * Current clusters.
      */
-    private List<Integer> clusters;
+    private List <Integer> clusters;
 
     /**
      * Number of iterations of algorithm.
@@ -177,12 +177,12 @@ public class KMeans implements ClusteringAlgorithm {
      * result.
      */
     @Override
-	public void cluster(DoubleMatrix2D data) {
+    public void cluster(DoubleMatrix2D data) {
         this.data = data;
 
         if (initializationType == RANDOM_POINTS) {
             centers = pickCenters(numCenters, data);
-            clusters = new ArrayList<Integer>();
+            clusters = new ArrayList <Integer>();
 
             for (int i = 0; i < data.rows(); i++) {
                 clusters.add(-1);
@@ -192,7 +192,7 @@ public class KMeans implements ClusteringAlgorithm {
 
             // Randomly assign points to clusters and get the initial centers of
             // mass from that assignment.
-            clusters = new ArrayList<Integer>();
+            clusters = new ArrayList <Integer>();
 
             for (int i = 0; i < data.rows(); i++) {
                 clusters.add(RandomUtil.getInstance()
@@ -201,7 +201,7 @@ public class KMeans implements ClusteringAlgorithm {
 
             moveCentersToMeans();
         } else if (initializationType == EXPLICIT_POINTS) {
-            clusters = new ArrayList<Integer>();
+            clusters = new ArrayList <Integer>();
 
             for (int i = 0; i < data.rows(); i++) {
                 clusters.add(-1);
@@ -232,16 +232,16 @@ public class KMeans implements ClusteringAlgorithm {
     }
 
     @Override
-	public List<List<Integer>> getClusters() {
+    public List <List <Integer>> getClusters() {
         return ClusterUtils.convertClusterIndicesToLists(clusters);
     }
 
     @Override
-	public DoubleMatrix2D getPrototypes() {
+    public DoubleMatrix2D getPrototypes() {
         return centers.copy();
     }
 
-    /**            
+    /**
      * Return the maximum number of iterations, or -1 if the algorithm is
      * allowed to run unconstrainted.
      *
@@ -265,8 +265,8 @@ public class KMeans implements ClusteringAlgorithm {
         return centers.rows();
     }
 
-    public List<Integer> getCluster(int k) {
-        List<Integer> cluster = new ArrayList<Integer>();
+    public List <Integer> getCluster(int k) {
+        List <Integer> cluster = new ArrayList <Integer>();
 
         for (int i = 0; i < clusters.size(); i++) {
             if (clusters.get(i) == k) {
@@ -328,7 +328,7 @@ public class KMeans implements ClusteringAlgorithm {
      * Returns a string representation of the cluster result.
      */
     @Override
-	public String toString() {
+    public String toString() {
         NumberFormat n1 = NumberFormatUtil.getInstance().getNumberFormat();
 
         DoubleMatrix1D counts = countClusterSizes();
@@ -403,7 +403,7 @@ public class KMeans implements ClusteringAlgorithm {
     }
 
     private DoubleMatrix2D pickCenters(int numCenters, DoubleMatrix2D data) {
-        SortedSet<Integer> indexSet = new TreeSet<Integer>();
+        SortedSet <Integer> indexSet = new TreeSet <Integer>();
 
         while (indexSet.size() < numCenters) {
             int candidate = RandomUtil.getInstance().nextInt(data.rows());
@@ -453,7 +453,7 @@ public class KMeans implements ClusteringAlgorithm {
     }
 
     @Override
-	public void setVerbose(boolean verbose) {
+    public void setVerbose(boolean verbose) {
         this.verbose = verbose;
     }
 }

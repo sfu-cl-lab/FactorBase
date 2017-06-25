@@ -106,7 +106,7 @@ public class ParameterPair implements TetradSerializable {
      * @return true if the object pairs are equals, false if not.
      */
     @Override
-	public boolean equals(Object object) {
+    public boolean equals(Object object) {
         if (object == null) {
             return false;
         }
@@ -126,7 +126,7 @@ public class ParameterPair implements TetradSerializable {
      * @return this hashcode.
      */
     @Override
-	public int hashCode() {
+    public int hashCode() {
         int hashCode = 31 + ((a == null) ? 0 : a.hashCode());
 
         return 31 * hashCode + ((b == null) ? 0 : b.hashCode());
@@ -138,8 +138,8 @@ public class ParameterPair implements TetradSerializable {
      * @param a the new first element.
      * @param b the new seconde element.
      * @return the revised pair (a, b), just in case anyone wants an in-line
-     *         reference to it.  (This method just sets a and b to the new
-     *         values and returns a reference to itself.)
+     * reference to it.  (This method just sets a and b to the new
+     * values and returns a reference to itself.)
      */
     public ParameterPair setPair(Parameter a, Parameter b) {
         this.a = a;

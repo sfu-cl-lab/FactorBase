@@ -56,7 +56,7 @@ public class RegressionToLag1 implements Regression {
     /**
      * The variables.
      */
-    private List<Node> variables;
+    private List <Node> variables;
 
     /**
      * The significance level for determining which regressors are significant
@@ -73,15 +73,16 @@ public class RegressionToLag1 implements Regression {
 
     /**
      * Constructs a linear regression model for the given tabular data set.
+     *
      * @param data A rectangular data set, the relevant variables of which
-     * are continuous.
+     *             are continuous.
      */
     public RegressionToLag1(DataSet data) {
         this.data = data.getDoubleData();
         this.variables = data.getVariables();
     }
 
-    public RegressionToLag1(DoubleMatrix2D data, List<Node> variables) {
+    public RegressionToLag1(DoubleMatrix2D data, List <Node> variables) {
         this.data = data;
         this.variables = variables;
     }
@@ -93,29 +94,31 @@ public class RegressionToLag1 implements Regression {
      * based on their p values.
      */
     @Override
-	public void setAlpha(double alpha) {
+    public void setAlpha(double alpha) {
         this.alpha = alpha;
     }
 
     /**
      * Returns the graph of signifiocant regressors into the target.
+     *
      * @return This graph.
      */
     @Override
-	public Graph getGraph() {
+    public Graph getGraph() {
         return this.graph;
     }
 
     /**
      * Regresses the target on the given regressors.
-     * @param target The target variable.
+     *
+     * @param target     The target variable.
      * @param regressors The regressor variables.
      * @return The regression plane, specifying for each regressors its
      * coefficeint, se, t, and p values, and specifying the same for the
      * constant.
      */
     @Override
-	public RegressionResult regress(Node target, List<Node> regressors) {
+    public RegressionResult regress(Node target, List <Node> regressors) {
         int n = data.rows();
         int k = regressors.size() + 1;
 
@@ -140,21 +143,19 @@ public class RegressionToLag1 implements Regression {
         DoubleMatrix2D x;
 
         if (regressors.size() > 0) {
-            x = new DenseDoubleMatrix2D(xSub.rows(),  xSub.columns() + 1);
+            x = new DenseDoubleMatrix2D(xSub.rows(), xSub.columns() + 1);
 
             for (int i = 0; i < x.rows(); i++) {
                 for (int j = 0; j < x.columns(); j++) {
                     if (j == 0) {
                         x.set(i, j, 1);
-                    }
-                    else {
+                    } else {
                         x.set(i, j, xSub.get(i, j - 1));
                     }
                 }
             }
-        }
-        else {
-            x = new DenseDoubleMatrix2D(xSub.rows(),  xSub.columns());
+        } else {
+            x = new DenseDoubleMatrix2D(xSub.rows(), xSub.columns());
 
             for (int i = 0; i < x.rows(); i++) {
                 for (int j = 0; j < x.columns(); j++) {
@@ -218,15 +219,15 @@ public class RegressionToLag1 implements Regression {
     }
 
     @Override
-	public RegressionResult regress(Node target, Node... regressors) {
-        List<Node> _regressors = Arrays.asList(regressors);
+    public RegressionResult regress(Node target, Node... regressors) {
+        List <Node> _regressors = Arrays.asList(regressors);
         return regress(target, _regressors);
     }
 
     //=======================PRIVATE METHODS================================//
 
     private Graph createOutputGraph(String target, DoubleMatrix2D x,
-                                   List<Node> regressors, DoubleMatrix1D p) {
+                                    List <Node> regressors, DoubleMatrix1D p) {
         // Create output graph.
         Node targetNode = new GraphNode(target);
 
@@ -250,7 +251,7 @@ public class RegressionToLag1 implements Regression {
     }
 
     private String createResultString(int n, int k, double rss, double r2,
-                                      DoubleMatrix2D x, List<Node> regressors,
+                                      DoubleMatrix2D x, List <Node> regressors,
                                       DoubleMatrix2D b, DoubleMatrix1D se,
                                       DoubleMatrix1D t, DoubleMatrix1D p) {
         // Create result string.

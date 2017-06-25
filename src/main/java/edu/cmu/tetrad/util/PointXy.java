@@ -32,12 +32,14 @@ public class PointXy implements TetradSerializable {
 
     /**
      * The x coordinate.
+     *
      * @serial
      */
     private final int x;
 
     /**
      * The y coordinate.
+     *
      * @serial
      */
     private final int y;
@@ -46,6 +48,7 @@ public class PointXy implements TetradSerializable {
 
     /**
      * Constructs a new point with the given coordinates.
+     *
      * @param x The x coordinate for the point.
      * @param y The y coordinate for the point.
      */
@@ -56,6 +59,7 @@ public class PointXy implements TetradSerializable {
 
     /**
      * Copy constructor.
+     *
      * @param point The point to be copied.
      */
     public PointXy(PointXy point) {
@@ -65,6 +69,7 @@ public class PointXy implements TetradSerializable {
 
     /**
      * Generates a simple exemplar of this class to test serialization.
+     *
      * @return the examplar.
      * @see edu.cmu.TestSerialization
      * @see edu.cmu.tetradapp.util.TetradSerializableUtils
@@ -78,6 +83,7 @@ public class PointXy implements TetradSerializable {
 
     /**
      * Returns the x coordinate of the point.
+     *
      * @return Ibid.
      */
     public int getX() {
@@ -86,6 +92,7 @@ public class PointXy implements TetradSerializable {
 
     /**
      * Returns the y coordinate of the point.
+     *
      * @return Ibid.
      */
     public int getY() {
@@ -97,7 +104,7 @@ public class PointXy implements TetradSerializable {
      * coordinates.
      */
     @Override
-	public boolean equals(Object o) {
+    public boolean equals(Object o) {
         if (!(o instanceof PointXy)) {
             throw new IllegalArgumentException("Not a Point object.");
         }
@@ -114,7 +121,7 @@ public class PointXy implements TetradSerializable {
      * Returns a string representation of a point.
      */
     @Override
-	public String toString() {
+    public String toString() {
         return "Point<" + x + "," + y + ">";
     }
 }

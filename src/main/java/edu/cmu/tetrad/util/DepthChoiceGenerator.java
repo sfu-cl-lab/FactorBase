@@ -106,6 +106,38 @@ public final class DepthChoiceGenerator {
         initialize();
     }
 
+    /**
+     * This static method will print the series of combinations for a choose depth
+     * to System.out.
+     *
+     * @param a     the number of objects being selected from.
+     * @param depth the number of objects in the desired selection.
+     */
+    @SuppressWarnings({"SameParameterValue"})
+    public static void testPrint(int a, int depth) {
+        DepthChoiceGenerator cg = new DepthChoiceGenerator(a, depth);
+        int[] choice;
+
+        System.out.println();
+        System.out.println(
+                "Printing combinations for " + a + " choose " + depth + ":");
+        System.out.println();
+
+        while ((choice = cg.next()) != null) {
+            if (choice.length == 0) {
+                System.out.println("zero-length array");
+            } else {
+                for (int aChoice : choice) {
+                    System.out.print(aChoice + "\t");
+                }
+
+                System.out.println();
+            }
+        }
+
+        System.out.println();
+    }
+
     private void initialize() {
         choiceLocal = new int[b];
         choiceReturned = new int[b];
@@ -138,7 +170,7 @@ public final class DepthChoiceGenerator {
      * the sequence of choices returned.
      *
      * @return the next combination in the series, or null if the series is
-     *         finished.
+     * finished.
      */
     public int[] next() {
 //        if (getB() == this.choiceLocal.length) return null;
@@ -173,40 +205,8 @@ public final class DepthChoiceGenerator {
         }
     }
 
-    /**
-     * This static method will print the series of combinations for a choose depth
-     * to System.out.
-     *
-     * @param a     the number of objects being selected from.
-     * @param depth the number of objects in the desired selection.
-     */
-    @SuppressWarnings({"SameParameterValue"})
-    public static void testPrint(int a, int depth) {
-        DepthChoiceGenerator cg = new DepthChoiceGenerator(a, depth);
-        int[] choice;
-
-        System.out.println();
-        System.out.println(
-                "Printing combinations for " + a + " choose " + depth + ":");
-        System.out.println();
-
-        while ((choice = cg.next()) != null) {
-            if (choice.length == 0) {
-                System.out.println("zero-length array");
-            } else {
-                for (int aChoice : choice) {
-                    System.out.print(aChoice + "\t");
-                }
-
-                System.out.println();
-            }
-        }
-
-        System.out.println();
-    }
-
     @Override
-	public String toString() {
+    public String toString() {
         StringBuilder buf = new StringBuilder();
         buf.append("Depth choice generator: a = ").append(a).append(" depth = ").append(depth);
         return buf.toString();

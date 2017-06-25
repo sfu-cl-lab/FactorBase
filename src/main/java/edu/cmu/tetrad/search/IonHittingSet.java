@@ -21,8 +21,6 @@
 
 package edu.cmu.tetrad.search;
 
-import java.util.*;
-
 /**
  * **************************************************************************
  *
@@ -46,12 +44,12 @@ public class IonHittingSet {
     /**
      * takes a List of HashSets of GraphChanges, and returns a List of GraphChanges.
      */
-    public static List<GraphChange> findHittingSet(List<Set<GraphChange>> Forig) {
+    public static List <GraphChange> findHittingSet(List <Set <GraphChange>> Forig) {
 
-        LinkedList<HsNode> currentLevel = new LinkedList<HsNode>();
-        LinkedList<HsNode> nextLevel = new LinkedList<HsNode>();
-        List<GraphChange> hittingSets = new ArrayList<GraphChange>();
-        List<Set<GraphChange>> F;
+        LinkedList <HsNode> currentLevel = new LinkedList <HsNode>();
+        LinkedList <HsNode> nextLevel = new LinkedList <HsNode>();
+        List <GraphChange> hittingSets = new ArrayList <GraphChange>();
+        List <Set <GraphChange>> F;
 
         /* Enhancement Step 3 */
         F = precompute(Forig);
@@ -95,7 +93,7 @@ public class IonHittingSet {
             /* if there are no nodes left in the current level, continue onto the next */
             if (currentLevel.isEmpty()) {
                 currentLevel = nextLevel;
-                nextLevel = new LinkedList<HsNode>();
+                nextLevel = new LinkedList <HsNode>();
             }
         }
         return hittingSets;
@@ -106,7 +104,7 @@ public class IonHittingSet {
      * Implements one of the listed enhancements, checking if there is a node on the next level which already has the
      * new path. Returns true if a new node should be created with that path and false if a new node is unnecessary.
      */
-    private static boolean pathNecessary(GraphChange path, LinkedList<HsNode> nextLevel) {
+    private static boolean pathNecessary(GraphChange path, LinkedList <HsNode> nextLevel) {
         boolean necessary = true;
 
         /* Enhancement Step 1 */
@@ -125,7 +123,7 @@ public class IonHittingSet {
      * Implements one of the listed enhancements, checking if the path for the given node n contains a known hitting
      * set. Returns true if the node is redundant and false if the node should be processed.
      */
-    private static boolean nodeRedundant(HsNode n, List<GraphChange> hittingSets) {
+    private static boolean nodeRedundant(HsNode n, List <GraphChange> hittingSets) {
         boolean redundant = false;
 
         /* Enhancement Step 2 */
@@ -144,14 +142,14 @@ public class IonHittingSet {
      * Given a node and the List of HashSets returns the index of the first HashSet in F that the node does not
      * intersect or -1 if all are intersected
      */
-    private static int findNextUCSigma(List<Set<GraphChange>> F, HsNode n) {
+    private static int findNextUCSigma(List <Set <GraphChange>> F, HsNode n) {
         /* nodes are created with their parent's labels to make this function faster */
         int index = n.getLabel();
         GraphChange path = n.getPath();
 
         /* loop through elements of F */
         for (; index < F.size(); index++) {
-            Set<GraphChange> sigma = F.get(index);
+            Set <GraphChange> sigma = F.get(index);
             boolean intersect = false;
 
             for (GraphChange aSigma : sigma) {
@@ -172,15 +170,15 @@ public class IonHittingSet {
      * removed at the end in order to avoid the O(n) removal for each set individually. This effectively implements
      * Enhancement step 3, just not the on-the-fly way specified.
      */
-    private static List precompute(List<Set<GraphChange>> F) {
+    private static List precompute(List <Set <GraphChange>> F) {
         int size = F.size();
-        List<Set<GraphChange>> pruned = new ArrayList<Set<GraphChange>>(size);
+        List <Set <GraphChange>> pruned = new ArrayList <Set <GraphChange>>(size);
 
         for (int i = 0; i < size; i++) {
-            Set<GraphChange> setI = F.get(i);
+            Set <GraphChange> setI = F.get(i);
 
             for (int j = (i + 1); j < size; j++) {
-                Set<GraphChange> setJ = F.get(j);
+                Set <GraphChange> setJ = F.get(j);
                 /* if one set is already marked, the following check is unnecessary */
                 boolean notMarked = !setJ.contains(new GraphChange());
 

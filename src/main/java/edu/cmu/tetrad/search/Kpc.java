@@ -85,12 +85,12 @@ public class Kpc implements GraphSearch {
     /**
      * In an enumeration of triple types, these are the collider triples.
      */
-    private Set<Triple> unshieldedColliders;
+    private Set <Triple> unshieldedColliders;
 
     /**
      * In an enumeration of triple types, these are the noncollider triples.
      */
-    private Set<Triple> unshieldedNoncolliders;
+    private Set <Triple> unshieldedNoncolliders;
 
     /**
      * The number of indepdendence tests in the last search.
@@ -199,7 +199,7 @@ public class Kpc implements GraphSearch {
 
     /**
      * @return the current depth of search--that is, the maximum number of conditioning nodes for any conditional
-     *         independence checked.
+     * independence checked.
      */
     public int getDepth() {
         return depth;
@@ -233,7 +233,7 @@ public class Kpc implements GraphSearch {
      * of latent common causes, or due to statistical errors in conditional independence judgments.
      */
     @Override
-	public Graph search() {
+    public Graph search() {
         return search(independenceTest.getVariables());
     }
 
@@ -246,7 +246,7 @@ public class Kpc implements GraphSearch {
      * <p/>
      * All of the given nodes must be in the domain of the given conditional independence test.
      */
-    public Graph search(List<Node> nodes) {
+    public Graph search(List <Node> nodes) {
         this.logger.log("info", "Starting kPC algorithm");
         this.logger.log("info", "Independence test = " + getIndependenceTest() + ".");
 
@@ -301,7 +301,7 @@ public class Kpc implements GraphSearch {
      * Returns the elapsed time of the search, in milliseconds.
      */
     @Override
-	public long getElapsedTime() {
+    public long getElapsedTime() {
         return elapsedTime;
     }
 
@@ -309,7 +309,7 @@ public class Kpc implements GraphSearch {
      * Returns the set of unshielded colliders in the graph returned by <code>search()</code>. Non-null after
      * <code>search</code> is called.
      */
-    public Set<Triple> getUnshieldedColliders() {
+    public Set <Triple> getUnshieldedColliders() {
         return unshieldedColliders;
     }
 
@@ -317,23 +317,11 @@ public class Kpc implements GraphSearch {
      * Returns the set of unshielded noncolliders in the graph returned by <code>search()</code>. Non-null after
      * <code>search</code> is called.
      */
-    public Set<Triple> getUnshieldedNoncolliders() {
+    public Set <Triple> getUnshieldedNoncolliders() {
         return unshieldedNoncolliders;
     }
 
     //===============================ADDED FOR KPC=========================//
-
-    /**
-     * Sets the significance level at which independence judgments should be made.
-     */
-    public void setAlpha(double alpha) {
-        if (alpha < 0.0 || alpha > 1.0) {
-            throw new IllegalArgumentException("Significance out of range.");
-        }
-
-        this.alpha = alpha;
-        independenceTest.setAlpha(alpha);
-    }
 
     /**
      * Sets the precision for the Incomplete Choleksy factorization method for approximating Gram matrices. A value <= 0
@@ -345,26 +333,22 @@ public class Kpc implements GraphSearch {
     }
 
     /**
-     * Set the number of bootstrap samples to use
-     */
-    public void setPerms(int perms) {
-        this.perms = perms;
-        independenceTest.setPerms(perms);
-    }
-
-    /**
-     * Sets the regularizer
-     */
-    public void setRegularizer(double regularizer) {
-        this.regularizer = regularizer;
-        independenceTest.setRegularizer(regularizer);
-    }
-
-    /**
      * Gets the current significance level.
      */
     public double getAlpha() {
         return this.alpha;
+    }
+
+    /**
+     * Sets the significance level at which independence judgments should be made.
+     */
+    public void setAlpha(double alpha) {
+        if (alpha < 0.0 || alpha > 1.0) {
+            throw new IllegalArgumentException("Significance out of range.");
+        }
+
+        this.alpha = alpha;
+        independenceTest.setAlpha(alpha);
     }
 
     /**
@@ -382,20 +366,36 @@ public class Kpc implements GraphSearch {
     }
 
     /**
+     * Set the number of bootstrap samples to use
+     */
+    public void setPerms(int perms) {
+        this.perms = perms;
+        independenceTest.setPerms(perms);
+    }
+
+    /**
      * Gets the current regularizer
      */
     public double getRegularizer() {
         return this.regularizer;
     }
 
+    /**
+     * Sets the regularizer
+     */
+    public void setRegularizer(double regularizer) {
+        this.regularizer = regularizer;
+        independenceTest.setRegularizer(regularizer);
+    }
+
     //===============================PRIVATE METHODS=======================//
 
     private void enumerateTriples() {
-        this.unshieldedColliders = new HashSet<Triple>();
-        this.unshieldedNoncolliders = new HashSet<Triple>();
+        this.unshieldedColliders = new HashSet <Triple>();
+        this.unshieldedNoncolliders = new HashSet <Triple>();
 
         for (Node y : graph.getNodes()) {
-            List<Node> adj = graph.getAdjacentNodes(y);
+            List <Node> adj = graph.getAdjacentNodes(y);
 
             if (adj.size() < 2) {
                 continue;
@@ -408,7 +408,7 @@ public class Kpc implements GraphSearch {
                 Node x = adj.get(choice[0]);
                 Node z = adj.get(choice[1]);
 
-                List<Node> nodes = sepset.get(x, z);
+                List <Node> nodes = sepset.get(x, z);
 
                 // Note that checking adj(x, z) does not suffice when knowledge
                 // has been specified.

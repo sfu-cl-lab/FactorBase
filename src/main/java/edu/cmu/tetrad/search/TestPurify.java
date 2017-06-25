@@ -46,6 +46,16 @@ public class TestPurify extends TestCase {
         super(name);
     }
 
+    /**
+     * This method uses reflection to collect up all of the test methods from this class and return them to the test
+     * runner.
+     */
+    public static Test suite() {
+
+        // Edit the name of the class in the parens to match the name
+        // of this class.
+        return new TestSuite(TestPurify.class);
+    }
 
     public void test1() {
         SemGraph graph = new SemGraph();
@@ -147,9 +157,9 @@ public class TestPurify extends TestCase {
 //            partition.get(RandomUtil.getInstance().nextInt(2)).add(nodes.get(i));
 //        }
 
-        List<List<Node>> partition = new ArrayList<List<Node>>();
+        List <List <Node>> partition = new ArrayList <List <Node>>();
 
-        List<Node> cluster1 = new ArrayList<Node>();
+        List <Node> cluster1 = new ArrayList <Node>();
         cluster1.add(x1);
         cluster1.add(x2);
         cluster1.add(x3);
@@ -157,14 +167,14 @@ public class TestPurify extends TestCase {
         cluster1.add(x4b);
         cluster1.add(x5);
 
-        List<Node> cluster2 = new ArrayList<Node>();
+        List <Node> cluster2 = new ArrayList <Node>();
         cluster2.add(x5);
         cluster2.add(x6);
         cluster2.add(x7);
         cluster2.add(x8);
         cluster2.add(x8b);
 
-        List<Node> cluster3 = new ArrayList<Node>();
+        List <Node> cluster3 = new ArrayList <Node>();
         cluster3.add(x9);
         cluster3.add(x10);
         cluster3.add(x11);
@@ -253,9 +263,9 @@ public class TestPurify extends TestCase {
         SemIm im = new SemIm(pm);
         DataSet data = im.simulateData(3000, false);
 
-        List<List<Node>> partition = new ArrayList<List<Node>>();
+        List <List <Node>> partition = new ArrayList <List <Node>>();
 
-        List<Node> cluster1 = new ArrayList<Node>();
+        List <Node> cluster1 = new ArrayList <Node>();
         cluster1.add(x1);
         cluster1.add(x2);
         cluster1.add(x3);
@@ -263,7 +273,7 @@ public class TestPurify extends TestCase {
         cluster1.add(x5);
 //        cluster1.add(x6);
 
-        List<Node> cluster2 = new ArrayList<Node>();
+        List <Node> cluster2 = new ArrayList <Node>();
 //        cluster2.add(x6);
         cluster2.add(x7);
         cluster2.add(x8);
@@ -282,7 +292,7 @@ public class TestPurify extends TestCase {
 //        IPurify purify = new PurifyTetradBasedH(test, 10);
         purify.setTrueGraph(graph);
 
-        List<List<Node>> clustering = purify.purify(partition);
+        List <List <Node>> clustering = purify.purify(partition);
         System.out.println(clustering);
 
 //        PurifyTetradBasedG purify2 = new PurifyTetradBasedG(test);
@@ -312,7 +322,7 @@ public class TestPurify extends TestCase {
 
         ContinuousTetradTest test = new ContinuousTetradTest(data, TestType.TETRAD_WISHART, 0.01);
 
-        List<Node> latents = new ArrayList<Node>();
+        List <Node> latents = new ArrayList <Node>();
 
         for (Node node : graph.getNodes()) {
             if (node.getNodeType() == NodeType.LATENT) latents.add(node);
@@ -321,10 +331,10 @@ public class TestPurify extends TestCase {
         Graph structuralGraph = graph.subgraph(latents);
         System.out.println("True structural graph = " + structuralGraph);
 
-        List<List<Node>> clustering = new ArrayList<List<Node>>();
+        List <List <Node>> clustering = new ArrayList <List <Node>>();
 
         for (Node node : latents) {
-            List<Node> adj = graph.getAdjacentNodes(node);
+            List <Node> adj = graph.getAdjacentNodes(node);
             adj.removeAll(latents);
 
             clustering.add(adj);
@@ -333,7 +343,7 @@ public class TestPurify extends TestCase {
         System.out.println("Purify");
         IPurify purify = new PurifyTetradBasedD(test);
 
-        List<List<Node>> purifiedClustering = purify.purify(clustering);
+        List <List <Node>> purifiedClustering = purify.purify(clustering);
 
 //        System.out.println(purifiedClustering);
 
@@ -355,7 +365,7 @@ public class TestPurify extends TestCase {
 
         System.out.println(_graph);
 
-        List<Node> _latents = new ArrayList<Node>();
+        List <Node> _latents = new ArrayList <Node>();
 
         for (Node node : _graph.getNodes()) {
             if (node.getNodeType() == NodeType.LATENT) _latents.add(node);
@@ -371,7 +381,7 @@ public class TestPurify extends TestCase {
     }
 
     public void testTest() {
-        List<Node> nodes = new ArrayList<Node>();
+        List <Node> nodes = new ArrayList <Node>();
         GraphNode x1 = new GraphNode("X1");
         GraphNode x2 = new GraphNode("X2");
         GraphNode x3 = new GraphNode("X3");
@@ -397,17 +407,5 @@ public class TestPurify extends TestCase {
         nodes.set(j, node1);
 
         System.out.println(nodes);
-    }
-
-
-    /**
-     * This method uses reflection to collect up all of the test methods from this class and return them to the test
-     * runner.
-     */
-    public static Test suite() {
-
-        // Edit the name of the class in the parens to match the name
-        // of this class.
-        return new TestSuite(TestPurify.class);
     }
 }

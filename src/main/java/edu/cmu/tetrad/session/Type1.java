@@ -46,24 +46,24 @@ public class Type1 implements SessionModel, TetradSerializableExcluded {
     }
 
     @Override
-	public boolean equals(Object o) {
+    public boolean equals(Object o) {
         return (o instanceof Type1);
-    }
-
-    /**
-     * Sets the name of the session model.
-     */
-    @Override
-	public void setName(String name) {
-        //To change body of implemented methods use File | Settings | File Templates.
     }
 
     /**
      * Returns the name of the session model.
      */
     @Override
-	public String getName() {
+    public String getName() {
         return null;  //To change body of implemented methods use File | Settings | File Templates.
+    }
+
+    /**
+     * Sets the name of the session model.
+     */
+    @Override
+    public void setName(String name) {
+        //To change body of implemented methods use File | Settings | File Templates.
     }
 }
 

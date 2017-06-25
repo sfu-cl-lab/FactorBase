@@ -37,27 +37,27 @@ import java.util.SortedSet;
  */
 public class ImagesFirstNontriangular implements GraphSearch, IImages {
     private Knowledge knowledge = new Knowledge();
-    private List<DataSet> dataSets;
+    private List <DataSet> dataSets;
     private IImages images;
     private double penalty = 1.0;
 
-    public ImagesFirstNontriangular(List<DataSet> dataSets) {
+    public ImagesFirstNontriangular(List <DataSet> dataSets) {
         this.dataSets = dataSets;
         images = new Images3(dataSets);
     }
 
     @Override
-	public boolean isAggressivelyPreventCycles() {
+    public boolean isAggressivelyPreventCycles() {
         return images.isAggressivelyPreventCycles();
     }
 
     @Override
-	public void setAggressivelyPreventCycles(boolean aggressivelyPreventCycles) {
+    public void setAggressivelyPreventCycles(boolean aggressivelyPreventCycles) {
         images.setAggressivelyPreventCycles(aggressivelyPreventCycles);
     }
 
     @Override
-	public Graph search() {
+    public Graph search() {
         Graph pattern = new EdgeListGraph();
 
         for (int c = (int) penalty; c < penalty + 150; c++) {
@@ -92,128 +92,128 @@ public class ImagesFirstNontriangular implements GraphSearch, IImages {
     }
 
     @Override
-	public Graph search(List<Node> nodes) {
+    public Graph search(List <Node> nodes) {
         throw new UnsupportedOperationException();
     }
 
     @Override
-	public long getElapsedTime() {
+    public long getElapsedTime() {
         return images.getElapsedTime();
     }
 
     @Override
-	public void setElapsedTime(long elapsedTime) {
+    public void setElapsedTime(long elapsedTime) {
         images.setElapsedTime(elapsedTime);
     }
 
     @Override
-	public void addPropertyChangeListener(PropertyChangeListener l) {
+    public void addPropertyChangeListener(PropertyChangeListener l) {
         images.addPropertyChangeListener(l);
     }
 
     @Override
-	public double getPenaltyDiscount() {
+    public double getPenaltyDiscount() {
         return images.getPenaltyDiscount();
     }
 
     @Override
-	public void setPenaltyDiscount(double penaltyDiscount) {
+    public void setPenaltyDiscount(double penaltyDiscount) {
         images.setPenaltyDiscount(penaltyDiscount);
     }
 
     @Override
-	public int getMaxNumEdges() {
+    public int getMaxNumEdges() {
         return images.getMaxNumEdges();
     }
 
     @Override
-	public void setMaxNumEdges(int maxNumEdges) {
+    public void setMaxNumEdges(int maxNumEdges) {
         images.setMaxNumEdges(maxNumEdges);
     }
 
     @Override
-	public double getModelScore() {
+    public double getModelScore() {
         return images.getModelScore();
     }
 
     @Override
-	public double getScore(Graph dag) {
+    public double getScore(Graph dag) {
         return images.getScore(dag);
     }
 
     @Override
-	public SortedSet<ScoredGraph> getTopGraphs() {
+    public SortedSet <ScoredGraph> getTopGraphs() {
         return images.getTopGraphs();
     }
 
     @Override
-	public int getNumPatternsToStore() {
+    public int getNumPatternsToStore() {
         return images.getNumPatternsToStore();
     }
 
     @Override
-	public void setNumPatternsToStore(int numPatternsToStore) {
+    public void setNumPatternsToStore(int numPatternsToStore) {
         images.setNumPatternsToStore(numPatternsToStore);
     }
 
     @Override
-	public Map<Edge, Integer> getBoostrapCounts(int numBootstraps) {
+    public Map <Edge, Integer> getBoostrapCounts(int numBootstraps) {
         return images.getBoostrapCounts(numBootstraps);
     }
 
     @Override
-	public String bootstrapPercentagesString(int numBootstraps) {
+    public String bootstrapPercentagesString(int numBootstraps) {
         return images.bootstrapPercentagesString(numBootstraps);
     }
 
     @Override
-	public String gesCountsString() {
+    public String gesCountsString() {
         return images.gesCountsString();
     }
 
     @Override
-	public Map<Edge, Double> averageStandardizedCoefficients() {
+    public Map <Edge, Double> averageStandardizedCoefficients() {
         return images.averageStandardizedCoefficients();
     }
 
     @Override
-	public Map<Edge, Double> averageStandardizedCoefficients(Graph graph) {
+    public Map <Edge, Double> averageStandardizedCoefficients(Graph graph) {
         return images.averageStandardizedCoefficients(graph);
     }
 
     @Override
-	public String averageStandardizedCoefficientsString() {
+    public String averageStandardizedCoefficientsString() {
         return images.averageStandardizedCoefficientsString();
     }
 
     @Override
-	public String averageStandardizedCoefficientsString(Graph graph) {
+    public String averageStandardizedCoefficientsString(Graph graph) {
         return images.averageStandardizedCoefficientsString(graph);
     }
 
     @Override
-	public String logEdgeBayesFactorsString(Graph dag) {
+    public String logEdgeBayesFactorsString(Graph dag) {
         return images.logEdgeBayesFactorsString(dag);
     }
 
     @Override
-	public Map<Edge, Double> logEdgeBayesFactors(Graph dag) {
+    public Map <Edge, Double> logEdgeBayesFactors(Graph dag) {
         return images.logEdgeBayesFactors(dag);
     }
 
 
     @Override
-	public Knowledge getKnowledge() {
+    public Knowledge getKnowledge() {
         return knowledge;
     }
 
     @Override
-	public void setKnowledge(Knowledge knowledge) {
+    public void setKnowledge(Knowledge knowledge) {
         this.knowledge = knowledge;
     }
 
     @Override
-	public double scoreGraph(Graph graph) {
+    public double scoreGraph(Graph graph) {
         return images.scoreGraph(graph);
     }
 
@@ -227,7 +227,7 @@ public class ImagesFirstNontriangular implements GraphSearch, IImages {
 
     private boolean containsTriangle(Graph graph) {
         int numNodes = graph.getNumNodes();
-        List<Node> nodes = graph.getNodes();
+        List <Node> nodes = graph.getNodes();
 
         for (int j1 = 0; j1 < numNodes; j1++) {
             for (int j2 = j1; j2 < numNodes; j2++) {
@@ -260,7 +260,7 @@ public class ImagesFirstNontriangular implements GraphSearch, IImages {
 
 
     @Override
-	public void setMinJump(double minJump) {
+    public void setMinJump(double minJump) {
         //To change body of implemented methods use File | Settings | File Templates.
     }
 }

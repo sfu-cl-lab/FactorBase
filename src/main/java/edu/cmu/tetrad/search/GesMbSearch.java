@@ -40,25 +40,25 @@ public class GesMbSearch implements MbSearch {
     }
 
     @Override
-	public List<Node> findMb(String targetName) {
+    public List <Node> findMb(String targetName) {
         Node target = getVariableForName(targetName);
 
         Ges search = new Ges(dataSet);
         Graph graph = search.search();
         MbUtils.trimToMbNodes(graph, target, false);
-        List<Node> mbVariables = graph.getNodes();
+        List <Node> mbVariables = graph.getNodes();
         mbVariables.remove(target);
 
         return mbVariables;
     }
 
     @Override
-	public String getAlgorithmName() {
+    public String getAlgorithmName() {
         return "GESMB";
     }
 
     @Override
-	public int getNumIndependenceTests() {
+    public int getNumIndependenceTests() {
         return 0;
     }
 

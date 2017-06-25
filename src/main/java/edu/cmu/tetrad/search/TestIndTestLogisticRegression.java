@@ -53,6 +53,10 @@ public class TestIndTestLogisticRegression extends TestCase {
         super(name);
     }
 
+    public static Test suite() {
+        return new TestSuite(TestIndTestGSquare.class);
+    }
+
     public void testIsIndependent() {
         int numPassed = 0;
 
@@ -74,7 +78,7 @@ public class TestIndTestLogisticRegression extends TestCase {
             Node x4 = data.getVariable("X4");
             Node x5 = data.getVariable("X5");
 
-            List<Node> cond = new ArrayList<Node>();
+            List <Node> cond = new ArrayList <Node>();
             cond.add(x3);
             cond.add(x4);
             cond.add(x5);
@@ -82,7 +86,7 @@ public class TestIndTestLogisticRegression extends TestCase {
             Node x1Graph = graph.getNode(x1.getName());
             Node x2Graph = graph.getNode(x2.getName());
 
-            List<Node> condGraph = new ArrayList<Node>();
+            List <Node> condGraph = new ArrayList <Node>();
 
             for (Node node : cond) {
                 condGraph.add(graph.getNode(node.getName()));
@@ -104,10 +108,6 @@ public class TestIndTestLogisticRegression extends TestCase {
 
         assertTrue(numPassed > 80);
         System.out.println("Seed = " + RandomUtil.getInstance().getSeed());
-    }
-
-    public static Test suite() {
-        return new TestSuite(TestIndTestGSquare.class);
     }
 
     public void setTest(IndTestTimeSeries test) {

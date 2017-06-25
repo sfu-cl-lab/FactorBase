@@ -59,14 +59,13 @@ public final class BidirectedToExogenous implements GraphConstraint {
      * @return true if the edge may be added, false if not.
      */
     @Override
-	public boolean isEdgeAddable(Edge edge, Graph graph) {
+    public boolean isEdgeAddable(Edge edge, Graph graph) {
         if (Edges.isBidirectedEdge(edge)) {
             Node nodeA = edge.getNode1();
             Node nodeB = edge.getNode2();
 
             return isExogenous(nodeA, graph) && isExogenous(nodeB, graph);
-        }
-        else if (Edges.isDirectedEdge(edge)) {
+        } else if (Edges.isDirectedEdge(edge)) {
             Node head = getDirectedEdgeHead(edge);
 
             for (Edge edge1 : graph.getEdges(head)) {
@@ -83,7 +82,7 @@ public final class BidirectedToExogenous implements GraphConstraint {
      * @return true.
      */
     @Override
-	public boolean isNodeAddable(Node node, Graph graph) {
+    public boolean isNodeAddable(Node node, Graph graph) {
         return true;
     }
 
@@ -91,7 +90,7 @@ public final class BidirectedToExogenous implements GraphConstraint {
      * @return true.
      */
     @Override
-	public boolean isEdgeRemovable(Edge edge, Graph graph) {
+    public boolean isEdgeRemovable(Edge edge, Graph graph) {
         return true;
     }
 
@@ -99,7 +98,7 @@ public final class BidirectedToExogenous implements GraphConstraint {
      * @return true.
      */
     @Override
-	public boolean isNodeRemovable(Node node, Graph graph) {
+    public boolean isNodeRemovable(Node node, Graph graph) {
         return true;
     }
 
@@ -111,8 +110,7 @@ public final class BidirectedToExogenous implements GraphConstraint {
     private Node getDirectedEdgeHead(Edge edge) {
         if (edge.getEndpoint1() == Endpoint.ARROW) {
             return edge.getNode1();
-        }
-        else {
+        } else {
             return edge.getNode2();
         }
     }
@@ -127,8 +125,8 @@ public final class BidirectedToExogenous implements GraphConstraint {
     /**
      * Returns the set of parents for a node.
      */
-    private Collection<Node> getParents(Node node, Graph graph) {
-        Collection<Node> parents = new HashSet<Node>();
+    private Collection <Node> getParents(Node node, Graph graph) {
+        Collection <Node> parents = new HashSet <Node>();
 
         for (Edge edge1 : graph.getEdges(node)) {
             Node sub = Edges.traverseReverseDirected(node, edge1);
@@ -157,7 +155,7 @@ public final class BidirectedToExogenous implements GraphConstraint {
      * Returns a string representation of this constraint.
      */
     @Override
-	public String toString() {
+    public String toString() {
         return "<Bidirected edges connect exogenous nodes.>";
     }
 }

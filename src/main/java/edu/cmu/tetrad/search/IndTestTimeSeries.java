@@ -44,7 +44,7 @@ public final class IndTestTimeSeries implements IndependenceTest {
     /**
      * The vars of the correlation matrix, in order.
      */
-    private final List<Node> vars;
+    private final List <Node> vars;
 
     /**
      * Input time series data, n times x k vars.
@@ -115,7 +115,7 @@ public final class IndTestTimeSeries implements IndependenceTest {
      * @param vars The variables over which the data is (repeatedly) measured. The number of variables must equal the
      *             number of columns in the data-- that is, vars.size() == data[i].length for each i.
      */
-    public IndTestTimeSeries(DoubleMatrix2D data, List<Node> vars) {
+    public IndTestTimeSeries(DoubleMatrix2D data, List <Node> vars) {
         if (data == null) {
             throw new NullPointerException("Data must not be null.");
         }
@@ -145,7 +145,7 @@ public final class IndTestTimeSeries implements IndependenceTest {
      * Required by IndependenceTest.
      */
     @Override
-	public IndependenceTest indTestSubset(List vars) {
+    public IndependenceTest indTestSubset(List vars) {
         throw new UnsupportedOperationException();
     }
 
@@ -159,7 +159,7 @@ public final class IndTestTimeSeries implements IndependenceTest {
      * @return true iff x _||_ data | z.
      */
     @Override
-	public boolean isIndependent(Node x, Node y, List<Node> z) {
+    public boolean isIndependent(Node x, Node y, List <Node> z) {
         if (z == null) {
             throw new NullPointerException();
         }
@@ -175,19 +175,19 @@ public final class IndTestTimeSeries implements IndependenceTest {
     }
 
     @Override
-	public boolean isIndependent(Node x, Node y, Node... z) {
-        List<Node> zList = Arrays.asList(z);
+    public boolean isIndependent(Node x, Node y, Node... z) {
+        List <Node> zList = Arrays.asList(z);
         return isIndependent(x, y, zList);
     }
 
     @Override
-	public boolean isDependent(Node x, Node y, List<Node> z) {
+    public boolean isDependent(Node x, Node y, List <Node> z) {
         return !isIndependent(x, y, z);
     }
 
     @Override
-	public boolean isDependent(Node x, Node y, Node... z) {
-        List<Node> zList = Arrays.asList(z);
+    public boolean isDependent(Node x, Node y, Node... z) {
+        List <Node> zList = Arrays.asList(z);
         return isDependent(x, y, zList);
     }
 
@@ -252,9 +252,9 @@ public final class IndTestTimeSeries implements IndependenceTest {
      * Returns the list of variable varNames.
      */
     @Override
-	public List<String> getVariableNames() {
-        List<Node> variables = getVariables();
-        List<String> variableNames = new ArrayList<String>();
+    public List <String> getVariableNames() {
+        List <Node> variables = getVariables();
+        List <String> variableNames = new ArrayList <String>();
 
         for (Node variable : variables) {
             variableNames.add(variable.getName());
@@ -264,19 +264,31 @@ public final class IndTestTimeSeries implements IndependenceTest {
     }
 
     @Override
-	public boolean determines(List<Node> z, Node x1) {
+    public boolean determines(List <Node> z, Node x1) {
         throw new UnsupportedOperationException(
                 "This independence test does not " +
                         "test whether Z determines X for list Z of variable and variable X.");
     }
 
     @Override
-	public double getAlpha() {
+    public double getAlpha() {
         return alpha;
     }
 
+    /**
+     * Sets the significance level for statistical tests. By default, this is 0.05.
+     */
     @Override
-	public Node getVariable(String name) {
+    public void setAlpha(double alpha) {
+        if (alpha < 0.0 || alpha > 1.0) {
+            throw new IllegalArgumentException(
+                    "Alpha must be in [0.0, 1.0]: " + alpha);
+        }
+        this.alpha = alpha;
+    }
+
+    @Override
+    public Node getVariable(String name) {
         for (int i = 0; i < getVariables().size(); i++) {
             Node variable = getVariables().get(i);
             if (variable.getName().equals(name)) {
@@ -291,20 +303,8 @@ public final class IndTestTimeSeries implements IndependenceTest {
      * Returns the (unmodifiable) list of vars.
      */
     @Override
-	public List<Node> getVariables() {
+    public List <Node> getVariables() {
         return this.vars;
-    }
-
-    /**
-     * Sets the significance level for statistical tests. By default, this is 0.05.
-     */
-    @Override
-	public void setAlpha(double alpha) {
-        if (alpha < 0.0 || alpha > 1.0) {
-            throw new IllegalArgumentException(
-                    "Alpha must be in [0.0, 1.0]: " + alpha);
-        }
-        this.alpha = alpha;
     }
 
     /**
@@ -376,7 +376,7 @@ public final class IndTestTimeSeries implements IndependenceTest {
      * Needed for the IndependenceTest interface.  Probably not meaningful here.
      */
     @Override
-	public double getPValue() {
+    public double getPValue() {
         return Double.NaN;
     }
 
@@ -395,19 +395,19 @@ public final class IndTestTimeSeries implements IndependenceTest {
         return this.indexedCorr;
     }
 
-    private void setIndices(int[] indices) {
-
-        // The indices are stored in the IndexedMatrix. (No need to duplicate.)
-        indexedCorr().setIndices(indices);
-    }
-
     private int[] getIndices() {
 
         // The indices are stored in the IndexedMatrix. (No need to duplicate.)
         return indexedCorr().getIndices();
     }
 
-    private int[] createIndexArray(List<Node> z, Node x, Node y) {
+    private void setIndices(int[] indices) {
+
+        // The indices are stored in the IndexedMatrix. (No need to duplicate.)
+        indexedCorr().setIndices(indices);
+    }
+
+    private int[] createIndexArray(List <Node> z, Node x, Node y) {
         int[] indices = new int[z.size() + 2];
 
         indices[0] = getVariables().indexOf(x);
@@ -970,15 +970,15 @@ public final class IndTestTimeSeries implements IndependenceTest {
                         s(1, 2) * s(3, 5) * s(3, 5) -
                         s(1, 3) * s(2, 3) * s(5, 5) +
                         s(1, 2) * s(3, 3) * s(5, 5), s(1, 5) * s(2, 4) *
-                        s(3, 3) + s(1, 4) * s(2, 5) * s(3, 3) -
-                        s(1, 5) * s(2, 3) * s(3, 4) - s(1, 3) * s(2, 5) * s(3, 4) -
-                        s(1, 4) * s(2, 3) * s(3, 5) - s(1, 3) * s(2, 4) * s(3, 5) +
-                        2 * s(1, 2) * s(3, 4) * s(3, 5) +
-                        2 * s(1, 3) * s(2, 3) * s(4, 5) -
-                        2 * s(1, 2) * s(3, 3) * s(4, 5), -s(1, 4) * s(2, 4) * s(3, 3) +
-                        s(1, 4) * s(2, 3) * s(3, 4) + s(1, 3) * s(2, 4) * s(3, 4) -
-                        s(1, 2) * s(3, 4) * s(3, 4) - s(1, 3) * s(2, 3) * s(4, 4) +
-                        s(1, 2) * s(3, 3) * s(4, 4)};
+                s(3, 3) + s(1, 4) * s(2, 5) * s(3, 3) -
+                s(1, 5) * s(2, 3) * s(3, 4) - s(1, 3) * s(2, 5) * s(3, 4) -
+                s(1, 4) * s(2, 3) * s(3, 5) - s(1, 3) * s(2, 4) * s(3, 5) +
+                2 * s(1, 2) * s(3, 4) * s(3, 5) +
+                2 * s(1, 3) * s(2, 3) * s(4, 5) -
+                2 * s(1, 2) * s(3, 3) * s(4, 5), -s(1, 4) * s(2, 4) * s(3, 3) +
+                s(1, 4) * s(2, 3) * s(3, 4) + s(1, 3) * s(2, 4) * s(3, 4) -
+                s(1, 2) * s(3, 4) * s(3, 4) - s(1, 3) * s(2, 3) * s(4, 4) +
+                s(1, 2) * s(3, 3) * s(4, 4)};
     }
 
     /**
@@ -1491,12 +1491,12 @@ public final class IndTestTimeSeries implements IndependenceTest {
     }
 
     @Override
-	public String toString() {
+    public String toString() {
         return "Time Series";
     }
 
     @Override
-	public DataSet getData() {
+    public DataSet getData() {
         return null;  //To change body of implemented methods use File | Settings | File Templates.
     }
 }

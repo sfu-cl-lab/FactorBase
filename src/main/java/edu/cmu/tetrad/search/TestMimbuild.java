@@ -32,7 +32,6 @@ import junit.framework.TestSuite;
 
 import java.io.File;
 import java.io.FileWriter;
-import java.util.*;
 
 /**
  * Tests the BooleanFunction class.
@@ -48,6 +47,16 @@ public class TestMimbuild extends TestCase {
         super(name);
     }
 
+    /**
+     * This method uses reflection to collect up all of the test methods from this class and return them to the test
+     * runner.
+     */
+    public static Test suite() {
+
+        // Edit the name of the class in the parens to match the name
+        // of this class.
+        return new TestSuite(TestMimbuild.class);
+    }
 
     public void testMimbuild() {
 //        RandomUtil.getInstance().setSeed(127679241L);
@@ -80,7 +89,7 @@ public class TestMimbuild extends TestCase {
 
         System.out.println("Form a random selection of the clusters");
 
-        List<Node> latents = new ArrayList<Node>();
+        List <Node> latents = new ArrayList <Node>();
 
         for (Node node : mim.getNodes()) {
             if (node.getNodeType() == NodeType.LATENT) {
@@ -88,11 +97,11 @@ public class TestMimbuild extends TestCase {
             }
         }
 
-        List<List<Node>> clustering = ClusterUtils.mimClustering(latents, mim, data);
+        List <List <Node>> clustering = ClusterUtils.mimClustering(latents, mim, data);
 //        List<List<Node>> clusterSelection = clustering;
-        List<List<Node>> clusterSelection = ClusterUtils.getClusterSelection(maxClusterSelectionSize, data, clustering);
+        List <List <Node>> clusterSelection = ClusterUtils.getClusterSelection(maxClusterSelectionSize, data, clustering);
 
-        List<Node> subClusterNodes = new ArrayList<Node>(ClusterUtils.getAllNodesInClusters(clusterSelection));
+        List <Node> subClusterNodes = new ArrayList <Node>(ClusterUtils.getAllNodesInClusters(clusterSelection));
         DataSet subClusterData = data.subsetColumns(subClusterNodes);
 
 //        DataUtils.zeroMean(subClusterData);
@@ -102,7 +111,7 @@ public class TestMimbuild extends TestCase {
 
         IPurify purify = new PurifyTetradBasedD(test);
 //        IPurify purify = new PurifyTetradBasedH(test, maxClusterSize);
-        List<List<Node>> _clustering = purify.purify(clusterSelection);
+        List <List <Node>> _clustering = purify.purify(clusterSelection);
 
         Mimbuild2 mimbuild = new Mimbuild2();
         mimbuild.setMinClusterSize(minClusterSize);
@@ -111,7 +120,7 @@ public class TestMimbuild extends TestCase {
         mimbuild.setLatentsBeforeSearch(latents);
         mimbuild.setAlpha(mimbuildAlpha);
         Graph _graph = mimbuild.search(_clustering, subClusterData);
-        List<Node> _latents = mimbuild.latentsAfterSearch();
+        List <Node> _latents = mimbuild.latentsAfterSearch();
 
         Graph _structuralGraph = mim.subgraph(_latents);
         Graph _structuralGraphPattern = SearchGraphUtils.patternForDag(_structuralGraph);
@@ -327,16 +336,5 @@ public class TestMimbuild extends TestCase {
         } catch (Exception e) {
             e.printStackTrace();
         }
-    }
-
-    /**
-     * This method uses reflection to collect up all of the test methods from this class and return them to the test
-     * runner.
-     */
-    public static Test suite() {
-
-        // Edit the name of the class in the parens to match the name
-        // of this class.
-        return new TestSuite(TestMimbuild.class);
     }
 }

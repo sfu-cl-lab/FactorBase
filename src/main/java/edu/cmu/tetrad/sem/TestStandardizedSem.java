@@ -48,6 +48,17 @@ public class TestStandardizedSem extends TestCase {
         super(name);
     }
 
+    /**
+     * This method uses reflection to collect up all of the test methods from
+     * this class and return them to the test runner.
+     */
+    public static Test suite() {
+
+        // Edit the name of the class in the parens to match the name
+        // of this class.
+        return new TestSuite(TestStandardizedSem.class);
+    }
+
     // Test the code that standardizes a data set.
     public void test1() {
         SemGraph graph = new SemGraph(GraphUtils.randomDag(5, 5, false));
@@ -174,7 +185,7 @@ public class TestStandardizedSem extends TestCase {
         StandardizedSemIm sem = new StandardizedSemIm(im);
 
         for (int i = 0; i < 20; i++) {
-            List<Edge> edges = graph.getEdges();
+            List <Edge> edges = graph.getEdges();
             RandomUtil random = RandomUtil.getInstance();
             int index = random.nextInt(edges.size());
             Edge edge = edges.get(index);
@@ -308,7 +319,7 @@ public class TestStandardizedSem extends TestCase {
 
         SemGraph graph = new SemGraph(GraphUtils.randomDag(5, 5, false));
 
-        List<Node> nodes = graph.getNodes();
+        List <Node> nodes = graph.getNodes();
         int n1 = RandomUtil.getInstance().nextInt(nodes.size());
         int n2 = RandomUtil.getInstance().nextInt(nodes.size());
 
@@ -496,7 +507,6 @@ public class TestStandardizedSem extends TestCase {
         return true;
     }
 
-
     public void testSliderValues() {
         int n = 100;
 
@@ -524,20 +534,16 @@ public class TestStandardizedSem extends TestCase {
         return valueToSlider(value, min, max, n);
     }
 
-
     private double sliderToValue(int slider, double min, double max, int n) {
         double f;
         if (min != Double.NEGATIVE_INFINITY && max != Double.POSITIVE_INFINITY) {
             f = min + ((double) slider / n) * (max - min);
-        }
-        else if (min != Double.NEGATIVE_INFINITY) {
+        } else if (min != Double.NEGATIVE_INFINITY) {
             f = min + Math.tan(((double) slider / n) * (Math.PI / 2));
-        }
-        else if (max != Double.POSITIVE_INFINITY) {
+        } else if (max != Double.POSITIVE_INFINITY) {
             f = max + Math.tan(-(((double) n - slider) / n) * (Math.PI / 2));
 //            System.out.println("slider = " + slider + " min = " + min + " max = " + max + "  f = " + f);
-        }
-        else {
+        } else {
             f = Math.tan(-Math.PI / 2 + ((double) slider / n) * Math.PI);
         }
         return f;
@@ -547,15 +553,12 @@ public class TestStandardizedSem extends TestCase {
         double x;
         if (min != Double.NEGATIVE_INFINITY && max != Double.POSITIVE_INFINITY) {
             x = n * (value - min) / (max - min);
-        }
-        else if (min != Double.NEGATIVE_INFINITY) {
+        } else if (min != Double.NEGATIVE_INFINITY) {
             x = (2. * n) / Math.PI * Math.atan(value - min);
-        }
-        else if (max != Double.POSITIVE_INFINITY) {
+        } else if (max != Double.POSITIVE_INFINITY) {
             x = n + (2. * n) / Math.PI * Math.atan(value - max);
 //            System.out.println("value = " + value + " x = " + x);
-        }
-        else {
+        } else {
             x = (n / Math.PI) * (Math.atan(value) + Math.PI / 2);
         }
 
@@ -563,16 +566,5 @@ public class TestStandardizedSem extends TestCase {
         if (slider > 100) slider = 100;
         if (slider < 0) slider = 0;
         return slider;
-    }
-
-    /**
-     * This method uses reflection to collect up all of the test methods from
-     * this class and return them to the test runner.
-     */
-    public static Test suite() {
-
-        // Edit the name of the class in the parens to match the name
-        // of this class.
-        return new TestSuite(TestStandardizedSem.class);
     }
 }

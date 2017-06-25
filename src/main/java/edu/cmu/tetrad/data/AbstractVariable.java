@@ -66,19 +66,27 @@ abstract class AbstractVariable implements Variable {
      * Returns the missing value marker as an Object.
      */
     @Override
-	public abstract Object getMissingValueMarker();
+    public abstract Object getMissingValueMarker();
 
     /**
      * Tests whether the given value is the missing data marker.
      */
     @Override
-	public abstract boolean isMissingValue(Object value);
+    public abstract boolean isMissingValue(Object value);
+
+    /**
+     * Returns the name of this variable.
+     */
+    @Override
+    public final String getName() {
+        return name;
+    }
 
     /**
      * Sets the name of this variable.
      */
     @Override
-	public final void setName(String name) {
+    public final void setName(String name) {
         if (name == null) {
             throw new NullPointerException(
                     "AbstractVariable name must not be null.");
@@ -90,14 +98,6 @@ abstract class AbstractVariable implements Variable {
         }
 
         this.name = name;
-    }
-
-    /**
-     * Returns the name of this variable.
-     */
-    @Override
-	public final String getName() {
-        return name;
     }
 
     /**
@@ -115,10 +115,10 @@ abstract class AbstractVariable implements Variable {
      *
      * @param value a value
      * @return <tt>true</tt> if the value is an acceptable value for
-     *         <tt>this</tt> variable, and <tt>false</tt> otherwise
+     * <tt>this</tt> variable, and <tt>false</tt> otherwise
      */
     @Override
-	public boolean checkValue(Object value) {
+    public boolean checkValue(Object value) {
         return true;
     }
 
@@ -127,16 +127,16 @@ abstract class AbstractVariable implements Variable {
      * of the variable is returned.
      */
     @Override
-	public String toString() {
+    public String toString() {
         return name;
     }
 
     @Override
-	public abstract Node like(String name);
+    public abstract Node like(String name);
 
 
     @Override
-	public int compareTo(Object o) {
+    public int compareTo(Object o) {
         Node node = (Node) o;
         return getName().compareTo(node.getName());
     }

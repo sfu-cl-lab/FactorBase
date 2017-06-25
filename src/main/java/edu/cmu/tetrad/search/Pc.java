@@ -87,12 +87,12 @@ public class Pc implements GraphSearch {
     /**
      * In an enumeration of triple types, these are the collider triples.
      */
-    private Set<Triple> unshieldedColliders;
+    private Set <Triple> unshieldedColliders;
 
     /**
      * In an enumeration of triple types, these are the noncollider triples.
      */
-    private Set<Triple> unshieldedNoncolliders;
+    private Set <Triple> unshieldedNoncolliders;
 
     /**
      * The number of indepdendence tests in the last search.
@@ -180,7 +180,7 @@ public class Pc implements GraphSearch {
 
     /**
      * @return the current depth of search--that is, the maximum number of conditioning nodes for any conditional
-     *         independence checked.
+     * independence checked.
      */
     public int getDepth() {
         return depth;
@@ -214,7 +214,7 @@ public class Pc implements GraphSearch {
      * of latent common causes, or due to statistical errors in conditional independence judgments.
      */
     @Override
-	public Graph search() {
+    public Graph search() {
         return search(independenceTest.getVariables());
     }
 
@@ -227,7 +227,7 @@ public class Pc implements GraphSearch {
      * <p/>
      * All of the given nodes must be in the domain of the given conditional independence test.
      */
-    public Graph search(List<Node> nodes) {
+    public Graph search(List <Node> nodes) {
         this.logger.log("info", "Starting PC algorithm");
         this.logger.log("info", "Independence test = " + getIndependenceTest() + ".");
 
@@ -265,7 +265,7 @@ public class Pc implements GraphSearch {
 
         SearchGraphUtils.pcOrientbk(knowledge, graph, nodes);
         SearchGraphUtils.orientCollidersUsingSepsets(this.sepsets, knowledge, graph);
-        MeekRules rules = new MeekRules();              
+        MeekRules rules = new MeekRules();
         rules.setAggressivelyPreventCycles(this.aggressivelyPreventCycles);
         rules.setKnowledge(knowledge);
         rules.orientImplied(graph);
@@ -285,7 +285,7 @@ public class Pc implements GraphSearch {
      * Returns the elapsed time of the search, in milliseconds.
      */
     @Override
-	public long getElapsedTime() {
+    public long getElapsedTime() {
         return elapsedTime;
     }
 
@@ -293,7 +293,7 @@ public class Pc implements GraphSearch {
      * Returns the set of unshielded colliders in the graph returned by <code>search()</code>. Non-null after
      * <code>search</code> is called.
      */
-    public Set<Triple> getUnshieldedColliders() {
+    public Set <Triple> getUnshieldedColliders() {
         return unshieldedColliders;
     }
 
@@ -301,18 +301,18 @@ public class Pc implements GraphSearch {
      * Returns the set of unshielded noncolliders in the graph returned by <code>search()</code>. Non-null after
      * <code>search</code> is called.
      */
-    public Set<Triple> getUnshieldedNoncolliders() {
+    public Set <Triple> getUnshieldedNoncolliders() {
         return unshieldedNoncolliders;
     }
 
     //===============================PRIVATE METHODS=======================//
 
     private void enumerateTriples() {
-        this.unshieldedColliders = new HashSet<Triple>();
-        this.unshieldedNoncolliders = new HashSet<Triple>();
+        this.unshieldedColliders = new HashSet <Triple>();
+        this.unshieldedNoncolliders = new HashSet <Triple>();
 
         for (Node y : graph.getNodes()) {
-            List<Node> adj = graph.getAdjacentNodes(y);
+            List <Node> adj = graph.getAdjacentNodes(y);
 
             if (adj.size() < 2) {
                 continue;
@@ -325,7 +325,7 @@ public class Pc implements GraphSearch {
                 Node x = adj.get(choice[0]);
                 Node z = adj.get(choice[1]);
 
-                List<Node> nodes = this.sepsets.get(x, z);
+                List <Node> nodes = this.sepsets.get(x, z);
 
                 // Note that checking adj(x, z) does not suffice when knowledge
                 // has been specified.
@@ -358,27 +358,27 @@ public class Pc implements GraphSearch {
         return numDependenceJudgements;
     }
 
-    public List<Node> getNodes() {
+    public List <Node> getNodes() {
         return graph.getNodes();
     }
 
-    public List<Triple> getColliders(Node node) {
+    public List <Triple> getColliders(Node node) {
         return null;  //To change body of implemented methods use File | Settings | File Templates.
     }
 
-    public List<Triple> getNoncolliders(Node node) {
+    public List <Triple> getNoncolliders(Node node) {
         return null;  //To change body of implemented methods use File | Settings | File Templates.
     }
 
-    public List<Triple> getAmbiguousTriples(Node node) {
+    public List <Triple> getAmbiguousTriples(Node node) {
         return null;  //To change body of implemented methods use File | Settings | File Templates.
     }
 
-    public List<Triple> getUnderlineTriples(Node node) {
+    public List <Triple> getUnderlineTriples(Node node) {
         return null;  //To change body of implemented methods use File | Settings | File Templates.
     }
 
-    public List<Triple> getDottedUnderlineTriples(Node node) {
+    public List <Triple> getDottedUnderlineTriples(Node node) {
         return null;  //To change body of implemented methods use File | Settings | File Templates.
     }
 }

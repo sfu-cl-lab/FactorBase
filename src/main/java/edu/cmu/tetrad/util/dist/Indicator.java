@@ -25,8 +25,8 @@ import edu.cmu.tetrad.util.RandomUtil;
 
 /**
  * Created by IntelliJ IDEA. User: jdramsey Date: Jan 15, 2008 Time: 5:07:01 PM
-* To change this template use File | Settings | File Templates.
-*/
+ * To change this template use File | Settings | File Templates.
+ */
 public class Indicator implements Distribution {
     static final long serialVersionUID = 23L;
 
@@ -34,6 +34,7 @@ public class Indicator implements Distribution {
 
     /**
      * Returns 0 with probably 1 - p and 1 with probability p.
+     *
      * @param p Ibid.
      */
     public Indicator(double p) {
@@ -54,17 +55,17 @@ public class Indicator implements Distribution {
     }
 
     @Override
-	public int getNumParameters() {
+    public int getNumParameters() {
         return 1;
     }
 
     @Override
-	public String getName() {
+    public String getName() {
         return "Indicator";
     }
 
     @Override
-	public void setParameter(int index, double value) {
+    public void setParameter(int index, double value) {
         if (index == 0) {
             p = value;
         }
@@ -73,7 +74,7 @@ public class Indicator implements Distribution {
     }
 
     @Override
-	public double getParameter(int index) {
+    public double getParameter(int index) {
         if (index == 0) {
             return p;
         }
@@ -82,7 +83,7 @@ public class Indicator implements Distribution {
     }
 
     @Override
-	public String getParameterName(int index) {
+    public String getParameterName(int index) {
         if (index == 0) {
             return "Cutuff";
         }
@@ -91,12 +92,12 @@ public class Indicator implements Distribution {
     }
 
     @Override
-	public double nextRandom() {
+    public double nextRandom() {
         return RandomUtil.getInstance().nextDouble() < p ? 1 : 0;
     }
 
     @Override
-	public String toString() {
+    public String toString() {
         return "Indicator(" + p + ")";
     }
 }

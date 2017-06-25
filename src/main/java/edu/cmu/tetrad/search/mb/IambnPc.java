@@ -45,7 +45,7 @@ public class IambnPc implements MbSearch {
     /**
      * The list of variables being searched over. Must contain the target.
      */
-    private List<Node> variables;
+    private List <Node> variables;
 
     /**
      * Constructs a new search.
@@ -62,9 +62,9 @@ public class IambnPc implements MbSearch {
     }
 
     @Override
-	public List<Node> findMb(String targetName) {
+    public List <Node> findMb(String targetName) {
         Node target = getVariableForName(targetName);
-        List<Node> cmb = new LinkedList<Node>();
+        List <Node> cmb = new LinkedList <Node>();
         Pc pc = new Pc(independenceTest);
         boolean cont = true;
 
@@ -72,7 +72,7 @@ public class IambnPc implements MbSearch {
         while (cont) {
             cont = false;
 
-            List<Node> remaining = new LinkedList<Node>(variables);
+            List <Node> remaining = new LinkedList <Node>(variables);
             remaining.removeAll(cmb);
             remaining.remove(target);
 
@@ -114,18 +114,18 @@ public class IambnPc implements MbSearch {
         return cmb;
     }
 
-    private double associationStrength(Node v, Node target, List<Node> cmb) {
+    private double associationStrength(Node v, Node target, List <Node> cmb) {
         independenceTest.isIndependent(v, target, cmb);
         return 1.0 - independenceTest.getPValue();
     }
 
     @Override
-	public String getAlgorithmName() {
+    public String getAlgorithmName() {
         return "IAMBnPC";
     }
 
     @Override
-	public int getNumIndependenceTests() {
+    public int getNumIndependenceTests() {
         return 0;
     }
 

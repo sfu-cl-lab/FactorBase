@@ -62,7 +62,7 @@ public final class NoHalfdirectedEdges implements GraphConstraint {
      * @return true if the new edge may be added, false if not.
      */
     @Override
-	public boolean isEdgeAddable(Edge edge, Graph graph) {
+    public boolean isEdgeAddable(Edge edge, Graph graph) {
         return !Edges.isPartiallyOrientedEdge(edge);
     }
 
@@ -74,7 +74,7 @@ public final class NoHalfdirectedEdges implements GraphConstraint {
      * @return true if the new node may be added, false if not.
      */
     @Override
-	public boolean isNodeAddable(Node node, Graph graph) {
+    public boolean isNodeAddable(Node node, Graph graph) {
         return true;
     }
 
@@ -84,7 +84,7 @@ public final class NoHalfdirectedEdges implements GraphConstraint {
      * @return true.
      */
     @Override
-	public boolean isEdgeRemovable(Edge edge, Graph graph) {
+    public boolean isEdgeRemovable(Edge edge, Graph graph) {
         return true;
     }
 
@@ -94,7 +94,7 @@ public final class NoHalfdirectedEdges implements GraphConstraint {
      * @return true.
      */
     @Override
-	public boolean isNodeRemovable(Node node, Graph graph) {
+    public boolean isNodeRemovable(Node node, Graph graph) {
         return true;
     }
 
@@ -104,7 +104,7 @@ public final class NoHalfdirectedEdges implements GraphConstraint {
      * @return this representation.
      */
     @Override
-	public String toString() {
+    public String toString() {
         return "<No partially oriented edges.>";
     }
 }

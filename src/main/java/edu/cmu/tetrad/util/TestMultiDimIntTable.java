@@ -36,8 +36,19 @@ public class TestMultiDimIntTable extends TestCase {
         super(name);
     }
 
+    /**
+     * This method uses reflection to collect up all of the test methods from
+     * this class and return them to the test runner.
+     */
+    public static Test suite() {
+
+        // Edit the name of the class in the parens to match the name
+        // of this class.
+        return new TestSuite(TestMultiDimIntTable.class);
+    }
+
     @Override
-	public void setUp() {
+    public void setUp() {
 
         int[] dims = new int[]{2, 3, 4, 5};
 
@@ -45,7 +56,7 @@ public class TestMultiDimIntTable extends TestCase {
     }
 
     @Override
-	public void tearDown() {
+    public void tearDown() {
 
         // Do takedown for tests here.
     }
@@ -87,17 +98,6 @@ public class TestMultiDimIntTable extends TestCase {
 
     public void testNumDimensions() {
         assertEquals(4, table.getNumDimensions());
-    }
-
-    /**
-     * This method uses reflection to collect up all of the test methods from
-     * this class and return them to the test runner.
-     */
-    public static Test suite() {
-
-        // Edit the name of the class in the parens to match the name
-        // of this class.
-        return new TestSuite(TestMultiDimIntTable.class);
     }
 }
 

@@ -79,7 +79,7 @@ public class Uniform implements Distribution {
      * Sets the value of the i'th parameter.
      */
     @Override
-	public void setParameter(int index, double value) {
+    public void setParameter(int index, double value) {
         if (index == 0 && value < b) {
             a = value;
         } else if (index == 1 && value > a) {
@@ -94,7 +94,7 @@ public class Uniform implements Distribution {
      * Returns the value of the ith parameter.
      */
     @Override
-	public double getParameter(int index) {
+    public double getParameter(int index) {
         if (index == 0) {
             return a;
         } else if (index == 1) {
@@ -105,7 +105,7 @@ public class Uniform implements Distribution {
     }
 
     @Override
-	public String getParameterName(int index) {
+    public String getParameterName(int index) {
         if (index == 0) {
             return "Lower Bound";
         } else if (index == 1) {
@@ -119,7 +119,7 @@ public class Uniform implements Distribution {
      * Returns the number of parameters = 2.
      */
     @Override
-	public int getNumParameters() {
+    public int getNumParameters() {
         return 2;
     }
 
@@ -127,18 +127,18 @@ public class Uniform implements Distribution {
      * Returns the next random sample from the distribution.
      */
     @Override
-	public double nextRandom() {
+    public double nextRandom() {
         return RandomUtil.getInstance().nextUniform(a, b);
     }
 
 
     @Override
-	public String getName() {
+    public String getName() {
         return "Uniform";
     }
 
     @Override
-	public String toString() {
+    public String toString() {
         NumberFormat nf = NumberFormatUtil.getInstance().getNumberFormat();
         return "U(" + nf.format(getParameter(0)) + ", " + nf.format(getParameter(1)) + ")";
     }

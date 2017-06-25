@@ -50,8 +50,19 @@ public final class TestGraph extends TestCase {
         super(name);
     }
 
+    /**
+     * This method uses reflection to collect up all of the test methods from this class and return them to the test
+     * runner.
+     */
+    public static Test suite() {
+
+        // Edit the name of the class in the parens to match the name
+        // of this class.
+        return new TestSuite(edu.cmu.tetrad.graph.TestEdgeListGraph.class);
+    }
+
     @Override
-	public void setUp() {
+    public void setUp() {
         x1 = new GraphNode("x1");
         x2 = new GraphNode("x2");
         x3 = new GraphNode("x3");
@@ -61,13 +72,12 @@ public final class TestGraph extends TestCase {
         //        graph = new EndpointMatrixGraph();
     }
 
-
     /**
      * Tests to see if d separation facts are symmetric.
      */
     public void testDSeparation() {
         Graph graph = GraphUtils.randomDag(20, 0, 30, 3, 3, 3, false);
-        List<Node> nodes = graph.getNodes();
+        List <Node> nodes = graph.getNodes();
 
         int depth = 2;
 
@@ -76,7 +86,7 @@ public final class TestGraph extends TestCase {
                 Node x = nodes.get(i);
                 Node y = nodes.get(j);
 
-                List<Node> theRest = new ArrayList<Node>(nodes);
+                List <Node> theRest = new ArrayList <Node>(nodes);
                 theRest.remove(x);
                 theRest.remove(y);
 
@@ -84,7 +94,7 @@ public final class TestGraph extends TestCase {
                 int[] choice;
 
                 while ((choice = gen.next()) != null) {
-                    List<Node> z = new LinkedList<Node>();
+                    List <Node> z = new LinkedList <Node>();
 
                     for (int k = 0; k < choice.length; k++) {
                         z.add(theRest.get(choice[k]));
@@ -110,16 +120,5 @@ public final class TestGraph extends TestCase {
         Graph pattern = pc.search();
         Graph pattern2 = SearchGraphUtils.patternFromDag(pattern);
         assertEquals(pattern, pattern2);
-    }
-
-    /**
-     * This method uses reflection to collect up all of the test methods from this class and return them to the test
-     * runner.
-     */
-    public static Test suite() {
-
-        // Edit the name of the class in the parens to match the name
-        // of this class.
-        return new TestSuite(edu.cmu.tetrad.graph.TestEdgeListGraph.class);
     }
 }

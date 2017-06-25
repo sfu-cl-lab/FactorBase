@@ -27,7 +27,7 @@ import edu.cmu.tetrad.util.RandomUtil;
  * Represents an exponential power distribution for purposes of sampling.
  *
  * @author Joseph Ramsey
-*/
+ */
 public class ExponentialPower implements Distribution {
     static final long serialVersionUID = 23L;
 
@@ -50,17 +50,17 @@ public class ExponentialPower implements Distribution {
     }
 
     @Override
-	public int getNumParameters() {
+    public int getNumParameters() {
         return 1;
     }
 
     @Override
-	public String getName() {
+    public String getName() {
         return "Exponential Power";
     }
 
     @Override
-	public void setParameter(int index, double value) {
+    public void setParameter(int index, double value) {
         if (index == 0) {
             tau = value;
         }
@@ -69,7 +69,7 @@ public class ExponentialPower implements Distribution {
     }
 
     @Override
-	public double getParameter(int index) {
+    public double getParameter(int index) {
         if (index == 0) {
             return tau;
         }
@@ -78,7 +78,7 @@ public class ExponentialPower implements Distribution {
     }
 
     @Override
-	public String getParameterName(int index) {
+    public String getParameterName(int index) {
         if (index == 0) {
             return "Tau";
         }
@@ -87,12 +87,12 @@ public class ExponentialPower implements Distribution {
     }
 
     @Override
-	public double nextRandom() {
+    public double nextRandom() {
         return RandomUtil.getInstance().nextExponentialPower(tau);
     }
 
     @Override
-	public String toString() {
+    public String toString() {
         return "ExponentialPower(" + tau + ")";
     }
 }

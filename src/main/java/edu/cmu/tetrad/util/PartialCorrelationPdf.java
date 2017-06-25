@@ -83,7 +83,7 @@ public class PartialCorrelationPdf implements Function, TetradSerializable {
     public PartialCorrelationPdf(int n, int k) {
         this.n = n;
         this.k = k;
-        this.gammaRatio=gammaRatio(n, k);
+        this.gammaRatio = gammaRatio(n, k);
         this.constant = (1 / Math.pow(Math.PI, 0.5)) * gammaRatio;
         this.outsideExp = (n - k - 2) / 2.0;
     }
@@ -109,7 +109,7 @@ public class PartialCorrelationPdf implements Function, TetradSerializable {
      * @return the value of the function at x.
      */
     @Override
-	public double valueAt(double x) {
+    public double valueAt(double x) {
         return constant * Math.pow(1 - x * x, outsideExp);
     }
 
@@ -131,7 +131,7 @@ public class PartialCorrelationPdf implements Function, TetradSerializable {
      * Returns a description of the function.
      */
     @Override
-	public String toString() {
+    public String toString() {
         return "Zero partial correlation distribution with n = " + getN() +
                 " and k = " + getK() + "\n\n";
     }
@@ -143,6 +143,7 @@ public class PartialCorrelationPdf implements Function, TetradSerializable {
 
     /**
      * Returns the number of compared variables = 2 + # conditioning variables.
+     *
      * @return Ibid.
      */
     public int getK() {

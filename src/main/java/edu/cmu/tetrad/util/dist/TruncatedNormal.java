@@ -88,12 +88,12 @@ public class TruncatedNormal implements Distribution {
     //=========================PUBLIC METHODS=========================//
 
     @Override
-	public String getName() {
+    public String getName() {
         return "TruncNormal";
     }
 
     @Override
-	public void setParameter(int index, double value) {
+    public void setParameter(int index, double value) {
         if (index == 0) {
             mean = value;
         } else if (index == 1 && value >= 0) {
@@ -109,7 +109,7 @@ public class TruncatedNormal implements Distribution {
     }
 
     @Override
-	public double getParameter(int index) {
+    public double getParameter(int index) {
         if (index == 0) {
             return mean;
         } else if (index == 1) {
@@ -120,7 +120,7 @@ public class TruncatedNormal implements Distribution {
     }
 
     @Override
-	public String getParameterName(int index) {
+    public String getParameterName(int index) {
         if (index == 0) {
             return "Mean";
         } else if (index == 1) {
@@ -138,7 +138,7 @@ public class TruncatedNormal implements Distribution {
      * Returns the number of parameters = 2.
      */
     @Override
-	public int getNumParameters() {
+    public int getNumParameters() {
         return 4;
     }
 
@@ -146,12 +146,12 @@ public class TruncatedNormal implements Distribution {
      * Returns the next random sample from the distribution.
      */
     @Override
-	public double nextRandom() {
+    public double nextRandom() {
         return RandomUtil.getInstance().nextTruncatedNormal(mean, sd, low, high);
     }
 
     @Override
-	public String toString() {
+    public String toString() {
         NumberFormat nf = NumberFormatUtil.getInstance().getNumberFormat();
         return "TruncNormal(" + nf.format(mean) + ", " + nf.format(sd) + ", " + nf.format(low) + ", " + nf.format(high) + ")";
     }

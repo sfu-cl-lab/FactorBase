@@ -131,6 +131,20 @@ public class RegressionCovariance implements Regression {
 
     //===========================PUBLIC METHODS==========================//
 
+    private static DoubleMatrix1D zeroMeans(int numVars) {
+        return new DenseDoubleMatrix1D(numVars);
+    }
+
+    private static DoubleMatrix1D standardDeviations(ICovarianceMatrix covariances) {
+        DoubleMatrix1D standardDeviations = new DenseDoubleMatrix1D(covariances.getDimension());
+
+        for (int i = 0; i < covariances.getDimension(); i++) {
+            standardDeviations.set(i, Math.sqrt(covariances.getValue(i, i)));
+        }
+
+        return standardDeviations;
+    }
+
     /**
      * Sets the cutoff for significance. Parameters with p values less than this
      * will be labeled as significant.
@@ -138,18 +152,21 @@ public class RegressionCovariance implements Regression {
      * @param alpha The significance level.
      */
     @Override
-	public void setAlpha(double alpha) {
+    public void setAlpha(double alpha) {
         this.alpha = alpha;
     }
 
     /**
      * Returns the graph of significant regressors into the target
+     *
      * @return This graph.
      */
     @Override
-	public Graph getGraph() {
+    public Graph getGraph() {
         return this.graph;
     }
+
+    //===========================PRIVATE METHODS==========================//
 
     /**
      * Regresses the given target on the given regressors, yielding a regression
@@ -162,10 +179,10 @@ public class RegressionCovariance implements Regression {
      * @return the regression plane.
      */
     @Override
-	public RegressionResult regress(Node target, List<Node> regressors) {
+    public RegressionResult regress(Node target, List <Node> regressors) {
         DoubleMatrix2D allCorrelations = correlations.getMatrix();
 
-        List<Node> variables = correlations.getVariables();
+        List <Node> variables = correlations.getVariables();
 
         int yIndex = variables.indexOf(target);
 
@@ -257,14 +274,12 @@ public class RegressionCovariance implements Regression {
     }
 
     @Override
-	public RegressionResult regress(Node target, Node... regressors) {
-        List<Node> _regressors = Arrays.asList(regressors);
+    public RegressionResult regress(Node target, Node... regressors) {
+        List <Node> _regressors = Arrays.asList(regressors);
         return regress(target, _regressors);
     }
 
-    //===========================PRIVATE METHODS==========================//
-
-    private String[] createVarNamesArray(List<Node> regressors) {
+    private String[] createVarNamesArray(List <Node> regressors) {
         String[] vNames = getVarNamesArray(regressors);
 
         for (int i = 0; i < regressors.size(); i++) {
@@ -273,11 +288,11 @@ public class RegressionCovariance implements Regression {
         return vNames;
     }
 
-    private String[] getVarNamesArray(List<Node> regressors) {
+    private String[] getVarNamesArray(List <Node> regressors) {
         return new String[regressors.size()];
     }
 
-    private Graph createGraph(Node target, int[] allIndices, List<Node> regressors, DoubleMatrix1D p) {
+    private Graph createGraph(Node target, int[] allIndices, List <Node> regressors, DoubleMatrix1D p) {
         Graph graph = new EdgeListGraph();
         graph.addNode(target);
 
@@ -293,11 +308,11 @@ public class RegressionCovariance implements Regression {
                 graph.addEdge(newEdge);
             }
         }
-        
+
         return graph;
     }
 
-    private String createSummary(int n, int k, double rss, double r2, int[] allIndices, List<Node> regressors, DoubleMatrix1D b, DoubleMatrix1D se, DoubleMatrix1D t, DoubleMatrix1D p) {
+    private String createSummary(int n, int k, double rss, double r2, int[] allIndices, List <Node> regressors, DoubleMatrix1D b, DoubleMatrix1D se, DoubleMatrix1D t, DoubleMatrix1D p) {
         String summary = "\n REGRESSION RESULT";
         summary += "\n n = " + n + ", k = " + k + ", alpha = " + alpha + "\n";
 
@@ -317,20 +332,6 @@ public class RegressionCovariance implements Regression {
                     ((p.get(i) < alpha) ? "significant " : "") + "\n";
         }
         return summary;
-    }
-
-    private static DoubleMatrix1D zeroMeans(int numVars) {
-        return new DenseDoubleMatrix1D(numVars);
-    }
-
-    private static DoubleMatrix1D standardDeviations(ICovarianceMatrix covariances) {
-        DoubleMatrix1D standardDeviations = new DenseDoubleMatrix1D(covariances.getDimension());
-
-        for (int i = 0; i < covariances.getDimension(); i++) {
-            standardDeviations.set(i, Math.sqrt(covariances.getValue(i, i)));
-        }
-
-        return standardDeviations;
     }
 }
 

@@ -25,8 +25,6 @@ import edu.cmu.tetrad.graph.Dag;
 import edu.cmu.tetrad.graph.GraphNode;
 import edu.cmu.tetrad.graph.Node;
 
-import java.util.*;
-
 /**
  * Provides static methods for creating Bayes nets.
  *
@@ -47,7 +45,7 @@ final class BayesImFactory {
      * @return The BayesNetIM for these parameters.
      */
     public static BayesIm createBayesNet(final String[] vars,
-            final List<String>[] varVals, final String[] edges) {
+                                         final List <String>[] varVals, final String[] edges) {
         return createBayesNet(vars, varVals, edges, null);
     }
 
@@ -62,12 +60,12 @@ final class BayesImFactory {
      * @return The BayesNetIM for these parameters
      */
     public static BayesIm createBayesNet(final String[] vars,
-            final String[][] varVals, final String[] edges) {
+                                         final String[][] varVals, final String[] edges) {
 
-        final List<String>[] valVect = new ArrayList[varVals.length];
+        final List <String>[] valVect = new ArrayList[varVals.length];
 
         for (int i = 0; i < valVect.length; i++) {
-            valVect[i] = new ArrayList<String>();
+            valVect[i] = new ArrayList <String>();
 
             for (int j = 0; j < varVals[i].length; j++) {
                 valVect[i].add(varVals[i][j]);
@@ -90,13 +88,13 @@ final class BayesImFactory {
      * @return The BayesNetIM for these parameters
      */
     public static BayesIm createBayesNet(final String[] vars,
-            final String[][] varVals, final String[] edges,
-            final String[][] probs) {
+                                         final String[][] varVals, final String[] edges,
+                                         final String[][] probs) {
 
-        final List<String>[] valVect = new ArrayList[varVals.length];
+        final List <String>[] valVect = new ArrayList[varVals.length];
 
         for (int i = 0; i < valVect.length; i++) {
-            valVect[i] = new ArrayList<String>();
+            valVect[i] = new ArrayList <String>();
 
             for (int j = 0; j < varVals[i].length; j++) {
                 valVect[i].add(varVals[i][j]);
@@ -119,8 +117,8 @@ final class BayesImFactory {
      * @return The BayesNetIM for these parameters
      */
     private static BayesIm createBayesNet(final String[] vars,
-            final List<String>[] varVals, final String[] edges,
-            final String[][] probs) {
+                                          final List <String>[] varVals, final String[] edges,
+                                          final String[][] probs) {
 
         // construct the DAG
         final Dag dag = new Dag();
@@ -143,15 +141,14 @@ final class BayesImFactory {
         for (int i = 0; i < varVals.length; i++) {
             try {
                 Node node = dag.getNode(vars[i]);
-                List<String> categories = new LinkedList<String>();
+                List <String> categories = new LinkedList <String>();
 
                 for (int j = 0; j < varVals[i].size(); j++) {
                     categories.add(varVals[i].get(j));
                 }
 
                 bayesPm.setCategories(node, categories);
-            }
-            catch (Exception e) {
+            } catch (Exception e) {
                 throw new RuntimeException("Problem setting node values.", e);
             }
         }
@@ -192,8 +189,7 @@ final class BayesImFactory {
 
                 try {
                     prob = Double.parseDouble(st.nextToken());
-                }
-                catch (NumberFormatException nfe) {
+                } catch (NumberFormatException nfe) {
                     System.err.println("Bad probability: " + nfe.toString());
 
                     return null;

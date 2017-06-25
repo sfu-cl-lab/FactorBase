@@ -29,19 +29,17 @@ package edu.cmu.tetrad.search;
 public class BinaryFunction {
 
     /**
+     * Represents the function column of the truth table.
+     */
+    int[] functionColumn;
+    /**
      * The function index.
      */
     private long functionIndex;
-
     /**
      * The number of arguments to the function.
      */
     private int numArgs;
-
-    /**
-     * Represents the function column of the truth table.
-     */
-    int[] functionColumn;
 
     //=============================CONSTRUCTORS=========================//
 
@@ -182,7 +180,7 @@ public class BinaryFunction {
     }
 
     @Override
-	public String toString() {
+    public String toString() {
         StringBuilder buf = new StringBuilder();
         buf.append("\n");
 
@@ -211,7 +209,7 @@ public class BinaryFunction {
     }
 
     @Override
-	public boolean equals(Object o) {
+    public boolean equals(Object o) {
         if (!(o instanceof BinaryFunction)) {
             return false;
         }

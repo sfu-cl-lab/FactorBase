@@ -63,7 +63,7 @@ public final class TestModelGenerator extends TestCase {
         graph.addDirectedEdge(x2, x3);
         graph.addDirectedEdge(x3, x4);
 
-        List<Graph> variants1 = ModelGenerator.generate(graph);
+        List <Graph> variants1 = ModelGenerator.generate(graph);
 
         System.out.println("Size of list = " + variants1.size());
         assertEquals(17, variants1.size());

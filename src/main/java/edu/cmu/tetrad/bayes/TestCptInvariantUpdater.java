@@ -43,19 +43,6 @@ public final class TestCptInvariantUpdater extends TestCase {
         super(name);
     }
 
-    @Override
-	public void setUp() throws Exception {
-        TetradLogger.getInstance().addOutputStream(System.out);
-        TetradLogger.getInstance().setForceLog(true);
-    }
-
-
-    @Override
-	public void tearDown(){
-        TetradLogger.getInstance().setForceLog(false);
-        TetradLogger.getInstance().removeOutputStream(System.out);
-    }
-
     /**
      * Richard's 2-variable example worked by hand.
      */
@@ -388,6 +375,18 @@ public final class TestCptInvariantUpdater extends TestCase {
         // Edit the name of the class in the parens to match the name
         // of this class.
         return new TestSuite(TestCptInvariantUpdater.class);
+    }
+
+    @Override
+    public void setUp() throws Exception {
+        TetradLogger.getInstance().addOutputStream(System.out);
+        TetradLogger.getInstance().setForceLog(true);
+    }
+
+    @Override
+    public void tearDown() {
+        TetradLogger.getInstance().setForceLog(false);
+        TetradLogger.getInstance().removeOutputStream(System.out);
     }
 }
 

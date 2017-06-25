@@ -58,7 +58,7 @@ class FciDsepLegalPairs implements LegalPairs {
      * Returns true iff x is adjacent to y.
      */
     @Override
-	public boolean isLegalFirstEdge(Node x, Node y) {
+    public boolean isLegalFirstEdge(Node x, Node y) {
         return this.graph.isAdjacentTo(x, y);
     }
 
@@ -68,8 +68,8 @@ class FciDsepLegalPairs implements LegalPairs {
      * @throws IllegalArgumentException if x is not adjacent to y or y is not adjacent to z.
      */
     @Override
-	public boolean isLegalPair(Node x, Node y, Node z, List<Node> c,
-                               List<Node> d) {
+    public boolean isLegalPair(Node x, Node y, Node z, List <Node> c,
+                               List <Node> d) {
         if (!(graph.isAdjacentTo(x, y)) || !(graph.isAdjacentTo(y, z))) {
             throw new IllegalArgumentException();
         }

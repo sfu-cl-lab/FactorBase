@@ -25,8 +25,6 @@ import edu.cmu.tetrad.data.*;
 import edu.cmu.tetrad.graph.*;
 import edu.cmu.tetrad.util.ChoiceGenerator;
 
-import java.util.*;
-
 
 /**
  * Implements a modification of BuildPureClusters-Simplified from Silva, Scheines, Glymour, and Spirtes,
@@ -48,16 +46,16 @@ import java.util.*;
  * @author Joseph Ramsey
  */
 public class BuildPureClusters2 {
+    private static final int MAX_CLIQUE_TRIALS = 50;
     private DataSet dataSet;
     private ICovarianceMatrix cov;
-    private List<Node> variables;
+    private List <Node> variables;
     private TetradTest test;
     private double alpha;
-    private static final int MAX_CLIQUE_TRIALS = 50;
     private IndependenceTest indTest;
     private boolean depthOne = false;
     private Graph depthOneGraph;
-    private HashMap<Node, Integer> variablesMap;
+    private HashMap <Node, Integer> variablesMap;
     private TestType testType;
     private BollenTingTetradTest bollenTingTest;
 
@@ -178,7 +176,7 @@ public class BuildPureClusters2 {
 
         for (int round = 0; round < 2; round++) {
 
-            List<Edge> edges = G.getEdges();
+            List <Edge> edges = G.getEdges();
 //            Collections.shuffle(edges);
 
             EDGES:
@@ -186,8 +184,8 @@ public class BuildPureClusters2 {
                 Node x1 = edge.getNode1();
                 Node y1 = edge.getNode2();
 
-                List<Node> variablesX1 = reachable(G, x1, 2);
-                List<Node> variablesY1 = reachable(G, y1, 2);
+                List <Node> variablesX1 = reachable(G, x1, 2);
+                List <Node> variablesY1 = reachable(G, y1, 2);
 
                 variablesX1.remove(x1);
                 variablesX1.remove(y1);
@@ -204,7 +202,7 @@ public class BuildPureClusters2 {
                     Node x2 = variablesX1.get(choice[0]);
                     Node x3 = variablesX1.get(choice[1]);
 
-                    List<Node> _variablesY1 = new ArrayList<Node>(variablesY1);
+                    List <Node> _variablesY1 = new ArrayList <Node>(variablesY1);
                     _variablesY1.remove(x2);
                     _variablesY1.remove(x3);
 
@@ -485,15 +483,15 @@ public class BuildPureClusters2 {
         this.depthOne = depthOne;
     }
 
-    private List<Node> reachable(Graph g, Node x1, Node y1) {
+    private List <Node> reachable(Graph g, Node x1, Node y1) {
 //        Set<Node> reachable = reachable(g, x1, 2);
 //        reachable.addAll(reachable(g, y1, 2));
 
         int depth = 4;
 
-        Set<Node> reachable2 = new TreeSet<Node>(reachable(g, x1, depth));
+        Set <Node> reachable2 = new TreeSet <Node>(reachable(g, x1, depth));
         reachable2.addAll(reachable(g, y1, depth));
-        return new ArrayList<Node>(reachable2);
+        return new ArrayList <Node>(reachable2);
 
 //        reachable2.retainAll(reachable);
 //        return new ArrayList<Node>(reachable2);
@@ -501,17 +499,17 @@ public class BuildPureClusters2 {
 
     }
 
-    private List<Node> reachable(Graph g, Node x, int depth) {
-        Set<Node> reachable = new TreeSet<Node>();
+    private List <Node> reachable(Graph g, Node x, int depth) {
+        Set <Node> reachable = new TreeSet <Node>();
         reachable.add(x);
 
         for (int count = 0; count < depth; count++) {
-            for (Node node : new TreeSet<Node>(reachable)) {
+            for (Node node : new TreeSet <Node>(reachable)) {
                 reachable.addAll(g.getAdjacentNodes(node));
             }
         }
 
-        return new ArrayList<Node>(reachable);
+        return new ArrayList <Node>(reachable);
 
 //        Set<Node> reachable2 = new HashSet<Node>();
 //        reachable2.add(x);
@@ -535,14 +533,14 @@ public class BuildPureClusters2 {
         ((ContinuousTetradTest) test).setBollenTest(bollenTingTest);
 
         IPurify purify = new PurifyTetradBasedD(test);
-        List<List<Node>> _clustering = extractClusters(G);
+        List <List <Node>> _clustering = extractClusters(G);
         _clustering = purify.purify(_clustering);
         G = convertSearchGraphNodes(_clustering);
 
 // 6. Remove all latents with less than three children, and their respective measures;
         for (Node node : G.getNodes()) {
             if (node.getNodeType() == NodeType.LATENT) {
-                List<Node> children = G.getChildren(node);
+                List <Node> children = G.getChildren(node);
                 if (children.size() < 3) {
                     G.removeNode(node);
                     G.removeNodes(children);
@@ -553,7 +551,7 @@ public class BuildPureClusters2 {
 
         // 7. if G has at least four observed variables, return G. Otherwise, return an empty model.
 
-        List<Node> measured = new ArrayList<Node>();
+        List <Node> measured = new ArrayList <Node>();
 
         for (Node node : G.getNodes()) {
             if (node.getNodeType() == NodeType.MEASURED) {
@@ -579,7 +577,7 @@ public class BuildPureClusters2 {
 
         for (Node node : G.getNodes()) {
             if (node.getNodeType() == NodeType.LATENT) {
-                List<Node> children = G.getChildren(node);
+                List <Node> children = G.getChildren(node);
 
                 if (children.size() == 1) {
                     G.removeNode(node);
@@ -597,7 +595,7 @@ public class BuildPureClusters2 {
                 continue;
             }
 
-            List<Node> parents = G.getParents(node);
+            List <Node> parents = G.getParents(node);
 
             if (parents.size() > 1) {
                 G.removeNode(node);
@@ -704,12 +702,12 @@ public class BuildPureClusters2 {
 //        }
 //    }
 
-    private List<List<Node>> extractClusters(Graph g) {
-        List<List<Node>> clustering = new ArrayList<List<Node>>();
+    private List <List <Node>> extractClusters(Graph g) {
+        List <List <Node>> clustering = new ArrayList <List <Node>>();
 
         for (Node node : g.getNodes()) {
             if (node.getNodeType() == NodeType.LATENT) {
-                List<Node> children = g.getChildren(node);
+                List <Node> children = g.getChildren(node);
                 clustering.add(children);
             }
         }
@@ -759,10 +757,10 @@ public class BuildPureClusters2 {
     /**
      * Returns the converted search graph, or null if there is no model.
      */
-    private Graph convertSearchGraph(List<int[]> clusters) {
+    private Graph convertSearchGraph(List <int[]> clusters) {
         Graph graph = new EdgeListGraph(variables);
 
-        List<Node> latents = new ArrayList<Node>();
+        List <Node> latents = new ArrayList <Node>();
         for (int i = 0; i < clusters.size(); i++) {
             Node latent = new GraphNode(MimBuild.LATENT_PREFIX + (i + 1));
             latent.setNodeType(NodeType.LATENT);
@@ -779,10 +777,10 @@ public class BuildPureClusters2 {
         return graph;
     }
 
-    private Graph convertSearchGraphNodes(List<List<Node>> clusters) {
+    private Graph convertSearchGraphNodes(List <List <Node>> clusters) {
         Graph graph = new EdgeListGraph(variables);
 
-        List<Node> latents = new ArrayList<Node>();
+        List <Node> latents = new ArrayList <Node>();
         for (int i = 0; i < clusters.size(); i++) {
             Node latent = new GraphNode(MimBuild.LATENT_PREFIX + (i + 1));
             latent.setNodeType(NodeType.LATENT);
@@ -800,7 +798,7 @@ public class BuildPureClusters2 {
     }
 
 
-    private Graph fas(List<Node> variables, int depth) {
+    private Graph fas(List <Node> variables, int depth) {
         Graph G = new EdgeListGraph(variables);
         G.fullyConnect(Endpoint.TAIL);
 
@@ -882,7 +880,7 @@ public class BuildPureClusters2 {
      * than Stage 2 of the FindMeasurementPattern algorithm.
      */
 
-    private List<int[]> findComponents(Graph graph) {
+    private List <int[]> findComponents(Graph graph) {
         boolean marked[] = new boolean[variables.size()];
         for (int i = 0; i < variables.size(); i++) {
             marked[i] = false;
@@ -944,7 +942,7 @@ public class BuildPureClusters2 {
         numCalls[0] = 0;
         int c[] = new int[1];
         c[0] = 0;
-        List<int[]> output = new ArrayList<int[]>();
+        List <int[]> output = new ArrayList <int[]>();
         int compsub[] = new int[elements.length];
         int old[] = new int[elements.length];
         for (int i = 0; i < elements.length; i++) {
@@ -955,7 +953,7 @@ public class BuildPureClusters2 {
         return output;
     }
 
-    private void findMaximalCliquesOperator(int numCalls[], List<int[]> output, boolean connected[][], int compsub[], int c[],
+    private void findMaximalCliquesOperator(int numCalls[], List <int[]> output, boolean connected[][], int compsub[], int c[],
                                             int old[], int ne, int ce) {
         if (numCalls[0] > MAX_CLIQUE_TRIALS) {
             return;
@@ -1072,7 +1070,7 @@ public class BuildPureClusters2 {
 
     private boolean t(Node n1, Node n2, Node n3, Node n4) {
         if (variablesMap == null) {
-            variablesMap = new HashMap<Node, Integer>();
+            variablesMap = new HashMap <Node, Integer>();
 
             for (int i = 0; i < variables.size(); i++) {
                 variablesMap.put(variables.get(i), i);

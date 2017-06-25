@@ -68,7 +68,7 @@ public class SemOptimizerPalCds implements SemOptimizer {
      * Optimizes the fitting function for the SEM.
      */
     @Override
-	public void optimize(SemIm semIm) {
+    public void optimize(SemIm semIm) {
         if (DataUtils.containsMissingValue(semIm.getSampleCovar())) {
             throw new IllegalArgumentException("Please remove or impute missing values.");
         }
@@ -113,7 +113,7 @@ public class SemOptimizerPalCds implements SemOptimizer {
          * parameter values.
          */
         @Override
-		public double evaluate(final double[] argument) {
+        public double evaluate(final double[] argument) {
             for (int i = 0; i < argument.length; i++) {
                 if (Double.isNaN(argument[i])) {
                     throw new IllegalArgumentException("Attempt to set parameter " +
@@ -140,7 +140,7 @@ public class SemOptimizerPalCds implements SemOptimizer {
          * interface.
          */
         @Override
-		public int getNumArguments() {
+        public int getNumArguments() {
             return this.sem.getNumFreeParams();
         }
 
@@ -149,7 +149,7 @@ public class SemOptimizerPalCds implements SemOptimizer {
          * MultivariateFunction interface.
          */
         @Override
-		public double getLowerBound(final int n) {
+        public double getLowerBound(final int n) {
             Parameter param = this.sem.getFreeParameters().get(n);
             return (param.getType() == ParamType.COEF ||
                     param.getType() == ParamType.COVAR) ? -10000.0 : 0.0001;
@@ -160,7 +160,7 @@ public class SemOptimizerPalCds implements SemOptimizer {
          * MultivariateFunction interface.
          */
         @Override
-		public double getUpperBound(final int n) {
+        public double getUpperBound(final int n) {
             return 10000.0;
         }
 

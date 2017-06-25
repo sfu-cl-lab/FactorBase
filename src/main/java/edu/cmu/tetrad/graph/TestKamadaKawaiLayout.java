@@ -43,6 +43,17 @@ public final class TestKamadaKawaiLayout extends TestCase {
         super(name);
     }
 
+    /**
+     * This method uses reflection to collect up all of the test methods from
+     * this class and return them to the test runner.
+     */
+    public static Test suite() {
+
+        // Edit the name of the class in the parens to match the name
+        // of this class.
+        return new TestSuite(TestKamadaKawaiLayout.class);
+    }
+
     public void testLayout() {
         //        Dag dag = GraphUtils.createRandomDag(40, 0, 80, 6, 6, 6, true);
 
@@ -75,19 +86,6 @@ public final class TestKamadaKawaiLayout extends TestCase {
         //        Layout.doLayout();
     }
 
-    public void testSolve() {
-        DoubleMatrix2D a =
-                new DenseDoubleMatrix2D(new double[][]{{1, 2}, {3, 4}});
-
-        DoubleMatrix2D b = new DenseDoubleMatrix2D(new double[][]{{1}, {1}});
-
-        DoubleMatrix2D c = new Algebra().solve(a, b);
-
-        System.out.println(a);
-        System.out.println(b);
-        System.out.println(c);
-    }
-
     //    public void testEdgeCrossings() {
     //        Graph graph = GraphUtils.createRandomDag(15, 0, 25, 3, 3, 3, false);
     //
@@ -103,15 +101,17 @@ public final class TestKamadaKawaiLayout extends TestCase {
     //        System.out.println("Intersects: " + intersects);
     //    }
 
-    /**
-     * This method uses reflection to collect up all of the test methods from
-     * this class and return them to the test runner.
-     */
-    public static Test suite() {
+    public void testSolve() {
+        DoubleMatrix2D a =
+                new DenseDoubleMatrix2D(new double[][]{{1, 2}, {3, 4}});
 
-        // Edit the name of the class in the parens to match the name
-        // of this class.
-        return new TestSuite(TestKamadaKawaiLayout.class);
+        DoubleMatrix2D b = new DenseDoubleMatrix2D(new double[][]{{1}, {1}});
+
+        DoubleMatrix2D c = new Algebra().solve(a, b);
+
+        System.out.println(a);
+        System.out.println(b);
+        System.out.println(c);
     }
 }
 

@@ -51,6 +51,17 @@ public class TestSem extends TestCase {
         super(name);
     }
 
+    /**
+     * This method uses reflection to collect up all of the test methods from
+     * this class and return them to the test runner.
+     */
+    public static Test suite() {
+
+        // Edit the name of the class in the parens to match the name
+        // of this class.
+        return new TestSuite(TestSem.class);
+    }
+
     public void testSet1() {
         Graph graph = constructGraph1();
         SemPm semPm = new SemPm(graph);
@@ -222,17 +233,6 @@ public class TestSem extends TestCase {
         DoubleMatrix2D m2 = new DenseDoubleMatrix2D(m);
 
         return new CovarianceMatrix(DataUtils.createContinuousVariables(vars), m2, sampleSize);
-    }
-
-    /**
-     * This method uses reflection to collect up all of the test methods from
-     * this class and return them to the test runner.
-     */
-    public static Test suite() {
-
-        // Edit the name of the class in the parens to match the name
-        // of this class.
-        return new TestSuite(TestSem.class);
     }
 }
 

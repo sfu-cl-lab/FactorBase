@@ -49,14 +49,14 @@ import java.util.List;
  */
 public class LocalLingOrientation2 {
     private Graph pattern;
-    private List<DataSet> dataSets;
+    private List <DataSet> dataSets;
     private double alpha = 0.05;
-    private ArrayList<Regression> regressions;
-    private List<Node> variables;
+    private ArrayList <Regression> regressions;
+    private List <Node> variables;
 
     //===============================CONSTRUCTOR============================//
 
-    public LocalLingOrientation2(Graph pattern, List<DataSet> dataSets)
+    public LocalLingOrientation2(Graph pattern, List <DataSet> dataSets)
             throws IllegalArgumentException {
 
         if (pattern == null) {
@@ -70,7 +70,7 @@ public class LocalLingOrientation2 {
         this.pattern = pattern;
         this.dataSets = dataSets;
 
-        regressions = new ArrayList<Regression>();
+        regressions = new ArrayList <Regression>();
         this.variables = dataSets.get(0).getVariables();
 
         for (DataSet dataSet : dataSets) {
@@ -83,19 +83,19 @@ public class LocalLingOrientation2 {
         Graph skeleton = GraphUtils.undirectedGraph(getPattern());
         Graph graph = new EdgeListGraph(skeleton.getNodes());
 
-        List<Node> nodes = skeleton.getNodes();
+        List <Node> nodes = skeleton.getNodes();
         Collections.shuffle(nodes);
 
         for (Node node : nodes) {
-            List<Node> adj = skeleton.getAdjacentNodes(node);
+            List <Node> adj = skeleton.getAdjacentNodes(node);
 
             DepthChoiceGenerator gen = new DepthChoiceGenerator(adj.size(), adj.size());
             int[] choice;
             double minP = Double.POSITIVE_INFINITY;
-            List<Node> parents = null;
+            List <Node> parents = null;
 
             while ((choice = gen.next()) != null) {
-                List<Node> _parents = GraphUtils.asList(choice, adj);
+                List <Node> _parents = GraphUtils.asList(choice, adj);
                 if (_parents.isEmpty()) continue;
 
                 double p = score(node, _parents);
@@ -141,10 +141,10 @@ public class LocalLingOrientation2 {
         for (Edge adj : skeleton.getEdges()) {
             Node x = adj.getNode1();
             Node y = adj.getNode2();
-            List<Edge> edges = graph.getEdges(x, y);
+            List <Edge> edges = graph.getEdges(x, y);
             if (edges.size() == 1) continue;
 
-            List<Node> parents = graph.getParents(x);
+            List <Node> parents = graph.getParents(x);
             double score1 = score(x, parents);
 
             parents.remove(y);
@@ -243,7 +243,7 @@ public class LocalLingOrientation2 {
 //        Graph skeleton = GraphUtils.undirectedGraph(getPattern());
         Graph graph = new EdgeListGraph(skeleton.getNodes());
 
-        List<Node> nodes = skeleton.getNodes();
+        List <Node> nodes = skeleton.getNodes();
         Collections.shuffle(nodes);
 
 //        for (Node node : nodes) {
@@ -308,7 +308,7 @@ public class LocalLingOrientation2 {
                 Node x = edge.getNode1();
                 Node y = edge.getNode2();
 
-                List<Node> parents = graph.getParents(x);
+                List <Node> parents = graph.getParents(x);
                 double score1 = score(x, parents);
 
                 parents.remove(y);
@@ -349,10 +349,10 @@ public class LocalLingOrientation2 {
         for (Edge adj : skeleton.getEdges()) {
             Node x = adj.getNode1();
             Node y = adj.getNode2();
-            List<Edge> edges = graph.getEdges(x, y);
+            List <Edge> edges = graph.getEdges(x, y);
             if (edges.size() == 1) continue;
 
-            List<Node> parents = graph.getParents(x);
+            List <Node> parents = graph.getParents(x);
             double score1 = score(x, parents);
 
             parents.remove(y);
@@ -411,22 +411,22 @@ public class LocalLingOrientation2 {
         return graph;
     }
 
-    private double score(Node y, List<Node> parents) {
+    private double score(Node y, List <Node> parents) {
         return andersonDarlingPA(y, parents);
 //        return localScoreB(y, parents);
     }
 
     //=============================PRIVATE METHODS=========================//
 
-    private double localScoreA(Node node, List<Node> parents) {
+    private double localScoreA(Node node, List <Node> parents) {
         double score = 0.0;
 
-        List<Double> _residuals = new ArrayList<Double>();
+        List <Double> _residuals = new ArrayList <Double>();
 
         Node _target = node;
-        List<Node> _regressors = parents;
+        List <Node> _regressors = parents;
         Node target = getVariable(variables, _target.getName());
-        List<Node> regressors = new ArrayList<Node>();
+        List <Node> regressors = new ArrayList <Node>();
 
         for (Node _regressor : _regressors) {
             Node variable = getVariable(variables, _regressor.getName());
@@ -479,15 +479,15 @@ public class LocalLingOrientation2 {
         return score;
     }
 
-    private double localScoreB(Node node, List<Node> parents) {
+    private double localScoreB(Node node, List <Node> parents) {
 
         double score = 0.0;
         double maxScore = Double.NEGATIVE_INFINITY;
 
         Node _target = node;
-        List<Node> _regressors = parents;
+        List <Node> _regressors = parents;
         Node target = getVariable(variables, _target.getName());
-        List<Node> regressors = new ArrayList<Node>();
+        List <Node> regressors = new ArrayList <Node>();
 
         for (Node _regressor : _regressors) {
             Node variable = getVariable(variables, _regressor.getName());
@@ -541,13 +541,13 @@ public class LocalLingOrientation2 {
 //        return score / dataSets.size();
     }
 
-    private double andersonDarlingPA(Node node, List<Node> parents) {
-        List<Double> _residuals = new ArrayList<Double>();
+    private double andersonDarlingPA(Node node, List <Node> parents) {
+        List <Double> _residuals = new ArrayList <Double>();
 
         Node _target = node;
-        List<Node> _regressors = parents;
+        List <Node> _regressors = parents;
         Node target = getVariable(variables, _target.getName());
-        List<Node> regressors = new ArrayList<Node>();
+        List <Node> regressors = new ArrayList <Node>();
 
         for (Node _regressor : _regressors) {
             Node variable = getVariable(variables, _regressor.getName());
@@ -594,13 +594,13 @@ public class LocalLingOrientation2 {
         return p;
     }
 
-    private double andersonDarlingPB(Node node, List<Node> parents) {
-        List<Double> _residuals = new ArrayList<Double>();
+    private double andersonDarlingPB(Node node, List <Node> parents) {
+        List <Double> _residuals = new ArrayList <Double>();
 
         Node _target = node;
-        List<Node> _regressors = parents;
+        List <Node> _regressors = parents;
         Node target = getVariable(variables, _target.getName());
-        List<Node> regressors = new ArrayList<Node>();
+        List <Node> regressors = new ArrayList <Node>();
 
         for (Node _regressor : _regressors) {
             Node variable = getVariable(variables, _regressor.getName());
@@ -682,7 +682,7 @@ public class LocalLingOrientation2 {
         return pattern;
     }
 
-    private Node getVariable(List<Node> variables, String name) {
+    private Node getVariable(List <Node> variables, String name) {
         for (Node node : variables) {
             if (name.equals(node.getName())) {
                 return node;

@@ -29,29 +29,26 @@ import edu.cmu.tetrad.util.ChoiceGenerator;
 import edu.cmu.tetrad.util.StatUtils;
 import edu.cmu.tetrad.util.TetradLogger;
 
-import java.util.*;
-
 /**
  * A clean-up of Ricardo's tetrad-based purify.
  *
  * @author Joe Ramsey
  */
 public class PurifyTetradBasedH implements IPurify {
+    boolean listTetrads = false;
     private TetradTest tetradTest;
     private int maxClusterSize = 5;
-
-    private List<Node> nodes;
-    boolean listTetrads = false;
-    private HashMap<Node, Integer> nodeMap;
+    private List <Node> nodes;
+    private HashMap <Node, Integer> nodeMap;
     private Graph mim;
     private Tetrad foundTetrad;
-    private List<Double> pvalueList = new ArrayList<Double>();
+    private List <Double> pvalueList = new ArrayList <Double>();
 
     public PurifyTetradBasedH(TetradTest tetradTest, int maxClusterSize) {
         this.tetradTest = tetradTest;
         this.nodes = tetradTest.getVariables();
 
-        this.nodeMap = new HashMap<Node, Integer>();
+        this.nodeMap = new HashMap <Node, Integer>();
 
         for (int index = 0; index < nodes.size(); index++) {
             nodeMap.put(nodes.get(index), index);
@@ -63,28 +60,28 @@ public class PurifyTetradBasedH implements IPurify {
     }
 
     @Override
-	public List<List<Node>> purify(List<List<Node>> clustering) {
+    public List <List <Node>> purify(List <List <Node>> clustering) {
 
         // The inputs nodes may not be object identical to the ones from the tetrad test, so we map them over then
         // back by their names.
-        List<Node> originalNodes = new ArrayList<Node>();
+        List <Node> originalNodes = new ArrayList <Node>();
 
-        for (List<Node> cluster : clustering) {
+        for (List <Node> cluster : clustering) {
             originalNodes.addAll(cluster);
         }
 
-        List<List<Node>> _clustering = new ArrayList<List<Node>>();
+        List <List <Node>> _clustering = new ArrayList <List <Node>>();
 
-        for (List<Node> cluster : clustering) {
-            List<Node> converted = GraphUtils.replaceNodes(cluster, nodes);
+        for (List <Node> cluster : clustering) {
+            List <Node> converted = GraphUtils.replaceNodes(cluster, nodes);
             _clustering.add(converted);
         }
 
-        List<List<Node>> result = combinedSearch(_clustering, getMaxClusterSize());
-        List<List<Node>> convertedResult = new ArrayList<List<Node>>();
+        List <List <Node>> result = combinedSearch(_clustering, getMaxClusterSize());
+        List <List <Node>> convertedResult = new ArrayList <List <Node>>();
 
-        for (List<Node> cluster : result) {
-            List<Node> converted = GraphUtils.replaceNodes(cluster, originalNodes);
+        for (List <Node> cluster : result) {
+            List <Node> converted = GraphUtils.replaceNodes(cluster, originalNodes);
             convertedResult.add(converted);
         }
 
@@ -95,20 +92,20 @@ public class PurifyTetradBasedH implements IPurify {
     }
 
 
-    private List<List<Node>> combinedSearch(List<List<Node>> clustering, int maxSize) {
+    private List <List <Node>> combinedSearch(List <List <Node>> clustering, int maxSize) {
         double cutoff = tetradTest.getSignificance();
 
-        List<List<Node>> _clustering = initializeZeroClusters(clustering.size());
-        Set<Node> allNodes = getAllNodesInClusters(clustering);
+        List <List <Node>> _clustering = initializeZeroClusters(clustering.size());
+        Set <Node> allNodes = getAllNodesInClusters(clustering);
         addPureNodes(clustering, _clustering, allNodes, cutoff, maxSize);
 
         return _clustering;
     }
 
-    private void addNodesToSubclusters(List<List<Node>> clustering, List<List<Node>> subclustering, int maxSize) {
+    private void addNodesToSubclusters(List <List <Node>> clustering, List <List <Node>> subclustering, int maxSize) {
         for (int i = 0; i < clustering.size(); i++) {
-            List<Node> cluster = clustering.get(i);
-            List<Node> subcluster = subclustering.get(i);
+            List <Node> cluster = clustering.get(i);
+            List <Node> subcluster = subclustering.get(i);
             Collections.shuffle(cluster);
 
             for (Node node : cluster) {
@@ -119,39 +116,39 @@ public class PurifyTetradBasedH implements IPurify {
         }
     }
 
-    private List<List<Node>> initializeZeroClusters(int numClusters) {
-        List<List<Node>> clustering = new ArrayList<List<Node>>();
+    private List <List <Node>> initializeZeroClusters(int numClusters) {
+        List <List <Node>> clustering = new ArrayList <List <Node>>();
 
         for (int i = 0; i < numClusters; i++) {
-            clustering.add(new ArrayList<Node>());
+            clustering.add(new ArrayList <Node>());
         }
         return clustering;
     }
 
-    private Set<Node> getAllNodesInClusters(List<List<Node>> clustering) {
-        Set<Node> allNodes = new HashSet<Node>();
+    private Set <Node> getAllNodesInClusters(List <List <Node>> clustering) {
+        Set <Node> allNodes = new HashSet <Node>();
 
-        for (List<Node> cluster : clustering) {
+        for (List <Node> cluster : clustering) {
             allNodes.addAll(cluster);
         }
         return allNodes;
     }
 
-    private void addPureNodes(List<List<Node>> clustering, List<List<Node>> _clustering, Set<Node> allNodes, double cutoff, int maxSize) {
-        List<Node> _allNodes = new ArrayList<Node>(allNodes);
+    private void addPureNodes(List <List <Node>> clustering, List <List <Node>> _clustering, Set <Node> allNodes, double cutoff, int maxSize) {
+        List <Node> _allNodes = new ArrayList <Node>(allNodes);
         Collections.shuffle(_allNodes);
 
-        List<Node> nodesToTry = new ArrayList<Node>(_allNodes);
+        List <Node> nodesToTry = new ArrayList <Node>(_allNodes);
         int index = 0;
 
         while (!nodesToTry.isEmpty()) {
 
             NODE:
-            for (Node node : new ArrayList<Node>(nodesToTry)) {
+            for (Node node : new ArrayList <Node>(nodesToTry)) {
 
                 for (int i = 0; i < _clustering.size(); i++) {
-                    List<Node> cluster = _clustering.get(i);
-                    List<Node> originalCluster = clustering.get(i);
+                    List <Node> cluster = _clustering.get(i);
+                    List <Node> originalCluster = clustering.get(i);
 
                     if (!originalCluster.contains(node)) {
                         continue;
@@ -173,7 +170,7 @@ public class PurifyTetradBasedH implements IPurify {
                     exists = existsImpurity(node, _clustering, cutoff);
 
                     if (exists) {
-                        for (List<Node> __cluster : _clustering) {
+                        for (List <Node> __cluster : _clustering) {
                             __cluster.remove(node);
                         }
 
@@ -197,14 +194,14 @@ public class PurifyTetradBasedH implements IPurify {
         System.out.println("Subgraph for node " + node + ", tetrad " + getFoundTetrad() + ":");
         TetradLogger.getInstance().log("details", "Subgraph for node " + node + ", tetrad " + getFoundTetrad() + ":");
 
-        List<Node> _nodes = new ArrayList<Node>();
+        List <Node> _nodes = new ArrayList <Node>();
 
         for (Node node2 : getFoundTetrad().getNodes()) {
             _nodes.add(mim.getNode(node2.getName()));
         }
 
 //                        Graph subgraph = mim.subgraph(_nodes);
-        List<Edge> edges = mim.getEdges();
+        List <Edge> edges = mim.getEdges();
 
         for (int t = 0; t < edges.size(); t++) {
             Edge edge = edges.get(t);
@@ -216,8 +213,8 @@ public class PurifyTetradBasedH implements IPurify {
         }
     }
 
-    private boolean existsImpurity(Node node, List<List<Node>> clustering, double cutoff) {
-        for (List<Node> cluster : clustering) {
+    private boolean existsImpurity(Node node, List <List <Node>> clustering, double cutoff) {
+        for (List <Node> cluster : clustering) {
 //            if (!cluster.contains(node)) {
 //                continue;
 //            }
@@ -229,13 +226,13 @@ public class PurifyTetradBasedH implements IPurify {
         return existsCrossConstructImpurity(node, clustering, cutoff);
     }
 
-    private boolean existsWithinClusterImpurity(Node node, List<Node> cluster, double cutoff) {
+    private boolean existsWithinClusterImpurity(Node node, List <Node> cluster, double cutoff) {
         if (cluster.size() < 4) return false;
         ChoiceGenerator gen = new ChoiceGenerator(cluster.size(), 4);
         int[] choice;
 
         while ((choice = gen.next()) != null) {
-            List<Node> _cluster = GraphUtils.asList(choice, cluster);
+            List <Node> _cluster = GraphUtils.asList(choice, cluster);
             boolean exists = existsThreeTetradImpurity(node, _cluster, cutoff);
             if (exists) return true;
         }
@@ -243,11 +240,11 @@ public class PurifyTetradBasedH implements IPurify {
         return false;
     }
 
-    private boolean existsCrossConstructImpurity(Node node, List<List<Node>> clustering, double cutoff) {
+    private boolean existsCrossConstructImpurity(Node node, List <List <Node>> clustering, double cutoff) {
         for (int p1 = 0; p1 < clustering.size(); p1++) {
             for (int p2 = p1 + 1; p2 < clustering.size(); p2++) {
-                List<Node> cluster1 = clustering.get(p1);
-                List<Node> cluster2 = clustering.get(p2);
+                List <Node> cluster1 = clustering.get(p1);
+                List <Node> cluster2 = clustering.get(p2);
 
 //                if (!(cluster1.contains(node) || cluster2.contains(node))) {
 //                    continue;
@@ -262,7 +259,7 @@ public class PurifyTetradBasedH implements IPurify {
                         int[] choice2;
 
                         while ((choice2 = gen2.next()) != null) {
-                            List<Node> crossCluster = new ArrayList<Node>();
+                            List <Node> crossCluster = new ArrayList <Node>();
                             for (int i : choice1) crossCluster.add(cluster1.get(i));
                             for (int i : choice2) crossCluster.add(cluster2.get(i));
 
@@ -285,7 +282,7 @@ public class PurifyTetradBasedH implements IPurify {
                         int[] choice2;
 
                         while ((choice2 = gen2.next()) != null) {
-                            List<Node> crossCluster = new ArrayList<Node>();
+                            List <Node> crossCluster = new ArrayList <Node>();
                             for (int i : choice1) crossCluster.add(cluster2.get(i));
                             for (int i : choice2) crossCluster.add(cluster1.get(i));
 
@@ -308,7 +305,7 @@ public class PurifyTetradBasedH implements IPurify {
                         int[] choice2;
 
                         while ((choice2 = gen2.next()) != null) {
-                            List<Node> crossCluster = new ArrayList<Node>();
+                            List <Node> crossCluster = new ArrayList <Node>();
                             for (int i : choice1) crossCluster.add(cluster1.get(i));
                             for (int i : choice2) crossCluster.add(cluster2.get(i));
 
@@ -327,7 +324,7 @@ public class PurifyTetradBasedH implements IPurify {
         return false;
     }
 
-    private boolean existsThreeTetradImpurity(Node node, List<Node> cluster, double cutoff) {
+    private boolean existsThreeTetradImpurity(Node node, List <Node> cluster, double cutoff) {
         if (cluster.size() != 4) throw new IllegalStateException("Expected a 4-node cluster: " + cluster);
 
         Node ci = cluster.get(0);
@@ -372,7 +369,7 @@ public class PurifyTetradBasedH implements IPurify {
         return false;
     }
 
-    private boolean existsTetrads2By2Impurity(Node node, List<Node> cluster, double cutoff) {
+    private boolean existsTetrads2By2Impurity(Node node, List <Node> cluster, double cutoff) {
         if (cluster.size() != 4) throw new IllegalStateException("Expected a 4-node cluster: " + cluster);
 
         Node ci = cluster.get(0);
@@ -406,7 +403,7 @@ public class PurifyTetradBasedH implements IPurify {
     }
 
     @Override
-	public void setTrueGraph(Graph mim) {
+    public void setTrueGraph(Graph mim) {
         this.mim = mim;
     }
 

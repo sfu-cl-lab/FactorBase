@@ -107,38 +107,15 @@ public class GraphNode implements Node, TetradSerializable {
      * Returns the name of the variable.
      */
     @Override
-	public final String getName() {
+    public final String getName() {
         return this.name;
-    }
-
-    /**
-     * Returns the node type.
-     *
-     * @see edu.cmu.tetrad.graph.NodeType
-     */
-    @Override
-	public final NodeType getNodeType() {
-        return nodeType;
-    }
-
-    /**
-     * Sets the node type.
-     *
-     * @see edu.cmu.tetrad.graph.NodeType
-     */
-    @Override
-	public final void setNodeType(NodeType nodeType) {
-        if (nodeType == null) {
-            throw new NullPointerException("Node type must not be null.");
-        }
-        this.nodeType = nodeType;
     }
 
     /**
      * Sets the name of this variable.
      */
     @Override
-	public final void setName(String name) {
+    public final void setName(String name) {
         if (name == null) {
             throw new NullPointerException("Name must not be null.");
         }
@@ -154,10 +131,33 @@ public class GraphNode implements Node, TetradSerializable {
     }
 
     /**
+     * Returns the node type.
+     *
+     * @see edu.cmu.tetrad.graph.NodeType
+     */
+    @Override
+    public final NodeType getNodeType() {
+        return nodeType;
+    }
+
+    /**
+     * Sets the node type.
+     *
+     * @see edu.cmu.tetrad.graph.NodeType
+     */
+    @Override
+    public final void setNodeType(NodeType nodeType) {
+        if (nodeType == null) {
+            throw new NullPointerException("Node type must not be null.");
+        }
+        this.nodeType = nodeType;
+    }
+
+    /**
      * Returns the x coordinate of the center of the node.
      */
     @Override
-	public final int getCenterX() {
+    public final int getCenterX() {
         return this.centerX;
     }
 
@@ -165,7 +165,7 @@ public class GraphNode implements Node, TetradSerializable {
      * Sets the x coordinate of the center of this node.
      */
     @Override
-	public final void setCenterX(int centerX) {
+    public final void setCenterX(int centerX) {
         this.centerX = centerX;
     }
 
@@ -173,7 +173,7 @@ public class GraphNode implements Node, TetradSerializable {
      * Returns the y coordinate of the center of the node.
      */
     @Override
-	public final int getCenterY() {
+    public final int getCenterY() {
         return this.centerY;
     }
 
@@ -181,7 +181,7 @@ public class GraphNode implements Node, TetradSerializable {
      * Sets the y coordinate of the center of this node.
      */
     @Override
-	public final void setCenterY(int centerY) {
+    public final void setCenterY(int centerY) {
         this.centerY = centerY;
     }
 
@@ -189,7 +189,7 @@ public class GraphNode implements Node, TetradSerializable {
      * Sets the (x, y) coordinates of the center of this node.
      */
     @Override
-	public final void setCenter(int centerX, int centerY) {
+    public final void setCenter(int centerX, int centerY) {
         this.centerX = centerX;
         this.centerY = centerY;
     }
@@ -209,7 +209,7 @@ public class GraphNode implements Node, TetradSerializable {
      * Adds a property change listener.
      */
     @Override
-	public final void addPropertyChangeListener(PropertyChangeListener l) {
+    public final void addPropertyChangeListener(PropertyChangeListener l) {
         getPcs().addPropertyChangeListener(l);
     }
 
@@ -224,12 +224,12 @@ public class GraphNode implements Node, TetradSerializable {
      * Returns the name of the node as its string representation.
      */
     @Override
-	public String toString() {
+    public String toString() {
         return name;
     }
 
     @Override
-	public int hashCode() {
+    public int hashCode() {
         int hashCode = 63;
         hashCode = 17 * hashCode + getName().hashCode();
         hashCode = 19 * hashCode + getNodeType().hashCode();
@@ -241,7 +241,7 @@ public class GraphNode implements Node, TetradSerializable {
      * same missing value marker.
      */
     @Override
-	public boolean equals(Object o) {
+    public boolean equals(Object o) {
         if (o == null) {
             return false;
         }
@@ -260,7 +260,7 @@ public class GraphNode implements Node, TetradSerializable {
     }
 
     @Override
-	public Node like(String name) {
+    public Node like(String name) {
         GraphNode node = new GraphNode(name);
         node.setNodeType(getNodeType());
         return node;
@@ -293,7 +293,7 @@ public class GraphNode implements Node, TetradSerializable {
     }
 
     @Override
-	public int compareTo(Object o) {
+    public int compareTo(Object o) {
         Node node = (Node) o;
         return getName().compareTo(node.getName());
     }

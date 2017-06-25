@@ -59,7 +59,7 @@ public interface Node extends TetradSerializable, Comparable {
      * Returns a string representation of the node.
      */
     @Override
-	String toString();
+    String toString();
 
     /**
      * Returns the x coordinate of the center of the node.
@@ -95,13 +95,13 @@ public interface Node extends TetradSerializable, Comparable {
      * Returns a hashcode for this variable.
      */
     @Override
-	int hashCode();
+    int hashCode();
 
     /**
      * Returns true iff this variable is equal to the given variable.
      */
     @Override
-	boolean equals(Object o);
+    boolean equals(Object o);
 
     /**
      * Creates a new node of the same type as this one with the given name.
@@ -112,7 +112,7 @@ public interface Node extends TetradSerializable, Comparable {
      * Alphabetical order.
      */
     @Override
-	int compareTo(Object o);
+    int compareTo(Object o);
 }
 
 

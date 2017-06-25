@@ -23,8 +23,6 @@ package edu.cmu.tetrad.search;
 
 import edu.cmu.tetrad.graph.*;
 
-import java.util.*;
-
 /**
  * Finds possible d-connecting paths for the IonSearch.
  * <p/>
@@ -44,16 +42,16 @@ public class PossibleDConnectingPath {
     /**
      * The conditions.
      */
-    private Set<Node> conditions;
+    private Set <Node> conditions;
 
 
     /**
      * The path.
      */
-    private List<Node> path;
+    private List <Node> path;
 
 
-    private PossibleDConnectingPath(Graph p, Set<Node> conditions, List<Node> path) {
+    private PossibleDConnectingPath(Graph p, Set <Node> conditions, List <Node> path) {
         if (p == null || conditions == null || path == null) {
             throw new NullPointerException();
         }
@@ -65,29 +63,10 @@ public class PossibleDConnectingPath {
 
     //========================= Public methods ======================//
 
-
-    public Graph getPag() {
-        return this.pag;
-    }
-
-    public Set<Node> getConditions() {
-        return Collections.unmodifiableSet(conditions);
-    }
-
-    public List<Node> getPath() {
-        return Collections.unmodifiableList(path);
-    }
-
-    @Override
-	public String toString() {
-        return path.toString();
-    }
-
-
     /**
      * Finds all possible D-connection paths as sub-graphs of the pag given at construction time from x to y given z.
      */
-    public static List<PossibleDConnectingPath> findDConnectingPaths(Graph pag, Node x, Node y, Collection<Node> z) {
+    public static List <PossibleDConnectingPath> findDConnectingPaths(Graph pag, Node x, Node y, Collection <Node> z) {
         if (!pag.containsNode(x) || !pag.containsNode(y) || x.equals(y)) {
             return Collections.emptyList();
         }
@@ -97,14 +76,14 @@ public class PossibleDConnectingPath {
             }
         }
         if (pag.isAdjacentTo(x, y)) {
-            return Collections.singletonList(new PossibleDConnectingPath(pag, new HashSet<Node>(z), Arrays.asList(x, y)));
+            return Collections.singletonList(new PossibleDConnectingPath(pag, new HashSet <Node>(z), Arrays.asList(x, y)));
         }
-        List<PossibleDConnectingPath> connectingPaths = new LinkedList<PossibleDConnectingPath>();
-        Set<Node> conditions = new HashSet<Node>(z);
-        Set<Node> closure = getConditioningClosure(pag, z);
-        Set<List<Node>> paths = new HashSet<List<Node>>();
-        findPaths(pag, paths, null, x, y, conditions, closure, new LinkedList<Node>());
-        for (List<Node> path : paths) {
+        List <PossibleDConnectingPath> connectingPaths = new LinkedList <PossibleDConnectingPath>();
+        Set <Node> conditions = new HashSet <Node>(z);
+        Set <Node> closure = getConditioningClosure(pag, z);
+        Set <List <Node>> paths = new HashSet <List <Node>>();
+        findPaths(pag, paths, null, x, y, conditions, closure, new LinkedList <Node>());
+        for (List <Node> path : paths) {
             connectingPaths.add(new PossibleDConnectingPath(pag, conditions, path));
         }
         return connectingPaths;
@@ -114,7 +93,7 @@ public class PossibleDConnectingPath {
      * Finds all possible D-connection paths as sub-graphs of the pag given at construction time from x to y given z for
      * a particular path length.
      */
-    public static List<PossibleDConnectingPath> findDConnectingPathsOfLength(Graph pag, Node x, Node y, Collection<Node> z, Integer length) {
+    public static List <PossibleDConnectingPath> findDConnectingPathsOfLength(Graph pag, Node x, Node y, Collection <Node> z, Integer length) {
         if (!pag.containsNode(x) || !pag.containsNode(y) || x.equals(y)) {
             return Collections.emptyList();
         }
@@ -124,52 +103,26 @@ public class PossibleDConnectingPath {
             }
         }
         if (pag.isAdjacentTo(x, y)) {
-            return Collections.singletonList(new PossibleDConnectingPath(pag, new HashSet<Node>(z), Arrays.asList(x, y)));
+            return Collections.singletonList(new PossibleDConnectingPath(pag, new HashSet <Node>(z), Arrays.asList(x, y)));
         }
-        List<PossibleDConnectingPath> connectingPaths = new LinkedList<PossibleDConnectingPath>();
-        Set<Node> conditions = new HashSet<Node>(z);
-        Set<Node> closure = getConditioningClosure(pag, z);
-        Set<List<Node>> paths = new HashSet<List<Node>>();
-        findPathsOfLength(pag, paths, null, x, y, conditions, closure, new LinkedList<Node>(), length);
-        for (List<Node> path : paths) {
+        List <PossibleDConnectingPath> connectingPaths = new LinkedList <PossibleDConnectingPath>();
+        Set <Node> conditions = new HashSet <Node>(z);
+        Set <Node> closure = getConditioningClosure(pag, z);
+        Set <List <Node>> paths = new HashSet <List <Node>>();
+        findPathsOfLength(pag, paths, null, x, y, conditions, closure, new LinkedList <Node>(), length);
+        for (List <Node> path : paths) {
             connectingPaths.add(new PossibleDConnectingPath(pag, conditions, path));
         }
         return connectingPaths;
     }
 
-
-    @Override
-	public boolean equals(Object o) {
-        if (!(o instanceof PossibleDConnectingPath)) {
-            return false;
-        }
-        PossibleDConnectingPath p = (PossibleDConnectingPath) o;
-        return p.pag.equals(pag) && p.path.equals(path) && p.conditions.equals(conditions);
-    }
-
-    /*
-     public int hashCode(){
-         int result = 17;
-         result += 19 * pag.hashCode();
-         result += 23 * path.hashCode();
-         result += 27 * conditions.hashCode();
-
-         return result;
-     }
-
-    */
-
-    //================================== Private methods =======================//
-
-
-    private static Set<Node> getConditioningClosure(Graph pag, Collection<Node> z) {
-        Set<Node> closure = new HashSet<Node>();
+    private static Set <Node> getConditioningClosure(Graph pag, Collection <Node> z) {
+        Set <Node> closure = new HashSet <Node>();
         for (Node node : z) {
             doParentClosureVisit(pag, node, closure);
         }
         return closure;
     }
-
 
     /**
      * Find the closure of a conditioning set of nodes under the parent relation.
@@ -178,7 +131,7 @@ public class PossibleDConnectingPath {
      * @param node    the node in question
      * @param closure the closure of the conditioning set uner the parent relation (to be calculated recursively).
      */
-    private static void doParentClosureVisit(Graph pag, Node node, Set<Node> closure) {
+    private static void doParentClosureVisit(Graph pag, Node node, Set <Node> closure) {
         if (!closure.contains(node)) {
             closure.add(node);
 
@@ -194,12 +147,11 @@ public class PossibleDConnectingPath {
         }
     }
 
-
     /**
      * Recursive methods that finds all the paths.
      */
-    private static void findPaths(Graph pag, Set<List<Node>> paths, Node previous, Node current,
-                                  Node target, Set<Node> condition, Set<Node> conditionClosure, List<Node> history) {
+    private static void findPaths(Graph pag, Set <List <Node>> paths, Node previous, Node current,
+                                  Node target, Set <Node> condition, Set <Node> conditionClosure, List <Node> history) {
 
         // check for cycles.
         if (history.contains(current)) {
@@ -212,10 +164,10 @@ public class PossibleDConnectingPath {
             return;
         }
         // recurse
-        List<Node> adjacencies = pag.getAdjacentNodes(current);
+        List <Node> adjacencies = pag.getAdjacentNodes(current);
         for (Node adj : adjacencies) {
             if (previous == null) {
-                List<Node> h = new ArrayList<Node>(history);
+                List <Node> h = new ArrayList <Node>(history);
                 h.add(current);
                 findPaths(pag, paths, current, adj, target, condition, conditionClosure, h);
                 continue;
@@ -230,7 +182,7 @@ public class PossibleDConnectingPath {
             }
 
             if (pass) {
-                List<Node> h = new ArrayList<Node>(history);
+                List <Node> h = new ArrayList <Node>(history);
                 h.add(current);
                 findPaths(pag, paths, current, adj, target, condition, conditionClosure, h);
             }
@@ -241,8 +193,8 @@ public class PossibleDConnectingPath {
     /**
      * Recursive methods that finds all the paths of a specified length.
      */
-    private static void findPathsOfLength(Graph pag, Set<List<Node>> paths, Node previous, Node current,
-                                          Node target, Set<Node> condition, Set<Node> conditionClosure, List<Node> history, Integer length) {
+    private static void findPathsOfLength(Graph pag, Set <List <Node>> paths, Node previous, Node current,
+                                          Node target, Set <Node> condition, Set <Node> conditionClosure, List <Node> history, Integer length) {
         // checks if size greater than length
         if (history.size() > length) {
             return;
@@ -259,10 +211,10 @@ public class PossibleDConnectingPath {
             return;
         }
         // recurse
-        List<Node> adjacencies = pag.getAdjacentNodes(current);
+        List <Node> adjacencies = pag.getAdjacentNodes(current);
         for (Node adj : adjacencies) {
             if (previous == null) {
-                List<Node> h = new ArrayList<Node>(history);
+                List <Node> h = new ArrayList <Node>(history);
                 h.add(current);
                 findPathsOfLength(pag, paths, current, adj, target, condition, conditionClosure, h, length);
                 continue;
@@ -277,14 +229,13 @@ public class PossibleDConnectingPath {
             }
 
             if (pass) {
-                List<Node> h = new ArrayList<Node>(history);
+                List <Node> h = new ArrayList <Node>(history);
                 h.add(current);
                 findPathsOfLength(pag, paths, current, adj, target, condition, conditionClosure, h, length);
             }
         }
 
     }
-
 
     private static boolean isOpen(Graph pag, Node x, Node y, Node z) {
         Edge edge = pag.getEdge(x, y);
@@ -293,6 +244,46 @@ public class PossibleDConnectingPath {
         }
         edge = pag.getEdge(y, z);
         return edge.getEndpoint1() == Endpoint.CIRCLE && edge.getEndpoint2() == Endpoint.CIRCLE;
+    }
+
+    /*
+     public int hashCode(){
+         int result = 17;
+         result += 19 * pag.hashCode();
+         result += 23 * path.hashCode();
+         result += 27 * conditions.hashCode();
+
+         return result;
+     }
+
+    */
+
+    //================================== Private methods =======================//
+
+    public Graph getPag() {
+        return this.pag;
+    }
+
+    public Set <Node> getConditions() {
+        return Collections.unmodifiableSet(conditions);
+    }
+
+    public List <Node> getPath() {
+        return Collections.unmodifiableList(path);
+    }
+
+    @Override
+    public String toString() {
+        return path.toString();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (!(o instanceof PossibleDConnectingPath)) {
+            return false;
+        }
+        PossibleDConnectingPath p = (PossibleDConnectingPath) o;
+        return p.pag.equals(pag) && p.path.equals(path) && p.conditions.equals(conditions);
     }
 
 }

@@ -64,7 +64,7 @@ public final class DagScorer implements TetradSerializable, Scorer {
     private DoubleMatrix2D edgeCoef;
     private DoubleMatrix2D errorCovar;
     private Graph dag = null;
-    private List<Node> variables;
+    private List <Node> variables;
     private DoubleMatrix2D implCovarC;
     private DenseDoubleMatrix2D implCovarMeasC;
     private DoubleMatrix2D sampleCovar;
@@ -77,8 +77,8 @@ public final class DagScorer implements TetradSerializable, Scorer {
     /**
      * Constructs a new SemEstimator that uses the specified optimizer.
      *
-     * @param dataSet      a DataSet, all of whose variables are contained in
-     *                     the given SemPm. (They are identified by name.)
+     * @param dataSet a DataSet, all of whose variables are contained in
+     *                the given SemPm. (They are identified by name.)
      */
     public DagScorer(DataSet dataSet) {
         this(new CovarianceMatrix(dataSet));
@@ -88,9 +88,9 @@ public final class DagScorer implements TetradSerializable, Scorer {
     /**
      * Constructs a new SemEstimator that uses the specified optimizer.
      *
-     * @param covMatrix    a covariance matrix, all of whose variables are
-     *                     contained in the given SemPm. (They are identified by
-     *                     name.)
+     * @param covMatrix a covariance matrix, all of whose variables are
+     *                  contained in the given SemPm. (They are identified by
+     *                  name.)
      */
     public DagScorer(ICovarianceMatrix covMatrix) {
         if (covMatrix == null) {
@@ -124,8 +124,8 @@ public final class DagScorer implements TetradSerializable, Scorer {
      * constructor. Returns the fml score of the resulting model.
      */
     @Override
-	public double score(Graph dag) {
-        List<Node> changedNodes = getChangedNodes(dag);
+    public double score(Graph dag) {
+        List <Node> changedNodes = getChangedNodes(dag);
 
         Algebra algebra = Algebra.ZERO;
 
@@ -141,7 +141,7 @@ public final class DagScorer implements TetradSerializable, Scorer {
             }
 
             int idx = indexOf(node);
-            List<Node> parents = dag.getParents(node);
+            List <Node> parents = dag.getParents(node);
 
             for (int i = 0; i < parents.size(); i++) {
                 Node nextParent = parents.get(i);
@@ -199,21 +199,21 @@ public final class DagScorer implements TetradSerializable, Scorer {
         throw new IllegalArgumentException("Dag must have the same nodes as the data.");
     }
 
-    private List<Node> getChangedNodes(Graph dag) {
+    private List <Node> getChangedNodes(Graph dag) {
         if (this.dag == null) {
             return dag.getNodes();
         }
 
-        if (!new HashSet<Node>(this.getVariables()).equals(new HashSet<Node>(dag.getNodes()))) {
-            System.out.println(new TreeSet<Node>(dag.getNodes()));
-            System.out.println(new TreeSet<Node>(variables));
+        if (!new HashSet <Node>(this.getVariables()).equals(new HashSet <Node>(dag.getNodes()))) {
+            System.out.println(new TreeSet <Node>(dag.getNodes()));
+            System.out.println(new TreeSet <Node>(variables));
             throw new IllegalArgumentException("Dag must have the same nodes as the data.");
         }
 
-        List<Node> changedNodes = new ArrayList<Node>();
+        List <Node> changedNodes = new ArrayList <Node>();
 
         for (Node node : dag.getNodes()) {
-            if (!new HashSet<Node>(this.dag.getParents(node)).equals(new HashSet<Node>(dag.getParents(node)))) {
+            if (!new HashSet <Node>(this.dag.getParents(node)).equals(new HashSet <Node>(dag.getParents(node)))) {
                 changedNodes.add(node);
             }
         }
@@ -222,7 +222,7 @@ public final class DagScorer implements TetradSerializable, Scorer {
     }
 
     @Override
-	public ICovarianceMatrix getCovMatrix() {
+    public ICovarianceMatrix getCovMatrix() {
         return covMatrix;
     }
 
@@ -230,7 +230,7 @@ public final class DagScorer implements TetradSerializable, Scorer {
      * Returns a string representation of the Sem.
      */
     @Override
-	public String toString() {
+    public String toString() {
         StringBuilder buf = new StringBuilder();
         buf.append("\nSemEstimator");
 
@@ -244,7 +244,7 @@ public final class DagScorer implements TetradSerializable, Scorer {
      * (Bollen 107). To optimize, this should be minimized.
      */
     @Override
-	public double getFml() {
+    public double getFml() {
         if (!Double.isNaN(this.fml)) {
             return this.fml;
         }
@@ -284,7 +284,7 @@ public final class DagScorer implements TetradSerializable, Scorer {
     }
 
     @Override
-	public double getLogLikelihood() {
+    public double getLogLikelihood() {
         DoubleMatrix2D SigmaTheta; // Do this once.
 
         try {
@@ -358,7 +358,7 @@ public final class DagScorer implements TetradSerializable, Scorer {
      * when minimized.
      */
     @Override
-	public double getTruncLL() {
+    public double getTruncLL() {
         // Formula Bollen p. 263.
 
         DoubleMatrix2D Sigma = implCovarMeas();
@@ -377,7 +377,7 @@ public final class DagScorer implements TetradSerializable, Scorer {
         return getSampleCovar();
     }
 
-    private DoubleMatrix2D implCovarMeas () {
+    private DoubleMatrix2D implCovarMeas() {
         computeImpliedCovar();
         return this.implCovarMeasC;
     }
@@ -386,7 +386,7 @@ public final class DagScorer implements TetradSerializable, Scorer {
      * Returns BIC score, calculated as chisq - dof. This is equal to getFullBicScore() up to a constant.
      */
     @Override
-	public double getBicScore() {
+    public double getBicScore() {
         int dof = getDof();
         return getChiSquare() - dof * Math.log(getSampleSize());
 
@@ -398,7 +398,7 @@ public final class DagScorer implements TetradSerializable, Scorer {
     }
 
     @Override
-	public double getAicScore() {
+    public double getAicScore() {
         int dof = getDof();
         return getChiSquare() - 2 * dof;
 //
@@ -422,7 +422,7 @@ public final class DagScorer implements TetradSerializable, Scorer {
 //    }
 
     @Override
-	public double getKicScore() {
+    public double getKicScore() {
         double fml = getFml();
         int edgeCount = dag.getNumEdges();
         int sampleSize = getSampleSize();
@@ -434,7 +434,7 @@ public final class DagScorer implements TetradSerializable, Scorer {
      * Returns the chi square value for the model.
      */
     @Override
-	public double getChiSquare() {
+    public double getChiSquare() {
         return (getSampleSize() - 1) * getFml();
     }
 
@@ -442,7 +442,7 @@ public final class DagScorer implements TetradSerializable, Scorer {
      * Returns the p-value for the model.
      */
     @Override
-	public double getPValue() {
+    public double getPValue() {
         double pValue = 1.0 - ProbUtils.chisqCdf(getChiSquare(), getDof());
 //        System.out.println("P value = " + pValue);
         return pValue;
@@ -464,8 +464,8 @@ public final class DagScorer implements TetradSerializable, Scorer {
      * @throws ClassNotFoundException
      */
     private void readObject
-            (ObjectInputStream
-                    s)
+    (ObjectInputStream
+             s)
             throws IOException, ClassNotFoundException {
         s.defaultReadObject();
 
@@ -610,62 +610,60 @@ public final class DagScorer implements TetradSerializable, Scorer {
 //    }
 
     @Override
-	public DataSet getDataSet() {
+    public DataSet getDataSet() {
         return dataSet;
     }
 
     @Override
-	public int getNumFreeParams() {
+    public int getNumFreeParams() {
         return dag.getEdges().size() + dag.getNodes().size();
     }
 
     @Override
-	public int getDof() {
+    public int getDof() {
         return (dag.getNodes().size() * (dag.getNodes().size() + 1)) / 2 - getNumFreeParams();
     }
 
-     @Override
-	public int getSampleSize() {
+    @Override
+    public int getSampleSize() {
         return covMatrix.getSampleSize();
     }
 
 
     @Override
-	public List<Node> getMeasuredNodes() {
+    public List <Node> getMeasuredNodes() {
         return this.getVariables();
     }
 
     @Override
-	public DoubleMatrix2D getSampleCovar() {
+    public DoubleMatrix2D getSampleCovar() {
         return sampleCovar;
     }
 
     @Override
-	public DoubleMatrix2D getEdgeCoef() {
+    public DoubleMatrix2D getEdgeCoef() {
         return edgeCoef;
     }
 
     @Override
-	public DoubleMatrix2D getErrorCovar() {
+    public DoubleMatrix2D getErrorCovar() {
         return errorCovar;
     }
 
     @Override
-	public List<Node> getVariables() {
+    public List <Node> getVariables() {
         return variables;
     }
 
     @Override
-	public SemIm getEstSem() {
+    public SemIm getEstSem() {
         SemPm pm = new SemPm(dag);
 
         if (dataSet != null) {
             return new SemEstimator(dataSet, pm, new SemOptimizerRegression()).estimate();
-        }
-        else if (covMatrix != null) {
+        } else if (covMatrix != null) {
             return new SemEstimator(covMatrix, pm, new SemOptimizerRegression()).estimate();
-        }
-        else {
+        } else {
             throw new IllegalStateException();
         }
     }

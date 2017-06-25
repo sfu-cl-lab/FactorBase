@@ -42,7 +42,7 @@ public class BDeScore implements LocalDiscreteScore {
     }
 
     @Override
-	public double localScore(int i, int parents[]) {
+    public double localScore(int i, int parents[]) {
         double oldScore = localScoreCache.get(i, parents);
 
         if (!Double.isNaN(oldScore)) {
@@ -123,7 +123,7 @@ public class BDeScore implements LocalDiscreteScore {
     }
 
     @Override
-	public DataSet getDataSet() {
+    public DataSet getDataSet() {
         return dataSet;
     }
 
@@ -152,15 +152,15 @@ public class BDeScore implements LocalDiscreteScore {
         return Double.NaN;
     }
 
+    @Override
+    public void setStructurePrior(double structurePrior) {
+    }
+
     public double getSamplePrior() {
         return Double.NaN;
     }
 
     @Override
-	public void setStructurePrior(double structurePrior) {
-    }
-
-    @Override
-	public void setSamplePrior(double samplePrior) {
+    public void setSamplePrior(double samplePrior) {
     }
 }

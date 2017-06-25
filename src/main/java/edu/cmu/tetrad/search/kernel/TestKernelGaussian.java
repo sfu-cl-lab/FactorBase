@@ -28,8 +28,6 @@ import edu.cmu.tetrad.graph.*;
 import edu.cmu.tetrad.util.TetradLogger;
 import junit.framework.TestCase;
 
-import java.util.*;
-
 /**
  * Tests the KernelGaussian class.
  *
@@ -45,7 +43,7 @@ public class TestKernelGaussian extends TestCase {
     }
 
     @Override
-	public void setUp() throws Exception {
+    public void setUp() throws Exception {
         TetradLogger.getInstance().addOutputStream(System.out);
         TetradLogger.getInstance().setForceLog(true);
         TetradLogger.getInstance().setLogging(true);
@@ -53,7 +51,7 @@ public class TestKernelGaussian extends TestCase {
 
 
     @Override
-	public void tearDown() {
+    public void tearDown() {
         TetradLogger.getInstance().setForceLog(false);
         TetradLogger.getInstance().removeOutputStream(System.out);
     }

@@ -178,6 +178,19 @@ public final class SemEstimator implements TetradSerializable {
 
     //==============================PUBLIC METHODS=========================//
 
+    private static boolean containsCovarParam(SemPm semPm) {
+        boolean containsCovarParam = false;
+        List <Parameter> params = semPm.getParameters();
+
+        for (Parameter param : params) {
+            if (param.getType() == ParamType.COVAR) {
+                containsCovarParam = true;
+                break;
+            }
+        }
+        return containsCovarParam;
+    }
+
     /**
      * Runs the estimator on the data and SemPm passed in through the
      * constructor.
@@ -258,10 +271,6 @@ public final class SemEstimator implements TetradSerializable {
         return this.estimatedSem;
     }
 
-    private void setCovMatrix(ICovarianceMatrix covMatrix) {
-        this.covMatrix = covMatrix;
-    }
-
     /**
      * Returns the estimated SemIm. If the <code>estimate</code> method has not
      * yet been called, <code>null</code> is returned.
@@ -270,20 +279,42 @@ public final class SemEstimator implements TetradSerializable {
         return this.estimatedSem;
     }
 
+    private void setEstimatedSem(SemIm estimatedSem) {
+        this.estimatedSem = estimatedSem;
+    }
+
     public DataSet getDataSet() {
         return dataSet;
     }
 
-    public SemPm getSemPm () {
+    private void setDataSet(DataSet dataSet) {
+        this.dataSet = dataSet;
+    }
+
+    public SemPm getSemPm() {
         return semPm;
+    }
+
+    private void setSemPm(SemPm semPm) {
+        this.semPm = semPm;
     }
 
     public ICovarianceMatrix getCovMatrix() {
         return covMatrix;
     }
 
+    private void setCovMatrix(ICovarianceMatrix covMatrix) {
+        this.covMatrix = covMatrix;
+    }
+
+    //============================PRIVATE METHODS==========================//
+
     public SemOptimizer getSemOptimizer() {
         return semOptimizer;
+    }
+
+    private void setSemOptimizer(SemOptimizer semOptimizer) {
+        this.semOptimizer = semOptimizer;
     }
 
     public SemIm getTrueSemIm() {
@@ -299,7 +330,7 @@ public final class SemEstimator implements TetradSerializable {
      * Returns a string representation of the Sem.
      */
     @Override
-	public String toString() {
+    public String toString() {
         StringBuilder buf = new StringBuilder();
         buf.append("\nSemEstimator");
 
@@ -322,10 +353,8 @@ public final class SemEstimator implements TetradSerializable {
         return buf.toString();
     }
 
-    //============================PRIVATE METHODS==========================//
-
     private void doDefaultOptimization(SemIm semIm) {
-        boolean containsLatent = false;             
+        boolean containsLatent = false;
 
         for (Node node : getSemPm().getGraph().getNodes()) {
             if (node.getNodeType() == NodeType.LATENT) {
@@ -356,25 +385,24 @@ public final class SemEstimator implements TetradSerializable {
         optimizer.optimize(semIm);
         this.semOptimizer = optimizer;
     }
-                            
+
     private boolean containsFixedParam() {
         return new SemIm(getSemPm()).getNumFixedParams() > 0;
     }
 
     /**
      * @return A submatrix of <code>covMatrix</code> with the order of its
-     *         variables the same as in <code>semPm</code>.
+     * variables the same as in <code>semPm</code>.
      * @throws IllegalArgumentException if not all of the variables of
      *                                  <code>semPm</code> are in <code>covMatrix</code>.
      */
     private ICovarianceMatrix submatrix(ICovarianceMatrix covMatrix,
-                                       SemPm semPm) {
+                                        SemPm semPm) {
         String[] measuredVarNames = semPm.getMeasuredVarNames();
 
         try {
             return covMatrix.getSubmatrix(measuredVarNames);
-        }
-        catch (IllegalArgumentException e) {
+        } catch (IllegalArgumentException e) {
             throw new RuntimeException(
                     "All of the variables from the data set " +
                             "must be in the SEM parameterized model.", e);
@@ -391,19 +419,6 @@ public final class SemEstimator implements TetradSerializable {
         }
 
         return dataSet.subsetColumns(varIndices);
-    }
-
-    private static boolean containsCovarParam(SemPm semPm) {
-        boolean containsCovarParam = false;
-        List<Parameter> params = semPm.getParameters();
-
-        for (Parameter param : params) {
-            if (param.getType() == ParamType.COVAR) {
-                containsCovarParam = true;
-                break;
-            }
-        }
-        return containsCovarParam;
     }
 
     /**
@@ -430,29 +445,13 @@ public final class SemEstimator implements TetradSerializable {
                 semIm.setMeanStandardDeviation(variableNode, standardDeviation);
             }
         } else if (getCovMatrix() != null) {
-            List<Node> variables = getCovMatrix().getVariables();
+            List <Node> variables = getCovMatrix().getVariables();
 
             for (Node node : variables) {
                 Node variableNode = semIm.getVariableNode(node.getName());
                 semIm.setMean(variableNode, 0.0);
             }
         }
-    }
-
-    private void setSemOptimizer(SemOptimizer semOptimizer) {
-        this.semOptimizer = semOptimizer;
-    }
-
-    private void setEstimatedSem  (SemIm  estimatedSem) {
-        this.estimatedSem = estimatedSem;
-    }
-
-    private void setSemPm(SemPm semPm) {
-        this.semPm = semPm;
-    }
-
-    private void setDataSet(DataSet dataSet) {
-        this.dataSet = dataSet;
     }
 
     /**
@@ -470,8 +469,8 @@ public final class SemEstimator implements TetradSerializable {
      * @throws ClassNotFoundException
      */
     private void readObject
-            (ObjectInputStream
-                    s)
+    (ObjectInputStream
+             s)
             throws IOException, ClassNotFoundException {
         s.defaultReadObject();
 

@@ -67,7 +67,7 @@ public class Edge implements TetradSerializable, Comparable {
      * @param endpoint2 the endpoint at the second node
      */
     public Edge(Node node1, Node node2, Endpoint endpoint1,
-            Endpoint endpoint2) {
+                Endpoint endpoint2) {
         if (node1 == null || node2 == null) {
             throw new NullPointerException("Nodes must not be null.");
         }
@@ -82,8 +82,7 @@ public class Edge implements TetradSerializable, Comparable {
             this.node2 = node1;
             this.endpoint1 = endpoint2;
             this.endpoint2 = endpoint1;
-        }
-        else {
+        } else {
             this.node1 = node1;
             this.node2 = node2;
             this.endpoint1 = endpoint1;
@@ -92,11 +91,7 @@ public class Edge implements TetradSerializable, Comparable {
     }
 
 
-
-
-
-
-    public Edge(Edge edge){
+    public Edge(Edge edge) {
         this(edge.node1, edge.node2, edge.endpoint1, edge.endpoint2);
     }
 
@@ -135,6 +130,10 @@ public class Edge implements TetradSerializable, Comparable {
         return this.endpoint1;
     }
 
+    public final void setEndpoint1(Endpoint e) {
+        this.endpoint1 = e;
+    }
+
     /**
      * Returns the endpoint of the edge at the B node.
      */
@@ -142,16 +141,9 @@ public class Edge implements TetradSerializable, Comparable {
         return this.endpoint2;
     }
 
-    public final void setEndpoint1(Endpoint e) {
-        this.endpoint1 = e;
-    }
-
     public final void setEndpoint2(Endpoint e) {
         this.endpoint2 = e;
     }
-
-
-
 
 
     /**
@@ -209,13 +201,14 @@ public class Edge implements TetradSerializable, Comparable {
 
     /**
      * Returns true just in case this edge is directed. (Gustavo 7 May 2007.)
+     *
      * @return true just in case this edge is directed.
      */
     public boolean isDirected() {
-    	Endpoint endpt1 = getEndpoint1();
-    	Endpoint endpt2 = getEndpoint2();
-    	return ((endpt1 == Endpoint.TAIL)&&(endpt2 == Endpoint.ARROW))||
-    	((endpt1 == Endpoint.ARROW)&&(endpt2 == Endpoint.TAIL));
+        Endpoint endpt1 = getEndpoint1();
+        Endpoint endpt2 = getEndpoint2();
+        return ((endpt1 == Endpoint.TAIL) && (endpt2 == Endpoint.ARROW)) ||
+                ((endpt1 == Endpoint.ARROW) && (endpt2 == Endpoint.TAIL));
     }
 
     /**
@@ -233,7 +226,7 @@ public class Edge implements TetradSerializable, Comparable {
      * Produces a string representation of the edge.
      */
     @Override
-	public final String toString() {
+    public final String toString() {
         StringBuilder buf = new StringBuilder();
 
         Endpoint endptTypeA = getEndpoint1();
@@ -244,11 +237,9 @@ public class Edge implements TetradSerializable, Comparable {
 
         if (endptTypeA == Endpoint.TAIL) {
             buf.append("-");
-        }
-        else if (endptTypeA == Endpoint.ARROW) {
+        } else if (endptTypeA == Endpoint.ARROW) {
             buf.append("<");
-        }
-        else if (endptTypeA == Endpoint.CIRCLE) {
+        } else if (endptTypeA == Endpoint.CIRCLE) {
             buf.append("o");
         }
 
@@ -256,11 +247,9 @@ public class Edge implements TetradSerializable, Comparable {
 
         if (endptTypeB == Endpoint.TAIL) {
             buf.append("-");
-        }
-        else if (endptTypeB == Endpoint.ARROW) {
+        } else if (endptTypeB == Endpoint.ARROW) {
             buf.append(">");
-        }
-        else if (endptTypeB == Endpoint.CIRCLE) {
+        } else if (endptTypeB == Endpoint.CIRCLE) {
             buf.append("o");
         }
 
@@ -271,7 +260,7 @@ public class Edge implements TetradSerializable, Comparable {
     }
 
     @Override
-	public final int hashCode() {
+    public final int hashCode() {
 
         // Note that this hashcode must return the same value for
         // e.g. X --> Y as for Y <-- X.
@@ -289,7 +278,7 @@ public class Edge implements TetradSerializable, Comparable {
      * same endpoints proximal to each node.
      */
     @Override
-	public final boolean equals(Object o) {
+    public final boolean equals(Object o) {
         if (o == null) return false;
 
         Edge edge = (Edge) o;
@@ -298,8 +287,7 @@ public class Edge implements TetradSerializable, Comparable {
                 edge.getNode2().getName().equals(getNode2().getName())) {
             return getEndpoint1() == edge.getEndpoint1() &&
                     getEndpoint2() == edge.getEndpoint2();
-        }
-        else if (edge.getNode1().getName().equals(getNode2().getName()) &&
+        } else if (edge.getNode1().getName().equals(getNode2().getName()) &&
                 edge.getNode2().getName().equals(getNode1().getName())) {
             return getEndpoint1() == edge.getEndpoint2() &&
                     getEndpoint2() == edge.getEndpoint1();
@@ -309,7 +297,7 @@ public class Edge implements TetradSerializable, Comparable {
     }
 
     @Override
-	public int compareTo(Object o) {
+    public int compareTo(Object o) {
         Edge _edge = (Edge) o;
 
         int comp1 = getNode1().compareTo(_edge.getNode1());

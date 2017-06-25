@@ -46,16 +46,25 @@ public class TestPcd extends TestCase {
         super(name);
     }
 
+    /**
+     * This method uses reflection to collect up all of the test methods from this class and return them to the test
+     * runner.
+     */
+    public static Test suite() {
+
+        // Edit the name of the class in the parens to match the name
+        // of this class.
+        return new TestSuite(TestPcd.class);
+    }
 
     @Override
-	public void setUp() throws Exception {
+    public void setUp() throws Exception {
         TetradLogger.getInstance().addOutputStream(System.out);
         TetradLogger.getInstance().setForceLog(true);
     }
 
-
     @Override
-	public void tearDown() {
+    public void tearDown() {
         TetradLogger.getInstance().setForceLog(false);
         TetradLogger.getInstance().removeOutputStream(System.out);
     }
@@ -152,17 +161,6 @@ public class TestPcd extends TestCase {
 
         // Do test.
         assertTrue(resultGraph.equals(trueGraph));
-    }
-
-    /**
-     * This method uses reflection to collect up all of the test methods from this class and return them to the test
-     * runner.
-     */
-    public static Test suite() {
-
-        // Edit the name of the class in the parens to match the name
-        // of this class.
-        return new TestSuite(TestPcd.class);
     }
 }
 

@@ -67,7 +67,7 @@ public interface TetradTest {
 
     public String[] getVarNames();
 
-    List<Node> getVariables();
+    List <Node> getVariables();
 
     ICovarianceMatrix getCovMatrix();
 

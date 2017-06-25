@@ -34,14 +34,14 @@ import java.util.List;
  * @author Joe Ramsey
  */
 public class PurifyTetradBased2 implements IPurify {
-    private boolean outputMessage = true;
-    private TetradTest tetradTest;
-    private int numVars;
-    boolean doFdr = false;
-    boolean listTetrads = false;
     private final int PURE = 0;
     private final int IMPURE = 1;
     private final int UNDEFINED = 2;
+    boolean doFdr = false;
+    boolean listTetrads = false;
+    private boolean outputMessage = true;
+    private TetradTest tetradTest;
+    private int numVars;
 
 
     public PurifyTetradBased2(TetradTest tetradTest) {
@@ -50,14 +50,14 @@ public class PurifyTetradBased2 implements IPurify {
     }
 
     @Override
-	public List<List<Node>> purify(List<List<Node>> clustering) {
-        List<int[]> _clustering = convertListToInt(clustering);
-        List<int[]> _clustering2 = tetradBasedPurify2(_clustering);
+    public List <List <Node>> purify(List <List <Node>> clustering) {
+        List <int[]> _clustering = convertListToInt(clustering);
+        List <int[]> _clustering2 = tetradBasedPurify2(_clustering);
         return convertIntToList(_clustering2);
     }
 
     @Override
-	public void setTrueGraph(Graph mim) {
+    public void setTrueGraph(Graph mim) {
         throw new UnsupportedOperationException();
     }
 
@@ -311,12 +311,12 @@ public class PurifyTetradBased2 implements IPurify {
         return total;
     }
 
-    private List<int[]> convertListToInt(List<List<Node>> clustering) {
-        List<Node> nodes = tetradTest.getVariables();
-        List<int[]> _clustering = new ArrayList<int[]>();
+    private List <int[]> convertListToInt(List <List <Node>> clustering) {
+        List <Node> nodes = tetradTest.getVariables();
+        List <int[]> _clustering = new ArrayList <int[]>();
 
         for (int i = 0; i < clustering.size(); i++) {
-            List<Node> cluster = clustering.get(i);
+            List <Node> cluster = clustering.get(i);
             int[] _cluster = new int[cluster.size()];
 
             for (int j = 0; j < cluster.size(); j++) {
@@ -333,13 +333,13 @@ public class PurifyTetradBased2 implements IPurify {
         return _clustering;
     }
 
-    private List<List<Node>> convertIntToList(List<int[]> clustering) {
-        List<Node> nodes = tetradTest.getVariables();
-        List<List<Node>> _clustering = new ArrayList<List<Node>>();
+    private List <List <Node>> convertIntToList(List <int[]> clustering) {
+        List <Node> nodes = tetradTest.getVariables();
+        List <List <Node>> _clustering = new ArrayList <List <Node>>();
 
         for (int i = 0; i < clustering.size(); i++) {
             int[] cluster = clustering.get(i);
-            List<Node> _cluster = new ArrayList<Node>();
+            List <Node> _cluster = new ArrayList <Node>();
 
             for (int j = 0; j < cluster.length; j++) {
                 _cluster.add(nodes.get(cluster[j]));

@@ -31,9 +31,7 @@ import edu.cmu.tetrad.util.TetradLogger;
 import edu.cmu.tetrad.util.TetradLoggerConfig;
 import edu.cmu.tetrad.util.TetradSerializable;
 
-import javax.swing.*;
 import javax.swing.border.MatteBorder;
-import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
@@ -48,7 +46,7 @@ import java.util.List;
  *
  * @author Aaron Powers
  * @author Joseph Ramsey
- * @version $Revision: 6512 $ 
+ * @version $Revision: 6512 $
  */
 public final class dbDagEditor extends JPanel
         implements GraphEditable, LayoutEditable, DelegatesEditing, IndTestProducer {
@@ -69,7 +67,7 @@ public final class dbDagEditor extends JPanel
 
         this.workbench.addPropertyChangeListener(new PropertyChangeListener() {
             @Override
-			public void propertyChange(PropertyChangeEvent evt) {
+            public void propertyChange(PropertyChangeEvent evt) {
                 if ("graph".equals(evt.getPropertyName())) {
                     if (getDagWrapper() != null) {
                         getDagWrapper().setDag((Dag) evt.getNewValue());
@@ -97,7 +95,7 @@ public final class dbDagEditor extends JPanel
 
         this.workbench.addPropertyChangeListener(new PropertyChangeListener() {
             @Override
-			public void propertyChange(PropertyChangeEvent evt) {
+            public void propertyChange(PropertyChangeEvent evt) {
                 String propertyName = evt.getPropertyName();
 
                 if ("dag".equals(propertyName)) {
@@ -112,7 +110,7 @@ public final class dbDagEditor extends JPanel
 
         this.workbench.addPropertyChangeListener(new PropertyChangeListener() {
             @Override
-			public void propertyChange(PropertyChangeEvent evt) {
+            public void propertyChange(PropertyChangeEvent evt) {
                 String propertyName = evt.getPropertyName();
 
                 if ("modelChanged".equals(propertyName)) {
@@ -127,19 +125,19 @@ public final class dbDagEditor extends JPanel
      * Sets the name of this editor.
      */
     @Override
-	public final void setName(String name) {
+    public final void setName(String name) {
         String oldName = getName();
         super.setName(name);
         firePropertyChange("name", oldName, getName());
     }
 
     @Override
-	public JComponent getEditDelegate() {
+    public JComponent getEditDelegate() {
         return getWorkbench();
     }
 
     @Override
-	public GraphWorkbench getWorkbench() {
+    public GraphWorkbench getWorkbench() {
         return workbench;
     }
 
@@ -153,18 +151,17 @@ public final class dbDagEditor extends JPanel
      * @return the set of selected model nodes.
      */
     @Override
-	public List getSelectedModelComponents() {
-        List<Component> selectedComponents =
+    public List getSelectedModelComponents() {
+        List <Component> selectedComponents =
                 getWorkbench().getSelectedComponents();
-        List<TetradSerializable> selectedModelComponents =
-                new ArrayList<TetradSerializable>();
+        List <TetradSerializable> selectedModelComponents =
+                new ArrayList <TetradSerializable>();
 
         for (Object comp : selectedComponents) {
             if (comp instanceof DisplayNode) {
                 selectedModelComponents.add(
                         ((DisplayNode) comp).getModelNode());
-            }
-            else if (comp instanceof DisplayEdge) {
+            } else if (comp instanceof DisplayEdge) {
                 selectedModelComponents.add(
                         ((DisplayEdge) comp).getModelEdge());
             }
@@ -177,7 +174,7 @@ public final class dbDagEditor extends JPanel
      * Pastes list of session elements into the workbench.
      */
     @Override
-	public void pasteSubsession(List sessionElements, Point upperLeft) {
+    public void pasteSubsession(List sessionElements, Point upperLeft) {
         getWorkbench().pasteSubgraph(sessionElements, upperLeft);
         getWorkbench().deselectAll();
 
@@ -192,37 +189,37 @@ public final class dbDagEditor extends JPanel
     }
 
     @Override
-	public Graph getGraph() {
+    public Graph getGraph() {
         return workbench.getGraph();
     }
 
     @Override
-	public void setGraph(Graph graph) {
+    public void setGraph(Graph graph) {
         workbench.setGraph(graph);
     }
 
     @Override
-	public Knowledge getKnowledge() {
+    public Knowledge getKnowledge() {
         return null;
     }
 
     @Override
-	public Graph getSourceGraph() {
+    public Graph getSourceGraph() {
         return getWorkbench().getGraph();
     }
 
     @Override
-	public void layoutByGraph(Graph graph) {
+    public void layoutByGraph(Graph graph) {
         getWorkbench().layoutByGraph(graph);
     }
 
     @Override
-	public void layoutByKnowledge() {
+    public void layoutByKnowledge() {
         // Does nothing.
     }
 
     @Override
-	public Rectangle getVisibleRect() {
+    public Rectangle getVisibleRect() {
         return getWorkbench().getVisibleRect();
     }
 
@@ -240,7 +237,7 @@ public final class dbDagEditor extends JPanel
         menuBar.add(fileMenu);
         menuBar.add(editMenu);
         TetradLoggerConfig config = TetradLogger.getInstance().getTetradLoggerConfigForModel(DagWrapper.class);
-        if(config != null){
+        if (config != null) {
             menuBar.add(new LoggingMenu(config));
         }
         menuBar.add(graphMenu);
@@ -304,7 +301,7 @@ public final class dbDagEditor extends JPanel
 
         randomDagModel.addActionListener(new ActionListener() {
             @Override
-			public void actionPerformed(ActionEvent e) {
+            public void actionPerformed(ActionEvent e) {
                 RandomDagEditor editor = new RandomDagEditor();
 
                 int ret = JOptionPane.showConfirmDialog(
@@ -343,7 +340,7 @@ public final class dbDagEditor extends JPanel
     }
 
     @Override
-	public IndependenceTest getIndependenceTest() {
+    public IndependenceTest getIndependenceTest() {
         return new IndTestDSep(workbench.getGraph());
     }
 }

@@ -70,98 +70,108 @@ public final class TestFactoredScoreCacheMd extends TestCase {
             }
             */
 
-        DataReader reader = new DataReader();
-        reader.setDelimiter(DelimiterType.COMMA);
-        reader.setCommentMarker("#");
-        DataSet ds = reader.parseTabular(file);
+            DataReader reader = new DataReader();
+            reader.setDelimiter(DelimiterType.COMMA);
+            reader.setCommentMarker("#");
+            DataSet ds = reader.parseTabular(file);
 
-        Node l1 = new GraphNode("L1");
-        Node x1 = new GraphNode("X1");
-        Node x2 = new GraphNode("X2");
-        Node x3 = new GraphNode("X3");
+            Node l1 = new GraphNode("L1");
+            Node x1 = new GraphNode("X1");
+            Node x2 = new GraphNode("X2");
+            Node x3 = new GraphNode("X3");
 
-        //L1.setNodeType(NodeType.LATENT);
-        l1.setNodeType(NodeType.MEASURED);
-        x1.setNodeType(NodeType.MEASURED);
-        x2.setNodeType(NodeType.MEASURED);
-        x3.setNodeType(NodeType.MEASURED);
+            //L1.setNodeType(NodeType.LATENT);
+            l1.setNodeType(NodeType.MEASURED);
+            x1.setNodeType(NodeType.MEASURED);
+            x2.setNodeType(NodeType.MEASURED);
+            x3.setNodeType(NodeType.MEASURED);
 
-        //X4 = new GraphNode("X4");
-        //X5 = new GraphNode("X5");
-        //        graph = new EdgeListGraph();
-        Dag graph = new Dag();
+            //X4 = new GraphNode("X4");
+            //X5 = new GraphNode("X5");
+            //        graph = new EdgeListGraph();
+            Dag graph = new Dag();
 
-        graph.clear();
+            graph.clear();
 
-        // Add and remove some nodes.
-        graph.addNode(l1);
-        graph.addNode(x1);
-        graph.addNode(x2);
-        graph.addNode(x3);
-        //graph.addIndex(X4);
-        //graph.addIndex(X5);
+            // Add and remove some nodes.
+            graph.addNode(l1);
+            graph.addNode(x1);
+            graph.addNode(x2);
+            graph.addNode(x3);
+            //graph.addIndex(X4);
+            //graph.addIndex(X5);
 
-        //graph.addDirectedEdge(X1, X2);
-        //graph.addDirectedEdge(X2, X3);
-        //graph.addDirectedEdge(X3, X4);
-        //graph.addDirectedEdge(X1, X3);
-        //graph.addDirectedEdge(X2, X3);
+            //graph.addDirectedEdge(X1, X2);
+            //graph.addDirectedEdge(X2, X3);
+            //graph.addDirectedEdge(X3, X4);
+            //graph.addDirectedEdge(X1, X3);
+            //graph.addDirectedEdge(X2, X3);
 
-        BayesPm bayesPm = new BayesPm(graph);
-        bayesPm.setNumCategories(l1, 2);
-        bayesPm.setNumCategories(x1, 2);
-        bayesPm.setNumCategories(x2, 2);
-        bayesPm.setNumCategories(x3, 2);
-        //bayesPm.setNumSplits(X4, 2);
-        //bayesPm.setNumSplits(X5, 2);
+            BayesPm bayesPm = new BayesPm(graph);
+            bayesPm.setNumCategories(l1, 2);
+            bayesPm.setNumCategories(x1, 2);
+            bayesPm.setNumCategories(x2, 2);
+            bayesPm.setNumCategories(x3, 2);
+            //bayesPm.setNumSplits(X4, 2);
+            //bayesPm.setNumSplits(X5, 2);
 
-        FactoredBayesStructuralEM fbsem =
-                new FactoredBayesStructuralEM(ds, bayesPm);
+            FactoredBayesStructuralEM fbsem =
+                    new FactoredBayesStructuralEM(ds, bayesPm);
 
-        //The iterate method, called below, uses the BdeMetric class in an implementation of the
-        //Procedure Factored-Bayesian-SEM in the paper "The Bayesian Structural EM
-        //Algorithm" by Nir Friedman.  The iterate1 method uses the BdeMetricCache
-        //class instead.  The latter class factors each of the models it searches over
-        //exploiting the fact that different models may share factors whose score only
-        //has to be computed and stored once.  Hence, the iterate and iterate1 methods
-        //should return the same model with the same score but iterate1 should be more
-        //efficient.
+            //The iterate method, called below, uses the BdeMetric class in an implementation of the
+            //Procedure Factored-Bayesian-SEM in the paper "The Bayesian Structural EM
+            //Algorithm" by Nir Friedman.  The iterate1 method uses the BdeMetricCache
+            //class instead.  The latter class factors each of the models it searches over
+            //exploiting the fact that different models may share factors whose score only
+            //has to be computed and stored once.  Hence, the iterate and iterate1 methods
+            //should return the same model with the same score but iterate1 should be more
+            //efficient.
 
-        //System.exit(0);    //Temporary until implementation finished.
+            //System.exit(0);    //Temporary until implementation finished.
 
-        //BayesPm  bestPm = fbsem.iterate();
-        //BayesPm bestPm = fbsem.iterate1();
-        //BayesPm bestPm = fbsem.iterate2();
+            //BayesPm  bestPm = fbsem.iterate();
+            //BayesPm bestPm = fbsem.iterate1();
+            //BayesPm bestPm = fbsem.iterate2();
 
-        fbsem.scoreTest();
+            fbsem.scoreTest();
 
-        //System.out.println("Graph of best model (output of FactoredBayesStructuralEM:  ");
-        //Graph bestGraph = bestPm.getGraph();
-        //System.out.println(bestGraph);
-        //System.out.println(bestPm);
+            //System.out.println("Graph of best model (output of FactoredBayesStructuralEM:  ");
+            //Graph bestGraph = bestPm.getGraph();
+            //System.out.println(bestGraph);
+            //System.out.println(bestPm);
 
-        //Graph gen is the graph of the generating model.  That is, if the
-        //search algorithm is correct it will infer gen from the data.
-        Graph genGraph = new Dag();
+            //Graph gen is the graph of the generating model.  That is, if the
+            //search algorithm is correct it will infer gen from the data.
+            Graph genGraph = new Dag();
 
-        genGraph.clear();
+            genGraph.clear();
 
-        // Add and remove some nodes.
-        genGraph.addNode(l1);
-        genGraph.addNode(x1);
-        genGraph.addNode(x2);
-        genGraph.addNode(x3);
+            // Add and remove some nodes.
+            genGraph.addNode(l1);
+            genGraph.addNode(x1);
+            genGraph.addNode(x2);
+            genGraph.addNode(x3);
 
-        genGraph.addDirectedEdge(x1, l1);
-        genGraph.addDirectedEdge(x2, x1);
-        genGraph.addDirectedEdge(l1, x3);
+            genGraph.addDirectedEdge(x1, l1);
+            genGraph.addDirectedEdge(x2, x1);
+            genGraph.addDirectedEdge(l1, x3);
 
-        //assertEquals(genGraph, bestGraph);
-        }
-        catch (IOException e) {
+            //assertEquals(genGraph, bestGraph);
+        } catch (IOException e) {
             e.printStackTrace();
         }
 
+    }
+
+    /**
+     * This method uses reflection to collect up all of the test methods from
+     * this class and return them to the test runner.
+     */
+    public static Test suite() {
+
+        // Edit the name of the class in the parens to match the name
+        // of this class.
+        return new TestSuite(TestFactoredScoreCacheMd.class);
     }
 
     public void testFB_SEM_MDW() {
@@ -283,17 +293,6 @@ public final class TestFactoredScoreCacheMd extends TestCase {
 
         //assertEquals(genGraph, bestGraph);
 
-    }
-
-    /**
-     * This method uses reflection to collect up all of the test methods from
-     * this class and return them to the test runner.
-     */
-    public static Test suite() {
-
-        // Edit the name of the class in the parens to match the name
-        // of this class.
-        return new TestSuite(TestFactoredScoreCacheMd.class);
     }
 }
 

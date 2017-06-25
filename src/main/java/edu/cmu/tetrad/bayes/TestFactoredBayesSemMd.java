@@ -120,8 +120,7 @@ public final class TestFactoredBayesSemMd extends TestCase {
             genGraph.addDirectedEdge(x1, l1);
             genGraph.addDirectedEdge(x2, x1);
             genGraph.addDirectedEdge(l1, x3);
-        }
-        catch (IOException e) {
+        } catch (IOException e) {
             e.printStackTrace();
         }
 
@@ -220,8 +219,7 @@ public final class TestFactoredBayesSemMd extends TestCase {
 
 
             assertEquals(genGraph, bestGraph);
-        }
-        catch (IOException e) {
+        } catch (IOException e) {
             e.printStackTrace();
         }
 
@@ -293,8 +291,7 @@ public final class TestFactoredBayesSemMd extends TestCase {
             //Graph gen is the graph of the generating model.  That is, if the
             //search algorithm is correct it will infer gen from the data.
             Graph genGraph = new Dag();
-        }
-        catch (IOException e) {
+        } catch (IOException e) {
             e.printStackTrace();
         }
 
@@ -370,8 +367,7 @@ public final class TestFactoredBayesSemMd extends TestCase {
 
             genGraph.addDirectedEdge(W, Z);
             assertEquals(genGraph, bestGraph);
-        }
-        catch (IOException e) {
+        } catch (IOException e) {
             e.printStackTrace();
         }
 

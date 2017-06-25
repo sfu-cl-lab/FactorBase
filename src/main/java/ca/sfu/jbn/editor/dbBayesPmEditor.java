@@ -24,10 +24,9 @@ import edu.cmu.tetrad.bayes.BayesPm;
 import edu.cmu.tetrad.graph.Graph;
 import edu.cmu.tetrad.session.DelegatesEditing;
 
-import javax.swing.*;
-import java.awt.*;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+
 /**
  * Displays a workbench editing workbench area together with a toolbench for
  * editing tetrad-style graphs.
@@ -106,11 +105,12 @@ public class dbBayesPmEditor extends JPanel implements PropertyChangeListener, D
         this.wizard = wizard;
     }
 
-    /**                                      G
+    /**
+     * G
      * Reacts to property change events.
      */
     @Override
-	public void propertyChange(PropertyChangeEvent e) {
+    public void propertyChange(PropertyChangeEvent e) {
         if ("editorClosing".equals(e.getPropertyName())) {
             firePropertyChange("editorClosing", null, getName());
         }
@@ -130,14 +130,14 @@ public class dbBayesPmEditor extends JPanel implements PropertyChangeListener, D
      * Sets the name fo the Bayes PM.
      */
     @Override
-	public void setName(String name) {
+    public void setName(String name) {
         String oldName = getName();
         super.setName(name);
         firePropertyChange("name", oldName, getName());
     }
 
     @Override
-	public JComponent getEditDelegate() {
+    public JComponent getEditDelegate() {
         return wizard;
     }
 

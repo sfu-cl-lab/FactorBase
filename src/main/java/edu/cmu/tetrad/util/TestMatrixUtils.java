@@ -40,6 +40,10 @@ public class TestMatrixUtils extends TestCase {
         super(name);
     }
 
+    public static Test suite() {
+        return new TestSuite(TestMatrixUtils.class);
+    }
+
     public void testEquals() {
         double[][] m1 = {{1.0, 2.0, 3.0}};
 
@@ -132,7 +136,6 @@ public class TestMatrixUtils extends TestCase {
         assertTrue(MatrixUtils.equals(n4, n1));
     }
 
-
     public void testConvertCovMatrixToCorrMatrix() {
         double[][] data = {
                 {-0.377133, -1.480267, -1.696021, 1.195592, -0.345426},
@@ -167,10 +170,6 @@ public class TestMatrixUtils extends TestCase {
 
         System.out.println("\n\nCorrelation matrix:");
         System.out.println(MatrixUtils.toString(m.toArray()));
-    }
-
-    public static Test suite() {
-        return new TestSuite(TestMatrixUtils.class);
     }
 }
 

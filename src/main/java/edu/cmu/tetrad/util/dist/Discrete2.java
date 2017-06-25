@@ -35,8 +35,8 @@ import java.util.Arrays;
  */
 public class Discrete2 implements Distribution {
     static final long serialVersionUID = 23L;
-    private double[] x;
     private final double[] p;
+    private double[] x;
 
     /**
      * Returns 0 with probably 1 - p and 1 with probability p. Each of the
@@ -47,19 +47,6 @@ public class Discrete2 implements Distribution {
         checkX(x, p);
         this.x = x;
         this.p = convert(p);
-    }
-
-    private void checkX(double[] x, double[] p) {
-
-        for (int i = 1; i < x.length; i++) {
-            if (!(x[i-1] < x[i])) {
-                throw new IllegalArgumentException("X values must be in ascending order.");
-            }
-        }
-
-        if (!(x.length == p.length)) {
-            throw new IllegalArgumentException("X must have the same number of values as p.");
-        }
     }
 
     /**
@@ -74,33 +61,46 @@ public class Discrete2 implements Distribution {
         return new Discrete2(new double[0], new double[0]);
     }
 
+    private void checkX(double[] x, double[] p) {
+
+        for (int i = 1; i < x.length; i++) {
+            if (!(x[i - 1] < x[i])) {
+                throw new IllegalArgumentException("X values must be in ascending order.");
+            }
+        }
+
+        if (!(x.length == p.length)) {
+            throw new IllegalArgumentException("X must have the same number of values as p.");
+        }
+    }
+
     @Override
-	public int getNumParameters() {
+    public int getNumParameters() {
         return p.length;
     }
 
     @Override
-	public String getName() {
+    public String getName() {
         return "Discrete";
     }
 
     @Override
-	public void setParameter(int index, double value) {
+    public void setParameter(int index, double value) {
         p[index] = value;
     }
 
     @Override
-	public double getParameter(int index) {
+    public double getParameter(int index) {
         return p[index];
     }
 
     @Override
-	public String getParameterName(int index) {
+    public String getParameterName(int index) {
         return "Cut #" + (index + 1);
     }
 
     @Override
-	public double nextRandom() {
+    public double nextRandom() {
         double r = RandomUtil.getInstance().nextDouble();
 
         for (int i = 0; i < p.length; i++) {
@@ -111,7 +111,7 @@ public class Discrete2 implements Distribution {
     }
 
     @Override
-	public String toString() {
+    public String toString() {
         return "Discrete(" + Arrays.toString(p) + ")";
     }
 

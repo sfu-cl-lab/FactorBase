@@ -25,8 +25,6 @@ package edu.cmu.tetrad.graph;
 import edu.cmu.tetrad.util.ChoiceGenerator;
 import org.apache.commons.collections.MultiHashMap;
 
-import java.util.*;
-
 /**
  * Lays out a graph by placing springs between the nodes and letting the system
  * settle (one node at a time).
@@ -54,11 +52,11 @@ public final class LayeredDrawing {
 
     public void doLayout() {
         //                List tiers = GraphUtils.getTiers(graph);
-        List<List<Node>> tiers = placeInTiers(graph);
+        List <List <Node>> tiers = placeInTiers(graph);
 
         int y = 0;
 
-        for (List<Node> tier1 : tiers) {
+        for (List <Node> tier1 : tiers) {
             y += 60;
             int x = 0;
 
@@ -72,31 +70,31 @@ public final class LayeredDrawing {
 
     //============================PRIVATE METHODS=========================//
 
-    private List<List<Node>> placeInTiers(Graph graph) {
-        List<List<Node>> connectedComponents =
+    private List <List <Node>> placeInTiers(Graph graph) {
+        List <List <Node>> connectedComponents =
                 GraphUtils.connectedComponents(graph);
-        List<List<Node>> tiers = new ArrayList<List<Node>>();
+        List <List <Node>> tiers = new ArrayList <List <Node>>();
 
-        for (List<Node> component : connectedComponents) {
+        for (List <Node> component : connectedComponents) {
 
             // Recursively map each node to its tier inside the component,
             // starting with the first node. These tiers are relative and
             // can be negative.
             Node firstNode = component.get(0);
-            Map<Node, Integer> componentTiers = new HashMap<Node, Integer>();
+            Map <Node, Integer> componentTiers = new HashMap <Node, Integer>();
             placeNodes(firstNode, componentTiers, graph);
 
             // Reverse the map. The domain of this map is now possibly negative
             // tiers.
-            Map<Integer, Node> reversedMap = new MultiHashMap();
+            Map <Integer, Node> reversedMap = new MultiHashMap();
 
             for (Node _node : component) {
                 Integer _tier = componentTiers.get(_node);
                 reversedMap.put(_tier, _node);
             }
 
-            List<Integer> indices =
-                    new ArrayList<Integer>(reversedMap.keySet());
+            List <Integer> indices =
+                    new ArrayList <Integer>(reversedMap.keySet());
             Collections.sort(indices);
 
             // Add these tiers low to high to the list of all tiers. Note that
@@ -105,16 +103,16 @@ public final class LayeredDrawing {
             int start = tiers.size();
 
             for (int i : indices) {
-                Collection<Node> collection = (Collection<Node>) reversedMap.get(i);
-                tiers.add(new ArrayList<Node>(collection));
+                Collection <Node> collection = (Collection <Node>) reversedMap.get(i);
+                tiers.add(new ArrayList <Node>(collection));
             }
 
             // Do some heuristic uncrossing of edges in successive tiers.
             for (int i = start; i < tiers.size() - 1; i++) {
-                List<Node> tier1 = tiers.get(i);
-                List<Node> tier2 = tiers.get(i + 1);
+                List <Node> tier1 = tiers.get(i);
+                List <Node> tier2 = tiers.get(i + 1);
 
-                List<Node> saveArray = new ArrayList<Node>();
+                List <Node> saveArray = new ArrayList <Node>();
                 int saveCrossings = Integer.MAX_VALUE;
 
                 for (int j = 0; j < 4 * tier2.size(); j++) {
@@ -122,7 +120,7 @@ public final class LayeredDrawing {
                     int numCrossings = numCrossings(tier1, tier2, graph);
 
                     if (numCrossings < saveCrossings) {
-                        saveArray = new ArrayList<Node>(tier2);
+                        saveArray = new ArrayList <Node>(tier2);
                         saveCrossings = numCrossings;
                     }
                 }
@@ -134,7 +132,7 @@ public final class LayeredDrawing {
         return tiers;
     }
 
-    private int numCrossings(List<Node> tier1, List<Node> tier2, Graph graph) {
+    private int numCrossings(List <Node> tier1, List <Node> tier2, Graph graph) {
         if (tier2.size() < 2) {
             return 0;
         }
@@ -144,8 +142,8 @@ public final class LayeredDrawing {
         int numCrossings = 0;
 
         while ((choice = cg.next()) != null) {
-            List<Node> list1 = graph.getAdjacentNodes(tier2.get(choice[0]));
-            List<Node> list2 = graph.getAdjacentNodes(tier2.get(choice[1]));
+            List <Node> list1 = graph.getAdjacentNodes(tier2.get(choice[0]));
+            List <Node> list2 = graph.getAdjacentNodes(tier2.get(choice[1]));
 
             list1.retainAll(tier1);
             list2.retainAll(tier1);
@@ -162,35 +160,33 @@ public final class LayeredDrawing {
         return numCrossings;
     }
 
-    private void placeNodes(Node node, Map<Node, Integer> tiers, Graph graph) {
+    private void placeNodes(Node node, Map <Node, Integer> tiers, Graph graph) {
         if (tiers.keySet().contains(node)) {
             return;
         }
 
-        Set<Node> keySet = tiers.keySet();
-        List<Node> parents = graph.getParents(node);
+        Set <Node> keySet = tiers.keySet();
+        List <Node> parents = graph.getParents(node);
         parents.retainAll(keySet);
 
-        List<Node> children = graph.getChildren(node);
+        List <Node> children = graph.getChildren(node);
         children.retainAll(keySet);
 
         if (parents.isEmpty() && children.isEmpty()) {
             tiers.put(node, 0);
-        }
-        else if (parents.isEmpty()) {
+        } else if (parents.isEmpty()) {
             int cMin = getCMin(children, tiers);
             tiers.put(node, cMin - 1);
             placeChildren(node, tiers, graph);
             return;
-        }
-        else {
+        } else {
             int pMax = getPMax(parents, tiers);
             int cMin = getCMin(children, tiers);
             tiers.put(node, pMax + 1);
 
             if (!children.isEmpty() && cMin < pMax + 2) {
                 int diff = (pMax + 2) - cMin;
-                List<Node> descendants =
+                List <Node> descendants =
                         graph.getDescendants(Collections.singletonList(node));
                 descendants.retainAll(keySet);
                 descendants.remove(node);
@@ -205,17 +201,17 @@ public final class LayeredDrawing {
         placeChildren(node, tiers, graph);
     }
 
-    private void placeChildren(Node node, Map<Node, Integer> tiers,
+    private void placeChildren(Node node, Map <Node, Integer> tiers,
                                Graph graph) {
         // Recurse.
-        List<Node> adj = graph.getAdjacentNodes(node);
+        List <Node> adj = graph.getAdjacentNodes(node);
 
         for (Node _node : adj) {
             placeNodes(_node, tiers, graph);
         }
     }
 
-    private int getPMax(List<Node> parents, Map<Node, Integer> tiers) {
+    private int getPMax(List <Node> parents, Map <Node, Integer> tiers) {
         int pMax = Integer.MIN_VALUE;
 
         for (Node parent : parents) {
@@ -227,7 +223,7 @@ public final class LayeredDrawing {
         return pMax;
     }
 
-    private int getCMin(List<Node> children, Map<Node, Integer> tiers) {
+    private int getCMin(List <Node> children, Map <Node, Integer> tiers) {
         int cMin = Integer.MAX_VALUE;
 
         for (Node child : children) {

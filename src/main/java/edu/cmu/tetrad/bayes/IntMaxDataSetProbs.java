@@ -42,34 +42,30 @@ import java.util.List;
 public final class IntMaxDataSetProbs implements DiscreteProbs {
 
     /**
-     * The data set that this is a cell count table for.
-     */
-    private DataSet dataSet;
-
-    /**
      * An array whose length is the number of dimensions of the cell and whose
      * contents, for each value dims[i], are the numbers of values for each
      * i'th dimension. Each of these dimensions must be an integer greater than
      * zero.
      */
     private final int[] dims;
-
     /**
-     * Indicates whether bounds on coordinate values are explicitly enforced.
-     * This may slow down loops.
+     * The number of rows in the data.
      */
-    private boolean boundsEnforced = true;
+    private final int numRows;
+    /**
+     * The data set that this is a cell count table for.
+     */
+    private DataSet dataSet;
 //
 //    /**
 //     * The data from dataset as an array. Data beyond numRows is noise.
 //     */
 //    private int[][] untrimmedData;
-
     /**
-     * The number of rows in the data.
+     * Indicates whether bounds on coordinate values are explicitly enforced.
+     * This may slow down loops.
      */
-    private final int numRows;
-
+    private boolean boundsEnforced = true;
     /**
      * True iff a missing value case was found on the last run through the
      * data.
@@ -105,7 +101,7 @@ public final class IntMaxDataSetProbs implements DiscreteProbs {
      * variable values is the order of the variables in getVariable().
      */
     @Override
-	public double getCellProb(int[] variableValues) {
+    public double getCellProb(int[] variableValues) {
         int[] point = new int[dims.length];
         int count = 0;
         this.missingValueCaseFound = false;
@@ -133,7 +129,7 @@ public final class IntMaxDataSetProbs implements DiscreteProbs {
      * Returns the estimated probability of the given proposition.
      */
     @Override
-	public double getProb(Proposition assertion) {
+    public double getProb(Proposition assertion) {
         int[] point = new int[dims.length];
         int count = 0;
         this.missingValueCaseFound = false;
@@ -162,16 +158,16 @@ public final class IntMaxDataSetProbs implements DiscreteProbs {
      * conditional on the given condition.
      */
     @Override
-	public double getConditionalProb(Proposition assertion,
-            Proposition condition) {
+    public double getConditionalProb(Proposition assertion,
+                                     Proposition condition) {
         if (assertion.getVariableSource() != condition.getVariableSource()) {
             throw new IllegalArgumentException(
                     "Assertion and condition must be " +
                             "for the same Bayes IM.");
         }
 
-        List<Node> assertionVars = assertion.getVariableSource().getVariables();
-        List<Node> dataVars = dataSet.getVariables();
+        List <Node> assertionVars = assertion.getVariableSource().getVariables();
+        List <Node> dataVars = dataSet.getVariables();
 
         if (!assertionVars.equals(dataVars)) {
             throw new IllegalArgumentException(
@@ -256,7 +252,7 @@ public final class IntMaxDataSetProbs implements DiscreteProbs {
     }
 
     @Override
-	public boolean isMissingValueCaseFound() {
+    public boolean isMissingValueCaseFound() {
         return this.missingValueCaseFound;
     }
 
@@ -272,7 +268,7 @@ public final class IntMaxDataSetProbs implements DiscreteProbs {
      * probabilities for.
      */
     @Override
-	public List<Node> getVariables() {
+    public List <Node> getVariables() {
         return null;
     }
 

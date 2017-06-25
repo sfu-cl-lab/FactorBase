@@ -45,7 +45,7 @@ public class IndTestFisherZBootstrap implements IndependenceTest {
     /**
      * The variables of the correlation matrix, in order. (Unmodifiable list.)
      */
-    private final List<Node> variables;
+    private final List <Node> variables;
 
     /**
      * The significance level of the independence tests.
@@ -100,12 +100,12 @@ public class IndTestFisherZBootstrap implements IndependenceTest {
     }
 
     @Override
-	public IndependenceTest indTestSubset(List<Node> vars) {
+    public IndependenceTest indTestSubset(List <Node> vars) {
         return null;  //To change body of implemented methods use File | Settings | File Templates.
     }
 
     @Override
-	public boolean isIndependent(Node x, Node y, List<Node> z) {
+    public boolean isIndependent(Node x, Node y, List <Node> z) {
 //        DoubleMatrix2D fullData = dataSet.getDoubleData();
         int[] independentGuys = new int[numBootstrapSamples];
 
@@ -132,24 +132,24 @@ public class IndTestFisherZBootstrap implements IndependenceTest {
     }
 
     @Override
-	public boolean isIndependent(Node x, Node y, Node... z) {
-        List<Node> zList = Arrays.asList(z);
+    public boolean isIndependent(Node x, Node y, Node... z) {
+        List <Node> zList = Arrays.asList(z);
         return isIndependent(x, y, zList);
     }
 
     @Override
-	public boolean isDependent(Node x, Node y, List<Node> z) {
+    public boolean isDependent(Node x, Node y, List <Node> z) {
         return !isIndependent(x, y, z);
     }
 
     @Override
-	public boolean isDependent(Node x, Node y, Node... z) {
-        List<Node> zList = Arrays.asList(z);
+    public boolean isDependent(Node x, Node y, Node... z) {
+        List <Node> zList = Arrays.asList(z);
         return isDependent(x, y, zList);
     }
 
     @Override
-	public double getPValue() {
+    public double getPValue() {
         return 0;  //To change body of implemented methods use File | Settings | File Templates.
     }
 
@@ -158,7 +158,7 @@ public class IndTestFisherZBootstrap implements IndependenceTest {
      * relations-- that is, all the variables in the given graph or the given data set.
      */
     @Override
-	public List<Node> getVariables() {
+    public List <Node> getVariables() {
         return this.variables;
     }
 
@@ -166,7 +166,7 @@ public class IndTestFisherZBootstrap implements IndependenceTest {
      * Returns the variable with the given name.
      */
     @Override
-	public Node getVariable(String name) {
+    public Node getVariable(String name) {
         for (int i = 0; i < getVariables().size(); i++) {
             Node variable = getVariables().get(i);
             if (variable.getName().equals(name)) {
@@ -181,9 +181,9 @@ public class IndTestFisherZBootstrap implements IndependenceTest {
      * Returns the list of variable varNames.
      */
     @Override
-	public List<String> getVariableNames() {
-        List<Node> variables = getVariables();
-        List<String> variableNames = new ArrayList<String>();
+    public List <String> getVariableNames() {
+        List <Node> variables = getVariables();
+        List <String> variableNames = new ArrayList <String>();
         for (Node variable1 : variables) {
             variableNames.add(variable1.getName());
         }
@@ -191,28 +191,28 @@ public class IndTestFisherZBootstrap implements IndependenceTest {
     }
 
     @Override
-	public boolean determines(List<Node> z, Node x1) {
+    public boolean determines(List <Node> z, Node x1) {
         return false;  //To change body of implemented methods use File | Settings | File Templates.
     }
 
     @Override
-	public double getAlpha() {
+    public double getAlpha() {
         return alpha;
     }
 
     @Override
-	public void setAlpha(double alpha) {
+    public void setAlpha(double alpha) {
         this.alpha = alpha;
     }
 
     @Override
-	public String toString() {
+    public String toString() {
         return "Fisher's Z Bootstrap";
     }
 
 
     @Override
-	public DataSet getData() {
+    public DataSet getData() {
         return dataSet;
     }
 }

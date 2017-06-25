@@ -84,7 +84,7 @@ public class Mapping implements TetradSerializable {
      * @param j         Right coordinate of matrix[i][j].
      */
     public Mapping(ISemIm semIm, Parameter parameter, DoubleMatrix2D matrix,
-            int i, int j) {
+                   int i, int j) {
         if (semIm == null) {
             throw new NullPointerException("SemIm must not be null.");
         }
@@ -121,6 +121,13 @@ public class Mapping implements TetradSerializable {
     }
 
     /**
+     * Returns the value of the array element at (i, j).
+     */
+    public double getValue() {
+        return aC.getQuick(i, j);
+    }
+
+    /**
      * Sets the value of the array element at the stored coordinates (i, j).
      * If the array is symmetric sets two elements.
      */
@@ -141,13 +148,6 @@ public class Mapping implements TetradSerializable {
     }
 
     /**
-     * Returns the value of the array element at (i, j).
-     */
-    public double getValue() {
-        return aC.getQuick(i, j);
-    }
-
-    /**
      * Returns the paramter that this mapping maps.
      */
     public Parameter getParameter() {
@@ -159,7 +159,7 @@ public class Mapping implements TetradSerializable {
      * subscripts) about the array element associated with this mapping.
      */
     @Override
-	public String toString() {
+    public String toString() {
         return "<" + getParameter().getName() + " " + getParameter().getType() +
                 "[" + i + "][" + j + "]>";
     }

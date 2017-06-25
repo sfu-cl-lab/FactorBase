@@ -72,7 +72,7 @@ public interface DataSet extends KnowledgeTransferable, DataModel, TetradSeriali
      * used. The purpose of this is to allow these names to be set later
      * by the calling class, without incurring conflicts.
      */
-    void ensureColumns(int columns, List<String> excludedVariableNames);
+    void ensureColumns(int columns, List <String> excludedVariableNames);
 
     /**
      * Ensures that the dataset has at least <code>rows</code> rows.
@@ -130,7 +130,7 @@ public interface DataSet extends KnowledgeTransferable, DataModel, TetradSeriali
      * Returns the name of the data set.
      */
     @Override
-	String getName();
+    String getName();
 
     /**
      * Returns the number of columns in the data set.
@@ -173,14 +173,14 @@ public interface DataSet extends KnowledgeTransferable, DataModel, TetradSeriali
      * of their columns.
      */
     @Override
-	List<String> getVariableNames();
+    List <String> getVariableNames();
 
     /**
      * Returns (a copy of) the List of Variables for the data set, in the order
      * of their columns.
      */
     @Override
-	List<Node> getVariables();
+    List <Node> getVariables();
 
     /**
      * Returns true if case multipliers are being used in this data set.
@@ -238,6 +238,7 @@ public interface DataSet extends KnowledgeTransferable, DataModel, TetradSeriali
 
     /**
      * Sets the case ID fo the given case numnber to the given value.
+     *
      * @throws IllegalArgumentException if the given case ID is already used.
      */
     void setCaseId(int caseNumber, String id);
@@ -290,7 +291,7 @@ public interface DataSet extends KnowledgeTransferable, DataModel, TetradSeriali
      * ordering of the elements of vars will be the same as in the list of
      * variables in this DataSet.
      */
-    DataSet subsetColumns(List<Node> vars);
+    DataSet subsetColumns(List <Node> vars);
 
     /**
      * Returns a new data set in which the the column at indices[i] is placed at
@@ -308,7 +309,7 @@ public interface DataSet extends KnowledgeTransferable, DataModel, TetradSeriali
      * Returns a string representation of this dataset.
      */
     @Override
-	String toString();
+    String toString();
 
     /**
      * Returns true iff this variable is set to accomodate new categories
@@ -336,8 +337,9 @@ public interface DataSet extends KnowledgeTransferable, DataModel, TetradSeriali
      */
     void permuteRows();
 
-	void setColumnToTooltip(Map<String, String> columnToTooltip);
-	Map<String, String> getColumnToTooltip();
+    Map <String, String> getColumnToTooltip();
+
+    void setColumnToTooltip(Map <String, String> columnToTooltip);
 }
 
 

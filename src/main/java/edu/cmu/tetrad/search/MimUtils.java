@@ -37,7 +37,7 @@ import java.util.List;
 public final class MimUtils {
 
     public static Clusters convertToClusters(Graph clusterGraph) {
-        List<Node> measuredVariables = new ArrayList<Node>();
+        List <Node> measuredVariables = new ArrayList <Node>();
 
         for (Node node : clusterGraph.getNodes()) {
             if (node.getNodeType() != NodeType.LATENT) {
@@ -53,14 +53,14 @@ public final class MimUtils {
      * number of latents Li, i = 0,...,n-1, for each of which there is a list of indicators Wj, j = 0,...,m_i-1, such
      * that , Li-->Wj. Returns a Clusters object mapping i to Wj. The name for cluster i is set to Li.
      */
-    public static Clusters convertToClusters(Graph clusterGraph, List<Node> measuredVariables) {
-        List<String> latents = new ArrayList<String>();
+    public static Clusters convertToClusters(Graph clusterGraph, List <Node> measuredVariables) {
+        List <String> latents = new ArrayList <String>();
         Clusters clusters = new Clusters();
 
         for (Node node : clusterGraph.getNodes()) {
             if (!measuredVariables.contains(node)) {
 //                if (node.getNodeType() == NodeType.LATENT) {
-                    latents.add(node.getName());
+                latents.add(node.getName());
             }
         }
 
@@ -70,13 +70,13 @@ public final class MimUtils {
             String name = latents.get(i);
             clusters.setClusterName(i, name);
             Node latent = clusterGraph.getNode(name);
-            List<Node> measured =
+            List <Node> measured =
                     clusterGraph.getNodesOutTo(latent, Endpoint.ARROW);
 
             for (Node _node : measured) {
                 if (measuredVariables.contains(_node)) {
 //                    if (!(_node.getNodeType() == NodeType.LATENT)) {
-                        clusters.addToCluster(i, _node.getName());
+                    clusters.addToCluster(i, _node.getName());
                 }
             }
         }
@@ -89,7 +89,7 @@ public final class MimUtils {
      */
     public static Graph extractStructureGraph(Graph clusterGraph)
             throws Exception {
-        List<Edge> edges = clusterGraph.getEdges();
+        List <Edge> edges = clusterGraph.getEdges();
         Graph structureGraph = new EdgeListGraph();
 
         for (Edge edge : edges) {

@@ -139,8 +139,7 @@ public final class BdeMetric {
                             observedCountsRowSum[i][j]);
                     //System.out.println("num = " + numerator + " denom = " + denom);
                     prodj *= (numerator / denom);
-                }
-                catch (Exception e) {
+                } catch (Exception e) {
                     e.printStackTrace();
                 }
 
@@ -151,8 +150,7 @@ public final class BdeMetric {
                         prodk *= Gamma.gamma(
                                 priorProbs[i][j][k] + observedCounts[i][j][k]) /
                                 Gamma.gamma(priorProbs[i][j][k]);
-                    }
-                    catch (Exception e) {
+                    } catch (Exception e) {
                         e.printStackTrace();
                     }
                 }
@@ -251,8 +249,7 @@ public final class BdeMetric {
                             observedCountsRowSum[i][j]);
                     //System.out.println("num = " + numerator + " denom = " + denom);
                     sumj += (numerator - denom);
-                }
-                catch (Exception e) {
+                } catch (Exception e) {
                     e.printStackTrace();
                 }
 
@@ -265,8 +262,7 @@ public final class BdeMetric {
                         sumk += ProbUtils.lngamma(
                                 priorProbs[i][j][k] + observedCounts[i][j][k]) -
                                 ProbUtils.lngamma(priorProbs[i][j][k]);
-                    }
-                    catch (Exception e) {
+                    } catch (Exception e) {
                         e.printStackTrace();
                     }
                 }
@@ -320,8 +316,7 @@ public final class BdeMetric {
                 //for(int m = 0; m < ar.getNumSplits(); m++)
                 //    System.out.print("    " + m + " " + observedCounts[j][0][m]);
                 //System.out.println();
-            }
-            else {    //For variables with parents:
+            } else {    //For variables with parents:
                 int numRows = bayesIm.getNumRows(varIndex);
 
                 for (int row = 0; row < numRows; row++) {

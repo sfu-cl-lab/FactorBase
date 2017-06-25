@@ -55,6 +55,19 @@ public class TestBollenTetradTest extends TestCase {
         super(name);
     }
 
+    /**
+     * This method uses reflection to collect up all of the test methods from this class and return them to the test
+     * runner.
+     */
+    public static Test suite() {
+
+        // Edit the name of the class in the parens to match the name
+        // of this class.
+        return new TestSuite(TestBollenTetradTest.class);
+    }
+
+    // Bollen and Ting, Confirmatory Tetrad Analysis, p. 164 Sympathy and Anger.
+
     public void test4aIteratedPositives() {
         int numTrials = 100;
         double alpha = 0.2;
@@ -114,14 +127,14 @@ public class TestBollenTetradTest extends TestCase {
         }
     }
 
-    // Bollen and Ting, Confirmatory Tetrad Analysis, p. 164 Sympathy and Anger.
+    // Bollen and Ting p. 167 (Confirmatory Tetrad Analysis). Union Sentiment.
 
     public void testBollenExample1() {
         CovarianceMatrix cov = getBollenExample1Data();
 
         System.out.println(cov);
 
-        List<Node> variables = cov.getVariables();
+        List <Node> variables = cov.getVariables();
 
         Node v1 = variables.get(0);
         Node v2 = variables.get(1);
@@ -151,13 +164,13 @@ public class TestBollenTetradTest extends TestCase {
         // Just using the covariance matrix provided, I get chi square = 8.46, p = 0.39, df = 8.
     }
 
-    // Bollen and Ting p. 167 (Confirmatory Tetrad Analysis). Union Sentiment.
+    // Bollen 2000 A Tetrad Test for Causal Indicators, p. 13.
 
     public void testBollenExample2() {
         CovarianceMatrix cov = getBollenExample2Data();
         System.out.println(cov);
 
-        List<Node> variables = cov.getVariables();
+        List <Node> variables = cov.getVariables();
 
         Node y1 = variables.get(0);
         Node y2 = variables.get(1);
@@ -178,15 +191,13 @@ public class TestBollenTetradTest extends TestCase {
         // So do I.
     }
 
-    // Bollen 2000 A Tetrad Test for Causal Indicators, p. 13.
-
     public void testBollenSimulationExample() {
         CovarianceMatrix cov = getBollenSimulationExampleData();
 
 
         System.out.println(cov);
 
-        List<Node> variables = cov.getVariables();
+        List <Node> variables = cov.getVariables();
 
         Node y1 = variables.get(0);
         Node y2 = variables.get(1);
@@ -252,17 +263,6 @@ public class TestBollenTetradTest extends TestCase {
 //            System.out.println("Chi Square = " + chiSq);
 //            System.out.println("P value = " + test.getPValue());
 //        }
-    }
-
-    /**
-     * This method uses reflection to collect up all of the test methods from this class and return them to the test
-     * runner.
-     */
-    public static Test suite() {
-
-        // Edit the name of the class in the parens to match the name
-        // of this class.
-        return new TestSuite(TestBollenTetradTest.class);
     }
 
     private SemIm getFigure4aSem() {
@@ -342,7 +342,7 @@ public class TestBollenTetradTest extends TestCase {
         Node v5 = new ContinuousVariable("v5");
         Node v6 = new ContinuousVariable("v6");
 
-        List<Node> nodes = new ArrayList<Node>();
+        List <Node> nodes = new ArrayList <Node>();
         nodes.add(v1);
         nodes.add(v2);
         nodes.add(v3);
@@ -379,7 +379,7 @@ public class TestBollenTetradTest extends TestCase {
         Node x1 = new ContinuousVariable("x1");
         Node x2 = new ContinuousVariable("x2");
 
-        List<Node> nodes = new ArrayList<Node>();
+        List <Node> nodes = new ArrayList <Node>();
         nodes.add(y1);
         nodes.add(y2);
         nodes.add(y3);
@@ -418,7 +418,7 @@ public class TestBollenTetradTest extends TestCase {
         Node y4 = new ContinuousVariable("y4");
         Node y5 = new ContinuousVariable("y5");
 
-        List<Node> nodes = new ArrayList<Node>();
+        List <Node> nodes = new ArrayList <Node>();
         nodes.add(y1);
         nodes.add(y2);
         nodes.add(y3);

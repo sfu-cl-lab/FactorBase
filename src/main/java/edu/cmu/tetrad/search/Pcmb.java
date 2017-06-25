@@ -42,26 +42,26 @@ public class Pcmb implements MbSearch {
     }
 
     @Override
-	public List<Node> findMb(String targetName) {
+    public List <Node> findMb(String targetName) {
         Node target = getVariableForName(targetName);
 
         Pc search = new Pc(test);
         search.setDepth(depth);
         Graph graph = search.search();
         MbUtils.trimToMbNodes(graph, target, false);
-        List<Node> mbVariables = graph.getNodes();
+        List <Node> mbVariables = graph.getNodes();
         mbVariables.remove(target);
 
         return mbVariables;
     }
 
     @Override
-	public String getAlgorithmName() {
+    public String getAlgorithmName() {
         return "PCMB";
     }
 
     @Override
-	public int getNumIndependenceTests() {
+    public int getNumIndependenceTests() {
         return 0;
     }
 

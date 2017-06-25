@@ -50,6 +50,36 @@ public class TestLing extends TestCase {
 
     // test from gustavo's essay
 
+    private static boolean allEigenvaluesAreSmallerThanOneInModulus(DoubleMatrix2D b) {
+        EigenvalueDecomposition dec = new EigenvalueDecomposition(b);
+        DoubleMatrix1D realEigenvalues = dec.getRealEigenvalues();
+        DoubleMatrix1D imagEigenvalues = dec.getImagEigenvalues();
+
+        boolean allEigenvaluesSmallerThanOneInModulus = true;
+        for (int i = 0; i < realEigenvalues.size(); i++) {
+            double realEigenvalue = realEigenvalues.get(i);
+            double imagEigenvalue = imagEigenvalues.get(i);
+            double modulus = Math.sqrt(Math.pow(realEigenvalue, 2) + Math.pow(imagEigenvalue, 2));
+
+            if (modulus >= 1) {
+                allEigenvaluesSmallerThanOneInModulus = false;
+            }
+        }
+
+        return allEigenvaluesSmallerThanOneInModulus;
+    }
+
+    /**
+     * This method uses reflection to collect up all of the test methods from this class and return them to the test
+     * runner.
+     */
+    public static Test suite() {
+
+        // Edit the name of the class in the parens to match the name
+        // of this class.
+        return new TestSuite(TestLing.class);
+    }
+
     public void test() {
 
         Graph g = new EdgeListGraph();
@@ -138,6 +168,8 @@ public class TestLing extends TestCase {
         System.out.println("All eidgenvalues smaller than one in modulus: " + smaller);
     }
 
+    // randomly generated cyclic graph
+
     public void test1_8() {
 
         // This one confuses me.
@@ -215,7 +247,7 @@ public class TestLing extends TestCase {
 
     }
 
-    // randomly generated cyclic graph
+    // simple loop test
 
     public void test2() {
         Dag dag = GraphUtils.randomDag(6, 0, 7, 3, 3, 4, false);
@@ -246,6 +278,8 @@ public class TestLing extends TestCase {
         }
     }
 
+    // test for peter
+
     public void test2_1() {
         Dag dag = GraphUtils.randomDag(8, 0, 8, 3, 3, 4, false);
         Graph graph = GraphUtils.addCycles(dag, 1, 3);
@@ -270,7 +304,7 @@ public class TestLing extends TestCase {
         }
     }
 
-    // simple loop test
+    // test for peter
 
     public void test3() {
 
@@ -306,7 +340,7 @@ public class TestLing extends TestCase {
 
     }
 
-    // test for peter
+    // benchmark1 of ling to lingam
 
     public void test4() {
 
@@ -347,8 +381,6 @@ public class TestLing extends TestCase {
 
     }
 
-    // test for peter
-
     public void test5() {
 
         Graph g = new EdgeListGraph();
@@ -387,8 +419,6 @@ public class TestLing extends TestCase {
         }
 
     }
-
-    // benchmark1 of ling to lingam
 
     public void test6() {
 
@@ -450,36 +480,6 @@ public class TestLing extends TestCase {
             e.printStackTrace();
         }
 
-    }
-
-    private static boolean allEigenvaluesAreSmallerThanOneInModulus(DoubleMatrix2D b) {
-        EigenvalueDecomposition dec = new EigenvalueDecomposition(b);
-        DoubleMatrix1D realEigenvalues = dec.getRealEigenvalues();
-        DoubleMatrix1D imagEigenvalues = dec.getImagEigenvalues();
-
-        boolean allEigenvaluesSmallerThanOneInModulus = true;
-        for (int i = 0; i < realEigenvalues.size(); i++) {
-            double realEigenvalue = realEigenvalues.get(i);
-            double imagEigenvalue = imagEigenvalues.get(i);
-            double modulus = Math.sqrt(Math.pow(realEigenvalue, 2) + Math.pow(imagEigenvalue, 2));
-
-            if (modulus >= 1) {
-                allEigenvaluesSmallerThanOneInModulus = false;
-            }
-        }
-
-        return allEigenvaluesSmallerThanOneInModulus;
-    }
-
-    /**
-     * This method uses reflection to collect up all of the test methods from this class and return them to the test
-     * runner.
-     */
-    public static Test suite() {
-
-        // Edit the name of the class in the parens to match the name
-        // of this class.
-        return new TestSuite(TestLing.class);
     }
 
 }

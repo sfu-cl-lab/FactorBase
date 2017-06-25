@@ -67,22 +67,22 @@ public final class Cpc2 implements GraphSearch {
     /**
      * The list of all unshielded triples.
      */
-    private Set<Triple> allTriples;
+    private Set <Triple> allTriples;
 
     /**
      * Set of unshielded colliders from the triple orientation step.
      */
-    private Set<Triple> colliderTriples;
+    private Set <Triple> colliderTriples;
 
     /**
      * Set of unshielded noncolliders from the triple orientation step.
      */
-    private Set<Triple> noncolliderTriples;
+    private Set <Triple> noncolliderTriples;
 
     /**
      * Set of ambiguous unshielded triples.
      */
-    private Set<Triple> ambiguousTriples;
+    private Set <Triple> ambiguousTriples;
 
     /**
      * True if cycles are to be aggressively prevented. May be expensive for large graphs (but also useful for large
@@ -112,6 +112,12 @@ public final class Cpc2 implements GraphSearch {
 
     //==============================PUBLIC METHODS========================//
 
+    private static boolean isArrowpointAllowed1(Node from, Node to,
+                                                IKnowledge knowledge) {
+        return knowledge == null || !knowledge.edgeRequired(to.toString(), from.toString()) &&
+                !knowledge.edgeForbidden(from.toString(), to.toString());
+    }
+
     /**
      * Returns true just in case edges will not be added if they would create cycles.
      */
@@ -127,27 +133,10 @@ public final class Cpc2 implements GraphSearch {
     }
 
     /**
-     * Sets the maximum number of variables conditioned on in any conditional independence test. If set to -1, the value
-     * of 1000 will be used. May not be set to Integer.MAX_VALUE, due to a Java bug on multi-core systems.
-     */
-    public final void setDepth(int depth) {
-        if (depth < -1) {
-            throw new IllegalArgumentException("Depth must be -1 or >= 0: " + depth);
-        }
-
-        if (depth == Integer.MAX_VALUE) {
-            throw new IllegalArgumentException("Depth must not be Integer.MAX_VALUE, " +
-                    "due to a known bug.");
-        }
-
-        this.depth = depth;
-    }
-
-    /**
      * Returns the elapsed time of search in milliseconds, after <code>search()</code> has been run.
      */
     @Override
-	public final long getElapsedTime() {
+    public final long getElapsedTime() {
         return this.elapsedTime;
     }
 
@@ -182,35 +171,52 @@ public final class Cpc2 implements GraphSearch {
     }
 
     /**
+     * Sets the maximum number of variables conditioned on in any conditional independence test. If set to -1, the value
+     * of 1000 will be used. May not be set to Integer.MAX_VALUE, due to a Java bug on multi-core systems.
+     */
+    public final void setDepth(int depth) {
+        if (depth < -1) {
+            throw new IllegalArgumentException("Depth must be -1 or >= 0: " + depth);
+        }
+
+        if (depth == Integer.MAX_VALUE) {
+            throw new IllegalArgumentException("Depth must not be Integer.MAX_VALUE, " +
+                    "due to a known bug.");
+        }
+
+        this.depth = depth;
+    }
+
+    /**
      * Returns the set of ambiguous triples found during the most recent run of the algorithm. Non-null after a call to
      * <code>search()</code>.
      */
-    public Set<Triple> getAmbiguousTriples() {
-        return new HashSet<Triple>(ambiguousTriples);
+    public Set <Triple> getAmbiguousTriples() {
+        return new HashSet <Triple>(ambiguousTriples);
     }
 
     /**
      * Returns the set of collider triples found during the most recent run of the algorithm. Non-null after a call to
      * <code>search()</code>.
      */
-    public Set<Triple> getColliderTriples() {
-        return new HashSet<Triple>(colliderTriples);
+    public Set <Triple> getColliderTriples() {
+        return new HashSet <Triple>(colliderTriples);
     }
 
     /**
      * Returns the set of noncollider triples found during the most recent run of the algorithm. Non-null after a call
      * to <code>search()</code>.
      */
-    public Set<Triple> getNoncolliderTriples() {
-        return new HashSet<Triple>(noncolliderTriples);
+    public Set <Triple> getNoncolliderTriples() {
+        return new HashSet <Triple>(noncolliderTriples);
     }
 
     /**
      * Returns the set of all triples found during the most recent run of the algorithm. Non-null after a call to
      * <code>search()</code>.
      */
-    public Set<Triple> getAllTriples() {
-        return new HashSet<Triple>(allTriples);
+    public Set <Triple> getAllTriples() {
+        return new HashSet <Triple>(allTriples);
     }
 
     /**
@@ -218,7 +224,7 @@ public final class Cpc2 implements GraphSearch {
      * See PC for caveats. The number of possible cycles and bidirected edges is far less with CPC than with PC.
      */
     @Override
-	public final Graph search() {
+    public final Graph search() {
         return search(independenceTest.getVariables());
     }
 
@@ -226,20 +232,20 @@ public final class Cpc2 implements GraphSearch {
      * Runs PC on just the given variable, all of which must be in the domain of the independence test. See PC for
      * caveats. The number of possible cycles and bidirected edges is far less with CPC than with PC.
      */
-    public Graph search(List<Node> nodes) {
+    public Graph search(List <Node> nodes) {
         TetradLogger.getInstance().log("info", "Starting CPC algorithm.");
         TetradLogger.getInstance().log("info", "Independence test = " + independenceTest + ".");
         long startTime = System.currentTimeMillis();
-        this.allTriples = new HashSet<Triple>();
-        this.ambiguousTriples = new HashSet<Triple>();
-        this.colliderTriples = new HashSet<Triple>();
-        this.noncolliderTriples = new HashSet<Triple>();
+        this.allTriples = new HashSet <Triple>();
+        this.ambiguousTriples = new HashSet <Triple>();
+        this.colliderTriples = new HashSet <Triple>();
+        this.noncolliderTriples = new HashSet <Triple>();
 
         if (getIndependenceTest() == null) {
             throw new NullPointerException();
         }
 
-        List<Node> allNodes = getIndependenceTest().getVariables();
+        List <Node> allNodes = getIndependenceTest().getVariables();
         if (!allNodes.containsAll(nodes)) {
             throw new IllegalArgumentException("All of the given nodes must " +
                     "be in the domain of the independence test provided.");
@@ -284,6 +290,8 @@ public final class Cpc2 implements GraphSearch {
         return graph;
     }
 
+    //==========================PRIVATE METHODS===========================//
+
     /**
      * Orients the given graph using CPC orientation with the conditional independence test provided in the
      * constructor.
@@ -311,8 +319,6 @@ public final class Cpc2 implements GraphSearch {
         return graph;
     }
 
-    //==========================PRIVATE METHODS===========================//
-
     private void logTriples() {
         TetradLogger.getInstance().log("info", "\nCollider triples judged from sepsets:");
 
@@ -338,16 +344,16 @@ public final class Cpc2 implements GraphSearch {
                                          IndependenceTest test, int depth) {
         TetradLogger.getInstance().log("info", "Starting Collider Orientation:");
 
-        colliderTriples = new HashSet<Triple>();
-        noncolliderTriples = new HashSet<Triple>();
-        ambiguousTriples = new HashSet<Triple>();
-        List<Node> nodes = graph.getNodes();
+        colliderTriples = new HashSet <Triple>();
+        noncolliderTriples = new HashSet <Triple>();
+        ambiguousTriples = new HashSet <Triple>();
+        List <Node> nodes = graph.getNodes();
         int count = 0;
 
         for (Node y : nodes) {
             if (++count % 100 == 0) System.out.println("Orienting triples node # " + count);
 
-            List<Node> adjacentNodes = graph.getAdjacentNodes(y);
+            List <Node> adjacentNodes = graph.getAdjacentNodes(y);
 
             if (adjacentNodes.size() < 2) {
                 continue;
@@ -393,11 +399,5 @@ public final class Cpc2 implements GraphSearch {
     private boolean colliderAllowed(Node x, Node y, Node z, IKnowledge knowledge) {
         return Cpc2.isArrowpointAllowed1(x, y, knowledge) &&
                 Cpc2.isArrowpointAllowed1(z, y, knowledge);
-    }
-
-    private static boolean isArrowpointAllowed1(Node from, Node to,
-                                                IKnowledge knowledge) {
-        return knowledge == null || !knowledge.edgeRequired(to.toString(), from.toString()) &&
-                !knowledge.edgeForbidden(from.toString(), to.toString());
     }
 }

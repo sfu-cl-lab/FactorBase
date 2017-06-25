@@ -35,7 +35,6 @@ import pal.math.ConjugateDirectionSearch;
 import pal.math.MultivariateFunction;
 
 import java.text.NumberFormat;
-import java.util.*;
 
 /**
  * Represents a generalized SEM instantiated model. The parameteric form of this model allows arbitrary
@@ -52,7 +51,7 @@ public class GeneralizedSemIm implements TetradSerializable {
      * A map from parameters names to their values--these form the context for evaluating expressions.
      * Variables do not appear in this list. All parameters are double-valued.
      */
-    private Map<String, Double> parameterValues;
+    private Map <String, Double> parameterValues;
 
     /**
      * True iff only positive data should be simulated.
@@ -69,9 +68,9 @@ public class GeneralizedSemIm implements TetradSerializable {
     public GeneralizedSemIm(GeneralizedSemPm pm) {
         this.pm = new GeneralizedSemPm(pm);
 
-        this.parameterValues = new HashMap<String, Double>();
+        this.parameterValues = new HashMap <String, Double>();
 
-        Set<String> parameters = pm.getParameters();
+        Set <String> parameters = pm.getParameters();
 
         for (String parameter : parameters) {
             Expression expression = pm.setParameterExpression(parameter);
@@ -91,7 +90,7 @@ public class GeneralizedSemIm implements TetradSerializable {
         this(pm);
         SemPm semPm = semIm.getSemPm();
 
-        Set<String> parameters = pm.getParameters();
+        Set <String> parameters = pm.getParameters();
 
         // If there are any missing parameters, just ignore the sem IM.
         for (String parameter : parameters) {
@@ -205,7 +204,7 @@ public class GeneralizedSemIm implements TetradSerializable {
      *                          substituted for the stored values where applicable.
      * @return the expression string with values substituted for parameters.
      */
-    public String getNodeSubstitutedString(Node node, Map<String, Double> substitutedValues) {
+    public String getNodeSubstitutedString(Node node, Map <String, Double> substitutedValues) {
         if (node == null) {
             throw new NullPointerException();
         }
@@ -247,8 +246,8 @@ public class GeneralizedSemIm implements TetradSerializable {
      * Returns a String representation of the IM, in this case a lsit of parameters and their values.
      */
     @Override
-	public String toString() {
-        List<String> parameters = new ArrayList<String>(pm.getParameters());
+    public String toString() {
+        List <String> parameters = new ArrayList <String>(pm.getParameters());
         Collections.sort(parameters);
         NumberFormat nf = NumberFormatUtil.getInstance().getNumberFormat();
 
@@ -293,16 +292,16 @@ public class GeneralizedSemIm implements TetradSerializable {
         semGraph.setShowErrorTerms(true);
         TimeLagGraph timeLagGraph = getSemPm().getGraph().getTimeLagGraph();
 
-        List<Node> variables = new ArrayList<Node>();
+        List <Node> variables = new ArrayList <Node>();
 
         for (Node node : timeLagGraph.getLag0Nodes()) {
             if (node.getNodeType() == NodeType.ERROR) continue;
             variables.add(new ContinuousVariable(timeLagGraph.getNodeId(node).getName()));
         }
 
-        List<Node> lag0Nodes = timeLagGraph.getLag0Nodes();
+        List <Node> lag0Nodes = timeLagGraph.getLag0Nodes();
 
-        for (Node node : new ArrayList<Node>(lag0Nodes)) {
+        for (Node node : new ArrayList <Node>(lag0Nodes)) {
             if (node.getNodeType() == NodeType.ERROR) {
                 lag0Nodes.remove(node);
             }
@@ -310,7 +309,7 @@ public class GeneralizedSemIm implements TetradSerializable {
 
         DataSet fullData = new ColtDataSet(sampleSize, variables);
 
-        Map<Node, Integer> nodeIndices = new HashMap<Node, Integer>();
+        Map <Node, Integer> nodeIndices = new HashMap <Node, Integer>();
 
         for (int i = 0; i < lag0Nodes.size(); i++) {
             nodeIndices.put(lag0Nodes.get(i), i);
@@ -318,15 +317,15 @@ public class GeneralizedSemIm implements TetradSerializable {
 
         Graph contemporaneousDag = timeLagGraph.subgraph(timeLagGraph.getLag0Nodes());
 
-        List<Node> tierOrdering = contemporaneousDag.getTierOrdering();
+        List <Node> tierOrdering = contemporaneousDag.getTierOrdering();
 
-        for (Node node : new ArrayList<Node>(tierOrdering)) {
+        for (Node node : new ArrayList <Node>(tierOrdering)) {
             if (node.getNodeType() == NodeType.ERROR) {
                 tierOrdering.remove(node);
             }
         }
 
-        final Map<String, Double> variableValues = new HashMap<String, Double>();
+        final Map <String, Double> variableValues = new HashMap <String, Double>();
 
         Context context = new Context() {
             public Double getValue(String term) {
@@ -397,7 +396,7 @@ public class GeneralizedSemIm implements TetradSerializable {
      * @return the simulated data set.
      */
     public DataSet simulateDataRecursive1(int sampleSize, boolean latentDataSaved) {
-        final Map<String, Double> variableValues = new HashMap<String, Double>();
+        final Map <String, Double> variableValues = new HashMap <String, Double>();
 
         Context context = new Context() {
             public Double getValue(String term) {
@@ -417,9 +416,9 @@ public class GeneralizedSemIm implements TetradSerializable {
             }
         };
 
-        List<Node> variables = pm.getNodes();
-        List<Node> continuousVariables = new LinkedList<Node>();
-        List<Node> nonErrorVariables = pm.getVariableNodes();
+        List <Node> variables = pm.getNodes();
+        List <Node> continuousVariables = new LinkedList <Node>();
+        List <Node> nonErrorVariables = pm.getVariableNodes();
 
         // Work with a copy of the variables, because their type can be set externally.
         for (Node node : nonErrorVariables) {
@@ -435,7 +434,7 @@ public class GeneralizedSemIm implements TetradSerializable {
 
         // Create some index arrays to hopefully speed up the simulation.
         SemGraph graph = pm.getGraph();
-        List<Node> tierOrdering = graph.getFullTierOrdering();
+        List <Node> tierOrdering = graph.getFullTierOrdering();
 
         int[] tierIndices = new int[variables.size()];
 
@@ -447,7 +446,7 @@ public class GeneralizedSemIm implements TetradSerializable {
 
         for (int i = 0; i < variables.size(); i++) {
             Node node = variables.get(i);
-            List<Node> parents = graph.getParents(node);
+            List <Node> parents = graph.getParents(node);
 
             _parents[i] = new int[parents.size()];
 
@@ -491,13 +490,13 @@ public class GeneralizedSemIm implements TetradSerializable {
     }
 
     public DataSet simulateDataMinimizeSurface(int sampleSize, boolean latentDataSaved) {
-        final Map<String, Double> variableValues = new HashMap<String, Double>();
+        final Map <String, Double> variableValues = new HashMap <String, Double>();
 
         final double func_tolerance = 1.0e-4;
         final double param_tolerance = 1.0e-3;
 
-        List<Node> continuousVariables = new LinkedList<Node>();
-        final List<Node> variableNodes = pm.getVariableNodes();
+        List <Node> continuousVariables = new LinkedList <Node>();
+        final List <Node> variableNodes = pm.getVariableNodes();
 
         // Work with a copy of the variables, because their type can be set externally.
         for (Node node : variableNodes) {
@@ -535,7 +534,7 @@ public class GeneralizedSemIm implements TetradSerializable {
             double metric;
 
             @Override
-			public double evaluate(double[] doubles) {
+            public double evaluate(double[] doubles) {
                 for (int i = 0; i < variableNodes.size(); i++) {
                     variableValues.put(variableNodes.get(i).getName(), doubles[i]);
                 }
@@ -569,17 +568,17 @@ public class GeneralizedSemIm implements TetradSerializable {
             }
 
             @Override
-			public int getNumArguments() {
+            public int getNumArguments() {
                 return variableNodes.size();
             }
 
             @Override
-			public double getLowerBound(int i) {
+            public double getLowerBound(int i) {
                 return -10000;
             }
 
             @Override
-			public double getUpperBound(int i) {
+            public double getUpperBound(int i) {
                 return 10000;
             }
 
@@ -588,7 +587,7 @@ public class GeneralizedSemIm implements TetradSerializable {
             }
 
             public OrthogonalHints getOrthogonalHints() {
-                return null; 
+                return null;
             }
         };
 
@@ -653,10 +652,10 @@ public class GeneralizedSemIm implements TetradSerializable {
     }
 
     public DataSet simulateDataAvoidInfinity(int sampleSize, boolean latentDataSaved) {
-        final Map<String, Double> variableValues = new HashMap<String, Double>();
+        final Map <String, Double> variableValues = new HashMap <String, Double>();
 
-        List<Node> continuousVariables = new LinkedList<Node>();
-        final List<Node> variableNodes = pm.getVariableNodes();
+        List <Node> continuousVariables = new LinkedList <Node>();
+        final List <Node> variableNodes = pm.getVariableNodes();
 //        System.out.println("AAA" + variableNodes);
 
         // Work with a copy of the variables, because their type can be set externally.
@@ -783,8 +782,7 @@ public class GeneralizedSemIm implements TetradSerializable {
                 row--;
                 System.out.println("Trying another starting point...");
                 continue ROW;
-            }
-            else if (_count >= 100) {
+            } else if (_count >= 100) {
                 System.out.println("Couldn't converge in simulation.");
 
                 for (int i = 0; i < variableNodes.size(); i++) {
@@ -815,9 +813,9 @@ public class GeneralizedSemIm implements TetradSerializable {
     }
 
     DoubleMatrix1D simulateOneRecord(DoubleMatrix1D e) {
-        final Map<String, Double> variableValues = new HashMap<String, Double>();
+        final Map <String, Double> variableValues = new HashMap <String, Double>();
 
-        final List<Node> variableNodes = pm.getVariableNodes();
+        final List <Node> variableNodes = pm.getVariableNodes();
 
         final Context context = new Context() {
             public Double getValue(String term) {
@@ -1059,10 +1057,10 @@ public class GeneralizedSemIm implements TetradSerializable {
 //    }
 
     public DataSet simulateDataNSteps(int sampleSize, boolean latentDataSaved) {
-        final Map<String, Double> variableValues = new HashMap<String, Double>();
+        final Map <String, Double> variableValues = new HashMap <String, Double>();
 
-        List<Node> continuousVariables = new LinkedList<Node>();
-        final List<Node> variableNodes = pm.getVariableNodes();
+        List <Node> continuousVariables = new LinkedList <Node>();
+        final List <Node> variableNodes = pm.getVariableNodes();
 
         // Work with a copy of the variables, because their type can be set externally.
         for (Node node : variableNodes) {
@@ -1168,7 +1166,7 @@ public class GeneralizedSemIm implements TetradSerializable {
         return new GeneralizedSemPm(pm);
     }
 
-    public void setSubstitutions(Map<String, Double> parameterValues) {
+    public void setSubstitutions(Map <String, Double> parameterValues) {
         for (String parameter : parameterValues.keySet()) {
             if (this.parameterValues.keySet().contains(parameter)) {
                 this.parameterValues.put(parameter, parameterValues.get(parameter));

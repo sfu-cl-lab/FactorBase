@@ -126,7 +126,7 @@ public interface Graph extends TetradSerializable {
 
     /**
      * @return true iff there is a semi-directed path from node1 to something in
-     *         nodes2 in the graph
+     * nodes2 in the graph
      */
     boolean existsUndirectedPathFromTo(Node node1, Node node2);
 
@@ -135,9 +135,9 @@ public interface Graph extends TetradSerializable {
      * edge has an arrowhead pointing "back" towards A.
      *
      * @return true iff there is a semi-directed path from node1 to something in
-     *         nodes2 in the graph
+     * nodes2 in the graph
      */
-    boolean existsSemiDirectedPathFromTo(Node node1, Set<Node> nodes);
+    boolean existsSemiDirectedPathFromTo(Node node1, Set <Node> nodes);
 
     /**
      * Determines whether an inducing path exists between node1 and node2, given
@@ -149,8 +149,8 @@ public interface Graph extends TetradSerializable {
      * @param conditioningNodes the set of nodes conditioned upon.
      * @return true if an inducing path exists, false if not.
      */
-    boolean existsInducingPath(Node node1, Node node2, Set<Node> observedNodes,
-            Set<Node> conditioningNodes);
+    boolean existsInducingPath(Node node1, Node node2, Set <Node> observedNodes,
+                               Set <Node> conditioningNodes);
 
     /**
      * Returns true iff a trek exists between two nodes in the graph.  A trek
@@ -170,7 +170,7 @@ public interface Graph extends TetradSerializable {
      * directed edges and one undirected edge between nodes A and B.
      */
     @Override
-	boolean equals(Object o);
+    boolean equals(Object o);
 
     /**
      * Removes all edges from the graph and fully connects it using #-# edges,
@@ -186,17 +186,17 @@ public interface Graph extends TetradSerializable {
     /**
      * Returns a mutable list of nodes adjacent to the given node.
      */
-    List<Node> getAdjacentNodes(Node node);
+    List <Node> getAdjacentNodes(Node node);
 
     /**
      * Returns a mutable list of ancestors for the given nodes.
      */
-    List<Node> getAncestors(List<Node> nodes);
+    List <Node> getAncestors(List <Node> nodes);
 
     /**
      * Returns a mutable list of children for a node.
      */
-    List<Node> getChildren(Node node);
+    List <Node> getChildren(Node node);
 
     /**
      * Returns the connectivity of the graph.
@@ -206,7 +206,7 @@ public interface Graph extends TetradSerializable {
     /**
      * Returns a mutable list of descendants for the given nodes.
      */
-    List<Node> getDescendants(List<Node> nodes);
+    List <Node> getDescendants(List <Node> nodes);
 
     /**
      * Returns the edge connecting node1 and node2, provided a unique such edge
@@ -229,18 +229,18 @@ public interface Graph extends TetradSerializable {
      * Returns the list of edges connected to a particular node. No particular
      * ordering of the edges in the list is guaranteed.
      */
-    List<Edge> getEdges(Node node);
+    List <Edge> getEdges(Node node);
 
     /**
      * Returns the edges connecting node1 and node2.
      */
-    List<Edge> getEdges(Node node1, Node node2);
+    List <Edge> getEdges(Node node1, Node node2);
 
     /**
      * Returns the list of edges in the graph.  No particular ordering of the
      * edges in the list is guaranteed.
      */
-    List<Edge> getEdges();
+    List <Edge> getEdges();
 
     /**
      * Returns the endpoint along the edge from node to node2 at the node2 end.
@@ -256,7 +256,7 @@ public interface Graph extends TetradSerializable {
     /**
      * Returns the list of graph constraints for this graph.
      */
-    List<GraphConstraint> getGraphConstraints();
+    List <GraphConstraint> getGraphConstraints();
 
     /**
      * Returns the number of arrow endpoints adjacent to a node.
@@ -273,12 +273,12 @@ public interface Graph extends TetradSerializable {
     /**
      * Returns the list of nodes for the graph.
      */
-    List<Node> getNodes();
+    List <Node> getNodes();
 
     /**
      * @return the names of the nodes, in the order of <code>getNodes</code>.
      */
-    List<String> getNodeNames();
+    List <String> getNodeNames();
 
     /**
      * Returns the number of edges in the (entire) graph.
@@ -304,7 +304,7 @@ public interface Graph extends TetradSerializable {
     /**
      * Returns the list of parents for a node.
      */
-    List<Node> getParents(Node node);
+    List <Node> getParents(Node node);
 
     /**
      * Returns true iff node1 is adjacent to node2 in the graph.
@@ -382,13 +382,13 @@ public interface Graph extends TetradSerializable {
      * hold in common for which the endpoints leading into the node are both
      * arrow endpoints.
      */
-    boolean isDConnectedTo(Node node1, Node node2, List<Node> z);
+    boolean isDConnectedTo(Node node1, Node node2, List <Node> z);
 
     /**
      * Determines whether one node is d-separated from another. Two elements are   E
      * d-separated just in case they are not d-connected.
      */
-    boolean isDSeparatedFrom(Node node1, Node node2, List<Node> z);
+    boolean isDSeparatedFrom(Node node1, Node node2, List <Node> z);
 
     /**
      * Determines if nodes 1 and 2 are possibly d-connected given conditioning
@@ -400,7 +400,7 @@ public interface Graph extends TetradSerializable {
      *
      * @return true iff nodes 1 and 2 are possibly d-connected given z
      */
-    boolean possDConnectedTo(Node node1, Node node2, List<Node> z);
+    boolean possDConnectedTo(Node node1, Node node2, List <Node> z);
 
     /**
      * Returns true iff there is a single directed edge from node1 to node2 in
@@ -433,12 +433,12 @@ public interface Graph extends TetradSerializable {
     /**
      * Nodes adjacent to the given node with the given proximal endpoint.
      */
-    List<Node> getNodesInTo(Node node, Endpoint n);
+    List <Node> getNodesInTo(Node node, Endpoint n);
 
     /**
      * Nodes adjacent to the given node with the given distal endpoint.
      */
-    List<Node> getNodesOutTo(Node node, Endpoint n);
+    List <Node> getNodesOutTo(Node node, Endpoint n);
 
     /**
      * Removes the given edge from the graph.
@@ -473,7 +473,7 @@ public interface Graph extends TetradSerializable {
      *
      * @return true if edges were added, false if not.
      */
-    boolean removeEdges(List<Edge> edges);
+    boolean removeEdges(List <Edge> edges);
 
     /**
      * Removes a node from the graph.
@@ -489,7 +489,7 @@ public interface Graph extends TetradSerializable {
      *
      * @return true if nodes were added, false if not.
      */
-    boolean removeNodes(List<Node> nodes);
+    boolean removeNodes(List <Node> nodes);
 
     /**
      * Sets the endpoint type at the 'to' end of the edge from 'from' to 'to' to
@@ -513,13 +513,13 @@ public interface Graph extends TetradSerializable {
      * Constructs and returns a subgraph consisting of a given subset of the
      * nodes of this graph together with the edges between them.
      */
-    Graph subgraph(List<Node> nodes);
+    Graph subgraph(List <Node> nodes);
 
     /**
      * Returns a string representation of the graph.
      */
     @Override
-	String toString();
+    String toString();
 
     /**
      * Transfers nodes and edges from one graph to another.  One way this is
@@ -528,9 +528,8 @@ public interface Graph extends TetradSerializable {
      * the old graph to the new graph.
      *
      * @param graph the graph from which nodes and edges are to be pilfered.
-     * @throws java.lang.IllegalArgumentException
-     *          This exception is thrown if adding some node or edge violates
-     *          one of the basicConstraints of this graph.
+     * @throws java.lang.IllegalArgumentException This exception is thrown if adding some node or edge violates
+     *                                            one of the basicConstraints of this graph.
      */
     void transferNodesAndEdges(Graph graph) throws IllegalArgumentException;
 
@@ -538,21 +537,29 @@ public interface Graph extends TetradSerializable {
      * @return the list of ambiguous triples associated with this graph. Triples <x, y, z> that no longer
      * lie along a path in the current graph are removed.
      */
-    Set<Triple> getAmbiguousTriples();
+    Set <Triple> getAmbiguousTriples();
+
+    /**
+     * Sets the list of ambiguous triples to the triples in the given set.
+     *
+     * @param triples The new set of ambiguous triples. This replaces the old list.
+     * @throws IllegalArgumentException if any triple <x, y, z> in <code>triples</code> does not lie along a path in the graph.
+     */
+    void setAmbiguousTriples(Set <Triple> triples);
 
     /**
      * @return the set of underlines associated with this graph. This is used currently by ION, DCI, and CCD.
      * It used to be used by FCI, but it not in the current form.  Triples <x, y, z> that no longer
      * lie along a path in the current graph are removed.
      */
-    Set<Triple> getUnderLines();
+    Set <Triple> getUnderLines();
 
     /**
      * @return the set of dotted underlines associated with this graph. This used to be used by FCI, but it is
      * not used in the current form. It is used by CCD.  Triples <x, y, z> that no longer
      * lie along a path in the current graph are removed.
      */
-    Set<Triple> getDottedUnderlines();
+    Set <Triple> getDottedUnderlines();
 
     /**
      * @return true iff the triple <x, y, z> is set as ambiguous.  Triples <x, y, z> that no longer
@@ -574,18 +581,21 @@ public interface Graph extends TetradSerializable {
 
     /**
      * Adds the triple <x, y, z> as an ambiguous triple in the graph.
+     *
      * @throws IllegalArgumentException if <x, y, z> does not lie along a path in the graph.
      */
     void addAmbiguousTriple(Node x, Node y, Node Z);
 
     /**
      * Adds the triple <x, y, z> as an underline triple in the graph.
+     *
      * @throws IllegalArgumentException if <x, y, z> does not lie along a path in the graph.
      */
     void addUnderlineTriple(Node x, Node y, Node Z);
 
     /**
      * Adds the triple <x, y, z> as a dotted underlined triple in the graph.
+     *
      * @throws IllegalArgumentException if <x, y, z> does not lie along a path in the graph.
      */
     void addDottedUnderlineTriple(Node x, Node y, Node Z);
@@ -606,30 +616,25 @@ public interface Graph extends TetradSerializable {
     void removeDottedUnderlineTriple(Node x, Node y, Node z);
 
     /**
-     * Sets the list of ambiguous triples to the triples in the given set.
-     * @param triples The new set of ambiguous triples. This replaces the old list.
-     * @throws IllegalArgumentException if any triple <x, y, z> in <code>triples</code> does not lie along a path in the graph.
-     */
-    void setAmbiguousTriples(Set<Triple> triples);
-
-    /**
      * Sets the list of underlined triples to the triples in the given set.
+     *
      * @param triples The new list of ambiguous triples. This replaces the old list.
      * @throws IllegalArgumentException if any triple <x, y, z> in <code>triples</code> does not lie along a path in the graph.
      */
-    void setUnderLineTriples(Set<Triple> triples);
+    void setUnderLineTriples(Set <Triple> triples);
 
     /**
      * Sets the list of dotted underlined triples to the triples in the given set.
+     *
      * @param triples The new list of dotted underlined triples. This replaces the old list.
      * @throws IllegalArgumentException if any triple <x, y, z> in <code>triples</code> does not lie along a path in the graph.
      */
-    void setDottedUnderLineTriples(Set<Triple> triples);
+    void setDottedUnderLineTriples(Set <Triple> triples);
 
     /**
      * @return a tier orderering, for acyclic graphs. Undefined for cyclic graphs.
      */
-    List<Node> getTierOrdering();
+    List <Node> getTierOrdering();
 
     /**
      * Sets an edge to be highlighted.
@@ -638,6 +643,7 @@ public interface Graph extends TetradSerializable {
 
     /**
      * Returns true just in case the given edge is highlighted.
+     *
      * @throws IllegalArgumentException if the given edge is not in the graph.
      */
     boolean isHighlighted(Edge edge);

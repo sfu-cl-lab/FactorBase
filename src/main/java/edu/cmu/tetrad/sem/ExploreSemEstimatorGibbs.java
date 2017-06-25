@@ -41,9 +41,9 @@ public class ExploreSemEstimatorGibbs {
 
 //		System.out.println("data = "+dat);
 
-		System.out.println("Graph as retrieved from SemPm");
-		System.out.println(semPm.getGraph());
-		System.out.println(semIm);
+        System.out.println("Graph as retrieved from SemPm");
+        System.out.println(semPm.getGraph());
+        System.out.println(semIm);
 
         semIm.setCovMatrix(covMatrix);
 
@@ -51,7 +51,7 @@ public class ExploreSemEstimatorGibbs {
 
         System.out.println(covMatrix);
 
-		//Parameters
+        //Parameters
         boolean flatPrior = true;
         double stretch = 2.0;
         int numIterations = 2500;
@@ -62,22 +62,22 @@ public class ExploreSemEstimatorGibbs {
 
         SemIm gibbsSemIm = gibbsEstimator.getEstimatedSem();
 
-		System.out.println(gibbsSemIm);
+        System.out.println(gibbsSemIm);
 
-		DoubleMatrix2D data = gibbsEstimator.getDataSet();
+        DoubleMatrix2D data = gibbsEstimator.getDataSet();
 
         double[] means = new double[data.rows()];
 
         // print means
-        for (int i = 0; i < data.rows(); i++){
+        for (int i = 0; i < data.rows(); i++) {
 
             double v = 0.0;
-            for (int j = 0; j < data.columns(); j++){
+            for (int j = 0; j < data.columns(); j++) {
                 if (Double.isInfinite(data.get(i, j))) continue;
 
-                v += data.get(i,j);
+                v += data.get(i, j);
             }
-            v = v/data.columns();
+            v = v / data.columns();
             means[i] = v;
 
             Parameter parameter = gibbsSemIm.getSemPm().getParameters().get(i);
@@ -94,7 +94,7 @@ public class ExploreSemEstimatorGibbs {
 
         double[] eArray = errors.getStdErrors();//new double[gibbsSemIm.getFreeParameters().size()];
 
-        for (int i=0; i<eArray.length; i++){
+        for (int i = 0; i < eArray.length; i++) {
             Parameter parameter = gibbsSemIm.getSemPm().getParameters().get(i);
             System.out.println("SE(" + parameter + ") = " + eArray[i]);
         }
@@ -119,7 +119,7 @@ public class ExploreSemEstimatorGibbs {
 
         double[] eArray2 = errors2.getStdErrors();//new double[gibbsSemIm.getFreeParameters().size()];
 
-        for (int i=0; i<eArray2.length; i++){
+        for (int i = 0; i < eArray2.length; i++) {
             Parameter parameter = gibbsSemIm.getSemPm().getParameters().get(i);
             System.out.println("SE(" + parameter.getName() + ") = " + eArray2[i]);
         }
@@ -145,7 +145,7 @@ public class ExploreSemEstimatorGibbs {
 //		System.out.println();
 //		System.out.println("score: "+score);
 
-	}
+    }
 
 }
 

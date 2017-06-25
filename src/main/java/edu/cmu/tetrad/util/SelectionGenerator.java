@@ -93,49 +93,6 @@ public final class SelectionGenerator {
     }
 
     /**
-     * Returns the next selection in the series, or null if the series is
-     * finished.  The array that is produced should not be altered by the user,
-     * as it is reused by the selection generator.
-     * <p/>
-     * If the number of items chosen is zero, a zero-length array will be
-     * returned once, with null after that.
-     * <p/>
-     * The array that is returned is reused, but modifying it will not change
-     * the sequence of choices returned.
-     *
-     * @return the next selection in the series, or null if the series is
-     *         finished.
-     */
-    public int[] next() {
-        int i = getA();
-
-        // Scan from the right for the first index whose value is less than
-        // its expected maximum (i + diff) and perform the fill() operation
-        // at that index.
-        while (--i > -1) {
-            if (this.selectionLocal[i] < getA() - 1) {
-                this.selectionLocal[i]++;
-
-                for (int i1 = i + 1; i1 < getA(); i1++) {
-                    this.selectionLocal[i1] = 0;
-                }
-
-                begun = true;
-                System.arraycopy(selectionLocal, 0, selectionReturned, 0, a);
-                return selectionReturned;
-            }
-        }
-
-        if (this.begun) {
-            return null;
-        } else {
-            begun = true;
-            System.arraycopy(selectionLocal, 0, selectionReturned, 0, a);
-            return selectionReturned;
-        }
-    }
-
-    /**
      * This static method will print the series of combinations for a choose b
      * to System.out.
      *
@@ -164,6 +121,49 @@ public final class SelectionGenerator {
         }
 
         System.out.println();
+    }
+
+    /**
+     * Returns the next selection in the series, or null if the series is
+     * finished.  The array that is produced should not be altered by the user,
+     * as it is reused by the selection generator.
+     * <p/>
+     * If the number of items chosen is zero, a zero-length array will be
+     * returned once, with null after that.
+     * <p/>
+     * The array that is returned is reused, but modifying it will not change
+     * the sequence of choices returned.
+     *
+     * @return the next selection in the series, or null if the series is
+     * finished.
+     */
+    public int[] next() {
+        int i = getA();
+
+        // Scan from the right for the first index whose value is less than
+        // its expected maximum (i + diff) and perform the fill() operation
+        // at that index.
+        while (--i > -1) {
+            if (this.selectionLocal[i] < getA() - 1) {
+                this.selectionLocal[i]++;
+
+                for (int i1 = i + 1; i1 < getA(); i1++) {
+                    this.selectionLocal[i1] = 0;
+                }
+
+                begun = true;
+                System.arraycopy(selectionLocal, 0, selectionReturned, 0, a);
+                return selectionReturned;
+            }
+        }
+
+        if (this.begun) {
+            return null;
+        } else {
+            begun = true;
+            System.arraycopy(selectionLocal, 0, selectionReturned, 0, a);
+            return selectionReturned;
+        }
     }
 
     /**

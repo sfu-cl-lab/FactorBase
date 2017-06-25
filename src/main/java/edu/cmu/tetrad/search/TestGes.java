@@ -63,6 +63,16 @@ public class TestGes extends TestCase {
 //        TetradLogger.getInstance().removeOutputStream(System.out);
 //    }
 
+    /**
+     * This method uses reflection to collect up all of the test methods from this class and return them to the test
+     * runner.
+     */
+    public static Test suite() {
+
+        // Edit the name of the class in the parens to match the name
+        // of this class.
+        return new TestSuite(TestGes.class);
+    }
 
     public void testBlank() {
         // Blank to keep the automatic JUnit runner happy.
@@ -267,38 +277,6 @@ public class TestGes extends TestCase {
         System.out.println("Pattern = " + pattern);
     }
 
-    public void testSearch7() {
-//        TetradLogger.getInstance().clear();
-//
-//        TetradLogger.getInstance().removeOutputStream(System.out);
-//        TetradLogger.getInstance().setForceLog(false);
-//        TetradLogger.getInstance().setEventsToLog("insertedEdges", "deletedEdges", "directedEdges");
-
-        Dag trueGraph = GraphUtils.randomDag(500, 500, false);
-
-        int sampleSize = 1000;
-
-        SemPm semPm = new SemPm(trueGraph);
-        SemIm bayesIm = new SemIm(semPm);
-        DataSet dataSet = bayesIm.simulateData(sampleSize, false);
-
-        Ges ges = new Ges(dataSet);
-
-        long start = System.currentTimeMillis();
-
-        Graph pattern = ges.search();
-
-        long stop = System.currentTimeMillis();
-
-        Graph truePattern = SearchGraphUtils.patternForDag(trueGraph);
-
-        System.out.println(GraphUtils.graphComparisonString("GES pattern ", pattern, "True pattern", truePattern, false));
-
-
-        System.out.println("Elapsed time = " + (start - stop) / 1000 + " seconds ");
-
-    }
-
 //    public void testSearch8() {
 //        System.out.println("seed = " + RandomUtil.getInstance().getSeed());
 //
@@ -387,6 +365,38 @@ public class TestGes extends TestCase {
 //        Graph patternJcpc = search.search();
 //        System.out.println(GraphUtils.graphComparisonString("JCPC pattern ", patternJcpc, "True pattern", truePattern, false));
 //    }
+
+    public void testSearch7() {
+//        TetradLogger.getInstance().clear();
+//
+//        TetradLogger.getInstance().removeOutputStream(System.out);
+//        TetradLogger.getInstance().setForceLog(false);
+//        TetradLogger.getInstance().setEventsToLog("insertedEdges", "deletedEdges", "directedEdges");
+
+        Dag trueGraph = GraphUtils.randomDag(500, 500, false);
+
+        int sampleSize = 1000;
+
+        SemPm semPm = new SemPm(trueGraph);
+        SemIm bayesIm = new SemIm(semPm);
+        DataSet dataSet = bayesIm.simulateData(sampleSize, false);
+
+        Ges ges = new Ges(dataSet);
+
+        long start = System.currentTimeMillis();
+
+        Graph pattern = ges.search();
+
+        long stop = System.currentTimeMillis();
+
+        Graph truePattern = SearchGraphUtils.patternForDag(trueGraph);
+
+        System.out.println(GraphUtils.graphComparisonString("GES pattern ", pattern, "True pattern", truePattern, false));
+
+
+        System.out.println("Elapsed time = " + (start - stop) / 1000 + " seconds ");
+
+    }
 
     public void testSearch9() {
 //        TetradLogger.getInstance().clear();
@@ -484,6 +494,16 @@ public class TestGes extends TestCase {
         System.out.println(patternJcpc);
     }
 
+//    public void testTemp() {
+//        String s = "E1";
+//
+//        for (int i = 2; i <= 209; i++) {
+//            s += "+E" + i;
+//        }
+//
+//        System.out.println(s);
+//    }
+
     public void test10() {
         NumberFormat nf = new DecimalFormat("0.0000000");
 
@@ -526,16 +546,6 @@ public class TestGes extends TestCase {
 
 
     }
-
-//    public void testTemp() {
-//        String s = "E1";
-//
-//        for (int i = 2; i <= 209; i++) {
-//            s += "+E" + i;
-//        }
-//
-//        System.out.println(s);
-//    }
 
     /**
      * Presents the input graph to Fci and checks to make sure the output of Fci is equivalent to the given output
@@ -603,17 +613,6 @@ public class TestGes extends TestCase {
 
         // Do test.
         assertTrue(resultGraph.equals(trueGraph));
-    }
-
-    /**
-     * This method uses reflection to collect up all of the test methods from this class and return them to the test
-     * runner.
-     */
-    public static Test suite() {
-
-        // Edit the name of the class in the parens to match the name
-        // of this class.
-        return new TestSuite(TestGes.class);
     }
 }
 

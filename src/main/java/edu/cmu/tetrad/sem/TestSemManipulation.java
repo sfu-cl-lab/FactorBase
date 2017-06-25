@@ -44,14 +44,6 @@ public class TestSemManipulation extends TestCase {
         super(name);
     }
 
-    public void testEvidence() {
-        Graph graph = constructGraph1();
-        SemPm semPm = new SemPm(graph);
-        SemIm semIm = new SemIm(semPm);
-        SemManipulation manipulation = new SemManipulation(semIm);
-        System.out.println(manipulation);
-    }
-
     /**
      * This method uses reflection to collect up all of the test methods from
      * this class and return them to the test runner.
@@ -61,6 +53,14 @@ public class TestSemManipulation extends TestCase {
         // Edit the name of the class in the parens to match the name
         // of this class.
         return new TestSuite(TestSemManipulation.class);
+    }
+
+    public void testEvidence() {
+        Graph graph = constructGraph1();
+        SemPm semPm = new SemPm(graph);
+        SemIm semIm = new SemIm(semPm);
+        SemManipulation manipulation = new SemManipulation(semIm);
+        System.out.println(manipulation);
     }
 
     private Graph constructGraph1() {

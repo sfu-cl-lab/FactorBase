@@ -29,147 +29,13 @@ import nu.xom.Element;
 import nu.xom.Elements;
 import nu.xom.Text;
 
-import java.util.*;
-
 /**
  * Parses Bayes elements back to objects.
  *
  * @author Joseph Ramsey
  */
 public final class BayesXmlParser {
-    private Map<String, Node> namesToVars;
-
-    public BayesIm getBayesIm(Element element) {
-        if (!"bayesNet".equals(element.getQualifiedName())) {
-            throw new IllegalArgumentException("Expecting 'bayesNet' element.");
-        }
-
-        Elements elements = element.getChildElements();
-
-        Element element0 = elements.get(0);
-        Element element1 = elements.get(1);
-        Element element2 = elements.get(2);
-
-        List<Node> variables = getVariables(element0);
-        BayesPm bayesPm = makeBayesPm(variables, element1);
-
-        return makeBayesIm(bayesPm, element2);
-    }
-
-    private List<Node> getVariables(Element element0) {
-        if (!"bnVariables".equals(element0.getQualifiedName())) {
-            throw new IllegalArgumentException(
-                    "Expecting 'bnVariables' element.");
-        }
-
-        List<Node> variables = new LinkedList<Node>();
-
-        Elements elements = element0.getChildElements();
-
-        for (int i = 0; i < elements.size(); i++) {
-            Element e1 = elements.get(i);
-            Elements e2Elements = e1.getChildElements();
-
-
-            if (!"discreteVariable".equals(e1.getQualifiedName())) {
-                throw new IllegalArgumentException(
-                        "Expecting 'discreteVariable' " + "element.");
-            }
-
-            String name = e1.getAttributeValue("name");
-
-            String isLatentVal = e1.getAttributeValue("latent");
-            boolean isLatent =
-                    (isLatentVal != null) && ((isLatentVal.equals("yes")));
-            Integer x = new Integer(e1.getAttributeValue("x"));
-            Integer y = new Integer(e1.getAttributeValue("y"));
-
-            int numCategories = e2Elements.size();
-            List<String> categories = new LinkedList<String>();
-
-
-            for (int j = 0; j < numCategories; j++) {
-                Element e2 = e2Elements.get(j);
-
-                if (!"category".equals(e2.getQualifiedName())) {
-                    throw new IllegalArgumentException(
-                            "Expecting 'category' " + "element.");
-                }
-
-                categories.add(e2.getAttributeValue("name"));
-            }
-
-            DiscreteVariable var = new DiscreteVariable(name, categories);
-            if (isLatent) {
-                var.setNodeType(NodeType.LATENT);
-            }
-
-            var.setCenterX(x);
-            var.setCenterY(y);
-            variables.add(var);
-        }
-
-        namesToVars = new HashMap<String, Node>();
-
-        for (Node v : variables) {
-            String name = v.getName();
-            namesToVars.put(name, v);
-        }
-
-        return variables;
-    }
-
-    private BayesPm makeBayesPm(List<Node> variables, Element element1) {
-        if (!"parents".equals(element1.getQualifiedName())) {
-            throw new IllegalArgumentException("Expecting 'parents' element.");
-        }
-
-        Dag graph = new Dag();
-
-        for (Node variable : variables) {
-            graph.addNode(variable);
-        }
-
-        Elements elements = element1.getChildElements();
-
-        for (int i = 0; i < elements.size(); i++) {
-            Element e1 = elements.get(i);
-
-            if (!"parentsFor".equals(e1.getQualifiedName())) {
-                throw new IllegalArgumentException(
-                        "Expecting 'parentsFor' element.");
-            }
-
-            String varName = e1.getAttributeValue("name");
-            Node var = namesToVars.get(varName);
-
-            Elements elements1 = e1.getChildElements();
-
-            for (int j = 0; j < elements1.size(); j++) {
-                Element e2 = elements1.get(j);
-
-                if (!"parent".equals(e2.getQualifiedName())) {
-                    throw new IllegalArgumentException(
-                            "Expecting 'parent' element.");
-                }
-
-                String parentName = e2.getAttributeValue("name");
-                Node parent = namesToVars.get(parentName);
-
-                graph.addDirectedEdge(parent, var);
-            }
-        }
-
-        BayesPm bayesPm = new BayesPm(graph);
-
-        for (Node variable1 : variables) {
-            DiscreteVariable graphVariable = (DiscreteVariable) variable1;
-            List<String> categories = graphVariable.getCategories();
-            bayesPm.setCategories(graphVariable, categories);
-        }
-
-        return bayesPm;
-    }
+    private Map <String, Node> namesToVars;
 
     private static BayesIm makeBayesIm(BayesPm bayesPm, Element element2) {
         if (!"cpts".equals(element2.getQualifiedName())) {
@@ -221,8 +87,7 @@ public final class BayesXmlParser {
                         double value = Double.parseDouble(token);
                         bayesIm.setProbability(nodeIndex, rowIndex, colIndex,
                                 value);
-                    }
-                    catch (NumberFormatException e) {
+                    } catch (NumberFormatException e) {
                         // Skip.
                     }
                 }
@@ -237,6 +102,138 @@ public final class BayesXmlParser {
         }
 
         return bayesIm;
+    }
+
+    public BayesIm getBayesIm(Element element) {
+        if (!"bayesNet".equals(element.getQualifiedName())) {
+            throw new IllegalArgumentException("Expecting 'bayesNet' element.");
+        }
+
+        Elements elements = element.getChildElements();
+
+        Element element0 = elements.get(0);
+        Element element1 = elements.get(1);
+        Element element2 = elements.get(2);
+
+        List <Node> variables = getVariables(element0);
+        BayesPm bayesPm = makeBayesPm(variables, element1);
+
+        return makeBayesIm(bayesPm, element2);
+    }
+
+    private List <Node> getVariables(Element element0) {
+        if (!"bnVariables".equals(element0.getQualifiedName())) {
+            throw new IllegalArgumentException(
+                    "Expecting 'bnVariables' element.");
+        }
+
+        List <Node> variables = new LinkedList <Node>();
+
+        Elements elements = element0.getChildElements();
+
+        for (int i = 0; i < elements.size(); i++) {
+            Element e1 = elements.get(i);
+            Elements e2Elements = e1.getChildElements();
+
+
+            if (!"discreteVariable".equals(e1.getQualifiedName())) {
+                throw new IllegalArgumentException(
+                        "Expecting 'discreteVariable' " + "element.");
+            }
+
+            String name = e1.getAttributeValue("name");
+
+            String isLatentVal = e1.getAttributeValue("latent");
+            boolean isLatent =
+                    (isLatentVal != null) && ((isLatentVal.equals("yes")));
+            Integer x = new Integer(e1.getAttributeValue("x"));
+            Integer y = new Integer(e1.getAttributeValue("y"));
+
+            int numCategories = e2Elements.size();
+            List <String> categories = new LinkedList <String>();
+
+
+            for (int j = 0; j < numCategories; j++) {
+                Element e2 = e2Elements.get(j);
+
+                if (!"category".equals(e2.getQualifiedName())) {
+                    throw new IllegalArgumentException(
+                            "Expecting 'category' " + "element.");
+                }
+
+                categories.add(e2.getAttributeValue("name"));
+            }
+
+            DiscreteVariable var = new DiscreteVariable(name, categories);
+            if (isLatent) {
+                var.setNodeType(NodeType.LATENT);
+            }
+
+            var.setCenterX(x);
+            var.setCenterY(y);
+            variables.add(var);
+        }
+
+        namesToVars = new HashMap <String, Node>();
+
+        for (Node v : variables) {
+            String name = v.getName();
+            namesToVars.put(name, v);
+        }
+
+        return variables;
+    }
+
+    private BayesPm makeBayesPm(List <Node> variables, Element element1) {
+        if (!"parents".equals(element1.getQualifiedName())) {
+            throw new IllegalArgumentException("Expecting 'parents' element.");
+        }
+
+        Dag graph = new Dag();
+
+        for (Node variable : variables) {
+            graph.addNode(variable);
+        }
+
+        Elements elements = element1.getChildElements();
+
+        for (int i = 0; i < elements.size(); i++) {
+            Element e1 = elements.get(i);
+
+            if (!"parentsFor".equals(e1.getQualifiedName())) {
+                throw new IllegalArgumentException(
+                        "Expecting 'parentsFor' element.");
+            }
+
+            String varName = e1.getAttributeValue("name");
+            Node var = namesToVars.get(varName);
+
+            Elements elements1 = e1.getChildElements();
+
+            for (int j = 0; j < elements1.size(); j++) {
+                Element e2 = elements1.get(j);
+
+                if (!"parent".equals(e2.getQualifiedName())) {
+                    throw new IllegalArgumentException(
+                            "Expecting 'parent' element.");
+                }
+
+                String parentName = e2.getAttributeValue("name");
+                Node parent = namesToVars.get(parentName);
+
+                graph.addDirectedEdge(parent, var);
+            }
+        }
+
+        BayesPm bayesPm = new BayesPm(graph);
+
+        for (Node variable1 : variables) {
+            DiscreteVariable graphVariable = (DiscreteVariable) variable1;
+            List <String> categories = graphVariable.getCategories();
+            bayesPm.setCategories(graphVariable, categories);
+        }
+
+        return bayesPm;
     }
 }
 

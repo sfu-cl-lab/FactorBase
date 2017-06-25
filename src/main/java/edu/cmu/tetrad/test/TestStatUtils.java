@@ -46,6 +46,10 @@ public class TestStatUtils extends TestCase {
         super(name);
     }
 
+    public static Test suite() {
+        return new TestSuite(TestStatUtils.class);
+    }
+
     /**
      * Tests that the unconditional correlations and covariances are correct,
      * at least for the unconditional tests.
@@ -84,14 +88,10 @@ public class TestStatUtils extends TestCase {
     }
 
     public void testRankCorr() {
-        double[] a1 = new double[] {2, 2, 3};
-        double[] a2 = new double[] {2, 3, 4};
+        double[] a1 = new double[]{2, 2, 3};
+        double[] a2 = new double[]{2, 3, 4};
 
         double r = StatUtils.rankCorrelation(a1, a2);
         System.out.println("rank corr = " + r);
-    }
-
-    public static Test suite() {
-        return new TestSuite(TestStatUtils.class);
     }
 }

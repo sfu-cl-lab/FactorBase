@@ -34,6 +34,6 @@ import java.util.Set;
  */
 /* The calls for globalScorecache have been added*/
 public interface GraphScorer {
-    double scoreGraph(Graph graph, Map<Node, Map<Set<Node>, Double>> globalScoreHash);
+    double scoreGraph(Graph graph, Map <Node, Map <Set <Node>, Double>> globalScoreHash);
 }
 

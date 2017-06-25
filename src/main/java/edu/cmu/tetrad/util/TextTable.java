@@ -145,7 +145,7 @@ public class TextTable {
     }
 
     @Override
-	public String toString() {
+    public String toString() {
         StringBuilder buffer = new StringBuilder();
 
         int[] colWidths = new int[tokens[0].length];

@@ -30,7 +30,6 @@ import edu.cmu.tetrad.util.TetradLogger;
 
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
-import java.util.*;
 
 /**
  * Improves the P value of a SEM IM by adding, removing, or reversing single edges.
@@ -39,13 +38,13 @@ import java.util.*;
  */
 
 public final class PValueImproverGes implements PValueImprover {
+    private final NumberFormat nf = new DecimalFormat("0.0#########");
     private DataSet dataSet;
     private Knowledge knowledge = new Knowledge();
     private Graph graph;
     private double alpha = 0.05;
     private double highPValueAlpha = 0.05;
-    private final NumberFormat nf = new DecimalFormat("0.0#########");
-    private Set<GraphWithPValue> significantModels = new HashSet<GraphWithPValue>();
+    private Set <GraphWithPValue> significantModels = new HashSet <GraphWithPValue>();
     private Graph trueModel;
     private SemIm originalSemIm;
     private SemIm newSemIm;
@@ -76,6 +75,105 @@ public final class PValueImproverGes implements PValueImprover {
         super();
     }
 
+    /**
+     * Test if the candidate deletion is a valid operation (Theorem 17 from Chickering, 2002).
+     */
+    private static boolean validDelete(Node x, Node y, Set <Node> h,
+                                       Graph graph) {
+        List <Node> naYXH = findNaYX(x, y, graph);
+        naYXH.removeAll(h);
+        return isClique(naYXH, graph);
+    }
+
+    /**
+     * Get all nodes that are connected to Y by an undirected edge and not adjacent to X.
+     */
+    private static List <Node> getTNeighbors(Node x, Node y, Graph graph) {
+        List <Node> tNeighbors = new LinkedList <Node>(graph.getAdjacentNodes(y));
+        tNeighbors.removeAll(graph.getAdjacentNodes(x));
+
+        for (int i = tNeighbors.size() - 1; i >= 0; i--) {
+            Node z = tNeighbors.get(i);
+            Edge edge = graph.getEdge(y, z);
+
+            if (!Edges.isUndirectedEdge(edge)) {
+                tNeighbors.remove(z);
+            }
+        }
+
+        return tNeighbors;
+    }
+
+    /**
+     * Get all nodes that are connected to Y by an undirected edge and adjacent to X
+     */
+    private static List <Node> getHNeighbors(Node x, Node y, Graph graph) {
+        List <Node> hNeighbors = new LinkedList <Node>(graph.getAdjacentNodes(y));
+        hNeighbors.retainAll(graph.getAdjacentNodes(x));
+
+        for (int i = hNeighbors.size() - 1; i >= 0; i--) {
+            Node z = hNeighbors.get(i);
+            Edge edge = graph.getEdge(y, z);
+
+            if (!Edges.isUndirectedEdge(edge)) {
+                hNeighbors.remove(z);
+            }
+        }
+
+        return hNeighbors;
+    }
+
+    /**
+     * Find all nodes that are connected to Y by an undirected edge that are adjacent to X (that is, by undirected or
+     * directed edge) NOTE: very inefficient implementation, since the current library does not allow access to the
+     * adjacency list/matrix of the graph.
+     */
+    private static List <Node> findNaYX(Node x, Node y, Graph graph) {
+        List <Node> naYX = new LinkedList <Node>(graph.getAdjacentNodes(y));
+        naYX.retainAll(graph.getAdjacentNodes(x));
+
+        for (int i = 0; i < naYX.size(); i++) {
+            Node z = naYX.get(i);
+            Edge edge = graph.getEdge(y, z);
+
+            if (!Edges.isUndirectedEdge(edge)) {
+                naYX.remove(z);
+            }
+        }
+
+        return naYX;
+    }
+
+    /**
+     * Returns true iif the given set forms a clique in the given graph.
+     */
+    private static boolean isClique(List <Node> set, Graph graph) {
+        List <Node> setv = new LinkedList <Node>(set);
+        for (int i = 0; i < setv.size() - 1; i++) {
+            for (int j = i + 1; j < setv.size(); j++) {
+                if (!graph.isAdjacentTo(setv.get(i), setv.get(j))) {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
+    private static List <Set <Node>> powerSet(List <Node> nodes) {
+        List <Set <Node>> subsets = new ArrayList <Set <Node>>();
+        int total = (int) Math.pow(2, nodes.size());
+        for (int i = 0; i < total; i++) {
+            Set <Node> newSet = new HashSet <Node>();
+            String selection = Integer.toBinaryString(i);
+            for (int j = selection.length() - 1; j >= 0; j--) {
+                if (selection.charAt(j) == '1') {
+                    newSet.add(nodes.get(selection.length() - j - 1));
+                }
+            }
+            subsets.add(newSet);
+        }
+        return subsets;
+    }
 
     private void saveModelIfSignificant(Graph graph) {
         double pValue = scoreGraph(graph).getPValue();
@@ -91,36 +189,6 @@ public final class PValueImproverGes implements PValueImprover {
 
     public void setNewDag(Graph newDag) {
         this.newDag = newDag;
-    }
-
-    public static class GraphWithPValue {
-        private Graph graph;
-        private double pValue;
-
-        public GraphWithPValue(Graph graph, double pValue) {
-            this.graph = graph;
-            this.pValue = pValue;
-        }
-
-        public Graph getGraph() {
-            return graph;
-        }
-
-        public double getPValue() {
-            return pValue;
-        }
-
-        @Override
-		public int hashCode() {
-            return 17 * graph.hashCode();
-        }
-
-        @Override
-		public boolean equals(Object o) {
-            if (o == null) return false;
-            GraphWithPValue p = (GraphWithPValue) o;
-            return (p.graph.equals(graph));
-        }
     }
 
     public Score scoreGraph(Graph graph) {
@@ -147,12 +215,12 @@ public final class PValueImproverGes implements PValueImprover {
     }
 
     @Override
-	public SemIm getOriginalSemIm() {
+    public SemIm getOriginalSemIm() {
         return originalSemIm;
     }
 
     @Override
-	public SemIm getNewSemIm() {
+    public SemIm getNewSemIm() {
         return newSemIm;
     }
 
@@ -161,9 +229,15 @@ public final class PValueImproverGes implements PValueImprover {
     }
 
     @Override
-	public void setHighPValueAlpha(double highPValueAlpha) {
+    public void setHighPValueAlpha(double highPValueAlpha) {
         this.highPValueAlpha = highPValueAlpha;
     }
+
+
+    /*
+    * Do an actual insertion
+    * (Definition 12 from Chickering, 2002).
+    **/
 
     public Score scoreDag(Graph dag) {
 //        SemPm semPm = new SemPm(dag);
@@ -202,7 +276,7 @@ public final class PValueImproverGes implements PValueImprover {
     }
 
     @Override
-	public Graph search() {
+    public Graph search() {
         Score score1 = scoreGraph(getGraph());
         double score = score1.getScore();
         System.out.println(getGraph());
@@ -236,11 +310,11 @@ public final class PValueImproverGes implements PValueImprover {
         TetradLogger.getInstance().log("info", "Initial Score = " + nf.format(bestScore));
 
         Node x, y;
-        Set<Node> t = new HashSet<Node>();
+        Set <Node> t = new HashSet <Node>();
 
         do {
             x = y = null;
-            List<Node> nodes = graph.getNodes();
+            List <Node> nodes = graph.getNodes();
             Collections.shuffle(nodes);
 
             for (int i = 0; i < nodes.size(); i++) {
@@ -260,10 +334,10 @@ public final class PValueImproverGes implements PValueImprover {
                         continue;
                     }
 
-                    List<Node> tNeighbors = getTNeighbors(_x, _y, graph);
-                    List<Set<Node>> tSubsets = powerSet(tNeighbors);
+                    List <Node> tNeighbors = getTNeighbors(_x, _y, graph);
+                    List <Set <Node>> tSubsets = powerSet(tNeighbors);
 
-                    for (Set<Node> tSubset : tSubsets) {
+                    for (Set <Node> tSubset : tSubsets) {
 
                         if (!validSetByKnowledge(_x, _y, tSubset, true)) {
                             continue;
@@ -313,16 +387,21 @@ public final class PValueImproverGes implements PValueImprover {
         return score;
     }
 
+    /*
+    * Test if the candidate insertion is a valid operation
+    * (Theorem 15 from Chickering, 2002).
+    **/
+
     private double bes(Graph graph, double initialScore) {
         TetradLogger.getInstance().log("info", "** BACKWARD ELIMINATION SEARCH");
         TetradLogger.getInstance().log("info", "Initial Score = " + nf.format(initialScore));
         double score = initialScore;
         double bestScore = score;
         Node x, y;
-        Set<Node> t = new HashSet<Node>();
+        Set <Node> t = new HashSet <Node>();
         do {
             x = y = null;
-            List<Edge> graphEdges = graph.getEdges();
+            List <Edge> graphEdges = graph.getEdges();
             Collections.shuffle(graphEdges);
 
             for (Edge edge : graphEdges) {
@@ -340,10 +419,10 @@ public final class PValueImproverGes implements PValueImprover {
                     continue;
                 }
 
-                List<Node> hNeighbors = getHNeighbors(_x, _y, graph);
-                List<Set<Node>> hSubsets = powerSet(hNeighbors);
+                List <Node> hNeighbors = getHNeighbors(_x, _y, graph);
+                List <Set <Node>> hSubsets = powerSet(hNeighbors);
 
-                for (Set<Node> hSubset : hSubsets) {
+                for (Set <Node> hSubset : hSubsets) {
                     if (!validSetByKnowledge(_x, _y, hSubset, false)) {
                         continue;
                     }
@@ -390,13 +469,7 @@ public final class PValueImproverGes implements PValueImprover {
         return score;
     }
 
-
-    /*
-    * Do an actual insertion
-    * (Definition 12 from Chickering, 2002).
-    **/
-
-    private void tryInsert(Node x, Node y, Set<Node> subset, Graph graph, double score, boolean log) {
+    private void tryInsert(Node x, Node y, Set <Node> subset, Graph graph, double score, boolean log) {
         Edge trueEdge = null;
         Graph trueGraph = null;
 
@@ -428,7 +501,7 @@ public final class PValueImproverGes implements PValueImprover {
     /**
      * Do an actual deletion (Definition 13 from Chickering, 2002).
      */
-    private void tryDelete(Node x, Node y, Set<Node> subset, Graph graph, boolean log) {
+    private void tryDelete(Node x, Node y, Set <Node> subset, Graph graph, boolean log) {
         graph.removeEdge(x, y);
 
         for (Node h : subset) {
@@ -456,7 +529,7 @@ public final class PValueImproverGes implements PValueImprover {
         }
     }
 
-    private void insert(Node x, Node y, Set<Node> subset, Graph graph, boolean log) {
+    private void insert(Node x, Node y, Set <Node> subset, Graph graph, boolean log) {
         Edge trueEdge = null;
         Graph trueGraph = null;
 
@@ -499,7 +572,7 @@ public final class PValueImproverGes implements PValueImprover {
     /**
      * Do an actual deletion (Definition 13 from Chickering, 2002).
      */
-    private void delete(Node x, Node y, Set<Node> subset, Graph graph, boolean log) {
+    private void delete(Node x, Node y, Set <Node> subset, Graph graph, boolean log) {
 
         if (log) {
             Edge oldEdge = graph.getEdge(x, y);
@@ -535,96 +608,22 @@ public final class PValueImproverGes implements PValueImprover {
         }
     }
 
-    /*
-    * Test if the candidate insertion is a valid operation
-    * (Theorem 15 from Chickering, 2002).
-    **/
-
-    private boolean validInsert(Node x, Node y, Set<Node> subset, Graph graph) {
-        List<Node> naYXT = new LinkedList<Node>(subset);
+    private boolean validInsert(Node x, Node y, Set <Node> subset, Graph graph) {
+        List <Node> naYXT = new LinkedList <Node>(subset);
         naYXT.addAll(findNaYX(x, y, graph));
 
         if (!isClique(naYXT, graph)) {
             return false;
         }
 
-        if (!isSemiDirectedBlocked(x, y, naYXT, graph, new HashSet<Node>())) {
+        if (!isSemiDirectedBlocked(x, y, naYXT, graph, new HashSet <Node>())) {
             return false;
         }
 
         return true;
     }
 
-    /**
-     * Test if the candidate deletion is a valid operation (Theorem 17 from Chickering, 2002).
-     */
-    private static boolean validDelete(Node x, Node y, Set<Node> h,
-                                       Graph graph) {
-        List<Node> naYXH = findNaYX(x, y, graph);
-        naYXH.removeAll(h);
-        return isClique(naYXH, graph);
-    }
-
-    /**
-     * Get all nodes that are connected to Y by an undirected edge and not adjacent to X.
-     */
-    private static List<Node> getTNeighbors(Node x, Node y, Graph graph) {
-        List<Node> tNeighbors = new LinkedList<Node>(graph.getAdjacentNodes(y));
-        tNeighbors.removeAll(graph.getAdjacentNodes(x));
-
-        for (int i = tNeighbors.size() - 1; i >= 0; i--) {
-            Node z = tNeighbors.get(i);
-            Edge edge = graph.getEdge(y, z);
-
-            if (!Edges.isUndirectedEdge(edge)) {
-                tNeighbors.remove(z);
-            }
-        }
-
-        return tNeighbors;
-    }
-
-    /**
-     * Get all nodes that are connected to Y by an undirected edge and adjacent to X
-     */
-    private static List<Node> getHNeighbors(Node x, Node y, Graph graph) {
-        List<Node> hNeighbors = new LinkedList<Node>(graph.getAdjacentNodes(y));
-        hNeighbors.retainAll(graph.getAdjacentNodes(x));
-
-        for (int i = hNeighbors.size() - 1; i >= 0; i--) {
-            Node z = hNeighbors.get(i);
-            Edge edge = graph.getEdge(y, z);
-
-            if (!Edges.isUndirectedEdge(edge)) {
-                hNeighbors.remove(z);
-            }
-        }
-
-        return hNeighbors;
-    }
-
-    /**
-     * Find all nodes that are connected to Y by an undirected edge that are adjacent to X (that is, by undirected or
-     * directed edge) NOTE: very inefficient implementation, since the current library does not allow access to the
-     * adjacency list/matrix of the graph.
-     */
-    private static List<Node> findNaYX(Node x, Node y, Graph graph) {
-        List<Node> naYX = new LinkedList<Node>(graph.getAdjacentNodes(y));
-        naYX.retainAll(graph.getAdjacentNodes(x));
-
-        for (int i = 0; i < naYX.size(); i++) {
-            Node z = naYX.get(i);
-            Edge edge = graph.getEdge(y, z);
-
-            if (!Edges.isUndirectedEdge(edge)) {
-                naYX.remove(z);
-            }
-        }
-
-        return naYX;
-    }
-
-    private boolean validSetByKnowledge(Node x, Node y, Set<Node> subset,
+    private boolean validSetByKnowledge(Node x, Node y, Set <Node> subset,
                                         boolean insertMode) {
         if (insertMode) {
             for (Node aSubset : subset) {
@@ -648,12 +647,12 @@ public final class PValueImproverGes implements PValueImprover {
         return true;
     }
 
-    private double scoreGraphChange(Node y, Set<Node> parents1,
-                                    Set<Node> parents2, Graph graph) {
+    private double scoreGraphChange(Node y, Set <Node> parents1,
+                                    Set <Node> parents2, Graph graph) {
         graph = SearchGraphUtils.dagFromPattern(graph);
 
-        List<Node> currentParents = graph.getParents(y);
-        List<Node> currentChildren = graph.getChildren(y);
+        List <Node> currentParents = graph.getParents(y);
+        List <Node> currentChildren = graph.getChildren(y);
 
         for (Node node : currentParents) {
             graph.removeEdge(node, y);
@@ -699,25 +698,10 @@ public final class PValueImproverGes implements PValueImprover {
     }
 
     /**
-     * Returns true iif the given set forms a clique in the given graph.
-     */
-    private static boolean isClique(List<Node> set, Graph graph) {
-        List<Node> setv = new LinkedList<Node>(set);
-        for (int i = 0; i < setv.size() - 1; i++) {
-            for (int j = i + 1; j < setv.size(); j++) {
-                if (!graph.isAdjacentTo(setv.get(i), setv.get(j))) {
-                    return false;
-                }
-            }
-        }
-        return true;
-    }
-
-    /**
      * Verifies if every semidirected path from y to x contains a node in naYXT.
      */
-    private boolean isSemiDirectedBlocked(Node x, Node y, List<Node> naYXT,
-                                          Graph graph, Set<Node> marked) {
+    private boolean isSemiDirectedBlocked(Node x, Node y, List <Node> naYXT,
+                                          Graph graph, Set <Node> marked) {
         if (naYXT.contains(y)) {
             return true;
         }
@@ -744,23 +728,6 @@ public final class PValueImproverGes implements PValueImprover {
 
         return true;
     }
-
-    private static List<Set<Node>> powerSet(List<Node> nodes) {
-        List<Set<Node>> subsets = new ArrayList<Set<Node>>();
-        int total = (int) Math.pow(2, nodes.size());
-        for (int i = 0; i < total; i++) {
-            Set<Node> newSet = new HashSet<Node>();
-            String selection = Integer.toBinaryString(i);
-            for (int j = selection.length() - 1; j >= 0; j--) {
-                if (selection.charAt(j) == '1') {
-                    newSet.add(nodes.get(selection.length() - j - 1));
-                }
-            }
-            subsets.add(newSet);
-        }
-        return subsets;
-    }
-
 
     /**
      * Completes a pattern that was modified by an insertion/deletion operator Based on the algorithm described on
@@ -789,7 +756,7 @@ public final class PValueImproverGes implements PValueImprover {
 
     private void addRequiredEdges(Graph graph) {
         // Add required edges.
-        List<Node> nodes = graph.getNodes();
+        List <Node> nodes = graph.getNodes();
 
         for (int i = 0; i < nodes.size(); i++) {
             for (int j = 0; j < nodes.size(); j++) {
@@ -804,17 +771,12 @@ public final class PValueImproverGes implements PValueImprover {
         }
     }
 
-    @Override
-	public void setKnowledge(Knowledge knowledge) {
-        this.knowledge = knowledge;
-    }
-
     public Graph getTrueModel() {
         return trueModel;
     }
 
     @Override
-	public void setTrueModel(Graph trueModel) {
+    public void setTrueModel(Graph trueModel) {
         this.trueModel = trueModel;
     }
 
@@ -823,12 +785,12 @@ public final class PValueImproverGes implements PValueImprover {
     }
 
     @Override
-	public void setAlpha(double alpha) {
+    public void setAlpha(double alpha) {
         this.alpha = alpha;
     }
 
     @Override
-	public void setBeamWidth(int beamWidth) {
+    public void setBeamWidth(int beamWidth) {
 //        if (beamWidth < 1) throw new IllegalArgumentException();
         // Do nothing. We don't care about beam width.
     }
@@ -837,8 +799,41 @@ public final class PValueImproverGes implements PValueImprover {
         return knowledge;
     }
 
-    public Set<GraphWithPValue> getSignificantModels() {
+    @Override
+    public void setKnowledge(Knowledge knowledge) {
+        this.knowledge = knowledge;
+    }
+
+    public Set <GraphWithPValue> getSignificantModels() {
         return significantModels;
+    }
+
+    /**
+     * This method straightforwardly applies the standard definition of the numerical estimates of the second order
+     * partial derivatives.  See for example Section 5.7 of Numerical Recipes in C.
+     */
+    public double secondPartialDerivative(FittingFunction f, int i, int j,
+                                          double[] p, double delt) {
+        double[] arg = new double[p.length];
+        System.arraycopy(p, 0, arg, 0, p.length);
+
+        arg[i] += delt;
+        arg[j] += delt;
+        double ff1 = f.evaluate(arg);
+
+        arg[j] -= 2 * delt;
+        double ff2 = f.evaluate(arg);
+
+        arg[i] -= 2 * delt;
+        arg[j] += 2 * delt;
+        double ff3 = f.evaluate(arg);
+
+        arg[j] -= 2 * delt;
+        double ff4 = f.evaluate(arg);
+
+        double fsSum = ff1 - ff2 - ff3 + ff4;
+
+        return fsSum / (4.0 * delt * delt);
     }
 
 //    public static class Score {
@@ -909,6 +904,54 @@ public final class PValueImproverGes implements PValueImprover {
 //        }
 //    }
 
+    /**
+     * Evaluates a fitting function for an array of parameters.
+     *
+     * @author Joseph Ramsey
+     */
+    static interface FittingFunction {
+
+        /**
+         * Returns the value of the function for the given array of parameter values.
+         */
+        double evaluate(double[] argument);
+
+        /**
+         * Returns the number of parameters.
+         */
+        int getNumParameters();
+    }
+
+    public static class GraphWithPValue {
+        private Graph graph;
+        private double pValue;
+
+        public GraphWithPValue(Graph graph, double pValue) {
+            this.graph = graph;
+            this.pValue = pValue;
+        }
+
+        public Graph getGraph() {
+            return graph;
+        }
+
+        public double getPValue() {
+            return pValue;
+        }
+
+        @Override
+        public int hashCode() {
+            return 17 * graph.hashCode();
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (o == null) return false;
+            GraphWithPValue p = (GraphWithPValue) o;
+            return (p.graph.equals(graph));
+        }
+    }
+
     public static class Score {
         private Scorer scorer;
         private double pValue;
@@ -938,6 +981,10 @@ public final class PValueImproverGes implements PValueImprover {
             this.chisq = 0.0;
         }
 
+        public static Score negativeInfinity() {
+            return new Score();
+        }
+
         public SemIm getEstimatedSem() {
             return scorer.getEstSem();
         }
@@ -963,10 +1010,6 @@ public final class PValueImproverGes implements PValueImprover {
 //            return -aic;
         }
 
-        public double getFml() {
-            return fml;
-        }
-
 //        public double getChisq() {
 //            return chisq;
 //        }
@@ -985,8 +1028,8 @@ public final class PValueImproverGes implements PValueImprover {
 //            return maxP;
 //        }
 
-        public static Score negativeInfinity() {
-            return new Score();
+        public double getFml() {
+            return fml;
         }
 
         public int getDof() {
@@ -1008,52 +1051,6 @@ public final class PValueImproverGes implements PValueImprover {
         public double getBic() {
             return bic;
         }
-    }
-
-    /**
-     * This method straightforwardly applies the standard definition of the numerical estimates of the second order
-     * partial derivatives.  See for example Section 5.7 of Numerical Recipes in C.
-     */
-    public double secondPartialDerivative(FittingFunction f, int i, int j,
-                                          double[] p, double delt) {
-        double[] arg = new double[p.length];
-        System.arraycopy(p, 0, arg, 0, p.length);
-
-        arg[i] += delt;
-        arg[j] += delt;
-        double ff1 = f.evaluate(arg);
-
-        arg[j] -= 2 * delt;
-        double ff2 = f.evaluate(arg);
-
-        arg[i] -= 2 * delt;
-        arg[j] += 2 * delt;
-        double ff3 = f.evaluate(arg);
-
-        arg[j] -= 2 * delt;
-        double ff4 = f.evaluate(arg);
-
-        double fsSum = ff1 - ff2 - ff3 + ff4;
-
-        return fsSum / (4.0 * delt * delt);
-    }
-
-    /**
-     * Evaluates a fitting function for an array of parameters.
-     *
-     * @author Joseph Ramsey
-     */
-    static interface FittingFunction {
-
-        /**
-         * Returns the value of the function for the given array of parameter values.
-         */
-        double evaluate(double[] argument);
-
-        /**
-         * Returns the number of parameters.
-         */
-        int getNumParameters();
     }
 
     /**
@@ -1080,7 +1077,7 @@ public final class PValueImproverGes implements PValueImprover {
          * These values are mapped to parameter values.
          */
         @Override
-		public double evaluate(double[] parameters) {
+        public double evaluate(double[] parameters) {
             sem.setFreeParamValues(parameters);
 
             // This needs to be FML-- see Bollen p. 109.
@@ -1091,7 +1088,7 @@ public final class PValueImproverGes implements PValueImprover {
          * Returns the number of arguments. Required by the MultivariateFunction interface.
          */
         @Override
-		public int getNumParameters() {
+        public int getNumParameters() {
             return this.sem.getNumFreeParams();
         }
     }

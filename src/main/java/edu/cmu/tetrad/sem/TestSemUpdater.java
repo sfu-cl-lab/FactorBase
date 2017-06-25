@@ -43,6 +43,17 @@ public class TestSemUpdater extends TestCase {
         super(name);
     }
 
+    /**
+     * This method uses reflection to collect up all of the test methods from
+     * this class and return them to the test runner.
+     */
+    public static Test suite() {
+
+        // Edit the name of the class in the parens to match the name
+        // of this class.
+        return new TestSuite(TestSemUpdater.class);
+    }
+
     public void testUpdate() {
         Graph graph = constructGraph1();
 
@@ -78,17 +89,6 @@ public class TestSemUpdater extends TestCase {
         System.out.println(
                 "Updated graph: " + updatedSemIm.getSemPm().getGraph());
         System.out.println("Updated SEM = " + updatedSemIm);
-    }
-
-    /**
-     * This method uses reflection to collect up all of the test methods from
-     * this class and return them to the test runner.
-     */
-    public static Test suite() {
-
-        // Edit the name of the class in the parens to match the name
-        // of this class.
-        return new TestSuite(TestSemUpdater.class);
     }
 
     private Graph constructGraph1() {

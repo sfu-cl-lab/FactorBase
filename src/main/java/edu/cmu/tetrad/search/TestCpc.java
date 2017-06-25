@@ -57,15 +57,25 @@ public class TestCpc extends TestCase {
         super(name);
     }
 
+    /**
+     * This method uses reflection to collect up all of the test methods from this class and return them to the test
+     * runner.
+     */
+    public static Test suite() {
+
+        // Edit the name of the class in the parens to match the name
+        // of this class.
+        return new TestSuite(TestCpc.class);
+    }
+
     @Override
-	public void setUp() throws Exception {
+    public void setUp() throws Exception {
         TetradLogger.getInstance().addOutputStream(System.out);
         TetradLogger.getInstance().setForceLog(true);
     }
 
-
     @Override
-	public void tearDown() {
+    public void tearDown() {
         TetradLogger.getInstance().setForceLog(false);
         TetradLogger.getInstance().removeOutputStream(System.out);
     }
@@ -132,10 +142,10 @@ public class TestCpc extends TestCase {
             Graph resultGraph = search.search();
 
             if (previousResult != null) {
-                List<Edge> resultEdges = resultGraph.getEdges();
-                List<Edge> previousEdges = previousResult.getEdges();
+                List <Edge> resultEdges = resultGraph.getEdges();
+                List <Edge> previousEdges = previousResult.getEdges();
 
-                List<Edge> addedEdges = new LinkedList<Edge>();
+                List <Edge> addedEdges = new LinkedList <Edge>();
 
                 for (Edge edge : resultEdges) {
                     if (!previousEdges.contains(edge)) {
@@ -143,7 +153,7 @@ public class TestCpc extends TestCase {
                     }
                 }
 
-                List<Edge> removedEdges = new LinkedList<Edge>();
+                List <Edge> removedEdges = new LinkedList <Edge>();
 
                 for (Edge edge : previousEdges) {
                     if (!resultEdges.contains(edge)) {
@@ -234,7 +244,7 @@ public class TestCpc extends TestCase {
 
             ChoiceGenerator cg = new ChoiceGenerator(graph.getNumNodes(), 3);
             int[] choice;
-            List<Node> nodes = graph.getNodes();
+            List <Node> nodes = graph.getNodes();
 
             while ((choice = cg.next()) != null) {
                 Node node0 = nodes.get(choice[0]);
@@ -358,17 +368,6 @@ public class TestCpc extends TestCase {
 
         // Do test.
 //        assertTrue(resultGraph.equals(trueGraph));
-    }
-
-    /**
-     * This method uses reflection to collect up all of the test methods from this class and return them to the test
-     * runner.
-     */
-    public static Test suite() {
-
-        // Edit the name of the class in the parens to match the name
-        // of this class.
-        return new TestSuite(TestCpc.class);
     }
 }
 

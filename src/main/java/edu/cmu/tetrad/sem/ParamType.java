@@ -34,38 +34,36 @@ import java.io.ObjectStreamException;
  * @author Joseph Ramsey
  */
 public class ParamType implements TetradSerializable {
-    static final long serialVersionUID = 23L;
-
     /**
      * A coefficient parameter.
      */
     public static final ParamType COEF = new ParamType("Linear Coefficient");
-
     /**
      * A mean parameter.
      */
     public static final ParamType MEAN = new ParamType("Variable Mean");
-
     /**
      * A variance parameter.
      */
     public static final ParamType VAR = new ParamType("Error Variance");
-
     /**
      * A covariance parameter. (Does not include variance parameters; these are
      * indicated using VAR.)
      */
     public static final ParamType COVAR = new ParamType("Error Covariance");
-
     /**
      * A parameter of a distribution.
      */
     public static final ParamType DIST = new ParamType("Distribution Parameter");
-
+    static final long serialVersionUID = 23L;
+    private static final ParamType[] TYPES = {COEF, MEAN, VAR, COVAR, DIST};
+    // Declarations required for serialization.
+    private static int NEXT_ORDINAL = 0;
     /**
      * The name of this type.
      */
     private final transient String name;
+    private final int ordinal = NEXT_ORDINAL++;
 
     /**
      * Protected constructor for the types; this allows for extension in case
@@ -89,14 +87,9 @@ public class ParamType implements TetradSerializable {
      * Prints out the name of the type.
      */
     @Override
-	public String toString() {
+    public String toString() {
         return name;
     }
-
-    // Declarations required for serialization.
-    private static int NEXT_ORDINAL = 0;
-    private final int ordinal = NEXT_ORDINAL++;
-    private static final ParamType[] TYPES = {COEF, MEAN, VAR, COVAR, DIST};
 
     Object readResolve() throws ObjectStreamException {
         return TYPES[ordinal]; // Canonicalize.

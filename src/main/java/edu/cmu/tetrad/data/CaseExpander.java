@@ -31,14 +31,6 @@ package edu.cmu.tetrad.data;
  */
 public final class CaseExpander implements DataFilter {
 
-    /**
-     * Expands cases for the given dataset.
-     */
-    @Override
-	public final DataSet filter(DataSet dataSet) {
-        return expand(dataSet);
-    }
-
     private static DataSet expand(DataSet dataSet) {
         int rows = 0;
 
@@ -64,11 +56,9 @@ public final class CaseExpander implements DataFilter {
                 for (int j = 0; j < cols; j++) {
                     if (dataSet.getVariable(j) instanceof ContinuousVariable) {
                         newDataSet.setDouble(index, j, dataSet.getDouble(i, j));
-                    }
-                    else if (dataSet.getVariable(j) instanceof DiscreteVariable) {
+                    } else if (dataSet.getVariable(j) instanceof DiscreteVariable) {
                         newDataSet.setInt(index, j, dataSet.getInt(i, j));
-                    }
-                    else {
+                    } else {
                         throw new IllegalStateException("Expecting either a " +
                                 "continuous or a discrete variable.");
                     }
@@ -78,6 +68,14 @@ public final class CaseExpander implements DataFilter {
         }
 
         return newDataSet;
+    }
+
+    /**
+     * Expands cases for the given dataset.
+     */
+    @Override
+    public final DataSet filter(DataSet dataSet) {
+        return expand(dataSet);
     }
 }
 

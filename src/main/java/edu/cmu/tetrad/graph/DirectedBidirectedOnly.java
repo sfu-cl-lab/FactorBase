@@ -57,7 +57,7 @@ public final class DirectedBidirectedOnly implements GraphConstraint {
      * @return true if the new edge may be added, false if not.
      */
     @Override
-	public boolean isEdgeAddable(Edge edge, Graph graph) {
+    public boolean isEdgeAddable(Edge edge, Graph graph) {
         return (Edges.isDirectedEdge(edge) || Edges.isBidirectedEdge(edge));
     }
 
@@ -67,7 +67,7 @@ public final class DirectedBidirectedOnly implements GraphConstraint {
      * @return true.
      */
     @Override
-	public boolean isNodeAddable(Node node, Graph graph) {
+    public boolean isNodeAddable(Node node, Graph graph) {
         return true;
     }
 
@@ -77,7 +77,7 @@ public final class DirectedBidirectedOnly implements GraphConstraint {
      * @return true.
      */
     @Override
-	public boolean isEdgeRemovable(Edge edge, Graph graph) {
+    public boolean isEdgeRemovable(Edge edge, Graph graph) {
         return true;
     }
 
@@ -87,7 +87,7 @@ public final class DirectedBidirectedOnly implements GraphConstraint {
      * @return true.
      */
     @Override
-	public boolean isNodeRemovable(Node node, Graph graph) {
+    public boolean isNodeRemovable(Node node, Graph graph) {
         return true;
     }
 
@@ -97,7 +97,7 @@ public final class DirectedBidirectedOnly implements GraphConstraint {
      * @return this representation.
      */
     @Override
-	public String toString() {
+    public String toString() {
         return "<Directed or bidirected edges only.>";
     }
 }

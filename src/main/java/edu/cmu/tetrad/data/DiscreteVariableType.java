@@ -35,17 +35,19 @@ import java.io.ObjectStreamException;
  * @author Joseph Ramsey
  */
 public final class DiscreteVariableType implements TetradSerializable {
-    static final long serialVersionUID = 23L;
-
     public static final DiscreteVariableType NOMINAL =
             new DiscreteVariableType("Nominal");
+    static final long serialVersionUID = 23L;
     private static final DiscreteVariableType ORDINAL =
             new DiscreteVariableType("Ordinal");
-
+    private static final DiscreteVariableType[] TYPES = {NOMINAL, ORDINAL};
+    // Declarations required for serialization.
+    private static int nextOrdinal = 0;
     /**
      * The name of this type.
      */
     private transient final String name;
+    private final int ordinal = nextOrdinal++;
 
     /**
      * Protected constructor for the types; this allows for extension in case
@@ -69,14 +71,9 @@ public final class DiscreteVariableType implements TetradSerializable {
      * Prints out the name of the type.
      */
     @Override
-	public final String toString() {
+    public final String toString() {
         return name;
     }
-
-    // Declarations required for serialization.
-    private static int nextOrdinal = 0;
-    private final int ordinal = nextOrdinal++;
-    private static final DiscreteVariableType[] TYPES = {NOMINAL, ORDINAL};
 
     final Object readResolve() throws ObjectStreamException {
         return TYPES[ordinal]; // Canonicalize.

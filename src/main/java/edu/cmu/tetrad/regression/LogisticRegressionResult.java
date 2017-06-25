@@ -181,7 +181,7 @@ public class LogisticRegressionResult implements TetradSerializable {
         return this.target;
     }
 
-    public double getIntercept(){
+    public double getIntercept() {
         return this.intercept;
     }
 
@@ -246,7 +246,7 @@ public class LogisticRegressionResult implements TetradSerializable {
     }
 
     @Override
-	public String toString() {
+    public String toString() {
         return result;
     }
 

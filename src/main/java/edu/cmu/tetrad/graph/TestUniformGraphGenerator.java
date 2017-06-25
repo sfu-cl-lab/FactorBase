@@ -37,6 +37,17 @@ public final class TestUniformGraphGenerator extends TestCase {
         super(name);
     }
 
+    /**
+     * This method uses reflection to collect up all of the test methods from
+     * this class and return them to the test runner.
+     */
+    public static Test suite() {
+
+        // Edit the name of the class in the parens to match the name
+        // of this class.
+        return new TestSuite(TestUniformGraphGenerator.class);
+    }
+
     public void testRandomDag1() {
         long start = System.currentTimeMillis();
 
@@ -190,17 +201,6 @@ public final class TestUniformGraphGenerator extends TestCase {
         System.out.println("Elapsed time " + (stop - start) + " ms.");
 
         System.out.println(generator.getDag());
-    }
-
-    /**
-     * This method uses reflection to collect up all of the test methods from
-     * this class and return them to the test runner.
-     */
-    public static Test suite() {
-
-        // Edit the name of the class in the parens to match the name
-        // of this class.
-        return new TestSuite(TestUniformGraphGenerator.class);
     }
 }
 

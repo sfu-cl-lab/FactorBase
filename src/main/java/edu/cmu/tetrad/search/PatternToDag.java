@@ -63,11 +63,11 @@ public class PatternToDag {
      * THIS IMPLEMENTATION IS NOT DEBUGGED.
      */
     public Dag patternToDagMeek() {
-    	
-    	//System.out.println("entering patternToDagMeek()");
+
+        //System.out.println("entering patternToDagMeek()");
         Graph dag = new EdgeListGraph(pattern);
-     //   System.out.println("left patternToDagMeek()/EdgeListGraph(pattern)");
-        
+        //   System.out.println("left patternToDagMeek()/EdgeListGraph(pattern)");
+
         while (nondirectedEdges(dag).size() > 0) {
             List edges = nondirectedEdges(dag);
             Edge edge = (Edge) edges.get(0);
@@ -92,7 +92,7 @@ public class PatternToDag {
             }
 //System.out.println("before trying rule UR2");
             //Try rule UR2
-            List<Edge> allEdges = dag.getEdges();
+            List <Edge> allEdges = dag.getEdges();
 
             for (Edge otherEdge : allEdges) {
                 if (otherEdge.getNode1() == B && otherEdge.getNode2() != A &&
@@ -107,7 +107,7 @@ public class PatternToDag {
             }
 
             //Try rule UR3
-            List<Node> allNodes = dag.getNodes();
+            List <Node> allNodes = dag.getNodes();
 
             for (Edge otherEdge : allEdges) {
                 for (Node D : allNodes) {
@@ -167,8 +167,8 @@ public class PatternToDag {
     }
 
     private List nondirectedEdges(Graph graph) {
-        List<Edge> allEdges = graph.getEdges();
-        List<Edge> nondirected = new ArrayList<Edge>();
+        List <Edge> allEdges = graph.getEdges();
+        List <Edge> nondirected = new ArrayList <Edge>();
 
         for (Edge edge : allEdges) {
             if (edge.getEndpoint1() == Endpoint.TAIL &&
@@ -196,13 +196,13 @@ public class PatternToDag {
         //Create the DAG and all the nodes of pattern to it.
         Dag dag = new Dag();
 
-        List<Node> allNodes = pattern.getNodes();
+        List <Node> allNodes = pattern.getNodes();
 
         for (Node node : allNodes) {
             dag.addNode(node);
         }
 
-        List<Edge> allEdges = pattern.getEdges();
+        List <Edge> allEdges = pattern.getEdges();
 
         for (Edge edge : allEdges) {
 
@@ -235,8 +235,8 @@ public class PatternToDag {
             allNodes = pattern.getNodes();
 
             for (Node node : allNodes) {
-                List<Node> adjacentNodes = pattern.getAdjacentNodes(node);
-                List<Node> neighborNodes = new ArrayList<Node>();
+                List <Node> adjacentNodes = pattern.getAdjacentNodes(node);
+                List <Node> neighborNodes = new ArrayList <Node>();
 
                 for (Node adjacent : adjacentNodes) {
                     Edge nodeToAdjacent = pattern.getEdge(node, adjacent);
@@ -248,9 +248,9 @@ public class PatternToDag {
 
                 //System.out.println("neighbors = " + neighborNodes);
 
-                List<Node> parentsUnionNeighbors =
-                        new ArrayList<Node>(neighborNodes);
-                List<Node> parentNodes = pattern.getParents(node);
+                List <Node> parentsUnionNeighbors =
+                        new ArrayList <Node>(neighborNodes);
+                List <Node> parentNodes = pattern.getParents(node);
 
                 //System.out.println("parents = " + parentNodes);
 
@@ -277,7 +277,7 @@ public class PatternToDag {
                 if (pattern.getOutdegree(node) == 0 && isClique) {
                     //System.out.println("X exists = " + node);
 
-                    List<Edge> undirectedEdges = pattern.getEdges(node);
+                    List <Edge> undirectedEdges = pattern.getEdges(node);
 
                     //For each undirected edge Y -- X incident to node in pattern insert
                     //a directed edge Y --> X in dag
@@ -311,7 +311,7 @@ public class PatternToDag {
      * @param s a list of nodes in the graph
      * @return true if the subgraph determined by the nodes in s is a clique.
      */
-    private boolean cliqueSubgraph(Graph g, List<Node> s) {
+    private boolean cliqueSubgraph(Graph g, List <Node> s) {
 
         //Is every pair of nodes in s adjacent?
         int n = s.size();

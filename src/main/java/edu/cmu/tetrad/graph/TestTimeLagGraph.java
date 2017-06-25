@@ -38,6 +38,17 @@ public final class TestTimeLagGraph extends TestCase {
         super(name);
     }
 
+    /**
+     * This method uses reflection to collect up all of the test methods from
+     * this class and return them to the test runner.
+     */
+    public static Test suite() {
+
+        // Edit the name of the class in the parens to match the name
+        // of this class.
+        return new TestSuite(TestTimeLagGraph.class);
+    }
+
     public void test1() {
         TimeLagGraph graph = new TimeLagGraph();
 
@@ -101,16 +112,5 @@ public final class TestTimeLagGraph extends TestCase {
 
 //        SemPm pm = new SemPm(graph);
 
-    }
-
-    /**
-     * This method uses reflection to collect up all of the test methods from
-     * this class and return them to the test runner.
-     */
-    public static Test suite() {
-
-        // Edit the name of the class in the parens to match the name
-        // of this class.
-        return new TestSuite(TestTimeLagGraph.class);
     }
 }

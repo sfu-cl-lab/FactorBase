@@ -48,54 +48,8 @@ import java.util.List;
  */
 
 public final class DiscreteTetradTest implements TetradTest {
-    DataSet dataSet;
-//    int rawdata[][];
-    int counts[][][][]; //bivariate counts only
-    int values[][], valueIndices[];
-    private double prob[], tempProb, sig1, sig2, sig3, sig;
-    private boolean bvalues[];
-    double thresholds[][];
-    int indices[];
-    int currentCounts[][][][];
-    int currentVar1, currentVar2;
-    double currentFiBuffer[][];
-    double currentPi[][];
-    double currentRho;
-    double rhoGrid[];
-    double polyCorr[][];
-    double btCovars[][][];
-
     private static final int MAX_VALUES = 50;
     private static final int RHO_GRID_SIZE = 1000;
-    //private static final double FUNC_TOLERANCE = 1.0e-4;
-    //private static final double PARAM_TOLERANCE = 1.0e-3;
-
-    public boolean verbose = false;
-
-    //Gaussian-Hermite points and weights (Stroud and Secrest, 1966)
-    /*double GHY[] = {4.49999070730939155366438053053, 3.66995037340445253472922383312, 2.9671669279056032484,
-                    2.325732486, 1.719992575, 1.136115585, 0.5650695832, 0.,
-                  -0.5650695832, -1.136115585, -1.719992575, -2.325732486, -2.9671669279056032484, -3.66995037340445253472922383312, -4.49999070730939155366438053053};
-    double GHW[] = {0.000000001522475804, 0.000001059115547, 0.0001000044412, 0.002778068842, 0.03078003387, 0.1584889157, 0.4120286974,
-                  0.5641003087,
-                  0.4120286974, 0.1584889157, 0.03078003387, 0.002778068842, 0.0001000044412, 0.000001059115547, 0.000000001522475804};*/
-    //double GHY[] = {3.436159118, 2.532731674, 1.1756683649, 1.036610829, 0.3429013272, -1.036610829, -1.1756683649, -2.532731674, -3.436159118};
-    //double GHW[] = {0.000007640432855, 0.001343645746, 0.03387439445, 0.2401386110, 0.6108626337, 0.2401386110, 0.03387439445, 0.001343645746, 0.000007640432855};
-    //double GHY[] = {1.3190993201, 1.2266580584, 1.1468553289, 0.7235510187, 0., -0.7235510187, -1.1468553289, -1.2266580584, -1.3190993201};
-    //double GHW[] = {0.0003960697726, 0.004943624275, 0.08847453739, 0.4326515590, 0.7202352156, 0.4326515590, 0.08847453739, 0.004943624275, 0.0003960697726};
-    /*double GHY[] = {5.5550351873, 4.773992343, 4.12199547,
-                    3.531972877, 2.979991207, 2.453552124,
-                    1.944962949, 1.44893425, 0.9614996344, 0.479450707,
-                    0.,
-                    -5.5550351873, -4.773992343, -4.12199547,
-                    -3.531972877, -2.979991207, -2.453552124,
-                    -1.944962949, -1.44893425, -0.9614996344, -0.479450707};
-    double GHW[] = {0.0000000000000372036507,
-                    0.00000000008818611242, 0.0000000257123018, 0.000002171884898,
-                    0.00007478398867, 0.001254982041, 0.01141406583, 0.06017964665, 0.192120324, 0.3816690736, 0.4790237031,
-                    0.0000000000000372036507, 0.00000000008818611242, 0.0000000257123018, 0.000002171884898,
-                    0.00007478398867, 0.001254982041, 0.01141406583, 0.06017964665, 0.192120324, 0.3816690736};*/
-
     private static double GHY[] = {5.55503518732646782452296868771,
             4.77399234341121942970150957712, 4.12199554749184002081690067728,
             3.53197287713767773917138228262, 2.97999120770459800253772781753,
@@ -127,20 +81,60 @@ public final class DiscreteTetradTest implements TetradTest {
             0.0114140658374343833765845047287,
             0.0601796466589122671716641792812, 0.192120324066997756129082460739,
             0.381669073613502098270416641564, 0.479023703120177648419744153424};
-    //Caching test constraints
-    //TODO: a space-efficient caching system
+    public boolean verbose = false;
+    DataSet dataSet;
+    //    int rawdata[][];
+    int counts[][][][]; //bivariate counts only
+    int values[][], valueIndices[];
+    double thresholds[][];
+    int indices[];
+    int currentCounts[][][][];
+    int currentVar1, currentVar2;
+    double currentFiBuffer[][];
+    double currentPi[][];
+    double currentRho;
+    double rhoGrid[];
+    double polyCorr[][];
+    //private static final double FUNC_TOLERANCE = 1.0e-4;
+    //private static final double PARAM_TOLERANCE = 1.0e-3;
+    double btCovars[][][];
 
+    //Gaussian-Hermite points and weights (Stroud and Secrest, 1966)
+    /*double GHY[] = {4.49999070730939155366438053053, 3.66995037340445253472922383312, 2.9671669279056032484,
+                    2.325732486, 1.719992575, 1.136115585, 0.5650695832, 0.,
+                  -0.5650695832, -1.136115585, -1.719992575, -2.325732486, -2.9671669279056032484, -3.66995037340445253472922383312, -4.49999070730939155366438053053};
+    double GHW[] = {0.000000001522475804, 0.000001059115547, 0.0001000044412, 0.002778068842, 0.03078003387, 0.1584889157, 0.4120286974,
+                  0.5641003087,
+                  0.4120286974, 0.1584889157, 0.03078003387, 0.002778068842, 0.0001000044412, 0.000001059115547, 0.000000001522475804};*/
+    //double GHY[] = {3.436159118, 2.532731674, 1.1756683649, 1.036610829, 0.3429013272, -1.036610829, -1.1756683649, -2.532731674, -3.436159118};
+    //double GHW[] = {0.000007640432855, 0.001343645746, 0.03387439445, 0.2401386110, 0.6108626337, 0.2401386110, 0.03387439445, 0.001343645746, 0.000007640432855};
+    //double GHY[] = {1.3190993201, 1.2266580584, 1.1468553289, 0.7235510187, 0., -0.7235510187, -1.1468553289, -1.2266580584, -1.3190993201};
+    //double GHW[] = {0.0003960697726, 0.004943624275, 0.08847453739, 0.4326515590, 0.7202352156, 0.4326515590, 0.08847453739, 0.004943624275, 0.0003960697726};
+    /*double GHY[] = {5.5550351873, 4.773992343, 4.12199547,
+                    3.531972877, 2.979991207, 2.453552124,
+                    1.944962949, 1.44893425, 0.9614996344, 0.479450707,
+                    0.,
+                    -5.5550351873, -4.773992343, -4.12199547,
+                    -3.531972877, -2.979991207, -2.453552124,
+                    -1.944962949, -1.44893425, -0.9614996344, -0.479450707};
+    double GHW[] = {0.0000000000000372036507,
+                    0.00000000008818611242, 0.0000000257123018, 0.000002171884898,
+                    0.00007478398867, 0.001254982041, 0.01141406583, 0.06017964665, 0.192120324, 0.3816690736, 0.4790237031,
+                    0.0000000000000372036507, 0.00000000008818611242, 0.0000000257123018, 0.000002171884898,
+                    0.00007478398867, 0.001254982041, 0.01141406583, 0.06017964665, 0.192120324, 0.3816690736};*/
     /**
      * @serial
      */
     int oneFactor4Tests[][][][], oneFactor5Tests[][][][][];
-
     /**
      * @serial
      */
     int twoFactor4Tests[][][][];
-
+    //Caching test constraints
+    //TODO: a space-efficient caching system
     boolean highPrecisionIntegral = false;
+    private double prob[], tempProb, sig1, sig2, sig3, sig;
+    private boolean bvalues[];
 
     public DiscreteTetradTest(DataSet dataSet, double sig) {
         this.dataSet = dataSet;
@@ -149,17 +143,17 @@ public final class DiscreteTetradTest implements TetradTest {
     }
 
     @Override
-	public String[] getVarNames() {
+    public String[] getVarNames() {
         return this.dataSet.getVariableNames().toArray(new String[0]);
     }
 
     @Override
-	public List<Node> getVariables() {
+    public List <Node> getVariables() {
         return dataSet.getVariables();
     }
 
     @Override
-	public DataSet getDataSet() {
+    public DataSet getDataSet() {
         return this.dataSet;
     }
 
@@ -271,25 +265,25 @@ public final class DiscreteTetradTest implements TetradTest {
     }
 
     @Override
-	public double getSignificance() {
+    public double getSignificance() {
         return this.sig;
     }
 
     @Override
-	public void setSignificance(double sig) {
+    public void setSignificance(double sig) {
         this.sig = sig;
-    }
-
-    public void setHighPrecision(boolean p) {
-        this.highPrecisionIntegral = p;
     }
 
     public boolean getHighPrecision() {
         return this.highPrecisionIntegral;
     }
 
+    public void setHighPrecision(boolean p) {
+        this.highPrecisionIntegral = p;
+    }
+
     @Override
-	public int tetradScore(int i, int j, int k, int l) {
+    public int tetradScore(int i, int j, int k, int l) {
         if (oneFactorTest(i, j, k, l)) {
             return 3;
         } else {
@@ -339,7 +333,7 @@ public final class DiscreteTetradTest implements TetradTest {
      */
 
     @Override
-	public boolean tetradScore1(int v1, int v2, int v3, int v4) {
+    public boolean tetradScore1(int v1, int v2, int v3, int v4) {
         if (oneFactorTest(v1, v2, v3, v4)) {
             return false;
         }
@@ -351,23 +345,23 @@ public final class DiscreteTetradTest implements TetradTest {
      */
 
     @Override
-	public boolean tetradScore3(int v1, int v2, int v3, int v4) {
+    public boolean tetradScore3(int v1, int v2, int v3, int v4) {
         return oneFactorTest(v1, v2, v3, v4);
     }
 
     @Override
-	public double tetradPValue(int v1, int v2, int v3, int v4) {
+    public double tetradPValue(int v1, int v2, int v3, int v4) {
         twoFactorTest(v1, v2, v3, v4);
         return this.tempProb;
     }
 
     @Override
-	public double tetradPValue(int i1, int j1, int k1, int l1, int i2, int j2, int k2, int l2) {
+    public double tetradPValue(int i1, int j1, int k1, int l1, int i2, int j2, int k2, int l2) {
         return 0;  //To change body of implemented methods use File | Settings | File Templates.
     }
 
     @Override
-	public boolean tetradHolds(int i, int j, int k, int l) {
+    public boolean tetradHolds(int i, int j, int k, int l) {
         twoFactorTest(i, l, j, k);
         this.prob[0] = this.tempProb;
         this.bvalues[0] = (this.prob[0] >= this.sig);
@@ -822,7 +816,7 @@ public final class DiscreteTetradTest implements TetradTest {
     }
 
     @Override
-	public boolean oneFactorTest(int i, int j, int k, int l) {
+    public boolean oneFactorTest(int i, int j, int k, int l) {
         //System.out.println("oneFactorTest: " + i + " " + j + " " + k + " " + l);
 
         this.indices = new int[4];
@@ -985,7 +979,7 @@ public final class DiscreteTetradTest implements TetradTest {
     }
 
     @Override
-	public boolean oneFactorTest(int i, int j, int k, int l, int x) {
+    public boolean oneFactorTest(int i, int j, int k, int l, int x) {
         //System.out.println("oneFactorTest: " + i + " " + j + " " + k + " " + l + " " + x);
 
         indices = new int[5];
@@ -1106,7 +1100,7 @@ public final class DiscreteTetradTest implements TetradTest {
     }
 
     @Override
-	public boolean oneFactorTest(int i, int j, int k, int l, int x, int y) {
+    public boolean oneFactorTest(int i, int j, int k, int l, int x, int y) {
         //System.out.println("oneFactorTest: " + i + " " + j + " " + k + " " + l + " " + x + " " + y);
 
         indices = new int[6];
@@ -1224,7 +1218,7 @@ public final class DiscreteTetradTest implements TetradTest {
     }
 
     @Override
-	public boolean twoFactorTest(int i, int j, int k, int l) {
+    public boolean twoFactorTest(int i, int j, int k, int l) {
         //System.out.println("twoFactorTest: " + i + " " + j + " " + k + " " + l);
 
         indices = new int[4];
@@ -1380,7 +1374,7 @@ public final class DiscreteTetradTest implements TetradTest {
     }
 
     @Override
-	public boolean twoFactorTest(int i, int j, int k, int l, int x) {
+    public boolean twoFactorTest(int i, int j, int k, int l, int x) {
         //System.out.println("twoFactorTest: " + i + " " + j + " " + k + " " + l + " " + x);
 
         indices = new int[5];
@@ -1502,7 +1496,7 @@ public final class DiscreteTetradTest implements TetradTest {
     }
 
     @Override
-	public boolean twoFactorTest(int i, int j, int k, int l, int x, int y) {
+    public boolean twoFactorTest(int i, int j, int k, int l, int x, int y) {
         //System.out.println("twoFactorTest: " + i + " " + j + " " + k + " " + l + " " + x + " " + y);
 
         indices = new int[6];
@@ -1667,9 +1661,9 @@ public final class DiscreteTetradTest implements TetradTest {
         for (int i = 0; i < indices.length; i++) {
             Node uNode = semIm.getSemPm().getGraph().getNode("xi" + i);
             Node uParent = null, uError = null;
-            for (Iterator<Node> it =
-                    semIm.getSemPm().getGraph().getParents(uNode)
-                            .iterator(); it.hasNext();) {
+            for (Iterator <Node> it =
+                 semIm.getSemPm().getGraph().getParents(uNode)
+                         .iterator(); it.hasNext(); ) {
                 Node parent = it.next();
                 if (parent.getNodeType() == NodeType.LATENT) {
                     uParent = parent;
@@ -1819,7 +1813,7 @@ public final class DiscreteTetradTest implements TetradTest {
 
 
     @Override
-	public ICovarianceMatrix getCovMatrix() {
+    public ICovarianceMatrix getCovMatrix() {
         return null;
     }
 }

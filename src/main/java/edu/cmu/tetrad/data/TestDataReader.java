@@ -40,6 +40,17 @@ public final class TestDataReader extends TestCase {
         super(name);
     }
 
+    /**
+     * This method uses reflection to collect up all of the test methods from
+     * this class and return them to the test runner.
+     */
+    public static Test suite() {
+
+        // Edit the name of the class in the parens to match the name
+        // of this class.
+        return new TestSuite(TestDataReader.class);
+    }
+
     public void test1() {
         TetradLogger.getInstance().addOutputStream(System.out);
 
@@ -50,26 +61,6 @@ public final class TestDataReader extends TestCase {
         reader.setDelimiter(DelimiterType.WHITESPACE);
         reader.setIdsSupplied(true);
         reader.setIdLabel("Case");
-
-        DataModel data = reader.parseTabular(chars);
-
-        TetradLogger.getInstance().removeOutputStream(System.out);
-
-        System.out.println(data);
-    }
-
-    // Without the ar names.
-    public void test1b() {
-        TetradLogger.getInstance().addOutputStream(System.out);
-
-        File file = new File("sample_data/cheese2.txt");
-        char[] chars = fileToCharArray(file);
-
-        DataReader reader = new DataReader();
-        reader.setDelimiter(DelimiterType.WHITESPACE);
-        reader.setVariablesSupplied(false);
-        reader.setIdsSupplied(true);
-        reader.setIdLabel(null);
 
         DataModel data = reader.parseTabular(chars);
 
@@ -236,6 +227,26 @@ public final class TestDataReader extends TestCase {
 //
 //    }
 
+    // Without the ar names.
+    public void test1b() {
+        TetradLogger.getInstance().addOutputStream(System.out);
+
+        File file = new File("sample_data/cheese2.txt");
+        char[] chars = fileToCharArray(file);
+
+        DataReader reader = new DataReader();
+        reader.setDelimiter(DelimiterType.WHITESPACE);
+        reader.setVariablesSupplied(false);
+        reader.setIdsSupplied(true);
+        reader.setIdLabel(null);
+
+        DataModel data = reader.parseTabular(chars);
+
+        TetradLogger.getInstance().removeOutputStream(System.out);
+
+        System.out.println(data);
+    }
+
     public void test11() {
         try {
             DataReader reader = new DataReader();
@@ -243,20 +254,6 @@ public final class TestDataReader extends TestCase {
         } catch (IOException e) {
             e.printStackTrace();
         }
-    }
-
-    public void test10() {
-        TetradLogger.getInstance().addOutputStream(System.out);
-        File file = new File("sample_data/bollen.txt");
-        char[] chars = fileToCharArray(file);
-
-        DataReader reader = new DataReader();
-//        DataModel data = parser.parseCovariance(chars);
-        DataModel data = reader.parseTabular(chars);
-
-        TetradLogger.getInstance().removeOutputStream(System.out);
-
-        System.out.println(data);
     }
 
 //    public void rtest11() {
@@ -334,6 +331,20 @@ public final class TestDataReader extends TestCase {
 //        }
 //    }
 
+    public void test10() {
+        TetradLogger.getInstance().addOutputStream(System.out);
+        File file = new File("sample_data/bollen.txt");
+        char[] chars = fileToCharArray(file);
+
+        DataReader reader = new DataReader();
+//        DataModel data = parser.parseCovariance(chars);
+        DataModel data = reader.parseTabular(chars);
+
+        TetradLogger.getInstance().removeOutputStream(System.out);
+
+        System.out.println(data);
+    }
+
     private char[] fileToCharArray(File file) {
         try {
             FileReader reader = new FileReader(file);
@@ -345,21 +356,9 @@ public final class TestDataReader extends TestCase {
             }
 
             return writer.toCharArray();
-        }
-        catch (IOException e) {
+        } catch (IOException e) {
             throw new RuntimeException(e);
         }
-    }
-
-    /**
-     * This method uses reflection to collect up all of the test methods from
-     * this class and return them to the test runner.
-     */
-    public static Test suite() {
-
-        // Edit the name of the class in the parens to match the name
-        // of this class.
-        return new TestSuite(TestDataReader.class);
     }
 }
 

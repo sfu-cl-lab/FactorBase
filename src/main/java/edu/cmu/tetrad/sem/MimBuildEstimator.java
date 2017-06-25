@@ -62,50 +62,44 @@ import java.util.List;
 public class MimBuildEstimator {
 
     /**
+     * Absolute tolerance of function value.
+     */
+    private static final double FUNC_TOLERANCE = 1.0e-4;
+    /**
+     * Absolute tolerance of each parameter.
+     */
+    private static final double PARAM_TOLERANCE = 1.0e-3;
+    /**
      * Defines the number of iterations
      */
     static int NUM_ITER_TSLS = 10;
     static int NUM_ITER = 20;
     int numIterTsls, numIter;
-
+    int numIndicators, numLatents, numFixedIndicators;
+    Node indicators[], latents[];
+    double beta[][], fi[][], iBeta[][], iSigma[][], theta[], bigLambda[][];
+    double iMinusB[][], iMinusBT[][], J[][];
+    List <int[]> latentParents;
+    int indicatorParents[];
+    int lambdaIndex[], betaIndex[], indicatorErrorsIndex, latentErrorsIndex;
+    double latentImpliedCovar[][], observedImpliedCovar[][], covMatrixValue[][];
+    boolean latentImportant[][][];
     /**
      * The SemPm containing the graph and the parameters to be estimated.
      */
     private SemPm semPm;
-
     /**
      * The covariance matrix used to estimate the SemIm. Note that the variables
      * names in the covariance matrix must be in the same order as the variable
      * names in the semPm.
      */
     private ICovarianceMatrix covMatrix;
-
     /**
      * The most recently estimated model, or null if no model has been estimated
      * yet.
      */
     private SemIm estimatedSem;
     private DataSet dataSet = null;
-
-    /**
-     * Absolute tolerance of function value.
-     */
-    private static final double FUNC_TOLERANCE = 1.0e-4;
-
-    /**
-     * Absolute tolerance of each parameter.
-     */
-    private static final double PARAM_TOLERANCE = 1.0e-3;
-
-    int numIndicators, numLatents, numFixedIndicators;
-    Node indicators[], latents[];
-    double beta[][], fi[][], iBeta[][], iSigma[][], theta[], bigLambda[][];
-    double iMinusB[][], iMinusBT[][], J[][];
-    List<int[]> latentParents;
-    int indicatorParents[];
-    int lambdaIndex[], betaIndex[], indicatorErrorsIndex, latentErrorsIndex;
-    double latentImpliedCovar[][], observedImpliedCovar[][], covMatrixValue[][];
-    boolean latentImportant[][][];
 
     //=============================CONSTRUCTORS============================//
 
@@ -116,7 +110,7 @@ public class MimBuildEstimator {
      */
 
     public MimBuildEstimator(ICovarianceMatrix covMatrix, SemPm semPm,
-            int numIter, int numIterTsls) {
+                             int numIter, int numIterTsls) {
 
         if (covMatrix == null) {
             throw new NullPointerException("DataWrapper must not be null.");
@@ -132,8 +126,8 @@ public class MimBuildEstimator {
                             "measurement/structural model.");
         }
 
-        List<Node> latents = new ArrayList<Node>();
-        List<Node> measured = new ArrayList<Node>();
+        List <Node> latents = new ArrayList <Node>();
+        List <Node> measured = new ArrayList <Node>();
 
         for (Node node : semPm.getVariableNodes()) {
             if (node.getNodeType() == NodeType.LATENT) latents.add(node);
@@ -164,7 +158,7 @@ public class MimBuildEstimator {
      */
 
     public static MimBuildEstimator newInstance(DataSet dataSet,
-            SemPm semPm) {
+                                                SemPm semPm) {
         MimBuildEstimator me = new MimBuildEstimator(
                 new CovarianceMatrix(dataSet), semPm, NUM_ITER, NUM_ITER_TSLS);
         me.dataSet = dataSet;
@@ -172,7 +166,7 @@ public class MimBuildEstimator {
     }
 
     public static MimBuildEstimator newInstance(DataSet dataSet,
-            SemPm semPm, int numIter, int numIterTsls) {
+                                                SemPm semPm, int numIter, int numIterTsls) {
         MimBuildEstimator me = new MimBuildEstimator(
                 new CovarianceMatrix(dataSet), semPm, numIter, numIterTsls);
         me.dataSet = dataSet;
@@ -191,12 +185,12 @@ public class MimBuildEstimator {
      */
 
     public static MimBuildEstimator newInstance(ICovarianceMatrix covMatrix,
-            SemPm semPm) {
+                                                SemPm semPm) {
         return new MimBuildEstimator(covMatrix, semPm, NUM_ITER, NUM_ITER_TSLS);
     }
 
     public static MimBuildEstimator newInstance(ICovarianceMatrix covMatrix,
-            SemPm semPm, int numIter, int numIterTsls) {
+                                                SemPm semPm, int numIter, int numIterTsls) {
         return new MimBuildEstimator(covMatrix, semPm, numIter, numIterTsls);
     }
 
@@ -207,15 +201,14 @@ public class MimBuildEstimator {
     //==============================PRIVATE METHODS========================//
 
     private void buildMeasurementStructuralModel() {
-        List<Node> semPmVars = semPm.getVariableNodes();
-        List<Node> indicatorsL = new ArrayList<Node>(semPmVars.size());
-        List<Node> latentsL = new ArrayList<Node>(semPmVars.size());
+        List <Node> semPmVars = semPm.getVariableNodes();
+        List <Node> indicatorsL = new ArrayList <Node>(semPmVars.size());
+        List <Node> latentsL = new ArrayList <Node>(semPmVars.size());
 
         for (Node nextNode : semPmVars) {
             if (nextNode.getNodeType() == NodeType.LATENT) {
                 latentsL.add(nextNode);
-            }
-            else {
+            } else {
                 indicatorsL.add(nextNode);
             }
         }
@@ -251,8 +244,7 @@ public class MimBuildEstimator {
             for (int j = 0; j < numIndicators; j++) {
                 if (i == j) {
                     iSigma[i][j] = 1.;
-                }
-                else {
+                } else {
                     iSigma[i][j] = 0.;
                 }
             }
@@ -273,8 +265,7 @@ public class MimBuildEstimator {
                     if (!markedLatents[j]) {
                         markedLatents[j] = true;
                         fixedIndicators[i] = true;
-                    }
-                    else {
+                    } else {
                         fixedIndicators[i] = false;
                     }
                     break;
@@ -287,18 +278,17 @@ public class MimBuildEstimator {
         for (int i = 0; i < numIndicators; i++) {
             if (fixedIndicators[i]) {
                 lambdaIndex[i] = -1;
-            }
-            else {
+            } else {
                 lambdaIndex[i] = count++;
             }
         }
 
-        latentParents = new ArrayList<int[]>(numLatents);
+        latentParents = new ArrayList <int[]>(numLatents);
         beta = new double[numLatents][numLatents];
         fi = new double[numLatents][numLatents];
         iBeta = new double[numLatents][numLatents];
         for (int i = 0; i < numLatents; i++) {
-            List<Integer> parentsL = new LinkedList<Integer>();
+            List <Integer> parentsL = new LinkedList <Integer>();
             for (int j = 0; j < numLatents; j++) {
                 if (semPm.getGraph().isParentOf(latents[j], latents[i])) {
                     parentsL.add(j);
@@ -307,8 +297,7 @@ public class MimBuildEstimator {
                 fi[i][j] = 0.;
                 if (i == j) {
                     iBeta[i][j] = 1.;
-                }
-                else {
+                } else {
                     iBeta[i][j] = 0.;
                 }
             }
@@ -365,8 +354,7 @@ public class MimBuildEstimator {
                             RandomUtil.getInstance().nextNormal(0, 1);
                     //theta[i] = r.nextDouble() + 0.1;
                 } while (Math.abs(theta[i]) < 0.1);
-            }
-            else {
+            } else {
                 theta[i] =
                         RandomUtil.getInstance().nextDouble() + 0.1;
             }
@@ -386,7 +374,7 @@ public class MimBuildEstimator {
         if (dataSet == null) {
             return;
         }
-        List<String> fixedLoadings = new ArrayList<String>();
+        List <String> fixedLoadings = new ArrayList <String>();
         for (int i = 0; i < indicators.length; i++) {
             if (lambdaIndex[i] < 0) {
                 fixedLoadings.add(indicators[i].getName());
@@ -394,7 +382,7 @@ public class MimBuildEstimator {
         }
         Tsls tsls = new Tsls(semPm, dataSet, null, fixedLoadings);
         SemIm semIm = tsls.estimate();
-        List<Parameter> parameters = semIm.getFreeParameters();
+        List <Parameter> parameters = semIm.getFreeParameters();
 
         for (Parameter nextP : parameters) {
             if (nextP.getType() == ParamType.COEF) {
@@ -427,8 +415,7 @@ public class MimBuildEstimator {
                     if (lambdaIndex[bIndex] >= 0) {
                         theta[lambdaIndex[bIndex]] = semIm.getParamValue(nextP);
                     }
-                }
-                else {
+                } else {
                     int parents[] = latentParents.get(bIndex);
                     for (int i = 0; i < parents.length; i++) {
                         if (latents[parents[i]].getName().equals(
@@ -489,14 +476,12 @@ public class MimBuildEstimator {
                 double coeff1, coeff2;
                 if (lambdaIndex[i] < 0) {
                     coeff1 = 1.;
-                }
-                else {
+                } else {
                     coeff1 = theta[lambdaIndex[i]];
                 }
                 if (lambdaIndex[j] < 0) {
                     coeff2 = 1.;
-                }
-                else {
+                } else {
                     coeff2 = theta[lambdaIndex[j]];
                 }
                 observedImpliedCovar[i][j] = coeff1 * coeff2 *
@@ -504,8 +489,7 @@ public class MimBuildEstimator {
                 if (i == j) {
                     observedImpliedCovar[i][j] +=
                             theta[indicatorErrorsIndex + i];
-                }
-                else {
+                } else {
                     observedImpliedCovar[j][i] = observedImpliedCovar[i][j];
                 }
             }
@@ -538,8 +522,7 @@ public class MimBuildEstimator {
                     double coeff;
                     if (lambdaIndex[d2] < 0) {
                         coeff = 1.;
-                    }
-                    else {
+                    } else {
                         coeff = theta[lambdaIndex[d2]];
                     }
                     gradient[lambdaIndex[d1]] += 2. * gradient_sigma[d1][d2] *
@@ -554,8 +537,7 @@ public class MimBuildEstimator {
             for (int i = 0; i < numIndicators; i++) {
                 if (lambdaIndex[i] < 0) {
                     bigLambda[i][indicatorParents[i]] = 1.;
-                }
-                else {
+                } else {
                     bigLambda[i][indicatorParents[i]] = theta[lambdaIndex[i]];
                 }
             }
@@ -587,8 +569,7 @@ public class MimBuildEstimator {
                     }
                 }
             }
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             for (int i = 0; i < gradient.length; i++) {
                 gradient[i] = 0.;
             }
@@ -598,13 +579,13 @@ public class MimBuildEstimator {
 
     /**
      * @return A submatrix of <code>covMatrix</code> with the order of its
-     *         variables the same as in <code>semPm</code>.
+     * variables the same as in <code>semPm</code>.
      * @throws IllegalArgumentException if not all of the variables of
      *                                  <code>semPm</code> are in <code>covMatrix</code>.
      */
     private ICovarianceMatrix fixVarOrder(SemPm semPm,
-            ICovarianceMatrix covMatrix) {
-        List<Node> semPmVars = semPm.getVariableNodes();
+                                          ICovarianceMatrix covMatrix) {
+        List <Node> semPmVars = semPm.getVariableNodes();
         int observedNodes = 0;
         for (Node semPmVar : semPmVars) {
             if (semPmVar.getNodeType() != NodeType.LATENT) {
@@ -629,8 +610,7 @@ public class MimBuildEstimator {
         SemPm fixedPm;
         try {
             fixedPm = (SemPm) new MarshalledObject(semPm).get();
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             throw new RuntimeException(e);
         }
 
@@ -653,7 +633,7 @@ public class MimBuildEstimator {
         }
 
         SemIm semIm = new SemIm(fixedPm, covMatrix);
-        List<Parameter> parameters = semIm.getFreeParameters();
+        List <Parameter> parameters = semIm.getFreeParameters();
         for (Parameter nextP : parameters) {
             if (nextP.getType() == ParamType.COEF) {
                 Node nodeA = nextP.getNodeA();
@@ -686,12 +666,10 @@ public class MimBuildEstimator {
                     //It should never get to here, actually... (Ricardo, 07/07/2003)
                     {
                         semIm.setParamValue(nextP, 1.);
-                    }
-                    else {
+                    } else {
                         semIm.setParamValue(nextP, theta[lambdaIndex[bIndex]]);
                     }
-                }
-                else {
+                } else {
                     int[] parents = latentParents.get(bIndex);
                     for (int i = 0; i < parents.length; i++) {
                         if (latents[parents[i]].getName().equals(
@@ -702,8 +680,7 @@ public class MimBuildEstimator {
                         }
                     }
                 }
-            }
-            else if (nextP.getType() == ParamType.VAR) {
+            } else if (nextP.getType() == ParamType.VAR) {
                 Node nodeA = nextP.getNodeA();
                 if (nodeA.getNodeType() == NodeType.LATENT) {
                     //exogenous latent
@@ -714,8 +691,7 @@ public class MimBuildEstimator {
                             break;
                         }
                     }
-                }
-                else {
+                } else {
                     //error term
                     boolean foundIndicator = false;
 
@@ -858,8 +834,7 @@ public class MimBuildEstimator {
                     System.arraycopy(thetaTSLS, 0, theta, 0, theta.length);
                     randomizeVariancesOnly();
                 }
-            }
-            else {
+            } else {
                 randomizeParameters();
             }
             double start[] = new double[theta.length];
@@ -900,7 +875,7 @@ public class MimBuildEstimator {
      * Returns a string representation of the Sem.
      */
     @Override
-	public String toString() {
+    public String toString() {
         NumberFormat nf = NumberFormatUtil.getInstance().getNumberFormat();
 
         StringBuilder buf = new StringBuilder();
@@ -908,8 +883,7 @@ public class MimBuildEstimator {
 
         if (this.estimatedSem == null) {
             buf.append("\n\t...SemIm has not been estimated yet.");
-        }
-        else {
+        } else {
             SemIm sem = this.estimatedSem;
 
             buf.append("\n\n\tfml = ");
@@ -959,19 +933,19 @@ public class MimBuildEstimator {
          * parameter values.
          */
         @Override
-		public double evaluate(final double[] argument) {
+        public double evaluate(final double[] argument) {
             System.arraycopy(argument, 0, mim.theta, 0, mim.theta.length);
             return mim.getFittingScore();
         }
 
         @Override
-		public double evaluate(final double[] argument, double gradient[]) {
+        public double evaluate(final double[] argument, double gradient[]) {
             computeGradient(argument, gradient);
             return mim.getFittingScore();
         }
 
         @Override
-		public void computeGradient(final double[] argument, double[] gradient) {
+        public void computeGradient(final double[] argument, double[] gradient) {
             System.arraycopy(argument, 0, mim.theta, 0, mim.theta.length);
             mim.computeGradient(gradient);
         }
@@ -981,7 +955,7 @@ public class MimBuildEstimator {
          * interface.
          */
         @Override
-		public int getNumArguments() {
+        public int getNumArguments() {
             return mim.theta.length;
         }
 
@@ -990,7 +964,7 @@ public class MimBuildEstimator {
          * MultivariateFunction interface.
          */
         @Override
-		public double getLowerBound(final int n) {
+        public double getLowerBound(final int n) {
             if (n >= mim.indicatorErrorsIndex) {
                 return 0.0001;
             }
@@ -1002,7 +976,7 @@ public class MimBuildEstimator {
          * MultivariateFunction interface.
          */
         @Override
-		public double getUpperBound(final int n) {
+        public double getUpperBound(final int n) {
             return 1000.0;
         }
 

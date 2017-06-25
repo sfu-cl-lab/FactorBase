@@ -31,8 +31,6 @@ import edu.cmu.tetrad.search.SepsetMap;
 import edu.cmu.tetrad.util.ChoiceGenerator;
 import edu.cmu.tetrad.util.TetradLogger;
 
-import java.util.*;
-
 /**
  * Implements the PC ("Peter/Clark") algorithm, as specified in Chapter 6 of Spirtes, Glymour, and Scheines, "Causation,
  * Prediction, and Search," 2nd edition, with a modified rule set in step D due to Chris Meek. For the modified rule
@@ -118,6 +116,23 @@ public class PcSearchRsch implements GraphSearch {
 
     //==============================PUBLIC METHODS========================//
 
+    /**
+     * Constructs a list of nodes from the given <code>nodes</code> list at the given indices in that list.
+     *
+     * @param indices The indices of the desired nodes in <code>nodes</code>.
+     * @param nodes   The list of nodes from which we select a sublist.
+     * @return the The sublist selected.
+     */
+    public static List <Node> asList(int[] indices, List <Node> nodes) {
+        List <Node> list = new LinkedList <Node>();
+
+        for (int i : indices) {
+            list.add(nodes.get(i));
+        }
+
+        return list;
+    }
+
     public IndependenceTest getIndependenceTest() {
         return independenceTest;
     }
@@ -146,19 +161,19 @@ public class PcSearchRsch implements GraphSearch {
      * Runs PC starting with a fully connected graph over all of the variables in the domain of the independence test.
      */
     @Override
-	public Graph search() {
+    public Graph search() {
         return search(independenceTest.getVariables());
     }
 
     @Override
-	public long getElapsedTime() {
+    public long getElapsedTime() {
         return this.elapsedTime;
     }
 
     /**
      * Runs PC on just the given variable, all of which must be in the domain of the independence test.
      */
-    public Graph search(List<Node> nodes) {
+    public Graph search(List <Node> nodes) {
         TetradLogger.getInstance().log("info", "Starting PC algorithm.");
         TetradLogger.getInstance().log("info", "Independence test = " + independenceTest + ".");
         long startTime = System.currentTimeMillis();
@@ -202,11 +217,11 @@ public class PcSearchRsch implements GraphSearch {
     /**
      * Orients according to background knowledge
      */
-    public void pcOrientbk(Knowledge bk, Graph graph, List<Node> nodes) {
+    public void pcOrientbk(Knowledge bk, Graph graph, List <Node> nodes) {
         TetradLogger.getInstance().log("info", "Starting BK Orientation.");
 
-        for (Iterator<KnowledgeEdge> it =
-                bk.forbiddenEdgesIterator(); it.hasNext();) {
+        for (Iterator <KnowledgeEdge> it =
+             bk.forbiddenEdgesIterator(); it.hasNext(); ) {
             KnowledgeEdge edge = it.next();
 
             //match strings to variables in the graph.
@@ -229,8 +244,8 @@ public class PcSearchRsch implements GraphSearch {
             TetradLogger.getInstance().log("impliedOrientation", SearchLogUtils.edgeOrientedMsg("Knowledge", graph.getEdge(to, from)));
         }
 
-        for (Iterator<KnowledgeEdge> it =
-                bk.requiredEdgesIterator(); it.hasNext();) {
+        for (Iterator <KnowledgeEdge> it =
+             bk.requiredEdgesIterator(); it.hasNext(); ) {
             KnowledgeEdge edge = it.next();
 
             //match strings to variables in this graph
@@ -262,10 +277,10 @@ public class PcSearchRsch implements GraphSearch {
                                             Graph graph) {
         TetradLogger.getInstance().log("info", "Starting Collider Orientation:");
 
-        List<Node> nodes = graph.getNodes();
+        List <Node> nodes = graph.getNodes();
 
         for (Node a : nodes) {
-            List<Node> adjacentNodes = graph.getAdjacentNodes(a);
+            List <Node> adjacentNodes = graph.getAdjacentNodes(a);
 
             if (adjacentNodes.size() < 2) {
                 continue;
@@ -288,7 +303,7 @@ public class PcSearchRsch implements GraphSearch {
                     continue;
                 }
 
-                List<Node> sepset = set.get(b, c);
+                List <Node> sepset = set.get(b, c);
 
                 if (sepset == null) {
                     throw new IllegalArgumentException();
@@ -327,7 +342,7 @@ public class PcSearchRsch implements GraphSearch {
 //                        System.out.println(trueGraph.getEdge(trueC, trueA));
                     }
 
-                    List<Node> trueS = new LinkedList<Node>();
+                    List <Node> trueS = new LinkedList <Node>();
 
                     for (Node s : sepset) {
                         trueS.add(getTrueGraph().getNode(s.getName()));
@@ -387,12 +402,12 @@ public class PcSearchRsch implements GraphSearch {
         Node trueY = getTrueGraph().getNode(y.getName());
         Node trueZ = getTrueGraph().getNode(z.getName());
 
-        Set<Node> __nodes = new HashSet<Node>(trueGraph.getAdjacentNodes(trueX));
+        Set <Node> __nodes = new HashSet <Node>(trueGraph.getAdjacentNodes(trueX));
         __nodes.addAll(trueGraph.getAdjacentNodes(trueZ));
         __nodes.remove(trueX);
         __nodes.remove(trueZ);
 
-        List<Node> _nodes = new LinkedList<Node>();
+        List <Node> _nodes = new LinkedList <Node>();
 
         for (Node node : __nodes) {
             _nodes.add(graph.getNode(node.getName()));
@@ -413,7 +428,7 @@ public class PcSearchRsch implements GraphSearch {
                 int[] choice;
 
                 while ((choice = cg2.next()) != null) {
-                    List<Node> condSet = asList(choice, _nodes);
+                    List <Node> condSet = asList(choice, _nodes);
 
                     if (!condSet.contains(y)) {
                         continue;
@@ -444,7 +459,7 @@ public class PcSearchRsch implements GraphSearch {
         Node trueY = trueGraph.getNode(y.getName());
         Node trueZ = trueGraph.getNode(z.getName());
 
-        List<Node> _nodes = new LinkedList<Node>();
+        List <Node> _nodes = new LinkedList <Node>();
         _nodes.addAll(trueGraph.getAdjacentNodes(trueX));
         _nodes.addAll(trueGraph.getAdjacentNodes(trueZ));
 
@@ -463,7 +478,7 @@ public class PcSearchRsch implements GraphSearch {
                 int[] choice;
 
                 while ((choice = cg2.next()) != null) {
-                    List<Node> condSet = asList(choice, _nodes);
+                    List <Node> condSet = asList(choice, _nodes);
 
                     if (!condSet.contains(trueY)) {
                         continue;
@@ -486,25 +501,8 @@ public class PcSearchRsch implements GraphSearch {
         return false;
     }
 
-    /**
-     * Constructs a list of nodes from the given <code>nodes</code> list at the given indices in that list.
-     *
-     * @param indices The indices of the desired nodes in <code>nodes</code>.
-     * @param nodes   The list of nodes from which we select a sublist.
-     * @return the The sublist selected.
-     */
-    public static List<Node> asList(int[] indices, List<Node> nodes) {
-        List<Node> list = new LinkedList<Node>();
-
-        for (int i : indices) {
-            list.add(nodes.get(i));
-        }
-
-        return list;
-    }
-
     private void printSubsetMessage(Graph graph, Node b, Node a, Node c,
-                                    List<Node> sepset) {
+                                    List <Node> sepset) {
         Node trueA = trueGraph.getNode(a.getName());
         Node trueB = trueGraph.getNode(b.getName());
         Node trueC = trueGraph.getNode(c.getName());
@@ -559,7 +557,7 @@ public class PcSearchRsch implements GraphSearch {
         triple.append(c);
 
         boolean unshielded = !trueGraph.isAdjacentTo(trueB, trueC);
-        boolean dsep = trueGraph.isDSeparatedFrom(trueB, trueC, new LinkedList<Node>());
+        boolean dsep = trueGraph.isDSeparatedFrom(trueB, trueC, new LinkedList <Node>());
         boolean localCol = isCollider(b, a, c);
         boolean graphicalCol = isGraphicalCollider(b, a, c);
 
@@ -606,7 +604,7 @@ public class PcSearchRsch implements GraphSearch {
     /**
      * Returns the string in nodelist which matches string in BK.
      */
-    public Node translate(String a, List<Node> nodes) {
+    public Node translate(String a, List <Node> nodes) {
         for (Node node : nodes) {
             if ((node.getName()).equals(a)) {
                 return node;
@@ -661,13 +659,13 @@ public class PcSearchRsch implements GraphSearch {
         return graph.getNumEdges();
     }
 
+    public Graph getTrueGraph() {
+        return this.trueGraph;
+    }
+
     public void setTrueGraph(Dag trueGraph) {
         this.trueGraph = trueGraph;
         this.graphicalTest = new IndTestDSep(trueGraph);
-    }
-
-    public Graph getTrueGraph() {
-        return this.trueGraph;
     }
 }
 

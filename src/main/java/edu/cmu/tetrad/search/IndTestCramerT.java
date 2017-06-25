@@ -43,10 +43,9 @@ import java.util.List;
 public final class IndTestCramerT implements IndependenceTest {
 
     /**
-     * The data set over which conditional independence judgements are being formed.
+     * Formats as 0.0000.
      */
-    private DataSet dataSet;
-
+    private static final NumberFormat nf = NumberFormatUtil.getInstance().getNumberFormat();
     /**
      * The correlation matrix.
      */
@@ -55,32 +54,27 @@ public final class IndTestCramerT implements IndependenceTest {
     /**
      * The variables of the correlation matrix, in order. (Unmodifiable list.)
      */
-    private final List<Node> variables;
-
+    private final List <Node> variables;
+    /**
+     * The data set over which conditional independence judgements are being formed.
+     */
+    private DataSet dataSet;
     /**
      * The significance level of the independence tests.
      */
     private double alpha;
-
     /**
      * The last used partial correlation distribution function.
      */
     private PartialCorrelationPdf pdf;
-
     /**
      * The cutoff value for 'alpha' area in the two tails of the partial correlation distribution function.
      */
     private double cutoff = 0.;
-
     /**
      * The last calculated partial correlation, needed to calculate relative strength.
      */
     private double storedR = 0.;
-
-    /**
-     * Formats as 0.0000.
-     */
-    private static final NumberFormat nf = NumberFormatUtil.getInstance().getNumberFormat();
 
     //==========================CONSTRUCTORS=============================//
 
@@ -133,7 +127,7 @@ public final class IndTestCramerT implements IndependenceTest {
      * Creates a new IndTestCramerT instance for a subset of the variables.
      */
     @Override
-	public IndependenceTest indTestSubset(List<Node> vars) {
+    public IndependenceTest indTestSubset(List <Node> vars) {
         if (vars.isEmpty()) {
             throw new IllegalArgumentException("Subset may not be empty.");
         }
@@ -167,7 +161,7 @@ public final class IndTestCramerT implements IndependenceTest {
      * @throws RuntimeException if a matrix singularity is encountered.
      */
     @Override
-	public boolean isIndependent(Node x, Node y, List<Node> z) {
+    public boolean isIndependent(Node x, Node y, List <Node> z) {
         if (z == null) {
             throw new NullPointerException();
         }
@@ -257,19 +251,19 @@ public final class IndTestCramerT implements IndependenceTest {
     }
 
     @Override
-	public boolean isIndependent(Node x, Node y, Node... z) {
-        List<Node> zList = Arrays.asList(z);
+    public boolean isIndependent(Node x, Node y, Node... z) {
+        List <Node> zList = Arrays.asList(z);
         return isIndependent(x, y, zList);
     }
 
     @Override
-	public boolean isDependent(Node x, Node y, List<Node> z) {
+    public boolean isDependent(Node x, Node y, List <Node> z) {
         return !isIndependent(x, y, z);
     }
 
     @Override
-	public boolean isDependent(Node x, Node y, Node... z) {
-        List<Node> zList = Arrays.asList(z);
+    public boolean isDependent(Node x, Node y, Node... z) {
+        List <Node> zList = Arrays.asList(z);
         return isDependent(x, y, zList);
     }
 
@@ -277,28 +271,28 @@ public final class IndTestCramerT implements IndependenceTest {
      * Returns the probability associated with the most recently computed independence test.
      */
     @Override
-	public double getPValue() {
+    public double getPValue() {
         return 2.0 * Integrator.getArea(pdf(), Math.abs(storedR), 1.0, 100);
-    }
-
-    /**
-     * Sets the significance level for future tests.
-     */
-    @Override
-	public void setAlpha(double alpha) {
-        if (alpha < 0.0 || alpha > 1.0) {
-            throw new IllegalArgumentException("Significance out of range.");
-        }
-
-        this.alpha = alpha;
     }
 
     /**
      * Returns the current significance level.
      */
     @Override
-	public double getAlpha() {
+    public double getAlpha() {
         return this.alpha;
+    }
+
+    /**
+     * Sets the significance level for future tests.
+     */
+    @Override
+    public void setAlpha(double alpha) {
+        if (alpha < 0.0 || alpha > 1.0) {
+            throw new IllegalArgumentException("Significance out of range.");
+        }
+
+        this.alpha = alpha;
     }
 
     private ICovarianceMatrix covMatrix() {
@@ -310,7 +304,7 @@ public final class IndTestCramerT implements IndependenceTest {
      * relations-- that is, all the variables in the given graph or the given data set.
      */
     @Override
-	public List<Node> getVariables() {
+    public List <Node> getVariables() {
         return this.variables;
     }
 
@@ -318,7 +312,7 @@ public final class IndTestCramerT implements IndependenceTest {
      * Returns the variable with the given name, or null if there is no such variable.
      */
     @Override
-	public Node getVariable(String name) {
+    public Node getVariable(String name) {
         for (int i = 0; i < getVariables().size(); i++) {
             Node variable = getVariables().get(i);
             if (variable.getName().equals(name)) {
@@ -330,7 +324,7 @@ public final class IndTestCramerT implements IndependenceTest {
     }
 
     @Override
-	public boolean determines(List z, Node x) throws UnsupportedOperationException {
+    public boolean determines(List z, Node x) throws UnsupportedOperationException {
         int[] parents = new int[z.size()];
 
         for (int j = 0; j < parents.length; j++) {
@@ -351,8 +345,7 @@ public final class IndTestCramerT implements IndependenceTest {
             try {
                 inverse = new Algebra().inverse(Czz);
 //                inverse = MatrixUtils.ginverse(Czz);
-            }
-            catch (Exception e) {
+            } catch (Exception e) {
                 return true;
             }
 
@@ -367,7 +360,7 @@ public final class IndTestCramerT implements IndependenceTest {
     }
 
     @Override
-	public DataSet getData() {
+    public DataSet getData() {
         return dataSet;
     }
 
@@ -375,9 +368,9 @@ public final class IndTestCramerT implements IndependenceTest {
      * Returns the list of variable names
      */
     @Override
-	public List<String> getVariableNames() {
-        List<Node> variables = getVariables();
-        List<String> variableNames = new ArrayList<String>();
+    public List <String> getVariableNames() {
+        List <Node> variables = getVariables();
+        List <String> variableNames = new ArrayList <String>();
 
         for (Node variable : variables) {
             variableNames.add(variable.getName());
@@ -390,7 +383,7 @@ public final class IndTestCramerT implements IndependenceTest {
      * Returns a string representation of this test.
      */
     @Override
-	public String toString() {
+    public String toString() {
         return "Partial Correlation T Test, alpha = " + nf.format(getAlpha());
     }
 

@@ -26,7 +26,6 @@ import edu.cmu.tetrad.util.TetradSerializable;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
-import java.util.*;
 
 /**
  * Calculates marginals of the form P(V=v') for an updated Bayes net for
@@ -168,8 +167,7 @@ public final class CptInvariantMarginalCalculator
                 if (!Double.isNaN(marginal)) {
                     probabilityOfRow *= marginal;
                 }
-            }
-            else {
+            } else {
                 Evidence evidence = new Evidence(this.evidence);
                 CptInvariantMarginalCalculator marginals =
                         new CptInvariantMarginalCalculator(bayesIm, evidence);
@@ -191,17 +189,17 @@ public final class CptInvariantMarginalCalculator
      * value i).
      */
     private boolean noModifiedCpts(int[] parents, int i) {
-        List<Node> target =
+        List <Node> target =
                 Collections.singletonList(bayesIm.getNode(parents[i]));
-        List<Node> conditioners = new LinkedList<Node>();
+        List <Node> conditioners = new LinkedList <Node>();
 
         for (int j = 0; j < i; j++) {
             conditioners.add(bayesIm.getNode(parents[j]));
         }
 
-        List<Node> condAncestors = bayesIm.getDag().getAncestors(conditioners);
-        List<Node> targetAncestor = bayesIm.getDag().getAncestors(target);
-        Set<Node> intersection = new HashSet<Node>(condAncestors);
+        List <Node> condAncestors = bayesIm.getDag().getAncestors(conditioners);
+        List <Node> targetAncestor = bayesIm.getDag().getAncestors(target);
+        Set <Node> intersection = new HashSet <Node>(condAncestors);
         intersection.retainAll(targetAncestor);
 
         return intersection.isEmpty();

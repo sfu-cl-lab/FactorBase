@@ -51,11 +51,22 @@ public class TestSemVarMeans extends TestCase {
         super(name);
     }
 
+    /**
+     * This method uses reflection to collect up all of the test methods from
+     * this class and return them to the test runner.
+     */
+    public static Test suite() {
+
+        // Edit the name of the class in the parens to match the name
+        // of this class.
+        return new TestSuite(TestSemVarMeans.class);
+    }
+
     public void testMeansRecursive() {
         Graph graph = constructGraph1();
         SemPm semPm1 = new SemPm(graph);
 
-        List<Parameter> parameters = semPm1.getParameters();
+        List <Parameter> parameters = semPm1.getParameters();
 
         for (Parameter p : parameters) {
             p.setInitializedRandomly(false);
@@ -77,7 +88,7 @@ public class TestSemVarMeans extends TestCase {
         SemEstimator semEst = new SemEstimator(dataSet, semPm1);
         semEst.estimate();
         SemIm estSemIm = semEst.getEstimatedSem();
-        List<Node> nodes = semPm1.getVariableNodes();
+        List <Node> nodes = semPm1.getVariableNodes();
 
         for (Node node : nodes) {
             double mean = semIm1.getMean(node);
@@ -89,7 +100,7 @@ public class TestSemVarMeans extends TestCase {
         Graph graph = constructGraph1();
         SemPm semPm1 = new SemPm(graph);
 
-        List<Parameter> parameters = semPm1.getParameters();
+        List <Parameter> parameters = semPm1.getParameters();
 
         for (Parameter p : parameters) {
             p.setInitializedRandomly(false);
@@ -111,7 +122,7 @@ public class TestSemVarMeans extends TestCase {
         SemEstimator semEst = new SemEstimator(dataSet, semPm1);
         semEst.estimate();
         SemIm estSemIm = semEst.getEstimatedSem();
-        List<Node> nodes = semPm1.getVariableNodes();
+        List <Node> nodes = semPm1.getVariableNodes();
 
         for (Node node : nodes) {
             double mean = semIm1.getMean(node);
@@ -123,7 +134,7 @@ public class TestSemVarMeans extends TestCase {
         Graph graph = constructGraph1();
         SemPm semPm1 = new SemPm(graph);
 
-        List<Parameter> parameters = semPm1.getParameters();
+        List <Parameter> parameters = semPm1.getParameters();
 
         for (Parameter p : parameters) {
             p.setInitializedRandomly(false);
@@ -145,7 +156,7 @@ public class TestSemVarMeans extends TestCase {
         SemEstimator semEst = new SemEstimator(dataSet, semPm1);
         semEst.estimate();
         SemIm estSemIm = semEst.getEstimatedSem();
-        List<Node> nodes = semPm1.getVariableNodes();
+        List <Node> nodes = semPm1.getVariableNodes();
 
         for (Node node : nodes) {
             double mean = semIm1.getMean(node);
@@ -178,17 +189,6 @@ public class TestSemVarMeans extends TestCase {
         graph.addDirectedEdge(x4, x5);
 
         return graph;
-    }
-
-    /**
-     * This method uses reflection to collect up all of the test methods from
-     * this class and return them to the test runner.
-     */
-    public static Test suite() {
-
-        // Edit the name of the class in the parens to match the name
-        // of this class.
-        return new TestSuite(TestSemVarMeans.class);
     }
 }
 

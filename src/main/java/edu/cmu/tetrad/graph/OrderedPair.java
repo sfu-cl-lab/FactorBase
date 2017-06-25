@@ -41,11 +41,11 @@ public class OrderedPair<E> {
     private E second;
 
 
-    public OrderedPair(E first, E second){
-        if(first == null){
+    public OrderedPair(E first, E second) {
+        if (first == null) {
             throw new NullPointerException("First node must not be null.");
         }
-        if(second == null){
+        if (second == null) {
             throw new NullPointerException("Second node must not be null.");
         }
         this.first = first;
@@ -54,16 +54,16 @@ public class OrderedPair<E> {
 
     //============================== Public methods =============================//
 
-    public E getFirst(){
+    public E getFirst() {
         return this.first;
     }
 
-    public E getSecond(){
+    public E getSecond() {
         return this.second;
     }
 
     @Override
-	public int hashCode(){
+    public int hashCode() {
         int hashCode = 17;
         hashCode += 13 * this.first.hashCode();
         hashCode += 23 * this.second.hashCode();
@@ -72,23 +72,23 @@ public class OrderedPair<E> {
 
 
     @Override
-	public boolean equals(Object o){
-        if(o == this){
+    public boolean equals(Object o) {
+        if (o == this) {
             return true;
         }
-        if(!(o instanceof OrderedPair)){
+        if (!(o instanceof OrderedPair)) {
             return false;
         }
         OrderedPair thatPair = (OrderedPair) o;
-        if(this.first.equals(thatPair.first)
-                && this.second.equals(thatPair.second)){
+        if (this.first.equals(thatPair.first)
+                && this.second.equals(thatPair.second)) {
             return true;
         }
         return false;
     }
 
     @Override
-	public String toString(){
+    public String toString() {
         return "<" + this.first + ", " + this.second + ">";
     }
 

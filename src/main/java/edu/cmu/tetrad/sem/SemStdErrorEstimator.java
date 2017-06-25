@@ -111,7 +111,7 @@ public class SemStdErrorEstimator {
         //information matrix.
         DoubleMatrix2D hess = new DenseDoubleMatrix2D(n, n);
 
-        List<Parameter> freeParameters = estSem.getFreeParameters();
+        List <Parameter> freeParameters = estSem.getFreeParameters();
         boolean containsCovararianceParameter = false;
 
         for (Parameter p : freeParameters) {
@@ -175,7 +175,7 @@ public class SemStdErrorEstimator {
 //            DoubleMatrix2D hessInv = MatrixUtils.ginverse(hess);
 
 //            System.out.println("Inverse: " + hessInv);
-            
+
 //            for (int i = 0; i < freeParameters.size(); i++) {
 //                System.out.println(i + " = " + freeParameters.get(i));
 //            }
@@ -188,13 +188,12 @@ public class SemStdErrorEstimator {
                 double v = Math.sqrt((2.0 / (estSem.getSampleSize() - 1)) * hessInv.get(i, i));
 
                 if (v == 0) {
-                    System.out.println("v = " + v + " hessInv(i, i) = " + hessInv.get(i,i));
+                    System.out.println("v = " + v + " hessInv(i, i) = " + hessInv.get(i, i));
                 }
 
                 if (v == 0) {
                     stdErrs[i] = Double.NaN;
-                }
-                else {
+                } else {
                     stdErrs[i] = v;
                 }
             }
@@ -213,10 +212,10 @@ public class SemStdErrorEstimator {
         estSem.setParameterBoundsEnforced(true);
     }
 
-    private List<Node> unmeasuredLatents(SemPm semPm) {
+    private List <Node> unmeasuredLatents(SemPm semPm) {
         SemGraph graph = semPm.getGraph();
 
-        List<Node> unmeasuredLatents = new LinkedList<Node>();
+        List <Node> unmeasuredLatents = new LinkedList <Node>();
 
         NODES:
         for (Node node : graph.getNodes()) {
@@ -264,7 +263,7 @@ public class SemStdErrorEstimator {
         double ff3 = f.evaluate(arg);
 
         arg[j] -= 2 * delt;
-        double ff4 = f.evaluate(arg);                                                      
+        double ff4 = f.evaluate(arg);
 
         double fsSum = ff1 - ff2 - ff3 + ff4;
 
@@ -396,8 +395,8 @@ public class SemStdErrorEstimator {
          * to parameter values.
          */
         @Override
-		public double evaluate(double[] parameters) {
-            List<Parameter> _parameters = sem.getSemPm().getFreeParameters();
+        public double evaluate(double[] parameters) {
+            List <Parameter> _parameters = sem.getSemPm().getFreeParameters();
 
             for (int i = 0; i < _parameters.size(); i++) {
                 Parameter parameter = _parameters.get(i);
@@ -410,7 +409,7 @@ public class SemStdErrorEstimator {
 
             // This needs to be FML-- see Bollen p. 109.
 //            try {
-                return sem.getFml();
+            return sem.getFml();
 //            } catch (Exception e) {
 //                return Double.NEGATIVE_INFINITY;
 //            }
@@ -421,7 +420,7 @@ public class SemStdErrorEstimator {
          * interface.
          */
         @Override
-		public int getNumParameters() {
+        public int getNumParameters() {
             return this.sem.getNumFreeParams();
         }
     }

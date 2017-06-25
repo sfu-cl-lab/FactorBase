@@ -54,16 +54,25 @@ public class TestVarianceTiebreaking extends TestCase {
         super(name);
     }
 
+    /**
+     * This method uses reflection to collect up all of the test methods from this class and return them to the test
+     * runner.
+     */
+    public static Test suite() {
+
+        // Edit the name of the class in the parens to match the name
+        // of this class.
+        return new TestSuite(TestVarianceTiebreaking.class);
+    }
 
     @Override
-	public void setUp() throws Exception {
+    public void setUp() throws Exception {
         TetradLogger.getInstance().addOutputStream(System.out);
         TetradLogger.getInstance().setForceLog(true);
     }
 
-
     @Override
-	public void tearDown() {
+    public void tearDown() {
         TetradLogger.getInstance().setForceLog(false);
         TetradLogger.getInstance().removeOutputStream(System.out);
     }
@@ -137,7 +146,7 @@ public class TestVarianceTiebreaking extends TestCase {
     private double conditionalVariance(Node x, Node y, ICovarianceMatrix cov) {
         int[] indices = new int[2];
 
-        List<String> variableNames = cov.getVariableNames();
+        List <String> variableNames = cov.getVariableNames();
         indices[0] = variableNames.indexOf(x.getName());
         indices[1] = variableNames.indexOf(y.getName());
 
@@ -165,7 +174,7 @@ public class TestVarianceTiebreaking extends TestCase {
     private double conditionalVariance(Node x, Node y, Node z, ICovarianceMatrix cov) {
         int[] indices = new int[3];
 
-        List<String> variableNames = cov.getVariableNames();
+        List <String> variableNames = cov.getVariableNames();
         indices[0] = variableNames.indexOf(x.getName());
         indices[1] = variableNames.indexOf(y.getName());
         indices[2] = variableNames.indexOf(z.getName());
@@ -189,17 +198,6 @@ public class TestVarianceTiebreaking extends TestCase {
 //        return d;
 
 //        return 1./d;
-    }
-
-    /**
-     * This method uses reflection to collect up all of the test methods from this class and return them to the test
-     * runner.
-     */
-    public static Test suite() {
-
-        // Edit the name of the class in the parens to match the name
-        // of this class.
-        return new TestSuite(TestVarianceTiebreaking.class);
     }
 }
 

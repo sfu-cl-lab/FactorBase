@@ -61,7 +61,7 @@ public final class KernelGaussian implements Kernel {
      * Returns the bandwidth
      */
     @Override
-	public double getBandwidth() {
+    public double getBandwidth() {
         return this.sigma;
     }
 
@@ -73,7 +73,7 @@ public final class KernelGaussian implements Kernel {
      * @return
      */
     @Override
-	public double eval(double i, double j) {
+    public double eval(double i, double j) {
         double evalKernel = Math.exp(-.5 * (Math.pow((i - j), 2) / Math.pow(sigma, 2)));
         return evalKernel;
     }
@@ -86,7 +86,7 @@ public final class KernelGaussian implements Kernel {
      * @return
      */
     @Override
-	public void setDefaultBw(DataSet dataset, Node node) {
+    public void setDefaultBw(DataSet dataset, Node node) {
         setMedianBandwidth(dataset, node);
     }
 

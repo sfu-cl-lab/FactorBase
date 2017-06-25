@@ -29,7 +29,6 @@ import edu.cmu.tetrad.session.SessionModel;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
-import java.util.*;
 
 /**
  * Wraps a DataModel as a model class for a Session, providing constructors for
@@ -75,7 +74,7 @@ public class DataWrapper implements SessionModel, KnowledgeEditable {
      *
      * @serial Can be null.
      */
-    private List<Node> knownVariables;
+    private List <Node> knownVariables;
 
     //==============================CONSTRUCTORS===========================//
 
@@ -83,7 +82,7 @@ public class DataWrapper implements SessionModel, KnowledgeEditable {
      * Constructs a data wrapper using a new DataSet as data model.
      */
     public DataWrapper() {
-        setDataModel(new ColtDataSet(0, new LinkedList<Node>()));
+        setDataModel(new ColtDataSet(0, new LinkedList <Node>()));
         System.out.println("DataWrapper Generating");
     }
 
@@ -94,7 +93,7 @@ public class DataWrapper implements SessionModel, KnowledgeEditable {
      * @param wrapper
      */
     public DataWrapper(DataWrapper wrapper) {
-    	System.out.println("re");
+        System.out.println("re");
         this.name = wrapper.name;
         this.dataModelList = new DataModelList();
         for (int i = 0; i < wrapper.dataModelList.size(); i++) {
@@ -103,11 +102,11 @@ public class DataWrapper implements SessionModel, KnowledgeEditable {
                 this.dataModelList.add(copyData(data));
             }
         }
-        if(wrapper.sourceGraph != null){
+        if (wrapper.sourceGraph != null) {
             this.sourceGraph = new EdgeListGraph(wrapper.sourceGraph);
         }
-        if(wrapper.knownVariables != null){
-            this.knownVariables = new ArrayList<Node>(wrapper.knownVariables);
+        if (wrapper.knownVariables != null) {
+            this.knownVariables = new ArrayList <Node>(wrapper.knownVariables);
         }
     }
 
@@ -124,8 +123,8 @@ public class DataWrapper implements SessionModel, KnowledgeEditable {
             throw new NullPointerException();
         }
 
-        List<Node> nodes = graph.getNodes();
-        List<Node> variables = new LinkedList<Node>();
+        List <Node> nodes = graph.getNodes();
+        List <Node> variables = new LinkedList <Node>();
 
         for (Object node1 : nodes) {
             Node node = (Node) node1;
@@ -166,6 +165,20 @@ public class DataWrapper implements SessionModel, KnowledgeEditable {
 
     //==============================PUBLIC METHODS========================//
 
+    private static DataModel copyData(RectangularDataSet data) {
+        ColtDataSet newData = new ColtDataSet(data.getNumRows(), data.getVariables());
+        for (int col = 0; col < data.getNumColumns(); col++) {
+            for (int row = 0; row < data.getNumRows(); row++) {
+                newData.setObject(row, col, data.getObject(row, col));
+            }
+        }
+        newData.setKnowledge(new Knowledge(data.getKnowledge()));
+        if (data.getName() != null) {
+            newData.setName(data.getName());
+        }
+        return newData;
+    }
+
     /**
      * Returns the list of models.
      */
@@ -186,7 +199,7 @@ public class DataWrapper implements SessionModel, KnowledgeEditable {
      */
     public void setDataModel(DataModel dataModel) {
         if (dataModel == null) {
-            dataModel = new ColtDataSet(0, new LinkedList<Node>());
+            dataModel = new ColtDataSet(0, new LinkedList <Node>());
         }
 
         if (dataModel instanceof DataModelList) {
@@ -198,17 +211,17 @@ public class DataWrapper implements SessionModel, KnowledgeEditable {
     }
 
     @Override
-	public Knowledge getKnowledge() {
+    public Knowledge getKnowledge() {
         return getSelectedDataModel().getKnowledge();
     }
 
     @Override
-	public void setKnowledge(Knowledge knowledge) {
+    public void setKnowledge(Knowledge knowledge) {
         getSelectedDataModel().setKnowledge(knowledge);
     }
 
     @Override
-	public List<String> getVarNames() {
+    public List <String> getVarNames() {
         return getSelectedDataModel().getVariableNames();
     }
 
@@ -216,15 +229,8 @@ public class DataWrapper implements SessionModel, KnowledgeEditable {
      * Returns the source workbench, if there is one.
      */
     @Override
-	public Graph getSourceGraph() {
+    public Graph getSourceGraph() {
         return this.sourceGraph;
-    }
-
-    /**
-     * Returns the variable names, in order.
-     */
-    public List getVariables() {
-        return this.getSelectedDataModel().getVariables();
     }
 
     /**
@@ -235,36 +241,28 @@ public class DataWrapper implements SessionModel, KnowledgeEditable {
     }
 
     /**
-     * Sets the source graph.
+     * Returns the variable names, in order.
      */
-    public void setKnownVariables(List<Node> variables) {
-        this.knownVariables = variables;
+    public List getVariables() {
+        return this.getSelectedDataModel().getVariables();
     }
 
     public Map getDiscretizationSpecs() {
         return discretizationSpecs;
     }
 
-    public List<Node> getKnownVariables() {
-        return knownVariables;	
+    public List <Node> getKnownVariables() {
+        return knownVariables;
     }
 
     //=============================== Private Methods ==========================//
 
-    private static DataModel copyData(RectangularDataSet data) {
-        ColtDataSet newData = new ColtDataSet(data.getNumRows(), data.getVariables());
-        for (int col = 0; col < data.getNumColumns(); col++) {
-            for (int row = 0; row < data.getNumRows(); row++) {
-                newData.setObject(row, col, data.getObject(row, col));
-            }
-        }
-        newData.setKnowledge(new Knowledge(data.getKnowledge()));
-        if (data.getName() != null) {
-            newData.setName(data.getName());
-        }
-        return newData;
+    /**
+     * Sets the source graph.
+     */
+    public void setKnownVariables(List <Node> variables) {
+        this.knownVariables = variables;
     }
-
 
     /**
      * Adds semantic checks to the default deserialization method. This method
@@ -284,7 +282,7 @@ public class DataWrapper implements SessionModel, KnowledgeEditable {
         s.defaultReadObject();
 
         if (dataModelList == null) {
-           //throw new NullPointerException();
+            //throw new NullPointerException();
         }
 
         if (discretizationSpecs == null) {
@@ -293,12 +291,12 @@ public class DataWrapper implements SessionModel, KnowledgeEditable {
     }
 
     @Override
-	public String getName() {
+    public String getName() {
         return name;
     }
 
     @Override
-	public void setName(String name) {
+    public void setName(String name) {
         this.name = name;
     }
 }

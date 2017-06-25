@@ -38,7 +38,7 @@ public final class CombinationGenerator {
     /**
      * The number of items for each dimension.
      */
-    private final int[]  dims;
+    private final int[] dims;
 
     /**
      * The internally stored choice.
@@ -86,44 +86,6 @@ public final class CombinationGenerator {
     }
 
     /**
-     * Returns the next combination in the series, or null if the series is
-     * finished.  The array that is produced should not be altered by the user,
-     * as it is reused by the choice generator.
-     * <p/>
-     * If the number of items chosen is zero, a zero-length array will be
-     * returned once, with null after that.
-     * <p/>
-     * The array that is returned is reused, but modifying it will not change
-     * the sequence of choices returned.
-     *
-     * @return the next combination in the series, or null if the series is
-     *         finished.
-     */
-    public int[] next() {
-        int i = getNumObjects();
-
-        // Scan from the right for the first index whose value is less than
-        // its expected maximum (i + diff) and perform the fill() operation
-        // at that index.
-        while (--i > -1) {
-            if (this.local[i] < dims[i] - 1) {
-                fill(i);
-                begun = true;
-                System.arraycopy(local, 0, returned, 0, getNumObjects());
-                return returned;
-            }
-        }
-
-        if (this.begun) {
-            return null;
-        } else {
-            begun = true;
-            System.arraycopy(local, 0, returned, 0, getNumObjects());
-            return returned;
-        }
-    }
-
-    /**
      * This static method will print the series of combinations for a choose b
      * to System.out.
      *
@@ -160,6 +122,44 @@ public final class CombinationGenerator {
         }
 
         System.out.println();
+    }
+
+    /**
+     * Returns the next combination in the series, or null if the series is
+     * finished.  The array that is produced should not be altered by the user,
+     * as it is reused by the choice generator.
+     * <p/>
+     * If the number of items chosen is zero, a zero-length array will be
+     * returned once, with null after that.
+     * <p/>
+     * The array that is returned is reused, but modifying it will not change
+     * the sequence of choices returned.
+     *
+     * @return the next combination in the series, or null if the series is
+     * finished.
+     */
+    public int[] next() {
+        int i = getNumObjects();
+
+        // Scan from the right for the first index whose value is less than
+        // its expected maximum (i + diff) and perform the fill() operation
+        // at that index.
+        while (--i > -1) {
+            if (this.local[i] < dims[i] - 1) {
+                fill(i);
+                begun = true;
+                System.arraycopy(local, 0, returned, 0, getNumObjects());
+                return returned;
+            }
+        }
+
+        if (this.begun) {
+            return null;
+        } else {
+            begun = true;
+            System.arraycopy(local, 0, returned, 0, getNumObjects());
+            return returned;
+        }
     }
 
     /**

@@ -44,7 +44,7 @@ public class TestKpc extends TestCase {
     }
 
     @Override
-	public void setUp() throws Exception {
+    public void setUp() throws Exception {
         TetradLogger.getInstance().addOutputStream(System.out);
         TetradLogger.getInstance().setForceLog(true);
         TetradLogger.getInstance().setLogging(true);
@@ -52,7 +52,7 @@ public class TestKpc extends TestCase {
 
 
     @Override
-	public void tearDown() {
+    public void tearDown() {
         TetradLogger.getInstance().setForceLog(false);
         TetradLogger.getInstance().removeOutputStream(System.out);
     }

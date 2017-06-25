@@ -46,8 +46,19 @@ public final class TestEdgeListGraph extends TestCase {
         super(name);
     }
 
+    /**
+     * This method uses reflection to collect up all of the test methods from
+     * this class and return them to the test runner.
+     */
+    public static Test suite() {
+
+        // Edit the name of the class in the parens to match the name
+        // of this class.
+        return new TestSuite(TestEdgeListGraph.class);
+    }
+
     @Override
-	public void setUp() {
+    public void setUp() {
         x1 = new GraphNode("x1");
         x2 = new GraphNode("x2");
         x3 = new GraphNode("x3");
@@ -71,8 +82,8 @@ public final class TestEdgeListGraph extends TestCase {
         graph.addDirectedEdge(x2, x3);
         graph.addDirectedEdge(x3, x4);
 
-        List<Node> children = graph.getChildren(x1);
-        List<Node> parents = graph.getParents(x4);
+        List <Node> children = graph.getChildren(x1);
+        List <Node> parents = graph.getParents(x4);
 
         assertEquals(children, Collections.singletonList(x2));
         assertEquals(parents, Collections.singletonList(x3));
@@ -108,8 +119,7 @@ public final class TestEdgeListGraph extends TestCase {
         try {
             graph.addDirectedEdge(x1, x3);
             fail("Shouldn't have been able to add an edge already in the graph.");
-        }
-        catch (IllegalArgumentException e) {
+        } catch (IllegalArgumentException e) {
             // Ignore.
         }
 
@@ -128,21 +138,6 @@ public final class TestEdgeListGraph extends TestCase {
         graph.removeEdge(graph.getEdge(x3, x4));
 
         System.out.println(graph);
-    }
-
-    public void testSequence3() {
-        Graph graph = GraphUtils.randomDag(50, 50, false);
-        
-        Node node1 = graph.getNodes().get(0);
-        Node node2 = graph.getNodes().get(1);
-        List<Node> cond = new ArrayList<Node>();
-        for (int i= 2; i < 5; i++) {
-            cond.add(graph.getNodes().get(i));
-        }
-
-        boolean dsep = graph.isDSeparatedFrom(node1, node2, cond);
-
-        System.out.println(dsep);
     }
 
 //    public void testTemp() {
@@ -188,15 +183,19 @@ public final class TestEdgeListGraph extends TestCase {
 //
 //    }
 
-    /**
-     * This method uses reflection to collect up all of the test methods from
-     * this class and return them to the test runner.
-     */
-    public static Test suite() {
+    public void testSequence3() {
+        Graph graph = GraphUtils.randomDag(50, 50, false);
 
-        // Edit the name of the class in the parens to match the name
-        // of this class.
-        return new TestSuite(TestEdgeListGraph.class);
+        Node node1 = graph.getNodes().get(0);
+        Node node2 = graph.getNodes().get(1);
+        List <Node> cond = new ArrayList <Node>();
+        for (int i = 2; i < 5; i++) {
+            cond.add(graph.getNodes().get(i));
+        }
+
+        boolean dsep = graph.isDSeparatedFrom(node1, node2, cond);
+
+        System.out.println(dsep);
     }
 }
 

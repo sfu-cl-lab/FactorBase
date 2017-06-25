@@ -31,8 +31,6 @@ import java.io.ObjectStreamException;
  * @author Joseph Ramsey
  */
 public final class IndTestType implements TetradSerializable {
-    static final long serialVersionUID = 23L;
-
     public static final IndTestType DEFAULT = new IndTestType("Default");
     public static final IndTestType CORRELATION_T =
             new IndTestType("Correlation T Test");
@@ -59,11 +57,20 @@ public final class IndTestType implements TetradSerializable {
             new IndTestType("Fisher Z Pooled Residuals");
     public static final IndTestType FISHER = new IndTestType("Fisher (Fisher Z)");
     public static final IndTestType TIPPETT = new IndTestType("Tippett (Fisher Z)");
-
+    static final long serialVersionUID = 23L;
+    private static final IndTestType[] TYPES = {DEFAULT, CORRELATION_T,
+            FISHER_Z, LINEAR_REGRESSION, FISHER_ZD, FISHER_Z_BOOTSTRAP,
+            G_SQUARE, CHI_SQUARE,
+            D_SEPARATION, TIME_SERIES,
+            LOGISTIC_REGRESSION, MULTINOMIAL_LOGISTIC_REGRESSION,
+            INDEPENDENCE_FACTS, POOL_RESIDUALS_FISHER_Z, FISHER, TIPPETT};
+    // Declarations required for serialization.
+    private static int nextOrdinal = 0;
     /**
      * The name of this type.
      */
     private final transient String name;
+    private final int ordinal = nextOrdinal++;
 
     /**
      * Protected constructor for the types; this allows for extension in case anyone wants to add formula types.
@@ -86,19 +93,9 @@ public final class IndTestType implements TetradSerializable {
      * Prints out the name of the type.
      */
     @Override
-	public String toString() {
+    public String toString() {
         return name;
     }
-
-    // Declarations required for serialization.
-    private static int nextOrdinal = 0;
-    private final int ordinal = nextOrdinal++;
-    private static final IndTestType[] TYPES = {DEFAULT, CORRELATION_T,
-            FISHER_Z, LINEAR_REGRESSION, FISHER_ZD, FISHER_Z_BOOTSTRAP,
-            G_SQUARE, CHI_SQUARE,
-            D_SEPARATION, TIME_SERIES,
-            LOGISTIC_REGRESSION, MULTINOMIAL_LOGISTIC_REGRESSION,
-            INDEPENDENCE_FACTS, POOL_RESIDUALS_FISHER_Z, FISHER, TIPPETT};
 
     Object readResolve() throws ObjectStreamException {
         return TYPES[ordinal]; // Canonicalize.

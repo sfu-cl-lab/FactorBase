@@ -40,6 +40,17 @@ public final class TestCollisions extends TestCase {
         super(name);
     }
 
+    /**
+     * This method uses reflection to collect up all of the test methods from
+     * this class and return them to the test runner.
+     */
+    public static Test suite() {
+
+        // Edit the name of the class in the parens to match the name
+        // of this class.
+        return new TestSuite(TestCollisions.class);
+    }
+
     public void testMatrixGraph() {
         checkGraph(new EdgeListGraph());
     }
@@ -89,17 +100,6 @@ public final class TestCollisions extends TestCase {
         assertFalse(graph.isDefNoncollider(x1, x2, x3));
         assertFalse(graph.isDefCollider(x1, x2, x3));
 
-    }
-
-    /**
-     * This method uses reflection to collect up all of the test methods from
-     * this class and return them to the test runner.
-     */
-    public static Test suite() {
-
-        // Edit the name of the class in the parens to match the name
-        // of this class.
-        return new TestSuite(TestCollisions.class);
     }
 }
 

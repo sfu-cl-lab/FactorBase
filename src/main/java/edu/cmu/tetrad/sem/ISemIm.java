@@ -53,27 +53,27 @@ public interface ISemIm extends TetradSerializable {
 
     void setParamValue(Node nodeA, Node nodeB, double value);
 
-    List<Parameter> getFreeParameters();
+    List <Parameter> getFreeParameters();
 
     int getNumFreeParams();
 
-    List<Parameter> getFixedParameters();
+    List <Parameter> getFixedParameters();
 
     int getSampleSize();
-
-    void setParameterBoundsEnforced(boolean b);
 
     double getFml();
 
     boolean isParameterBoundsEnforced();
 
-    List<Node> listUnmeasuredLatents();
+    void setParameterBoundsEnforced(boolean b);
+
+    List <Node> listUnmeasuredLatents();
 
     boolean isCyclic();
 
     boolean isEstimated();
 
-    List<Node> getVariableNodes();
+    List <Node> getVariableNodes();
 
     double getMean(Node node);
 

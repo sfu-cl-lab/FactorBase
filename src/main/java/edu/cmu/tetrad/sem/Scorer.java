@@ -42,7 +42,7 @@ public interface Scorer {
     ICovarianceMatrix getCovMatrix();
 
     @Override
-	String toString();
+    String toString();
 
     double getFml();
 
@@ -68,7 +68,7 @@ public interface Scorer {
 
     int getSampleSize();
 
-    List<Node> getMeasuredNodes();
+    List <Node> getMeasuredNodes();
 
     DoubleMatrix2D getSampleCovar();
 
@@ -76,7 +76,7 @@ public interface Scorer {
 
     DoubleMatrix2D getErrorCovar();
 
-    List<Node> getVariables();
+    List <Node> getVariables();
 
     SemIm getEstSem();
 }

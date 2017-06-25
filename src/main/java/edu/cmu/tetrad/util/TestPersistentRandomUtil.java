@@ -35,6 +35,10 @@ public class TestPersistentRandomUtil extends TestCase {
         super(name);
     }
 
+    public static Test suite() {
+        return new TestSuite(TestPersistentRandomUtil.class);
+    }
+
     public void testIntegralSumToOne() {
         int numBoxes = 100;
         int[] boxes = new int[numBoxes];
@@ -49,7 +53,6 @@ public class TestPersistentRandomUtil extends TestCase {
         }
     }
 
-
     public void testGaussian() {
         int numBoxes = 40;
         double low = -4;
@@ -61,7 +64,7 @@ public class TestPersistentRandomUtil extends TestCase {
         double[] cutoffs = new double[numBoxes - 1];
 
         for (int i = 0; i < cutoffs.length; i++) {
-             cutoffs[i] = low + (i / (double) (cutoffs.length - 1)) * (high - low);
+            cutoffs[i] = low + (i / (double) (cutoffs.length - 1)) * (high - low);
         }
 
         LOOP:
@@ -96,7 +99,7 @@ public class TestPersistentRandomUtil extends TestCase {
         double[] cutoffs = new double[numBoxes - 1];
 
         for (int i = 0; i < cutoffs.length; i++) {
-             cutoffs[i] = low + (i / (double) (cutoffs.length - 1)) * (high - low);
+            cutoffs[i] = low + (i / (double) (cutoffs.length - 1)) * (high - low);
         }
 
         LOOP:
@@ -118,9 +121,5 @@ public class TestPersistentRandomUtil extends TestCase {
         }
 
         System.out.println("> " + nf.format(cutoffs[cutoffs.length - 1]) + " = " + boxes[cutoffs.length]);
-    }
-
-    public static Test suite() {
-        return new TestSuite(TestPersistentRandomUtil.class);
     }
 }

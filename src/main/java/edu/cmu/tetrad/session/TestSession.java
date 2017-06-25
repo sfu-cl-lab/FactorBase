@@ -51,8 +51,19 @@ public class TestSession extends TestCase {
         super(name);
     }
 
+    /**
+     * This method uses reflection to collect up all of the test methods from
+     * this class and return them to the test runner.
+     */
+    public static Test suite() {
+
+        // Edit the name of the class in the parens to match the name
+        // of this class.
+        return new TestSuite(TestSession.class);
+    }
+
     @Override
-	public void setUp() {
+    public void setUp() {
         this.session = new Session("Test");
     }
 
@@ -97,7 +108,7 @@ public class TestSession extends TestCase {
              * This method is called when a node is added.
              */
             @Override
-			public void nodeAdded(SessionEvent event) {
+            public void nodeAdded(SessionEvent event) {
                 setEventId("nodeAdded");
             }
 
@@ -105,7 +116,7 @@ public class TestSession extends TestCase {
              * This method is called when a node is removed.
              */
             @Override
-			public void nodeRemoved(SessionEvent event) {
+            public void nodeRemoved(SessionEvent event) {
                 setEventId("nodeRemoved");
             }
 
@@ -113,7 +124,7 @@ public class TestSession extends TestCase {
              * This method is called when a parent is added.
              */
             @Override
-			public void parentAdded(SessionEvent event) {
+            public void parentAdded(SessionEvent event) {
                 setEventId("parentAdded");
             }
 
@@ -121,7 +132,7 @@ public class TestSession extends TestCase {
              * This method is called when a parent is removed.
              */
             @Override
-			public void parentRemoved(SessionEvent event) {
+            public void parentRemoved(SessionEvent event) {
                 setEventId("parentRemoved");
             }
 
@@ -129,7 +140,7 @@ public class TestSession extends TestCase {
              * This method is called when a model is created for a node.
              */
             @Override
-			public void modelCreated(SessionEvent event) {
+            public void modelCreated(SessionEvent event) {
                 setEventId("modelCreated");
             }
 
@@ -137,7 +148,7 @@ public class TestSession extends TestCase {
              * This method is called when a model is destroyed for a node.
              */
             @Override
-			public void modelDestroyed(SessionEvent event) {
+            public void modelDestroyed(SessionEvent event) {
                 setEventId("modelDestroyed");
             }
 
@@ -145,7 +156,7 @@ public class TestSession extends TestCase {
              * This method is called when a model is destroyed for a node.
              */
             @Override
-			public void modelUnclear(SessionEvent event) {
+            public void modelUnclear(SessionEvent event) {
                 setEventId("modelUnclear");
             }
 
@@ -153,7 +164,7 @@ public class TestSession extends TestCase {
              * This method is called when a node is executed manually.
              */
             @Override
-			public void executionStarted(SessionEvent event) {
+            public void executionStarted(SessionEvent event) {
                 setEventId("executionBegun");
             }
 
@@ -161,7 +172,7 @@ public class TestSession extends TestCase {
              * This method is called when a node is executed manually.
              */
             @Override
-			public void repetitionChanged(SessionEvent event) {
+            public void repetitionChanged(SessionEvent event) {
                 setEventId("repetitionChanged");
             }
 
@@ -169,7 +180,7 @@ public class TestSession extends TestCase {
              * This method is called when a node is executed manually.
              */
             @Override
-			public void addingEdge(SessionEvent event) {
+            public void addingEdge(SessionEvent event) {
                 setEventId("addingEdge");
             }
         };
@@ -206,19 +217,18 @@ public class TestSession extends TestCase {
             setEventId(null);
             this.session.removeNode(node2);
             assertEquals("nodeRemoved", getEventId());
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             e.printStackTrace();
             fail(e.getMessage());
         }
     }
 
-    private void setEventId(String eventId) {
-        this.eventId = eventId;
-    }
-
     private String getEventId() {
         return this.eventId;
+    }
+
+    private void setEventId(String eventId) {
+        this.eventId = eventId;
     }
 
     /**
@@ -249,28 +259,15 @@ public class TestSession extends TestCase {
             node2.createModel(Type7.class, simulation);
             node3.createModel(Type8.class, simulation);
             node1.createModel(Type6.class, simulation);
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             fail("Model not created.");
         }
 
         try {
             new MarshalledObject(this.session).get();
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             fail("Serialization failed.");
         }
-    }
-
-    /**
-     * This method uses reflection to collect up all of the test methods from
-     * this class and return them to the test runner.
-     */
-    public static Test suite() {
-
-        // Edit the name of the class in the parens to match the name
-        // of this class.
-        return new TestSuite(TestSession.class);
     }
 }
 

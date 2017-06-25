@@ -39,16 +39,14 @@ import java.io.ObjectInputStream;
  */
 public class BayesImWrapper implements SessionModel, GraphSource {
     static final long serialVersionUID = 23L;
-
-    /**
-     * @serial Can be null.
-     */
-    private String name;
-
     /**
      * @serial Cannot be null.
      */
     protected BayesIm bayesIm;
+    /**
+     * @serial Can be null.
+     */
+    private String name;
 
     //===========================CONSTRUCTORS===========================//
 
@@ -74,14 +72,14 @@ public class BayesImWrapper implements SessionModel, GraphSource {
         }
         log(bayesIm);
     }
-    
-	public BayesImWrapper(dbDataWrapper dataWrapper) {
-		if (dataWrapper == null) {
-			throw new NullPointerException(
-			"BayesDataWrapper must not be null.");
-		}
 
-	}
+    public BayesImWrapper(dbDataWrapper dataWrapper) {
+        if (dataWrapper == null) {
+            throw new NullPointerException(
+                    "BayesDataWrapper must not be null.");
+        }
+
+    }
 
     public BayesImWrapper(BayesEstimatorWrapper wrapper) {
         if (wrapper == null) {
@@ -140,17 +138,17 @@ public class BayesImWrapper implements SessionModel, GraphSource {
 
 
     @Override
-	public Graph getGraph() {
+    public Graph getGraph() {
         return bayesIm.getBayesPm().getDag();
     }
 
     @Override
-	public String getName() {
+    public String getName() {
         return name;
     }
 
     @Override
-	public void setName(String name) {
+    public void setName(String name) {
         this.name = name;
     }
 

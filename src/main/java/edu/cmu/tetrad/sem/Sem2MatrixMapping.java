@@ -86,7 +86,7 @@ public class Sem2MatrixMapping implements Sem2Mapping, TetradSerializable {
      * @param j         Right coordinate of matrix[i][j].
      */
     public Sem2MatrixMapping(SemIm2 semIm2, Parameter parameter, DoubleMatrix2D matrix,
-            int i, int j) {
+                             int i, int j) {
         if (semIm2 == null) {
             throw new NullPointerException("SemIm must not be null.");
         }
@@ -123,11 +123,19 @@ public class Sem2MatrixMapping implements Sem2Mapping, TetradSerializable {
     }
 
     /**
+     * Returns the value of the array element at (i, j).
+     */
+    @Override
+    public double getValue() {
+        return aC.getQuick(i, j);
+    }
+
+    /**
      * Sets the value of the array element at the stored coordinates (i, j).
      * If the array is symmetric sets two elements.
      */
     @Override
-	public void setValue(double x) {
+    public void setValue(double x) {
         if (this.semIm.isParameterBoundsEnforced() &&
                 getParameter().getType() == ParamType.VAR && x < 0.0) {
             throw new IllegalArgumentException(
@@ -143,18 +151,10 @@ public class Sem2MatrixMapping implements Sem2Mapping, TetradSerializable {
     }
 
     /**
-     * Returns the value of the array element at (i, j).
-     */
-    @Override
-	public double getValue() {
-        return aC.getQuick(i, j);
-    }
-
-    /**
      * Returns the paramter that this mapping maps.
      */
     @Override
-	public Parameter getParameter() {
+    public Parameter getParameter() {
         return this.parameter;
     }
 
@@ -163,7 +163,7 @@ public class Sem2MatrixMapping implements Sem2Mapping, TetradSerializable {
      * subscripts) about the array element associated with this mapping.
      */
     @Override
-	public String toString() {
+    public String toString() {
         return "<" + getParameter().getName() + " " + getParameter().getType() +
                 "[" + i + "][" + j + "]>";
     }

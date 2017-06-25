@@ -32,7 +32,7 @@ import java.util.Set;
  * Settings | File Templates.
  */
 public interface GraphSearch {
-    Graph search(Map<Node, Map<Set<Node>, Double>> globalScoreHash);
+    Graph search(Map <Node, Map <Set <Node>, Double>> globalScoreHash);
 
     long getElapsedTime();
 }

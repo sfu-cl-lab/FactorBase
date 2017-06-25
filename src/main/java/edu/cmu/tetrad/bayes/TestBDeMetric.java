@@ -34,8 +34,15 @@ public final class TestBDeMetric extends TestCase {
         super(name);
     }
 
-    public void testTemp() {
+    /**
+     * This method uses reflection to collect up all of the test methods from
+     * this class and return them to the test runner.
+     */
+    public static Test suite() {
 
+        // Edit the name of the class in the parens to match the name
+        // of this class.
+        return new TestSuite(TestBDeMetric.class);
     }
 
 //    public static void testMetric() {
@@ -106,16 +113,8 @@ public final class TestBDeMetric extends TestCase {
 //
 //    }
 
+    public void testTemp() {
 
-    /**
-     * This method uses reflection to collect up all of the test methods from
-     * this class and return them to the test runner.
-     */
-    public static Test suite() {
-
-        // Edit the name of the class in the parens to match the name
-        // of this class.
-        return new TestSuite(TestBDeMetric.class);
     }
 }
 

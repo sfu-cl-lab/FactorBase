@@ -35,7 +35,6 @@ import edu.cmu.tetrad.graph.*;
 import edu.cmu.tetrad.util.*;
 
 import java.text.NumberFormat;
-import java.util.*;
 
 /**
  * A special SEM model in which variances of variables are always 1 and means of variables
@@ -59,28 +58,20 @@ import java.util.*;
  * Currently we are not allowing bidirected edges in the SEM graph.
  */
 public class StandardizedSemIm implements TetradSerializable {
-    public enum Initialization {
-        CALCULATE_FROM_SEM, INITIALIZE_FROM_DATA
-    }
-
     static final long serialVersionUID = 23L;
-
     /**
      * The SEM model.
      */
     private SemPm semPm;
-
     /**
      * The graph of the model. Stored internally because it must be ensured that the error terms are showing.
      */
     private SemGraph semGraph;
-
     /**
      * A map from edges in the graph to their coefficients. These are the only parameters in the model. This
      * includes coefficients for directed as well as bidirected edges.
      */
-    private Map<Edge, Double> edgeParameters;
-
+    private Map <Edge, Double> edgeParameters;
     /**
      * A map from error nodes in the graph to their error variances. These are not parameters in the model; their
      * values are always calculated as residual variances, under the constraint that the variances of each
@@ -90,13 +81,9 @@ public class StandardizedSemIm implements TetradSerializable {
 
     private DoubleMatrix2D implCovar;
     private DenseDoubleMatrix2D implCovarMeas;
-    private List<Node> measuredNodes;
+    private List <Node> measuredNodes;
     private Edge editingEdge;
     private ParameterRange range;
-
-
-    //========================================CONSTRUCTORS========================================================//
-
     /**
      * Constructs a new standardized SEM IM, initializing from the parameters in the given SEM IM.
      *
@@ -106,17 +93,8 @@ public class StandardizedSemIm implements TetradSerializable {
         this(im, Initialization.CALCULATE_FROM_SEM);
     }
 
-    /**
-     * Generates a simple exemplar of this class to test serialization.
-     *
-     * @see edu.cmu.TestSerialization
-     * @see edu.cmu.tetradapp.util.TetradSerializableUtils
-     */
-    public static StandardizedSemIm serializableInstance() {
-        return new StandardizedSemIm(SemIm.serializableInstance());
-    }
 
-    //===========================================PUBLIC METHODS==================================================//
+    //========================================CONSTRUCTORS========================================================//
 
     /**
      * Constructs a new standardized SEM IM from the parameters in the given SEM IM.
@@ -136,9 +114,9 @@ public class StandardizedSemIm implements TetradSerializable {
 
         if (initialization == Initialization.CALCULATE_FROM_SEM) {
 //         This code calculates the new coefficients directly from the old ones.
-            edgeParameters = new HashMap<Edge, Double>();
+            edgeParameters = new HashMap <Edge, Double>();
 
-            List<Node> nodes = im.getVariableNodes();
+            List <Node> nodes = im.getVariableNodes();
             DoubleMatrix2D impliedCovar = im.getImplCovar();
 
             for (Parameter parameter : im.getSemPm().getParameters()) {
@@ -172,7 +150,7 @@ public class StandardizedSemIm implements TetradSerializable {
             SemEstimator estimator = new SemEstimator(dataSetStandardized, im.getSemPm());
             SemIm imStandardized = estimator.estimate();
 
-            edgeParameters = new HashMap<Edge, Double>();
+            edgeParameters = new HashMap <Edge, Double>();
 
             for (Parameter parameter : imStandardized.getSemPm().getParameters()) {
                 if (parameter.getType() == ParamType.COEF) {
@@ -193,6 +171,18 @@ public class StandardizedSemIm implements TetradSerializable {
 
         this.measuredNodes = Collections.unmodifiableList(semPm.getMeasuredNodes());
     }
+
+    /**
+     * Generates a simple exemplar of this class to test serialization.
+     *
+     * @see edu.cmu.TestSerialization
+     * @see edu.cmu.tetradapp.util.TetradSerializableUtils
+     */
+    public static StandardizedSemIm serializableInstance() {
+        return new StandardizedSemIm(SemIm.serializableInstance());
+    }
+
+    //===========================================PUBLIC METHODS==================================================//
 
     public boolean containsParameter(Edge edge) {
         if (Edges.isBidirectedEdge(edge)) {
@@ -264,8 +254,7 @@ public class StandardizedSemIm implements TetradSerializable {
         if (covar > range.getLow() && covar < range.getHigh()) {
             edgeParameters.put(edge, covar);
             return true;
-        }
-        else {
+        } else {
             return false;
         }
 
@@ -448,8 +437,8 @@ public class StandardizedSemIm implements TetradSerializable {
     /**
      * @param error The error term. A node with NodeType.ERROR.
      * @return the error variance for the given error term. THIS IS NOT A PARAMETER OF THE
-     *         MODEL! Its value is simply calculated from the given coefficients of the model.
-     *         Returns Double.NaN if the error variance cannot be computed.
+     * MODEL! Its value is simply calculated from the given coefficients of the model.
+     * Returns Double.NaN if the error variance cannot be computed.
      */
     public double getErrorVariance(Node error) {
         return calculateErrorVarianceFromParams(error);
@@ -458,8 +447,8 @@ public class StandardizedSemIm implements TetradSerializable {
     /**
      * @return a map from error to error variances, or to Double.NaN where these cannot be computed.
      */
-    public Map<Node, Double> errorVariances() {
-        Map<Node, Double> errorVarances = new HashMap<Node, Double>();
+    public Map <Node, Double> errorVariances() {
+        Map <Node, Double> errorVarances = new HashMap <Node, Double>();
 
         for (Node error : getErrorNodes()) {
             errorVarances.put(error, getErrorVariance(error));
@@ -472,7 +461,7 @@ public class StandardizedSemIm implements TetradSerializable {
      * @return a string representation of the coefficients and variances of the model.
      */
     @Override
-	public String toString() {
+    public String toString() {
         StringBuilder buf = new StringBuilder();
         NumberFormat nf = NumberFormatUtil.getInstance().getNumberFormat();
 
@@ -512,17 +501,17 @@ public class StandardizedSemIm implements TetradSerializable {
     /**
      * @return the list of variable nodes of the model, in order.
      */
-    public List<Node> getVariableNodes() {
+    public List <Node> getVariableNodes() {
         return semPm.getVariableNodes();
     }
 
     /**
      * @return The edge coefficient matrix of the model, a la SemIm. Note that this will normally need to be
-     *         transposed, since [a][b] is the edge coefficient for a-->b, not b-->a. Sorry. History. THESE ARE
-     *         PARAMETERS OF THE MODEL--THE ONLY PARAMETERS.
+     * transposed, since [a][b] is the edge coefficient for a-->b, not b-->a. Sorry. History. THESE ARE
+     * PARAMETERS OF THE MODEL--THE ONLY PARAMETERS.
      */
     public DoubleMatrix2D edgeCoef() {
-        List<Node> variableNodes = getVariableNodes();
+        List <Node> variableNodes = getVariableNodes();
 
         DoubleMatrix2D edgeCoef = new DenseDoubleMatrix2D(variableNodes.size(), variableNodes.size());
 
@@ -547,9 +536,9 @@ public class StandardizedSemIm implements TetradSerializable {
 
     /**
      * @return Returns the error covariance matrix of the model. i.e. [a][b] is the covariance of E_a and E_b,
-     *         with [a][a] of course being the variance of E_a. THESE ARE NOT PARAMETERS OF THE MODEL; THEY ARE
-     *         CALCULATED. Note that elements of this matrix may be Double.NaN; this indicates that these
-     *         elements cannot be calculated.
+     * with [a][a] of course being the variance of E_a. THESE ARE NOT PARAMETERS OF THE MODEL; THEY ARE
+     * CALCULATED. Note that elements of this matrix may be Double.NaN; this indicates that these
+     * elements cannot be calculated.
      */
     public DoubleMatrix2D errCovar() {
         return errCovar(errorVariances());
@@ -557,8 +546,8 @@ public class StandardizedSemIm implements TetradSerializable {
 
     /**
      * @return For compatibility only. Returns the variable means of the model. These are always
-     *         zero, since this is a standardized model. THESE ARE ALSO NOT PARAMETERS OF THE MODEL. ONLY THE
-     *         COEFFICIENTS ARE PARAMETERS.
+     * zero, since this is a standardized model. THESE ARE ALSO NOT PARAMETERS OF THE MODEL. ONLY THE
+     * COEFFICIENTS ARE PARAMETERS.
      */
     public double[] means() {
         return new double[semPm.getVariableNodes().size()];
@@ -572,7 +561,7 @@ public class StandardizedSemIm implements TetradSerializable {
      * @param sampleSize      The sample size of the desired data set.
      * @param latentDataSaved True if latent variables should be included in the data set.
      * @return This returns a standardized data set simulated from the model, using the reduced form
-     *         method.
+     * method.
      */
     public DataSet simulateData(int sampleSize, boolean latentDataSaved) {
         return simulateDataReducedForm(sampleSize, latentDataSaved);
@@ -582,7 +571,7 @@ public class StandardizedSemIm implements TetradSerializable {
      * @param sampleSize      The sample size of the desired data set.
      * @param latentDataSaved True if latent variables should be included in the data set.
      * @return This returns a standardized data set simulated from the model, using the reduced form
-     *         method.
+     * method.
      */
     public DataSet simulateDataReducedForm(int sampleSize, boolean latentDataSaved) {
         int numVars = getVariableNodes().size();
@@ -634,17 +623,15 @@ public class StandardizedSemIm implements TetradSerializable {
         return implCovarMeas().copy();
     }
 
-    //========================================PRIVATE METHODS==========================================//
-
     /**
      * @return Returns the error covariance matrix of the model. i.e. [a][b] is the covariance of E_a and E_b,
-     *         with [a][a] of course being the variance of E_a. THESE ARE NOT PARAMETERS OF THE MODEL; THEY ARE
-     *         CALCULATED. Note that elements of this matrix may be Double.NaN; this indicates that these
-     *         elements cannot be calculated.
+     * with [a][a] of course being the variance of E_a. THESE ARE NOT PARAMETERS OF THE MODEL; THEY ARE
+     * CALCULATED. Note that elements of this matrix may be Double.NaN; this indicates that these
+     * elements cannot be calculated.
      */
-    private DoubleMatrix2D errCovar(Map<Node, Double> errorVariances) {
-        List<Node> variableNodes = getVariableNodes();
-        List<Node> errorNodes = new ArrayList<Node>();
+    private DoubleMatrix2D errCovar(Map <Node, Double> errorVariances) {
+        List <Node> variableNodes = getVariableNodes();
+        List <Node> errorNodes = new ArrayList <Node>();
 
         for (Node node : variableNodes) {
             errorNodes.add(semGraph.getExogenous(node));
@@ -673,6 +660,8 @@ public class StandardizedSemIm implements TetradSerializable {
 
         return errorCovar;
     }
+
+    //========================================PRIVATE METHODS==========================================//
 
     private DoubleMatrix2D implCovar() {
         computeImpliedCovar();
@@ -717,7 +706,7 @@ public class StandardizedSemIm implements TetradSerializable {
     /**
      * The list of measured nodes for the semPm. (Unmodifiable.)
      */
-    public List<Node> getMeasuredNodes() {
+    public List <Node> getMeasuredNodes() {
         return getSemPm().getMeasuredNodes();
     }
 
@@ -732,8 +721,8 @@ public class StandardizedSemIm implements TetradSerializable {
      * @param randomUtil a random number generator, if null the method will make
      *                   a new generator for each random number needed
      * @return an array the same length as the width or length (cholesky should
-     *         have the same width and length) containing a randomly generate
-     *         data set.
+     * have the same width and length) containing a randomly generate
+     * data set.
      */
     private double[] exogenousData(DoubleMatrix2D cholesky, RandomUtil
             randomUtil) {
@@ -761,8 +750,8 @@ public class StandardizedSemIm implements TetradSerializable {
         return point;
     }
 
-    public List<Node> getErrorNodes() {
-        List<Node> errorNodes = new ArrayList<Node>();
+    public List <Node> getErrorNodes() {
+        List <Node> errorNodes = new ArrayList <Node>();
 
         for (Node node : getVariableNodes()) {
             errorNodes.add(semGraph.getExogenous(node));
@@ -778,7 +767,112 @@ public class StandardizedSemIm implements TetradSerializable {
         return new SemPm(semPm);
     }
 
+    private boolean paramInBounds(Edge edge, double newValue) {
+        edgeParameters.put(edge, newValue);
+        Map <Node, Double> errorVariances = new HashMap <Node, Double>();
+        for (Node node : semPm.getVariableNodes()) {
+            Node error = semGraph.getExogenous(node);
+            double d2 = calculateErrorVarianceFromParams(error);
+            if (Double.isNaN(d2)) {
+                return false;
+            }
+
+            errorVariances.put(error, d2);
+        }
+
+        if (!MatrixUtils.isPositiveDefinite(errCovar(errorVariances))) {
+            return false;
+        }
+
+        return true;
+    }
+
     //-------------------------------------------PUBLIC CLASSES--------------------------------------------//
+
+    /**
+     * Calculates the error variance for the given error node, given all of the coefficient values in the model.
+     *
+     * @param error An error term in the model--i.e. a variable with NodeType.ERROR.
+     * @return The value of the error variance, or Double.NaN is the value is undefined.
+     */
+    private double calculateErrorVarianceFromParams(Node error) {
+        error = semGraph.getNode(error.getName());
+
+        Node child = semGraph.getChildren(error).get(0);
+        List <Node> parents = semGraph.getParents(child);
+
+        double otherVariance = 0;
+
+        for (Node parent : parents) {
+            if (parent == error) continue;
+            double coef = getEdgeCoefficient(parent, child);
+            otherVariance += coef * coef;
+        }
+
+        if (parents.size() >= 2) {
+            ChoiceGenerator gen = new ChoiceGenerator(parents.size(), 2);
+            int[] indices;
+
+            while ((indices = gen.next()) != null) {
+                Node node1 = parents.get(indices[0]);
+                Node node2 = parents.get(indices[1]);
+
+                double coef1, coef2;
+
+                if (node1.getNodeType() != NodeType.ERROR) {
+                    coef1 = getEdgeCoefficient(node1, child);
+                } else {
+                    coef1 = 1;
+                }
+
+                if (node2.getNodeType() != NodeType.ERROR) {
+                    coef2 = getEdgeCoefficient(node2, child);
+                } else {
+                    coef2 = 1;
+                }
+
+                List <List <Node>> treks = GraphUtils.treksIncludingBidirected(semGraph, node1, node2);
+
+                double cov = 0.0;
+
+                for (List <Node> trek : treks) {
+                    double product = 1.0;
+
+                    for (int i = 1; i < trek.size(); i++) {
+                        Node _node1 = trek.get(i - 1);
+                        Node _node2 = trek.get(i);
+
+                        Edge edge = semGraph.getEdge(_node1, _node2);
+                        double factor;
+
+                        if (Edges.isBidirectedEdge(edge)) {
+                            factor = edgeParameters.get(edge);
+                        } else if (!edgeParameters.containsKey(edge)) {
+                            factor = 1;
+                        } else if (semGraph.isParentOf(_node1, _node2)) {
+                            factor = getEdgeCoefficient(_node1, _node2);
+                        } else {
+                            factor = getEdgeCoefficient(_node2, _node1);
+                        }
+
+                        product *= factor;
+                    }
+
+                    cov += product;
+                }
+
+                otherVariance += 2 * coef1 * coef2 * cov;
+            }
+        }
+
+        return 1.0 - otherVariance <= 0 ? Double.NaN : 1.0 - otherVariance;
+    }
+
+    //-------------------------------------------PRIVATE METHODS-------------------------------------------//
+
+    public enum Initialization {
+        CALCULATE_FROM_SEM, INITIALIZE_FROM_DATA
+    }
 
     /**
      * Stores a coefficient range--i.e. the edge and coefficient value for which the range is needed,
@@ -828,7 +922,7 @@ public class StandardizedSemIm implements TetradSerializable {
         }
 
         @Override
-		public String toString() {
+        public String toString() {
             StringBuilder buf = new StringBuilder();
 
             buf.append("\n\nRange for " + edge);
@@ -838,107 +932,6 @@ public class StandardizedSemIm implements TetradSerializable {
 
             return buf.toString();
         }
-    }
-
-    //-------------------------------------------PRIVATE METHODS-------------------------------------------//
-
-    private boolean paramInBounds(Edge edge, double newValue) {
-        edgeParameters.put(edge, newValue);
-        Map<Node, Double> errorVariances = new HashMap<Node, Double>();
-        for (Node node : semPm.getVariableNodes()) {
-            Node error = semGraph.getExogenous(node);
-            double d2 = calculateErrorVarianceFromParams(error);
-            if (Double.isNaN(d2)) {
-                return false;
-            }
-
-            errorVariances.put(error, d2);
-        }
-
-        if (!MatrixUtils.isPositiveDefinite(errCovar(errorVariances))) {
-            return false;
-        }
-
-        return true;
-    }
-
-    /**
-     * Calculates the error variance for the given error node, given all of the coefficient values in the model.
-     *
-     * @param error An error term in the model--i.e. a variable with NodeType.ERROR.
-     * @return The value of the error variance, or Double.NaN is the value is undefined.
-     */
-    private double calculateErrorVarianceFromParams(Node error) {
-        error = semGraph.getNode(error.getName());
-
-        Node child = semGraph.getChildren(error).get(0);
-        List<Node> parents = semGraph.getParents(child);
-
-        double otherVariance = 0;
-
-        for (Node parent : parents) {
-            if (parent == error) continue;
-            double coef = getEdgeCoefficient(parent, child);
-            otherVariance += coef * coef;
-        }
-
-        if (parents.size() >= 2) {
-            ChoiceGenerator gen = new ChoiceGenerator(parents.size(), 2);
-            int[] indices;
-
-            while ((indices = gen.next()) != null) {
-                Node node1 = parents.get(indices[0]);
-                Node node2 = parents.get(indices[1]);
-
-                double coef1, coef2;
-
-                if (node1.getNodeType() != NodeType.ERROR) {
-                    coef1 = getEdgeCoefficient(node1, child);
-                } else {
-                    coef1 = 1;
-                }
-
-                if (node2.getNodeType() != NodeType.ERROR) {
-                    coef2 = getEdgeCoefficient(node2, child);
-                } else {
-                    coef2 = 1;
-                }
-
-                List<List<Node>> treks = GraphUtils.treksIncludingBidirected(semGraph, node1, node2);
-
-                double cov = 0.0;
-
-                for (List<Node> trek : treks) {
-                    double product = 1.0;
-
-                    for (int i = 1; i < trek.size(); i++) {
-                        Node _node1 = trek.get(i - 1);
-                        Node _node2 = trek.get(i);
-
-                        Edge edge = semGraph.getEdge(_node1, _node2);
-                        double factor;
-
-                        if (Edges.isBidirectedEdge(edge)) {
-                            factor = edgeParameters.get(edge);
-                        } else if (!edgeParameters.containsKey(edge)) {
-                            factor = 1;
-                        } else if (semGraph.isParentOf(_node1, _node2)) {
-                            factor = getEdgeCoefficient(_node1, _node2);
-                        } else {
-                            factor = getEdgeCoefficient(_node2, _node1);
-                        }
-
-                        product *= factor;
-                    }
-
-                    cov += product;
-                }
-
-                otherVariance += 2 * coef1 * coef2 * cov;
-            }
-        }
-
-        return 1.0 - otherVariance <= 0 ? Double.NaN : 1.0 - otherVariance;
     }
 }
 

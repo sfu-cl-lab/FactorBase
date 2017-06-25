@@ -68,7 +68,7 @@ public class IndTestLogisticRegression implements IndependenceTest {
      * Returns an Independence test for a subset of the variables.
      */
     @Override
-	public IndependenceTest indTestSubset(List<Node> vars) {
+    public IndependenceTest indTestSubset(List <Node> vars) {
         throw new UnsupportedOperationException();
     }
 
@@ -78,7 +78,7 @@ public class IndTestLogisticRegression implements IndependenceTest {
      * getVariableNames().
      */
     @Override
-	public boolean isIndependent(Node x, Node y, List<Node> z) {
+    public boolean isIndependent(Node x, Node y, List <Node> z) {
         DiscreteVariable binaryTarget;
 
         if (x instanceof DiscreteVariable && ((DiscreteVariable) x).getNumCategories() == 2) {
@@ -98,7 +98,7 @@ public class IndTestLogisticRegression implements IndependenceTest {
         }
     }
 
-    private boolean isIndependentLogisticRegression(Node x, Node y, List<Node> z) {
+    private boolean isIndependentLogisticRegression(Node x, Node y, List <Node> z) {
         if (z == null) {
             throw new NullPointerException();
         }
@@ -110,11 +110,11 @@ public class IndTestLogisticRegression implements IndependenceTest {
         }
 
         DataSet regressors = new ColtDataSet((ColtDataSet) dataSet);
-        List<String> regressorList = new ArrayList<String>();
+        List <String> regressorList = new ArrayList <String>();
         int targetIndex = dataSet.getVariables().indexOf(x);
         regressors.removeColumn(x);
 
-        List<Node> dataSetVariables = regressors.getVariables();
+        List <Node> dataSetVariables = regressors.getVariables();
 
         regressorList.add(dataSet.getVariable(y.getName()).getName());
 
@@ -186,7 +186,7 @@ public class IndTestLogisticRegression implements IndependenceTest {
         return indep;
     }
 
-    private boolean isIndependentRegression(Node x, Node y, List<Node> z) {
+    private boolean isIndependentRegression(Node x, Node y, List <Node> z) {
         if (z == null) {
             throw new NullPointerException();
         }
@@ -197,7 +197,7 @@ public class IndTestLogisticRegression implements IndependenceTest {
             }
         }
 
-        List<Node> regressors = new ArrayList<Node>();
+        List <Node> regressors = new ArrayList <Node>();
         regressors.add(dataSet.getVariable(y.getName()));
 
         for (Node zVar : z) {
@@ -228,8 +228,8 @@ public class IndTestLogisticRegression implements IndependenceTest {
 
 
     @Override
-	public boolean isIndependent(Node x, Node y, Node... z) {
-        List<Node> zList = Arrays.asList(z);
+    public boolean isIndependent(Node x, Node y, Node... z) {
+        List <Node> zList = Arrays.asList(z);
         return isIndependent(x, y, zList);
     }
 
@@ -239,13 +239,13 @@ public class IndTestLogisticRegression implements IndependenceTest {
      * getVariableNames().
      */
     @Override
-	public boolean isDependent(Node x, Node y, List<Node> z) {
+    public boolean isDependent(Node x, Node y, List <Node> z) {
         return !this.isIndependent(x, y, z);
     }
 
     @Override
-	public boolean isDependent(Node x, Node y, Node... z) {
-        List<Node> zList = Arrays.asList(z);
+    public boolean isDependent(Node x, Node y, Node... z) {
+        List <Node> zList = Arrays.asList(z);
         return isDependent(x, y, zList);
     }
 
@@ -254,7 +254,7 @@ public class IndTestLogisticRegression implements IndependenceTest {
      * not meaningful for tis test.
      */
     @Override
-	public double getPValue() {
+    public double getPValue() {
         return this.lastP; //STUB
     }
 
@@ -263,7 +263,7 @@ public class IndTestLogisticRegression implements IndependenceTest {
      * relations.
      */
     @Override
-	public List<Node> getVariables() {
+    public List <Node> getVariables() {
         return dataSet.getVariables(); //STUB
     }
 
@@ -271,9 +271,9 @@ public class IndTestLogisticRegression implements IndependenceTest {
      * Returns the list of variable varNames.
      */
     @Override
-	public List<String> getVariableNames() {
-        List<Node> variables = getVariables();
-        List<String> variableNames = new ArrayList<String>();
+    public List <String> getVariableNames() {
+        List <Node> variables = getVariables();
+        List <String> variableNames = new ArrayList <String>();
         for (Node variable1 : variables) {
             variableNames.add(variable1.getName());
         }
@@ -281,7 +281,7 @@ public class IndTestLogisticRegression implements IndependenceTest {
     }
 
     @Override
-	public Node getVariable(String name) {
+    public Node getVariable(String name) {
         for (int i = 0; i < getVariables().size(); i++) {
             Node variable = getVariables().get(i);
             if (variable.getName().equals(name)) {
@@ -296,7 +296,7 @@ public class IndTestLogisticRegression implements IndependenceTest {
      * Returns true if y is determined the variable in z.
      */
     @Override
-	public boolean determines(List<Node> z, Node y) {
+    public boolean determines(List <Node> z, Node y) {
         return false; //stub
     }
 
@@ -306,7 +306,7 @@ public class IndTestLogisticRegression implements IndependenceTest {
      * @throws UnsupportedOperationException if there is no significance level.
      */
     @Override
-	public double getAlpha() {
+    public double getAlpha() {
         return this.alpha; //STUB 
     }
 
@@ -314,12 +314,12 @@ public class IndTestLogisticRegression implements IndependenceTest {
      * Sets the significance level.
      */
     @Override
-	public void setAlpha(double alpha) {
+    public void setAlpha(double alpha) {
         this.alpha = alpha;
     }
 
     @Override
-	public DataSet getData() {
+    public DataSet getData() {
         return null; //STUB
     }
 }

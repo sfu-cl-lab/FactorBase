@@ -36,10 +36,10 @@ import java.util.List;
  */
 public interface ICovarianceMatrix extends DataModel, TetradSerializable {
     @Override
-	List<Node> getVariables();
+    List <Node> getVariables();
 
     @Override
-	List<String> getVariableNames();
+    List <String> getVariableNames();
 
     String getVariableName(int index);
 
@@ -47,33 +47,33 @@ public interface ICovarianceMatrix extends DataModel, TetradSerializable {
 
     int getSampleSize();
 
-    @Override
-	String getName();
+    void setSampleSize(int sampleSize);
 
     @Override
-	void setName(String name);
+    String getName();
 
     @Override
-	Knowledge getKnowledge();
+    void setName(String name);
 
     @Override
-	void setKnowledge(Knowledge knowledge);
+    Knowledge getKnowledge();
+
+    @Override
+    void setKnowledge(Knowledge knowledge);
 
     ICovarianceMatrix getSubmatrix(int[] indices);
 
-    ICovarianceMatrix getSubmatrix(List<String> submatrixVarNames);
+    ICovarianceMatrix getSubmatrix(List <String> submatrixVarNames);
 
     ICovarianceMatrix getSubmatrix(String[] submatrixVarNames);
 
     double getValue(int i, int j);
 
-    void setMatrix(DoubleMatrix2D matrix);
-
-    void setSampleSize(int sampleSize);
-
     int getSize();
 
     DoubleMatrix2D getMatrix();
+
+    void setMatrix(DoubleMatrix2D matrix);
 
     void select(Node variable);
 
@@ -81,10 +81,10 @@ public interface ICovarianceMatrix extends DataModel, TetradSerializable {
 
     boolean isSelected(Node variable);
 
-    List<String> getSelectedVariableNames();
+    List <String> getSelectedVariableNames();
 
     @Override
-	String toString();
+    String toString();
 
     Node getVariable(String name);
 }

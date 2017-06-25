@@ -100,7 +100,7 @@ public final class BayesUpdaterClassifier
      * "equals" method of DiscreteVariable.
      * @serial
      */
-    private List<Node> bayesImVars;
+    private List <Node> bayesImVars;
 
     /**
      * @serial
@@ -146,7 +146,7 @@ public final class BayesUpdaterClassifier
         this.bayesIm = bayesIm;
         this.testData = testData;
         this.percentCorrect = Double.NaN;
-        this.bayesImVars = new LinkedList<Node>(bayesIm.getVariables());
+        this.bayesImVars = new LinkedList <Node>(bayesIm.getVariables());
     }
 
     /**
@@ -190,7 +190,7 @@ public final class BayesUpdaterClassifier
      * values of the target variable as described above.
      */
     @Override
-	public int[] classify() {
+    public int[] classify() {
         if (targetVariable == null) {
             throw new NullPointerException("Target not set.");
         }
@@ -204,7 +204,7 @@ public final class BayesUpdaterClassifier
         int ncases = testData.getNumRows();
 
         int[] varIndices = new int[nvars];
-        List<Node> dataVars = testData.getVariables();
+        List <Node> dataVars = testData.getVariables();
 
         for (int i = 0; i < nvars; i++) {
             DiscreteVariable variable =
@@ -347,10 +347,10 @@ public final class BayesUpdaterClassifier
      * categories of the target variable.
      *
      * @return an int[][] array containing the counts, or null if the target
-     *         variable is not in the test data.
+     * variable is not in the test data.
      */
     @Override
-	public int[][] crossTabulation() {
+    public int[][] crossTabulation() {
         int[] estimatedValues = classify();
 
         // Retrieve the column for the test variable from the test data; these
@@ -405,10 +405,10 @@ public final class BayesUpdaterClassifier
 
     /**
      * @return the percentage of cases in which the target variable is correctly
-     *         classified.
+     * classified.
      */
     @Override
-	public double getPercentCorrect() {
+    public double getPercentCorrect() {
         if (Double.isNaN(percentCorrect)) {
             crossTabulation();
         }
@@ -462,7 +462,7 @@ public final class BayesUpdaterClassifier
         this.binaryCutoff = binaryCutoff;
     }
 
-    public List<Node> getBayesImVars() {
+    public List <Node> getBayesImVars() {
         return bayesImVars;
     }
 

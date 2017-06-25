@@ -47,12 +47,12 @@ public class MeekRulesOld implements ImpliedOrientation {
     }
 
     @Override
-	public void orientImplied(Graph graph) {
+    public void orientImplied(Graph graph) {
         orientUsingMeekRules(knowledge, graph);
     }
 
     @Override
-	public void setKnowledge(IKnowledge knowledge) {
+    public void setKnowledge(IKnowledge knowledge) {
         this.knowledge = knowledge;
     }
 
@@ -138,14 +138,14 @@ public class MeekRulesOld implements ImpliedOrientation {
      * Meek's rule R1: if b-->a, a---c, and a not adj to c, then a-->c
      */
     private boolean meekR1(Graph graph, IKnowledge knowledge) {
-        List<Node> nodes = graph.getNodes();
+        List <Node> nodes = graph.getNodes();
         boolean changed = true;
 
         while (changed) {
             changed = false;
 
             for (Node a : nodes) {
-                List<Node> adjacentNodes = graph.getAdjacentNodes(a);
+                List <Node> adjacentNodes = graph.getAdjacentNodes(a);
 
                 if (adjacentNodes.size() < 2) {
                     continue;
@@ -213,11 +213,11 @@ public class MeekRulesOld implements ImpliedOrientation {
      * If b-->a-->c, b--c, then b-->c.
      */
     private boolean meekR2(Graph graph, IKnowledge knowledge) {
-        List<Node> nodes = graph.getNodes();
+        List <Node> nodes = graph.getNodes();
         boolean changed = false;
 
         for (Node a : nodes) {
-            List<Node> adjacentNodes = graph.getAdjacentNodes(a);
+            List <Node> adjacentNodes = graph.getAdjacentNodes(a);
 
             if (adjacentNodes.size() < 2) {
                 continue;
@@ -256,18 +256,18 @@ public class MeekRulesOld implements ImpliedOrientation {
      */
     private boolean meekR3(Graph graph, IKnowledge knowledge) {
 
-        List<Node> nodes = graph.getNodes();
+        List <Node> nodes = graph.getNodes();
         boolean changed = false;
 
         for (Node a : nodes) {
-            List<Node> adjacentNodes = graph.getAdjacentNodes(a);
+            List <Node> adjacentNodes = graph.getAdjacentNodes(a);
 
             if (adjacentNodes.size() < 3) {
                 continue;
             }
 
             for (Node b : adjacentNodes) {
-                List<Node> otherAdjacents = new LinkedList<Node>(adjacentNodes);
+                List <Node> otherAdjacents = new LinkedList <Node>(adjacentNodes);
                 otherAdjacents.remove(b);
 
                 if (!graph.isUndirectedFromTo(a, b)) {
@@ -315,11 +315,11 @@ public class MeekRulesOld implements ImpliedOrientation {
             return false;
         }
 
-        List<Node> nodes = graph.getNodes();
+        List <Node> nodes = graph.getNodes();
         boolean changed = false;
 
         for (Node a : nodes) {
-            List<Node> adjacentNodes = graph.getAdjacentNodes(a);
+            List <Node> adjacentNodes = graph.getAdjacentNodes(a);
 
             if (adjacentNodes.size() < 3) {
                 continue;
@@ -330,7 +330,7 @@ public class MeekRulesOld implements ImpliedOrientation {
                     continue;
                 }
 
-                List<Node> otherAdjacents = new LinkedList<Node>(adjacentNodes);
+                List <Node> otherAdjacents = new LinkedList <Node>(adjacentNodes);
                 otherAdjacents.remove(d);
 
                 ChoiceGenerator cg =

@@ -49,7 +49,7 @@ public final class TimeSeriesData implements DataModel {
      * @deprecated
      */
     @Deprecated
-	private double[][] data;
+    private double[][] data;
 
     /**
      * @serial
@@ -59,7 +59,7 @@ public final class TimeSeriesData implements DataModel {
     /**
      * @serial
      */
-    private List<String> varNames;
+    private List <String> varNames;
 
     /**
      * @serial
@@ -74,7 +74,7 @@ public final class TimeSeriesData implements DataModel {
      * contains a measured for each variable (in order) for a particular time.
      * The series of times is in increasing order.
      */
-    public TimeSeriesData(DoubleMatrix2D matrix, List<String> varNames) {
+    public TimeSeriesData(DoubleMatrix2D matrix, List <String> varNames) {
         if (matrix == null) {
             throw new NullPointerException("Data must not be null.");
         }
@@ -105,7 +105,7 @@ public final class TimeSeriesData implements DataModel {
      * @see edu.cmu.tetradapp.util.TetradSerializableUtils
      */
     public static TimeSeriesData serializableInstance() {
-        List<String> varNames = new ArrayList<String>();
+        List <String> varNames = new ArrayList <String>();
         varNames.add("X");
         varNames.add("Y");
         return new TimeSeriesData(new DenseDoubleMatrix2D(2, 2), varNames);
@@ -114,12 +114,12 @@ public final class TimeSeriesData implements DataModel {
     //=================================PUBLIC METHODS======================//
 
     @Override
-	public final String getName() {
+    public final String getName() {
         return this.name;
     }
 
     @Override
-	public final void setName(String name) {
+    public final void setName(String name) {
         if (name == null) {
             throw new NullPointerException("Name must not be null.");
         }
@@ -127,9 +127,9 @@ public final class TimeSeriesData implements DataModel {
     }
 
     @Override
-	public final List<Node> getVariables() {
+    public final List <Node> getVariables() {
         List varNames = getVariableNames();
-        List<Node> vars = new LinkedList<Node>();
+        List <Node> vars = new LinkedList <Node>();
 
         for (Object varName : varNames) {
             vars.add(new ContinuousVariable((String) varName));
@@ -139,12 +139,12 @@ public final class TimeSeriesData implements DataModel {
     }
 
     @Override
-	public final Knowledge getKnowledge() {
+    public final Knowledge getKnowledge() {
         return new Knowledge(this.knowledge);
     }
 
     @Override
-	public final void setKnowledge(Knowledge knowledge) {
+    public final void setKnowledge(Knowledge knowledge) {
         if (knowledge == null) {
             throw new NullPointerException();
         }
@@ -157,7 +157,7 @@ public final class TimeSeriesData implements DataModel {
      * of their columns.
      */
     @Override
-	public final List<String> getVariableNames() {
+    public final List <String> getVariableNames() {
         return this.varNames;
     }
 

@@ -28,7 +28,6 @@ import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
 
-import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -48,16 +47,44 @@ public class TestIndTestGSquare extends TestCase {
         super(name);
     }
 
+    private static void printFile(Reader reader) {
+        System.out.println();
+        BufferedReader br = new BufferedReader(reader);
+
+        try {
+            String line;
+
+            while ((line = br.readLine()) != null) {
+                System.out.println(line);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private static FileReader loadFile(String file) {
+        try {
+            return new FileReader(file);
+        } catch (IOException e) {
+            e.printStackTrace();
+            throw new RuntimeException("Error opening file " + file);
+        }
+    }
+
+    public static Test suite() {
+        return new TestSuite(TestIndTestGSquare.class);
+    }
+
     public void testIsIndependent() {
         try {
             DataSet dataSet = getDataSet(1);
 
             IndTestGSquare test = new IndTestGSquare(dataSet, 0.05);
-            List<Node> v = test.getVariables();
+            List <Node> v = test.getVariables();
 
             Node x = v.get(0);
             Node y = v.get(1);
-            ArrayList<Node> z = new ArrayList<Node>();
+            ArrayList <Node> z = new ArrayList <Node>();
             z.add(v.get(2));
 //            z.add(v.get(3));
             System.out.println(test.isIndependent(x, y, z));
@@ -65,8 +92,7 @@ public class TestIndTestGSquare extends TestCase {
             test.setDeterminationP(0.99);
             System.out.println("X determines Z " + test.determines(z, x));
             System.out.println("Y determines Z " + test.determines(z, y));
-        }
-        catch (IOException e) {
+        } catch (IOException e) {
             e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
         }
     }
@@ -78,14 +104,13 @@ public class TestIndTestGSquare extends TestCase {
             IndTestGSquare test = new IndTestGSquare(dataSet, 0.05);
 
             Node x = dataSet.getVariable("X4");
-            ArrayList<Node> z = new ArrayList<Node>();
+            ArrayList <Node> z = new ArrayList <Node>();
 //            z.add(dataSet.getVariable("X2"));
 
             test.setDeterminationP(0.99);
             System.out.println(x + " determined by " + z + ": " +
                     test.determines(z, x));
-        }
-        catch (IOException e) {
+        } catch (IOException e) {
             e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
         }
     }
@@ -104,36 +129,6 @@ public class TestIndTestGSquare extends TestCase {
         DataReader reader = new DataReader();
         reader.setMissingValueMarker("-99");
         return reader.parseTabular(new File(filename));
-    }
-
-    private static void printFile(Reader reader) {
-        System.out.println();
-        BufferedReader br = new BufferedReader(reader);
-
-        try {
-            String line;
-
-            while ((line = br.readLine()) != null) {
-                System.out.println(line);
-            }
-        }
-        catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-    private static FileReader loadFile(String file) {
-        try {
-            return new FileReader(file);
-        }
-        catch (IOException e) {
-            e.printStackTrace();
-            throw new RuntimeException("Error opening file " + file);
-        }
-    }
-
-    public static Test suite() {
-        return new TestSuite(TestIndTestGSquare.class);
     }
 
     public void setTest(IndTestTimeSeries test) {

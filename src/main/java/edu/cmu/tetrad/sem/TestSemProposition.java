@@ -46,6 +46,17 @@ public class TestSemProposition extends TestCase {
         super(name);
     }
 
+    /**
+     * This method uses reflection to collect up all of the test methods from
+     * this class and return them to the test runner.
+     */
+    public static Test suite() {
+
+        // Edit the name of the class in the parens to match the name
+        // of this class.
+        return new TestSuite(TestSemProposition.class);
+    }
+
     public void testEvidence() {
         Graph graph = constructGraph1();
         SemPm semPm = new SemPm(graph);
@@ -68,17 +79,6 @@ public class TestSemProposition extends TestCase {
         proposition.setValue(node4, 0.7);
         assertEquals(0.7, proposition.getValue(node4), 0.0);
         System.out.println(proposition);
-    }
-
-    /**
-     * This method uses reflection to collect up all of the test methods from
-     * this class and return them to the test runner.
-     */
-    public static Test suite() {
-
-        // Edit the name of the class in the parens to match the name
-        // of this class.
-        return new TestSuite(TestSemProposition.class);
     }
 
     private Graph constructGraph1() {

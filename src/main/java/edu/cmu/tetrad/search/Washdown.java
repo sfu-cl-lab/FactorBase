@@ -28,8 +28,6 @@ import edu.cmu.tetrad.sem.SemEstimator;
 import edu.cmu.tetrad.sem.SemIm;
 import edu.cmu.tetrad.sem.SemPm;
 
-import java.util.*;
-
 
 /**
  * Implements the Washdown algorithm,
@@ -65,7 +63,7 @@ public class Washdown {
 
     private ICovarianceMatrix cov;
     private DataSet dataSet;
-    private List<Node> variables;
+    private List <Node> variables;
     private double alpha;
 
     public Washdown(ICovarianceMatrix cov, double alpha) {
@@ -81,8 +79,8 @@ public class Washdown {
     }
 
     public Graph search() {
-        List<List<Node>> clusters = new ArrayList<List<Node>>();
-        clusters.add(new ArrayList<Node>(variables));
+        List <List <Node>> clusters = new ArrayList <List <Node>>();
+        clusters.add(new ArrayList <Node>(variables));
 
         double pValue;
 
@@ -95,7 +93,7 @@ public class Washdown {
 //                break;
 //            }
 
-            List<Node> disgards = getDiscards(clusters, variables);
+            List <Node> disgards = getDiscards(clusters, variables);
 
             clusters.add(disgards);
 
@@ -126,13 +124,13 @@ public class Washdown {
         return pureMeasurementModel(clusters);
     }
 
-    private List<Node> getDiscards(List<List<Node>> clusters, List<Node> variables) {
-        List<Node> disgards = new ArrayList<Node>();
+    private List <Node> getDiscards(List <List <Node>> clusters, List <Node> variables) {
+        List <Node> disgards = new ArrayList <Node>();
 
         for (Node node : variables) {
             boolean found = false;
 
-            for (List<Node> cluster : clusters) {
+            for (List <Node> cluster : clusters) {
                 if (cluster.contains(node)) {
                     found = true;
                 }
@@ -146,9 +144,9 @@ public class Washdown {
         return disgards;
     }
 
-    private List<List<Node>> purify(List<List<Node>> clusters) {
-        List<Node> keep = new ArrayList<Node>(this.variables);
-        List<Node> disgards = new ArrayList<Node>();
+    private List <List <Node>> purify(List <List <Node>> clusters) {
+        List <Node> keep = new ArrayList <Node>(this.variables);
+        List <Node> disgards = new ArrayList <Node>();
         double bestGof = gof(clusters);
         System.out.println("Purify Best GOF = " + bestGof + " clusters = " + clusters);
 
@@ -162,9 +160,9 @@ public class Washdown {
             Node bestNode = null;
 
             for (int i = 0; i < keep.size(); i++) {
-                List<List<Node>> _clusters = removeVar(keep.get(i), clusters);
+                List <List <Node>> _clusters = removeVar(keep.get(i), clusters);
                 double _gof = gof(_clusters);
-                System.out.println("     GOF = " + gof(_clusters) +  "P value = " + pValue(_clusters) + " clusters = " + _clusters);
+                System.out.println("     GOF = " + gof(_clusters) + "P value = " + pValue(_clusters) + " clusters = " + _clusters);
 
                 if (_gof < bestGof) {
                     bestGof = _gof;
@@ -182,11 +180,11 @@ public class Washdown {
         }
     }
 
-    private List<List<Node>> removeVar(Node node, List<List<Node>> clusters) {
-        List<List<Node>> _clusters = new ArrayList<List<Node>>();
+    private List <List <Node>> removeVar(Node node, List <List <Node>> clusters) {
+        List <List <Node>> _clusters = new ArrayList <List <Node>>();
 
-        for (List<Node> cluster : clusters) {
-            List<Node> _cluster = new ArrayList<Node>(cluster);
+        for (List <Node> cluster : clusters) {
+            List <Node> _cluster = new ArrayList <Node>(cluster);
             _cluster.remove(node);
             if (!cluster.isEmpty()) {
                 _clusters.add(_cluster);
@@ -200,7 +198,7 @@ public class Washdown {
      * Returns the p value of the given model.
      */
 
-    private double gof(List<List<Node>> clusters) {
+    private double gof(List <List <Node>> clusters) {
         clusters = removeEmpty(clusters);
 
         Graph graph = pureMeasurementModel(clusters);
@@ -210,8 +208,7 @@ public class Washdown {
 
         if (cov != null) {
             estimator = new SemEstimator(cov, pm);
-        }
-        else {
+        } else {
             estimator = new SemEstimator(dataSet, pm);
         }
 
@@ -220,7 +217,7 @@ public class Washdown {
         return est.getBicScore();
     }
 
-    private double pValue(List<List<Node>> clusters) {
+    private double pValue(List <List <Node>> clusters) {
         clusters = removeEmpty(clusters);
 
         Graph graph = pureMeasurementModel(clusters);
@@ -230,8 +227,7 @@ public class Washdown {
 
         if (cov != null) {
             estimator = new SemEstimator(cov, pm);
-        }
-        else {
+        } else {
             estimator = new SemEstimator(dataSet, pm);
         }
 
@@ -242,10 +238,10 @@ public class Washdown {
         return pValue;
     }
 
-    private List<List<Node>> removeEmpty(List<List<Node>> clusters) {
-        List<List<Node>> _clusters = new ArrayList<List<Node>>();
+    private List <List <Node>> removeEmpty(List <List <Node>> clusters) {
+        List <List <Node>> _clusters = new ArrayList <List <Node>>();
 
-        for (List<Node> cluster : clusters) {
+        for (List <Node> cluster : clusters) {
             if (!cluster.isEmpty()) {
                 _clusters.add(cluster);
             }
@@ -254,10 +250,10 @@ public class Washdown {
         return _clusters;
     }
 
-    private Graph pureMeasurementModel(List<List<Node>> clusters) {
+    private Graph pureMeasurementModel(List <List <Node>> clusters) {
         Graph G = new EdgeListGraph();
 
-        List<Node> latents = new ArrayList<Node>();
+        List <Node> latents = new ArrayList <Node>();
         for (int i = 0; i < clusters.size(); i++) {
             Node node = new GraphNode("L" + i);
             node.setNodeType(NodeType.LATENT);

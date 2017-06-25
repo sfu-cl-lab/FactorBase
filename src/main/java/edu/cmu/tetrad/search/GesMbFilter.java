@@ -52,14 +52,14 @@ public class GesMbFilter {
         search.setStructurePrior(0.01);
     }
 
-    public Graph filter(List<Node> variable, Node target) {
-        List<Node> dataVars = new LinkedList<Node>();
+    public Graph filter(List <Node> variable, Node target) {
+        List <Node> dataVars = new LinkedList <Node>();
 
         for (Node node1 : variable) {
             dataVars.add(dataSet.getVariable(node1.getName()));
         }
 
-        Graph mbPattern = search.search(new LinkedList<Node>(dataVars));
+        Graph mbPattern = search.search(new LinkedList <Node>(dataVars));
         Node dataTarget = dataSet.getVariable(target.getName());
 
         MbUtils.trimToMbNodes(mbPattern, dataTarget, false);

@@ -46,16 +46,98 @@ public final class TestKnowledge extends TestCase {
         super(name);
     }
 
+    public static void rtestLoadKnowledge() {
+        try {
+            String filename = "test_data/knowledge.txt";
+            File file = new File(filename);
+
+            DataReader reader = new DataReader();
+            Knowledge knowledge = reader.parseKnowledge(file);
+            System.out.println(knowledge);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public static void testSaveKnowledge() {
+        Knowledge knowledge = new Knowledge();
+        knowledge.addToTier(1, "x1");
+        knowledge.addToTier(1, "x2");
+        knowledge.addToTier(2, "x3");
+        knowledge.addToTier(2, "x4");
+        knowledge.addToTier(4, "x5");
+
+        knowledge.setEdgeForbidden("x5", "x1", true);
+        knowledge.setEdgeForbidden("x6", "x1", true);
+
+        knowledge.setEdgeRequired("x1", "x3", true);
+        knowledge.setEdgeRequired("x2", "x4", true);
+
+        //        System.out.println(knowledge);
+        //
+        try {
+            CharArrayWriter writer = new CharArrayWriter();
+            Knowledge.saveKnowledge(knowledge, writer);
+            System.out.println(writer.toString());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static void testCopyKnowledge() {
+        Knowledge knowledge = new Knowledge();
+        knowledge.addToTier(0, "x1");
+        knowledge.addToTier(0, "x2");
+        knowledge.addToTier(1, "x3");
+        knowledge.addToTier(1, "x4");
+        knowledge.addToTier(3, "x6");
+        knowledge.addToTier(3, "x7");
+        knowledge.addToTier(4, "x5");
+
+        Set <String> from = createSet("x10", "x11");
+        Set <String> to = createSet("x12");
+
+        KnowledgeGroup group = new KnowledgeGroup(KnowledgeGroup.REQUIRED, from, to);
+        knowledge.addKnowledgeGroup(group);
+
+        System.out.println(knowledge);
+
+        Knowledge knowledge2 = new Knowledge(knowledge);
+
+        System.out.println(knowledge2);
+
+        assertEquals(knowledge, knowledge2);
+    }
+
+    /**
+     * This method uses reflection to collect up all of the test methods from this class and return them to the test
+     * runner.
+     */
+    public static Test suite() {
+
+        // Edit the name of the class in the parens to match the name
+        // of this class.
+        return new TestSuite(TestKnowledge.class);
+    }
+
+    private static Set <String> createSet(String... vars) {
+        HashSet <String> set = new HashSet <String>();
+        for (String v : vars) {
+            set.add(v);
+        }
+        return set;
+    }
+
     @Override
-	public final void setUp() {
+    public final void setUp() {
         this.knowledge = new Knowledge();
     }
 
     public final void testForbiddenGroups() {
         Knowledge knowledge = new Knowledge();
 
-        Set<String> from = createSet("x1", "x2");
-        Set<String> to = createSet("x3");
+        Set <String> from = createSet("x1", "x2");
+        Set <String> to = createSet("x3");
         KnowledgeGroup group = new KnowledgeGroup(KnowledgeGroup.FORBIDDEN, from, to);
         knowledge.addKnowledgeGroup(group);
 
@@ -77,12 +159,11 @@ public final class TestKnowledge extends TestCase {
         assertFalse(knowledge.edgeForbidden("x2", "x1"));
     }
 
-
     public final void testRequiredGroups() {
         Knowledge knowledge = new Knowledge();
 
-        Set<String> from = createSet("x1", "x2");
-        Set<String> to = createSet("x3");
+        Set <String> from = createSet("x1", "x2");
+        Set <String> to = createSet("x3");
         KnowledgeGroup group = new KnowledgeGroup(KnowledgeGroup.REQUIRED, from, to);
         knowledge.addKnowledgeGroup(group);
 
@@ -102,7 +183,6 @@ public final class TestKnowledge extends TestCase {
         assertFalse(knowledge.edgeRequired("x3", "x1"));
         assertFalse(knowledge.edgeRequired("x2", "x1"));
     }
-
 
     /**
      * Makes sure that setting fobidden edges works.
@@ -145,91 +225,6 @@ public final class TestKnowledge extends TestCase {
         this.knowledge.setEdgeForbidden("X1", "X2", true);
         assertTrue(!(this.knowledge.edgeRequired("X1", "X2")));
         assertTrue(this.knowledge.edgeForbidden("X1", "X2"));
-    }
-
-    public static void rtestLoadKnowledge() {
-        try {
-            String filename = "test_data/knowledge.txt";
-            File file = new File(filename);
-
-            DataReader reader = new DataReader();
-            Knowledge knowledge = reader.parseKnowledge(file);
-            System.out.println(knowledge);
-        }
-        catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    public static void testSaveKnowledge() {
-        Knowledge knowledge = new Knowledge();
-        knowledge.addToTier(1, "x1");
-        knowledge.addToTier(1, "x2");
-        knowledge.addToTier(2, "x3");
-        knowledge.addToTier(2, "x4");
-        knowledge.addToTier(4, "x5");
-
-        knowledge.setEdgeForbidden("x5", "x1", true);
-        knowledge.setEdgeForbidden("x6", "x1", true);
-
-        knowledge.setEdgeRequired("x1", "x3", true);
-        knowledge.setEdgeRequired("x2", "x4", true);
-
-        //        System.out.println(knowledge);
-        //
-        try {
-            CharArrayWriter writer = new CharArrayWriter();
-            Knowledge.saveKnowledge(knowledge, writer);
-            System.out.println(writer.toString());
-        }
-        catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-    public static void testCopyKnowledge() {
-        Knowledge knowledge = new Knowledge();
-        knowledge.addToTier(0, "x1");
-        knowledge.addToTier(0, "x2");
-        knowledge.addToTier(1, "x3");
-        knowledge.addToTier(1, "x4");
-        knowledge.addToTier(3, "x6");
-        knowledge.addToTier(3, "x7");
-        knowledge.addToTier(4, "x5");
-
-        Set<String> from = createSet("x10", "x11");
-        Set<String> to = createSet("x12");
-
-        KnowledgeGroup group = new KnowledgeGroup(KnowledgeGroup.REQUIRED, from, to);
-        knowledge.addKnowledgeGroup(group);
-
-        System.out.println(knowledge);
-
-        Knowledge knowledge2 = new Knowledge(knowledge);
-
-        System.out.println(knowledge2);
-
-        assertEquals(knowledge, knowledge2);
-    }
-
-    /**
-     * This method uses reflection to collect up all of the test methods from this class and return them to the test
-     * runner.
-     */
-    public static Test suite() {
-
-        // Edit the name of the class in the parens to match the name
-        // of this class.
-        return new TestSuite(TestKnowledge.class);
-    }
-
-
-    private static Set<String> createSet(String... vars) {
-        HashSet<String> set = new HashSet<String>();
-        for (String v : vars) {
-            set.add(v);
-        }
-        return set;
     }
 
 }

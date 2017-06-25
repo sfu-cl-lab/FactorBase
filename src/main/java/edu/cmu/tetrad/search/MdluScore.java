@@ -41,7 +41,7 @@ public class MdluScore implements LocalDiscreteScore {
     }
 
     @Override
-	public double localScore(int i, int parents[]) {
+    public double localScore(int i, int parents[]) {
         double oldScore = localScoreCache.get(i, parents);
 
         if (!Double.isNaN(oldScore)) {
@@ -129,7 +129,7 @@ public class MdluScore implements LocalDiscreteScore {
     }
 
     @Override
-	public DataSet getDataSet() {
+    public DataSet getDataSet() {
         return dataSet;
     }
 
@@ -162,17 +162,17 @@ public class MdluScore implements LocalDiscreteScore {
         return structurePrior;
     }
 
+    @Override
+    public void setStructurePrior(double structurePrior) {
+        this.structurePrior = structurePrior;
+    }
+
     public double getSamplePrior() {
         return samplePrior;
     }
 
     @Override
-	public void setStructurePrior(double structurePrior) {
-        this.structurePrior = structurePrior;
-    }
-
-    @Override
-	public void setSamplePrior(double samplePrior) {
+    public void setSamplePrior(double samplePrior) {
         this.samplePrior = samplePrior;
     }
 }

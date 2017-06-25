@@ -53,18 +53,27 @@ public class TestPc extends TestCase {
         super(name);
     }
 
+    /**
+     * This method uses reflection to collect up all of the test methods from this class and return them to the test
+     * runner.
+     */
+    public static Test suite() {
+
+        // Edit the name of the class in the parens to match the name
+        // of this class.
+        return new TestSuite(TestPc.class);
+    }
 
     @Override
-	public void setUp() throws Exception {
+    public void setUp() throws Exception {
         TetradLogger.getInstance().addOutputStream(System.out);
         TetradLogger.getInstance().setForceLog(true);
         RandomUtil.getInstance().setSeed(-1857293L);
 
     }
 
-
     @Override
-	public void tearDown() {
+    public void tearDown() {
         TetradLogger.getInstance().setForceLog(false);
         TetradLogger.getInstance().removeOutputStream(System.out);
     }
@@ -139,10 +148,10 @@ public class TestPc extends TestCase {
             Graph resultGraph = search.search();
 
             if (previousResult != null) {
-                List<Edge> resultEdges = resultGraph.getEdges();
-                List<Edge> previousEdges = previousResult.getEdges();
+                List <Edge> resultEdges = resultGraph.getEdges();
+                List <Edge> previousEdges = previousResult.getEdges();
 
-                List<Edge> addedEdges = new LinkedList<Edge>();
+                List <Edge> addedEdges = new LinkedList <Edge>();
 
                 for (Edge edge : resultEdges) {
                     if (!previousEdges.contains(edge)) {
@@ -150,7 +159,7 @@ public class TestPc extends TestCase {
                     }
                 }
 
-                List<Edge> removedEdges = new LinkedList<Edge>();
+                List <Edge> removedEdges = new LinkedList <Edge>();
 
                 for (Edge edge : previousEdges) {
                     if (!resultEdges.contains(edge)) {
@@ -355,9 +364,9 @@ public class TestPc extends TestCase {
 
     private void allAtDepth(IndependenceTest test, int depth) {
 //        System.out.println("depth = " + depth);
-        List<Double> pValues = new ArrayList<Double>();
+        List <Double> pValues = new ArrayList <Double>();
 
-        List<Node> nodes = new LinkedList<Node>(test.getVariables());
+        List <Node> nodes = new LinkedList <Node>(test.getVariables());
 
         for (int d = 0; d <= depth; d++) {
             for (Node x : nodes) {
@@ -372,7 +381,7 @@ public class TestPc extends TestCase {
                     int[] choice;
 
                     while ((choice = cg.next()) != null) {
-                        List<Node> condSet = GraphUtils.asList(choice, nodes);
+                        List <Node> condSet = GraphUtils.asList(choice, nodes);
 
                         if (condSet.contains(x) || condSet.contains(y)) continue;
 
@@ -429,17 +438,6 @@ public class TestPc extends TestCase {
 //        System.out.println("Adj fp = " + GraphUtils.adjacenciesComplement(graph, dag).size());
 //        System.out.println("Adj fn = " + GraphUtils.adjacenciesComplement(dag, graph).size());
         System.out.println("Elapsed time = " + (time1 - time0) / 1000. + " s");
-    }
-
-    /**
-     * This method uses reflection to collect up all of the test methods from this class and return them to the test
-     * runner.
-     */
-    public static Test suite() {
-
-        // Edit the name of the class in the parens to match the name
-        // of this class.
-        return new TestSuite(TestPc.class);
     }
 }
 

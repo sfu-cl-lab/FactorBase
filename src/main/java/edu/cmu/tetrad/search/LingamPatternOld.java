@@ -37,8 +37,6 @@ import edu.cmu.tetrad.search.IndTestFisherZ;
 import edu.cmu.tetrad.search.IndependenceTest;
 import edu.cmu.tetrad.util.RandomUtil;
 
-import java.util.*;
-
 /**
  * Given a pattern, chooses the best DAG(s) in the pattern by calculating an objective function for each DAG in the
  * pattern and reporting the best of those. Algorithm by Patrik Hoyer.
@@ -70,7 +68,7 @@ public class LingamPatternOld {
      * @return
      * @throws IllegalArgumentException if the score cannot be calculated.
      */
-    public Result search(List<Graph> dags, DataSet dataSet) throws IllegalArgumentException {
+    public Result search(List <Graph> dags, DataSet dataSet) throws IllegalArgumentException {
 
 //        Collections.shuffle(dags);
 
@@ -85,7 +83,7 @@ public class LingamPatternOld {
         }
 
         DoubleMatrix2D data = dataSet.getDoubleData();
-        List<Node> variables = dataSet.getVariables();
+        List <Node> variables = dataSet.getVariables();
 
 //        List<Dag> dags = new ArrayList<Dag>();
         int bootstrapSize = data.rows() / 2;
@@ -111,7 +109,7 @@ public class LingamPatternOld {
 //        }
 
         if (dags.size() == 0) {
-            return new Result(new ArrayList<Graph>(), new ArrayList<Integer>(), numSamples);
+            return new Result(new ArrayList <Graph>(), new ArrayList <Integer>(), numSamples);
         }
 
         double[][] scores = new double[dags.size()][getNumSamples()];
@@ -126,7 +124,7 @@ public class LingamPatternOld {
             }
         }
 
-        final Map<Integer, Integer> highestCounts = new TreeMap<Integer, Integer>();
+        final Map <Integer, Integer> highestCounts = new TreeMap <Integer, Integer>();
 
 //        for (int i = 0; i < getNumSamples(); i++) {
 //            int maxDag = -1;
@@ -195,22 +193,22 @@ public class LingamPatternOld {
             }
         }
 
-        List<Integer> outputIndices = new ArrayList<Integer>(highestCounts.keySet());
+        List <Integer> outputIndices = new ArrayList <Integer>(highestCounts.keySet());
 
-        Collections.sort(outputIndices, new Comparator<Integer>() {
+        Collections.sort(outputIndices, new Comparator <Integer>() {
             @Override
-			public int compare(Integer o1, Integer o2) {
+            public int compare(Integer o1, Integer o2) {
                 return highestCounts.get(o2) - highestCounts.get(o1);
             }
         });
 
-        List<Graph> outputDags = new ArrayList<Graph>();
+        List <Graph> outputDags = new ArrayList <Graph>();
 
         for (int i = 0; i < outputIndices.size(); i++) {
             outputDags.add(dags.get(outputIndices.get(i)));
         }
 
-        List<Integer> outputCounts = new ArrayList<Integer>();
+        List <Integer> outputCounts = new ArrayList <Integer>();
 
         for (int i = 0; i < outputIndices.size(); i++) {
             outputCounts.add(highestCounts.get(outputIndices.get(i)));
@@ -223,65 +221,20 @@ public class LingamPatternOld {
         return new Result(outputDags, outputCounts, numSamples);
     }
 
-    public static class Result {
-        private List<Graph> dags;
-        private List<Integer> counts;
-        private int numSamples;
-
-        public Result(List<Graph> dags, List<Integer> counts, int numSamples) {
-            this.setDags(dags);
-            this.setCounts(counts);
-            this.numSamples = numSamples;
-        }
-
-        public List<Graph> getDags() {
-            return dags;
-        }
-
-        public void setDags(List<Graph> dags) {
-            this.dags = dags;
-        }
-
-        public List<Integer> getCounts() {
-            return counts;
-        }
-
-        public void setCounts(List<Integer> counts) {
-            this.counts = counts;
-        }
-
-        public int getNumSamples() {
-            return numSamples;
-        }
-
-        @Override
-		public String toString() {
-            StringBuilder buf = new StringBuilder();
-
-            for (int i = 0; i < dags.size(); i++) {
-                buf.append("#" + i).append("\n");
-                buf.append(dags.get(i));
-                buf.append(counts.get(i)).append(" votes\n");
-            }
-
-            return buf.toString();
-        }
-    }
-
-    private Double getScore(Graph dag, DoubleMatrix2D data, List<Node> variables) {
+    private Double getScore(Graph dag, DoubleMatrix2D data, List <Node> variables) {
 //        System.out.println("Scoring DAG: G" + dag);
 
         Regression regression = new RegressionDatasetGeneralized(data, variables);
 
-        List<Node> nodes = dag.getNodes();
+        List <Node> nodes = dag.getNodes();
         double score = 0.0;
         DoubleMatrix2D residuals = new DenseDoubleMatrix2D(data.rows(), data.columns());
 
         for (int i = 0; i < nodes.size(); i++) {
             Node _target = nodes.get(i);
-            List<Node> _regressors = dag.getParents(_target);
+            List <Node> _regressors = dag.getParents(_target);
             Node target = getVariable(variables, _target.getName());
-            List<Node> regressors = new ArrayList<Node>();
+            List <Node> regressors = new ArrayList <Node>();
 
             for (Node _regressor : _regressors) {
                 Node variable = getVariable(variables, _regressor.getName());
@@ -332,7 +285,7 @@ public class LingamPatternOld {
         return score;
     }
 
-    private Node getVariable(List<Node> variables, String name) {
+    private Node getVariable(List <Node> variables, String name) {
         for (Node node : variables) {
             if (name.equals(node.getName())) {
                 return node;
@@ -367,6 +320,51 @@ public class LingamPatternOld {
         }
 
         this.numSamples = numSamples;
+    }
+
+    public static class Result {
+        private List <Graph> dags;
+        private List <Integer> counts;
+        private int numSamples;
+
+        public Result(List <Graph> dags, List <Integer> counts, int numSamples) {
+            this.setDags(dags);
+            this.setCounts(counts);
+            this.numSamples = numSamples;
+        }
+
+        public List <Graph> getDags() {
+            return dags;
+        }
+
+        public void setDags(List <Graph> dags) {
+            this.dags = dags;
+        }
+
+        public List <Integer> getCounts() {
+            return counts;
+        }
+
+        public void setCounts(List <Integer> counts) {
+            this.counts = counts;
+        }
+
+        public int getNumSamples() {
+            return numSamples;
+        }
+
+        @Override
+        public String toString() {
+            StringBuilder buf = new StringBuilder();
+
+            for (int i = 0; i < dags.size(); i++) {
+                buf.append("#" + i).append("\n");
+                buf.append(dags.get(i));
+                buf.append(counts.get(i)).append(" votes\n");
+            }
+
+            return buf.toString();
+        }
     }
 }
 

@@ -7,8 +7,6 @@ import edu.cmu.tetrad.data.*;
 import edu.cmu.tetrad.graph.Node;
 import edu.cmu.tetrad.util.ProbUtils;
 
-import java.util.*;
-
 /**
  * Implements a test for simultaneously zero tetrads in Bollen, K. (1990). "Outlier screening and distribution-free test
  * for vanishing tetrads." Sociological Methods and Research 19, 80-92 and Bollen and Ting, Confirmatory Tetrad
@@ -27,8 +25,8 @@ public class BollenTingTetradTest {
     private double[][][][] fourthMoment;
     private int numVars;
     private double[] means;
-    private List<Node> variables;
-    private Map<Node, Integer> variablesHash;
+    private List <Node> variables;
+    private Map <Node, Integer> variablesHash;
     private boolean cacheFourthMoments = true;
 
 
@@ -54,9 +52,9 @@ public class BollenTingTetradTest {
 
         this.cov = new CovarianceMatrix(dataSet);
 
-        List<DataSet> data1 = new ArrayList<DataSet>();
+        List <DataSet> data1 = new ArrayList <DataSet>();
         data1.add(dataSet);
-        List<DataSet> data2 = DataUtils.centerData(data1);
+        List <DataSet> data2 = DataUtils.centerData(data1);
 
         this.dataSet = data2.get(0);
 
@@ -65,7 +63,7 @@ public class BollenTingTetradTest {
         this.variables = dataSet.getVariables();
         this.numVars = dataSet.getNumColumns();
 
-        this.variablesHash = new HashMap<Node, Integer>();
+        this.variablesHash = new HashMap <Node, Integer>();
 
         for (int i = 0; i < variables.size(); i++) {
             variablesHash.put(variables.get(i), i);
@@ -92,14 +90,14 @@ public class BollenTingTetradTest {
         this.numVars = cov.getVariables().size();
         this.variables = cov.getVariables();
 
-        this.variablesHash = new HashMap<Node, Integer>();
+        this.variablesHash = new HashMap <Node, Integer>();
 
         for (int i = 0; i < variables.size(); i++) {
             variablesHash.put(variables.get(i), i);
         }
     }
 
-    private void initializeForthMomentMatrix(List<Node> variables) {
+    private void initializeForthMomentMatrix(List <Node> variables) {
         int n = variables.size();
         fourthMoment = new double[n][n][n][n];
     }
@@ -115,8 +113,8 @@ public class BollenTingTetradTest {
         this.df = tetrads.length;
 
         // Need a list of symbolic covariances--i.e. covariances that appear in tetrads.
-        Set<Sigma> boldSigmaSet = new LinkedHashSet<Sigma>();
-        List<Sigma> boldSigma = new ArrayList<Sigma>();
+        Set <Sigma> boldSigmaSet = new LinkedHashSet <Sigma>();
+        List <Sigma> boldSigma = new ArrayList <Sigma>();
 
         for (Tetrad tetrad : tetrads) {
             Sigma sigma1 = new Sigma(tetrad.getI(), tetrad.getJ());
@@ -353,44 +351,6 @@ public class BollenTingTetradTest {
         this.cacheFourthMoments = cacheFourthMoments;
     }
 
-    private static class Sigma {
-        private Node a;
-        private Node b;
-
-        public Sigma(Node a, Node b) {
-            this.a = a;
-            this.b = b;
-        }
-
-        public Node getA() {
-            return a;
-        }
-
-        public Node getB() {
-            return b;
-        }
-
-        @Override
-		public boolean equals(Object o) {
-            if (!(o instanceof Sigma)) {
-                throw new IllegalArgumentException();
-            }
-
-            Sigma _o = (Sigma) o;
-            return (_o.getA().equals(getA()) && _o.getB().equals(getB())) || (_o.getB().equals(getA()) && _o.getA().equals(getB()));
-        }
-
-        @Override
-		public int hashCode() {
-            return a.hashCode() + b.hashCode();
-        }
-
-        @Override
-		public String toString() {
-            return "Sigma(" + getA() + ", " + getB() + ")";
-        }
-    }
-
     private double sxyzw(int x, int y, int z, int w) {
         double sxyzw = 0.0;
 
@@ -431,5 +391,43 @@ public class BollenTingTetradTest {
         }
 
         return sum / N;
+    }
+
+    private static class Sigma {
+        private Node a;
+        private Node b;
+
+        public Sigma(Node a, Node b) {
+            this.a = a;
+            this.b = b;
+        }
+
+        public Node getA() {
+            return a;
+        }
+
+        public Node getB() {
+            return b;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (!(o instanceof Sigma)) {
+                throw new IllegalArgumentException();
+            }
+
+            Sigma _o = (Sigma) o;
+            return (_o.getA().equals(getA()) && _o.getB().equals(getB())) || (_o.getB().equals(getA()) && _o.getA().equals(getB()));
+        }
+
+        @Override
+        public int hashCode() {
+            return a.hashCode() + b.hashCode();
+        }
+
+        @Override
+        public String toString() {
+            return "Sigma(" + getA() + ", " + getB() + ")";
+        }
     }
 }

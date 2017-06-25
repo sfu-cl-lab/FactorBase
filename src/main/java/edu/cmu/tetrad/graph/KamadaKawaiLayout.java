@@ -27,7 +27,6 @@ import cern.colt.matrix.linalg.Algebra;
 import edu.cmu.tetrad.util.NumberFormatUtil;
 import edu.cmu.tetrad.util.RandomUtil;
 
-import javax.swing.*;
 import java.text.NumberFormat;
 import java.util.Collections;
 import java.util.Comparator;
@@ -49,7 +48,7 @@ public final class KamadaKawaiLayout {
     /**
      * The list of nodes used to construct d, p, k, and l.
      */
-    private List<Node> componentNodes;
+    private List <Node> componentNodes;
 
     /**
      * Natural length of an edge.
@@ -118,19 +117,19 @@ public final class KamadaKawaiLayout {
         getMonitor().setMillisToPopup(0);
         getMonitor().setProgress(0);
 
-        List<List<Node>> components =
+        List <List <Node>> components =
                 GraphUtils.connectedComponents(this.graph);
 
-        Collections.sort(components, new Comparator<List<Node>>() {
+        Collections.sort(components, new Comparator <List <Node>>() {
             @Override
-			public int compare(List<Node> o1, List<Node> o2) {
+            public int compare(List <Node> o1, List <Node> o2) {
                 int i1 = o1.size();
                 int i2 = o2.size();
                 return i2 < i1 ? -1 : i2 == i1 ? 0 : 1;
             }
         });
 
-        for (List<Node> component1 : components) {
+        for (List <Node> component1 : components) {
             initialize(component1, isRandomlyInitialized());
             layoutComponent(component1);
         }
@@ -198,7 +197,7 @@ public final class KamadaKawaiLayout {
      *                            spring layout should start from the current
      *                            positions of the nodes.
      */
-    private void initialize(List<Node> nodes, boolean randomlyInitialized) {
+    private void initialize(List <Node> nodes, boolean randomlyInitialized) {
         setComponentNodes(Collections.unmodifiableList(nodes));
 
         p = new double[nodes.size()][2];
@@ -211,8 +210,7 @@ public final class KamadaKawaiLayout {
                 p[i][0] = RandomUtil.getInstance().nextInt(600);
                 p[i][1] = RandomUtil.getInstance().nextInt(600);
             }
-        }
-        else {
+        } else {
             for (int i = 0; i < nodes.size(); i++) {
                 Node node = nodes.get(i);
                 p[i][0] = node.getCenterX();
@@ -242,13 +240,13 @@ public final class KamadaKawaiLayout {
         }
     }
 
-    private void layoutComponent(List<Node> componentNodes) {
+    private void layoutComponent(List <Node> componentNodes) {
         setComponentNodes(componentNodes);
         optimize(getStopEnergy());
         shiftComponentToRight(componentNodes);
     }
 
-    private void shiftComponentToRight(List<Node> componentNodes) {
+    private void shiftComponentToRight(List <Node> componentNodes) {
         double minX = Double.MAX_VALUE, minY = Double.MAX_VALUE;
 
         for (int i = 0; i < componentNodes.size(); i++) {
@@ -364,8 +362,7 @@ public final class KamadaKawaiLayout {
 
                 try {
                     c = new Algebra().solve(a, b);
-                }
-                catch (Exception e) {
+                } catch (Exception e) {
                     p[m[0]][0] += RandomUtil.getInstance().nextInt(
                             2 * jump) - jump;
                     p[m[0]][1] += RandomUtil.getInstance().nextInt(
@@ -373,7 +370,7 @@ public final class KamadaKawaiLayout {
                     continue;
                 }
 
-                double dx = c.get(0, 0); 
+                double dx = c.get(0, 0);
                 double dy = c.get(1, 0);
 
                 p[m[0]][0] += dx;
@@ -489,8 +486,7 @@ public final class KamadaKawaiLayout {
                 Node node2 = getComponentNodes().get(j);
                 if (graph.getEdge(node1, node2) != null) {
                     I2[i][j] = 1;
-                }
-                else {
+                } else {
                     I2[i][j] = infinity;
                 }
             }
@@ -516,11 +512,11 @@ public final class KamadaKawaiLayout {
         return monitor;
     }
 
-    public List<Node> getComponentNodes() {
+    public List <Node> getComponentNodes() {
         return componentNodes;
     }
 
-    public void setComponentNodes(List<Node> componentNodes) {
+    public void setComponentNodes(List <Node> componentNodes) {
         this.componentNodes = componentNodes;
     }
 }

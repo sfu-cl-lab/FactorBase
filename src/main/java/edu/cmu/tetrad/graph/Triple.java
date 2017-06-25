@@ -65,6 +65,14 @@ public final class Triple implements TetradSerializable {
         return new Triple(new GraphNode("X"), new GraphNode("Y"), new GraphNode("Z"));
     }
 
+    public static String pathString(Graph graph, Node x, Node y, Node z) {
+        List <Node> path = new ArrayList <Node>();
+        path.add(x);
+        path.add(y);
+        path.add(z);
+        return GraphUtils.pathString(graph, path);
+    }
+
     public final Node getX() {
         return x;
     }
@@ -78,7 +86,7 @@ public final class Triple implements TetradSerializable {
     }
 
     @Override
-	public final int hashCode() {
+    public final int hashCode() {
         int hash = 17;
         hash += 19 * x.hashCode() * z.hashCode();
         hash += 23 * y.hashCode();
@@ -86,7 +94,7 @@ public final class Triple implements TetradSerializable {
     }
 
     @Override
-	public final boolean equals(Object obj) {
+    public final boolean equals(Object obj) {
         if (!(obj instanceof Triple)) {
             return false;
         }
@@ -99,20 +107,12 @@ public final class Triple implements TetradSerializable {
     }
 
     @Override
-	public String toString() {
+    public String toString() {
         return "<" + x + ", " + y + ", " + z + ">";
     }
 
     public boolean alongPathIn(Graph graph) {
         return graph.isAdjacentTo(x, y) && graph.isAdjacentTo(y, z) && x != z;
-    }
-
-    public static String pathString(Graph graph, Node x, Node y, Node z) {
-        List<Node> path = new ArrayList<Node>();
-        path.add(x);
-        path.add(y);
-        path.add(z);
-        return GraphUtils.pathString(graph, path);
     }
 }
 

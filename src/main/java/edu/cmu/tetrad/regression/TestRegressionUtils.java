@@ -45,6 +45,10 @@ public class TestRegressionUtils extends TestCase {
         super(name);
     }
 
+    public static Test suite() {
+        return new TestSuite(TestRegressionUtils.class);
+    }
+
     // Residuals for guys with no parents should be identical to the original data values.
     public void testRegressionUtils() {
         Dag graph = new Dag(GraphUtils.randomDag(5, 0, 3, 3, 3, 3, false));
@@ -53,7 +57,7 @@ public class TestRegressionUtils extends TestCase {
 
         SemPm pm = new SemPm(graph);
         SemIm im = new SemIm(pm);
-        
+
         DataSet dataSet = im.simulateData(1000, false);
 
         System.out.println(dataSet);
@@ -76,9 +80,5 @@ public class TestRegressionUtils extends TestCase {
                 assertEquals(dataSet.getDouble(i, j), residuals.getDouble(i, j), 0.001);
             }
         }
-    }
-
-    public static Test suite() {
-        return new TestSuite(TestRegressionUtils.class);
     }
 }

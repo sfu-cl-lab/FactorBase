@@ -30,7 +30,6 @@ import edu.cmu.tetrad.graph.Node;
 import edu.cmu.tetrad.util.*;
 
 import java.text.NumberFormat;
-import java.util.*;
 
 /**
  * Checks conditional independence of variable in a continuous data set using Fisher's Z test. See Spirtes, Glymour, and
@@ -42,37 +41,31 @@ import java.util.*;
 public final class IndTestFisherZ2 implements IndependenceTest {
 
     /**
-     * The covariance matrix.
-     */
-    private final ICovarianceMatrix covMatrix;
-
-//    private final DoubleMatrix2D _covMatrix;
-
-    /**
-     * The variables of the covariance matrix, in order. (Unmodifiable list.)
-     */
-    private List<Node> variables;
-
-    /**
-     * The significance level of the independence tests.
-     */
-    private double alpha;
-
-    /**
-     * The value of the Fisher's Z statistic associated with the las calculated partial correlation.
-     */
-    private double fisherZ;
-
-    /**
-     * The FisherZD independence test, used when Fisher Z throws an exception (i.e., when there's a collinearity).
-     */
-    private IndTestFisherZGeneralizedInverse deterministicTest;
-
-    /**
      * Formats as 0.0000.
      */
     private static NumberFormat nf = NumberFormatUtil.getInstance().getNumberFormat();
 
+//    private final DoubleMatrix2D _covMatrix;
+    /**
+     * The covariance matrix.
+     */
+    private final ICovarianceMatrix covMatrix;
+    /**
+     * The variables of the covariance matrix, in order. (Unmodifiable list.)
+     */
+    private List <Node> variables;
+    /**
+     * The significance level of the independence tests.
+     */
+    private double alpha;
+    /**
+     * The value of the Fisher's Z statistic associated with the las calculated partial correlation.
+     */
+    private double fisherZ;
+    /**
+     * The FisherZD independence test, used when Fisher Z throws an exception (i.e., when there's a collinearity).
+     */
+    private IndTestFisherZGeneralizedInverse deterministicTest;
     /**
      * Stores a reference to the dataset being analyzed.
      */
@@ -99,7 +92,7 @@ public final class IndTestFisherZ2 implements IndependenceTest {
 
         this.covMatrix = new CovarianceMatrixOnTheFly(dataSet, false);
 //        this._covMatrix = covMatrix.getMatrix();
-        List<Node> nodes = covMatrix.getVariables();
+        List <Node> nodes = covMatrix.getVariables();
 
         this.variables = Collections.unmodifiableList(nodes);
         setAlpha(alpha);
@@ -115,7 +108,7 @@ public final class IndTestFisherZ2 implements IndependenceTest {
      * @param variables A list of variables, a subset of the variables of <code>data</code>.
      * @param alpha     The significance cutoff level. p values less than alpha will be reported as dependent.
      */
-    public IndTestFisherZ2(DoubleMatrix2D data, List<Node> variables, double alpha) {
+    public IndTestFisherZ2(DoubleMatrix2D data, List <Node> variables, double alpha) {
         DataSet dataSet = ColtDataSet.makeContinuousData(variables, data);
         this.covMatrix = new CovarianceMatrix(dataSet);
 //        this._covMatrix = covMatrix.getMatrix();
@@ -142,7 +135,7 @@ public final class IndTestFisherZ2 implements IndependenceTest {
      * Creates a new IndTestCramerT instance for a subset of the variables.
      */
     @Override
-	public IndependenceTest indTestSubset(List<Node> vars) {
+    public IndependenceTest indTestSubset(List <Node> vars) {
         if (vars.isEmpty()) {
             throw new IllegalArgumentException("Subset may not be empty.");
         }
@@ -176,7 +169,7 @@ public final class IndTestFisherZ2 implements IndependenceTest {
      * @throws RuntimeException if a matrix singularity is encountered.
      */
     @Override
-	public boolean isIndependent(Node x, Node y, List<Node> z) {
+    public boolean isIndependent(Node x, Node y, List <Node> z) {
         DoubleMatrix2D submatrix = submatrix(x, y, z, covMatrix, variables);
         double r = 0;
 
@@ -191,7 +184,7 @@ public final class IndTestFisherZ2 implements IndependenceTest {
 
             while ((choice = gen.next()) != null) {
                 try {
-                    List<Node> z2 = new ArrayList<Node>(z);
+                    List <Node> z2 = new ArrayList <Node>(z);
                     z2.removeAll(GraphUtils.asList(choice, z));
                     submatrix = DataUtils.subMatrix(covMatrix, x, y, z2);
                     r = StatUtils.partialCorrelation(submatrix);
@@ -252,23 +245,23 @@ public final class IndTestFisherZ2 implements IndependenceTest {
         return independent;
     }
 
-    private DoubleMatrix2D submatrix(Node x, Node y, List<Node> z, ICovarianceMatrix cov, List<Node> vars) {
+    private DoubleMatrix2D submatrix(Node x, Node y, List <Node> z, ICovarianceMatrix cov, List <Node> vars) {
         return DataUtils2.subMatrix(cov, vars, x, y, z);
     }
 
     @Override
-	public boolean isIndependent(Node x, Node y, Node... z) {
+    public boolean isIndependent(Node x, Node y, Node... z) {
         return isIndependent(x, y, Arrays.asList(z));
     }
 
     @Override
-	public boolean isDependent(Node x, Node y, List<Node> z) {
+    public boolean isDependent(Node x, Node y, List <Node> z) {
         return !isIndependent(x, y, z);
     }
 
     @Override
-	public boolean isDependent(Node x, Node y, Node... z) {
-        List<Node> zList = Arrays.asList(z);
+    public boolean isDependent(Node x, Node y, Node... z) {
+        List <Node> zList = Arrays.asList(z);
         return isDependent(x, y, zList);
     }
 
@@ -276,7 +269,7 @@ public final class IndTestFisherZ2 implements IndependenceTest {
      * Returns the probability associated with the most recently computed independence test.
      */
     @Override
-	public double getPValue() {
+    public double getPValue() {
         if (!Double.isNaN(this.pValue)) {
             return Double.NaN;
         } else {
@@ -285,11 +278,19 @@ public final class IndTestFisherZ2 implements IndependenceTest {
     }
 
     /**
+     * Gets the current significance level.
+     */
+    @Override
+    public double getAlpha() {
+        return this.alpha;
+    }
+
+    /**
      * Sets the significance level at which independence judgments should be made.  Affects the cutoff for partial
      * correlations to be considered statistically equal to zero.
      */
     @Override
-	public void setAlpha(double alpha) {
+    public void setAlpha(double alpha) {
         if (alpha < 0.0 || alpha > 1.0) {
             throw new IllegalArgumentException("Significance out of range.");
         }
@@ -299,19 +300,11 @@ public final class IndTestFisherZ2 implements IndependenceTest {
     }
 
     /**
-     * Gets the current significance level.
-     */
-    @Override
-	public double getAlpha() {
-        return this.alpha;
-    }
-
-    /**
      * Returns the list of variables over which this independence checker is capable of determinine independence
      * relations-- that is, all the variables in the given graph or the given data set.
      */
     @Override
-	public List<Node> getVariables() {
+    public List <Node> getVariables() {
         return this.variables;
     }
 
@@ -319,7 +312,7 @@ public final class IndTestFisherZ2 implements IndependenceTest {
      * Returns the variable with the given name.
      */
     @Override
-	public Node getVariable(String name) {
+    public Node getVariable(String name) {
         for (int i = 0; i < getVariables().size(); i++) {
             Node variable = getVariables().get(i);
             if (variable.getName().equals(name)) {
@@ -334,9 +327,9 @@ public final class IndTestFisherZ2 implements IndependenceTest {
      * Returns the list of variable varNames.
      */
     @Override
-	public List<String> getVariableNames() {
-        List<Node> variables = getVariables();
-        List<String> variableNames = new ArrayList<String>();
+    public List <String> getVariableNames() {
+        List <Node> variables = getVariables();
+        List <String> variableNames = new ArrayList <String>();
         for (Node variable1 : variables) {
             variableNames.add(variable1.getName());
         }
@@ -348,7 +341,7 @@ public final class IndTestFisherZ2 implements IndependenceTest {
      * UnsupportedOperationException.
      */
     @Override
-	public boolean determines(List<Node> z, Node x) throws UnsupportedOperationException {
+    public boolean determines(List <Node> z, Node x) throws UnsupportedOperationException {
         int[] parents = new int[z.size()];
 
         for (int j = 0; j < parents.length; j++) {
@@ -369,8 +362,7 @@ public final class IndTestFisherZ2 implements IndependenceTest {
             try {
                 inverse = new Algebra().inverse(Czz);
 //                inverse = MatrixUtils.ginverse(Czz);
-            }
-            catch (Exception e) {
+            } catch (Exception e) {
                 return true;
             }
 
@@ -388,12 +380,12 @@ public final class IndTestFisherZ2 implements IndependenceTest {
      * Returns the data set being analyzed.
      */
     @Override
-	public DataSet getData() {
+    public DataSet getData() {
         return dataSet;
     }
 
     public void shuffleVariables() {
-        List<Node> nodes = new ArrayList(this.variables);
+        List <Node> nodes = new ArrayList(this.variables);
         Collections.shuffle(nodes);
         this.variables = Collections.unmodifiableList(nodes);
     }
@@ -402,7 +394,7 @@ public final class IndTestFisherZ2 implements IndependenceTest {
      * Returns a string representation of this test.
      */
     @Override
-	public String toString() {
+    public String toString() {
         return "Fisher's Z, alpha = " + nf.format(getAlpha());
     }
 

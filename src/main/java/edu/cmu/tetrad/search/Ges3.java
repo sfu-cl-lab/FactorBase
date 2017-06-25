@@ -32,7 +32,6 @@ import edu.cmu.tetrad.util.*;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.text.NumberFormat;
-import java.util.*;
 
 /**
  * GesSearch is an implentation of the GES algorithm, as specified in Chickering (2002) "Optimal structure
@@ -48,136 +47,116 @@ import java.util.*;
 public final class Ges3 implements GraphSearch, GraphScorer {
 
     /**
+     * For formatting printed numbers.
+     */
+    private final NumberFormat nf = NumberFormatUtil.getInstance().getNumberFormat();
+    /**
+     * For linear algebra.
+     */
+    private final Algebra algebra = new Algebra();                        // s = vv * x, or s12 = Theta.1 * Theta.12
+    /**
+     * Caches scores for discrete search.
+     */
+    private final LocalScoreCache localScoreCache = new LocalScoreCache();
+    SortedSet <Arrow> sortedArrows;
+    Set <Arrow>[][] lookupArrows;
+    SortedSet <Arrow> sortedArrowsBackwards;
+    Set <Arrow>[][] lookupArrowsBackwards;
+    Map <Node, Map <Set <Node>, Double>> scoreHash;
+    double minJump = 0;
+    /**
      * The data set, various variable subsets of which are to be scored.
      */
     private DataSet dataSet;
-
     /**
      * The covariance matrix for the data set.
      */
     private DoubleMatrix2D covariances;
-
     /**
      * Sample size, either from the data set or from the variances.
      */
     private int sampleSize;
-
     /**
      * Specification of forbidden and required edges.
      */
     private Knowledge knowledge = new Knowledge();
-
     /**
      * For discrete data scoring, the structure prior.
      */
     private double structurePrior;
-
     /**
      * For discrete data scoring, the sample prior.
      */
     private double samplePrior;
-
     /**
      * Map from variables to their column indices in the data set.
      */
-    private HashMap<Node, Integer> hashIndices;
-
+    private HashMap <Node, Integer> hashIndices;
     /**
      * Array of variable names from the data set, in order.
      */
     private String varNames[];
-
     /**
      * List of variables in the data set, in order.
      */
-    private List<Node> variables;
-
+    private List <Node> variables;
     /**
      * True iff the data set is discrete.
      */
     private boolean discrete;
-
     /**
      * The true graph, if known. If this is provided, asterisks will be printed out next to false positive added edges
      * (that is, edges added that aren't adjacencies in the true graph).
      */
     private Graph trueGraph;
-
-    /**
-     * For formatting printed numbers.
-     */
-    private final NumberFormat nf = NumberFormatUtil.getInstance().getNumberFormat();
-
-    /**
-     * For linear algebra.
-     */
-    private final Algebra algebra = new Algebra();                        // s = vv * x, or s12 = Theta.1 * Theta.12
-
-    /**
-     * Caches scores for discrete search.
-     */
-    private final LocalScoreCache localScoreCache = new LocalScoreCache();
-
     /**
      * Elapsed time of the most recent search.
      */
     private long elapsedTime;
-
     /**
      * True if cycles are to be aggressively prevented. May be expensive for large graphs (but also useful for large
      * graphs).
      */
     private boolean aggressivelyPreventCycles = false;
-
     /**
      * Listeners for graph change events.
      */
-    private transient List<PropertyChangeListener> listeners;
-
+    private transient List <PropertyChangeListener> listeners;
     /**
      * Penalty discount--the BIC penalty is multiplied by this (for continuous variables).
      */
     private double penaltyDiscount = 1.0;
-
     private boolean useFCutoff = false;
-
     private double fCutoffP = 0.01;
-
     /**
      * The maximum number of edges the algorithm will add to the graph.
      */
     private int maxEdgesAdded = -1;
-
     /**
      * The score for discrete searches.
      */
     private LocalDiscreteScore discreteScore;
-
     /**
      * The logger for this class. The config needs to be set.
      */
     private TetradLogger logger = TetradLogger.getInstance();
-
     /**
      * The top n graphs found by the algorithm, where n is <code>numPatternsToStore</code>.
      */
-    private SortedSet<ScoredGraph> topGraphs = new TreeSet<ScoredGraph>();
-
+    private SortedSet <ScoredGraph> topGraphs = new TreeSet <ScoredGraph>();
     /**
      * The number of top patterns to store.
      */
     private int numPatternsToStore = 10;
-
-    SortedSet<Arrow> sortedArrows;
-    Set<Arrow>[][] lookupArrows;
-    SortedSet<Arrow> sortedArrowsBackwards;
-    Set<Arrow>[][] lookupArrowsBackwards;
-    Map<Node, Map<Set<Node>, Double>> scoreHash;
-    private Map<Node, Integer> nodesHash;
-    private boolean storeGraphs = true;
+    private Map <Node, Integer> nodesHash;
 
 
     //===========================CONSTRUCTORS=============================//
+    private boolean storeGraphs = true;
+    private double minNeg = 0; //-1000000;
+
+    //==========================PUBLIC METHODS==========================//
+    private RegressionDataset regression;
 
     public Ges3(DataSet dataSet) {
         setDataSet(dataSet);
@@ -197,8 +176,116 @@ public final class Ges3 implements GraphSearch, GraphScorer {
         initialize(10., 1.0);
     }
 
-    //==========================PUBLIC METHODS==========================//
+    /**
+     * Get all nodes that are connected to Y by an undirected edge and not adjacent to X.
+     */
+    private static List <Node> getTNeighbors(Node x, Node y, Graph graph) {
+        List <Node> tNeighbors = graph.getAdjacentNodes(y);
+        tNeighbors.removeAll(graph.getAdjacentNodes(x));
 
+        for (int i = tNeighbors.size() - 1; i >= 0; i--) {
+            Node z = tNeighbors.get(i);
+            Edge edge = graph.getEdge(y, z);
+
+            if (!Edges.isUndirectedEdge(edge)) {
+                tNeighbors.remove(z);
+            }
+        }
+
+        return tNeighbors;
+    }
+
+    /**
+     * Get all nodes that are connected to Y by an undirected edge and adjacent to X
+     */
+    private static List <Node> getHNeighbors(Node x, Node y, Graph graph) {
+        List <Node> hNeighbors = graph.getAdjacentNodes(y);
+        hNeighbors.retainAll(graph.getAdjacentNodes(x));
+
+        for (int i = hNeighbors.size() - 1; i >= 0; i--) {
+            Node z = hNeighbors.get(i);
+            Edge edge = graph.getEdge(y, z);
+
+            if (!Edges.isUndirectedEdge(edge)) {
+                hNeighbors.remove(z);
+            }
+        }
+
+        return hNeighbors;
+    }
+
+    /**
+     * Test if the candidate deletion is a valid operation (Theorem 17 from Chickering, 2002).
+     */
+    private static boolean validDelete(Set <Node> h, Set <Node> naXY, Graph graph) {
+        Set <Node> set = new HashSet <Node>(naXY);
+        set.removeAll(h);
+        return isClique(set, graph);
+    }
+
+    /**
+     * Find all nodes that are connected to Y by an undirected edge that are adjacent to X (that is, by undirected or
+     * directed edge) NOTE: very inefficient implementation, since the current library does not allow access to the
+     * adjacency list/matrix of the graph.
+     */
+    private static Set <Node> findNaYX(Node x, Node y, Graph graph) {
+        Set <Node> naYX = new HashSet <Node>(graph.getAdjacentNodes(y));
+        naYX.retainAll(graph.getAdjacentNodes(x));
+
+        for (Node z : new HashSet <Node>(naYX)) {
+            Edge edge = graph.getEdge(y, z);
+
+            if (!Edges.isUndirectedEdge(edge)) {
+                naYX.remove(z);
+            }
+        }
+
+        return naYX;
+    }
+
+    /**
+     * Returns true iif the given set forms a clique in the given graph.
+     */
+    private static boolean isClique(Set <Node> _nodes, Graph graph) {
+        List <Node> nodes = new LinkedList <Node>(_nodes);
+        for (int i = 0; i < nodes.size() - 1; i++) {
+            for (int j = i + 1; j < nodes.size(); j++) {
+                if (!graph.isAdjacentTo(nodes.get(i), nodes.get(j))) {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
+    private static List <Set <Node>> powerSet(List <Node> nodes) {
+        List <Set <Node>> subsets = new ArrayList <Set <Node>>();
+        int total = (int) Math.pow(2, nodes.size());
+        for (int i = 0; i < total; i++) {
+            Set <Node> newSet = new HashSet <Node>();
+            String selection = Integer.toBinaryString(i);
+
+            int shift = nodes.size() - selection.length();
+
+            for (int j = nodes.size() - 1; j >= 0; j--) {
+                if (j >= shift && selection.charAt(j - shift) == '1') {
+                    newSet.add(nodes.get(j));
+                }
+            }
+            subsets.add(newSet);
+        }
+
+        return subsets;
+    }
+
+    private static int getRowIndex(int dim[], int[] values) {
+        int rowIndex = 0;
+        for (int i = 0; i < dim.length; i++) {
+            rowIndex *= dim[i];
+            rowIndex += values[i];
+        }
+        return rowIndex;
+    }
 
     public boolean isAggressivelyPreventCycles() {
         return this.aggressivelyPreventCycles;
@@ -215,7 +302,7 @@ public final class Ges3 implements GraphSearch, GraphScorer {
      * @return the resulting Pattern.
      */
     @Override
-	public Graph search() {
+    public Graph search() {
 //        long startTime = System.currentTimeMillis();
 
         // Check for missing values.
@@ -230,12 +317,12 @@ public final class Ges3 implements GraphSearch, GraphScorer {
                     "Please remove or impute missing values first.");
         }
 
-        Graph graph = new EdgeListGraph(new LinkedList<Node>(getVariables()));
+        Graph graph = new EdgeListGraph(new LinkedList <Node>(getVariables()));
 
-        scoreHash = new WeakHashMap<Node, Map<Set<Node>, Double>>();
+        scoreHash = new WeakHashMap <Node, Map <Set <Node>, Double>>();
 
         for (Node node : graph.getNodes()) {
-            scoreHash.put(node, new HashMap<Set<Node>, Double>());
+            scoreHash.put(node, new HashMap <Set <Node>, Double>());
         }
 
         fireGraphChange(graph);
@@ -247,20 +334,20 @@ public final class Ges3 implements GraphSearch, GraphScorer {
         // Don't need to score the original graph; the BIC scores all up to a constant.
 //        double score = 0;
         double score = scoreGraph(graph);
-        System.out.println("zqian########## get the score for input Graph :"+score);
+        System.out.println("zqian########## get the score for input Graph :" + score);
         //Oct 30, bug? Arrow implies non-ancestor
         //score=0;
         storeGraph(new EdgeListGraph(graph), score);
-        
-       // System.out.println("######## finished the storing");
+
+        // System.out.println("######## finished the storing");
         // Do forward search.
         score = fes(graph, score);
 //zqian
-       System.out.println("Fes Search is Done, here is the final BDeu Score "+ score +"\n");
+        System.out.println("Fes Search is Done, here is the final BDeu Score " + score + "\n");
         // Do backward search.
         score = bes(graph, score);
-//zqian        
- //       System.out.println("Bes Search is Done, here is  BDeu Score "+ score +"\n");
+//zqian
+        //       System.out.println("Bes Search is Done, here is  BDeu Score "+ score +"\n");
 //        score = fes(graph, score);
 //        bes(graph, score);
 
@@ -276,7 +363,7 @@ public final class Ges3 implements GraphSearch, GraphScorer {
         return graph;
 
     }
-    
+
     /*pruning phase using BES search @ zqian, Oct 23, 2013*/
     public Graph Pruning_BES() {
         long startTime = System.currentTimeMillis();
@@ -290,12 +377,12 @@ public final class Ges3 implements GraphSearch, GraphScorer {
         if (dataSet != null && DataUtils.containsMissingValue(dataSet)) {
             throw new IllegalArgumentException("Please remove or impute missing values first.");
         }
-        Graph graph = new EdgeListGraph(new LinkedList<Node>(getVariables()));
+        Graph graph = new EdgeListGraph(new LinkedList <Node>(getVariables()));
 
-        scoreHash = new WeakHashMap<Node, Map<Set<Node>, Double>>();
+        scoreHash = new WeakHashMap <Node, Map <Set <Node>, Double>>();
 
         for (Node node : graph.getNodes()) {
-            scoreHash.put(node, new HashMap<Set<Node>, Double>());
+            scoreHash.put(node, new HashMap <Set <Node>, Double>());
         }
 
         fireGraphChange(graph);
@@ -304,12 +391,12 @@ public final class Ges3 implements GraphSearch, GraphScorer {
 
         double score = scoreGraph(graph);
         storeGraph(new EdgeListGraph(graph), score);
-      
-        System.out.println("NO FES search, score before BES :"+ score +"\n");
+
+        System.out.println("NO FES search, score before BES :" + score + "\n");
         // Do backward search.
 
         score = Pruning_bes(graph, score);
-        System.out.println("Bes Search is Done, here is  BDeu Score "+ score +"\n");
+        System.out.println("Bes Search is Done, here is  BDeu Score " + score + "\n");
 
         long endTime = System.currentTimeMillis();
         this.elapsedTime = endTime - startTime;
@@ -317,8 +404,8 @@ public final class Ges3 implements GraphSearch, GraphScorer {
         return graph;
 
     }
-    
-    public Graph search(List<Node> nodes) {
+
+    public Graph search(List <Node> nodes) {
         long startTime = System.currentTimeMillis();
         localScoreCache.clear();
 
@@ -354,6 +441,7 @@ public final class Ges3 implements GraphSearch, GraphScorer {
 
     /**
      * Sets the background knowledge.     *
+     *
      * @param knowledge the knowledge object, specifying forbidden and required edges.
      */
     public void setKnowledge(Knowledge knowledge) {
@@ -363,22 +451,8 @@ public final class Ges3 implements GraphSearch, GraphScorer {
         this.knowledge = knowledge;
     }
 
-    public void setStructurePrior(double structurePrior) {
-        if (getDiscreteScore() != null) {
-            getDiscreteScore().setStructurePrior(structurePrior);
-        }
-        this.structurePrior = structurePrior;
-    }
-
-    public void setSamplePrior(double samplePrior) {
-        if (getDiscreteScore() != null) {
-            getDiscreteScore().setSamplePrior(samplePrior);
-        }
-        this.samplePrior = samplePrior;
-    }
-
     @Override
-	public long getElapsedTime() {
+    public long getElapsedTime() {
         return elapsedTime;
     }
 
@@ -407,6 +481,9 @@ public final class Ges3 implements GraphSearch, GraphScorer {
         return maxEdgesAdded;
     }
 
+
+    //===========================PRIVATE METHODS========================//
+
     public void setMaxEdgesAdded(int maxEdgesAdded) {
         if (maxEdgesAdded < -1) throw new IllegalArgumentException();
 
@@ -421,7 +498,7 @@ public final class Ges3 implements GraphSearch, GraphScorer {
         return scoreGraph(dag);
     }
 
-    public SortedSet<ScoredGraph> getTopGraphs() {
+    public SortedSet <ScoredGraph> getTopGraphs() {
         return topGraphs;
     }
 
@@ -445,9 +522,6 @@ public final class Ges3 implements GraphSearch, GraphScorer {
         this.storeGraphs = storeGraphs;
     }
 
-
-    //===========================PRIVATE METHODS========================//
-
     private void initialize(double samplePrior, double structurePrior) {
         setStructurePrior(structurePrior);
         setSamplePrior(samplePrior);
@@ -459,16 +533,16 @@ public final class Ges3 implements GraphSearch, GraphScorer {
      * @param graph The graph in the state prior to the forward equivalence search.
      * @param score The score in the state prior to the forward equivalence search
      * @return the score in the state after the forward equivelance search. Note that the graph is changed as a
-     *         side-effect to its state after the forward equivelance search.
+     * side-effect to its state after the forward equivelance search.
      */
     private double fes(Graph graph, double score) {
 
-        List<Node> nodes = graph.getNodes();
+        List <Node> nodes = graph.getNodes();
 
-        sortedArrows = new TreeSet<Arrow>();
+        sortedArrows = new TreeSet <Arrow>();
         lookupArrows = new HashSet[nodes.size()][nodes.size()];
 
-        nodesHash = new HashMap<Node, Integer>();
+        nodesHash = new HashMap <Node, Integer>();
         int index = -1;
 
         for (Node node : nodes) {
@@ -496,7 +570,7 @@ public final class Ges3 implements GraphSearch, GraphScorer {
                 continue;
             }
 
-            if (!new HashSet<Node>(getTNeighbors(_x, _y, graph)).containsAll(arrow.getHOrT())) {
+            if (!new HashSet <Node>(getTNeighbors(_x, _y, graph)).containsAll(arrow.getHOrT())) {
                 reevaluateFoward(graph, nodes, arrow);
                 continue;
             }
@@ -507,7 +581,7 @@ public final class Ges3 implements GraphSearch, GraphScorer {
 
             Node x = nodes.get(arrow.getX());
             Node y = nodes.get(arrow.getY());
-            Set<Node> t = arrow.getHOrT();
+            Set <Node> t = arrow.getHOrT();
             double bump = arrow.getBump();
 
             if (covariances != null && minJump == 0 && isUseFCutoff()) {
@@ -545,19 +619,15 @@ public final class Ges3 implements GraphSearch, GraphScorer {
         return score;
     }
 
-    double minJump = 0;
-    private double minNeg = 0; //-1000000;
-
-
     private double bes(Graph graph, double score) {
-        List<Node> nodes = graph.getNodes();
+        List <Node> nodes = graph.getNodes();
 
         TetradLogger.getInstance().log("info", "** BACKWARD EQUIVALENCE SEARCH");
-       TetradLogger.getInstance().log("info", "Initial Model BIC = " + nf.format(score)); // here is BIC socre or BDeu Score //zqian ?? 
-      // System.out.println("Within BES Search ");// + score );//+ " " + graph); // Oct 23
-       
+        TetradLogger.getInstance().log("info", "Initial Model BIC = " + nf.format(score)); // here is BIC socre or BDeu Score //zqian ??
+        // System.out.println("Within BES Search ");// + score );//+ " " + graph); // Oct 23
+
         initializeArrowsBackward(graph);
-      //  System.out.println("sortedArrowsBackwards.isEmpty() is : " + sortedArrowsBackwards.isEmpty() );
+        //  System.out.println("sortedArrowsBackwards.isEmpty() is : " + sortedArrowsBackwards.isEmpty() );
         while (!sortedArrowsBackwards.isEmpty()) {
             Arrow arrow = sortedArrowsBackwards.first();
             sortedArrowsBackwards.remove(arrow);
@@ -574,7 +644,7 @@ public final class Ges3 implements GraphSearch, GraphScorer {
                 continue;
             }
 
-            if (!new HashSet<Node>(getHNeighbors(_x, _y, graph)).containsAll(arrow.getHOrT())) {
+            if (!new HashSet <Node>(getHNeighbors(_x, _y, graph)).containsAll(arrow.getHOrT())) {
                 reevaluateBackward(graph, nodes, arrow);
                 continue;
             }
@@ -585,7 +655,7 @@ public final class Ges3 implements GraphSearch, GraphScorer {
 
             Node x = nodes.get(arrow.getX());
             Node y = nodes.get(arrow.getY());
-            Set<Node> h = arrow.getHOrT();
+            Set <Node> h = arrow.getHOrT();
             double bump = arrow.getBump();
 
             score = score + bump;
@@ -601,19 +671,19 @@ public final class Ges3 implements GraphSearch, GraphScorer {
     }
 
     private double Pruning_bes(Graph graph, double score) {
-        List<Node> nodes = graph.getNodes();
+        List <Node> nodes = graph.getNodes();
 
-        nodesHash = new HashMap<Node, Integer>();  // Oct 23 2013, copied from fes
+        nodesHash = new HashMap <Node, Integer>();  // Oct 23 2013, copied from fes
         int index = -1;
         for (Node node : nodes) {
             nodesHash.put(node, ++index);
         }
-       System.out.println("Within Pruning_BES Search " + score );//+ " " + graph); // Oct 23
-       
-       Pruning_initializeArrowsBackward(graph); //??
-        
-       System.out.println("sortedArrowsBackwards.isEmpty() is : " + sortedArrowsBackwards.isEmpty() );
-       // here is the key?  often empty?
+        System.out.println("Within Pruning_BES Search " + score);//+ " " + graph); // Oct 23
+
+        Pruning_initializeArrowsBackward(graph); //??
+
+        System.out.println("sortedArrowsBackwards.isEmpty() is : " + sortedArrowsBackwards.isEmpty());
+        // here is the key?  often empty?
         while (!sortedArrowsBackwards.isEmpty()) {
             Arrow arrow = sortedArrowsBackwards.first();
             sortedArrowsBackwards.remove(arrow);
@@ -626,12 +696,12 @@ public final class Ges3 implements GraphSearch, GraphScorer {
             }
 
             if (!findNaYX(_x, _y, graph).equals(arrow.getNaYX())) {
-            	Pruning_reevaluateBackward(graph, nodes, arrow);
+                Pruning_reevaluateBackward(graph, nodes, arrow);
                 continue;
             }
 
-            if (!new HashSet<Node>(getHNeighbors(_x, _y, graph)).containsAll(arrow.getHOrT())) {
-            	Pruning_reevaluateBackward(graph, nodes, arrow);
+            if (!new HashSet <Node>(getHNeighbors(_x, _y, graph)).containsAll(arrow.getHOrT())) {
+                Pruning_reevaluateBackward(graph, nodes, arrow);
                 continue;
             }
 
@@ -641,7 +711,7 @@ public final class Ges3 implements GraphSearch, GraphScorer {
 
             Node x = nodes.get(arrow.getX());
             Node y = nodes.get(arrow.getY());
-            Set<Node> h = arrow.getHOrT();
+            Set <Node> h = arrow.getHOrT();
             double bump = arrow.getBump();
 
             score = score + bump;
@@ -656,9 +726,8 @@ public final class Ges3 implements GraphSearch, GraphScorer {
         return score;
     }
 
-    
-    private void initializeArrowsForward(List<Node> nodes, Graph graph) {
-        Set<Node> empty = Collections.emptySet();
+    private void initializeArrowsForward(List <Node> nodes, Graph graph) {
+        Set <Node> empty = Collections.emptySet();
 
         for (int j = 0; j < nodes.size(); j++) {
 
@@ -668,12 +737,12 @@ public final class Ges3 implements GraphSearch, GraphScorer {
                 Node _x = nodes.get(i);
                 Node _y = nodes.get(j);
 
-                if (getKnowledge().edgeForbidden(_x.getName(),_y.getName())) {
+                if (getKnowledge().edgeForbidden(_x.getName(), _y.getName())) {
                     continue;
                 }
 
-                Set<Node> naYX = empty;
-                Set<Node> t = empty;
+                Set <Node> naYX = empty;
+                Set <Node> t = empty;
 
                 if (!validSetByKnowledge(_x, _y, t, true)) {
                     continue;
@@ -683,7 +752,7 @@ public final class Ges3 implements GraphSearch, GraphScorer {
 
                 if (bump > minJump) {
                     Arrow arrow = new Arrow(bump, i, j, t, naYX, nodes);
-                    lookupArrows[i][j] = new HashSet<Arrow>();
+                    lookupArrows[i][j] = new HashSet <Arrow>();
                     sortedArrows.add(arrow);
                     lookupArrows[i][j].add(arrow);
                 }
@@ -694,29 +763,29 @@ public final class Ges3 implements GraphSearch, GraphScorer {
     }
 
     private void initializeArrowsBackward(Graph graph) {
-        List<Node> nodes = graph.getNodes();
-        sortedArrowsBackwards = new TreeSet<Arrow>();
+        List <Node> nodes = graph.getNodes();
+        sortedArrowsBackwards = new TreeSet <Arrow>();
         lookupArrowsBackwards = new HashSet[nodes.size()][nodes.size()];
-        
 
-        List<Edge> graphEdges = graph.getEdges();
+
+        List <Edge> graphEdges = graph.getEdges();
         for (Edge edge : graphEdges) {
             Node _x = edge.getNode1();
             Node _y = edge.getNode2();
-            
-           // System.out.println("Within initializeArrowsBackward "); // Oct 23
+
+            // System.out.println("Within initializeArrowsBackward "); // Oct 23
 
             int i = nodesHash.get(edge.getNode1());
             int j = nodesHash.get(edge.getNode2());
-          //  System.out.println("i :" +i +"\n j :" +j); // Oct 23
+            //  System.out.println("i :" +i +"\n j :" +j); // Oct 23
 
             if (!getKnowledge().noEdgeRequired(_x.getName(), _y.getName())) {
                 continue;
             }
             if (Edges.isDirectedEdge(edge)) {
-            	
-            	calculateArrowsBackward(i, j, nodes, graph);
-                
+
+                calculateArrowsBackward(i, j, nodes, graph);
+
             } else {
                 calculateArrowsBackward(i, j, nodes, graph);
                 calculateArrowsBackward(j, i, nodes, graph);
@@ -726,41 +795,41 @@ public final class Ges3 implements GraphSearch, GraphScorer {
     }
 
     private void Pruning_initializeArrowsBackward(Graph graph) {
-        List<Node> nodes = graph.getNodes();
-        sortedArrowsBackwards = new TreeSet<Arrow>();
+        List <Node> nodes = graph.getNodes();
+        sortedArrowsBackwards = new TreeSet <Arrow>();
         lookupArrowsBackwards = new HashSet[nodes.size()][nodes.size()];
-        
 
-        List<Edge> graphEdges = graph.getEdges();
+
+        List <Edge> graphEdges = graph.getEdges();
         for (Edge edge : graphEdges) {
             Node _x = edge.getNode1();
             Node _y = edge.getNode2();
-            
-           // System.out.println("Within initializeArrowsBackward "); // Oct 23
+
+            // System.out.println("Within initializeArrowsBackward "); // Oct 23
 
             int i = nodesHash.get(edge.getNode1());
             int j = nodesHash.get(edge.getNode2());
-          //  System.out.println("i :" +i +"\n j :" +j); // Oct 23
+            //  System.out.println("i :" +i +"\n j :" +j); // Oct 23
 
             if (!getKnowledge().noEdgeRequired(_x.getName(), _y.getName())) {
                 continue;
             }
-            
-            System.out.println("Edges.isDirectedEdge(edge) :"+ Edges.isDirectedEdge(edge));
-            
+
+            System.out.println("Edges.isDirectedEdge(edge) :" + Edges.isDirectedEdge(edge));
+
             if (Edges.isDirectedEdge(edge)) {
-            	 
-            	Pruning_calculateArrowsBackward(i, j, nodes, graph);
-                
+
+                Pruning_calculateArrowsBackward(i, j, nodes, graph);
+
             } else {
-            	Pruning_calculateArrowsBackward(i, j, nodes, graph);
-            	Pruning_calculateArrowsBackward(j, i, nodes, graph);
+                Pruning_calculateArrowsBackward(i, j, nodes, graph);
+                Pruning_calculateArrowsBackward(j, i, nodes, graph);
             }
 
         }
     }
 
-    private void reevaluateFoward(Graph graph, List<Node> nodes, Arrow arrow) {
+    private void reevaluateFoward(Graph graph, List <Node> nodes, Arrow arrow) {
         Node x = nodes.get(arrow.getX());
         Node y = nodes.get(arrow.getY());
 
@@ -787,7 +856,7 @@ public final class Ges3 implements GraphSearch, GraphScorer {
         }
     }
 
-    private void reevaluateBackward(Graph graph, List<Node> nodes, Arrow arrow) {
+    private void reevaluateBackward(Graph graph, List <Node> nodes, Arrow arrow) {
         Node x = nodes.get(arrow.getX());
         Node y = nodes.get(arrow.getY());
 
@@ -806,7 +875,7 @@ public final class Ges3 implements GraphSearch, GraphScorer {
         }
     }
 
-    private void Pruning_reevaluateBackward(Graph graph, List<Node> nodes, Arrow arrow) {
+    private void Pruning_reevaluateBackward(Graph graph, List <Node> nodes, Arrow arrow) {
         Node x = nodes.get(arrow.getX());
         Node y = nodes.get(arrow.getY());
 
@@ -825,8 +894,7 @@ public final class Ges3 implements GraphSearch, GraphScorer {
         }
     }
 
-    
-    private void calculateArrowsForward(int i, int j, List<Node> nodes, Graph graph) {
+    private void calculateArrowsForward(int i, int j, List <Node> nodes, Graph graph) {
         if (i == j) {
             return;
         }
@@ -843,7 +911,7 @@ public final class Ges3 implements GraphSearch, GraphScorer {
             return;
         }
 
-        Set<Node> naYX = findNaYX(_x, _y, graph);
+        Set <Node> naYX = findNaYX(_x, _y, graph);
 
         if (lookupArrows[i][j] != null) {
             for (Arrow arrow : lookupArrows[i][j]) {
@@ -853,10 +921,10 @@ public final class Ges3 implements GraphSearch, GraphScorer {
             lookupArrows[i][j] = null;
         }
 
-        List<Node> tNeighbors = getTNeighbors(_x, _y, graph);
-        List<Set<Node>> tSubsets = powerSet(tNeighbors);
+        List <Node> tNeighbors = getTNeighbors(_x, _y, graph);
+        List <Set <Node>> tSubsets = powerSet(tNeighbors);
 
-        for (Set<Node> t : tSubsets) {
+        for (Set <Node> t : tSubsets) {
             if (!validSetByKnowledge(_x, _y, t, true)) {
                 continue;
             }
@@ -868,7 +936,7 @@ public final class Ges3 implements GraphSearch, GraphScorer {
 
             if (bump > minJump) {
                 if (lookupArrows[i][j] == null) {
-                    lookupArrows[i][j] = new HashSet<Arrow>();
+                    lookupArrows[i][j] = new HashSet <Arrow>();
                 }
                 sortedArrows.add(arrow);
                 lookupArrows[i][j].add(arrow);
@@ -876,7 +944,7 @@ public final class Ges3 implements GraphSearch, GraphScorer {
         }
     }
 
-    private void calculateArrowsBackward(int i, int j, List<Node> nodes, Graph graph) {
+    private void calculateArrowsBackward(int i, int j, List <Node> nodes, Graph graph) {
         if (i == j) {
             return;
         }
@@ -893,7 +961,7 @@ public final class Ges3 implements GraphSearch, GraphScorer {
             return;
         }
 
-        Set<Node> naYX = findNaYX(_x, _y, graph);
+        Set <Node> naYX = findNaYX(_x, _y, graph);
 
 
         if (lookupArrowsBackwards[i][j] != null) {
@@ -904,10 +972,10 @@ public final class Ges3 implements GraphSearch, GraphScorer {
             lookupArrowsBackwards[i][j] = null;
         }
 
-        List<Node> hNeighbors = getHNeighbors(_x, _y, graph);
-        List<Set<Node>> hSubsets = powerSet(hNeighbors);
+        List <Node> hNeighbors = getHNeighbors(_x, _y, graph);
+        List <Set <Node>> hSubsets = powerSet(hNeighbors);
 
-        for (Set<Node> h : hSubsets) {
+        for (Set <Node> h : hSubsets) {
             double bump = deleteEval(_x, _y, h, naYX, graph);
             Arrow arrow = new Arrow(bump, i, j, h, naYX, nodes);
 
@@ -915,7 +983,7 @@ public final class Ges3 implements GraphSearch, GraphScorer {
 
             if (bump > minNeg) {
                 if (lookupArrowsBackwards[i][j] == null) {
-                    lookupArrowsBackwards[i][j] = new HashSet<Arrow>();
+                    lookupArrowsBackwards[i][j] = new HashSet <Arrow>();
                 }
 
                 sortedArrowsBackwards.add(arrow);
@@ -924,7 +992,7 @@ public final class Ges3 implements GraphSearch, GraphScorer {
         }
     }
 
-    private void Pruning_calculateArrowsBackward(int i, int j, List<Node> nodes, Graph graph) {
+    private void Pruning_calculateArrowsBackward(int i, int j, List <Node> nodes, Graph graph) {
         if (i == j) {
             return;
         }
@@ -940,7 +1008,7 @@ public final class Ges3 implements GraphSearch, GraphScorer {
             return;
         }
 
-        Set<Node> naYX = findNaYX(_x, _y, graph);
+        Set <Node> naYX = findNaYX(_x, _y, graph);
 
 
         if (lookupArrowsBackwards[i][j] != null) {
@@ -951,10 +1019,10 @@ public final class Ges3 implements GraphSearch, GraphScorer {
             lookupArrowsBackwards[i][j] = null;
         }
 
-        List<Node> hNeighbors = getHNeighbors(_x, _y, graph);
-        List<Set<Node>> hSubsets = powerSet(hNeighbors);
+        List <Node> hNeighbors = getHNeighbors(_x, _y, graph);
+        List <Set <Node>> hSubsets = powerSet(hNeighbors);
 
-        for (Set<Node> h : hSubsets) {
+        for (Set <Node> h : hSubsets) {
             double bump = deleteEval(_x, _y, h, naYX, graph);
             Arrow arrow = new Arrow(bump, i, j, h, naYX, nodes);
 
@@ -962,7 +1030,7 @@ public final class Ges3 implements GraphSearch, GraphScorer {
 
             if (bump > minNeg) {
                 if (lookupArrowsBackwards[i][j] == null) {
-                    lookupArrowsBackwards[i][j] = new HashSet<Arrow>();
+                    lookupArrowsBackwards[i][j] = new HashSet <Arrow>();
                 }
 
                 sortedArrowsBackwards.add(arrow);
@@ -997,107 +1065,16 @@ public final class Ges3 implements GraphSearch, GraphScorer {
         this.fCutoffP = fCutoffP;
     }
 
-    private static class Arrow implements Comparable {
-        private double bump;
-        private int x;
-        private int y;
-        private Set<Node> hOrT;
-        private Set<Node> naYX;
-        private List<Node> nodes;
-
-        public Arrow(double bump, int x, int y, Set<Node> hOrT, Set<Node> naYX, List<Node> nodes) {
-            this.bump = bump;
-            this.x = x;
-            this.y = y;
-            this.hOrT = hOrT;
-            this.naYX = naYX;
-            this.nodes = nodes;
-        }
-
-        public double getBump() {
-            return bump;
-        }
-
-        public int getX() {
-            return x;
-        }
-
-        public int getY() {
-            return y;
-        }
-
-        public Set<Node> getHOrT() {
-            return hOrT;
-        }
-
-        public Set<Node> getNaYX() {
-            return naYX;
-        }
-
-        // Sorting is by bump, high to low.
-
-        @Override
-		public int compareTo(Object o) {
-            Arrow info = (Arrow) o;
-            return new Double(info.getBump()).compareTo(new Double(getBump()));
-        }
-
-        @Override
-		public String toString() {
-            return "Arrow<" + nodes.get(x) + "->" + nodes.get(y) + " bump = " + bump + " t = " + hOrT + " naYX = " + naYX + ">";
-        }
-    }
-
-
-    /**
-     * Get all nodes that are connected to Y by an undirected edge and not adjacent to X.
-     */
-    private static List<Node> getTNeighbors(Node x, Node y, Graph graph) {
-        List<Node> tNeighbors = graph.getAdjacentNodes(y);
-        tNeighbors.removeAll(graph.getAdjacentNodes(x));
-
-        for (int i = tNeighbors.size() - 1; i >= 0; i--) {
-            Node z = tNeighbors.get(i);
-            Edge edge = graph.getEdge(y, z);
-
-            if (!Edges.isUndirectedEdge(edge)) {
-                tNeighbors.remove(z);
-            }
-        }
-
-        return tNeighbors;
-    }
-
-    /**
-     * Get all nodes that are connected to Y by an undirected edge and adjacent to X
-     */
-    private static List<Node> getHNeighbors(Node x, Node y, Graph graph) {
-        List<Node> hNeighbors = graph.getAdjacentNodes(y);
-        hNeighbors.retainAll(graph.getAdjacentNodes(x));
-
-        for (int i = hNeighbors.size() - 1; i >= 0; i--) {
-            Node z = hNeighbors.get(i);
-            Edge edge = graph.getEdge(y, z);
-
-            if (!Edges.isUndirectedEdge(edge)) {
-                hNeighbors.remove(z);
-            }
-        }
-
-        return hNeighbors;
-    }
-
-
     /**
      * Evaluate the Insert(X, Y, T) operator (Definition 12 from Chickering, 2002).
      */
-    private double insertEval(Node x, Node y, Set<Node> t, Set<Node> naYX, Graph graph) {
+    private double insertEval(Node x, Node y, Set <Node> t, Set <Node> naYX, Graph graph) {
 
         // set1 contains x; set2 does not.
-        Set<Node> set2 = new HashSet<Node>(naYX);
+        Set <Node> set2 = new HashSet <Node>(naYX);
         set2.addAll(t);
         set2.addAll(graph.getParents(y));
-        Set<Node> set1 = new HashSet<Node>(set2);
+        Set <Node> set1 = new HashSet <Node>(set2);
         set1.add(x);
 
         double score = scoreGraphChange(y, set1, set2);
@@ -1108,22 +1085,23 @@ public final class Ges3 implements GraphSearch, GraphScorer {
     /**
      * Evaluate the Delete(X, Y, T) operator (Definition 12 from Chickering, 2002).
      */
-    private double deleteEval(Node x, Node y, Set<Node> h, Set<Node> naYX, Graph graph) {
+    private double deleteEval(Node x, Node y, Set <Node> h, Set <Node> naYX, Graph graph) {
 
         // set2 contains x; set1 does not.
-        Set<Node> set2 = new HashSet<Node>(naYX);
+        Set <Node> set2 = new HashSet <Node>(naYX);
         set2.removeAll(h);
         set2.addAll(graph.getParents(y));
         set2.add(x);
-        Set<Node> set1 = new HashSet<Node>(set2);
+        Set <Node> set1 = new HashSet <Node>(set2);
         set1.remove(x);
 
         return scoreGraphChange(y, set1, set2);
     }
 
-    /** Do an actual insertion , (Definition 12 from Chickering, 2002).   
-     *  **/
-    private void insert(Node x, Node y, Set<Node> t, Graph graph, double score, boolean log, double bump) {
+    /**
+     * Do an actual insertion , (Definition 12 from Chickering, 2002).
+     **/
+    private void insert(Node x, Node y, Set <Node> t, Graph graph, double score, boolean log, double bump) {
         if (graph.isAdjacentTo(x, y)) {
             throw new IllegalArgumentException(x + " and " + y + " are already adjacent in the graph.");
         }
@@ -1167,86 +1145,6 @@ public final class Ges3 implements GraphSearch, GraphScorer {
                         graph.getEdge(_t, y));
             }
         }
-    }
-
-    /**
-     * Do an actual deletion (Definition 13 from Chickering, 2002).
-     */
-    private void delete(Node x, Node y, Set<Node> subset, Graph graph, double score, boolean log, double bump) {
-    	System.out.println("here comes the delete step"); //zqian
-        Edge trueEdge = null;
-
-        if (trueGraph != null) {
-            Node _x = trueGraph.getNode(x.getName());
-            Node _y = trueGraph.getNode(y.getName());
-            trueEdge = trueGraph.getEdge(_x, _y);
-        }
-
-        if (log) {
-            Edge oldEdge = graph.getEdge(x, y);
-
-            String label = trueGraph != null && trueEdge != null ? "*" : "";
-            TetradLogger.getInstance().log("deletedEdges", (graph.getNumEdges() - 1) + ". DELETE " + oldEdge +
-                    " " + subset +
-                    " (" + nf.format(score) + ") " + label);
-            System.out.println((graph.getNumEdges() - 1) + ". DELETE " + oldEdge +
-                    " " + subset +
-                    " (" + nf.format(score) + ", " + bump + ") " + label);
-        }
-
-        graph.removeEdge(x, y);
-
-        for (Node h : subset) {
-            graph.removeEdge(y, h);
-            graph.addDirectedEdge(y, h);
-
-            if (log) {
-                Edge oldEdge = graph.getEdge(y, h);
-                TetradLogger.getInstance().log("directedEdges", "--- Directing " + oldEdge + " to " +
-                        graph.getEdge(y, h));
-            }
-
-            if (Edges.isUndirectedEdge(graph.getEdge(y, h))) {
-                if (!graph.isAdjacentTo(x, h)) throw new IllegalArgumentException("Not adjacent: " + x + ", " + h);
-
-                graph.removeEdge(x, h);
-                graph.addDirectedEdge(x, h);
-
-                if (log) {
-                    Edge oldEdge = graph.getEdge(x, h);
-                    TetradLogger.getInstance().log("directedEdges", "--- Directing " + oldEdge + " to " +
-                            graph.getEdge(x, h));
-                }
-            }
-        }
-    }
-
-    /**
-     * Test if the candidate insertion is a valid operation
-     * (Theorem 15 from Chickering, 2002).
-     **/
-    private boolean validInsert(Node x, Node y, Set<Node> t, Set<Node> naYX, Graph graph) {
-        Set<Node> union = new HashSet<Node>(t);
-        union.addAll(naYX);
-
-        if (!isClique(union, graph)) {
-            return false;
-        }
-
-        if (existsUnblockedSemiDirectedPath(y, x, union, graph)) {
-            return false;
-        }
-
-        return true;
-    }
-
-    /**
-     * Test if the candidate deletion is a valid operation (Theorem 17 from Chickering, 2002).
-     */
-    private static boolean validDelete(Set<Node> h, Set<Node> naXY, Graph graph) {
-        Set<Node> set = new HashSet<Node>(naXY);
-        set.removeAll(h);
-        return isClique(set, graph);
     }
 
     //---Background knowledge methods.
@@ -1302,17 +1200,89 @@ public final class Ges3 implements GraphSearch, GraphScorer {
         }
     }
     */
-     
-    
+
+    /**
+     * Do an actual deletion (Definition 13 from Chickering, 2002).
+     */
+    private void delete(Node x, Node y, Set <Node> subset, Graph graph, double score, boolean log, double bump) {
+        System.out.println("here comes the delete step"); //zqian
+        Edge trueEdge = null;
+
+        if (trueGraph != null) {
+            Node _x = trueGraph.getNode(x.getName());
+            Node _y = trueGraph.getNode(y.getName());
+            trueEdge = trueGraph.getEdge(_x, _y);
+        }
+
+        if (log) {
+            Edge oldEdge = graph.getEdge(x, y);
+
+            String label = trueGraph != null && trueEdge != null ? "*" : "";
+            TetradLogger.getInstance().log("deletedEdges", (graph.getNumEdges() - 1) + ". DELETE " + oldEdge +
+                    " " + subset +
+                    " (" + nf.format(score) + ") " + label);
+            System.out.println((graph.getNumEdges() - 1) + ". DELETE " + oldEdge +
+                    " " + subset +
+                    " (" + nf.format(score) + ", " + bump + ") " + label);
+        }
+
+        graph.removeEdge(x, y);
+
+        for (Node h : subset) {
+            graph.removeEdge(y, h);
+            graph.addDirectedEdge(y, h);
+
+            if (log) {
+                Edge oldEdge = graph.getEdge(y, h);
+                TetradLogger.getInstance().log("directedEdges", "--- Directing " + oldEdge + " to " +
+                        graph.getEdge(y, h));
+            }
+
+            if (Edges.isUndirectedEdge(graph.getEdge(y, h))) {
+                if (!graph.isAdjacentTo(x, h)) throw new IllegalArgumentException("Not adjacent: " + x + ", " + h);
+
+                graph.removeEdge(x, h);
+                graph.addDirectedEdge(x, h);
+
+                if (log) {
+                    Edge oldEdge = graph.getEdge(x, h);
+                    TetradLogger.getInstance().log("directedEdges", "--- Directing " + oldEdge + " to " +
+                            graph.getEdge(x, h));
+                }
+            }
+        }
+    }
+
+    /**
+     * Test if the candidate insertion is a valid operation
+     * (Theorem 15 from Chickering, 2002).
+     **/
+    private boolean validInsert(Node x, Node y, Set <Node> t, Set <Node> naYX, Graph graph) {
+        Set <Node> union = new HashSet <Node>(t);
+        union.addAll(naYX);
+
+        if (!isClique(union, graph)) {
+            return false;
+        }
+
+        if (existsUnblockedSemiDirectedPath(y, x, union, graph)) {
+            return false;
+        }
+
+        return true;
+    }
+
+    //--Auxiliary methods.
+
     /**/
     private void addRequiredEdges(Graph graph) {
-        for (Iterator<KnowledgeEdge> it =
-                this.getKnowledge().requiredEdgesIterator(); it.hasNext();) {
+        for (Iterator <KnowledgeEdge> it =
+             this.getKnowledge().requiredEdgesIterator(); it.hasNext(); ) {
             KnowledgeEdge next = it.next();
             String a = next.getFrom();
             String b = next.getTo();
             Node nodeA = null, nodeB = null;
-            Iterator<Node> itn = graph.getNodes().iterator();
+            Iterator <Node> itn = graph.getNodes().iterator();
             while (itn.hasNext() && (nodeA == null || nodeB == null)) {
                 Node nextNode = itn.next();
                 if (nextNode.getName().equals(a)) {
@@ -1324,23 +1294,22 @@ public final class Ges3 implements GraphSearch, GraphScorer {
             }
             if (!graph.isAncestorOf(nodeB, nodeA)) {
                 graph.removeEdge(nodeA, nodeB);
-                
+
                 /**************/
-                if(!(nodeA == null || nodeB == null)){/*******************/ /*changed August 27. Need to not add edges with one part null.*/
-                graph.addDirectedEdge(nodeA, nodeB);
-                TetradLogger.getInstance().log("insertedEdges", "Adding edge by knowledge: " + graph.getEdge(nodeA, nodeB));
-            }
+                if (!(nodeA == null || nodeB == null)) {/*******************/ /*changed August 27. Need to not add edges with one part null.*/
+                    graph.addDirectedEdge(nodeA, nodeB);
+                    TetradLogger.getInstance().log("insertedEdges", "Adding edge by knowledge: " + graph.getEdge(nodeA, nodeB));
+                }
             }
         }
     }
-    
-    
+
     /**
      * Use background knowledge to decide if an insert or delete operation does not orient edges in a forbidden
      * direction according to prior knowledge. If some orientation is forbidden in the subset, the whole subset is
      * forbidden.
      */
-    private boolean validSetByKnowledge(Node x, Node y, Set<Node> subset,
+    private boolean validSetByKnowledge(Node x, Node y, Set <Node> subset,
                                         boolean insertMode) {
         if (insertMode) {
             for (Node node : subset) {
@@ -1364,50 +1333,13 @@ public final class Ges3 implements GraphSearch, GraphScorer {
         return true;
     }
 
-    //--Auxiliary methods.
-
-    /**
-     * Find all nodes that are connected to Y by an undirected edge that are adjacent to X (that is, by undirected or
-     * directed edge) NOTE: very inefficient implementation, since the current library does not allow access to the
-     * adjacency list/matrix of the graph.
-     */
-    private static Set<Node> findNaYX(Node x, Node y, Graph graph) {
-        Set<Node> naYX = new HashSet<Node>(graph.getAdjacentNodes(y));
-        naYX.retainAll(graph.getAdjacentNodes(x));
-
-        for (Node z : new HashSet<Node>(naYX)) {
-            Edge edge = graph.getEdge(y, z);
-
-            if (!Edges.isUndirectedEdge(edge)) {
-                naYX.remove(z);
-            }
-        }
-
-        return naYX;
-    }
-
-    /**
-     * Returns true iif the given set forms a clique in the given graph.
-     */
-    private static boolean isClique(Set<Node> _nodes, Graph graph) {
-        List<Node> nodes = new LinkedList<Node>(_nodes);
-        for (int i = 0; i < nodes.size() - 1; i++) {
-            for (int j = i + 1; j < nodes.size(); j++) {
-                if (!graph.isAdjacentTo(nodes.get(i), nodes.get(j))) {
-                    return false;
-                }
-            }
-        }
-        return true;
-    }
-
-    public boolean existsUnblockedSemiDirectedPath(Node node1, Node node2, Set<Node> cond, Graph graph) {
+    public boolean existsUnblockedSemiDirectedPath(Node node1, Node node2, Set <Node> cond, Graph graph) {
         return existsUnblockedSemiDirectedPathVisit(node1, node2,
-                new LinkedList<Node>(), graph, cond);
+                new LinkedList <Node>(), graph, cond);
     }
 
     private boolean existsUnblockedSemiDirectedPathVisit(Node node1, Node nodes2,
-                                                         LinkedList<Node> path, Graph graph, Set<Node> cond) {
+                                                         LinkedList <Node> path, Graph graph, Set <Node> cond) {
         if (cond.contains(node1)) return false;
         if (path.size() > 6) return false;
         path.addLast(node1);
@@ -1436,26 +1368,6 @@ public final class Ges3 implements GraphSearch, GraphScorer {
         return false;
     }
 
-    private static List<Set<Node>> powerSet(List<Node> nodes) {
-        List<Set<Node>> subsets = new ArrayList<Set<Node>>();
-        int total = (int) Math.pow(2, nodes.size());
-        for (int i = 0; i < total; i++) {
-            Set<Node> newSet = new HashSet<Node>();
-            String selection = Integer.toBinaryString(i);
-
-            int shift = nodes.size() - selection.length();
-
-            for (int j = nodes.size() - 1; j >= 0; j--) {
-                if (j >= shift && selection.charAt(j - shift) == '1') {
-                    newSet.add(nodes.get(j));
-                }
-            }
-            subsets.add(newSet);
-        }
-
-        return subsets;
-    }
-
     /**
      * Completes a pattern that was modified by an insertion/deletion operator Based on the algorithm described on
      * Appendix C of (Chickering, 2002).
@@ -1475,7 +1387,7 @@ public final class Ges3 implements GraphSearch, GraphScorer {
 
         TetradLogger.getInstance().log("rebuiltPatterns", "Rebuilt pattern = " + graph);
     }
-    
+
     /**
      * Fully direct a graph with background knowledge. I am not sure how to adapt Chickering's suggested algorithm above
      * (dagToPdag) to incorporate background knowledge, so I am also implementing this algorithm based on Meek's 1995
@@ -1490,7 +1402,7 @@ public final class Ges3 implements GraphSearch, GraphScorer {
     }
 
     private void setDataSet(DataSet dataSet) {
-        List<String> _varNames = dataSet.getVariableNames();
+        List <String> _varNames = dataSet.getVariableNames();
 
         this.varNames = _varNames.toArray(new String[0]);
         this.variables = dataSet.getVariables();
@@ -1504,17 +1416,8 @@ public final class Ges3 implements GraphSearch, GraphScorer {
         this.sampleSize = dataSet.getNumRows();
     }
 
-    private void setCovMatrix(ICovarianceMatrix covarianceMatrix) {
-        this.covariances = covarianceMatrix.getMatrix();
-        List<String> _varNames = covarianceMatrix.getVariableNames();
-
-        this.varNames = _varNames.toArray(new String[0]);
-        this.variables = covarianceMatrix.getVariables();
-        this.sampleSize = covarianceMatrix.getSampleSize();
-    }
-
     private void buildIndexing(Graph graph) {
-        this.hashIndices = new HashMap<Node, Integer>();
+        this.hashIndices = new HashMap <Node, Integer>();
         for (Node next : graph.getNodes()) {
             for (int i = 0; i < this.varNames.length; i++) {
                 if (this.varNames[i].equals(next.getName())) {
@@ -1525,25 +1428,14 @@ public final class Ges3 implements GraphSearch, GraphScorer {
         }
     }
 
-    private static int getRowIndex(int dim[], int[] values) {
-        int rowIndex = 0;
-        for (int i = 0; i < dim.length; i++) {
-            rowIndex *= dim[i];
-            rowIndex += values[i];
-        }
-        return rowIndex;
-    }
-
-    //===========================SCORING METHODS===========================//
-
     @Override
-	public double scoreGraph(Graph graph) {
+    public double scoreGraph(Graph graph) {
         Graph dag = SearchGraphUtils.dagFromPattern(graph);
         double score = 0.;
-        
+
         for (Node y : dag.getNodes()) {
-        	
-            Set<Node> parents = new HashSet<Node>(dag.getParents(y));
+
+            Set <Node> parents = new HashSet <Node>(dag.getParents(y));
             int nextIndex = -1;
             for (int i = 0; i < getVariables().size(); i++) {
                 if (this.varNames[i].equals(y.getName())) {
@@ -1552,7 +1444,7 @@ public final class Ges3 implements GraphSearch, GraphScorer {
                 }
             }
             int parentIndices[] = new int[parents.size()];
-            Iterator<Node> pi = parents.iterator();
+            Iterator <Node> pi = parents.iterator();
             int count = 0;
             while (pi.hasNext()) {
                 Node nextParent = pi.next();
@@ -1565,22 +1457,22 @@ public final class Ges3 implements GraphSearch, GraphScorer {
             }
 
             if (this.isDiscrete()) {
-            //	System.out.println("zqian##########Node " + nextIndex +" has "+count+" Parents." );
-            	//System.out.println("zqian##########Entering localDiscreteScore.");
-            	
+                //	System.out.println("zqian##########Node " + nextIndex +" has "+count+" Parents." );
+                //System.out.println("zqian##########Entering localDiscreteScore.");
+
                 score += localDiscreteScore(nextIndex, parentIndices);
-                
+
             } else {
                 score += localSemScore(nextIndex, parentIndices);
             }
 
         }
-       // System.out.println("zqian##########Leaving scoreGraph(Graph) which has "+dag.getNodes().size()+ "Nodes.");
-        
+        // System.out.println("zqian##########Leaving scoreGraph(Graph) which has "+dag.getNodes().size()+ "Nodes.");
+
         return score;
     }
 
-    private double scoreGraphChange(Node y, Set<Node> parents1,Set<Node> parents2) {
+    private double scoreGraphChange(Node y, Set <Node> parents1, Set <Node> parents2) {
         int yIndex = hashIndices.get(y);
 
         Double score1 = scoreHash.get(y).get(parents1);
@@ -1633,13 +1525,11 @@ public final class Ges3 implements GraphSearch, GraphScorer {
         return getDiscreteScore().localScore(i, parents);
     }
 
-
+    //===========================SCORING METHODS===========================//
 
     private int numCategories(int i) {
         return ((DiscreteVariable) dataSet().getVariable(i)).getNumCategories();
     }
-
-    private RegressionDataset regression;
 
     /**
      * Calculates the sample likelihood and BIC score for i given its parents in a simple SEM model.
@@ -1733,8 +1623,7 @@ public final class Ges3 implements GraphSearch, GraphScorer {
 //            inverse = algebra().inverse(czz);
 //                inverse = MatrixUtils.inverse(czz);
             inverse = MatrixUtils.ginverse(czz);
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             StringBuilder buf = new StringBuilder();
             buf.append("Could not invert matrix for variables: ");
 
@@ -1755,12 +1644,21 @@ public final class Ges3 implements GraphSearch, GraphScorer {
         return this.sampleSize;
     }
 
-    private List<Node> getVariables() {
+    private List <Node> getVariables() {
         return variables;
     }
 
     private DoubleMatrix2D getCovMatrix() {
         return covariances;
+    }
+
+    private void setCovMatrix(ICovarianceMatrix covarianceMatrix) {
+        this.covariances = covarianceMatrix.getMatrix();
+        List <String> _varNames = covarianceMatrix.getVariableNames();
+
+        this.varNames = _varNames.toArray(new String[0]);
+        this.variables = covarianceMatrix.getVariables();
+        this.sampleSize = covarianceMatrix.getSampleSize();
     }
 
     private Algebra algebra() {
@@ -1775,8 +1673,22 @@ public final class Ges3 implements GraphSearch, GraphScorer {
         return structurePrior;
     }
 
+    public void setStructurePrior(double structurePrior) {
+        if (getDiscreteScore() != null) {
+            getDiscreteScore().setStructurePrior(structurePrior);
+        }
+        this.structurePrior = structurePrior;
+    }
+
     private double getSamplePrior() {
         return samplePrior;
+    }
+
+    public void setSamplePrior(double samplePrior) {
+        if (getDiscreteScore() != null) {
+            getDiscreteScore().setSamplePrior(samplePrior);
+        }
+        this.samplePrior = samplePrior;
     }
 
     private boolean isDiscrete() {
@@ -1789,31 +1701,32 @@ public final class Ges3 implements GraphSearch, GraphScorer {
         }
     }
 
-    private List<PropertyChangeListener> getListeners() {
+    private List <PropertyChangeListener> getListeners() {
         if (listeners == null) {
-            listeners = new ArrayList<PropertyChangeListener>();
+            listeners = new ArrayList <PropertyChangeListener>();
         }
         return listeners;
     }
+
     // store top N graphs based on score , zqian
     private void storeGraph(Graph graph, double score) {
         if (!isStoreGraphs()) return;
 
         if (topGraphs.isEmpty() || score > topGraphs.first().getScore()) { // compare with the lowest score
-        	//Oct 30, bug? Arrow implies non-ancestor 
-        	Graph graphCopy = new EdgeListGraph(graph);
+            //Oct 30, bug? Arrow implies non-ancestor
+            Graph graphCopy = new EdgeListGraph(graph);
 
             //System.out.println("Storing " + score + " " + graphCopy);
-            if (topGraphs.size() > getNumPatternsToStore()) {  //should also check the size  before adding 
+            if (topGraphs.size() > getNumPatternsToStore()) {  //should also check the size  before adding
                 topGraphs.remove(topGraphs.first());
             }
             topGraphs.add(new ScoredGraph(graphCopy, score));
 
-            if (topGraphs.size() > getNumPatternsToStore()) {  //should also check the size  before adding 
+            if (topGraphs.size() > getNumPatternsToStore()) {  //should also check the size  before adding
                 topGraphs.remove(topGraphs.first());
             }
         }
-       
+
     }
 
     public LocalDiscreteScore getDiscreteScore() {
@@ -1825,6 +1738,57 @@ public final class Ges3 implements GraphSearch, GraphScorer {
             throw new IllegalArgumentException("Must use the same data set.");
         }
         this.discreteScore = discreteScore;
+    }
+
+    private static class Arrow implements Comparable {
+        private double bump;
+        private int x;
+        private int y;
+        private Set <Node> hOrT;
+        private Set <Node> naYX;
+        private List <Node> nodes;
+
+        public Arrow(double bump, int x, int y, Set <Node> hOrT, Set <Node> naYX, List <Node> nodes) {
+            this.bump = bump;
+            this.x = x;
+            this.y = y;
+            this.hOrT = hOrT;
+            this.naYX = naYX;
+            this.nodes = nodes;
+        }
+
+        public double getBump() {
+            return bump;
+        }
+
+        public int getX() {
+            return x;
+        }
+
+        public int getY() {
+            return y;
+        }
+
+        public Set <Node> getHOrT() {
+            return hOrT;
+        }
+
+        public Set <Node> getNaYX() {
+            return naYX;
+        }
+
+        // Sorting is by bump, high to low.
+
+        @Override
+        public int compareTo(Object o) {
+            Arrow info = (Arrow) o;
+            return new Double(info.getBump()).compareTo(new Double(getBump()));
+        }
+
+        @Override
+        public String toString() {
+            return "Arrow<" + nodes.get(x) + "->" + nodes.get(y) + " bump = " + bump + " t = " + hOrT + " naYX = " + naYX + ">";
+        }
     }
 }
 

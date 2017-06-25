@@ -33,7 +33,6 @@ import edu.cmu.tetrad.util.*;
 import no.uib.cipr.matrix.*;
 
 import java.text.NumberFormat;
-import java.util.*;
 
 /**
  * Checks the conditional independence X _||_ Y | S, where S is a set of continuous variable, and X and Y are discrete
@@ -46,30 +45,25 @@ import java.util.*;
 public final class IndTestHsic implements IndependenceTest {
 
     /**
+     * Formats as 0.0000.
+     */
+    private static NumberFormat nf = NumberFormatUtil.getInstance().getNumberFormat();
+    /**
      * The variables of the covariance matrix, in order. (Unmodifiable list.)
      */
-    private List<Node> variables;
-
+    private List <Node> variables;
     /**
      * The significance level of the independence tests.
      */
     private double alpha;
-
     /**
      * The cutoff value for 'alpha'
      */
     private double thresh = Double.NaN;
-
     /**
      * The value of the empirical estimate of HSIC
      */
     private double hsic;
-
-    /**
-     * Formats as 0.0000.
-     */
-    private static NumberFormat nf = NumberFormatUtil.getInstance().getNumberFormat();
-
     /**
      * Stores a reference to the dataset being analyzed.
      */
@@ -108,7 +102,7 @@ public final class IndTestHsic implements IndependenceTest {
             throw new IllegalArgumentException("Data set must be continuous.");
         }
 
-        List<Node> nodes = dataSet.getVariables();
+        List <Node> nodes = dataSet.getVariables();
 
         this.variables = Collections.unmodifiableList(nodes);
         setAlpha(alpha);
@@ -116,7 +110,7 @@ public final class IndTestHsic implements IndependenceTest {
         this.dataSet = dataSet;
     }
 
-    public IndTestHsic(DoubleMatrix2D data, List<Node> variables, double alpha) {
+    public IndTestHsic(DoubleMatrix2D data, List <Node> variables, double alpha) {
         DataSet dataSet = ColtDataSet.makeContinuousData(variables, data);
 
         this.variables = Collections.unmodifiableList(variables);
@@ -128,11 +122,19 @@ public final class IndTestHsic implements IndependenceTest {
 
     //==========================PUBLIC METHODS=============================//
 
+    private static double trace(Matrix A, int m) {
+        double trace = 0.0;
+        for (int i = 0; i < m; i++) {
+            trace += A.get(i, i);
+        }
+        return trace;
+    }
+
     /**
      * Creates a new IndTestHsic instance for a subset of the variables.
      */
     @Override
-	public IndependenceTest indTestSubset(List<Node> vars) {
+    public IndependenceTest indTestSubset(List <Node> vars) {
         if (vars.isEmpty()) {
             throw new IllegalArgumentException("Subset may not be empty.");
         }
@@ -163,14 +165,14 @@ public final class IndTestHsic implements IndependenceTest {
      * @return true iff x _||_ y | z.
      */
     @Override
-	public boolean isIndependent(Node y, Node x, List<Node> z) {
+    public boolean isIndependent(Node y, Node x, List <Node> z) {
 
         int m = sampleSize();
 
         // choose kernels using median distance heuristic
         Kernel xKernel = new KernelGaussian(1);
         Kernel yKernel = new KernelGaussian(1);
-        List<Kernel> zKernel = new ArrayList<Kernel>();
+        List <Kernel> zKernel = new ArrayList <Kernel>();
         yKernel.setDefaultBw(this.dataSet, y);
         xKernel.setDefaultBw(this.dataSet, x);
         if (!z.isEmpty()) {
@@ -221,7 +223,7 @@ public final class IndTestHsic implements IndependenceTest {
         double[] nullapprox = new double[this.perms];
         int[] zind = null;
         int ycol = this.dataSet.getColumn(y);
-        List<List<Integer>> clusterAssign = null;
+        List <List <Integer>> clusterAssign = null;
         if (!z.isEmpty()) {
             // get clusters for z
             KMeans kmeans = KMeans.randomClusters((m / 3));
@@ -236,7 +238,7 @@ public final class IndTestHsic implements IndependenceTest {
             DataSet shuffleData = new ColtDataSet((ColtDataSet) dataSet);
             // shuffle data
             if (z.isEmpty()) {
-                List<Integer> indicesList = new ArrayList<Integer>();
+                List <Integer> indicesList = new ArrayList <Integer>();
                 for (int j = 0; j < m; j++) {
                     indicesList.add(j);
                 }
@@ -248,7 +250,7 @@ public final class IndTestHsic implements IndependenceTest {
             } else {
                 // shuffle data within clusters
                 for (int j = 0; j < clusterAssign.size(); j++) {
-                    List<Integer> shuffleCluster = new ArrayList<Integer>(clusterAssign.get(j));
+                    List <Integer> shuffleCluster = new ArrayList <Integer>(clusterAssign.get(j));
 
                     Collections.shuffle(shuffleCluster);
 
@@ -735,18 +737,18 @@ public final class IndTestHsic implements IndependenceTest {
     }
 
     @Override
-	public boolean isIndependent(Node x, Node y, Node... z) {
+    public boolean isIndependent(Node x, Node y, Node... z) {
         return isIndependent(x, y, Arrays.asList(z));
     }
 
     @Override
-	public boolean isDependent(Node x, Node y, List<Node> z) {
+    public boolean isDependent(Node x, Node y, List <Node> z) {
         return !isIndependent(x, y, z);
     }
 
     @Override
-	public boolean isDependent(Node x, Node y, Node... z) {
-        List<Node> zList = Arrays.asList(z);
+    public boolean isDependent(Node x, Node y, Node... z) {
+        List <Node> zList = Arrays.asList(z);
         return isDependent(x, y, zList);
     }
 
@@ -772,21 +774,8 @@ public final class IndTestHsic implements IndependenceTest {
      * Returns the probability associated with the most recently computed independence test.
      */
     @Override
-	public double getPValue() {
+    public double getPValue() {
         return this.pValue;
-    }
-
-    /**
-     * Sets the significance level at which independence judgments should be made.
-     */
-    @Override
-	public void setAlpha(double alpha) {
-        if (alpha < 0.0 || alpha > 1.0) {
-            throw new IllegalArgumentException("Significance out of range.");
-        }
-
-        this.alpha = alpha;
-        this.thresh = Double.NaN;
     }
 
     /**
@@ -798,25 +787,24 @@ public final class IndTestHsic implements IndependenceTest {
     }
 
     /**
-     * Set the number of bootstrap samples to use
-     */
-    public void setPerms(int perms) {
-        this.perms = perms;
-    }
-
-    /**
-     * Sets the regularizer
-     */
-    public void setRegularizer(double regularizer) {
-        this.regularizer = regularizer;
-    }
-
-    /**
      * Gets the current significance level.
      */
     @Override
-	public double getAlpha() {
+    public double getAlpha() {
         return this.alpha;
+    }
+
+    /**
+     * Sets the significance level at which independence judgments should be made.
+     */
+    @Override
+    public void setAlpha(double alpha) {
+        if (alpha < 0.0 || alpha > 1.0) {
+            throw new IllegalArgumentException("Significance out of range.");
+        }
+
+        this.alpha = alpha;
+        this.thresh = Double.NaN;
     }
 
     /**
@@ -834,6 +822,13 @@ public final class IndTestHsic implements IndependenceTest {
     }
 
     /**
+     * Set the number of bootstrap samples to use
+     */
+    public void setPerms(int perms) {
+        this.perms = perms;
+    }
+
+    /**
      * Gets the current regularizer
      */
     public double getRegularizer() {
@@ -841,11 +836,18 @@ public final class IndTestHsic implements IndependenceTest {
     }
 
     /**
+     * Sets the regularizer
+     */
+    public void setRegularizer(double regularizer) {
+        this.regularizer = regularizer;
+    }
+
+    /**
      * Returns the list of variables over which this independence checker is capable of determinine independence
      * relations-- that is, all the variables in the given graph or the given data set.
      */
     @Override
-	public List<Node> getVariables() {
+    public List <Node> getVariables() {
         return this.variables;
     }
 
@@ -853,7 +855,7 @@ public final class IndTestHsic implements IndependenceTest {
      * Returns the variable with the given name.
      */
     @Override
-	public Node getVariable(String name) {
+    public Node getVariable(String name) {
         for (int i = 0; i < getVariables().size(); i++) {
             Node variable = getVariables().get(i);
             if (variable.getName().equals(name)) {
@@ -867,9 +869,9 @@ public final class IndTestHsic implements IndependenceTest {
      * Returns the list of variable varNames.
      */
     @Override
-	public List<String> getVariableNames() {
-        List<Node> variables = getVariables();
-        List<String> variableNames = new ArrayList<String>();
+    public List <String> getVariableNames() {
+        List <Node> variables = getVariables();
+        List <String> variableNames = new ArrayList <String>();
         for (Node variable1 : variables) {
             variableNames.add(variable1.getName());
         }
@@ -880,12 +882,12 @@ public final class IndTestHsic implements IndependenceTest {
      * Returns the data set being analyzed.
      */
     @Override
-	public DataSet getData() {
+    public DataSet getData() {
         return dataSet;
     }
 
     public void shuffleVariables() {
-        List<Node> nodes = new ArrayList(this.variables);
+        List <Node> nodes = new ArrayList(this.variables);
         Collections.shuffle(nodes);
         this.variables = Collections.unmodifiableList(nodes);
     }
@@ -894,17 +896,16 @@ public final class IndTestHsic implements IndependenceTest {
      * Returns a string representation of this test.
      */
     @Override
-	public String toString() {
+    public String toString() {
         return "HSIC, alpha = " + nf.format(getAlpha());
-    }
-
-    @Override
-	public boolean determines(List z, Node x) throws UnsupportedOperationException {
-        throw new UnsupportedOperationException("Method not implemented");
     }
 
     //==========================PRIVATE METHODS============================//
 
+    @Override
+    public boolean determines(List z, Node x) throws UnsupportedOperationException {
+        throw new UnsupportedOperationException("Method not implemented");
+    }
 
     private int sampleSize() {
         return this.dataSet.getNumRows();
@@ -916,14 +917,6 @@ public final class IndTestHsic implements IndependenceTest {
             entry += X.get(i, k) * Y.get(k, j);
         }
         return entry;
-    }
-
-    private static double trace(Matrix A, int m) {
-        double trace = 0.0;
-        for (int i = 0; i < m; i++) {
-            trace += A.get(i, i);
-        }
-        return trace;
     }
 
 }

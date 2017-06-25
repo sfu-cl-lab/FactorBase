@@ -33,85 +33,93 @@ import java.io.IOException;
  *
  * @author Mike Freenor
  */
-public class ShortTriangularMatrix implements TriangularMatrix{
+public class ShortTriangularMatrix implements TriangularMatrix {
 
     private short matrix[][];
 
-    public ShortTriangularMatrix(){}
+    public ShortTriangularMatrix() {
+    }
 
-    public ShortTriangularMatrix(int size)
-    {
+    public ShortTriangularMatrix(int size) {
         create(size);
     }
 
-    public void becomeCorrelationMatrix(DataSet dataSet)
-    {
-        for(int i = 0; i < dataSet.getNumColumns(); i++)
+    //testing sandbox
+    public static void main(String[] args) {
+        ShortTriangularMatrix test = new ShortTriangularMatrix();
+        DataReader reader = new DataReader();
+        File file = new File("C:/data1.txt");
+        ColtDataSet data = null;
+        try {
+            data = (ColtDataSet) reader.parseTabular(file);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        test.becomeCorrelationMatrix(data);
+        System.out.println(test.toString());
+        CorrelationMatrix m = new CorrelationMatrix(data);
+        System.out.println(m.toString());
+        System.out.println(test.getDouble(1, 3));
+        System.out.println(test.getDouble(3, 1));
+    }
+
+    public void becomeCorrelationMatrix(DataSet dataSet) {
+        for (int i = 0; i < dataSet.getNumColumns(); i++)
             matrix[i][i] = 10000;
 
         DoubleMatrix2D doubleData = dataSet.getDoubleData();
         DoubleMatrix1D[] views = new DoubleMatrix1D[dataSet.getNumColumns()];
-        for(int i = 0; i < views.length; i++)
+        for (int i = 0; i < views.length; i++)
             views[i] = doubleData.viewColumn(i);
 
-        for(int i = 0; i < dataSet.getNumColumns() - 1; i++)
-            for(int j = i + 1; j < dataSet.getNumColumns(); j++)
+        for (int i = 0; i < dataSet.getNumColumns() - 1; i++)
+            for (int j = i + 1; j < dataSet.getNumColumns(); j++)
                 matrix[j][i] = StatUtils.compressedCorrelation(views[i], views[j]);
     }
 
     @Override
-	public void create(int size)
-    {
+    public void create(int size) {
         matrix = new short[size][];
-        for(int i = 0; i < size; i++)
-		{
-			matrix[i] = new short[i + 1];
+        for (int i = 0; i < size; i++) {
+            matrix[i] = new short[i + 1];
 
-			for(int j = 0; j < i + 1; j++)
-				matrix[i][j] = (short)i;
-		}
+            for (int j = 0; j < i + 1; j++)
+                matrix[i][j] = (short) i;
+        }
     }
 
     @Override
-	public short getShort(int row, int col)
-    {
-        if(col > row)
-        {
+    public short getShort(int row, int col) {
+        if (col > row) {
             int temp = col;
             col = row;
             row = temp;
         }
-        return matrix[row][col];    
+        return matrix[row][col];
     }
 
     @Override
-	public double getDouble(int row, int col)
-    {
-        if(col > row)
-        {
+    public double getDouble(int row, int col) {
+        if (col > row) {
             int temp = col;
             col = row;
             row = temp;
         }
 
-        return ((double)matrix[row][col]) / 10000;
+        return ((double) matrix[row][col]) / 10000;
     }
 
-    public boolean set(int row, int col, long value)
-    {
-        return set(row, col, (short)value);
+    public boolean set(int row, int col, long value) {
+        return set(row, col, (short) value);
     }
 
-    public boolean set(int row, int col, int value)
-    {
-        return set(row, col, (short)value);
+    public boolean set(int row, int col, int value) {
+        return set(row, col, (short) value);
     }
 
     @Override
-	public boolean set(int row, int col, short value)
-    {
-        if(col > row)
-        {
+    public boolean set(int row, int col, short value) {
+        if (col > row) {
             int temp = col;
             col = row;
             row = temp;
@@ -122,55 +130,27 @@ public class ShortTriangularMatrix implements TriangularMatrix{
     }
 
     @Override
-	public boolean set(int row, int col, double value)
-    {
-        if(col > row)
-        {
+    public boolean set(int row, int col, double value) {
+        if (col > row) {
             int temp = col;
             col = row;
             row = temp;
         }
 
-        matrix[row][col] = (short)(value * 10000);
+        matrix[row][col] = (short) (value * 10000);
         return true;
     }
 
     @Override
-	public String toString()
-    {
+    public String toString() {
         String out = "";
-        for(int i = 0; i < matrix.length; i++)
-		{
-			for(int j = 0; j < matrix[i].length; j++)
-			{
-				out += (getDouble(i, j) + "\t\t");
-			}
-			out += "\n";
-		}
+        for (int i = 0; i < matrix.length; i++) {
+            for (int j = 0; j < matrix[i].length; j++) {
+                out += (getDouble(i, j) + "\t\t");
+            }
+            out += "\n";
+        }
         return out;
-    }
-
-    //testing sandbox
-    public static void main(String [] args)
-    {
-        ShortTriangularMatrix test = new ShortTriangularMatrix();
-        DataReader reader = new DataReader();
-        File file = new File("C:/data1.txt");
-        ColtDataSet data = null;
-        try
-        {
-            data = (ColtDataSet)reader.parseTabular(file);
-        }
-        catch(IOException e)
-        {
-            e.printStackTrace();
-        }
-        test.becomeCorrelationMatrix(data);
-        System.out.println(test.toString());
-        CorrelationMatrix m = new CorrelationMatrix(data);
-        System.out.println(m.toString());
-        System.out.println(test.getDouble(1, 3));
-        System.out.println(test.getDouble(3, 1));
     }
 }
 

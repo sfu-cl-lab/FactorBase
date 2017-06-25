@@ -42,7 +42,7 @@ public class MultiDimIntTable {
      * given dimension array--in other words, the length must be greater than or
      * equal to dims[0] & dims[1] ... * dims[dims.length - 1].
      */
-    private Map<Integer, Long> cells;
+    private Map <Integer, Long> cells;
 
     /**
      * The number of cells in the table. (May be different from the length of
@@ -77,7 +77,7 @@ public class MultiDimIntTable {
      *               than the number of possible value for the corresponding
      *               dimension in the table. (Enforced.)
      * @return the row in the table for the given node and combination of parent
-     *         values.
+     * values.
      */
     public int getCellIndex(int[] coords) {
         int cellIndex = 0;
@@ -111,7 +111,7 @@ public class MultiDimIntTable {
      *
      * @param cellIndex an <code>int</code> value
      * @return the array representing the combination of parent values for this
-     *         row.
+     * row.
      */
     @SuppressWarnings({"SameParameterValue"})
     public int[] getCoordinates(int cellIndex) {
@@ -253,7 +253,7 @@ public class MultiDimIntTable {
             }
 
             // Construct (or reset) cells array.
-            cells = new HashMap<Integer, Long>();
+            cells = new HashMap <Integer, Long>();
 
 //            if ((cells == null) || (cells.length < this.numCells)) {
 //                cells = new long[this.numCells];

@@ -36,7 +36,6 @@ import edu.cmu.tetrad.util.dist.*;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.rmi.MarshalledObject;
-import java.util.*;
 
 /**
  * This is an instantiated model (i.e. a model in which values for the
@@ -69,14 +68,14 @@ public final class SemIm2 implements TetradSerializable {
      *
      * @serial Cannot be null.
      */
-    private final List<Node> variableNodes;
+    private final List <Node> variableNodes;
 
     /**
      * The list of measured variableNodes from the semPm. (Unmodifiable.)
      *
      * @serial Cannot be null.
      */
-    private final List<Node> measuredNodes;
+    private final List <Node> measuredNodes;
 
     /**
      * The list of free parameters (Unmodifiable). This must be in the same
@@ -84,7 +83,7 @@ public final class SemIm2 implements TetradSerializable {
      *
      * @serial Cannot be null.
      */
-    private List<Parameter> freeParameters;
+    private List <Parameter> freeParameters;
 
     /**
      * The list of fixed parameters (Unmodifiable). This must be in the same
@@ -92,7 +91,7 @@ public final class SemIm2 implements TetradSerializable {
      *
      * @serial Cannot be null.
      */
-    private List<Parameter> fixedParameters;
+    private List <Parameter> fixedParameters;
 
     /**
      * Matrix of edge coefficients. edgeCoef[i][j] is the coefficient of the
@@ -107,7 +106,7 @@ public final class SemIm2 implements TetradSerializable {
     /**
      * Map from nodes to error distributions.
      */
-    private Map<Node, Distribution> distributions;
+    private Map <Node, Distribution> distributions;
 
     /**
      * The sample size.
@@ -123,7 +122,7 @@ public final class SemIm2 implements TetradSerializable {
      *
      * @serial Cannot be null.
      */
-    private List<Sem2Mapping> freeMappings;
+    private List <Sem2Mapping> freeMappings;
 
     /**
      * The list of fixed parameters (Unmodifiable). This must be in the same
@@ -131,7 +130,7 @@ public final class SemIm2 implements TetradSerializable {
      *
      * @serial Cannot be null.
      */
-    private List<Sem2Mapping> fixedMappings;
+    private List <Sem2Mapping> fixedMappings;
 
     /**
      * Stores the standard errors for the parameters.  May be null.
@@ -174,11 +173,11 @@ public final class SemIm2 implements TetradSerializable {
         int numVars = this.variableNodes.size();
         this.edgeCoef = new SparseDoubleMatrix2D(numVars, numVars);
 
-        this.freeParameters = new ArrayList<Parameter>();
-        this.freeMappings = new ArrayList<Sem2Mapping>();
-        this.fixedParameters = new ArrayList<Parameter>();
-        this.fixedMappings = new ArrayList<Sem2Mapping>();
-        this.distributions = new HashMap<Node, Distribution>();
+        this.freeParameters = new ArrayList <Parameter>();
+        this.freeMappings = new ArrayList <Sem2Mapping>();
+        this.fixedParameters = new ArrayList <Parameter>();
+        this.fixedMappings = new ArrayList <Sem2Mapping>();
+        this.distributions = new HashMap <Node, Distribution>();
 
         processCoefficientParameters();
         processDistributionParameters();
@@ -212,11 +211,9 @@ public final class SemIm2 implements TetradSerializable {
             standardErrors = _semIm.standardErrors;
             parameterBoundsEnforced = _semIm.parameterBoundsEnforced;
             estimated = _semIm.estimated;
-        }
-        catch (IOException e) {
+        } catch (IOException e) {
             throw new RuntimeException("SemIm could not be deep cloned.", e);
-        }
-        catch (ClassNotFoundException e) {
+        } catch (ClassNotFoundException e) {
             throw new RuntimeException("SemIm could not be deep cloned.", e);
         }
     }
@@ -414,7 +411,7 @@ public final class SemIm2 implements TetradSerializable {
      * Returns the (unmodifiable) list of free parameters in the model.
      */
 
-    public List<Parameter> getFreeParameters() {
+    public List <Parameter> getFreeParameters() {
         return freeParameters;
     }
 
@@ -429,7 +426,7 @@ public final class SemIm2 implements TetradSerializable {
     /**
      * Returns the (unmodifiable) list of fixed parameters in the model.
      */
-    public List<Parameter> getFixedParameters() {
+    public List <Parameter> getFixedParameters() {
         return this.fixedParameters;
     }
 
@@ -443,14 +440,14 @@ public final class SemIm2 implements TetradSerializable {
     /**
      * The list of measured and latent nodes for the semPm. (Unmodifiable.)
      */
-    public List<Node> getVariableNodes() {
+    public List <Node> getVariableNodes() {
         return variableNodes;
     }
 
     /**
      * The list of measured nodes for the semPm. (Unmodifiable.)
      */
-    public List<Node> getMeasuredNodes() {
+    public List <Node> getMeasuredNodes() {
         return measuredNodes;
     }
 
@@ -522,8 +519,8 @@ public final class SemIm2 implements TetradSerializable {
      */
     public DataSet simulateData(int sampleSize,
                                 Distribution distribution) {
-        List<Node> variables = new LinkedList<Node>();
-        List<Node> variableNodes = getSemPm2().getVariableNodes();
+        List <Node> variables = new LinkedList <Node>();
+        List <Node> variableNodes = getSemPm2().getVariableNodes();
 
         for (Node node : variableNodes) {
             ContinuousVariable var = new ContinuousVariable(node.getName());
@@ -534,7 +531,7 @@ public final class SemIm2 implements TetradSerializable {
 
         // Create some index arrays to hopefully speed up the simulation.
         SemGraph graph = getSemPm2().getGraph();
-        List<Node> tierOrdering = graph.getTierOrdering();
+        List <Node> tierOrdering = graph.getTierOrdering();
 
         int[] tierIndices = new int[variableNodes.size()];
 
@@ -546,9 +543,9 @@ public final class SemIm2 implements TetradSerializable {
 
         for (int i = 0; i < variableNodes.size(); i++) {
             Node node = variableNodes.get(i);
-            List<Node> parents = graph.getParents(node);
+            List <Node> parents = graph.getParents(node);
 
-            for (Iterator<Node> j = parents.iterator(); j.hasNext();) {
+            for (Iterator <Node> j = parents.iterator(); j.hasNext(); ) {
                 Node _node = j.next();
 
                 if (_node.getNodeType() == NodeType.ERROR) {
@@ -587,7 +584,7 @@ public final class SemIm2 implements TetradSerializable {
      * Returns a string representation of the Sem (pretty detailed).
      */
     @Override
-	public String toString() {
+    public String toString() {
         StringBuilder buf = new StringBuilder();
         buf.append("\nSem");
 
@@ -667,7 +664,7 @@ public final class SemIm2 implements TetradSerializable {
             Distribution distribution = getDefaultDistribution(_type);
             distributions.put(node, distribution);
 
-            List<Parameter> _parameters = semPm2.getDistributionParameters(node);
+            List <Parameter> _parameters = semPm2.getDistributionParameters(node);
 
             for (int i = 0; i < _parameters.size(); i++) {
                 Sem2DistributionMapping mapping = new Sem2DistributionMapping(distribution, i, _parameters.get(i));
@@ -712,7 +709,7 @@ public final class SemIm2 implements TetradSerializable {
     /**
      * Returns the (unmodifiable) list of parameters (type Param).
      */
-    private List<Sem2Mapping> freeMappings() {
+    private List <Sem2Mapping> freeMappings() {
         return this.freeMappings;
     }
 

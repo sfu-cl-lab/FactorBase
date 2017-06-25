@@ -51,7 +51,7 @@ public final class SplitCasesSpec implements TetradSerializable {
     /**
      * @serial
      */
-    private final List<String> splitNames;
+    private final List <String> splitNames;
 
     /**
      * Sample size.
@@ -61,7 +61,7 @@ public final class SplitCasesSpec implements TetradSerializable {
     //============================CONSTRUCTORS==========================//
 
     public SplitCasesSpec(int sampleSize, int[] breakpoints,
-                          List<String> splits) {
+                          List <String> splits) {
         this.sampleSize = sampleSize;
         this.breakpoints = breakpoints;
         this.splitNames = splits;
@@ -73,13 +73,13 @@ public final class SplitCasesSpec implements TetradSerializable {
      * @see edu.cmu.TestSerialization
      * @see edu.cmu.tetradapp.util.TetradSerializableUtils
      */
-    public static SplitCasesSpec serializableInstance() {                                
-        return new SplitCasesSpec(0, new int[0], new ArrayList<String>());
+    public static SplitCasesSpec serializableInstance() {
+        return new SplitCasesSpec(0, new int[0], new ArrayList <String>());
     }
 
     //============================PUBLIC METHODS========================//
 
-    public List<String> getSplitNames() {
+    public List <String> getSplitNames() {
         return splitNames;
     }
 

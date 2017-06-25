@@ -45,7 +45,7 @@ import java.util.List;
  * and the columns of the table are variable values of the variable. Most of the
  * method in this interface are designed mainly to allow these values to be set
  * and retrieved. A few methods are dedicated to bookkeeping chores, like
- * clearing tables or initializing them randomly. One special method                            
+ * clearing tables or initializing them randomly. One special method
  * (simulateData) is dedicated to the task of generating randomly simulated data
  * sets consistent with the conditional probabilities implied by the information
  * stored in the conditional probability tables of the Bayes net. See
@@ -95,7 +95,7 @@ public interface BayesIm extends VariableSource {
      *
      * @param node the given node.
      * @return the index for that node, or -1 if the node is not in the
-     *         BayesIm.
+     * BayesIm.
      */
     int getNodeIndex(Node node);
 
@@ -103,18 +103,18 @@ public interface BayesIm extends VariableSource {
      * Returns the list of variable for this Bayes net.
      */
     @Override
-	List<Node> getVariables();
+    List <Node> getVariables();
 
     /**
      * Returns the list of variable names for this Bayes net.
      */
     @Override
-	List<String> getVariableNames();
+    List <String> getVariableNames();
 
     /**
      * Returns the list of measured variableNodes.
      */
-    public List<Node> getMeasuredNodes();
+    public List <Node> getMeasuredNodes();
 
 
     /**
@@ -198,7 +198,7 @@ public interface BayesIm extends VariableSource {
      * @param nodeIndex the index of the node.
      * @param rowIndex  the index of the row in question.
      * @return the array representing the combination of parent values for this
-     *         row.
+     * row.
      * @see #getNodeIndex
      * @see #getRowIndex
      */
@@ -244,7 +244,7 @@ public interface BayesIm extends VariableSource {
      * @param nodeIndex
      * @param values
      * @return the row in the table for the given node and combination of parent
-     *         values.
+     * values.
      * @see #getParentValues
      */
     int getRowIndex(int nodeIndex, int[] values);
@@ -283,7 +283,7 @@ public interface BayesIm extends VariableSource {
      * @see #getProbability
      */
     void setProbability(int nodeIndex, int rowIndex, int colIndex,
-            double value);
+                        double value);
 
     /**
      * Returns the index of the node with the given name in the specified
@@ -346,7 +346,7 @@ public interface BayesIm extends VariableSource {
     /**
      * Simulates a sample with the given sample size.
      *
-     * @param sampleSize the sample size.
+     * @param sampleSize      the sample size.
      * @param latentDataSaved
      * @return the simulated sample as a DataSet.
      */
@@ -366,13 +366,13 @@ public interface BayesIm extends VariableSource {
      * sense of equality may vary depending on the type of Bayes net.
      */
     @Override
-	boolean equals(Object o);
+    boolean equals(Object o);
 
     /**
      * Returns a string representation for this Bayes net.
      */
     @Override
-	String toString();
+    String toString();
 }
 
 

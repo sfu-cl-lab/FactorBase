@@ -2,8 +2,6 @@ package ca.sfu.jbn.editor;
 
 import ca.sfu.jbn.model.TesterModel;
 
-import javax.swing.*;
-import java.awt.*;
 import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
 
@@ -79,7 +77,7 @@ public class TesterEditor extends JPanel {
 
     //============================= Inner Class ============================//
 
-    private class FieldListener extends FocusAdapter  {
+    private class FieldListener extends FocusAdapter {
 
         private String current;
         private JTextField field;
@@ -90,16 +88,15 @@ public class TesterEditor extends JPanel {
         }
 
 
-
         @Override
-		public void focusLost(FocusEvent evt) {
+        public void focusLost(FocusEvent evt) {
             doAction();
         }
 
 
         private void doAction() {
             String text = field.getText();
-            if(current.equals(text)){
+            if (current.equals(text)) {
                 return;
             }
             if (isLegal(text)) {
@@ -107,7 +104,7 @@ public class TesterEditor extends JPanel {
                 testerModel.setName(text);
                 TesterEditor.this.firePropertyChange("changeNodeLabel", null, text);
             } else {
-               field.setText(current);
+                field.setText(current);
             }
         }
     }

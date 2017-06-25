@@ -44,11 +44,11 @@ public final class IndTestFisherZConcatenateResiduals implements IndependenceTes
     /**
      * The variables of the covariance matrix, in order. (Unmodifiable list.)
      */
-    private final List<Node> variables;
+    private final List <Node> variables;
 
-    private ArrayList<Regression> regressions;
+    private ArrayList <Regression> regressions;
 
-    private List<DataSet> dataSets;
+    private List <DataSet> dataSets;
 
     /**
      * The significance level of the independence tests.
@@ -63,9 +63,9 @@ public final class IndTestFisherZConcatenateResiduals implements IndependenceTes
 
     //==========================CONSTRUCTORS=============================//
 
-    public IndTestFisherZConcatenateResiduals(List<DataSet> dataSets, double alpha) {
+    public IndTestFisherZConcatenateResiduals(List <DataSet> dataSets, double alpha) {
         this.dataSets = dataSets;
-        regressions = new ArrayList<Regression>();
+        regressions = new ArrayList <Regression>();
         this.variables = dataSets.get(0).getVariables();
 
         for (DataSet dataSet : dataSets) {
@@ -78,7 +78,7 @@ public final class IndTestFisherZConcatenateResiduals implements IndependenceTes
     //==========================PUBLIC METHODS=============================//
 
     @Override
-	public IndependenceTest indTestSubset(List<Node> vars) {
+    public IndependenceTest indTestSubset(List <Node> vars) {
         throw new UnsupportedOperationException();
     }
 
@@ -92,14 +92,14 @@ public final class IndTestFisherZConcatenateResiduals implements IndependenceTes
      * @throws RuntimeException if a matrix singularity is encountered.
      */
     @Override
-	public boolean isIndependent(Node x, Node y, List<Node> z) {
+    public boolean isIndependent(Node x, Node y, List <Node> z) {
 
         // Calculate the residual of x and y conditional on z for each data set and concatenate them.
         double[] residualsX = residuals(x, z);
         double[] residualsY = residuals(y, z);
 
-        List<Double> residualsXFiltered = new ArrayList<Double>();
-        List<Double> residualsYFiltered = new ArrayList<Double>();
+        List <Double> residualsXFiltered = new ArrayList <Double>();
+        List <Double> residualsYFiltered = new ArrayList <Double>();
 
         for (int i = 0; i < residualsX.length; i++) {
             if (!Double.isNaN(residualsX[i]) && !Double.isNaN(residualsY[i])) {
@@ -154,13 +154,13 @@ public final class IndTestFisherZConcatenateResiduals implements IndependenceTes
     }
 
 
-    private double[] residuals(Node node, List<Node> parents) {
-        List<Double> _residuals = new ArrayList<Double>();
+    private double[] residuals(Node node, List <Node> parents) {
+        List <Double> _residuals = new ArrayList <Double>();
 
         Node _target = node;
-        List<Node> _regressors = parents;
+        List <Node> _regressors = parents;
         Node target = getVariable(variables, _target.getName());
-        List<Node> regressors = new ArrayList<Node>();
+        List <Node> regressors = new ArrayList <Node>();
 
         for (Node _regressor : _regressors) {
             Node variable = getVariable(variables, _regressor.getName());
@@ -199,7 +199,7 @@ public final class IndTestFisherZConcatenateResiduals implements IndependenceTes
         return _f;
     }
 
-    private Node getVariable(List<Node> variables, String name) {
+    private Node getVariable(List <Node> variables, String name) {
         for (Node node : variables) {
             if (name.equals(node.getName())) {
                 return node;
@@ -210,21 +210,21 @@ public final class IndTestFisherZConcatenateResiduals implements IndependenceTes
     }
 
     @Override
-	public boolean isIndependent(Node x, Node y, Node... z) {
-        List<Node> zList = Arrays.asList(z);
+    public boolean isIndependent(Node x, Node y, Node... z) {
+        List <Node> zList = Arrays.asList(z);
         boolean independent = isIndependent(x, y, zList);
 
         return independent;
     }
 
     @Override
-	public boolean isDependent(Node x, Node y, List<Node> z) {
+    public boolean isDependent(Node x, Node y, List <Node> z) {
         return !isIndependent(x, y, z);
     }
 
     @Override
-	public boolean isDependent(Node x, Node y, Node... z) {
-        List<Node> zList = Arrays.asList(z);
+    public boolean isDependent(Node x, Node y, Node... z) {
+        List <Node> zList = Arrays.asList(z);
         return isDependent(x, y, zList);
     }
 
@@ -232,7 +232,7 @@ public final class IndTestFisherZConcatenateResiduals implements IndependenceTes
      * Returns the probability associated with the most recently computed independence test.
      */
     @Override
-	public double getPValue() {
+    public double getPValue() {
         if (!Double.isNaN(this.pValue)) {
             return Double.NaN;
         } else {
@@ -241,11 +241,19 @@ public final class IndTestFisherZConcatenateResiduals implements IndependenceTes
     }
 
     /**
+     * Gets the current significance level.
+     */
+    @Override
+    public double getAlpha() {
+        return this.alpha;
+    }
+
+    /**
      * Sets the significance level at which independence judgments should be made.  Affects the cutoff for partial
      * correlations to be considered statistically equal to zero.
      */
     @Override
-	public void setAlpha(double alpha) {
+    public void setAlpha(double alpha) {
         if (alpha < 0.0 || alpha > 1.0) {
             throw new IllegalArgumentException("Significance out of range.");
         }
@@ -255,19 +263,11 @@ public final class IndTestFisherZConcatenateResiduals implements IndependenceTes
     }
 
     /**
-     * Gets the current significance level.
-     */
-    @Override
-	public double getAlpha() {
-        return this.alpha;
-    }
-
-    /**
      * Returns the list of variables over which this independence checker is capable of determinine independence
      * relations-- that is, all the variables in the given graph or the given data set.
      */
     @Override
-	public List<Node> getVariables() {
+    public List <Node> getVariables() {
         return this.variables;
     }
 
@@ -275,7 +275,7 @@ public final class IndTestFisherZConcatenateResiduals implements IndependenceTes
      * Returns the variable with the given name.
      */
     @Override
-	public Node getVariable(String name) {
+    public Node getVariable(String name) {
         for (int i = 0; i < getVariables().size(); i++) {
             Node variable = getVariables().get(i);
             if (variable.getName().equals(name)) {
@@ -290,9 +290,9 @@ public final class IndTestFisherZConcatenateResiduals implements IndependenceTes
      * Returns the list of variable varNames.
      */
     @Override
-	public List<String> getVariableNames() {
-        List<Node> variables = getVariables();
-        List<String> variableNames = new ArrayList<String>();
+    public List <String> getVariableNames() {
+        List <Node> variables = getVariables();
+        List <String> variableNames = new ArrayList <String>();
         for (Node variable1 : variables) {
             variableNames.add(variable1.getName());
         }
@@ -303,7 +303,7 @@ public final class IndTestFisherZConcatenateResiduals implements IndependenceTes
      * @throws UnsupportedOperationException
      */
     @Override
-	public boolean determines(List z, Node x) throws UnsupportedOperationException {
+    public boolean determines(List z, Node x) throws UnsupportedOperationException {
         throw new UnsupportedOperationException();
     }
 
@@ -311,7 +311,7 @@ public final class IndTestFisherZConcatenateResiduals implements IndependenceTes
      * @throw UnsupportedOperationException
      */
     @Override
-	public DataSet getData() {
+    public DataSet getData() {
         throw new UnsupportedOperationException();
     }
 
@@ -333,7 +333,7 @@ public final class IndTestFisherZConcatenateResiduals implements IndependenceTes
      * Returns a string representation of this test.
      */
     @Override
-	public String toString() {
+    public String toString() {
         return "Fisher Z, Concatenating Residuals";
     }
 }

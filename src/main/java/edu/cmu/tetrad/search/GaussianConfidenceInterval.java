@@ -36,7 +36,7 @@ public class GaussianConfidenceInterval {
      * @param mean
      * @param sampleSd
      * @return whether we reject the hypothesis that 'value' was sampled from this normal distribution with confidence
-     *         alpha
+     * alpha
      */
     public boolean test(double value, double mean, double sampleSd, int sampleSize) {
         double score = new Normal(mean, sampleSd, null).cdf(value);

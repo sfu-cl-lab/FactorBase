@@ -39,7 +39,7 @@ import java.util.List;
  */
 public final class ExtraCategoryInterpolator implements DataFilter {
     @Override
-	public final DataSet filter(DataSet dataSet) {
+    public final DataSet filter(DataSet dataSet) {
 
         // Why does it have to be discrete? Why can't we simply expand
         // whatever discrete columns are there and leave the continuous
@@ -48,7 +48,7 @@ public final class ExtraCategoryInterpolator implements DataFilter {
             throw new IllegalArgumentException("Data set must be discrete.");
         }
 
-        List<Node> variables = new LinkedList<Node>();
+        List <Node> variables = new LinkedList <Node>();
 
         // Add all of the variables to the new data set.
         for (int i = 0; i < dataSet.getNumColumns(); i++) {
@@ -56,8 +56,8 @@ public final class ExtraCategoryInterpolator implements DataFilter {
                     (DiscreteVariable) dataSet.getVariable(i);
 
             String oldName = variable.getName();
-            List<String> oldCategories = variable.getCategories();
-            List<String> newCategories = new LinkedList<String>(oldCategories);
+            List <String> oldCategories = variable.getCategories();
+            List <String> newCategories = new LinkedList <String>(oldCategories);
 
             String newCategory = "Missing";
             int j = 0;
@@ -88,8 +88,7 @@ public final class ExtraCategoryInterpolator implements DataFilter {
 
                 if (value == DiscreteVariable.MISSING_VALUE) {
                     newDataSet.setInt(i, j, numCategories);
-                }
-                else {
+                } else {
                     newDataSet.setInt(i, j, value);
                 }
             }

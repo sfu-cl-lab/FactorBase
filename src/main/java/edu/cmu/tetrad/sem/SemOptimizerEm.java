@@ -92,13 +92,13 @@ public class SemOptimizerEm implements SemOptimizer {
      * @see edu.cmu.tetradapp.util.TetradSerializableUtils
      */
     public static SemOptimizerEm serializableInstance() {
-        return new SemOptimizerEm();                
+        return new SemOptimizerEm();
     }
 
     //=============================PUBLIC METHODS=========================//
 
     @Override
-	public void optimize(SemIm semIm) {
+    public void optimize(SemIm semIm) {
         if (semIm == null) {
             throw new IllegalArgumentException();
         }
@@ -131,18 +131,16 @@ public class SemOptimizerEm implements SemOptimizer {
         this.graph = semIm.getSemPm().getGraph();
         this.yCov = semIm.getSampleCovar().toArray();
         this.numObserved = this.numLatent = 0;
-        List<Node> nodes = this.graph.getNodes();
+        List <Node> nodes = this.graph.getNodes();
         Collections.sort(nodes);
 
         for (int i = 0; i < nodes.size(); i++) {
             Node node = nodes.get(i);
             if (node.getNodeType() == NodeType.LATENT) {
                 this.numLatent++;
-            }
-            else if (node.getNodeType() == NodeType.MEASURED) {
+            } else if (node.getNodeType() == NodeType.MEASURED) {
                 this.numObserved++;
-            }
-            else if (node.getNodeType() == NodeType.ERROR) {
+            } else if (node.getNodeType() == NodeType.ERROR) {
                 continue;
             }
         }
@@ -157,11 +155,9 @@ public class SemOptimizerEm implements SemOptimizer {
             Node node = nodes.get(i);
             if (node.getNodeType() == NodeType.LATENT) {
                 this.idxLatent[countLatent++] = i;
-            }
-            else if (node.getNodeType() == NodeType.MEASURED) {
+            } else if (node.getNodeType() == NodeType.MEASURED) {
                 this.idxObserved[countObserved++] = i;
-            }
-            else if (node.getNodeType() == NodeType.ERROR) {
+            } else if (node.getNodeType() == NodeType.ERROR) {
                 continue;
             }
         }
@@ -207,8 +203,7 @@ public class SemOptimizerEm implements SemOptimizer {
                     this.parents[idx][i] =
                             nodes.indexOf(parents.get(i));
                 }
-            }
-            else {
+            } else {
                 this.parents[idx] = null;
             }
         }
@@ -240,7 +235,7 @@ public class SemOptimizerEm implements SemOptimizer {
     private void maximization() {
         for (Node node : this.graph.getNodes()) {
             if (node.getNodeType() == NodeType.ERROR) {
-                continue;                                       
+                continue;
             }
             int idx = this.graph.getNodes().indexOf(node);
             double variance = this.expectedCovariance[idx][idx];
@@ -275,8 +270,7 @@ public class SemOptimizerEm implements SemOptimizer {
                         this.semIm.setParamValue(
                                 this.graph.getNodes().get(idx2), node,
                                 edges[i]);
-                    }
-                    catch (IllegalArgumentException e) {
+                    } catch (IllegalArgumentException e) {
                         //Dont't do anything: it is just a fixed parameter
                     }
                 }
@@ -291,8 +285,7 @@ public class SemOptimizerEm implements SemOptimizer {
 
                 this.semIm.setParamValue(this.errorParent[idx],
                         this.errorParent[idx], variance);
-            }
-            catch (IllegalArgumentException e) {
+            } catch (IllegalArgumentException e) {
                 //Don't do anything: it is just a fixed parameter
             }
         }

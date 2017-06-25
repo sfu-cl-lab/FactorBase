@@ -93,7 +93,7 @@ public class FasDeterministic {
         TetradLogger.getInstance().log("info", "Starting Fast Adjacency Search.");
 
         // Remove edges forbidden both ways.
-        List<Edge> edges = graph.getEdges();
+        List <Edge> edges = graph.getEdges();
 
         for (Edge edge1 : edges) {
             String name1 = edge1.getNode1().getName();
@@ -159,9 +159,9 @@ public class FasDeterministic {
     /**
      * Removes from the list of nodes any that cannot be parents of x given the background knowledge.
      */
-    private List<Node> possibleParents(Node x, Node y, List<Node> nodes,
-                                       Knowledge knowledge) {
-        List<Node> possibleParents = new LinkedList<Node>();
+    private List <Node> possibleParents(Node x, Node y, List <Node> nodes,
+                                        Knowledge knowledge) {
+        List <Node> possibleParents = new LinkedList <Node>();
         String _x = x.getName();
         String _y = y.getName();
 
@@ -210,18 +210,18 @@ public class FasDeterministic {
     private boolean searchAtDepth(Graph graph, IndependenceTest test,
                                   Knowledge knowledge, SepsetMap sepset, int depth) {
         boolean more = false;
-        List<Node> nodes = new LinkedList<Node>(graph.getNodes());
+        List <Node> nodes = new LinkedList <Node>(graph.getNodes());
 
         for (Node x : nodes) {
-            List<Node> b = new LinkedList<Node>(graph.getAdjacentNodes(x));
+            List <Node> b = new LinkedList <Node>(graph.getAdjacentNodes(x));
 
             nextEdge:
             for (Node y : b) {
 
                 // This is the standard algorithm, without the v1 bias.
-                List<Node> adjx = graph.getAdjacentNodes(x);
+                List <Node> adjx = graph.getAdjacentNodes(x);
                 adjx.remove(y);
-                List<Node> ppx = possibleParents(x, y, adjx, knowledge);
+                List <Node> ppx = possibleParents(x, y, adjx, knowledge);
 
                 boolean noEdgeRequired =
                         knowledge.noEdgeRequired(x.getName(), y.getName());
@@ -231,13 +231,13 @@ public class FasDeterministic {
                     int[] choice;
 
                     while ((choice = cg.next()) != null) {
-                        List<Node> condSet = GraphUtils.asList(choice, ppx);
+                        List <Node> condSet = GraphUtils.asList(choice, ppx);
 
 //                        if (condSet.contains(x) || condSet.contains(y)) {
 //                            throw new IllegalArgumentException(condSet + " .. " + x + " " + y);
 //                        }
 
-                        List<Node> _x = Collections.singletonList(x);
+                        List <Node> _x = Collections.singletonList(x);
 
                         boolean determines = test.determines(_x, y);
                         boolean splitdetermines = test.determines(condSet, x) || test.determines(condSet, y);
@@ -261,7 +261,7 @@ public class FasDeterministic {
 
                             if (independent && noEdgeRequired) {
                                 graph.removeEdge(x, y);
-                                sepset.set(x, y, new LinkedList<Node>(condSet));
+                                sepset.set(x, y, new LinkedList <Node>(condSet));
                                 continue nextEdge;
                             }
                         }

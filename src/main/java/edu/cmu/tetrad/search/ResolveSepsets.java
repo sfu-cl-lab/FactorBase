@@ -31,8 +31,6 @@ import edu.cmu.tetrad.util.ProbUtils;
 import edu.cmu.tetrad.util.RandomUtil;
 import edu.cmu.tetrad.util.TetradLogger;
 
-import java.util.*;
-
 /**
  * Utilities for resolving inconsistencies that arise between sepsets learned for overlapping datasets. This occurs
  * frequently when using the DCI and ION algorithms. f
@@ -40,11 +38,6 @@ import java.util.*;
  * @author Robert Tillman
  */
 public final class ResolveSepsets {
-
-    public enum Method {
-        fisher, fisher2, tippett, worsleyfriston, stouffer, mudholkergeorge,
-        mudholkergeorge2, average, averagetest, random, fdr, majority
-    }
 
     /**
      * Resolves all inconsistencies between sepsets using a paricular method. Returns a sepsetMapDci with the resolved
@@ -58,19 +51,19 @@ public final class ResolveSepsets {
      * @param resolvedDependent
      * @return
      */
-    public static SepsetMapDci ResolveSepsets(List<SepsetMapDci> sepsets, List<IndependenceTest> independenceTests,
+    public static SepsetMapDci ResolveSepsets(List <SepsetMapDci> sepsets, List <IndependenceTest> independenceTests,
                                               Method method, SepsetMapDci resolvedIndependent, SepsetMapDci resolvedDependent) {
         SepsetMapDci resolvedSepset = new SepsetMapDci();
         // get all variables
-        Set<Node> allVars = new HashSet<Node>();
+        Set <Node> allVars = new HashSet <Node>();
         for (IndependenceTest independenceTest : independenceTests) {
             allVars.addAll(independenceTest.getVariables());
         }
         // checks each pair of nodes for inconsistencies across independenceTests
-        for (NodePair pair : allNodePairs(new ArrayList<Node>(allVars))) {
+        for (NodePair pair : allNodePairs(new ArrayList <Node>(allVars))) {
             // gets independenceTests and sepsets for every dataset with the pair
-            List<List<List<Node>>> pairSepsets = new ArrayList<List<List<Node>>>();
-            List<IndependenceTest> testsWithPair = new ArrayList<IndependenceTest>();
+            List <List <List <Node>>> pairSepsets = new ArrayList <List <List <Node>>>();
+            List <IndependenceTest> testsWithPair = new ArrayList <IndependenceTest>();
             for (int k = 0; k < independenceTests.size(); k++) {
                 IndependenceTest independenceTest = independenceTests.get(k);
                 if (independenceTest.getVariables().containsAll(Arrays.asList(pair.getFirst(), pair.getSecond()))) {
@@ -85,22 +78,22 @@ public final class ResolveSepsets {
                     if (pairSepsets.get(0) == null) {
                         continue;
                     }
-                    for (List<Node> sepset : pairSepsets.get(0)) {
+                    for (List <Node> sepset : pairSepsets.get(0)) {
                         resolvedSepset.set(pair.getFirst(), pair.getSecond(), sepset);
                     }
                 }
                 continue;
             }
             // check each conditioning set from a dataset
-            List<List<Node>> allConditioningSets = new ArrayList<List<Node>>();
-            for (List<List<Node>> conditioningSet : pairSepsets) {
+            List <List <Node>> allConditioningSets = new ArrayList <List <Node>>();
+            for (List <List <Node>> conditioningSet : pairSepsets) {
                 if (conditioningSet == null) {
                     continue;
                 }
                 allConditioningSets.addAll(conditioningSet);
             }
-            for (List<Node> conditioningSet : allConditioningSets) {
-                List<IndependenceTest> testsWithSet = new ArrayList<IndependenceTest>();
+            for (List <Node> conditioningSet : allConditioningSets) {
+                List <IndependenceTest> testsWithSet = new ArrayList <IndependenceTest>();
                 for (IndependenceTest independenceTest : testsWithPair) {
                     if (independenceTest.getVariables().containsAll(conditioningSet) || conditioningSet.isEmpty()) {
                         testsWithSet.add(independenceTest);
@@ -237,7 +230,7 @@ public final class ResolveSepsets {
      * @param condSet
      * @return
      */
-    public static boolean isIndependentPooled(Method method, List<IndependenceTest> independenceTests, Node x, Node y, List<Node> condSet) {
+    public static boolean isIndependentPooled(Method method, List <IndependenceTest> independenceTests, Node x, Node y, List <Node> condSet) {
         if (method == Method.fisher) {
             return isIndependentPooledFisher(independenceTests, x, y, condSet);
         } else if (method == Method.fisher2) {
@@ -278,12 +271,12 @@ public final class ResolveSepsets {
      * @param condSet
      * @return
      */
-    public static boolean isIndependentPooledFisher(List<IndependenceTest> independenceTests, Node x, Node y, List<Node> condSet) {
+    public static boolean isIndependentPooledFisher(List <IndependenceTest> independenceTests, Node x, Node y, List <Node> condSet) {
         double alpha = independenceTests.get(0).getAlpha();
         double tf = 0.0;
         for (IndependenceTest independenceTest : independenceTests) {
             if (missingVariable(x, y, condSet, independenceTest)) continue;
-            List<Node> localCondSet = new ArrayList<Node>();
+            List <Node> localCondSet = new ArrayList <Node>();
             for (Node node : condSet) {
                 localCondSet.add(independenceTest.getVariable(node.getName()));
             }
@@ -297,9 +290,9 @@ public final class ResolveSepsets {
     /**
      * Eliminates from considerations independence tests that cannot be evaluated (due to missing variables mainly).
      */
-    public static boolean isIndependentPooledFisher2(List<IndependenceTest> independenceTests, Node x, Node y, List<Node> condSet) {
+    public static boolean isIndependentPooledFisher2(List <IndependenceTest> independenceTests, Node x, Node y, List <Node> condSet) {
         double alpha = independenceTests.get(0).getAlpha();
-        List<Double> pValues = getAvailablePValues(independenceTests, x, y, condSet);
+        List <Double> pValues = getAvailablePValues(independenceTests, x, y, condSet);
 
         double tf = 0.0;
         int numPValues = 0;
@@ -329,12 +322,12 @@ public final class ResolveSepsets {
      * @param condSet
      * @return
      */
-    public static boolean isIndependentPooledTippett(List<IndependenceTest> independenceTests, Node x, Node y, List<Node> condSet) {
+    public static boolean isIndependentPooledTippett(List <IndependenceTest> independenceTests, Node x, Node y, List <Node> condSet) {
         double alpha = independenceTests.get(0).getAlpha();
         double p = -1.0;
         for (IndependenceTest independenceTest : independenceTests) {
             if (missingVariable(x, y, condSet, independenceTest)) continue;
-            List<Node> localCondSet = new ArrayList<Node>();
+            List <Node> localCondSet = new ArrayList <Node>();
             for (Node node : condSet) {
                 localCondSet.add(independenceTest.getVariable(node.getName()));
             }
@@ -363,7 +356,7 @@ public final class ResolveSepsets {
      * @param r
      * @return
      */
-    public static boolean isIndependentPooledWilkinson(List<IndependenceTest> independenceTests, Node x, Node y, List<Node> condSet, int r) {
+    public static boolean isIndependentPooledWilkinson(List <IndependenceTest> independenceTests, Node x, Node y, List <Node> condSet, int r) {
         double alpha = independenceTests.get(0).getAlpha();
         double p[] = new double[independenceTests.size()];
         int k = 0;
@@ -387,11 +380,11 @@ public final class ResolveSepsets {
      * @param condSet
      * @return
      */
-    public static boolean isIndependentPooledWorsleyFriston(List<IndependenceTest> independenceTests, Node x, Node y, List<Node> condSet) {
+    public static boolean isIndependentPooledWorsleyFriston(List <IndependenceTest> independenceTests, Node x, Node y, List <Node> condSet) {
         double alpha = independenceTests.get(0).getAlpha();
         double p = -1.0;
         for (IndependenceTest independenceTest : independenceTests) {
-            List<Node> localCondSet = new ArrayList<Node>();
+            List <Node> localCondSet = new ArrayList <Node>();
             if (missingVariable(x, y, condSet, independenceTest)) continue;
             for (Node node : condSet) {
                 localCondSet.add(independenceTest.getVariable(node.getName()));
@@ -421,11 +414,11 @@ public final class ResolveSepsets {
      * @param condSet
      * @return
      */
-    public static boolean isIndependentPooledStouffer(List<IndependenceTest> independenceTests, Node x, Node y, List<Node> condSet) {
+    public static boolean isIndependentPooledStouffer(List <IndependenceTest> independenceTests, Node x, Node y, List <Node> condSet) {
         double alpha = independenceTests.get(0).getAlpha();
         double ts = 0.0;
         for (IndependenceTest independenceTest : independenceTests) {
-            List<Node> localCondSet = new ArrayList<Node>();
+            List <Node> localCondSet = new ArrayList <Node>();
             for (Node node : condSet) {
                 localCondSet.add(independenceTest.getVariable(node.getName()));
             }
@@ -448,12 +441,12 @@ public final class ResolveSepsets {
      * @param condSet
      * @return
      */
-    public static boolean isIndependentPooledMudholkerGeorge(List<IndependenceTest> independenceTests, Node x, Node y, List<Node> condSet) {
+    public static boolean isIndependentPooledMudholkerGeorge(List <IndependenceTest> independenceTests, Node x, Node y, List <Node> condSet) {
         double alpha = independenceTests.get(0).getAlpha();
         double c = Math.sqrt(3 * (5 * independenceTests.size() + 4) / (independenceTests.size() * Math.pow(Math.PI, 2) * (5 * independenceTests.size() + 2)));
         double tm = 0.0;
         for (IndependenceTest independenceTest : independenceTests) {
-            List<Node> localCondSet = new ArrayList<Node>();
+            List <Node> localCondSet = new ArrayList <Node>();
             for (Node node : condSet) {
                 localCondSet.add(independenceTest.getVariable(node.getName()));
             }
@@ -470,9 +463,9 @@ public final class ResolveSepsets {
     /**
      * The same as isIndepenentPooledMudholkerGeoerge, except that only available independence tests are used.
      */
-    public static boolean isIndependentPooledMudholkerGeorge2(List<IndependenceTest> independenceTests, Node x, Node y, List<Node> condSet) {
+    public static boolean isIndependentPooledMudholkerGeorge2(List <IndependenceTest> independenceTests, Node x, Node y, List <Node> condSet) {
         double alpha = independenceTests.get(0).getAlpha();
-        List<Double> pValues = getAvailablePValues(independenceTests, x, y, condSet);
+        List <Double> pValues = getAvailablePValues(independenceTests, x, y, condSet);
         double c = Math.sqrt(3 * (5 * pValues.size() + 4) / (pValues.size() * Math.pow(Math.PI, 2) * (5 * pValues.size() + 2)));
         double tm = 0.0;
         for (double pk : pValues) {
@@ -491,7 +484,7 @@ public final class ResolveSepsets {
      * @param condSet
      * @return
      */
-    public static boolean isIndependentPooledAverage(List<IndependenceTest> independenceTests, Node x, Node y, List<Node> condSet) {
+    public static boolean isIndependentPooledAverage(List <IndependenceTest> independenceTests, Node x, Node y, List <Node> condSet) {
         double alpha = independenceTests.get(0).getAlpha();
         double sum = 0.0;
         int numTests = 0;
@@ -499,7 +492,7 @@ public final class ResolveSepsets {
         for (IndependenceTest independenceTest : independenceTests) {
             if (missingVariable(x, y, condSet, independenceTest)) continue;
 
-            List<Node> localCondSet = new ArrayList<Node>();
+            List <Node> localCondSet = new ArrayList <Node>();
             for (Node node : condSet) {
                 localCondSet.add(independenceTest.getVariable(node.getName()));
             }
@@ -524,7 +517,7 @@ public final class ResolveSepsets {
         return (sum / numTests > alpha);
     }
 
-    private static boolean missingVariable(Node x, Node y, List<Node> condSet, IndependenceTest independenceTest) {
+    private static boolean missingVariable(Node x, Node y, List <Node> condSet, IndependenceTest independenceTest) {
         DataSet dataSet = (DataSet) independenceTest.getData();
 
         if (isMissing(x, dataSet)) {
@@ -567,7 +560,7 @@ public final class ResolveSepsets {
      * @param condSet
      * @return
      */
-    public static boolean isIndependentPooledAverageTest(List<IndependenceTest> independenceTests, Node x, Node y, List<Node> condSet) {
+    public static boolean isIndependentPooledAverageTest(List <IndependenceTest> independenceTests, Node x, Node y, List <Node> condSet) {
         double alpha = independenceTests.get(0).getAlpha();
         double ts = 0.0;
         int df = 0;
@@ -575,7 +568,7 @@ public final class ResolveSepsets {
             if (!(independenceTest instanceof IndTestChiSquare)) {
                 throw new RuntimeException("Must be ChiSquare Test");
             }
-            List<Node> localCondSet = new ArrayList<Node>();
+            List <Node> localCondSet = new ArrayList <Node>();
             for (Node node : condSet) {
                 localCondSet.add(independenceTest.getVariable(node.getName()));
             }
@@ -597,11 +590,11 @@ public final class ResolveSepsets {
      * @param condSet
      * @return
      */
-    public static boolean isIndependentPooledRandom(List<IndependenceTest> independenceTests, Node x, Node y, List<Node> condSet) {
+    public static boolean isIndependentPooledRandom(List <IndependenceTest> independenceTests, Node x, Node y, List <Node> condSet) {
         double alpha = independenceTests.get(0).getAlpha();
         int r = RandomUtil.getInstance().nextInt(independenceTests.size());
         IndependenceTest independenceTest = independenceTests.get(r);
-        List<Node> localCondSet = new ArrayList<Node>();
+        List <Node> localCondSet = new ArrayList <Node>();
         for (Node node : condSet) {
             localCondSet.add(independenceTest.getVariable(node.getName()));
         }
@@ -613,8 +606,8 @@ public final class ResolveSepsets {
     /**
      * Generates NodePairs of all possible pairs of nodes from given list of nodes.
      */
-    public static List<NodePair> allNodePairs(List<Node> nodes) {
-        List<NodePair> nodePairs = new ArrayList<NodePair>();
+    public static List <NodePair> allNodePairs(List <Node> nodes) {
+        List <NodePair> nodePairs = new ArrayList <NodePair>();
         for (int j = 0; j < nodes.size() - 1; j++) {
             for (int k = j + 1; k < nodes.size(); k++) {
                 nodePairs.add(new NodePair(nodes.get(j), nodes.get(k)));
@@ -634,8 +627,8 @@ public final class ResolveSepsets {
      * @param condSet
      * @return
      */
-    private static boolean isIndependentMajorityFdr(List<IndependenceTest> independenceTests, Node x, Node y, List<Node> condSet) {
-        List<Double> allPValues = getAvailablePValues(independenceTests, x, y, condSet);
+    private static boolean isIndependentMajorityFdr(List <IndependenceTest> independenceTests, Node x, Node y, List <Node> condSet) {
+        List <Double> allPValues = getAvailablePValues(independenceTests, x, y, condSet);
 
         Collections.sort(allPValues);
         int c = 0;
@@ -660,12 +653,12 @@ public final class ResolveSepsets {
         return independent;
     }
 
-    private static List<Double> getAvailablePValues(List<IndependenceTest> independenceTests, Node x, Node y, List<Node> condSet) {
-        List<Double> allPValues = new ArrayList<Double>();
+    private static List <Double> getAvailablePValues(List <IndependenceTest> independenceTests, Node x, Node y, List <Node> condSet) {
+        List <Double> allPValues = new ArrayList <Double>();
 
         for (IndependenceTest test : independenceTests) {
             if (missingVariable(x, y, condSet, test)) continue;
-            List<Node> localCondSet = new ArrayList<Node>();
+            List <Node> localCondSet = new ArrayList <Node>();
             for (Node node : condSet) {
                 localCondSet.add(test.getVariable(node.getName()));
             }
@@ -692,8 +685,8 @@ public final class ResolveSepsets {
      * @param condSet
      * @return
      */
-    private static boolean isIndependentMajorityIndep(List<IndependenceTest> independenceTests, Node x, Node y, List<Node> condSet) {
-        List<Double> allPValues = getAvailablePValues(independenceTests, x, y, condSet);
+    private static boolean isIndependentMajorityIndep(List <IndependenceTest> independenceTests, Node x, Node y, List <Node> condSet) {
+        List <Double> allPValues = getAvailablePValues(independenceTests, x, y, condSet);
 
         Collections.sort(allPValues);
         int c = 0;
@@ -715,6 +708,11 @@ public final class ResolveSepsets {
         }
 
         return independent;
+    }
+
+    public enum Method {
+        fisher, fisher2, tippett, worsleyfriston, stouffer, mudholkergeorge,
+        mudholkergeorge2, average, averagetest, random, fdr, majority
     }
 }
 

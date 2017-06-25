@@ -40,7 +40,7 @@ final class ModelGenerator {
      * deleted, added or reversed.  Edges are not added or reversed if a cycle
      * would result.
      */
-    public static List<Graph> generate(Graph graph) {
+    public static List <Graph> generate(Graph graph) {
 
         //Make sure the argument contains no cycles.
         if (graph.existsDirectedCycle()) {
@@ -48,10 +48,10 @@ final class ModelGenerator {
                     "Input must not contain cycles.");
         }
 
-        List<Graph> graphs = new LinkedList<Graph>();
+        List <Graph> graphs = new LinkedList <Graph>();
 
-        List<Edge> allEdges = graph.getEdges();
-        List<Node> allNodes = graph.getNodes();
+        List <Edge> allEdges = graph.getEdges();
+        List <Node> allNodes = graph.getNodes();
 
         //Add those graphs in which each edge is removed in turn.
         for (Edge allEdge1 : allEdges) {

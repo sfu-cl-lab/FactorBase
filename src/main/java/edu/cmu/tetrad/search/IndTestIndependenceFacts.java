@@ -48,12 +48,12 @@ public final class IndTestIndependenceFacts implements IndependenceTest {
 
 
     @Override
-	public IndependenceTest indTestSubset(List<Node> vars) {
+    public IndependenceTest indTestSubset(List <Node> vars) {
         throw new UnsupportedOperationException();
     }
 
     @Override
-	public boolean isIndependent(Node x, Node y, List<Node> z) {
+    public boolean isIndependent(Node x, Node y, List <Node> z) {
         Node[] _z = new Node[z.size()];
 
         for (int i = 0; i < z.size(); i++) {
@@ -76,8 +76,8 @@ public final class IndTestIndependenceFacts implements IndependenceTest {
     }
 
     @Override
-	public boolean isIndependent(Node x, Node y, Node... z) {
-        List<Node> zz = new ArrayList<Node>();
+    public boolean isIndependent(Node x, Node y, Node... z) {
+        List <Node> zz = new ArrayList <Node>();
 
         for (Node node : z) {
             zz.add(node);
@@ -87,30 +87,30 @@ public final class IndTestIndependenceFacts implements IndependenceTest {
     }
 
     @Override
-	public boolean isDependent(Node x, Node y, List<Node> z) {
+    public boolean isDependent(Node x, Node y, List <Node> z) {
         return !isIndependent(x, y, z);
     }
 
     @Override
-	public boolean isDependent(Node x, Node y, Node... z) {
+    public boolean isDependent(Node x, Node y, Node... z) {
         return !isIndependent(x, y, z);
     }
 
     @Override
-	public double getPValue() {
+    public double getPValue() {
         return Double.NaN;
     }
 
     @Override
-	public List<Node> getVariables() {
+    public List <Node> getVariables() {
         return facts.getVariables();
     }
 
     @Override
-	public Node getVariable(String name) {
+    public Node getVariable(String name) {
         if (name == null) throw new NullPointerException();
 
-        List<Node> variables = facts.getVariables();
+        List <Node> variables = facts.getVariables();
 
         for (Node node : variables) {
             if (name.equals(node.getName())) {
@@ -122,27 +122,27 @@ public final class IndTestIndependenceFacts implements IndependenceTest {
     }
 
     @Override
-	public List<String> getVariableNames() {
+    public List <String> getVariableNames() {
         return facts.getVariableNames();
     }
 
     @Override
-	public boolean determines(List<Node> z, Node y) {
+    public boolean determines(List <Node> z, Node y) {
         return false;
     }
 
     @Override
-	public double getAlpha() {
+    public double getAlpha() {
         return Double.NaN;
     }
 
     @Override
-	public void setAlpha(double alpha) {
+    public void setAlpha(double alpha) {
         throw new UnsupportedOperationException();
     }
 
     @Override
-	public DataModel getData() {
+    public DataModel getData() {
         return facts;
     }
 

@@ -31,7 +31,6 @@ import edu.cmu.tetrad.util.TetradSerializable;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.text.NumberFormat;
-import java.util.*;
 
 /**
  * Wraps a COLT 2D matrix in such a way that mixed data sets can be stored. The
@@ -82,33 +81,21 @@ import java.util.*;
 public final class ColtDataSet
         implements DataSet, TetradSerializable {
     static final long serialVersionUID = 23L;
-    private Map<String, String> columnToTooltip;
-    @Override
-	public Map<String, String> getColumnToTooltip() {
-		return columnToTooltip;
-	}
-
-	@Override
-	public void setColumnToTooltip(Map<String, String> columnToTooltip) {
-		this.columnToTooltip = columnToTooltip;
-	}
-
-	/**
+    private Map <String, String> columnToTooltip;
+    /**
      * The name of the data model. This is not used internally; it is only here
      * in case an external class wants this dataset to have a name.
      *
      * @serial
      */
     private String name;
-
     /**
      * The list of variables. These correspond columnwise to the columns of
      * <code>data</code>.
      *
      * @serial
      */
-    private List<Node> variables = new ArrayList<Node>();
-
+    private List <Node> variables = new ArrayList <Node>();
     /**
      * The container storing the data. Rows are cases; columns are variables.
      * The order of columns is coordinated with the order of variables in
@@ -117,22 +104,19 @@ public final class ColtDataSet
      * @serial
      */
     private DoubleMatrix2D data;
-
     /**
      * The set of selected variables.
      *
      * @serial
      */
-    private Set<Node> selection = new HashSet<Node>();
-
+    private Set <Node> selection = new HashSet <Node>();
     /**
      * Case ID's. These are strings associated with some or all of the cases of
      * the dataset.
      *
      * @serial
      */
-    private Map<Integer, String> caseIds = new HashMap<Integer, String>();
-
+    private Map <Integer, String> caseIds = new HashMap <Integer, String>();
     /**
      * A map from cases to case multipliers. If a case is not in the domain of
      * this map, its case multiplier is by default 1. This is the number of
@@ -141,15 +125,13 @@ public final class ColtDataSet
      *
      * @serial
      */
-    private Map<Integer, Long> multipliers = new HashMap<Integer, Long>();
-
+    private Map <Integer, Long> multipliers = new HashMap <Integer, Long>();
     /**
      * The knowledge associated with this data.
      *
      * @serial
      */
     private Knowledge knowledge = new Knowledge();
-
     /**
      * True iff the column should adjust the discrete variable to accomodate new
      * categories added, false if new categories should be rejected.
@@ -158,34 +140,29 @@ public final class ColtDataSet
      * @deprecated Replaced by corresponding field on DiscreteVariable.
      */
     @Deprecated
-	private boolean newCategoriesAccomodated = true;
-
+    private boolean newCategoriesAccomodated = true;
     /**
      * The number formatter used for printing out continuous values.
      */
     private transient NumberFormat nf;
-
     /**
      * The character used as a delimiter when the dataset is printed.
      */
     private char outputDelimiter = '\t';
-
     /**
      * True iff line numbers should be written by calls to toString().
      */
     private boolean lineNumbersWritten;
-
-    //============================CONSTRUCTORS==========================//
 
     /**
      * Constructs a data set with the given number of rows (cases) and the given
      * list of variables. The number of columns will be equal to the number of
      * cases.
      */
-    public ColtDataSet(int rows, List<Node> variables) {
+    public ColtDataSet(int rows, List <Node> variables) {
         data = new DenseDoubleMatrix2D(rows, variables.size());
-      //  System.out.println("No of Variables "+ variables.size()); //zqian
-        this.variables = new LinkedList<Node>(variables);
+        //  System.out.println("No of Variables "+ variables.size()); //zqian
+        this.variables = new LinkedList <Node>(variables);
 
         for (int i = 0; i < rows; i++) {
             for (int j = 0; j < variables.size(); j++) {
@@ -200,14 +177,15 @@ public final class ColtDataSet
      */
     public ColtDataSet(ColtDataSet dataSet) {
         name = dataSet.name;
-        variables = new LinkedList<Node>(dataSet.variables);
+        variables = new LinkedList <Node>(dataSet.variables);
         data = dataSet.data.copy();
-        selection = new HashSet<Node>(dataSet.selection);
-        multipliers = new HashMap<Integer, Long>(dataSet.multipliers);
+        selection = new HashSet <Node>(dataSet.selection);
+        multipliers = new HashMap <Integer, Long>(dataSet.multipliers);
         knowledge = new Knowledge(dataSet.knowledge);
         newCategoriesAccomodated = dataSet.newCategoriesAccomodated;
     }
 
+    //============================CONSTRUCTORS==========================//
 
     /**
      * Creates a continuous data set from the given data. The matrix must be in
@@ -217,13 +195,13 @@ public final class ColtDataSet
      * @param data      A 2D data set containing the data. The number of columns
      *                  must equal the number of variables.
      */
-    public static ColtDataSet makeContinuousData(List<Node> variables,
+    public static ColtDataSet makeContinuousData(List <Node> variables,
                                                  DoubleMatrix2D data) {
         if (variables.size() != data.columns()) {
             throw new IllegalArgumentException();
         }
 
-        List<Node> convertedVars = new ArrayList<Node>();
+        List <Node> convertedVars = new ArrayList <Node>();
 
         for (Node node : variables) {
             if (!(node instanceof ContinuousVariable)) {
@@ -236,7 +214,7 @@ public final class ColtDataSet
             }
         }
 
-        List<Node> nodes = new ArrayList<Node>();
+        List <Node> nodes = new ArrayList <Node>();
 
         for (Node variable : convertedVars) {
             nodes.add(variable);
@@ -254,13 +232,13 @@ public final class ColtDataSet
         return dataSet;
     }
 
-    public static ColtDataSet makeData(List<Node> variables,
+    public static ColtDataSet makeData(List <Node> variables,
                                        DoubleMatrix2D data) {
         if (variables.size() != data.columns()) {
             throw new IllegalArgumentException();
         }
 
-        List<Node> convertedVars = new ArrayList<Node>(variables);
+        List <Node> convertedVars = new ArrayList <Node>(variables);
 
 //        for (Node node : variables) {
 //            if (!(node instanceof ContinuousVariable)) {
@@ -271,7 +249,7 @@ public final class ColtDataSet
 //            }
 //        }
 
-        List<Node> nodes = new ArrayList<Node>();
+        List <Node> nodes = new ArrayList <Node>();
 
         for (Node variable : convertedVars) {
             nodes.add(variable);
@@ -289,6 +267,72 @@ public final class ColtDataSet
         return dataSet;
     }
 
+    /**
+     * Generates a simple exemplar of this class to test serialization.
+     *
+     * @see edu.cmu.TestSerialization
+     * @see edu.cmu.tetradapp.util.TetradSerializableUtils
+     */
+    public static DataSet serializableInstance() {
+        return new ColtDataSet(0, new LinkedList <Node>());
+    }
+
+    /**
+     * Adds semantic checks to the default deserialization method. This method
+     * must have the standard signature for a readObject method, and the body of
+     * the method must begin with "s.defaultReadObject();". Other than that, any
+     * semantic checks can be specified and do not need to stay the same from
+     * version to version. A readObject method of this form may be added to any
+     * class, even if Tetrad sessions were previously saved out using a version
+     * of the class that didn't include it. (That's what the
+     * "s.defaultReadObject();" is for. See J. Bloch, Effective Java, for help.
+     *
+     * @throws java.io.IOException
+     * @throws ClassNotFoundException
+     */
+    private static void readObject(ObjectInputStream s)
+            throws IOException, ClassNotFoundException {
+        s.defaultReadObject();
+    }
+
+    /**
+     * Attempts to translate <code>element</code> into a double value, returning
+     * it if successful, otherwise throwing an exception. To be successful, the
+     * object must be either a Number or a String.
+     *
+     * @throws IllegalArgumentException if the translation cannot be made. The
+     *                                  reason is in the message.
+     */
+    private static double getValueFromObjectContinuous(Object element) {
+        if ("*".equals(element) || "".equals(element)) {
+            return ContinuousVariable.getDoubleMissingValue();
+        } else if (element instanceof Number) {
+            return ((Number) element).doubleValue();
+        } else if (element instanceof String) {
+            try {
+                return Double.parseDouble((String) element);
+            } catch (NumberFormatException e) {
+                return ContinuousVariable.getDoubleMissingValue();
+            }
+        } else {
+            throw new IllegalArgumentException(
+                    "The argument 'element' must be " +
+                            "either a Number or a String.");
+        }
+    }
+
+    @Override
+    public Map <String, String> getColumnToTooltip() {
+        return columnToTooltip;
+    }
+
+    //============================PUBLIC METHODS========================//
+
+    @Override
+    public void setColumnToTooltip(Map <String, String> columnToTooltip) {
+        this.columnToTooltip = columnToTooltip;
+    }
+
     public DataSet concatenateDataRowwise(ColtDataSet dataSet1, ColtDataSet dataSet2) {
         if (!(dataSet1.variables.equals(dataSet2.variables))) {
             throw new IllegalArgumentException();
@@ -304,12 +348,12 @@ public final class ColtDataSet
         DoubleMatrix2D matrix1 = dataSet1.data;
         DoubleMatrix2D matrix2 = dataSet2.data;
 
-        for (int i=0; i < cols; i++) {
-            for (int j=0; j<rows1; j++)  {
+        for (int i = 0; i < cols; i++) {
+            for (int j = 0; j < rows1; j++) {
                 concatMatrix.set(j, i, matrix1.get(j, i));
             }
-            for (int j=0; j<rows2; j++)  {
-                concatMatrix.set(j+rows1, i, matrix2.get(j, i));
+            for (int j = 0; j < rows2; j++) {
+                concatMatrix.set(j + rows1, i, matrix2.get(j, i));
             }
         }
 
@@ -317,22 +361,10 @@ public final class ColtDataSet
     }
 
     /**
-     * Generates a simple exemplar of this class to test serialization.
-     *
-     * @see edu.cmu.TestSerialization
-     * @see edu.cmu.tetradapp.util.TetradSerializableUtils
-     */
-    public static DataSet serializableInstance() {
-        return new ColtDataSet(0, new LinkedList<Node>());
-    }
-
-    //============================PUBLIC METHODS========================//
-
-    /**
      * Gets the name of the data set.
      */
     @Override
-	public final String getName() {
+    public final String getName() {
         return this.name;
     }
 
@@ -340,7 +372,7 @@ public final class ColtDataSet
      * Sets the name of the data set.
      */
     @Override
-	public final void setName(String name) {
+    public final void setName(String name) {
         if (name == null) {
             throw new NullPointerException("Name must not be null.");
         }
@@ -351,7 +383,7 @@ public final class ColtDataSet
      * Returns the number of variables in the data set.
      */
     @Override
-	public final int getNumColumns() {
+    public final int getNumColumns() {
         return variables.size();
     }
 
@@ -360,7 +392,7 @@ public final class ColtDataSet
      * maximum of the number of rows in the list of wrapped columns.
      */
     @Override
-	public final int getNumRows() {
+    public final int getNumRows() {
         return data.rows();
     }
 
@@ -372,7 +404,7 @@ public final class ColtDataSet
      * @param column The index of the variable.
      */
     @Override
-	public final void setInt(int row, int column, int value) {
+    public final void setInt(int row, int column, int value) {
         Node variable = getVariable(column);
 
         if (!(variable instanceof DiscreteVariable)) {
@@ -398,8 +430,7 @@ public final class ColtDataSet
 
         try {
             setIntPrivate(row, column, value);
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             if (row < 0 || column < 0) {
                 throw new IllegalArgumentException(
                         "Row and column must be >= 0.");
@@ -420,17 +451,16 @@ public final class ColtDataSet
      * @param column The index of the variable.
      */
     @Override
-	public final void setDouble(int row, int column, double value) {
+    public final void setDouble(int row, int column, double value) {
         if ((getVariable(column) instanceof DiscreteVariable)) {
 //            if (!(getVariable(column) instanceof ContinuousVariable)) {
-                throw new IllegalArgumentException(
+            throw new IllegalArgumentException(
                     "Can only set doubles for continuous columns: " + getVariable(column));
         }
 
         try {
             data.set(row, column, value);
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             if (row < 0 || column < 0) {
                 throw new IllegalArgumentException(
                         "Row and column must be >= 0.");
@@ -453,7 +483,7 @@ public final class ColtDataSet
      * @param col The index of the variable.
      */
     @Override
-	public final Object getObject(int row, int col) {
+    public final Object getObject(int row, int col) {
         Object variable = getVariable(col);
 
         if (variable instanceof ContinuousVariable) {
@@ -482,7 +512,7 @@ public final class ColtDataSet
      * @param col The index of the variable.
      */
     @Override
-	public final void setObject(int row, int col, Object value) {
+    public final void setObject(int row, int col, Object value) {
         Object variable = getVariable(col);
 
         if (variable instanceof ContinuousVariable) {
@@ -501,9 +531,9 @@ public final class ColtDataSet
      * Returns the indices of the currently selected variables.
      */
     @Override
-	public final int[] getSelectedIndices() {
-        List<Node> variables = getVariables();
-        Set<Node> selection = getSelection();
+    public final int[] getSelectedIndices() {
+        List <Node> variables = getVariables();
+        Set <Node> selection = getSelection();
 
         int[] indices = new int[selection.size()];
 
@@ -520,8 +550,8 @@ public final class ColtDataSet
     /**
      * Returns the set of currently selected variables.
      */
-    public final Set<Node> getSelectedVariables() {
-        return new HashSet<Node>(selection);
+    public final Set <Node> getSelectedVariables() {
+        return new HashSet <Node>(selection);
     }
 
     /**
@@ -533,7 +563,7 @@ public final class ColtDataSet
      *                                  dataset.
      */
     @Override
-	public final void addVariable(Node variable) {
+    public final void addVariable(Node variable) {
         if (variables.contains(variable)) {
             throw new IllegalArgumentException("Expecting a new variable: " + variable);
         }
@@ -554,7 +584,7 @@ public final class ColtDataSet
      * and inserting a column of missing values at column i.
      */
     @Override
-	public final void addVariable(int index, Node variable) {
+    public final void addVariable(int index, Node variable) {
         if (variables.contains(variable)) {
             throw new IllegalArgumentException("Expecting a new variable.");
         }
@@ -590,7 +620,7 @@ public final class ColtDataSet
      * Returns the variable at the given column.
      */
     @Override
-	public final Node getVariable(int col) {
+    public final Node getVariable(int col) {
         return variables.get(col);
     }
 
@@ -599,7 +629,7 @@ public final class ColtDataSet
      * this by calling getVariables().indexOf(variable).
      */
     @Override
-	public final int getColumn(Node variable) {
+    public final int getColumn(Node variable) {
         return variables.indexOf(variable);
     }
 
@@ -610,7 +640,7 @@ public final class ColtDataSet
      * @throws IllegalArgumentException if the given change is not supported.
      */
     @Override
-	@SuppressWarnings({"ConstantConditions"})
+    @SuppressWarnings({"ConstantConditions"})
     public final void changeVariable(Node from, Node to) {
         if (!(from instanceof DiscreteVariable &&
                 to instanceof DiscreteVariable)) {
@@ -623,7 +653,7 @@ public final class ColtDataSet
 
         int col = variables.indexOf(_from);
 
-        List<String> oldCategories = _from.getCategories();
+        List <String> oldCategories = _from.getCategories();
         List newCategories = _to.getCategories();
 
         int[] indexArray = new int[oldCategories.size()];
@@ -641,8 +671,7 @@ public final class ColtDataSet
             int newIndex = 0;
             try {
                 newIndex = indexArray[value];
-            }
-            catch (Exception e) {
+            } catch (Exception e) {
                 e.printStackTrace();
             }
 
@@ -660,7 +689,7 @@ public final class ColtDataSet
      * Returns the variable with the given name.
      */
     @Override
-	public final Node getVariable(String varName) {
+    public final Node getVariable(String varName) {
         for (Node variable1 : variables) {
             if (variable1.getName().equals(varName)) {
                 return variable1;
@@ -675,17 +704,16 @@ public final class ColtDataSet
      * of their columns.
      */
     @Override
-	public final List<Node> getVariables() {
-        return new LinkedList<Node>(variables);
+    public final List <Node> getVariables() {
+        return new LinkedList <Node>(variables);
     }
-
 
     /**
      * Returns a copy of the knowledge associated with this data set. (Cannot be
      * null.)
      */
     @Override
-	public final Knowledge getKnowledge() {
+    public final Knowledge getKnowledge() {
         return new Knowledge(this.knowledge);
     }
 
@@ -693,7 +721,7 @@ public final class ColtDataSet
      * Sets knowledge to be associated with this data set. May not be null.
      */
     @Override
-	public final void setKnowledge(Knowledge knowledge) {
+    public final void setKnowledge(Knowledge knowledge) {
         if (knowledge == null) {
             throw new NullPointerException();
         }
@@ -706,9 +734,9 @@ public final class ColtDataSet
      * of their columns.
      */
     @Override
-	public final List<String> getVariableNames() {
-        List<Node> vars = getVariables();
-        List<String> names = new ArrayList<String>();
+    public final List <String> getVariableNames() {
+        List <Node> vars = getVariables();
+        List <String> names = new ArrayList <String>();
 
         for (Node variable : vars) {
             String name = variable.getName();
@@ -723,7 +751,7 @@ public final class ColtDataSet
      * 'selected' is false.
      */
     @Override
-	public final void setSelected(Node variable, boolean selected) {
+    public final void setSelected(Node variable, boolean selected) {
         if (selected) {
             if (variables.contains(variable)) {
                 getSelection().add(variable);
@@ -739,7 +767,7 @@ public final class ColtDataSet
      * Marks all variables as deselected.
      */
     @Override
-	public final void clearSelection() {
+    public final void clearSelection() {
         getSelection().clear();
     }
 
@@ -749,7 +777,7 @@ public final class ColtDataSet
      * missing values.
      */
     @Override
-	public void ensureRows(int rows) {
+    public void ensureRows(int rows) {
         if (rows > getNumRows()) {
             resize(rows, getNumColumns());
         }
@@ -761,7 +789,7 @@ public final class ColtDataSet
      * The new columns will be filled with missing values.
      */
     @Override
-	public void ensureColumns(int columns, List<String> excludedVariableNames) {
+    public void ensureColumns(int columns, List <String> excludedVariableNames) {
         for (int col = getNumColumns(); col < columns; col++) {
             int i = 0;
             String _name;
@@ -781,7 +809,7 @@ public final class ColtDataSet
      * Returns true iff the given column has been marked as selected.
      */
     @Override
-	public final boolean isSelected(Node variable) {
+    public final boolean isSelected(Node variable) {
         return getSelection().contains(variable);
     }
 
@@ -790,7 +818,7 @@ public final class ColtDataSet
      * number of columns by one.
      */
     @Override
-	public final void removeColumn(int index) {
+    public final void removeColumn(int index) {
         if (index < 0 || index >= variables.size()) {
             throw new IllegalArgumentException(
                     "Not a column in this data set: " + index);
@@ -822,7 +850,7 @@ public final class ColtDataSet
      * the number of columns by one.
      */
     @Override
-	public final void removeColumn(Node variable) {
+    public final void removeColumn(Node variable) {
         int index = variables.indexOf(variable);
 
         if (index != -1) {
@@ -837,13 +865,13 @@ public final class ColtDataSet
      * variables in this DataSet.
      */
     @Override
-	public final DataSet subsetColumns(List<Node> vars) {
+    public final DataSet subsetColumns(List <Node> vars) {
 //        if (vars.isEmpty()) {
 //            throw new IllegalArgumentException("Subset must not be empty.");
 //        }
 
         if (!(getVariables().containsAll(vars))) {
-            List<Node> missingVars = new ArrayList<Node>(vars);
+            List <Node> missingVars = new ArrayList <Node>(vars);
             missingVars.removeAll(getVariables());
 
             throw new IllegalArgumentException(
@@ -864,13 +892,13 @@ public final class ColtDataSet
 
         DoubleMatrix2D _data = data.viewSelection(rows, columns).copy();
 
-        ColtDataSet _dataSet = new ColtDataSet(0, new LinkedList<Node>());
+        ColtDataSet _dataSet = new ColtDataSet(0, new LinkedList <Node>());
         _dataSet.data = _data;
 
 //        _dataSet.name = name + "_copy";
         _dataSet.variables = vars;
-        _dataSet.selection = new HashSet<Node>();
-        _dataSet.multipliers = new HashMap<Integer, Long>(multipliers);
+        _dataSet.selection = new HashSet <Node>();
+        _dataSet.multipliers = new HashMap <Integer, Long>(multipliers);
 
         // Might have to delete some knowledge.
         _dataSet.knowledge = new Knowledge(knowledge);
@@ -882,11 +910,11 @@ public final class ColtDataSet
      * Returns true if case multipliers are being used for this data set.
      */
     @Override
-	public final boolean isMulipliersCollapsed() {
+    public final boolean isMulipliersCollapsed() {
         for (int i : getMultipliers().keySet()) {
-        	System.out.println("zqian@Nov21_2013,getMultipliers().keySet().size()"+getMultipliers().keySet().size() );
+            System.out.println("zqian@Nov21_2013,getMultipliers().keySet().size()" + getMultipliers().keySet().size());
             if (getMultipliers().get(i) != 1) {
-            	System.out.println("zqian@Nov21_2013,getMultipliers().get(i) "+ getMultipliers().get(i) );
+                System.out.println("zqian@Nov21_2013,getMultipliers().get(i) " + getMultipliers().get(i));
                 return true;
             }
         }
@@ -903,7 +931,7 @@ public final class ColtDataSet
      * effectively contains n copies of that case.
      */
     @Override
-	public final long getMultiplier(int caseNumber) {
+    public final long getMultiplier(int caseNumber) {
         Long multiplierInt = getMultipliers().get(caseNumber);
         return multiplierInt == null ? 1 : multiplierInt;
     }
@@ -914,7 +942,7 @@ public final class ColtDataSet
      * @throws IllegalArgumentException if the given case ID is already used.
      */
     @Override
-	public final void setCaseId(int caseNumber, String id) {
+    public final void setCaseId(int caseNumber, String id) {
         if (id == null) {
             caseIds.remove(caseNumber);
         } else if (caseIds.values().contains(id)) {
@@ -929,7 +957,7 @@ public final class ColtDataSet
      * Returns the case ID for the given case number.
      */
     @Override
-	public final String getCaseId(int caseNumber) {
+    public final String getCaseId(int caseNumber) {
         return caseIds.get(caseNumber);
     }
 
@@ -939,7 +967,7 @@ public final class ColtDataSet
      * and continuous.)
      */
     @Override
-	public final boolean isContinuous() {
+    public final boolean isContinuous() {
         for (int i = 0; i < getNumColumns(); i++) {
             Node variable = variables.get(i);
 
@@ -957,7 +985,7 @@ public final class ColtDataSet
      * continuous.)
      */
     @Override
-	public final boolean isDiscrete() {
+    public final boolean isDiscrete() {
         for (int i = 0; i < getNumColumns(); i++) {
             Node column = variables.get(i);
 
@@ -974,7 +1002,7 @@ public final class ColtDataSet
      * least one continuous column and one discrete columnn.
      */
     @Override
-	public final boolean isMixed() {
+    public final boolean isMixed() {
         int numContinuous = 0;
         int numDiscrete = 0;
 
@@ -1005,7 +1033,7 @@ public final class ColtDataSet
      * first.
      */
     @Override
-	public final DoubleMatrix2D getCorrelationMatrix() {
+    public final DoubleMatrix2D getCorrelationMatrix() {
         if (!isContinuous()) {
             throw new IllegalStateException("Not a continuous data set.");
         }
@@ -1034,7 +1062,7 @@ public final class ColtDataSet
      * first.
      */
     @Override
-	public final DoubleMatrix2D getCovarianceMatrix() {
+    public final DoubleMatrix2D getCovarianceMatrix() {
 
         if (!isContinuous()) {
             throw new IllegalStateException("Not a continuous data set.");
@@ -1105,7 +1133,7 @@ public final class ColtDataSet
      * integer, or DiscreteVariable.MISSING_VALUE if the value is missing.
      */
     @Override
-	public final int getInt(int row, int column) {
+    public final int getInt(int row, int column) {
         double value = data.get(row, column);
 
         if (Double.isNaN(value)) {
@@ -1122,7 +1150,7 @@ public final class ColtDataSet
      * returned.
      */
     @Override
-	public final double getDouble(int row, int column) {
+    public final double getDouble(int row, int column) {
         return data.get(row, column);
     }
 
@@ -1131,7 +1159,7 @@ public final class ColtDataSet
      * >= 1).
      */
     @Override
-	public final void setMultiplier(int caseNumber, long multiplier) {
+    public final void setMultiplier(int caseNumber, long multiplier) {
         if (caseNumber < 0) {
             throw new IllegalArgumentException(
                     "Case numbers must be >= 0: " + caseNumber);
@@ -1162,9 +1190,9 @@ public final class ColtDataSet
      * @see DataWriter
      */
     @Override
-	public final String toString() {
+    public final String toString() {
         StringBuilder buf = new StringBuilder();
-        List<Node> variables = getVariables();
+        List <Node> variables = getVariables();
 
         buf.append("\n");
 
@@ -1256,7 +1284,7 @@ public final class ColtDataSet
      * @see #isMulipliersCollapsed()
      */
     @Override
-	public final DoubleMatrix2D getDoubleData() {
+    public final DoubleMatrix2D getDoubleData() {
         if (!isMulipliersCollapsed()) {
             return data.copy();
 //            return data;
@@ -1276,9 +1304,9 @@ public final class ColtDataSet
      * index i, for i = 0 to indices.length - 1. (Moved over from Purify.)
      */
     @Override
-	public final DataSet subsetColumns(int indices[]) {
-        List<Node> variables = getVariables();
-        List<Node> _variables = new LinkedList<Node>();
+    public final DataSet subsetColumns(int indices[]) {
+        List <Node> variables = getVariables();
+        List <Node> _variables = new LinkedList <Node>();
 
         for (int index : indices) {
             _variables.add(variables.get(index));
@@ -1292,14 +1320,14 @@ public final class ColtDataSet
 
         DoubleMatrix2D _data = data.viewSelection(rows, indices).copy();
 
-        ColtDataSet _dataSet = new ColtDataSet(0, new LinkedList<Node>());
+        ColtDataSet _dataSet = new ColtDataSet(0, new LinkedList <Node>());
         _dataSet.data = _data;
 
 //        _dataSet.name = name + "_copy";
         _dataSet.name = name;
         _dataSet.variables = _variables;
-        _dataSet.selection = new HashSet<Node>();
-        _dataSet.multipliers = new HashMap<Integer, Long>(multipliers);
+        _dataSet.selection = new HashSet <Node>();
+        _dataSet.multipliers = new HashMap <Integer, Long>(multipliers);
 
         // Might have to delete some knowledge.
         _dataSet.knowledge = new Knowledge(knowledge);
@@ -1307,7 +1335,7 @@ public final class ColtDataSet
     }
 
     @Override
-	public final DataSet subsetRows(int rows[]) {
+    public final DataSet subsetRows(int rows[]) {
         int cols[] = new int[this.data.columns()];
 
         for (int i = 0; i < cols.length; i++) {
@@ -1323,7 +1351,7 @@ public final class ColtDataSet
      * Shifts the given column
      */
     @Override
-	public final void shiftColumnDown(int row, int col, int numRowsShifted) {
+    public final void shiftColumnDown(int row, int col, int numRowsShifted) {
 
         // Find last row that does not consist entirely of missing values.
         if (row >= getNumRows() || col >= getNumColumns()) {
@@ -1355,7 +1383,7 @@ public final class ColtDataSet
      * Removes the given columns from the data set.
      */
     @Override
-	public final void removeCols(int[] cols) {
+    public final void removeCols(int[] cols) {
 
         // TODO Check sanity of values in cols.
         int[] rows = new int[data.rows()];
@@ -1373,7 +1401,7 @@ public final class ColtDataSet
             }
         }
 
-        List<Node> retainedVars = new LinkedList<Node>();
+        List <Node> retainedVars = new LinkedList <Node>();
 
         for (int retainedCol : retainedCols) {
             retainedVars.add(variables.get(retainedCol));
@@ -1381,8 +1409,8 @@ public final class ColtDataSet
 
         data = data.viewSelection(rows, retainedCols).copy();
         variables = retainedVars;
-        selection = new HashSet<Node>();
-        multipliers = new HashMap<Integer, Long>(multipliers);
+        selection = new HashSet <Node>();
+        multipliers = new HashMap <Integer, Long>(multipliers);
         knowledge = new Knowledge(
                 knowledge); // Might have to delete some knowledge.
     }
@@ -1391,7 +1419,7 @@ public final class ColtDataSet
      * Removes the given rows from the data set.
      */
     @Override
-	public final void removeRows(int[] selectedRows) {
+    public final void removeRows(int[] selectedRows) {
 
         // TODO Check sanity of values in cols.
         int[] cols = new int[data.columns()];
@@ -1410,8 +1438,8 @@ public final class ColtDataSet
         }
 
         data = data.viewSelection(retainedRows, cols).copy();
-        selection = new HashSet<Node>();
-        multipliers = new HashMap<Integer, Long>(multipliers);
+        selection = new HashSet <Node>();
+        multipliers = new HashMap <Integer, Long>(multipliers);
         knowledge = new Knowledge(
                 knowledge); // Might have to delete some knowledge.
     }
@@ -1422,7 +1450,7 @@ public final class ColtDataSet
      * equal, when rendered using the number format at <code>NumberFormatUtil.getInstance().getNumberFormat()</code>.
      */
     @Override
-	public final boolean equals(Object obj) {
+    public final boolean equals(Object obj) {
         NumberFormat nf = NumberFormatUtil.getInstance().getNumberFormat();
 
         if (obj == this) {
@@ -1495,8 +1523,8 @@ public final class ColtDataSet
      * @deprecated This is set in DiscreteVariable now.
      */
     @Deprecated
-	@Override
-	public boolean isNewCategoriesAccomodated() {
+    @Override
+    public boolean isNewCategoriesAccomodated() {
         return this.newCategoriesAccomodated;
     }
 
@@ -1506,19 +1534,10 @@ public final class ColtDataSet
      * @deprecated This is set in DiscreteVariable now.
      */
     @Deprecated
-	@Override
-	public final void setNewCategoriesAccomodated(
+    @Override
+    public final void setNewCategoriesAccomodated(
             boolean newCategoriesAccomodated) {
         this.newCategoriesAccomodated = newCategoriesAccomodated;
-    }
-
-    @Override
-	public void setNumberFormat(NumberFormat nf) {
-        if (nf == null) {
-            throw new NullPointerException();
-        }
-
-        this.nf = nf;
     }
 
     /**
@@ -1528,16 +1547,18 @@ public final class ColtDataSet
      * @see #toString
      */
     @Override
-	public void setOutputDelimiter(Character character) {
+    public void setOutputDelimiter(Character character) {
         this.outputDelimiter = character;
     }
+
+    //===============================PRIVATE METHODS=====================//
 
     /**
      * Randomly permutes the rows of the dataset.
      */
     @Override
-	public void permuteRows() {
-        List<Integer> permutation = new ArrayList<Integer>();
+    public void permuteRows() {
+        List <Integer> permutation = new ArrayList <Integer>();
 
         for (int i = 0; i < getNumRows(); i++) {
             permutation.add(i);
@@ -1555,8 +1576,6 @@ public final class ColtDataSet
 
         this.data = data2;
     }
-
-    //===============================PRIVATE METHODS=====================//
 
     private void setIntPrivate(int row, int col, int value) {
         if (value == -99) {
@@ -1594,63 +1613,18 @@ public final class ColtDataSet
     /**
      * Returns the set of case multipliers..
      */
-    private Map<Integer, Long> getMultipliers() {
+    private Map <Integer, Long> getMultipliers() {
         return multipliers;
-    }
-
-    /**
-     * Adds semantic checks to the default deserialization method. This method
-     * must have the standard signature for a readObject method, and the body of
-     * the method must begin with "s.defaultReadObject();". Other than that, any
-     * semantic checks can be specified and do not need to stay the same from
-     * version to version. A readObject method of this form may be added to any
-     * class, even if Tetrad sessions were previously saved out using a version
-     * of the class that didn't include it. (That's what the
-     * "s.defaultReadObject();" is for. See J. Bloch, Effective Java, for help.
-     *
-     * @throws java.io.IOException
-     * @throws ClassNotFoundException
-     */
-    private static void readObject(ObjectInputStream s)
-            throws IOException, ClassNotFoundException {
-        s.defaultReadObject();
     }
 
     /**
      * Returns the set of selected nodes, creating a new set if necessary.
      */
-    private Set<Node> getSelection() {
+    private Set <Node> getSelection() {
         if (selection == null) {
-            selection = new HashSet<Node>();
+            selection = new HashSet <Node>();
         }
         return selection;
-    }
-
-    /**
-     * Attempts to translate <code>element</code> into a double value, returning
-     * it if successful, otherwise throwing an exception. To be successful, the
-     * object must be either a Number or a String.
-     *
-     * @throws IllegalArgumentException if the translation cannot be made. The
-     *                                  reason is in the message.
-     */
-    private static double getValueFromObjectContinuous(Object element) {
-        if ("*".equals(element) || "".equals(element)) {
-            return ContinuousVariable.getDoubleMissingValue();
-        } else if (element instanceof Number) {
-            return ((Number) element).doubleValue();
-        } else if (element instanceof String) {
-            try {
-                return Double.parseDouble((String) element);
-            }
-            catch (NumberFormatException e) {
-                return ContinuousVariable.getDoubleMissingValue();
-            }
-        } else {
-            throw new IllegalArgumentException(
-                    "The argument 'element' must be " +
-                            "either a Number or a String.");
-        }
     }
 
     /**
@@ -1742,10 +1716,10 @@ public final class ColtDataSet
             throw new NullPointerException();
         }
 
-        List<String> categories = variable.getCategories();
+        List <String> categories = variable.getCategories();
 
         if (!categories.contains(category)) {
-            List<String> newCategories = new LinkedList<String>(categories);
+            List <String> newCategories = new LinkedList <String>(categories);
             newCategories.add(category);
             DiscreteVariable newVariable =
                     new DiscreteVariable(variable.getName(), newCategories);
@@ -1778,9 +1752,9 @@ public final class ColtDataSet
      */
     private void adjustCategories(DiscreteVariable variable,
                                   int numCategories) {
-        List<String> categories =
-                new LinkedList<String>(variable.getCategories());
-        List<String> newCategories = new LinkedList<String>(categories);
+        List <String> categories =
+                new LinkedList <String>(variable.getCategories());
+        List <String> newCategories = new LinkedList <String>(categories);
 
         if (categories.size() > numCategories) {
             for (int i = variable.getCategories().size() - 1;
@@ -1819,6 +1793,14 @@ public final class ColtDataSet
         return nf;
     }
 
+    @Override
+    public void setNumberFormat(NumberFormat nf) {
+        if (nf == null) {
+            throw new NullPointerException();
+        }
+
+        this.nf = nf;
+    }
 
     /**
      * Returns the index of the last row of the data that does not consist

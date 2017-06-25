@@ -37,6 +37,7 @@ public class Point implements Comparable {
 
     /**
      * Constructs a point with coordinates as in the given vector.
+     *
      * @param vector a vector representing the point coordinates, in order.
      */
     public Point(DoubleMatrix1D vector) {
@@ -45,6 +46,7 @@ public class Point implements Comparable {
 
     /**
      * Returns the coordinate at the given index.
+     *
      * @param index Ibid.
      * @return Ibid.
      */
@@ -54,6 +56,7 @@ public class Point implements Comparable {
 
     /**
      * Returns the size of the vector.
+     *
      * @return Ibid.
      */
     public int getSize() {
@@ -63,11 +66,12 @@ public class Point implements Comparable {
     /**
      * True iff the given object is a point with the same coordinates as
      * this one.
+     *
      * @param o Ibid.
      * @return Ibid.
      */
     @Override
-	public int compareTo(Object o) {
+    public int compareTo(Object o) {
         if (o == this) {
             return 0;
         }
@@ -85,10 +89,11 @@ public class Point implements Comparable {
 
     /**
      * Returns a string representation of this point.
+     *
      * @return Ibid.
      */
     @Override
-	public String toString() {
+    public String toString() {
         StringBuilder buf = new StringBuilder();
 
         buf.append("<");
@@ -107,6 +112,7 @@ public class Point implements Comparable {
 
     /**
      * Returns the vector of coordinates.
+     *
      * @return Ibid.
      */
     public DoubleMatrix1D getVector() {

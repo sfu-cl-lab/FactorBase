@@ -85,80 +85,6 @@ public class TestSemEstimator extends TestCase {
 
     }
 
-    public void testSet1() {
-        System.out.println("\n\nTest Set 1.");
-        Graph graph = constructGraph1();
-        SemPm semPm = new SemPm(graph);
-        ICovarianceMatrix covMatrix = constructCovMatrix1();
-        SemEstimator estimator = new SemEstimator(covMatrix, semPm);
-        System.out.println();
-        System.out.println("... Before:");
-        System.out.println(estimator);
-        estimator.estimate();
-        System.out.println();
-        System.out.println("... After:");
-        System.out.println(estimator);
-    }
-
-    public void testSet2() {
-        System.out.println("\n\nTest Set 2.");
-        Graph graph = constructGraph2();
-        SemPm semPm = new SemPm(graph);
-        ICovarianceMatrix covMatrix = constructCovMatrix2();
-        SemEstimator estimator = new SemEstimator(covMatrix, semPm);
-        System.out.println();
-        System.out.println("... Before:");
-        System.out.println(estimator);
-        estimator.estimate();
-        System.out.println();
-        System.out.println("... After:");
-        System.out.println(estimator);
-    }
-
-    public void testSet3() {
-        System.out.println("\n\nTest Set 3.");
-        Graph graph = constructGraph2();
-        SemPm semPm = new SemPm(graph);
-        ICovarianceMatrix covMatrix = constructCovMatrix2();
-        SemEstimator estimator = new SemEstimator(covMatrix, semPm);
-        System.out.println();
-        System.out.println("... Before:");
-        System.out.println(estimator);
-        estimator.estimate();
-        System.out.println();
-        System.out.println("... After:");
-        System.out.println(estimator);
-    }
-
-//    public void test4() {
-//        Graph graph = GraphUtils.randomDag(10, 10, false);
-//        SemPm pm = new SemPm(graph);
-//        SemIm im = new SemIm(pm);
-//        DataSet dataSet = im.simulateData(1000, false);
-//        Ges search = new Ges(dataSet);
-//        Graph pattern = search.search();
-//        Graph dag = SearchGraphUtils.dagFromPattern(pattern);
-//        SemPm pm2 = new SemPm(dag);
-//        SemEstimator estimator = new SemEstimator(dataSet, pm2);
-//        SemIm estSem = estimator.estimate();
-//        System.out.println(estSem);
-//    }
-//
-//    public void test5() {
-//        Dag graph = GraphUtils.randomDag(10, 10, false);
-//        BayesPm pm = new BayesPm(graph);
-//        BayesIm im = new MlBayesIm(pm, MlBayesIm.RANDOM);
-//        DataSet dataSet = im.simulateData(1000, false);
-//        Cpc search = new Cpc(new IndTestGSquare(dataSet, 0.05));
-//        Graph pattern = search.search();
-//        Dag dag = new Dag(SearchGraphUtils.dagFromPattern(pattern));
-//        BayesPm pm2 = new BayesPm(dag);
-//        MlBayesEstimator estimator = new MlBayesEstimator();
-//        BayesIm estSem = estimator.estimate(pm2, dataSet);
-//        System.out.println(estSem);
-//
-//    }
-
     /**
      * This method uses reflection to collect up all of the test methods from
      * this class and return them to the test runner.
@@ -215,6 +141,80 @@ public class TestSemEstimator extends TestCase {
 //        DoubleMatrix2D arr2 = new DenseDoubleMatrix2D(arr);
         return new CovarianceMatrix(DataUtils.createContinuousVariables(vars), new DenseDoubleMatrix2D(arr),
                 173);
+    }
+
+//    public void test4() {
+//        Graph graph = GraphUtils.randomDag(10, 10, false);
+//        SemPm pm = new SemPm(graph);
+//        SemIm im = new SemIm(pm);
+//        DataSet dataSet = im.simulateData(1000, false);
+//        Ges search = new Ges(dataSet);
+//        Graph pattern = search.search();
+//        Graph dag = SearchGraphUtils.dagFromPattern(pattern);
+//        SemPm pm2 = new SemPm(dag);
+//        SemEstimator estimator = new SemEstimator(dataSet, pm2);
+//        SemIm estSem = estimator.estimate();
+//        System.out.println(estSem);
+//    }
+//
+//    public void test5() {
+//        Dag graph = GraphUtils.randomDag(10, 10, false);
+//        BayesPm pm = new BayesPm(graph);
+//        BayesIm im = new MlBayesIm(pm, MlBayesIm.RANDOM);
+//        DataSet dataSet = im.simulateData(1000, false);
+//        Cpc search = new Cpc(new IndTestGSquare(dataSet, 0.05));
+//        Graph pattern = search.search();
+//        Dag dag = new Dag(SearchGraphUtils.dagFromPattern(pattern));
+//        BayesPm pm2 = new BayesPm(dag);
+//        MlBayesEstimator estimator = new MlBayesEstimator();
+//        BayesIm estSem = estimator.estimate(pm2, dataSet);
+//        System.out.println(estSem);
+//
+//    }
+
+    public void testSet1() {
+        System.out.println("\n\nTest Set 1.");
+        Graph graph = constructGraph1();
+        SemPm semPm = new SemPm(graph);
+        ICovarianceMatrix covMatrix = constructCovMatrix1();
+        SemEstimator estimator = new SemEstimator(covMatrix, semPm);
+        System.out.println();
+        System.out.println("... Before:");
+        System.out.println(estimator);
+        estimator.estimate();
+        System.out.println();
+        System.out.println("... After:");
+        System.out.println(estimator);
+    }
+
+    public void testSet2() {
+        System.out.println("\n\nTest Set 2.");
+        Graph graph = constructGraph2();
+        SemPm semPm = new SemPm(graph);
+        ICovarianceMatrix covMatrix = constructCovMatrix2();
+        SemEstimator estimator = new SemEstimator(covMatrix, semPm);
+        System.out.println();
+        System.out.println("... Before:");
+        System.out.println(estimator);
+        estimator.estimate();
+        System.out.println();
+        System.out.println("... After:");
+        System.out.println(estimator);
+    }
+
+    public void testSet3() {
+        System.out.println("\n\nTest Set 3.");
+        Graph graph = constructGraph2();
+        SemPm semPm = new SemPm(graph);
+        ICovarianceMatrix covMatrix = constructCovMatrix2();
+        SemEstimator estimator = new SemEstimator(covMatrix, semPm);
+        System.out.println();
+        System.out.println("... Before:");
+        System.out.println(estimator);
+        estimator.estimate();
+        System.out.println();
+        System.out.println("... After:");
+        System.out.println(estimator);
     }
 
     private Graph constructGraph1() {

@@ -28,6 +28,45 @@ package edu.cmu.tetrad.search;
  */
 public class GwpResult {
 
+    public AdjacencyEvaluationResult adj;
+    public OrientationEvaluationResult ori;
+    public CoefficientEvaluationResult coeffAll;
+    public CoefficientEvaluationResult coeffSome;
+    public PatternEvaluationResult pat;
+    public String name = null;
+    /**
+     * constructor for evaluations where the method evaluated purports to give us the entire structure.
+     *
+     * @param methodName
+     * @param adj
+     * @param ori
+     * @param coeffAll
+     * @param coeffSome
+     */
+    public GwpResult(String methodName, AdjacencyEvaluationResult adj, OrientationEvaluationResult ori,
+                     CoefficientEvaluationResult coeffAll, CoefficientEvaluationResult coeffSome) {
+        super();
+        this.name = methodName;
+        this.adj = adj;
+        this.ori = ori;
+        this.coeffAll = coeffAll;
+        this.coeffSome = coeffSome;
+
+    }
+    /**
+     * constructor for evaluations where the method evaluated purports to give us the Markov-equivalence class, represented
+     * by a pattern.
+     * <p/>
+     * * @param methodName
+     *
+     * @param pat
+     */
+    public GwpResult(String methodName, PatternEvaluationResult pat) {
+        super();
+        this.name = methodName;
+        this.pat = pat;
+    }
+
     public interface PartialEvaluationResult {
         public double[] values();
     }
@@ -47,7 +86,7 @@ public class GwpResult {
         }
 
         @Override
-		public double[] values() {
+        public double[] values() {
             return new double[]{errorsOfOmission, errorsOfCommission, loss()};
         }
     }
@@ -69,7 +108,7 @@ public class GwpResult {
         }
 
         @Override
-		public double[] values() {
+        public double[] values() {
             return new double[]{nCorrect, directedWrongWay, undirectedWhenShouldBeDirected, directedWhenShouldBeUndirected};
         }
 
@@ -94,21 +133,11 @@ public class GwpResult {
         }
 
         @Override
-		public double[] values() {
+        public double[] values() {
             return new double[]{totalCoeffErrorSq, nEdgesEvaluated, loss()};
         }
 
     }
-
-
-    public AdjacencyEvaluationResult adj;
-    public OrientationEvaluationResult ori;
-    public CoefficientEvaluationResult coeffAll;
-    public CoefficientEvaluationResult coeffSome;
-
-    public PatternEvaluationResult pat;
-
-    public String name = null;
 
     /**
      * Loss function for PC: * for adjacency errors, 1 pt (i.e. 1 for omission, 1 for commission) for orientation errors: *
@@ -138,41 +167,6 @@ public class GwpResult {
             return loss;
         }
 
-    }
-
-
-    /**
-     * constructor for evaluations where the method evaluated purports to give us the entire structure.
-     *
-     * @param methodName
-     * @param adj
-     * @param ori
-     * @param coeffAll
-     * @param coeffSome
-     */
-    public GwpResult(String methodName, AdjacencyEvaluationResult adj, OrientationEvaluationResult ori,
-                     CoefficientEvaluationResult coeffAll, CoefficientEvaluationResult coeffSome) {
-        super();
-        this.name = methodName;
-        this.adj = adj;
-        this.ori = ori;
-        this.coeffAll = coeffAll;
-        this.coeffSome = coeffSome;
-
-    }
-
-    /**
-     * constructor for evaluations where the method evaluated purports to give us the Markov-equivalence class, represented
-     * by a pattern.
-     * <p/>
-     * * @param methodName
-     *
-     * @param pat
-     */
-    public GwpResult(String methodName, PatternEvaluationResult pat) {
-        super();
-        this.name = methodName;
-        this.pat = pat;
     }
 
 

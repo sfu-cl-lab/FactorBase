@@ -37,6 +37,17 @@ public final class TestSemGraph extends TestCase {
         super(name);
     }
 
+    /**
+     * This method uses reflection to collect up all of the test methods from
+     * this class and return them to the test runner.
+     */
+    public static Test suite() {
+
+        // Edit the name of the class in the parens to match the name
+        // of this class.
+        return new TestSuite(TestSemGraph.class);
+    }
+
     public void test1() {
         SemGraph graph = new SemGraph();
 
@@ -73,17 +84,6 @@ public final class TestSemGraph extends TestCase {
         SemGraph copy = new SemGraph(graph2);
         Graph stripErrors = new EdgeListGraph(copy);
         System.out.println(stripErrors);
-    }
-
-    /**
-     * This method uses reflection to collect up all of the test methods from
-     * this class and return them to the test runner.
-     */
-    public static Test suite() {
-
-        // Edit the name of the class in the parens to match the name
-        // of this class.
-        return new TestSuite(TestSemGraph.class);
     }
 }
 

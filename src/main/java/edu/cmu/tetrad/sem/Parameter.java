@@ -193,7 +193,7 @@ public final class Parameter implements TetradSerializable {
      * Returns a string representation for this parameter.
      */
     @Override
-	public String toString() {
+    public String toString() {
         return "<" + this.name + ", " + this.type + ", " + this.nodeA + ", " +
                 this.nodeB + ", " + (this.fixed ? "fixed" : "free") + ">";
     }

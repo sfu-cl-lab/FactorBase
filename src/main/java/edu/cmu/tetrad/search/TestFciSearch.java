@@ -49,15 +49,25 @@ public class TestFciSearch extends TestCase {
         super(name);
     }
 
+    /**
+     * This method uses reflection to collect up all of the test methods from this class and return them to the test
+     * runner.
+     */
+    public static Test suite() {
+
+        // Edit the name of the class in the parens to match the name
+        // of this class.
+        return new TestSuite(TestFciSearch.class);
+    }
+
     @Override
-	public void setUp() throws Exception {
+    public void setUp() throws Exception {
         TetradLogger.getInstance().addOutputStream(System.out);
         TetradLogger.getInstance().setForceLog(true);
     }
 
-
     @Override
-	public void tearDown() {
+    public void tearDown() {
         TetradLogger.getInstance().setForceLog(false);
         TetradLogger.getInstance().removeOutputStream(System.out);
     }
@@ -78,7 +88,6 @@ public class TestFciSearch extends TestCase {
         System.out.println("Test2");
         checkSearch("Z1-->X,Z2-->X,X-->Y", "Z1o->X,Z2o->X,X-->Y", new Knowledge());
     }
-
 
     /**
      * Basic discriminating path checker.
@@ -123,7 +132,7 @@ public class TestFciSearch extends TestCase {
 
 
         checkSearch("Latent(E),Latent(G),E-->D,E-->H,G-->H,G-->L,D-->L,D-->M," +
-                "H-->M,L-->M,S-->D,I-->S,P-->S",
+                        "H-->M,L-->M,S-->D,I-->S,P-->S",
                 "D<->H,D-->L,D-->M,H<->L,H-->M,Io->S,L-->M,Po->S,S-->D", new Knowledge());
     }
 
@@ -158,7 +167,6 @@ public class TestFciSearch extends TestCase {
         checkSearch("A-->D,A-->B,B-->D,C-->D,D-->E",
                 "Ao->D,Ao-oB,Bo->D,Co->D,D-->E", new Knowledge());
     }
-
 
     public void testSearch10() {
         System.out.println("Test10");
@@ -387,17 +395,6 @@ public class TestFciSearch extends TestCase {
         resultGraph.setDottedUnderLineTriples(compareGraph.getDottedUnderlines());
 
         assertTrue(compareGraph.equals(resultGraph));
-    }
-
-    /**
-     * This method uses reflection to collect up all of the test methods from this class and return them to the test
-     * runner.
-     */
-    public static Test suite() {
-
-        // Edit the name of the class in the parens to match the name
-        // of this class.
-        return new TestSuite(TestFciSearch.class);
     }
 }
 

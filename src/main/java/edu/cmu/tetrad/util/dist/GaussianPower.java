@@ -27,12 +27,17 @@ public class GaussianPower implements Distribution {
     static final long serialVersionUID = 23L;
 
     private final double sd;
-    private double power;
     private final String name;
+    private double power;
 
-    @Override
-	public String getName() {
-        return this.name;
+    public GaussianPower(double power) {
+        this(1, power);
+    }
+
+    public GaussianPower(double sd, double power) {
+        this.sd = sd;
+        this.power = power;
+        this.name = "N^" + power + "(" + 0 + "," + sd + ")";
     }
 
     /**
@@ -47,18 +52,13 @@ public class GaussianPower implements Distribution {
         return new GaussianPower(1, 2);
     }
 
-    public GaussianPower(double power) {
-        this(1, power);
-    }
-
-    public GaussianPower(double sd, double power) {
-        this.sd = sd;
-        this.power = power;
-        this.name = "N^" + power + "(" + 0 + "," + sd + ")";
+    @Override
+    public String getName() {
+        return this.name;
     }
 
     @Override
-	public void setParameter(int index, double value) {
+    public void setParameter(int index, double value) {
         if (index == 0) {
             power = value;
         }
@@ -67,11 +67,10 @@ public class GaussianPower implements Distribution {
     }
 
     @Override
-	public double getParameter(int index) {
+    public double getParameter(int index) {
         if (index == 0) {
             return sd;
-        }
-        else if (index == 1) {
+        } else if (index == 1) {
             return power;
         }
 
@@ -79,11 +78,10 @@ public class GaussianPower implements Distribution {
     }
 
     @Override
-	public String getParameterName(int index) {
+    public String getParameterName(int index) {
         if (index == 0) {
             return "Standard Deviation";
-        }
-        else if (index == 1) {
+        } else if (index == 1) {
             return "Power";
         }
 
@@ -91,12 +89,12 @@ public class GaussianPower implements Distribution {
     }
 
     @Override
-	public int getNumParameters() {
+    public int getNumParameters() {
         return 2;
     }
 
     @Override
-	public double nextRandom() {
+    public double nextRandom() {
         double value = RandomUtil.getInstance().nextNormal(0, 1);
         double poweredValue = java.lang.Math.pow(java.lang.Math.abs(value), power);
         return (value >= 0) ? poweredValue : -poweredValue;

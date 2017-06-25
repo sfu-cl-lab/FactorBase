@@ -46,6 +46,10 @@ public class TestIndTestFisherZ extends TestCase {
         super(name);
     }
 
+    public static Test suite() {
+        return new TestSuite(TestIndTestFisherZ.class);
+    }
+
     public void testDirections() {
         Graph graph1 = new EdgeListGraph();
         Graph graph2 = new EdgeListGraph();
@@ -101,10 +105,5 @@ public class TestIndTestFisherZ extends TestCase {
 
         System.out.println("p1 = " + p1 + " p2 = " + p2);
 
-    }
-
-
-    public static Test suite() {
-        return new TestSuite(TestIndTestFisherZ.class);
     }
 }

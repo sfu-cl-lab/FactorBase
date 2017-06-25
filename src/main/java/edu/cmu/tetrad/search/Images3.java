@@ -42,7 +42,6 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
-import java.util.*;
 
 /**
  * GesSearch is an implentation of the GES algorithm, as specified in Chickering (2002) "Optimal structure
@@ -58,14 +57,13 @@ import java.util.*;
 public final class Images3 implements GraphSearch, IImages {
 
     /**
-     * The data set, various variable subsets of which are to be scored.
+     * For formatting printed numbers.
      */
-    private List<DataSet> dataSets;
-
+    private final NumberFormat nf = NumberFormatUtil.getInstance().getNumberFormat();
     /**
-     * The covariance matrices for the data set.
+     * For linear algebra.
      */
-    private List<DoubleMatrix2D> covariances;
+    private final Algebra algebra = new Algebra();                        // s = vv * x, or s12 = Theta.1 * Theta.12
 
 //    /**
 //     * The data set, various variable subsets of which are to be scored.
@@ -76,148 +74,229 @@ public final class Images3 implements GraphSearch, IImages {
 //     * The covariance matrix for the data set.
 //     */
 //    private DoubleMatrix2D covariances;
-
+    /**
+     * Caches scores for discrete search.
+     */
+    private final LocalScoreCache localScoreCache = new LocalScoreCache();
+    SortedSet <Arrow> sortedArrows;
+    Set <Arrow>[][] lookupArrows;
+    SortedSet <Arrow> sortedArrowsBackwards;
+    Set <Arrow>[][] lookupArrowsBackwards;
+    Map <Node, Map <Set <Node>, Double>> scoreHash;
+    double minJump = 0;
+    /**
+     * The data set, various variable subsets of which are to be scored.
+     */
+    private List <DataSet> dataSets;
+    /**
+     * The covariance matrices for the data set.
+     */
+    private List <DoubleMatrix2D> covariances;
     /**
      * Sample size, either from the data set or from the variances.
      */
     private int sampleSize;
-
     /**
      * Specification of forbidden and required edges.
      */
     private Knowledge knowledge = new Knowledge();
-
     /**
      * For discrete data scoring, the structure prior.
      */
     private double structurePrior;
-
     /**
      * For discrete data scoring, the sample prior.
      */
     private double samplePrior;
-
     /**
      * Map from variables to their column indices in the data set.
      */
-    private HashMap<Node, Integer> hashIndices;
-
+    private HashMap <Node, Integer> hashIndices;
     /**
      * Array of variable names from the data set, in order.
      */
     private String varNames[];
-
     /**
      * List of variables in the data set, in order.
      */
-    private List<Node> variables;
+    private List <Node> variables;
 
+//    private boolean useFCutoff = false;
+//
+//    private double fCutoffP = 0.01;
     /**
      * True iff the data set is discrete.
      */
     private boolean discrete;
-
     /**
      * The true graph, if known. If this is provided, asterisks will be printed out next to false positive added edges
      * (that is, edges added that aren't adjacencies in the true graph).
      */
     private Graph trueGraph;
-
-    /**
-     * For formatting printed numbers.
-     */
-    private final NumberFormat nf = NumberFormatUtil.getInstance().getNumberFormat();
-
-    /**
-     * For linear algebra.
-     */
-    private final Algebra algebra = new Algebra();                        // s = vv * x, or s12 = Theta.1 * Theta.12
-
-    /**
-     * Caches scores for discrete search.
-     */
-    private final LocalScoreCache localScoreCache = new LocalScoreCache();
-
     /**
      * Elapsed time of the most recent search.
      */
     private long elapsedTime;
-
     /**
      * True if cycles are to be aggressively prevented. May be expensive for large graphs (but also useful for large
      * graphs).
      */
     private boolean aggressivelyPreventCycles = false;
-
     /**
      * Listeners for graph change events.
      */
-    private transient List<PropertyChangeListener> listeners;
-
+    private transient List <PropertyChangeListener> listeners;
     /**
      * Penalty discount--the BIC penalty is multiplied by this (for continuous variables).
      */
     private double penaltyDiscount = 1.0;
-
-//    private boolean useFCutoff = false;
-//
-//    private double fCutoffP = 0.01;
-
     /**
      * The maximum number of edges the algorithm will add to the graph.
      */
     private int maxEdgesAdded = -1;
-
     /**
      * The score for discrete searches.
      */
     private LocalDiscreteScore discreteScore;
-
     /**
      * The logger for this class. The config needs to be set.
      */
     private TetradLogger logger = TetradLogger.getInstance();
-
     /**
      * The top n graphs found by the algorithm, where n is <code>numPatternsToStore</code>.
      */
-    private SortedSet<ScoredGraph> topGraphs = new TreeSet<ScoredGraph>();
-
+    private SortedSet <ScoredGraph> topGraphs = new TreeSet <ScoredGraph>();
     /**
      * The number of top patterns to store.
      */
     private int numPatternsToStore = 10;
-
-    SortedSet<Arrow> sortedArrows;
-    Set<Arrow>[][] lookupArrows;
-    SortedSet<Arrow> sortedArrowsBackwards;
-    Set<Arrow>[][] lookupArrowsBackwards;
-    Map<Node, Map<Set<Node>, Double>> scoreHash;
-    private Map<Node, Integer> nodesHash;
+    private Map <Node, Integer> nodesHash;
     private boolean storeGraphs = true;
-
     private double bic;
-    private Map<DataSet, List<Node>> missingVariables;
+    private Map <DataSet, List <Node>> missingVariables;
     private Graph returnGraph;
-    private int maxNumEdges = -1;
 
 
     //===========================CONSTRUCTORS=============================//
+    private int maxNumEdges = -1;
 
-    public Images3(List<DataSet> dataSets) {
+    //==========================PUBLIC METHODS==========================//
+    private double minNeg = 0; //-1000000;
+    private RegressionDataset regression;
+
+    public Images3(List <DataSet> dataSets) {
         setDataSets(dataSets);
     }
 
-    //==========================PUBLIC METHODS==========================//
+    /**
+     * Get all nodes that are connected to Y by an undirected edge and not adjacent to X.
+     */
+    private static List <Node> getTNeighbors(Node x, Node y, Graph graph) {
+        List <Node> tNeighbors = graph.getAdjacentNodes(y);
+        tNeighbors.removeAll(graph.getAdjacentNodes(x));
 
+        for (int i = tNeighbors.size() - 1; i >= 0; i--) {
+            Node z = tNeighbors.get(i);
+            Edge edge = graph.getEdge(y, z);
+
+            if (!Edges.isUndirectedEdge(edge)) {
+                tNeighbors.remove(z);
+            }
+        }
+
+        return tNeighbors;
+    }
+
+    /**
+     * Get all nodes that are connected to Y by an undirected edge and adjacent to X
+     */
+    private static List <Node> getHNeighbors(Node x, Node y, Graph graph) {
+        List <Node> hNeighbors = graph.getAdjacentNodes(y);
+        hNeighbors.retainAll(graph.getAdjacentNodes(x));
+
+        for (int i = hNeighbors.size() - 1; i >= 0; i--) {
+            Node z = hNeighbors.get(i);
+            Edge edge = graph.getEdge(y, z);
+
+            if (!Edges.isUndirectedEdge(edge)) {
+                hNeighbors.remove(z);
+            }
+        }
+
+        return hNeighbors;
+    }
+
+    /**
+     * Test if the candidate deletion is a valid operation (Theorem 17 from Chickering, 2002).
+     */
+    private static boolean validDelete(Set <Node> h, Set <Node> naXY, Graph graph) {
+        Set <Node> set = new HashSet <Node>(naXY);
+        set.removeAll(h);
+        return isClique(set, graph);
+    }
+
+    /**
+     * Find all nodes that are connected to Y by an undirected edge that are adjacent to X (that is, by undirected or
+     * directed edge) NOTE: very inefficient implementation, since the current library does not allow access to the
+     * adjacency list/matrix of the graph.
+     */
+    private static Set <Node> findNaYX(Node x, Node y, Graph graph) {
+        Set <Node> naYX = new HashSet <Node>(graph.getAdjacentNodes(y));
+        naYX.retainAll(graph.getAdjacentNodes(x));
+
+        for (Node z : new HashSet <Node>(naYX)) {
+            Edge edge = graph.getEdge(y, z);
+
+            if (!Edges.isUndirectedEdge(edge)) {
+                naYX.remove(z);
+            }
+        }
+
+        return naYX;
+    }
+
+    /**
+     * Returns true iif the given set forms a clique in the given graph.
+     */
+    private static boolean isClique(Set <Node> _nodes, Graph graph) {
+        List <Node> nodes = new LinkedList <Node>(_nodes);
+        for (int i = 0; i < nodes.size() - 1; i++) {
+            for (int j = i + 1; j < nodes.size(); j++) {
+                if (!graph.isAdjacentTo(nodes.get(i), nodes.get(j))) {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
+    private static List <Set <Node>> powerSet(List <Node> nodes) {
+        List <Set <Node>> subsets = new ArrayList <Set <Node>>();
+        int total = (int) Math.pow(2, nodes.size());
+        for (int i = 0; i < total; i++) {
+            Set <Node> newSet = new HashSet <Node>();
+            String selection = Integer.toBinaryString(i);
+
+            int shift = nodes.size() - selection.length();
+
+            for (int j = nodes.size() - 1; j >= 0; j--) {
+                if (j >= shift && selection.charAt(j - shift) == '1') {
+                    newSet.add(nodes.get(j));
+                }
+            }
+            subsets.add(newSet);
+        }
+
+        return subsets;
+    }
 
     @Override
-	public boolean isAggressivelyPreventCycles() {
+    public boolean isAggressivelyPreventCycles() {
         return this.aggressivelyPreventCycles;
     }
 
     @Override
-	public void setAggressivelyPreventCycles(boolean aggressivelyPreventCycles) {
+    public void setAggressivelyPreventCycles(boolean aggressivelyPreventCycles) {
         this.aggressivelyPreventCycles = aggressivelyPreventCycles;
     }
 
@@ -228,17 +307,17 @@ public final class Images3 implements GraphSearch, IImages {
      * @return the resulting Pattern.
      */
     @Override
-	public Graph search() {
+    public Graph search() {
         long startTime = System.currentTimeMillis();
 
-        topGraphs = new TreeSet<ScoredGraph>();
+        topGraphs = new TreeSet <ScoredGraph>();
 
-        Graph graph = new EdgeListGraph(new LinkedList<Node>(getVariables()));
+        Graph graph = new EdgeListGraph(new LinkedList <Node>(getVariables()));
 
-        scoreHash = new WeakHashMap<Node, Map<Set<Node>, Double>>();
+        scoreHash = new WeakHashMap <Node, Map <Set <Node>, Double>>();
 
         for (Node node : graph.getNodes()) {
-            scoreHash.put(node, new HashMap<Set<Node>, Double>());
+            scoreHash.put(node, new HashMap <Set <Node>, Double>());
         }
 
 
@@ -310,8 +389,8 @@ public final class Images3 implements GraphSearch, IImages {
     }
 
     @Override
-	public Graph search(List<Node> nodes) {
-        topGraphs = new TreeSet<ScoredGraph>();
+    public Graph search(List <Node> nodes) {
+        topGraphs = new TreeSet <ScoredGraph>();
 
         long startTime = System.currentTimeMillis();
         localScoreCache.clear();
@@ -344,7 +423,7 @@ public final class Images3 implements GraphSearch, IImages {
     }
 
     @Override
-	public Knowledge getKnowledge() {
+    public Knowledge getKnowledge() {
         return knowledge;
     }
 
@@ -354,7 +433,7 @@ public final class Images3 implements GraphSearch, IImages {
      * @param knowledge the knowledge object, specifying forbidden and required edges.
      */
     @Override
-	public void setKnowledge(Knowledge knowledge) {
+    public void setKnowledge(Knowledge knowledge) {
         if (knowledge == null) {
             throw new NullPointerException("Knowledge must not be null.");
         }
@@ -362,27 +441,35 @@ public final class Images3 implements GraphSearch, IImages {
     }
 
     @Override
-	public long getElapsedTime() {
+    public long getElapsedTime() {
         return elapsedTime;
     }
 
     @Override
-	public void setElapsedTime(long elapsedTime) {
+    public void setElapsedTime(long elapsedTime) {
         this.elapsedTime = elapsedTime;
     }
 
     @Override
-	public void addPropertyChangeListener(PropertyChangeListener l) {
+    public void addPropertyChangeListener(PropertyChangeListener l) {
         getListeners().add(l);
     }
 
+
+    //===========================PRIVATE METHODS========================//
+
+//    private void initialize(double samplePrior, double structurePrior) {
+//        setStructurePrior(structurePrior);
+//        setSamplePrior(samplePrior);
+//    }
+
     @Override
-	public double getPenaltyDiscount() {
+    public double getPenaltyDiscount() {
         return penaltyDiscount;
     }
 
     @Override
-	public void setPenaltyDiscount(double penaltyDiscount) {
+    public void setPenaltyDiscount(double penaltyDiscount) {
         if (penaltyDiscount < 0) {
             throw new IllegalArgumentException("Penalty discount must be >= 0: "
                     + penaltyDiscount);
@@ -396,22 +483,22 @@ public final class Images3 implements GraphSearch, IImages {
     }
 
     @Override
-	public double getScore(Graph dag) {
+    public double getScore(Graph dag) {
         return scoreGraph(dag);
     }
 
     @Override
-	public SortedSet<ScoredGraph> getTopGraphs() {
+    public SortedSet <ScoredGraph> getTopGraphs() {
         return topGraphs;
     }
 
     @Override
-	public int getNumPatternsToStore() {
+    public int getNumPatternsToStore() {
         return numPatternsToStore;
     }
 
     @Override
-	public void setNumPatternsToStore(int numPatternsToStore) {
+    public void setNumPatternsToStore(int numPatternsToStore) {
         if (numPatternsToStore < 1) {
             throw new IllegalArgumentException("Must store at least one pattern: " + numPatternsToStore);
         }
@@ -427,30 +514,22 @@ public final class Images3 implements GraphSearch, IImages {
         this.storeGraphs = storeGraphs;
     }
 
-
-    //===========================PRIVATE METHODS========================//
-
-//    private void initialize(double samplePrior, double structurePrior) {
-//        setStructurePrior(structurePrior);
-//        setSamplePrior(samplePrior);
-//    }
-
     /**
      * Forward equivalence search.
      *
      * @param graph The graph in the state prior to the forward equivalence search.
      * @param score The score in the state prior to the forward equivalence search
      * @return the score in the state after the forward equivelance search. Note that the graph is changed as a
-     *         side-effect to its state after the forward equivelance search.
+     * side-effect to its state after the forward equivelance search.
      */
     private double fes(Graph graph, double score) {
 
-        List<Node> nodes = graph.getNodes();
+        List <Node> nodes = graph.getNodes();
 
-        sortedArrows = new TreeSet<Arrow>();
+        sortedArrows = new TreeSet <Arrow>();
         lookupArrows = new HashSet[nodes.size()][nodes.size()];
 
-        nodesHash = new HashMap<Node, Integer>();
+        nodesHash = new HashMap <Node, Integer>();
         int index = -1;
 
         for (Node node : nodes) {
@@ -478,7 +557,7 @@ public final class Images3 implements GraphSearch, IImages {
                 continue;
             }
 
-            if (!new HashSet<Node>(getTNeighbors(_x, _y, graph)).containsAll(arrow.getHOrT())) {
+            if (!new HashSet <Node>(getTNeighbors(_x, _y, graph)).containsAll(arrow.getHOrT())) {
                 reevaluateFoward(graph, nodes, arrow);
                 continue;
             }
@@ -489,7 +568,7 @@ public final class Images3 implements GraphSearch, IImages {
 
             Node x = nodes.get(arrow.getX());
             Node y = nodes.get(arrow.getY());
-            Set<Node> t = arrow.getHOrT();
+            Set <Node> t = arrow.getHOrT();
             double bump = arrow.getBump();
 
 //            if (covariances != null && minJump == 0 && isUseFCutoff()) {
@@ -527,265 +606,6 @@ public final class Images3 implements GraphSearch, IImages {
         return score;
     }
 
-    double minJump = 0;
-    private double minNeg = 0; //-1000000;
-
-
-    private double bes(Graph graph, double score) {
-        List<Node> nodes = graph.getNodes();
-
-        TetradLogger.getInstance().log("info", "** BACKWARD EQUIVALENCE SEARCH");
-        TetradLogger.getInstance().log("info", "Initial Score = " + nf.format(score));
-
-        initializeArrowsBackward(graph);
-
-        while (!sortedArrowsBackwards.isEmpty()) {
-            Arrow arrow = sortedArrowsBackwards.first();
-            sortedArrowsBackwards.remove(arrow);
-
-            Node _x = nodes.get(arrow.getX());
-            Node _y = nodes.get(arrow.getY());
-
-            if (!graph.isAdjacentTo(_x, _y)) {
-                continue;
-            }
-
-            if (!findNaYX(_x, _y, graph).equals(arrow.getNaYX())) {
-                reevaluateBackward(graph, nodes, arrow);
-                continue;
-            }
-
-            if (!new HashSet<Node>(getHNeighbors(_x, _y, graph)).containsAll(arrow.getHOrT())) {
-                reevaluateBackward(graph, nodes, arrow);
-                continue;
-            }
-
-            if (!validDelete(arrow.getHOrT(), arrow.getNaYX(), graph)) {
-                continue;
-            }
-
-            Node x = nodes.get(arrow.getX());
-            Node y = nodes.get(arrow.getY());
-            Set<Node> h = arrow.getHOrT();
-            double bump = arrow.getBump();
-
-            score = score + bump;
-            delete(x, y, h, graph, score, true, bump);
-            rebuildPattern(graph);
-
-            storeGraph(graph, score);
-
-            reevaluateBackward(graph, nodes, arrow);
-        }
-
-        return score;
-    }
-
-    private void initializeArrowsForward(List<Node> nodes, Graph graph) {
-        Set<Node> empty = Collections.emptySet();
-
-        for (int j = 0; j < nodes.size(); j++) {
-            for (int i = 0; i < nodes.size(); i++) {
-                if (j == i) continue;
-
-                Node _x = nodes.get(i);
-                Node _y = nodes.get(j);
-
-                if (getKnowledge().edgeForbidden(_x.getName(),
-                        _y.getName())) {
-                    continue;
-                }
-
-                Set<Node> naYX = empty;
-                Set<Node> t = empty;
-
-                if (!validSetByKnowledge(_x, _y, t, true)) {
-                    continue;
-                }
-
-                double bump = insertEval(_x, _y, t, naYX, graph);
-
-                if (bump > minJump) {
-                    Arrow arrow = new Arrow(bump, i, j, t, naYX, nodes);
-                    lookupArrows[i][j] = new HashSet<Arrow>();
-                    sortedArrows.add(arrow);
-                    lookupArrows[i][j].add(arrow);
-                }
-            }
-        }
-
-
-    }
-
-    private void initializeArrowsBackward(Graph graph) {
-        List<Node> nodes = graph.getNodes();
-        sortedArrowsBackwards = new TreeSet<Arrow>();
-        lookupArrowsBackwards = new HashSet[nodes.size()][nodes.size()];
-
-        List<Edge> graphEdges = graph.getEdges();
-
-        for (Edge edge : graphEdges) {
-            Node _x = edge.getNode1();
-            Node _y = edge.getNode2();
-
-            int i = nodesHash.get(edge.getNode1());
-            int j = nodesHash.get(edge.getNode2());
-
-            if (!getKnowledge().noEdgeRequired(_x.getName(),
-                    _y.getName())) {
-                continue;
-            }
-
-            if (Edges.isDirectedEdge(edge)) {
-                calculateArrowsBackward(i, j, nodes, graph);
-            } else {
-                calculateArrowsBackward(i, j, nodes, graph);
-                calculateArrowsBackward(j, i, nodes, graph);
-            }
-
-        }
-    }
-
-    private void reevaluateFoward(Graph graph, List<Node> nodes, Arrow arrow) {
-        Node x = nodes.get(arrow.getX());
-        Node y = nodes.get(arrow.getY());
-
-        for (int _w = 0; _w < nodes.size(); _w++) {
-            Node w = nodes.get(_w);
-            if (w == x) continue;
-            if (w == y) continue;
-
-            if (!graph.isAdjacentTo(w, x)) {
-                calculateArrowsForward(_w, arrow.getX(), nodes, graph);
-
-                if (graph.isAdjacentTo(w, y)) {
-                    calculateArrowsForward(arrow.getX(), _w, nodes, graph);
-                }
-            }
-
-            if (!graph.isAdjacentTo(w, y)) {
-                calculateArrowsForward(_w, arrow.getY(), nodes, graph);
-
-                if (graph.isAdjacentTo(w, x)) {
-                    calculateArrowsForward(arrow.getY(), _w, nodes, graph);
-                }
-            }
-        }
-    }
-
-    private void reevaluateBackward(Graph graph, List<Node> nodes, Arrow arrow) {
-        Node x = nodes.get(arrow.getX());
-        Node y = nodes.get(arrow.getY());
-
-        for (Node w : graph.getAdjacentNodes(x)) {
-            int _w = nodesHash.get(w);
-
-            calculateArrowsBackward(_w, arrow.getX(), nodes, graph);
-            calculateArrowsBackward(arrow.getX(), _w, nodes, graph);
-        }
-
-        for (Node w : graph.getAdjacentNodes(y)) {
-            int _w = nodesHash.get(w);
-
-            calculateArrowsBackward(_w, arrow.getX(), nodes, graph);
-            calculateArrowsBackward(arrow.getX(), _w, nodes, graph);
-        }
-    }
-
-    private void calculateArrowsForward(int i, int j, List<Node> nodes, Graph graph) {
-        if (i == j) {
-            return;
-        }
-
-        Node _x = nodes.get(i);
-        Node _y = nodes.get(j);
-
-        if (graph.isAdjacentTo(_x, _y)) {
-            return;
-        }
-
-        if (getKnowledge().edgeForbidden(_x.getName(),
-                _y.getName())) {
-            return;
-        }
-
-        Set<Node> naYX = findNaYX(_x, _y, graph);
-
-        if (lookupArrows[i][j] != null) {
-            for (Arrow arrow : lookupArrows[i][j]) {
-                sortedArrows.remove(arrow);
-            }
-
-            lookupArrows[i][j] = null;
-        }
-
-        List<Node> tNeighbors = getTNeighbors(_x, _y, graph);
-        List<Set<Node>> tSubsets = powerSet(tNeighbors);
-
-        for (Set<Node> t : tSubsets) {
-            if (!validSetByKnowledge(_x, _y, t, true)) {
-                continue;
-            }
-
-            double bump = insertEval(_x, _y, t, naYX, graph);
-            Arrow arrow = new Arrow(bump, i, j, t, naYX, nodes);
-
-            if (bump > minJump) {
-                if (lookupArrows[i][j] == null) {
-                    lookupArrows[i][j] = new HashSet<Arrow>();
-                }
-                sortedArrows.add(arrow);
-                lookupArrows[i][j].add(arrow);
-            }
-        }
-    }
-
-    private void calculateArrowsBackward(int i, int j, List<Node> nodes, Graph graph) {
-        if (i == j) {
-            return;
-        }
-
-        Node _x = nodes.get(i);
-        Node _y = nodes.get(j);
-
-        if (!graph.isAdjacentTo(_x, _y)) {
-            return;
-        }
-
-        if (!getKnowledge().noEdgeRequired(_x.getName(),
-                _y.getName())) {
-            return;
-        }
-
-        Set<Node> naYX = findNaYX(_x, _y, graph);
-
-
-        if (lookupArrowsBackwards[i][j] != null) {
-            for (Arrow arrow : lookupArrowsBackwards[i][j]) {
-                sortedArrowsBackwards.remove(arrow);
-            }
-
-            lookupArrowsBackwards[i][j] = null;
-        }
-
-        List<Node> hNeighbors = getHNeighbors(_x, _y, graph);
-        List<Set<Node>> hSubsets = powerSet(hNeighbors);
-
-        for (Set<Node> h : hSubsets) {
-            double bump = deleteEval(_x, _y, h, naYX, graph);
-            Arrow arrow = new Arrow(bump, i, j, h, naYX, nodes);
-
-            if (bump > minNeg) {
-                if (lookupArrowsBackwards[i][j] == null) {
-                    lookupArrowsBackwards[i][j] = new HashSet<Arrow>();
-                }
-
-                sortedArrowsBackwards.add(arrow);
-                lookupArrowsBackwards[i][j].add(arrow);
-            }
-        }
-    }
-
 //    /**
 //     * True iff the f cutoff should be used in the forward search.
 //     */
@@ -812,113 +632,286 @@ public final class Images3 implements GraphSearch, IImages {
 //        this.fCutoffP = fCutoffP;
 //    }
 
+    private double bes(Graph graph, double score) {
+        List <Node> nodes = graph.getNodes();
+
+        TetradLogger.getInstance().log("info", "** BACKWARD EQUIVALENCE SEARCH");
+        TetradLogger.getInstance().log("info", "Initial Score = " + nf.format(score));
+
+        initializeArrowsBackward(graph);
+
+        while (!sortedArrowsBackwards.isEmpty()) {
+            Arrow arrow = sortedArrowsBackwards.first();
+            sortedArrowsBackwards.remove(arrow);
+
+            Node _x = nodes.get(arrow.getX());
+            Node _y = nodes.get(arrow.getY());
+
+            if (!graph.isAdjacentTo(_x, _y)) {
+                continue;
+            }
+
+            if (!findNaYX(_x, _y, graph).equals(arrow.getNaYX())) {
+                reevaluateBackward(graph, nodes, arrow);
+                continue;
+            }
+
+            if (!new HashSet <Node>(getHNeighbors(_x, _y, graph)).containsAll(arrow.getHOrT())) {
+                reevaluateBackward(graph, nodes, arrow);
+                continue;
+            }
+
+            if (!validDelete(arrow.getHOrT(), arrow.getNaYX(), graph)) {
+                continue;
+            }
+
+            Node x = nodes.get(arrow.getX());
+            Node y = nodes.get(arrow.getY());
+            Set <Node> h = arrow.getHOrT();
+            double bump = arrow.getBump();
+
+            score = score + bump;
+            delete(x, y, h, graph, score, true, bump);
+            rebuildPattern(graph);
+
+            storeGraph(graph, score);
+
+            reevaluateBackward(graph, nodes, arrow);
+        }
+
+        return score;
+    }
+
+    private void initializeArrowsForward(List <Node> nodes, Graph graph) {
+        Set <Node> empty = Collections.emptySet();
+
+        for (int j = 0; j < nodes.size(); j++) {
+            for (int i = 0; i < nodes.size(); i++) {
+                if (j == i) continue;
+
+                Node _x = nodes.get(i);
+                Node _y = nodes.get(j);
+
+                if (getKnowledge().edgeForbidden(_x.getName(),
+                        _y.getName())) {
+                    continue;
+                }
+
+                Set <Node> naYX = empty;
+                Set <Node> t = empty;
+
+                if (!validSetByKnowledge(_x, _y, t, true)) {
+                    continue;
+                }
+
+                double bump = insertEval(_x, _y, t, naYX, graph);
+
+                if (bump > minJump) {
+                    Arrow arrow = new Arrow(bump, i, j, t, naYX, nodes);
+                    lookupArrows[i][j] = new HashSet <Arrow>();
+                    sortedArrows.add(arrow);
+                    lookupArrows[i][j].add(arrow);
+                }
+            }
+        }
+
+
+    }
+
+    private void initializeArrowsBackward(Graph graph) {
+        List <Node> nodes = graph.getNodes();
+        sortedArrowsBackwards = new TreeSet <Arrow>();
+        lookupArrowsBackwards = new HashSet[nodes.size()][nodes.size()];
+
+        List <Edge> graphEdges = graph.getEdges();
+
+        for (Edge edge : graphEdges) {
+            Node _x = edge.getNode1();
+            Node _y = edge.getNode2();
+
+            int i = nodesHash.get(edge.getNode1());
+            int j = nodesHash.get(edge.getNode2());
+
+            if (!getKnowledge().noEdgeRequired(_x.getName(),
+                    _y.getName())) {
+                continue;
+            }
+
+            if (Edges.isDirectedEdge(edge)) {
+                calculateArrowsBackward(i, j, nodes, graph);
+            } else {
+                calculateArrowsBackward(i, j, nodes, graph);
+                calculateArrowsBackward(j, i, nodes, graph);
+            }
+
+        }
+    }
+
+    private void reevaluateFoward(Graph graph, List <Node> nodes, Arrow arrow) {
+        Node x = nodes.get(arrow.getX());
+        Node y = nodes.get(arrow.getY());
+
+        for (int _w = 0; _w < nodes.size(); _w++) {
+            Node w = nodes.get(_w);
+            if (w == x) continue;
+            if (w == y) continue;
+
+            if (!graph.isAdjacentTo(w, x)) {
+                calculateArrowsForward(_w, arrow.getX(), nodes, graph);
+
+                if (graph.isAdjacentTo(w, y)) {
+                    calculateArrowsForward(arrow.getX(), _w, nodes, graph);
+                }
+            }
+
+            if (!graph.isAdjacentTo(w, y)) {
+                calculateArrowsForward(_w, arrow.getY(), nodes, graph);
+
+                if (graph.isAdjacentTo(w, x)) {
+                    calculateArrowsForward(arrow.getY(), _w, nodes, graph);
+                }
+            }
+        }
+    }
+
+    private void reevaluateBackward(Graph graph, List <Node> nodes, Arrow arrow) {
+        Node x = nodes.get(arrow.getX());
+        Node y = nodes.get(arrow.getY());
+
+        for (Node w : graph.getAdjacentNodes(x)) {
+            int _w = nodesHash.get(w);
+
+            calculateArrowsBackward(_w, arrow.getX(), nodes, graph);
+            calculateArrowsBackward(arrow.getX(), _w, nodes, graph);
+        }
+
+        for (Node w : graph.getAdjacentNodes(y)) {
+            int _w = nodesHash.get(w);
+
+            calculateArrowsBackward(_w, arrow.getX(), nodes, graph);
+            calculateArrowsBackward(arrow.getX(), _w, nodes, graph);
+        }
+    }
+
+    private void calculateArrowsForward(int i, int j, List <Node> nodes, Graph graph) {
+        if (i == j) {
+            return;
+        }
+
+        Node _x = nodes.get(i);
+        Node _y = nodes.get(j);
+
+        if (graph.isAdjacentTo(_x, _y)) {
+            return;
+        }
+
+        if (getKnowledge().edgeForbidden(_x.getName(),
+                _y.getName())) {
+            return;
+        }
+
+        Set <Node> naYX = findNaYX(_x, _y, graph);
+
+        if (lookupArrows[i][j] != null) {
+            for (Arrow arrow : lookupArrows[i][j]) {
+                sortedArrows.remove(arrow);
+            }
+
+            lookupArrows[i][j] = null;
+        }
+
+        List <Node> tNeighbors = getTNeighbors(_x, _y, graph);
+        List <Set <Node>> tSubsets = powerSet(tNeighbors);
+
+        for (Set <Node> t : tSubsets) {
+            if (!validSetByKnowledge(_x, _y, t, true)) {
+                continue;
+            }
+
+            double bump = insertEval(_x, _y, t, naYX, graph);
+            Arrow arrow = new Arrow(bump, i, j, t, naYX, nodes);
+
+            if (bump > minJump) {
+                if (lookupArrows[i][j] == null) {
+                    lookupArrows[i][j] = new HashSet <Arrow>();
+                }
+                sortedArrows.add(arrow);
+                lookupArrows[i][j].add(arrow);
+            }
+        }
+    }
+
+    /*
+    * Do an actual insertion
+    * (Definition 12 from Chickering, 2002).
+    **/
+
+    private void calculateArrowsBackward(int i, int j, List <Node> nodes, Graph graph) {
+        if (i == j) {
+            return;
+        }
+
+        Node _x = nodes.get(i);
+        Node _y = nodes.get(j);
+
+        if (!graph.isAdjacentTo(_x, _y)) {
+            return;
+        }
+
+        if (!getKnowledge().noEdgeRequired(_x.getName(),
+                _y.getName())) {
+            return;
+        }
+
+        Set <Node> naYX = findNaYX(_x, _y, graph);
+
+
+        if (lookupArrowsBackwards[i][j] != null) {
+            for (Arrow arrow : lookupArrowsBackwards[i][j]) {
+                sortedArrowsBackwards.remove(arrow);
+            }
+
+            lookupArrowsBackwards[i][j] = null;
+        }
+
+        List <Node> hNeighbors = getHNeighbors(_x, _y, graph);
+        List <Set <Node>> hSubsets = powerSet(hNeighbors);
+
+        for (Set <Node> h : hSubsets) {
+            double bump = deleteEval(_x, _y, h, naYX, graph);
+            Arrow arrow = new Arrow(bump, i, j, h, naYX, nodes);
+
+            if (bump > minNeg) {
+                if (lookupArrowsBackwards[i][j] == null) {
+                    lookupArrowsBackwards[i][j] = new HashSet <Arrow>();
+                }
+
+                sortedArrowsBackwards.add(arrow);
+                lookupArrowsBackwards[i][j].add(arrow);
+            }
+        }
+    }
 
     @Override
-	public void setMinJump(double minJump) {
+    public void setMinJump(double minJump) {
         this.minJump = minJump;
     }
 
-    private static class Arrow implements Comparable {
-        private double bump;
-        private int x;
-        private int y;
-        private Set<Node> hOrT;
-        private Set<Node> naYX;
-        private List<Node> nodes;
-
-        public Arrow(double bump, int x, int y, Set<Node> hOrT, Set<Node> naYX, List<Node> nodes) {
-            this.bump = bump;
-            this.x = x;
-            this.y = y;
-            this.hOrT = hOrT;
-            this.naYX = naYX;
-            this.nodes = nodes;
-        }
-
-        public double getBump() {
-            return bump;
-        }
-
-        public int getX() {
-            return x;
-        }
-
-        public int getY() {
-            return y;
-        }
-
-        public Set<Node> getHOrT() {
-            return hOrT;
-        }
-
-        public Set<Node> getNaYX() {
-            return naYX;
-        }
-
-        // Sorting is by bump, high to low.
-
-        @Override
-		public int compareTo(Object o) {
-            Arrow info = (Arrow) o;
-            return new Double(info.getBump()).compareTo(new Double(getBump()));
-        }
-
-        @Override
-		public String toString() {
-            return "Arrow<" + nodes.get(x) + "->" + nodes.get(y) + " bump = " + bump + " t = " + hOrT + " naYX = " + naYX + ">";
-        }
-    }
-
-
-    /**
-     * Get all nodes that are connected to Y by an undirected edge and not adjacent to X.
-     */
-    private static List<Node> getTNeighbors(Node x, Node y, Graph graph) {
-        List<Node> tNeighbors = graph.getAdjacentNodes(y);
-        tNeighbors.removeAll(graph.getAdjacentNodes(x));
-
-        for (int i = tNeighbors.size() - 1; i >= 0; i--) {
-            Node z = tNeighbors.get(i);
-            Edge edge = graph.getEdge(y, z);
-
-            if (!Edges.isUndirectedEdge(edge)) {
-                tNeighbors.remove(z);
-            }
-        }
-
-        return tNeighbors;
-    }
-
-    /**
-     * Get all nodes that are connected to Y by an undirected edge and adjacent to X
-     */
-    private static List<Node> getHNeighbors(Node x, Node y, Graph graph) {
-        List<Node> hNeighbors = graph.getAdjacentNodes(y);
-        hNeighbors.retainAll(graph.getAdjacentNodes(x));
-
-        for (int i = hNeighbors.size() - 1; i >= 0; i--) {
-            Node z = hNeighbors.get(i);
-            Edge edge = graph.getEdge(y, z);
-
-            if (!Edges.isUndirectedEdge(edge)) {
-                hNeighbors.remove(z);
-            }
-        }
-
-        return hNeighbors;
-    }
-
+    /*
+     * Test if the candidate insertion is a valid operation
+     * (Theorem 15 from Chickering, 2002).
+     **/
 
     /**
      * Evaluate the Insert(X, Y, T) operator (Definition 12 from Chickering, 2002).
      */
-    private double insertEval(Node x, Node y, Set<Node> t, Set<Node> naYX, Graph graph) {
+    private double insertEval(Node x, Node y, Set <Node> t, Set <Node> naYX, Graph graph) {
 
         // set1 contains x; set2 does not.
-        Set<Node> set2 = new HashSet<Node>(naYX);
+        Set <Node> set2 = new HashSet <Node>(naYX);
         set2.addAll(t);
         set2.addAll(graph.getParents(y));
-        Set<Node> set1 = new HashSet<Node>(set2);
+        Set <Node> set1 = new HashSet <Node>(set2);
         set1.add(x);
 
         return scoreGraphChange(y, set1, set2);
@@ -927,25 +920,22 @@ public final class Images3 implements GraphSearch, IImages {
     /**
      * Evaluate the Delete(X, Y, T) operator (Definition 12 from Chickering, 2002).
      */
-    private double deleteEval(Node x, Node y, Set<Node> h, Set<Node> naYX, Graph graph) {
+    private double deleteEval(Node x, Node y, Set <Node> h, Set <Node> naYX, Graph graph) {
 
         // set2 contains x; set1 does not.
-        Set<Node> set2 = new HashSet<Node>(naYX);
+        Set <Node> set2 = new HashSet <Node>(naYX);
         set2.removeAll(h);
         set2.addAll(graph.getParents(y));
         set2.add(x);
-        Set<Node> set1 = new HashSet<Node>(set2);
+        Set <Node> set1 = new HashSet <Node>(set2);
         set1.remove(x);
 
         return scoreGraphChange(y, set1, set2);
     }
 
-    /*
-    * Do an actual insertion
-    * (Definition 12 from Chickering, 2002).
-    **/
+    //---Background knowledge methods.
 
-    private void insert(Node x, Node y, Set<Node> t, Graph graph, double score, boolean log, double bump) {
+    private void insert(Node x, Node y, Set <Node> t, Graph graph, double score, boolean log, double bump) {
         if (graph.isAdjacentTo(x, y)) {
             throw new IllegalArgumentException(x + " and " + y + " are already adjacent in the graph.");
         }
@@ -994,7 +984,7 @@ public final class Images3 implements GraphSearch, IImages {
     /**
      * Do an actual deletion (Definition 13 from Chickering, 2002).
      */
-    private void delete(Node x, Node y, Set<Node> subset, Graph graph, double score, boolean log, double bump) {
+    private void delete(Node x, Node y, Set <Node> subset, Graph graph, double score, boolean log, double bump) {
 
         Edge trueEdge = null;
 
@@ -1043,13 +1033,10 @@ public final class Images3 implements GraphSearch, IImages {
         }
     }
 
-    /*
-     * Test if the candidate insertion is a valid operation
-     * (Theorem 15 from Chickering, 2002).
-     **/
+    //--Auxiliary methods.
 
-    private boolean validInsert(Node x, Node y, Set<Node> t, Set<Node> naYX, Graph graph) {
-        Set<Node> union = new HashSet<Node>(t);
+    private boolean validInsert(Node x, Node y, Set <Node> t, Set <Node> naYX, Graph graph) {
+        Set <Node> union = new HashSet <Node>(t);
         union.addAll(naYX);
 
         if (!isClique(union, graph)) {
@@ -1063,25 +1050,14 @@ public final class Images3 implements GraphSearch, IImages {
         return true;
     }
 
-    /**
-     * Test if the candidate deletion is a valid operation (Theorem 17 from Chickering, 2002).
-     */
-    private static boolean validDelete(Set<Node> h, Set<Node> naXY, Graph graph) {
-        Set<Node> set = new HashSet<Node>(naXY);
-        set.removeAll(h);
-        return isClique(set, graph);
-    }
-
-    //---Background knowledge methods.
-
     private void addRequiredEdges(Graph graph) {
-        for (Iterator<KnowledgeEdge> it =
-                this.getKnowledge().requiredEdgesIterator(); it.hasNext();) {
+        for (Iterator <KnowledgeEdge> it =
+             this.getKnowledge().requiredEdgesIterator(); it.hasNext(); ) {
             KnowledgeEdge next = it.next();
             String a = next.getFrom();
             String b = next.getTo();
             Node nodeA = null, nodeB = null;
-            Iterator<Node> itn = graph.getNodes().iterator();
+            Iterator <Node> itn = graph.getNodes().iterator();
             while (itn.hasNext() && (nodeA == null || nodeB == null)) {
                 Node nextNode = itn.next();
                 if (nextNode.getName().equals(a)) {
@@ -1097,13 +1073,13 @@ public final class Images3 implements GraphSearch, IImages {
                 TetradLogger.getInstance().log("insertedEdges", "Adding edge by knowledge: " + graph.getEdge(nodeA, nodeB));
             }
         }
-        for (Iterator<KnowledgeEdge> it =
-                getKnowledge().forbiddenEdgesIterator(); it.hasNext();) {
+        for (Iterator <KnowledgeEdge> it =
+             getKnowledge().forbiddenEdgesIterator(); it.hasNext(); ) {
             KnowledgeEdge next = it.next();
             String a = next.getFrom();
             String b = next.getTo();
             Node nodeA = null, nodeB = null;
-            Iterator<Node> itn = graph.getNodes().iterator();
+            Iterator <Node> itn = graph.getNodes().iterator();
             while (itn.hasNext() && (nodeA == null || nodeB == null)) {
                 Node nextNode = itn.next();
                 if (nextNode.getName().equals(a)) {
@@ -1129,7 +1105,7 @@ public final class Images3 implements GraphSearch, IImages {
      * direction according to prior knowledge. If some orientation is forbidden in the subset, the whole subset is
      * forbidden.
      */
-    private boolean validSetByKnowledge(Node x, Node y, Set<Node> subset,
+    private boolean validSetByKnowledge(Node x, Node y, Set <Node> subset,
                                         boolean insertMode) {
         if (insertMode) {
             for (Node node : subset) {
@@ -1153,50 +1129,13 @@ public final class Images3 implements GraphSearch, IImages {
         return true;
     }
 
-    //--Auxiliary methods.
-
-    /**
-     * Find all nodes that are connected to Y by an undirected edge that are adjacent to X (that is, by undirected or
-     * directed edge) NOTE: very inefficient implementation, since the current library does not allow access to the
-     * adjacency list/matrix of the graph.
-     */
-    private static Set<Node> findNaYX(Node x, Node y, Graph graph) {
-        Set<Node> naYX = new HashSet<Node>(graph.getAdjacentNodes(y));
-        naYX.retainAll(graph.getAdjacentNodes(x));
-
-        for (Node z : new HashSet<Node>(naYX)) {
-            Edge edge = graph.getEdge(y, z);
-
-            if (!Edges.isUndirectedEdge(edge)) {
-                naYX.remove(z);
-            }
-        }
-
-        return naYX;
-    }
-
-    /**
-     * Returns true iif the given set forms a clique in the given graph.
-     */
-    private static boolean isClique(Set<Node> _nodes, Graph graph) {
-        List<Node> nodes = new LinkedList<Node>(_nodes);
-        for (int i = 0; i < nodes.size() - 1; i++) {
-            for (int j = i + 1; j < nodes.size(); j++) {
-                if (!graph.isAdjacentTo(nodes.get(i), nodes.get(j))) {
-                    return false;
-                }
-            }
-        }
-        return true;
-    }
-
-    public boolean existsUnblockedSemiDirectedPath(Node node1, Node node2, Set<Node> cond, Graph graph) {
+    public boolean existsUnblockedSemiDirectedPath(Node node1, Node node2, Set <Node> cond, Graph graph) {
         return existsUnblockedSemiDirectedPathVisit(node1, node2,
-                new LinkedList<Node>(), graph, cond);
+                new LinkedList <Node>(), graph, cond);
     }
 
     private boolean existsUnblockedSemiDirectedPathVisit(Node node1, Node nodes2,
-                                                         LinkedList<Node> path, Graph graph, Set<Node> cond) {
+                                                         LinkedList <Node> path, Graph graph, Set <Node> cond) {
         if (cond.contains(node1)) return false;
         if (path.size() > 6) return false;
         path.addLast(node1);
@@ -1225,26 +1164,6 @@ public final class Images3 implements GraphSearch, IImages {
         return false;
     }
 
-    private static List<Set<Node>> powerSet(List<Node> nodes) {
-        List<Set<Node>> subsets = new ArrayList<Set<Node>>();
-        int total = (int) Math.pow(2, nodes.size());
-        for (int i = 0; i < total; i++) {
-            Set<Node> newSet = new HashSet<Node>();
-            String selection = Integer.toBinaryString(i);
-
-            int shift = nodes.size() - selection.length();
-
-            for (int j = nodes.size() - 1; j >= 0; j--) {
-                if (j >= shift && selection.charAt(j - shift) == '1') {
-                    newSet.add(nodes.get(j));
-                }
-            }
-            subsets.add(newSet);
-        }
-
-        return subsets;
-    }
-
     /**
      * Completes a pattern that was modified by an insertion/deletion operator Based on the algorithm described on
      * Appendix C of (Chickering, 2002).
@@ -1270,11 +1189,11 @@ public final class Images3 implements GraphSearch, IImages {
         rules.orientImplied(graph);
     }
 
-    private void setDataSets(List<DataSet> dataSets) {
-        List<String> varNames = dataSets.get(0).getVariableNames();
+    private void setDataSets(List <DataSet> dataSets) {
+        List <String> varNames = dataSets.get(0).getVariableNames();
 
         for (int i = 2; i < dataSets.size(); i++) {
-            List<String> _varNames = dataSets.get(i).getVariableNames();
+            List <String> _varNames = dataSets.get(i).getVariableNames();
 
             if (!varNames.equals(_varNames)) {
                 throw new IllegalArgumentException("Variable names not consistent.");
@@ -1289,17 +1208,17 @@ public final class Images3 implements GraphSearch, IImages {
         this.discrete = dataSets.get(0).isDiscrete();
 
         if (!isDiscrete()) {
-            this.covariances = new ArrayList<DoubleMatrix2D>();
+            this.covariances = new ArrayList <DoubleMatrix2D>();
 
             for (int i = 0; i < dataSets.size(); i++) {
                 this.covariances.add(dataSets.get(i).getCovarianceMatrix());
             }
         }
 
-        missingVariables = new HashMap<DataSet, List<Node>>();
+        missingVariables = new HashMap <DataSet, List <Node>>();
 
         for (DataSet dataSet : dataSets) {
-            missingVariables.put(dataSet, new ArrayList<Node>());
+            missingVariables.put(dataSet, new ArrayList <Node>());
         }
 
         for (DataSet dataSet : dataSets) {
@@ -1324,7 +1243,7 @@ public final class Images3 implements GraphSearch, IImages {
     }
 
     private void buildIndexing(Graph graph) {
-        this.hashIndices = new HashMap<Node, Integer>();
+        this.hashIndices = new HashMap <Node, Integer>();
         for (Node next : graph.getNodes()) {
             for (int i = 0; i < this.varNames.length; i++) {
                 if (this.varNames[i].equals(next.getName())) {
@@ -1337,17 +1256,15 @@ public final class Images3 implements GraphSearch, IImages {
 
     //===========================SCORING METHODS===========================//
 
-    private RegressionDataset regression;
-
     @Override
-	public double scoreGraph(Graph graph) {
+    public double scoreGraph(Graph graph) {
         TetradLogger.getInstance().log("info", "Scoring graph");
 
         Graph dag = SearchGraphUtils.dagFromPattern(graph);
         double score = 0.;
 
         for (Node next : dag.getNodes()) {
-            Collection<Node> parents = dag.getParents(next);
+            Collection <Node> parents = dag.getParents(next);
             int nextIndex = -1;
             for (int i = 0; i < getVariables().size(); i++) {
                 if (this.varNames[i].equals(next.getName())) {
@@ -1356,7 +1273,7 @@ public final class Images3 implements GraphSearch, IImages {
                 }
             }
             int parentIndices[] = new int[parents.size()];
-            Iterator<Node> pi = parents.iterator();
+            Iterator <Node> pi = parents.iterator();
             int count = 0;
             while (pi.hasNext()) {
                 Node nextParent = pi.next();
@@ -1374,8 +1291,8 @@ public final class Images3 implements GraphSearch, IImages {
         return score;
     }
 
-    private double scoreGraphChange(Node y, Set<Node> parents1,
-                                    Set<Node> parents2) {
+    private double scoreGraphChange(Node y, Set <Node> parents1,
+                                    Set <Node> parents2) {
         int yIndex = hashIndices.get(y);
         int parentIndices1[] = new int[parents1.size()];
 
@@ -1440,8 +1357,7 @@ public final class Images3 implements GraphSearch, IImages {
             try {
 //                inverse = algebra().inverse(Czz);
                 inverse = MatrixUtils.ginverse(Czz);
-            }
-            catch (Exception e) {
+            } catch (Exception e) {
                 StringBuilder buf = new StringBuilder();
                 buf.append("Could not invert matrix for variables: ");
 
@@ -1465,7 +1381,7 @@ public final class Images3 implements GraphSearch, IImages {
 
         if (variance == 0.0) {
             throw new IllegalArgumentException("Zero residual detected in data set #" + (dataIndex + 1)
-                  + "; please check data for multicollinearity");
+                    + "; please check data for multicollinearity");
         }
 
         // Notice when it sums it up for all data sets it will be m * k parameters.
@@ -1476,7 +1392,7 @@ public final class Images3 implements GraphSearch, IImages {
     }
 
     private int[] eliminateMissing(int[] parents, int dataIndex) {
-        List<Integer> _parents = new ArrayList<Integer>();
+        List <Integer> _parents = new ArrayList <Integer>();
         DataSet dataSet = dataSets.get(dataIndex);
 
         for (int k : parents) {
@@ -1494,16 +1410,15 @@ public final class Images3 implements GraphSearch, IImages {
         return _parents2;
     }
 
-
     private int sampleSize() {
         return this.sampleSize;
     }
 
-    private List<Node> getVariables() {
+    private List <Node> getVariables() {
         return variables;
     }
 
-    private List<DoubleMatrix2D> getCovMatrices() {
+    private List <DoubleMatrix2D> getCovMatrices() {
         return covariances;
     }
 
@@ -1511,7 +1426,7 @@ public final class Images3 implements GraphSearch, IImages {
         return algebra;
     }
 
-    private List<DataSet> dataSets() {
+    private List <DataSet> dataSets() {
         return dataSets;
     }
 
@@ -1525,9 +1440,9 @@ public final class Images3 implements GraphSearch, IImages {
         }
     }
 
-    private List<PropertyChangeListener> getListeners() {
+    private List <PropertyChangeListener> getListeners() {
         if (listeners == null) {
-            listeners = new ArrayList<PropertyChangeListener>();
+            listeners = new ArrayList <PropertyChangeListener>();
         }
         return listeners;
     }
@@ -1551,7 +1466,7 @@ public final class Images3 implements GraphSearch, IImages {
     }
 
     @Override
-	public Map<Edge, Integer> getBoostrapCounts(int numBootstraps) {
+    public Map <Edge, Integer> getBoostrapCounts(int numBootstraps) {
         if (returnGraph == null) {
             returnGraph = search();
         }
@@ -1560,7 +1475,7 @@ public final class Images3 implements GraphSearch, IImages {
     }
 
     @Override
-	public String bootstrapPercentagesString(int numBootstraps) {
+    public String bootstrapPercentagesString(int numBootstraps) {
         if (returnGraph == null) {
             returnGraph = search();
         }
@@ -1574,27 +1489,27 @@ public final class Images3 implements GraphSearch, IImages {
                         "0% means it never occurs. Edges not mentioned occur in 0% of the random samples.\n\n"
         );
 
-        Map<Edge, Integer> counts = getBoostrapCounts(numBootstraps);
+        Map <Edge, Integer> counts = getBoostrapCounts(numBootstraps);
         builder.append(edgePercentagesString(counts, returnGraph.getEdges(), "The estimated pattern", null, numBootstraps));
 
         return builder.toString();
     }
 
     @Override
-	public String gesCountsString() {
+    public String gesCountsString() {
         if (returnGraph == null) {
             returnGraph = search();
         }
-        Map<Edge, Integer> counts = getGesCounts(dataSets(), returnGraph.getNodes(), getKnowledge(), getPenaltyDiscount());
+        Map <Edge, Integer> counts = getGesCounts(dataSets(), returnGraph.getNodes(), getKnowledge(), getPenaltyDiscount());
         return gesEdgesString(counts, dataSets());
     }
 
-    private Map<Edge, Integer> getGesCounts(List<DataSet> dataSets, List<Node> nodes, Knowledge knowledge, double penalty) {
+    private Map <Edge, Integer> getGesCounts(List <DataSet> dataSets, List <Node> nodes, Knowledge knowledge, double penalty) {
         if (returnGraph == null) {
             returnGraph = search();
         }
 
-        Map<Edge, Integer> counts = new HashMap<Edge, Integer>();
+        Map <Edge, Integer> counts = new HashMap <Edge, Integer>();
 
         for (DataSet dataSet : dataSets) {
             Ges ges = new Ges(dataSet);
@@ -1609,7 +1524,7 @@ public final class Images3 implements GraphSearch, IImages {
     }
 
     @Override
-	public Map<Edge, Double> averageStandardizedCoefficients() {
+    public Map <Edge, Double> averageStandardizedCoefficients() {
         if (returnGraph == null) {
             returnGraph = search();
         }
@@ -1618,10 +1533,10 @@ public final class Images3 implements GraphSearch, IImages {
     }
 
     @Override
-	public Map<Edge, Double> averageStandardizedCoefficients(Graph graph) {
+    public Map <Edge, Double> averageStandardizedCoefficients(Graph graph) {
 
         Graph dag = SearchGraphUtils.dagFromPattern(graph);
-        Map<Edge, Double> coefs = new HashMap<Edge, Double>();
+        Map <Edge, Double> coefs = new HashMap <Edge, Double>();
 
         for (DataSet dataSet : dataSets) {
             SemPm pm = new SemPm(dag);
@@ -1649,7 +1564,7 @@ public final class Images3 implements GraphSearch, IImages {
     }
 
     @Override
-	public String averageStandardizedCoefficientsString() {
+    public String averageStandardizedCoefficientsString() {
         if (returnGraph == null) {
             returnGraph = search();
         }
@@ -1659,21 +1574,21 @@ public final class Images3 implements GraphSearch, IImages {
     }
 
     @Override
-	public String averageStandardizedCoefficientsString(Graph graph) {
-        Map<Edge, Double> coefs = averageStandardizedCoefficients(graph);
+    public String averageStandardizedCoefficientsString(Graph graph) {
+        Map <Edge, Double> coefs = averageStandardizedCoefficients(graph);
         return edgeCoefsString(coefs, graph.getEdges(), "Estimated graph",
                 "Average standardized coefficient");
     }
 
     @Override
-	public String logEdgeBayesFactorsString(Graph dag) {
-        Map<Edge, Double> coefs = logEdgeBayesFactors(dag);
+    public String logEdgeBayesFactorsString(Graph dag) {
+        Map <Edge, Double> coefs = logEdgeBayesFactors(dag);
         return logBayesPosteriorFactorsString(coefs, scoreGraph(dag), dag.getEdges());
     }
 
     @Override
-	public Map<Edge, Double> logEdgeBayesFactors(Graph dag) {
-        Map<Edge, Double> logBayesFactors = new HashMap<Edge, Double>();
+    public Map <Edge, Double> logEdgeBayesFactors(Graph dag) {
+        Map <Edge, Double> logBayesFactors = new HashMap <Edge, Double>();
         double withEdge = scoreGraph(dag);
 
         for (Edge edge : dag.getEdges()) {
@@ -1687,14 +1602,13 @@ public final class Images3 implements GraphSearch, IImages {
         return logBayesFactors;
     }
 
-
     private Edge translateEdge(Edge edge, Graph graph) {
         Node node1 = graph.getNode(edge.getNode1().getName());
         Node node2 = graph.getNode(edge.getNode2().getName());
         return new Edge(node1, node2, edge.getEndpoint1(), edge.getEndpoint2());
     }
 
-    private String gesEdgesString(Map<Edge, Integer> counts, List<DataSet> dataSets) {
+    private String gesEdgesString(Map <Edge, Integer> counts, List <DataSet> dataSets) {
         if (returnGraph == null) {
             returnGraph = search();
         }
@@ -1702,7 +1616,6 @@ public final class Images3 implements GraphSearch, IImages {
         return edgePercentagesString(counts, returnGraph.getEdges(), "Estimated graph",
                 "Percentage of GES results each edge participates in", dataSets.size());
     }
-
 
     /**
      * Bootstraps images counts at a particular penalty level.
@@ -1715,9 +1628,9 @@ public final class Images3 implements GraphSearch, IImages {
      * @param penalty       The penalty discount at which the bootstrap analysis is to be done.
      * @return A map from edges to counts, where the edges are over the nodes of the datasets.
      */
-    private Map<Edge, Integer> bootstrapImagesCounts(List<DataSet> dataSets, List<Node> nodes, Knowledge knowledge,
-                                                     int numBootstraps, double penalty) {
-        List<Node> dataVars = dataSets.get(0).getVariables();
+    private Map <Edge, Integer> bootstrapImagesCounts(List <DataSet> dataSets, List <Node> nodes, Knowledge knowledge,
+                                                      int numBootstraps, double penalty) {
+        List <Node> dataVars = dataSets.get(0).getVariables();
 
         for (DataSet dataSet : dataSets) {
             if (!dataSet.getVariables().equals(dataVars)) {
@@ -1725,10 +1638,10 @@ public final class Images3 implements GraphSearch, IImages {
             }
         }
 
-        Map<Edge, Integer> counts = new HashMap<Edge, Integer>();
+        Map <Edge, Integer> counts = new HashMap <Edge, Integer>();
 
         for (int i = 0; i < numBootstraps; i++) {
-            List<DataSet> bootstraps = new ArrayList<DataSet>();
+            List <DataSet> bootstraps = new ArrayList <DataSet>();
 
             for (DataSet dataSet : dataSets) {
                 bootstraps.add(DataUtils.getBootstrapSample(dataSet, dataSet.getNumRows()));
@@ -1748,7 +1661,7 @@ public final class Images3 implements GraphSearch, IImages {
         return counts;
     }
 
-    private void incrementCounts(Map<Edge, Integer> counts, Graph pattern, List<Node> nodes) {
+    private void incrementCounts(Map <Edge, Integer> counts, Graph pattern, List <Node> nodes) {
         Graph _pattern = GraphUtils.replaceNodes(pattern, nodes);
 
         for (Edge e : _pattern.getEdges()) {
@@ -1769,7 +1682,7 @@ public final class Images3 implements GraphSearch, IImages {
      * @param percentagesLabel
      * @param numBootstraps
      */
-    private String edgePercentagesString(Map<Edge, Integer> counts, List<Edge> edgeList, String edgeListLabel,
+    private String edgePercentagesString(Map <Edge, Integer> counts, List <Edge> edgeList, String edgeListLabel,
                                          String percentagesLabel, int numBootstraps) {
         NumberFormat nf = new DecimalFormat("0");
         StringBuilder builder = new StringBuilder();
@@ -1782,7 +1695,7 @@ public final class Images3 implements GraphSearch, IImages {
             Edge edge = edgeList.get(i);
             int total = 0;
 
-            for (Edge _edge : new HashMap<Edge, Integer>(counts).keySet()) {
+            for (Edge _edge : new HashMap <Edge, Integer>(counts).keySet()) {
                 if (_edge.getNode1() == edge.getNode1() && _edge.getNode2() == edge.getNode2()
                         || _edge.getNode1() == edge.getNode2() && _edge.getNode2() == edge.getNode1()) {
                     total += counts.get(_edge);
@@ -1804,12 +1717,12 @@ public final class Images3 implements GraphSearch, IImages {
 //            builder.append(edge + " " + nf.format(percentage) + "%\n");
 //        }
 
-        for (Edge edge : new ArrayList<Edge>(counts.keySet())) {
+        for (Edge edge : new ArrayList <Edge>(counts.keySet())) {
             if (!counts.keySet().contains(edge)) continue;
 
             int total = 0;
 
-            for (Edge _edge : new HashMap<Edge, Integer>(counts).keySet()) {
+            for (Edge _edge : new HashMap <Edge, Integer>(counts).keySet()) {
                 if (_edge.getNode1() == edge.getNode1() && _edge.getNode2() == edge.getNode2()
                         || _edge.getNode1() == edge.getNode2() && _edge.getNode2() == edge.getNode1()) {
                     total += counts.get(_edge);
@@ -1833,7 +1746,7 @@ public final class Images3 implements GraphSearch, IImages {
         return builder.toString();
     }
 
-    private String edgeCoefsString(Map<Edge, Double> coefs, List<Edge> edgeList, String edgeListLabel,
+    private String edgeCoefsString(Map <Edge, Double> coefs, List <Edge> edgeList, String edgeListLabel,
                                    String percentagesLabel) {
         NumberFormat nf = new DecimalFormat("0.00");
         StringBuilder builder = new StringBuilder();
@@ -1850,7 +1763,7 @@ public final class Images3 implements GraphSearch, IImages {
         for (int i = 0; i < edgeList.size(); i++) {
             Edge edge = edgeList.get(i);
 
-            for (Edge _edge : new HashMap<Edge, Double>(coefs).keySet()) {
+            for (Edge _edge : new HashMap <Edge, Double>(coefs).keySet()) {
                 if (_edge.getNode1() == edge.getNode1() && _edge.getNode2() == edge.getNode2()
                         || _edge.getNode1() == edge.getNode2() && _edge.getNode2() == edge.getNode1()) {
                     double coef = coefs.get(_edge);
@@ -1864,13 +1777,13 @@ public final class Images3 implements GraphSearch, IImages {
         return builder.toString();
     }
 
-    private String logBayesPosteriorFactorsString(final Map<Edge, Double> coefs, double modelScore, List<Edge> edgeList) {
+    private String logBayesPosteriorFactorsString(final Map <Edge, Double> coefs, double modelScore, List <Edge> edgeList) {
         NumberFormat nf = new DecimalFormat("0.00");
         StringBuilder builder = new StringBuilder();
 
-        SortedMap<Edge, Double> sortedCoefs = new TreeMap<Edge, Double>(new Comparator<Edge>() {
+        SortedMap <Edge, Double> sortedCoefs = new TreeMap <Edge, Double>(new Comparator <Edge>() {
             @Override
-			public int compare(Edge edge1, Edge edge2) {
+            public int compare(Edge edge1, Edge edge2) {
                 return new Double(coefs.get(edge1)).compareTo(new Double(coefs.get(edge2)));
             }
         });
@@ -1914,22 +1827,72 @@ public final class Images3 implements GraphSearch, IImages {
         return builder.toString();
     }
 
-
     @Override
-	public double getModelScore() {
+    public double getModelScore() {
         return bic;
     }
 
     @Override
-	public int getMaxNumEdges() {
+    public int getMaxNumEdges() {
         return maxNumEdges;
     }
 
     @Override
-	public void setMaxNumEdges(int maxNumEdges) {
+    public void setMaxNumEdges(int maxNumEdges) {
         if (maxNumEdges < -1) throw new IllegalArgumentException();
 
         this.maxNumEdges = maxNumEdges;
+    }
+
+    private static class Arrow implements Comparable {
+        private double bump;
+        private int x;
+        private int y;
+        private Set <Node> hOrT;
+        private Set <Node> naYX;
+        private List <Node> nodes;
+
+        public Arrow(double bump, int x, int y, Set <Node> hOrT, Set <Node> naYX, List <Node> nodes) {
+            this.bump = bump;
+            this.x = x;
+            this.y = y;
+            this.hOrT = hOrT;
+            this.naYX = naYX;
+            this.nodes = nodes;
+        }
+
+        public double getBump() {
+            return bump;
+        }
+
+        public int getX() {
+            return x;
+        }
+
+        public int getY() {
+            return y;
+        }
+
+        public Set <Node> getHOrT() {
+            return hOrT;
+        }
+
+        public Set <Node> getNaYX() {
+            return naYX;
+        }
+
+        // Sorting is by bump, high to low.
+
+        @Override
+        public int compareTo(Object o) {
+            Arrow info = (Arrow) o;
+            return new Double(info.getBump()).compareTo(new Double(getBump()));
+        }
+
+        @Override
+        public String toString() {
+            return "Arrow<" + nodes.get(x) + "->" + nodes.get(y) + " bump = " + bump + " t = " + hOrT + " naYX = " + naYX + ">";
+        }
     }
 
 }

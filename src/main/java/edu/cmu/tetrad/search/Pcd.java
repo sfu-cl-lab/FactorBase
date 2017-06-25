@@ -111,7 +111,7 @@ public class Pcd implements GraphSearch {
      * Runs PC starting with a fully connected graph.
      */
     @Override
-	public Graph search() {
+    public Graph search() {
         TetradLogger.getInstance().log("info", "Starting PCD algorithm.");
         TetradLogger.getInstance().log("info", "Independence test = " + independenceTest + ".");
         long startTime = System.currentTimeMillis();
@@ -120,7 +120,7 @@ public class Pcd implements GraphSearch {
             throw new NullPointerException();
         }
 
-        List<Node> nodes = getIndependenceTest().getVariables();
+        List <Node> nodes = getIndependenceTest().getVariables();
         graph = new EdgeListGraph(nodes);
         graph.fullyConnect(Endpoint.TAIL);
 
@@ -152,7 +152,7 @@ public class Pcd implements GraphSearch {
     }
 
     @Override
-	public long getElapsedTime() {
+    public long getElapsedTime() {
         return 0;
     }
 

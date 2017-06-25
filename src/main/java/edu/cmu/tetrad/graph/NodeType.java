@@ -32,18 +32,20 @@ import java.io.ObjectStreamException;
  * @author Joseph Ramsey
  */
 public final class NodeType implements TetradSerializable {
-    static final long serialVersionUID = 23L;
-
     public static final NodeType MEASURED = new NodeType("Measured");
     public static final NodeType LATENT = new NodeType("Latent");
     public static final NodeType ERROR = new NodeType("Error");
     public static final NodeType SESSION = new NodeType("Session");
     public static final NodeType NO_TYPE = new NodeType("No type");
-
+    static final long serialVersionUID = 23L;
+    private static final NodeType[] TYPES = {MEASURED, LATENT, ERROR, NO_TYPE};
+    // Declarations required for serialization.
+    private static int nextOrdinal = 0;
     /**
      * The name of this type.
      */
     private final transient String name;
+    private final int ordinal = nextOrdinal++;
 
     /**
      * Protected constructor for the types; this allows for extension in case
@@ -67,14 +69,9 @@ public final class NodeType implements TetradSerializable {
      * Prints out the name of the type.
      */
     @Override
-	public String toString() {
+    public String toString() {
         return name;
     }
-
-    // Declarations required for serialization.
-    private static int nextOrdinal = 0;
-    private final int ordinal = nextOrdinal++;
-    private static final NodeType[] TYPES = {MEASURED, LATENT, ERROR, NO_TYPE};
 
     Object readResolve() throws ObjectStreamException {
         return TYPES[ordinal]; // Canonicalize.

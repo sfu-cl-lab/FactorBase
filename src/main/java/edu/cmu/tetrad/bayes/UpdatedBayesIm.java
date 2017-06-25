@@ -127,83 +127,99 @@ public final class UpdatedBayesIm implements BayesIm, TetradSerializable {
 
     //===============================PUBLIC METHODS=======================//
 
-    @Override
-	public BayesPm getBayesPm() {
-        return getBayesIm().getBayesPm();
+    private static boolean hasNextValue(Proposition proposition, int variable,
+                                        int curIndex) {
+        return nextValue(proposition, variable, curIndex) != -1;
     }
 
+    private static int nextValue(Proposition proposition, int variable,
+                                 int curIndex) {
+        for (int i = curIndex + 1;
+             i < proposition.getNumCategories(variable); i++) {
+            if (proposition.isAllowed(variable, i)) {
+                return i;
+            }
+        }
+
+        return -1;
+    }
+
+    @Override
+    public BayesPm getBayesPm() {
+        return getBayesIm().getBayesPm();
+    }
 
     private BayesIm getBayesIm() {
         return bayesIm;
     }
 
     @Override
-	public Dag getDag() {
+    public Dag getDag() {
         return getBayesIm().getDag();
     }
 
     @Override
-	public int getNumNodes() {
+    public int getNumNodes() {
         return getBayesIm().getNumNodes();
     }
 
     @Override
-	public Node getNode(int nodeIndex) {
+    public Node getNode(int nodeIndex) {
         return getBayesIm().getNode(nodeIndex);
     }
 
     @Override
-	public Node getNode(String name) {
+    public Node getNode(String name) {
         return getBayesIm().getNode(name);
     }
 
     @Override
-	public int getNodeIndex(Node node) {
+    public int getNodeIndex(Node node) {
         return getBayesIm().getNodeIndex(node);
     }
 
     @Override
-	public int getNumColumns(int nodeIndex) {
+    public int getNumColumns(int nodeIndex) {
         return getBayesIm().getNumColumns(nodeIndex);
     }
 
     @Override
-	public int getNumRows(int nodeIndex) {
+    public int getNumRows(int nodeIndex) {
         return getBayesIm().getNumRows(nodeIndex);
     }
 
     @Override
-	public int getNumParents(int nodeIndex) {
+    public int getNumParents(int nodeIndex) {
         return getBayesIm().getNumParents(nodeIndex);
     }
 
     @Override
-	public int getParent(int nodeIndex, int parentIndex) {
+    public int getParent(int nodeIndex, int parentIndex) {
         return getBayesIm().getParent(nodeIndex, parentIndex);
     }
 
     @Override
-	public int getParentDim(int nodeIndex, int parentIndex) {
+    public int getParentDim(int nodeIndex, int parentIndex) {
         return getBayesIm().getParentDim(nodeIndex, parentIndex);
     }
 
     @Override
-	public int[] getParentDims(int nodeIndex) {
+    public int[] getParentDims(int nodeIndex) {
         return getBayesIm().getParentDims(nodeIndex);
     }
 
     @Override
-	public int[] getParents(int nodeIndex) {
+    public int[] getParents(int nodeIndex) {
         return getBayesIm().getParents(nodeIndex);
     }
 
     @Override
-	public int[] getParentValues(int nodeIndex, int rowIndex) {
+    public int[] getParentValues(int nodeIndex, int rowIndex) {
         return getBayesIm().getParentValues(nodeIndex, rowIndex);
     }
 
     @Override
-	public int getParentValue(int nodeIndex, int rowIndex, int colIndex) {
+    public int getParentValue(int nodeIndex, int rowIndex, int colIndex) {
         return getBayesIm().getParentValue(nodeIndex, rowIndex, colIndex);
     }
 
@@ -213,7 +229,7 @@ public final class UpdatedBayesIm implements BayesIm, TetradSerializable {
      * evidence provided in the constuctor.
      */
     @Override
-	public double getProbability(int nodeIndex, int rowIndex, int colIndex) {
+    public double getProbability(int nodeIndex, int rowIndex, int colIndex) {
         if (!affectedVars[nodeIndex]) {
             return getBayesIm().getProbability(nodeIndex, rowIndex, colIndex);
         }
@@ -239,98 +255,98 @@ public final class UpdatedBayesIm implements BayesIm, TetradSerializable {
     }
 
     @Override
-	public int getRowIndex(int nodeIndex, int[] values) {
+    public int getRowIndex(int nodeIndex, int[] values) {
         return getBayesIm().getRowIndex(nodeIndex, values);
     }
 
     @Override
-	public void normalizeAll() {
+    public void normalizeAll() {
         getBayesIm().normalizeAll();
     }
 
     @Override
-	public void normalizeNode(int nodeIndex) {
+    public void normalizeNode(int nodeIndex) {
         getBayesIm().normalizeNode(nodeIndex);
     }
 
     @Override
-	public void normalizeRow(int nodeIndex, int rowIndex) {
+    public void normalizeRow(int nodeIndex, int rowIndex) {
         getBayesIm().normalizeRow(nodeIndex, rowIndex);
     }
 
     @Override
-	public void setProbability(int nodeIndex, int rowIndex, int colIndex,
-            double value) {
+    public void setProbability(int nodeIndex, int rowIndex, int colIndex,
+                               double value) {
         getBayesIm().setProbability(nodeIndex, rowIndex, colIndex, value);
     }
 
     @Override
-	public int getCorrespondingNodeIndex(int nodeIndex, BayesIm otherBayesIm) {
+    public int getCorrespondingNodeIndex(int nodeIndex, BayesIm otherBayesIm) {
         return getBayesIm().getCorrespondingNodeIndex(nodeIndex, otherBayesIm);
     }
 
     @Override
-	public void clearRow(int nodeIndex, int rowIndex) {
+    public void clearRow(int nodeIndex, int rowIndex) {
         getBayesIm().clearRow(nodeIndex, rowIndex);
     }
 
     @Override
-	public void randomizeRow(int nodeIndex, int rowIndex) {
+    public void randomizeRow(int nodeIndex, int rowIndex) {
         getBayesIm().randomizeRow(nodeIndex, rowIndex);
     }
 
     @Override
-	public void randomizeIncompleteRows(int nodeIndex) {
+    public void randomizeIncompleteRows(int nodeIndex) {
         getBayesIm().randomizeIncompleteRows(nodeIndex);
     }
 
     @Override
-	public void randomizeTable(int nodeIndex) {
+    public void randomizeTable(int nodeIndex) {
         getBayesIm().randomizeTable(nodeIndex);
     }
 
     @Override
-	public void clearTable(int nodeIndex) {
+    public void clearTable(int nodeIndex) {
         getBayesIm().clearTable(nodeIndex);
     }
 
     @Override
-	public boolean isIncomplete(int nodeIndex, int rowIndex) {
+    public boolean isIncomplete(int nodeIndex, int rowIndex) {
         return getBayesIm().isIncomplete(nodeIndex, rowIndex);
     }
 
     @Override
-	public boolean isIncomplete(int nodeIndex) {
+    public boolean isIncomplete(int nodeIndex) {
         return getBayesIm().isIncomplete(nodeIndex);
     }
 
     @Override
-	public DataSet simulateData(int sampleSize, boolean latentDataSaved) {
+    public DataSet simulateData(int sampleSize, boolean latentDataSaved) {
         return getBayesIm().simulateData(sampleSize, latentDataSaved);
     }
 
     @Override
-	public DataSet simulateData(DataSet dataSet, boolean latentDataSaved) {
+    public DataSet simulateData(DataSet dataSet, boolean latentDataSaved) {
         throw new UnsupportedOperationException();
     }
 
     @Override
-	public List<Node> getVariables() {
+    public List <Node> getVariables() {
         return getBayesIm().getVariables();
     }
 
     @Override
-	public List<String> getVariableNames() {
+    public List <String> getVariableNames() {
         return getBayesIm().getVariableNames();
     }
 
     @Override
-	public List<Node> getMeasuredNodes() {
+    public List <Node> getMeasuredNodes() {
         throw new UnsupportedOperationException();
     }
 
     @Override
-	public boolean equals(Object o) {
+    public boolean equals(Object o) {
         if (o == this) {
             return true;
         }
@@ -383,7 +399,7 @@ public final class UpdatedBayesIm implements BayesIm, TetradSerializable {
      * Prints out the probability table for each variable.
      */
     @Override
-	public String toString() {
+    public String toString() {
         StringBuilder buf = new StringBuilder();
         NumberFormat nf = NumberFormatUtil.getInstance().getNumberFormat();
 
@@ -423,15 +439,15 @@ public final class UpdatedBayesIm implements BayesIm, TetradSerializable {
      * evidence provided.
      */
     private boolean[] ancestorsOfEvidence(Evidence evidence) {
-        List<Node> variablesInEvidence = evidence.getVariablesInEvidence();
-        List<Node> nodesInEvidence = new LinkedList<Node>();
+        List <Node> variablesInEvidence = evidence.getVariablesInEvidence();
+        List <Node> nodesInEvidence = new LinkedList <Node>();
 
         for (Node _node : variablesInEvidence) {
             String nodeName = _node.getName();
             nodesInEvidence.add(bayesIm.getBayesPm().getNode(nodeName));
         }
 
-        List<Node> nodesInGraph = getBayesIm().getDag().getNodes();
+        List <Node> nodesInGraph = getBayesIm().getDag().getNodes();
         boolean[] ancestorsOfEvidence = new boolean[getBayesIm().getNumNodes()];
 
         for (int i = 0; i < nodesInGraph.size(); i++) {
@@ -469,14 +485,13 @@ public final class UpdatedBayesIm implements BayesIm, TetradSerializable {
 
         if (condition.existsCombination()) {
             return getConditionalProb(assertion, condition, relevantVars);
-        }
-        else {
+        } else {
             return Double.NaN;
         }
     }
 
     private double getConditionalProb(Proposition assertion,
-            Proposition condition, boolean[] relevantVars) {
+                                      Proposition condition, boolean[] relevantVars) {
         if (assertion.getVariableSource() != condition.getVariableSource()) {
             throw new IllegalArgumentException(
                     "Assertion and condition must be " +
@@ -519,8 +534,7 @@ public final class UpdatedBayesIm implements BayesIm, TetradSerializable {
                     if (!Double.isNaN(cellProb)) {
                         conditionTrue += cellProb;
 
-                        if (assertion.isPermissibleCombination(variableValues))
-                        {
+                        if (assertion.isPermissibleCombination(variableValues)) {
                             assertionTrue += cellProb;
                         }
                     }
@@ -533,23 +547,6 @@ public final class UpdatedBayesIm implements BayesIm, TetradSerializable {
         }
 
         return assertionTrue / conditionTrue;
-    }
-
-    private static boolean hasNextValue(Proposition proposition, int variable,
-            int curIndex) {
-        return nextValue(proposition, variable, curIndex) != -1;
-    }
-
-    private static int nextValue(Proposition proposition, int variable,
-            int curIndex) {
-        for (int i = curIndex + 1;
-                i < proposition.getNumCategories(variable); i++) {
-            if (proposition.isAllowed(variable, i)) {
-                return i;
-            }
-        }
-
-        return -1;
     }
 
     /**
@@ -565,7 +562,7 @@ public final class UpdatedBayesIm implements BayesIm, TetradSerializable {
             int[] parents = getBayesIm().getParents(node);
             int[] parentValues = new int[parents.length];
             for (int parentIndex = 0;
-                    parentIndex < parentValues.length; parentIndex++) {
+                 parentIndex < parentValues.length; parentIndex++) {
                 parentValues[parentIndex] =
                         variableValues[parents[parentIndex]];
             }
@@ -593,16 +590,16 @@ public final class UpdatedBayesIm implements BayesIm, TetradSerializable {
 
         Node node = bayesIm.getNode(nodeIndex);
 
-        List<Node> variablesInEvidence = evidence.getVariablesInEvidence();
+        List <Node> variablesInEvidence = evidence.getVariablesInEvidence();
 
-        List<Node> nodesInEvidence = new LinkedList<Node>();
+        List <Node> nodesInEvidence = new LinkedList <Node>();
 
         for (Node _node : variablesInEvidence) {
             nodesInEvidence.add(bayesIm.getBayesPm().getNode(_node.getName()));
         }
 
-        List<Node> conditionedNodes =
-                new LinkedList<Node>(nodesInEvidence);
+        List <Node> conditionedNodes =
+                new LinkedList <Node>(nodesInEvidence);
         conditionedNodes.addAll(bayesIm.getDag().getParents(node));
 
         for (int i = 0; i < bayesIm.getNumNodes(); i++) {

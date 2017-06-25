@@ -44,7 +44,7 @@ import java.util.Map;
  */
 public class FmlSearch {
     private DataSet data;
-    private List<Node> nodes;
+    private List <Node> nodes;
     private double alpha;
     private int maxEdges;
     private Dag trueDag;
@@ -77,8 +77,8 @@ public class FmlSearch {
         this.trueIm = trueIm;
     }
 
-    public List<Graph> search() {
-        List<Graph> currentPatterns = new ArrayList<Graph>();
+    public List <Graph> search() {
+        List <Graph> currentPatterns = new ArrayList <Graph>();
         currentPatterns.add(new EdgeListGraph(nodes));
 
         while (true) {
@@ -86,12 +86,12 @@ public class FmlSearch {
             // Among all of the current patterns, find the pattern + edge
             // combinations that result in the minimal FML scores for those
             // combinations.
-            List<Map<Edge, Double>> edgeFmls = new ArrayList<Map<Edge, Double>>();
+            List <Map <Edge, Double>> edgeFmls = new ArrayList <Map <Edge, Double>>();
 
             for (Graph pattern : currentPatterns) {
                 Graph dag = SearchGraphUtils.dagFromPattern(pattern);
 
-                Map<Edge, Double> _edgeFmls = new LinkedHashMap<Edge, Double>();
+                Map <Edge, Double> _edgeFmls = new LinkedHashMap <Edge, Double>();
                 edgeFmls.add(_edgeFmls);
 
                 for (int i = 0; i < nodes.size(); i++) {
@@ -122,7 +122,7 @@ public class FmlSearch {
 
             double minFml = Double.POSITIVE_INFINITY;
 
-            for (Map<Edge, Double> _edgeFmls : edgeFmls) {
+            for (Map <Edge, Double> _edgeFmls : edgeFmls) {
                 for (Edge edge : _edgeFmls.keySet()) {
                     if (_edgeFmls.get(edge) < minFml) {
                         minFml = _edgeFmls.get(edge);
@@ -132,7 +132,7 @@ public class FmlSearch {
 
             System.out.println("Min fml = " + minFml);
 
-            for (Map<Edge, Double> _edgeFmls : edgeFmls) {
+            for (Map <Edge, Double> _edgeFmls : edgeFmls) {
                 for (Edge edge : _edgeFmls.keySet()) {
                     if (_edgeFmls.get(edge) >= minFml && _edgeFmls.get(edge) < 1.1 * minFml) {
                         System.out.println("Nearby: " + edge + " FML = " + _edgeFmls.get(edge));
@@ -140,8 +140,8 @@ public class FmlSearch {
                 }
             }
 
-            for (Map<Edge, Double> _edgeFmls : edgeFmls) {
-                Map<Edge, Double> copy = new LinkedHashMap<Edge, Double>(_edgeFmls);
+            for (Map <Edge, Double> _edgeFmls : edgeFmls) {
+                Map <Edge, Double> copy = new LinkedHashMap <Edge, Double>(_edgeFmls);
 
                 for (Edge edge : copy.keySet()) {
                     if (_edgeFmls.get(edge) > minFml) {
@@ -153,11 +153,11 @@ public class FmlSearch {
             // Collect up all the distinct patterns that result from adding
             // the edges to DAGs from previous patterns that result in
             // the minimal FML score.
-            List<Graph> newCurrentPatterns = new ArrayList<Graph>();
+            List <Graph> newCurrentPatterns = new ArrayList <Graph>();
 
             for (int i = 0; i < edgeFmls.size(); i++) {
                 Graph pattern = currentPatterns.get(i);
-                Map<Edge, Double> _edgeFmls = edgeFmls.get(i);
+                Map <Edge, Double> _edgeFmls = edgeFmls.get(i);
                 Graph graph = SearchGraphUtils.dagFromPattern(pattern);
 
                 for (Edge edge : _edgeFmls.keySet()) {
@@ -181,7 +181,7 @@ public class FmlSearch {
 
             // Find a best DAG in each putative patterns and base a revised
             // pattern on that.
-            List<Graph> newCurrentPatternsRevised = new ArrayList<Graph>();
+            List <Graph> newCurrentPatternsRevised = new ArrayList <Graph>();
 
             for (int i = 0; i < newCurrentPatterns.size(); i++) {
                 Graph pattern = newCurrentPatterns.get(i);
@@ -208,7 +208,7 @@ public class FmlSearch {
             System.out.println("New current Patterns = " + currentPatterns);
 
             if (currentPatterns.isEmpty()) {
-                return new ArrayList<Graph>();
+                return new ArrayList <Graph>();
             }
 
             // If at this point the patterns are significant (all DAGs in
@@ -221,7 +221,7 @@ public class FmlSearch {
             if (pValue > alpha) {
                 System.out.println("P value of found models = " + pValue);
 
-                List<Graph> trimmedPatterns = new ArrayList<Graph>();
+                List <Graph> trimmedPatterns = new ArrayList <Graph>();
 
                 for (Graph pattern : currentPatterns) {
                     trimmedPatterns.add(trimPattern(pattern));
@@ -281,7 +281,7 @@ public class FmlSearch {
         return estimatedSem.getPValue();
     }
 
-    public Graph convertToPattern(List<Dag> dags) {
+    public Graph convertToPattern(List <Dag> dags) {
         if (dags == null || dags.isEmpty()) {
             return null;
         }

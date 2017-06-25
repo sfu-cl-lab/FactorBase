@@ -44,17 +44,6 @@ public class TestSemEvidence extends TestCase {
         super(name);
     }
 
-    public void testSemEvidence() {
-        Graph graph = constructGraph1();
-        SemPm semPm = new SemPm(graph);
-        SemIm semIm = new SemIm(semPm);
-        SemEvidence evidence = new SemEvidence(semIm);
-
-        evidence.setManipulated(1, true);
-        assertTrue(evidence.isManipulated(1));
-        System.out.println(evidence);
-    }
-
     /**
      * This method uses reflection to collect up all of the test methods from
      * this class and return them to the test runner.
@@ -64,6 +53,17 @@ public class TestSemEvidence extends TestCase {
         // Edit the name of the class in the parens to match the name
         // of this class.
         return new TestSuite(TestSemEvidence.class);
+    }
+
+    public void testSemEvidence() {
+        Graph graph = constructGraph1();
+        SemPm semPm = new SemPm(graph);
+        SemIm semIm = new SemIm(semPm);
+        SemEvidence evidence = new SemEvidence(semIm);
+
+        evidence.setManipulated(1, true);
+        assertTrue(evidence.isManipulated(1));
+        System.out.println(evidence);
     }
 
     private Graph constructGraph1() {

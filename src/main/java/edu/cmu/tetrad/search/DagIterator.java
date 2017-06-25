@@ -37,7 +37,7 @@ public class DagIterator {
      * The stack of graphs, with annotations as to the arbitrary undirected edges chosen in them and whether or not
      * these edges have already been oriented left and/or right.
      */
-    private LinkedList<DecoratedGraph> decoratedGraphs = new LinkedList<DecoratedGraph>();
+    private LinkedList <DecoratedGraph> decoratedGraphs = new LinkedList <DecoratedGraph>();
     private Graph storedDag;
 
     /**
@@ -244,7 +244,7 @@ public class DagIterator {
         }
 
         @Override
-		public String toString() {
+        public String toString() {
             return graph.toString();
         }
     }

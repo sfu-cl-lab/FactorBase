@@ -46,7 +46,7 @@ public interface Variable extends Node, TetradSerializable {
      * Returns the missing value marker as an Object.
      *
      * @return the missing value marker as an object--i.e. a double if
-     *         continuous, an Integer if discrete, etc.
+     * continuous, an Integer if discrete, etc.
      */
     Object getMissingValueMarker();
 

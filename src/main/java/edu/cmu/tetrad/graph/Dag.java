@@ -25,7 +25,6 @@ import java.beans.PropertyChangeListener;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.PrintStream;
-import java.util.*;
 
 /**
  * Represents a directed acyclic graph--that is, a graph containing only
@@ -63,12 +62,12 @@ public final class Dag implements Graph /*, KnowledgeTransferable*/ {
     /**
      * New edges that need to be added to the dpath matrix.
      */
-    private transient LinkedList<Edge> dpathNewEdges = new LinkedList<Edge>();
+    private transient LinkedList <Edge> dpathNewEdges = new LinkedList <Edge>();
 
     /**
      * The order of nodes used for dpath.
      */
-    private transient List<Node> dpathNodes;
+    private transient List <Node> dpathNodes;
 
     //===============================CONSTRUCTORS=======================//
 
@@ -79,18 +78,18 @@ public final class Dag implements Graph /*, KnowledgeTransferable*/ {
 //    	this.knowledge = new Knowledge();
         this.graph = new EdgeListGraph();
         setGraphConstraintsChecked(true);
-        List<GraphConstraint> constraints1 = Arrays.asList(constraints);
+        List <GraphConstraint> constraints1 = Arrays.asList(constraints);
 
         for (GraphConstraint aConstraints1 : constraints1) {
             addGraphConstraint(aConstraints1);
         }
     }
 
-    public Dag(List<Node> nodes) {
+    public Dag(List <Node> nodes) {
 //    	this.knowledge = new Knowledge();
         this.graph = new EdgeListGraph(nodes);
         setGraphConstraintsChecked(true);
-        List<GraphConstraint> constraints1 = Arrays.asList(constraints);
+        List <GraphConstraint> constraints1 = Arrays.asList(constraints);
 
         for (GraphConstraint aConstraints1 : constraints1) {
             addGraphConstraint(aConstraints1);
@@ -106,16 +105,16 @@ public final class Dag implements Graph /*, KnowledgeTransferable*/ {
      */
     public Dag(Graph graph) throws IllegalArgumentException {
         this.graph = new EdgeListGraph();
-       // System.out.println("Here is Dag(Graph graph)");
-        List<GraphConstraint> constraints1 = Arrays.asList(constraints);
+        // System.out.println("Here is Dag(Graph graph)");
+        List <GraphConstraint> constraints1 = Arrays.asList(constraints);
 
         for (GraphConstraint aConstraints1 : constraints1) {
             addGraphConstraint(aConstraints1);
         }
-       // System.out.println("Here is Dag(Graph graph)/transferNodesAndEdges(graph);");
+        // System.out.println("Here is Dag(Graph graph)/transferNodesAndEdges(graph);");
         //OCT 30
         transferNodesAndEdges(graph);
-       // System.out.println("resetDPath();");
+        // System.out.println("resetDPath();");
         resetDPath();
 
         for (Edge edge : graph.getEdges()) {
@@ -123,7 +122,7 @@ public final class Dag implements Graph /*, KnowledgeTransferable*/ {
                 setHighlighted(edge, true);
             }
         }
-      //  System.out.println("Leaving  Dag(Graph graph)");
+        //  System.out.println("Leaving  Dag(Graph graph)");
     }
 
     /**
@@ -141,13 +140,22 @@ public final class Dag implements Graph /*, KnowledgeTransferable*/ {
 
     //===============================PUBLIC METHODS======================//
 
+    public static boolean isDag(Graph graph) {
+        try {
+            new Dag(graph);
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
     @Override
-	public boolean addBidirectedEdge(Node node1, Node node2) {
+    public boolean addBidirectedEdge(Node node1, Node node2) {
         throw new UnsupportedOperationException();
     }
 
     @Override
-	public boolean addEdge(Edge edge) {
+    public boolean addEdge(Edge edge) {
         reconstituteDpath();
         Node _node1 = Edges.getDirectedEdgeTail(edge);
         Node _node2 = Edges.getDirectedEdgeHead(edge);
@@ -169,23 +177,23 @@ public final class Dag implements Graph /*, KnowledgeTransferable*/ {
     }
 
     @Override
-	public boolean addDirectedEdge(Node node1, Node node2) {
+    public boolean addDirectedEdge(Node node1, Node node2) {
         return addEdge(Edges.directedEdge(node1, node2));
     }
 
     @Override
-	public boolean addGraphConstraint(GraphConstraint gc) {
-    	 //System.out.println("addGraphConstraint(GraphConstraint gc)");
+    public boolean addGraphConstraint(GraphConstraint gc) {
+        //System.out.println("addGraphConstraint(GraphConstraint gc)");
         return getGraph().addGraphConstraint(gc);
     }
 
     @Override
-	public boolean addPartiallyOrientedEdge(Node node1, Node node2) {
+    public boolean addPartiallyOrientedEdge(Node node1, Node node2) {
         throw new UnsupportedOperationException();
     }
 
     @Override
-	public boolean addNode(Node node) {
+    public boolean addNode(Node node) {
         boolean added = getGraph().addNode(node);
 
         if (added) {
@@ -196,72 +204,72 @@ public final class Dag implements Graph /*, KnowledgeTransferable*/ {
     }
 
     @Override
-	public void addPropertyChangeListener(PropertyChangeListener l) {
+    public void addPropertyChangeListener(PropertyChangeListener l) {
         getGraph().addPropertyChangeListener(l);
     }
 
     @Override
-	public boolean addUndirectedEdge(Node node1, Node node2) {
+    public boolean addUndirectedEdge(Node node1, Node node2) {
         throw new UnsupportedOperationException();
     }
 
     @Override
-	public boolean addNondirectedEdge(Node node1, Node node2) {
+    public boolean addNondirectedEdge(Node node1, Node node2) {
         throw new UnsupportedOperationException();
     }
 
     @Override
-	public void clear() {
+    public void clear() {
         getGraph().clear();
     }
 
     @Override
-	public boolean containsEdge(Edge edge) {
+    public boolean containsEdge(Edge edge) {
         return getGraph().containsEdge(edge);
     }
 
     @Override
-	public boolean containsNode(Node node) {
+    public boolean containsNode(Node node) {
         return getGraph().containsNode(node);
     }
 
     @Override
-	public boolean defNonDescendent(Node node1, Node node2) {
+    public boolean defNonDescendent(Node node1, Node node2) {
         return getGraph().defNonDescendent(node1, node2);
     }
 
     @Override
-	public boolean existsDirectedCycle() {
+    public boolean existsDirectedCycle() {
         return false;
     }
 
     @Override
-	public boolean defVisible(Edge edge) {
+    public boolean defVisible(Edge edge) {
         return getGraph().defVisible(edge);
     }
 
     @Override
-	public boolean isDefNoncollider(Node node1, Node node2, Node node3) {
+    public boolean isDefNoncollider(Node node1, Node node2, Node node3) {
         return getGraph().isDefNoncollider(node1, node2, node3);
     }
 
     @Override
-	public boolean isDefCollider(Node node1, Node node2, Node node3) {
+    public boolean isDefCollider(Node node1, Node node2, Node node3) {
         return getGraph().isDefCollider(node1, node2, node3);
     }
 
     @Override
-	public boolean existsTrek(Node node1, Node node2) {
+    public boolean existsTrek(Node node1, Node node2) {
         return getGraph().existsTrek(node1, node2);
     }
 
     @Override
-	public boolean equals(Object o) {
+    public boolean equals(Object o) {
         return getGraph().equals(o);
     }
 
     @Override
-	public boolean existsDirectedPathFromTo(Node node1, Node node2) {
+    public boolean existsDirectedPathFromTo(Node node1, Node node2) {
         resetDPath();
         reconstituteDpath();
 
@@ -279,96 +287,95 @@ public final class Dag implements Graph /*, KnowledgeTransferable*/ {
     }
 
     @Override
-	public boolean existsUndirectedPathFromTo(Node node1, Node node2) {
+    public boolean existsUndirectedPathFromTo(Node node1, Node node2) {
         return false;
     }
 
-
     @Override
-	public boolean existsSemiDirectedPathFromTo(Node node1, Set<Node> nodes) {
+    public boolean existsSemiDirectedPathFromTo(Node node1, Set <Node> nodes) {
         return getGraph().existsSemiDirectedPathFromTo(node1, nodes);
     }
 
     @Override
-	public boolean existsInducingPath(Node node1, Node node2,
-            Set<Node> observedNodes, Set<Node> conditioningNodes) {
+    public boolean existsInducingPath(Node node1, Node node2,
+                                      Set <Node> observedNodes, Set <Node> conditioningNodes) {
         return getGraph().existsInducingPath(node1, node2, observedNodes,
                 conditioningNodes);
     }
 
     @Override
-	public void fullyConnect(Endpoint endpoint) {
+    public void fullyConnect(Endpoint endpoint) {
         throw new UnsupportedOperationException();
         //graph.fullyConnect(endpoint);
     }
 
     @Override
-	public Endpoint getEndpoint(Node node1, Node node2) {
+    public Endpoint getEndpoint(Node node1, Node node2) {
         return getGraph().getEndpoint(node1, node2);
     }
 
     @Override
-	public Endpoint[][] getEndpointMatrix() {
+    public Endpoint[][] getEndpointMatrix() {
         return getGraph().getEndpointMatrix();
     }
 
     @Override
-	public List<Node> getAdjacentNodes(Node node) {
+    public List <Node> getAdjacentNodes(Node node) {
         return getGraph().getAdjacentNodes(node);
     }
 
     @Override
-	public List<Node> getNodesInTo(Node node, Endpoint endpoint) {
+    public List <Node> getNodesInTo(Node node, Endpoint endpoint) {
         return getGraph().getNodesInTo(node, endpoint);
     }
 
     @Override
-	public List<Node> getNodesOutTo(Node node, Endpoint n) {
+    public List <Node> getNodesOutTo(Node node, Endpoint n) {
         return getGraph().getNodesOutTo(node, n);
     }
 
     @Override
-	public List<Node> getNodes() {
+    public List <Node> getNodes() {
         return getGraph().getNodes();
     }
 
     @Override
-	public List<Edge> getEdges() {
+    public List <Edge> getEdges() {
         return getGraph().getEdges();
     }
 
     @Override
-	public List<Edge> getEdges(Node node) {
+    public List <Edge> getEdges(Node node) {
         return getGraph().getEdges(node);
     }
 
     @Override
-	public List<Edge> getEdges(Node node1, Node node2) {
+    public List <Edge> getEdges(Node node1, Node node2) {
         return getGraph().getEdges(node1, node2);
     }
 
     @Override
-	public Node getNode(String name) {
+    public Node getNode(String name) {
         return getGraph().getNode(name);
     }
 
     @Override
-	public int getNumEdges() {
+    public int getNumEdges() {
         return getGraph().getNumEdges();
     }
 
     @Override
-	public int getNumNodes() {
+    public int getNumNodes() {
         return getGraph().getNumNodes();
     }
 
     @Override
-	public int getNumEdges(Node node) {
+    public int getNumEdges(Node node) {
         return getGraph().getNumEdges(node);
     }
 
     @Override
-	public List<GraphConstraint> getGraphConstraints() {
+    public List <GraphConstraint> getGraphConstraints() {
         return getGraph().getGraphConstraints();
     }
 
@@ -380,10 +387,10 @@ public final class Dag implements Graph /*, KnowledgeTransferable*/ {
      * @return the tiers of this digraph.
      * @see #printTiers
      */
-    public List<List<Node>> getTiers() {
-        Set<Node> found = new HashSet<Node>();
-        Set<Node> notFound = new HashSet<Node>();
-        List<List<Node>> tiers = new LinkedList<List<Node>>();
+    public List <List <Node>> getTiers() {
+        Set <Node> found = new HashSet <Node>();
+        Set <Node> notFound = new HashSet <Node>();
+        List <List <Node>> tiers = new LinkedList <List <Node>>();
 
         // first copy all the nodes into 'notFound'.
         for (Node node1 : getNodes()) {
@@ -394,7 +401,7 @@ public final class Dag implements Graph /*, KnowledgeTransferable*/ {
         // has all of its parents already in 'found', then add it to the
         // current tier.
         while (!notFound.isEmpty()) {
-            List<Node> thisTier = new LinkedList<Node>();
+            List <Node> thisTier = new LinkedList <Node>();
 
             for (Node node : notFound) {
                 if (found.containsAll(getParents(node))) {
@@ -414,42 +421,42 @@ public final class Dag implements Graph /*, KnowledgeTransferable*/ {
     }
 
     @Override
-	public List<Node> getChildren(Node node) {
+    public List <Node> getChildren(Node node) {
         return getGraph().getChildren(node);
     }
 
     @Override
-	public int getConnectivity() {
+    public int getConnectivity() {
         return getGraph().getConnectivity();
     }
 
     @Override
-	public List<Node> getDescendants(List<Node> nodes) {
+    public List <Node> getDescendants(List <Node> nodes) {
         return getGraph().getDescendants(nodes);
     }
 
     @Override
-	public Edge getEdge(Node node1, Node node2) {
+    public Edge getEdge(Node node1, Node node2) {
         return getGraph().getEdge(node1, node2);
     }
 
     @Override
-	public Edge getDirectedEdge(Node node1, Node node2) {
+    public Edge getDirectedEdge(Node node1, Node node2) {
         return getGraph().getDirectedEdge(node1, node2);
     }
 
     @Override
-	public List<Node> getParents(Node node) {
+    public List <Node> getParents(Node node) {
         return getGraph().getParents(node);
     }
 
     @Override
-	public int getIndegree(Node node) {
+    public int getIndegree(Node node) {
         return getGraph().getIndegree(node);
     }
 
     @Override
-	public int getOutdegree(Node node) {
+    public int getOutdegree(Node node) {
         return getGraph().getOutdegree(node);
     }
 
@@ -462,16 +469,16 @@ public final class Dag implements Graph /*, KnowledgeTransferable*/ {
      * @see #printTierOrdering
      */
     @Override
-	public List<Node> getTierOrdering() {
-        List<Node> found = new LinkedList<Node>();
-        Set<Node> notFound = new LinkedHashSet<Node>();
+    public List <Node> getTierOrdering() {
+        List <Node> found = new LinkedList <Node>();
+        Set <Node> notFound = new LinkedHashSet <Node>();
 
         for (Node node1 : getNodes()) {
             notFound.add(node1);
         }
 
         while (!notFound.isEmpty()) {
-            for (Iterator<Node> it = notFound.iterator(); it.hasNext();) {
+            for (Iterator <Node> it = notFound.iterator(); it.hasNext(); ) {
                 Node node = it.next();
 
                 if (found.containsAll(getParents(node))) {
@@ -485,95 +492,100 @@ public final class Dag implements Graph /*, KnowledgeTransferable*/ {
     }
 
     @Override
-	public void setHighlighted(Edge edge, boolean highlighted) {
+    public void setHighlighted(Edge edge, boolean highlighted) {
         getGraph().setHighlighted(edge, highlighted);
     }
 
     @Override
-	public boolean isHighlighted(Edge edge) {
+    public boolean isHighlighted(Edge edge) {
         return getGraph().isHighlighted(edge);
     }
 
     @Override
-	public boolean isParameterizable(Node node) {
+    public boolean isParameterizable(Node node) {
         return getGraph().isParameterizable(node);
     }
 
     @Override
-	public boolean isTimeLagModel() {
+    public boolean isTimeLagModel() {
         return getGraph().isTimeLagModel();
     }
 
     @Override
-	public TimeLagGraph getTimeLagGraph() {
+    public TimeLagGraph getTimeLagGraph() {
         return getGraph().getTimeLagGraph();
     }
 
     @Override
-	public boolean isAdjacentTo(Node nodeX, Node nodeY) {
+    public boolean isAdjacentTo(Node nodeX, Node nodeY) {
         return getGraph().isAdjacentTo(nodeX, nodeY);
     }
 
     @Override
-	public boolean isAncestorOf(Node node1, Node node2) {
+    public boolean isAncestorOf(Node node1, Node node2) {
         return (node1 == node2) || isProperAncestorOf(node1, node2);
         //return graph.isAncestorOf(node1, node2);
     }
 
     @Override
-	public boolean isDirectedFromTo(Node node1, Node node2) {
+    public boolean isDirectedFromTo(Node node1, Node node2) {
         return getGraph().isDirectedFromTo(node1, node2);
     }
 
     @Override
-	public boolean isUndirectedFromTo(Node node1, Node node2) {
+    public boolean isUndirectedFromTo(Node node1, Node node2) {
         return false;
     }
 
     @Override
-	public boolean isGraphConstraintsChecked() {
+    public boolean isGraphConstraintsChecked() {
         return getGraph().isGraphConstraintsChecked();
     }
 
     @Override
-	public boolean isParentOf(Node node1, Node node2) {
+    public void setGraphConstraintsChecked(boolean checked) {
+        getGraph().setGraphConstraintsChecked(checked);
+    }
+
+    @Override
+    public boolean isParentOf(Node node1, Node node2) {
         return getGraph().isParentOf(node1, node2);
     }
 
     @Override
-	public boolean isProperAncestorOf(Node node1, Node node2) {
+    public boolean isProperAncestorOf(Node node1, Node node2) {
         return existsDirectedPathFromTo(node1, node2);
         //return graph.isProperAncestorOf(node1, node2);
     }
 
     @Override
-	public boolean isProperDescendentOf(Node node1, Node node2) {
+    public boolean isProperDescendentOf(Node node1, Node node2) {
         return existsDirectedPathFromTo(node2, node1);
     }
 
     @Override
-	public boolean isExogenous(Node node) {
+    public boolean isExogenous(Node node) {
         return getGraph().isExogenous(node);
     }
 
     @Override
-	public boolean isDConnectedTo(Node node1, Node node2,
-            List<Node> conditioningNodes) {
+    public boolean isDConnectedTo(Node node1, Node node2,
+                                  List <Node> conditioningNodes) {
         return getGraph().isDConnectedTo(node1, node2, conditioningNodes);
     }
 
     @Override
-	public boolean isDSeparatedFrom(Node node1, Node node2, List<Node> z) {
+    public boolean isDSeparatedFrom(Node node1, Node node2, List <Node> z) {
         return getGraph().isDSeparatedFrom(node1, node2, z);
     }
 
     @Override
-	public boolean isChildOf(Node node1, Node node2) {
+    public boolean isChildOf(Node node1, Node node2) {
         return getGraph().isChildOf(node1, node2);
     }
 
     @Override
-	public boolean isDescendentOf(Node node1, Node node2) {
+    public boolean isDescendentOf(Node node1, Node node2) {
         return (node1 == node2) || isProperDescendentOf(node1, node2);
         //return graph.isDescendentOf(node1, node2);
     }
@@ -586,11 +598,11 @@ public final class Dag implements Graph /*, KnowledgeTransferable*/ {
      */
     public void printTiers(PrintStream out) {
 
-        List<List<Node>> tiers = getTiers();
+        List <List <Node>> tiers = getTiers();
 
         System.out.println();
 
-        for (List<Node> thisTier : tiers) {
+        for (List <Node> thisTier : tiers) {
             for (Node thisNode : thisTier) {
                 out.print(thisNode + "\t");
             }
@@ -608,7 +620,7 @@ public final class Dag implements Graph /*, KnowledgeTransferable*/ {
      * @see #getTierOrdering
      */
     public void printTierOrdering() {
-        List<Node> v = getTierOrdering();
+        List <Node> v = getTierOrdering();
 
         System.out.println();
 
@@ -620,7 +632,7 @@ public final class Dag implements Graph /*, KnowledgeTransferable*/ {
     }
 
     @Override
-	public boolean removeEdge(Node node1, Node node2) {
+    public boolean removeEdge(Node node1, Node node2) {
         boolean removed = getGraph().removeEdge(node1, node2);
 
         if (removed) {
@@ -631,7 +643,7 @@ public final class Dag implements Graph /*, KnowledgeTransferable*/ {
     }
 
     @Override
-	public boolean removeEdges(Node node1, Node node2) {
+    public boolean removeEdges(Node node1, Node node2) {
         boolean removed = getGraph().removeEdges(node1, node2);
 
         if (removed) {
@@ -642,7 +654,7 @@ public final class Dag implements Graph /*, KnowledgeTransferable*/ {
     }
 
     @Override
-	public boolean setEndpoint(Node node1, Node node2, Endpoint endpoint) {
+    public boolean setEndpoint(Node node1, Node node2, Endpoint endpoint) {
         boolean ret = getGraph().setEndpoint(node1, node2, endpoint);
 
         resetDPath();
@@ -651,24 +663,19 @@ public final class Dag implements Graph /*, KnowledgeTransferable*/ {
     }
 
     @Override
-	public Graph subgraph(List<Node> nodes) {
+    public Graph subgraph(List <Node> nodes) {
         return getGraph().subgraph(nodes);
     }
 
     @Override
-	public void setGraphConstraintsChecked(boolean checked) {
-        getGraph().setGraphConstraintsChecked(checked);
-    }
-
-    @Override
-	public boolean removeEdge(Edge edge) {
+    public boolean removeEdge(Edge edge) {
         boolean removed = getGraph().removeEdge(edge);
         resetDPath();
         return removed;
     }
 
     @Override
-	public boolean removeEdges(List<Edge> edges) {
+    public boolean removeEdges(List <Edge> edges) {
         boolean change = false;
 
         for (Edge edge : edges) {
@@ -682,7 +689,7 @@ public final class Dag implements Graph /*, KnowledgeTransferable*/ {
     }
 
     @Override
-	public boolean removeNode(Node node) {
+    public boolean removeNode(Node node) {
         boolean removed = getGraph().removeNode(node);
 
         if (removed) {
@@ -693,28 +700,28 @@ public final class Dag implements Graph /*, KnowledgeTransferable*/ {
     }
 
     @Override
-	public boolean removeNodes(List<Node> nodes) {
+    public boolean removeNodes(List <Node> nodes) {
         return getGraph().removeNodes(nodes);
     }
 
     @Override
-	public void reorientAllWith(Endpoint endpoint) {
+    public void reorientAllWith(Endpoint endpoint) {
         throw new UnsupportedOperationException();
         //graph.reorientAllWith(endpoint);
     }
 
     @Override
-	public boolean possibleAncestor(Node node1, Node node2) {
+    public boolean possibleAncestor(Node node1, Node node2) {
         return getGraph().possibleAncestor(node1, node2);
     }
 
     @Override
-	public List<Node> getAncestors(List<Node> nodes) {
+    public List <Node> getAncestors(List <Node> nodes) {
         return getGraph().getAncestors(nodes);
     }
 
     @Override
-	public boolean possDConnectedTo(Node node1, Node node2, List<Node> z) {
+    public boolean possDConnectedTo(Node node1, Node node2, List <Node> z) {
         return getGraph().possDConnectedTo(node1, node2, z);
     }
 
@@ -752,33 +759,36 @@ public final class Dag implements Graph /*, KnowledgeTransferable*/ {
     }
 
     @Override
-	public final void transferNodesAndEdges(Graph graph)
+    public final void transferNodesAndEdges(Graph graph)
             throws IllegalArgumentException {
         this.getGraph().transferNodesAndEdges(graph);
     }
 
-
     @Override
-	public Set<Triple> getAmbiguousTriples() {
+    public Set <Triple> getAmbiguousTriples() {
         return getGraph().getAmbiguousTriples();
     }
 
     @Override
-	public Set<Triple> getUnderLines() {
+    public void setAmbiguousTriples(Set <Triple> triples) {
+        getGraph().setAmbiguousTriples(triples);
+    }
+
+    @Override
+    public Set <Triple> getUnderLines() {
         return getGraph().getUnderLines();
     }
 
     @Override
-	public Set<Triple> getDottedUnderlines() {
+    public Set <Triple> getDottedUnderlines() {
         return getGraph().getDottedUnderlines();
     }
-
 
     /**
      * States whether x-y-x is an underline triple or not.
      */
     @Override
-	public boolean isAmbiguousTriple(Node x, Node y, Node z) {
+    public boolean isAmbiguousTriple(Node x, Node y, Node z) {
         return getGraph().isAmbiguousTriple(x, y, z);
     }
 
@@ -786,7 +796,7 @@ public final class Dag implements Graph /*, KnowledgeTransferable*/ {
      * States whether x-y-x is an underline triple or not.
      */
     @Override
-	public boolean isUnderlineTriple(Node x, Node y, Node z) {
+    public boolean isUnderlineTriple(Node x, Node y, Node z) {
         return getGraph().isUnderlineTriple(x, y, z);
     }
 
@@ -794,70 +804,63 @@ public final class Dag implements Graph /*, KnowledgeTransferable*/ {
      * States whether x-y-x is an underline triple or not.
      */
     @Override
-	public boolean isDottedUnderlineTriple(Node x, Node y, Node z) {
+    public boolean isDottedUnderlineTriple(Node x, Node y, Node z) {
         return getGraph().isDottedUnderlineTriple(x, y, z);
     }
 
     @Override
-	public void addAmbiguousTriple(Node x, Node y, Node z) {
+    public void addAmbiguousTriple(Node x, Node y, Node z) {
         getGraph().addAmbiguousTriple(x, y, z);
     }
 
     @Override
-	public void addUnderlineTriple(Node x, Node y, Node z) {
+    public void addUnderlineTriple(Node x, Node y, Node z) {
         getGraph().addUnderlineTriple(x, y, z);
     }
 
     @Override
-	public void addDottedUnderlineTriple(Node x, Node y, Node z) {
+    public void addDottedUnderlineTriple(Node x, Node y, Node z) {
         getGraph().addDottedUnderlineTriple(x, y, z);
     }
 
     @Override
-	public void removeAmbiguousTriple(Node x, Node y, Node z) {
+    public void removeAmbiguousTriple(Node x, Node y, Node z) {
         getGraph().removeAmbiguousTriple(x, y, z);
     }
 
     @Override
-	public void removeUnderlineTriple(Node x, Node y, Node z) {
+    public void removeUnderlineTriple(Node x, Node y, Node z) {
         getGraph().removeUnderlineTriple(x, y, z);
     }
 
     @Override
-	public void removeDottedUnderlineTriple(Node x, Node y, Node z) {
+    public void removeDottedUnderlineTriple(Node x, Node y, Node z) {
         getGraph().removeDottedUnderlineTriple(x, y, z);
     }
 
-
     @Override
-	public void setAmbiguousTriples(Set<Triple> triples) {
-        getGraph().setAmbiguousTriples(triples);
-    }
-
-    @Override
-	public void setUnderLineTriples(Set<Triple> triples) {
+    public void setUnderLineTriples(Set <Triple> triples) {
         getGraph().setUnderLineTriples(triples);
     }
 
-
     @Override
-	public void setDottedUnderLineTriples(Set<Triple> triples) {
+    public void setDottedUnderLineTriples(Set <Triple> triples) {
         getGraph().setDottedUnderLineTriples(triples);
     }
 
     @Override
-	public List<String> getNodeNames() {
+    public List <String> getNodeNames() {
         return getGraph().getNodeNames();
     }
 
     @Override
-	public String toString() {
+    public String toString() {
         return getGraph().toString();
     }
 
-    private LinkedList<Edge> dpathNewEdges() {
+    private LinkedList <Edge> dpathNewEdges() {
         if (dpathNewEdges == null) {
-            dpathNewEdges = new LinkedList<Edge>();
+            dpathNewEdges = new LinkedList <Edge>();
         }
         return dpathNewEdges;
     }
@@ -886,33 +889,23 @@ public final class Dag implements Graph /*, KnowledgeTransferable*/ {
 
     //Gustavo 5 May 2007
     //this returns the nodes that have zero parents
-    //  
+    //
     //should we use getTiers() instead?
-	public List<Node> getExogenousTerms() {
-		List<Node> errorTerms = new Vector();
+    public List <Node> getExogenousTerms() {
+        List <Node> errorTerms = new Vector();
 
-		List<Node> nodes = getNodes();
-		for (int i=0; i<nodes.size(); i++){
-			Node node = nodes.get(i);
-			if (getParents(node).isEmpty())
-				errorTerms.add(node);
-		}
-		
-		return errorTerms;
-	}
+        List <Node> nodes = getNodes();
+        for (int i = 0; i < nodes.size(); i++) {
+            Node node = nodes.get(i);
+            if (getParents(node).isEmpty())
+                errorTerms.add(node);
+        }
+
+        return errorTerms;
+    }
 
     private Graph getGraph() {
         return graph;
-    }
-
-    public static boolean isDag(Graph graph) {
-        try {
-            new Dag(graph);
-            return true;
-        }
-        catch (Exception e) {
-            return false;
-        }
     }
 
 //	public Knowledge getKnowledge() {

@@ -37,7 +37,7 @@ public interface DiscreteProbs {
      * Returns the variables over which probabilities and conditional
      * probabilities will be calculated.
      */
-    public List<Node> getVariables();
+    public List <Node> getVariables();
 
     /**
      * Returns the probability in a given cell.

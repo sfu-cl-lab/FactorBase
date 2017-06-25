@@ -53,7 +53,7 @@ public final class AtMostOneEdgePerPair implements GraphConstraint {
      * Returns true iff the new edge may be added.
      */
     @Override
-	public boolean isEdgeAddable(Edge edge, Graph graph) {
+    public boolean isEdgeAddable(Edge edge, Graph graph) {
         Node node1 = edge.getNode1();
         Node node2 = edge.getNode2();
 
@@ -64,7 +64,7 @@ public final class AtMostOneEdgePerPair implements GraphConstraint {
      * Returns true iff the node may be added.
      */
     @Override
-	public boolean isNodeAddable(Node node, Graph graph) {
+    public boolean isNodeAddable(Node node, Graph graph) {
         return true;
     }
 
@@ -72,7 +72,7 @@ public final class AtMostOneEdgePerPair implements GraphConstraint {
      * Returns true;
      */
     @Override
-	public boolean isEdgeRemovable(Edge edge, Graph graph) {
+    public boolean isEdgeRemovable(Edge edge, Graph graph) {
         return true;
     }
 
@@ -80,7 +80,7 @@ public final class AtMostOneEdgePerPair implements GraphConstraint {
      * Returns true.
      */
     @Override
-	public boolean isNodeRemovable(Node node, Graph graph) {
+    public boolean isNodeRemovable(Node node, Graph graph) {
         return true;
     }
 
@@ -90,7 +90,7 @@ public final class AtMostOneEdgePerPair implements GraphConstraint {
      * @return this representation.
      */
     @Override
-	public String toString() {
+    public String toString() {
         return "<At most one edge per node pair.>";
     }
 }

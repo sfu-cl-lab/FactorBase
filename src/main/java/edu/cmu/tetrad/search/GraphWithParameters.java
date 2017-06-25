@@ -45,15 +45,10 @@ public class GraphWithParameters {
     //a Dag has a list of edges
     //therefore, Hashmap from edges to weights
 
-    private Graph graph;
-
     public String generatingMethodName = null;
-
-    public String getGeneratingMethodName() {
-        return generatingMethodName;
-    }
-
-    private HashMap<Edge, Double> weightHash;
+    public int errorsOfOmission = 0;
+    public int errorsOfCommission = 0;
+    public int oriEvaluated = 0;
 
 //	public Dag patDag = null; //only non-null when graph is a pattern
 
@@ -61,6 +56,21 @@ public class GraphWithParameters {
       * estimate the weights for the nodes that have all parents determined.
       */
     //it would have been more efficient to only regression on the nodes that matter
+    public int oriCorrect = 0;
+    public int directedWrongWay = 0;
+
+//	public PatternWithParameters(ColtDataSet B) {
+//		Shimizu2006Search.makeDagWithParms(B);
+//	}
+    public int undirectedWhenShouldBeDirected = 0;
+    public int directedWhenShouldBeUndirected = 0;
+    public List <Edge> correctDirectedOrientationEdges;
+    //evaluating coefficients
+    double totalCoeffErrorSq;
+    List <List <Integer>> cycles = null;
+    private Graph graph;
+    private HashMap <Edge, Double> weightHash;
+
 
     public GraphWithParameters(SemIm semIm, Graph truePattern) {
 //		Graph g = (truePattern==null) ? semIm.getSemIm().getGraph() : truePattern;
@@ -84,28 +94,11 @@ public class GraphWithParameters {
         this.graph = getGraph();
     }
 
+
     public GraphWithParameters(Graph graph) {
         this.graph = graph;
-        weightHash = new HashMap<Edge, Double>();
+        weightHash = new HashMap <Edge, Double>();
     }
-
-//	public PatternWithParameters(ColtDataSet B) {
-//		Shimizu2006Search.makeDagWithParms(B);
-//	}
-
-    public void addEdge(Node node1, Node node2, double weight) {
-        Edge edge = new Edge(node1, node2, Endpoint.TAIL, Endpoint.ARROW);
-        getGraph().addEdge(edge);
-        getWeightHash().put(edge, weight);
-    }
-
-    public void addEdge(String nodeName1, String nodeName2, double weight) {
-        Node node1 = getGraph().getNode(nodeName1);
-        Node node2 = getGraph().getNode(nodeName2);
-        addEdge(node1, node2, weight);
-    }
-
-
     public GraphWithParameters(DataSet dataSet) {
 
         DoubleMatrix2D Bmatrix = dataSet.getDoubleData();
@@ -113,7 +106,7 @@ public class GraphWithParameters {
 //    	List<Node> variables = Bmatrix.getVariables();
 
         this.graph = new EdgeListGraph();
-        weightHash = new HashMap<Edge, Double>();
+        weightHash = new HashMap <Edge, Double>();
 
         int n = Bmatrix.rows();
 //		System.out.println("n = " + n);
@@ -142,8 +135,95 @@ public class GraphWithParameters {
         }
     }
 
+    public static Node getCorrespondingNode(Graph graph, Node node) {
+        String nodeName = node.getName();
+        Node node1 = graph.getNode(nodeName);
+        return node1;
+    }
+
+    public static Edge getCorrespondingEdge(Graph graph, Edge edge) {
+//		System.out.println("entered getCorrespondingEdge: edge = " + edge);
+        Node node1 = getCorrespondingNode(graph, edge.getNode1());
+        Node node2 = getCorrespondingNode(graph, edge.getNode2());
+        Edge result = graph.getEdge(node1, node2);
+        return result;
+    }
+
+    public static Edge getCorrespondingDirectedEdge(Graph graph, Edge edge) {
+        if (edge == null)
+            return null;
+        else {
+            String nodeName1 = edge.getNode1().getName();
+            String nodeName2 = edge.getNode2().getName();
+            Node node1 = graph.getNode(nodeName1);
+            Node node2 = graph.getNode(nodeName2);
+            Edge result = graph.getDirectedEdge(node1, node2);
+            return result;
+        }
+    }
+
+    private static boolean hasCorrespondingAdjacency(Graph graph, Edge edge) {
+        Edge corrEdge = getCorrespondingEdge(graph, edge);
+        return corrEdge != null;
+    }
+
+
+    //evaluating orientations
+    //should only evaluate on the adjacencies that are correct
+
+    private static boolean directionAgrees(Graph graph, Edge edge) {
+        String edgeDirection = (edge.toString().indexOf(">") == -1) ? "left" : "right";
+
+        String nodeName1 = edge.getNode1().getName();
+        String nodeName2 = edge.getNode2().getName();
+        Node node1 = graph.getNode(nodeName1);
+        Node node2 = graph.getNode(nodeName2);
+        Edge graphEdge = graph.getEdge(node1, node2);
+
+        String graphEdgeDirection = (graphEdge.toString().indexOf(">") == -1) ? "left" : "right";
+
+        return edgeDirection.equals(graphEdgeDirection);
+    }
+
+    /**
+     * creates a PatternWithParameters by running a regression, given a graph and data
+     *
+     * @param dataSet
+     * @param graph
+     * @return
+     */
+    public static GraphWithParameters regress(DataSet dataSet, Graph graph) {
+        SemPm semPmEstDag = new SemPm(graph);
+        SemEstimator estimatorEstDag = new SemEstimator(dataSet, semPmEstDag);
+        estimatorEstDag.estimate();
+        SemIm semImEstDag = estimatorEstDag.getEstimatedSem();
+        GraphWithParameters estimatedGraph = new GraphWithParameters(semImEstDag, graph);
+        return estimatedGraph;
+    }
+
+    public String getGeneratingMethodName() {
+        return generatingMethodName;
+    }
+
+    //evaluate every node-pair
+
+    public void addEdge(Node node1, Node node2, double weight) {
+        Edge edge = new Edge(node1, node2, Endpoint.TAIL, Endpoint.ARROW);
+        getGraph().addEdge(edge);
+        getWeightHash().put(edge, weight);
+    }
+
+
+    //we call this, passing the edges that PC evaluates
+
+    public void addEdge(String nodeName1, String nodeName2, double weight) {
+        Node node1 = getGraph().getNode(nodeName1);
+        Node node2 = getGraph().getNode(nodeName2);
+        addEdge(node1, node2, weight);
+    }
+
     @Override
-	public String toString() { //iterate through the edges and print their weight too
+    public String toString() { //iterate through the edges and print their weight too
         String str = "";
         for (Edge edge : getGraph().getEdges()) {
             str += edge.toString();
@@ -152,9 +232,7 @@ public class GraphWithParameters {
         return str;
     }
 
-
-    public int errorsOfOmission = 0;
-    public int errorsOfCommission = 0;
+    //should only evaluate those that are oriented correctly
 
     public AdjacencyEvaluationResult evalAdjacency(Graph standardDag) {
         //for each edge in this DAG, check whether it is in standardDag. If it isn't, that's an error of
@@ -189,24 +267,13 @@ public class GraphWithParameters {
         return new AdjacencyEvaluationResult(errorsOfOmission, errorsOfCommission);
     }
 
+    //either both point to the left or both point to the right
 
     public void printAdjacencyEvaluation() {
         System.out.println("== Results of evaluating adjacency ==");
         System.out.println("errorsOfOmission = " + errorsOfOmission);
         System.out.println("errorsOfCommission = " + errorsOfCommission);
     }
-
-
-    public int oriEvaluated = 0;
-    public int oriCorrect = 0;
-    public int directedWrongWay = 0;
-    public int undirectedWhenShouldBeDirected = 0;
-    public int directedWhenShouldBeUndirected = 0;
-    public List<Edge> correctDirectedOrientationEdges;
-
-
-    //evaluating orientations
-    //should only evaluate on the adjacencies that are correct
 
     public OrientationEvaluationResult evalOrientations(Graph standardGraph) {
         correctDirectedOrientationEdges = new Vector();
@@ -248,7 +315,6 @@ public class GraphWithParameters {
         return new OrientationEvaluationResult(oriCorrect, directedWrongWay, undirectedWhenShouldBeDirected, directedWhenShouldBeUndirected);
     }
 
-
     public void printOrientationEvaluation() {
         System.out.println("== Results of evaluating orientation ==");
         System.out.println("oriCorrect = " + oriCorrect + "  directedWrongWay = " + directedWrongWay +
@@ -256,16 +322,12 @@ public class GraphWithParameters {
         System.out.println("oriEvaluated = " + oriEvaluated);
     }
 
-
-    //evaluating coefficients
-    double totalCoeffErrorSq;
-
-    //evaluate every node-pair
+    //returns the edge of graph corresponding to edge
 
     public CoefficientEvaluationResult evalCoeffs(GraphWithParameters standardGraph) {
         totalCoeffErrorSq = 0;
 
-        List<Node> nodes = getGraph().getNodes();
+        List <Node> nodes = getGraph().getNodes();
         for (int i = 0; i < nodes.size(); i++) { //iterating through each node pair
             Node node1 = nodes.get(i);
             Node realNode1 = getCorrespondingNode(standardGraph.getGraph(), node1);
@@ -294,8 +356,7 @@ public class GraphWithParameters {
         return new CoefficientEvaluationResult(totalCoeffErrorSq, null);
     }
 
-
-    //we call this, passing the edges that PC evaluates
+    //returns the directed edge of graph corresponding to edge
 
     /**
      * evalute coefficients for some node pairs
@@ -303,7 +364,7 @@ public class GraphWithParameters {
      * @param standardGraph
      * @param edges         edges from the pattern returned by PC-search
      */
-    public CoefficientEvaluationResult evalCoeffsForNodePairs(GraphWithParameters standardGraph, List<Edge> edges) {
+    public CoefficientEvaluationResult evalCoeffsForNodePairs(GraphWithParameters standardGraph, List <Edge> edges) {
 
         totalCoeffErrorSq = 0;
 
@@ -336,6 +397,8 @@ public class GraphWithParameters {
     }
 
 
+    //does the graph have an edge similar to 'edge'?
+
     private double getDirectedEdgeCoeff(Node node1, Node node2) {
         double result;
         Edge edge = getGraph().getDirectedEdge(node1, node2);
@@ -346,10 +409,8 @@ public class GraphWithParameters {
         return result;
     }
 
-    //should only evaluate those that are oriented correctly
-
     public void evalCoeffsCorrectOrientation(GraphWithParameters standardGraph) {
-        List<Edge> edgesToEvaluate;
+        List <Edge> edgesToEvaluate;
 //		if (patDag!=null) //we use it
 //		{
 //		edgesToEvaluate = new Vector();
@@ -361,7 +422,7 @@ public class GraphWithParameters {
 //		edgesToEvaluate.add(getCorrespondingEdge(this.graph,patDagEdge));
 //		}
 //		}
-//		else 
+//		else
         edgesToEvaluate = correctDirectedOrientationEdges;
 
         System.out.println("correctOrientationEdges = " + correctDirectedOrientationEdges);
@@ -375,8 +436,6 @@ public class GraphWithParameters {
         }
 
     }
-
-    //either both point to the left or both point to the right
 
     private boolean oriAgrees(Edge edge1, Edge edge2) {
         int count = 0;
@@ -392,76 +451,6 @@ public class GraphWithParameters {
         System.out.println("== Results of evaluating coefficients ==");
         System.out.println("totalCoeffErrorSq = " + totalCoeffErrorSq);
     }
-
-    public static Node getCorrespondingNode(Graph graph, Node node) {
-        String nodeName = node.getName();
-        Node node1 = graph.getNode(nodeName);
-        return node1;
-    }
-
-    //returns the edge of graph corresponding to edge
-
-    public static Edge getCorrespondingEdge(Graph graph, Edge edge) {
-//		System.out.println("entered getCorrespondingEdge: edge = " + edge);
-        Node node1 = getCorrespondingNode(graph, edge.getNode1());
-        Node node2 = getCorrespondingNode(graph, edge.getNode2());
-        Edge result = graph.getEdge(node1, node2);
-        return result;
-    }
-
-    //returns the directed edge of graph corresponding to edge
-
-    public static Edge getCorrespondingDirectedEdge(Graph graph, Edge edge) {
-        if (edge == null)
-            return null;
-        else {
-            String nodeName1 = edge.getNode1().getName();
-            String nodeName2 = edge.getNode2().getName();
-            Node node1 = graph.getNode(nodeName1);
-            Node node2 = graph.getNode(nodeName2);
-            Edge result = graph.getDirectedEdge(node1, node2);
-            return result;
-        }
-    }
-
-
-    //does the graph have an edge similar to 'edge'?
-
-    private static boolean hasCorrespondingAdjacency(Graph graph, Edge edge) {
-        Edge corrEdge = getCorrespondingEdge(graph, edge);
-        return corrEdge != null;
-    }
-
-    private static boolean directionAgrees(Graph graph, Edge edge) {
-        String edgeDirection = (edge.toString().indexOf(">") == -1) ? "left" : "right";
-
-        String nodeName1 = edge.getNode1().getName();
-        String nodeName2 = edge.getNode2().getName();
-        Node node1 = graph.getNode(nodeName1);
-        Node node2 = graph.getNode(nodeName2);
-        Edge graphEdge = graph.getEdge(node1, node2);
-
-        String graphEdgeDirection = (graphEdge.toString().indexOf(">") == -1) ? "left" : "right";
-
-        return edgeDirection.equals(graphEdgeDirection);
-    }
-
-    /**
-     * creates a PatternWithParameters by running a regression, given a graph and data
-     *
-     * @param dataSet
-     * @param graph
-     * @return
-     */
-    public static GraphWithParameters regress(DataSet dataSet, Graph graph) {
-        SemPm semPmEstDag = new SemPm(graph);
-        SemEstimator estimatorEstDag = new SemEstimator(dataSet, semPmEstDag);
-        estimatorEstDag.estimate();
-        SemIm semImEstDag = estimatorEstDag.getEstimatedSem();
-        GraphWithParameters estimatedGraph = new GraphWithParameters(semImEstDag, graph);
-        return estimatedGraph;
-    }
-
 
     /**
      * @return the B matrix corresponding to the graph we do the reverse of Shimizu2006Search.makeDagWithParms()
@@ -482,9 +471,7 @@ public class GraphWithParameters {
         return DataUtils.makeDataSet(matrix, getGraph().getNodes());
     }
 
-    List<List<Integer>> cycles = null;
-
-    public List<List<Integer>> getCycles() {
+    public List <List <Integer>> getCycles() {
         if (cycles == null) {
             //find cycles
 
@@ -498,7 +485,7 @@ public class GraphWithParameters {
         return graph;
     }
 
-    public HashMap<Edge, Double> getWeightHash() {
+    public HashMap <Edge, Double> getWeightHash() {
         return weightHash;
     }
 }

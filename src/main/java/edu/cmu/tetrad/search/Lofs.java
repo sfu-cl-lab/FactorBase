@@ -47,27 +47,19 @@ import java.util.TreeMap;
  */
 public class Lofs {
     private Graph pattern;
-    private List<DataSet> dataSets;
+    private List <DataSet> dataSets;
     private double alpha = 0.05;
-    private ArrayList<Regression> regressions;
-    private List<Node> variables;
+    private ArrayList <Regression> regressions;
+    private List <Node> variables;
     private boolean r1Done = true;
     private boolean r2Done = true;
     private boolean strongR2 = false;
     private boolean meekDone = false;
     private boolean r2Orient2Cycles = true;
     private boolean meanCenterResiduals = false;
-
-    public enum Score {
-        andersonDarling, skew, kurtosis, fifthMoment, absoluteValue,
-        exp, expUnstandardized, expUnstandardizedInverted, other, logcosh
-    }
-
     private Score score = Score.andersonDarling;
 
-    //===============================CONSTRUCTOR============================//
-
-    public Lofs(Graph pattern, List<DataSet> dataSets)
+    public Lofs(Graph pattern, List <DataSet> dataSets)
             throws IllegalArgumentException {
 
         if (pattern == null) {
@@ -81,7 +73,7 @@ public class Lofs {
         this.pattern = pattern;
         this.dataSets = dataSets;
 
-        regressions = new ArrayList<Regression>();
+        regressions = new ArrayList <Regression>();
         this.variables = dataSets.get(0).getVariables();
 
         for (DataSet dataSet : dataSets) {
@@ -89,11 +81,13 @@ public class Lofs {
         }
     }
 
+    //===============================CONSTRUCTOR============================//
+
     public Graph orient() {
         Graph skeleton = GraphUtils.undirectedGraph(getPattern());
         Graph graph = new EdgeListGraph(skeleton.getNodes());
 
-        List<Node> nodes = skeleton.getNodes();
+        List <Node> nodes = skeleton.getNodes();
 //        Collections.shuffle(nodes);
 
         if (isR1Done()) {
@@ -117,19 +111,19 @@ public class Lofs {
         return graph;
     }
 
-    private void ruleR1(Graph skeleton, Graph graph, List<Node> nodes) {
+    private void ruleR1(Graph skeleton, Graph graph, List <Node> nodes) {
         for (Node node : nodes) {
-            SortedMap<Double, String> scoreReports = new TreeMap<Double, String>();
+            SortedMap <Double, String> scoreReports = new TreeMap <Double, String>();
 
-            List<Node> adj = skeleton.getAdjacentNodes(node);
+            List <Node> adj = skeleton.getAdjacentNodes(node);
 
             DepthChoiceGenerator gen = new DepthChoiceGenerator(adj.size(), adj.size());
             int[] choice;
             double maxScore = Double.NEGATIVE_INFINITY;
-            List<Node> parents = null;
+            List <Node> parents = null;
 
             while ((choice = gen.next()) != null) {
-                List<Node> _parents = GraphUtils.asList(choice, adj);
+                List <Node> _parents = GraphUtils.asList(choice, adj);
 
                 double score = score(node, _parents);
                 scoreReports.put(-score, _parents.toString());
@@ -165,7 +159,7 @@ public class Lofs {
     }
 
     private void ruleR2(Graph skeleton, Graph graph) {
-        List<Edge> edgeList1 = skeleton.getEdges();
+        List <Edge> edgeList1 = skeleton.getEdges();
 //        Collections.shuffle(edgeList1);
 
         for (Edge adj : edgeList1) {
@@ -185,12 +179,12 @@ public class Lofs {
     }
 
     private boolean isTwoCycle(Graph graph, Node x, Node y) {
-        List<Edge> edges = graph.getEdges(x, y);
+        List <Edge> edges = graph.getEdges(x, y);
         return edges.size() == 2;
     }
 
     private boolean isUndirected(Graph graph, Node x, Node y) {
-        List<Edge> edges = graph.getEdges(x, y);
+        List <Edge> edges = graph.getEdges(x, y);
         if (edges.size() == 1) {
             Edge edge = graph.getEdge(x, y);
             return Edges.isUndirectedEdge(edge);
@@ -199,7 +193,7 @@ public class Lofs {
         return false;
     }
 
-    private boolean normal(Node node, List<Node> parents) {
+    private boolean normal(Node node, List <Node> parents) {
         if (getAlpha() > .999) {
             return false;
         }
@@ -216,9 +210,9 @@ public class Lofs {
 
         TetradLogger.getInstance().log("info", "\nEDGE " + x + " --- " + y);
 
-        SortedMap<Double, String> scoreReports = new TreeMap<Double, String>();
+        SortedMap <Double, String> scoreReports = new TreeMap <Double, String>();
 
-        List<Node> neighborsx = graph.getAdjacentNodes(x);
+        List <Node> neighborsx = graph.getAdjacentNodes(x);
         neighborsx.remove(y);
 
         double max = Double.NEGATIVE_INFINITY;
@@ -229,22 +223,22 @@ public class Lofs {
         int[] choicex;
 
         while ((choicex = genx.next()) != null) {
-            List<Node> condxMinus = GraphUtils.asList(choicex, neighborsx);
+            List <Node> condxMinus = GraphUtils.asList(choicex, neighborsx);
 
-            List<Node> condxPlus = new ArrayList<Node>(condxMinus);
+            List <Node> condxPlus = new ArrayList <Node>(condxMinus);
             condxPlus.add(y);
 
             double xPlus = score(x, condxPlus);
             double xMinus = score(x, condxMinus);
 
-            List<Node> neighborsy = graph.getAdjacentNodes(y);
+            List <Node> neighborsy = graph.getAdjacentNodes(y);
             neighborsy.remove(x);
 
             DepthChoiceGenerator geny = new DepthChoiceGenerator(neighborsy.size(), neighborsy.size());
             int[] choicey;
 
             while ((choicey = geny.next()) != null) {
-                List<Node> condyMinus = GraphUtils.asList(choicey, neighborsy);
+                List <Node> condyMinus = GraphUtils.asList(choicey, neighborsy);
 
 //                List<Node> parentsY = oldGraph.getParents(y);
 //                parentsY.remove(x);
@@ -252,7 +246,7 @@ public class Lofs {
 //                    continue;
 //                }
 
-                List<Node> condyPlus = new ArrayList<Node>(condyMinus);
+                List <Node> condyPlus = new ArrayList <Node>(condyMinus);
                 condyPlus.add(x);
 
                 double yPlus = score(y, condyPlus);
@@ -420,7 +414,7 @@ public class Lofs {
         return score1 + score2;
     }
 
-    private double score(Node y, List<Node> parents) {
+    private double score(Node y, List <Node> parents) {
         if (score == Score.andersonDarling) {
             return andersonDarlingPASquareStar(y, parents);
         } else if (score == Score.kurtosis) {
@@ -436,17 +430,15 @@ public class Lofs {
         throw new IllegalStateException();
     }
 
-    //=============================PRIVATE METHODS=========================//
-
-    private double localScoreA(Node node, List<Node> parents) {
+    private double localScoreA(Node node, List <Node> parents) {
         double score = 0.0;
 
-        List<Double> _residuals = new ArrayList<Double>();
+        List <Double> _residuals = new ArrayList <Double>();
 
         Node _target = node;
-        List<Node> _regressors = parents;
+        List <Node> _regressors = parents;
         Node target = getVariable(variables, _target.getName());
-        List<Node> regressors = new ArrayList<Node>();
+        List <Node> regressors = new ArrayList <Node>();
 
         for (Node _regressor : _regressors) {
             Node variable = getVariable(variables, _regressor.getName());
@@ -499,15 +491,17 @@ public class Lofs {
         return score;
     }
 
-    private double localScoreB(Node node, List<Node> parents) {
+    //=============================PRIVATE METHODS=========================//
+
+    private double localScoreB(Node node, List <Node> parents) {
 
         double score = 0.0;
         double maxScore = Double.NEGATIVE_INFINITY;
 
         Node _target = node;
-        List<Node> _regressors = parents;
+        List <Node> _regressors = parents;
         Node target = getVariable(variables, _target.getName());
-        List<Node> regressors = new ArrayList<Node>();
+        List <Node> regressors = new ArrayList <Node>();
 
         for (Node _regressor : _regressors) {
             Node variable = getVariable(variables, _regressor.getName());
@@ -561,13 +555,13 @@ public class Lofs {
         return avg;
     }
 
-    private double andersonDarlingPASquareStar(Node node, List<Node> parents) {
-        List<Double> _residuals = new ArrayList<Double>();
+    private double andersonDarlingPASquareStar(Node node, List <Node> parents) {
+        List <Double> _residuals = new ArrayList <Double>();
 
         Node _target = node;
-        List<Node> _regressors = parents;
+        List <Node> _regressors = parents;
         Node target = getVariable(variables, _target.getName());
-        List<Node> regressors = new ArrayList<Node>();
+        List <Node> regressors = new ArrayList <Node>();
 
         for (Node _regressor : _regressors) {
             Node variable = getVariable(variables, _regressor.getName());
@@ -615,13 +609,13 @@ public class Lofs {
         return new AndersonDarlingTest(_f).getASquaredStar();
     }
 
-    private double andersonDarlingPASquareStarB(Node node, List<Node> parents) {
-        List<Double> _residuals = new ArrayList<Double>();
+    private double andersonDarlingPASquareStarB(Node node, List <Node> parents) {
+        List <Double> _residuals = new ArrayList <Double>();
 
         Node _target = node;
-        List<Node> _regressors = parents;
+        List <Node> _regressors = parents;
         Node target = getVariable(variables, _target.getName());
-        List<Node> regressors = new ArrayList<Node>();
+        List <Node> regressors = new ArrayList <Node>();
 
         for (Node _regressor : _regressors) {
             Node variable = getVariable(variables, _regressor.getName());
@@ -669,13 +663,13 @@ public class Lofs {
         return sum / dataSets.size();
     }
 
-    private double pValue(Node node, List<Node> parents) {
-        List<Double> _residuals = new ArrayList<Double>();
+    private double pValue(Node node, List <Node> parents) {
+        List <Double> _residuals = new ArrayList <Double>();
 
         Node _target = node;
-        List<Node> _regressors = parents;
+        List <Node> _regressors = parents;
         Node target = getVariable(variables, _target.getName());
-        List<Node> regressors = new ArrayList<Node>();
+        List <Node> regressors = new ArrayList <Node>();
 
         for (Node _regressor : _regressors) {
             Node variable = getVariable(variables, _regressor.getName());
@@ -721,13 +715,13 @@ public class Lofs {
         return new AndersonDarlingTest(_f).getP();
     }
 
-    private double[] residual(Node node, List<Node> parents) {
-        List<Double> _residuals = new ArrayList<Double>();
+    private double[] residual(Node node, List <Node> parents) {
+        List <Double> _residuals = new ArrayList <Double>();
 
         Node _target = node;
-        List<Node> _regressors = parents;
+        List <Node> _regressors = parents;
         Node target = getVariable(variables, _target.getName());
-        List<Node> regressors = new ArrayList<Node>();
+        List <Node> regressors = new ArrayList <Node>();
 
         for (Node _regressor : _regressors) {
             Node variable = getVariable(variables, _regressor.getName());
@@ -787,7 +781,7 @@ public class Lofs {
         return pattern;
     }
 
-    private Node getVariable(List<Node> variables, String name) {
+    private Node getVariable(List <Node> variables, String name) {
         for (Node node : variables) {
             if (name.equals(node.getName())) {
                 return node;
@@ -829,12 +823,12 @@ public class Lofs {
         this.strongR2 = strongR2;
     }
 
-    public void setR2Orient2Cycles(boolean r2Orient2Cycles) {
-        this.r2Orient2Cycles = r2Orient2Cycles;
-    }
-
     public boolean isR2Orient2Cycles() {
         return r2Orient2Cycles;
+    }
+
+    public void setR2Orient2Cycles(boolean r2Orient2Cycles) {
+        this.r2Orient2Cycles = r2Orient2Cycles;
     }
 
     public Score getScore() {
@@ -855,6 +849,11 @@ public class Lofs {
 
     public void setMeanCenterResiduals(boolean meanCenterResiduals) {
         this.meanCenterResiduals = meanCenterResiduals;
+    }
+
+    public enum Score {
+        andersonDarling, skew, kurtosis, fifthMoment, absoluteValue,
+        exp, expUnstandardized, expUnstandardizedInverted, other, logcosh
     }
 
 }

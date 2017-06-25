@@ -35,6 +35,10 @@ public class TestPoint extends TestCase {
         super(name);
     }
 
+    public static Test suite() {
+        return new TestSuite(TestPoint.class);
+    }
+
     public void testPoint() {
         PointXy p = new PointXy(25, 50);
         PointXy q = new PointXy(35, 55);
@@ -46,10 +50,6 @@ public class TestPoint extends TestCase {
         PointXy s = new PointXy(q);
 
         assertEquals(q, s);
-    }
-
-    public static Test suite() {
-        return new TestSuite(TestPoint.class);
     }
 }
 

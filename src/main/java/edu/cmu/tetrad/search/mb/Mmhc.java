@@ -74,8 +74,12 @@ public class Mmhc implements GraphSearch {
         return depth;
     }
 
+    public void setDepth(int depth) {
+        this.depth = depth;
+    }
+
     @Override
-	public long getElapsedTime() {
+    public long getElapsedTime() {
         return 0;
     }
 
@@ -83,10 +87,10 @@ public class Mmhc implements GraphSearch {
      * Runs PC starting with a fully connected graph over all of the variables in the domain of the independence test.
      */
     @Override
-	public Graph search() {
-        List<Node> variables = independenceTest.getVariables();
+    public Graph search() {
+        List <Node> variables = independenceTest.getVariables();
         Mmmb mmmb = new Mmmb(independenceTest, getDepth(), true);
-        Map<Node, List<Node>> pc = new HashMap<Node, List<Node>>();
+        Map <Node, List <Node>> pc = new HashMap <Node, List <Node>>();
 
         for (Node x : variables) {
             pc.put(x, mmmb.getPc(x));
@@ -121,10 +125,6 @@ public class Mmhc implements GraphSearch {
         }
 
         this.knowledge = knowledge;
-    }
-
-    public void setDepth(int depth) {
-        this.depth = depth;
     }
 }
 

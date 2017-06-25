@@ -28,8 +28,6 @@ import edu.cmu.tetrad.search.IndependenceTest;
 import edu.cmu.tetrad.search.SepsetMap;
 import edu.cmu.tetrad.util.ChoiceGenerator;
 
-import java.util.*;
-
 /**
  * <p>This class implements the adjacency search step of the Generalize MimBuild algorithm as described on p 362 of CPS,
  * 2nd edition.  The only function that is publically available is adjSearch().</p>
@@ -40,7 +38,7 @@ public final class MimAdjacencySearch {
     private Graph graph;
     private IndependenceTest ind;
     private Knowledge knowledge;
-    private List<Node> latents;
+    private List <Node> latents;
     private int depth = Integer.MAX_VALUE;
 
     /**
@@ -52,11 +50,29 @@ public final class MimAdjacencySearch {
      * @param latents
      */
     public MimAdjacencySearch(Graph graph, IndependenceTest ind,
-                              Knowledge knowledge, List<Node> latents) {
+                              Knowledge knowledge, List <Node> latents) {
         this.graph = graph;
         this.ind = ind;
         this.knowledge = knowledge;
         this.latents = latents;
+    }
+
+    /**
+     * The ChoiceGenerator supplies an int array.  This class will transform that int array (interpretted as indices
+     * array of objects) into an  into a List of objects
+     *
+     * @param i indices into o
+     * @param o the objects from which we obtain our list
+     * @return the list described above.
+     */
+    private static List asList(int[] i, Object[] o) {
+        Object[] temp = new Object[i.length];
+
+        for (int a = 0; a < i.length; a++) {
+            temp[a] = o[i[a]];
+        }
+
+        return Arrays.asList(temp);
     }
 
     /**
@@ -85,9 +101,9 @@ public final class MimAdjacencySearch {
      * Return an array of Nodes who can be conditional checks can be done on stipulated by temporal tiers </p> Shane
      * Harwood harwood+@andrew.cmu.edu
      */
-    private Object[] forbidFilter(Set<String> set1, String x, Knowledge bk) {
-        Iterator<String> it = set1.iterator();
-        List<String> arr = new LinkedList<String>();
+    private Object[] forbidFilter(Set <String> set1, String x, Knowledge bk) {
+        Iterator <String> it = set1.iterator();
+        List <String> arr = new LinkedList <String>();
 
         while (it.hasNext()) {
             String z = it.next();
@@ -119,14 +135,14 @@ public final class MimAdjacencySearch {
                             Knowledge knowledge, SepsetMap sepset, int n) {
         // Note: as a stateful object, all of these arguments should belong
         // to the state.  There is no need to pass them in every time.
-        Iterator<Node> it = latents.iterator();
+        Iterator <Node> it = latents.iterator();
         boolean result = false;
-        List<Node> visited = new LinkedList<Node>();    //list of visited nodes
+        List <Node> visited = new LinkedList <Node>();    //list of visited nodes
 
         // for each node x...
         while (it.hasNext()) {
             Node nodeX = it.next();
-            Set<Node> set = new HashSet<Node>();
+            Set <Node> set = new HashSet <Node>();
 
             for (Node node : graph.getAdjacentNodes(nodeX)) {
                 if (latents.contains(node)) {
@@ -141,20 +157,20 @@ public final class MimAdjacencySearch {
 
             visited.add(nodeX);
 
-            Iterator<Node> it1 = (new HashSet<Node>(set)).iterator();
+            Iterator <Node> it1 = (new HashSet <Node>(set)).iterator();
 
             // for each node y connected to x ...
             while (it1.hasNext()) {
                 Node nodeY = it1.next();
 
-                Set<String> set1 = new HashSet<String>();
+                Set <String> set1 = new HashSet <String>();
                 for (Node node : graph.getAdjacentNodes(nodeX)) {
                     if (latents.contains(node)) {
                         set1.add(node.toString());
                     }
                 }
 
-                Set<String> set2 = new HashSet<String>();    //find parents of Y
+                Set <String> set2 = new HashSet <String>();    //find parents of Y
                 for (Node node : graph.getAdjacentNodes(nodeY)) {
                     if (latents.contains(node)) {
                         set2.add(node.toString());
@@ -177,7 +193,7 @@ public final class MimAdjacencySearch {
 
                     // for each subset of size n ...
                     while ((subset = cg.next()) != null) {
-                        List<Node> condSet = asList(subset, seta);
+                        List <Node> condSet = asList(subset, seta);
                         if (ind.isIndependent(nodeX, nodeY, condSet) &&
                                 knowledge.noEdgeRequired(nodeX.getName(),
                                         nodeY.getName())) {
@@ -196,24 +212,6 @@ public final class MimAdjacencySearch {
         }
 
         return result;
-    }
-
-    /**
-     * The ChoiceGenerator supplies an int array.  This class will transform that int array (interpretted as indices
-     * array of objects) into an  into a List of objects
-     *
-     * @param i indices into o
-     * @param o the objects from which we obtain our list
-     * @return the list described above.
-     */
-    private static List asList(int[] i, Object[] o) {
-        Object[] temp = new Object[i.length];
-
-        for (int a = 0; a < i.length; a++) {
-            temp[a] = o[i[a]];
-        }
-
-        return Arrays.asList(temp);
     }
 
     public int getDepth() {

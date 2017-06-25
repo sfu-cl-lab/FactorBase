@@ -136,7 +136,7 @@ public class Fas {
     public Graph search() {
         this.logger.log("info", "Starting Fast Adjacency Search.");
         // Remove edges forbidden both ways.
-        List<Edge> edges = graph.getEdges();
+        List <Edge> edges = graph.getEdges();
 
 //        logger.log("info", "Edges: " + edges);
 
@@ -231,9 +231,9 @@ public class Fas {
     /**
      * Removes from the list of nodes any that cannot be parents of x given the background knowledge.
      */
-    private List<Node> possibleParents(Node x, List<Node> adjx,
-                                       IKnowledge knowledge) {
-        List<Node> possibleParents = new LinkedList<Node>();
+    private List <Node> possibleParents(Node x, List <Node> adjx,
+                                        IKnowledge knowledge) {
+        List <Node> possibleParents = new LinkedList <Node>();
         String _x = x.getName();
 
         for (Node z : adjx) {
@@ -273,11 +273,11 @@ public class Fas {
 //        List<Double> pValues = new ArrayList<Double>();
 
         boolean more = false;
-        List<Node> nodes = new LinkedList<Node>(graph.getNodes());
+        List <Node> nodes = new LinkedList <Node>(graph.getNodes());
         int removed = 0;
 
         for (Node x : nodes) {
-            List<Node> b = new LinkedList<Node>(graph.getAdjacentNodes(x));
+            List <Node> b = new LinkedList <Node>(graph.getAdjacentNodes(x));
 
 //            System.out.println("Adjacent nodes for " + x + " = " + b);
 //            System.out.println("Depth = " + depth);
@@ -286,9 +286,9 @@ public class Fas {
             for (Node y : b) {
 
                 // This is the standard algorithm, without the v1 bias.
-                List<Node> adjx = graph.getAdjacentNodes(x);
+                List <Node> adjx = graph.getAdjacentNodes(x);
                 adjx.remove(y);
-                List<Node> ppx = possibleParents(x, adjx, knowledge);
+                List <Node> ppx = possibleParents(x, adjx, knowledge);
 
 //                System.out.println("Possible parents for removing " + x + " --- " + y + " are " + ppx);
 
@@ -300,7 +300,7 @@ public class Fas {
                     int[] choice;
 
                     while ((choice = cg.next()) != null) {
-                        List<Node> condSet = GraphUtils.asList(choice, ppx);
+                        List <Node> condSet = GraphUtils.asList(choice, ppx);
 
                         boolean independent = false;
                         try {
@@ -315,7 +315,7 @@ public class Fas {
                             Node _x = testDSep.getVariable(x.getName());
                             Node _y = testDSep.getVariable(y.getName());
 
-                            List<Node> _condSet = new ArrayList<Node>();
+                            List <Node> _condSet = new ArrayList <Node>();
 
                             for (Node node : condSet) {
                                 _condSet.add(testDSep.getVariable(node.getName()));
@@ -350,7 +350,7 @@ public class Fas {
 //                            Edge edge = graph.getEdge(x, y);
                             graph.removeEdge(x, y);
                             removed++;
-                            sepset.set(x, y, new LinkedList<Node>(condSet));
+                            sepset.set(x, y, new LinkedList <Node>(condSet));
 //                            this.logger.log("info", SearchLogUtils.independenceFact(x, y, condSet));
                             continue nextEdge;
                         }

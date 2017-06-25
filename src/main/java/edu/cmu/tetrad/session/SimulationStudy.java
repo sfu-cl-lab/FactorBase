@@ -23,8 +23,6 @@ package edu.cmu.tetrad.session;
 
 import edu.cmu.tetrad.util.TetradLogger;
 
-import java.util.*;
-
 /**
  * Runs a simulation study for a session which traverses a subtree of the
  * session graph in depth-first order and executes each node encountered a
@@ -46,8 +44,8 @@ public final class SimulationStudy {
 
     /**
      * The set of nodes with models; only these should be executed.
-     */                                                       
-    private Set<SessionNode> nodesToExecute;
+     */
+    private Set <SessionNode> nodesToExecute;
 
     //===========================CONSTRUCTORS==============================//
 
@@ -65,7 +63,7 @@ public final class SimulationStudy {
         // remove their repetition numbers from the repetitions map.
         session.addSessionListener(new SessionAdapter() {
             @Override
-			public void nodeRemoved(SessionEvent e) {
+            public void nodeRemoved(SessionEvent e) {
                 SessionNode node = e.getNode();
                 removeRepetition(node);
             }
@@ -73,6 +71,48 @@ public final class SimulationStudy {
     }
 
     //===========================PUBLIC METHODS============================//
+
+    /**
+     * Gets the repeition of the given node. If the repetition of a node has not
+     * been set, it is assumed to be 1.
+     *
+     * @see #setRepetition
+     */
+    public static int getRepetition(SessionNode node) {
+        if (node.getRepetition() < 1) {
+            node.setRepetition(1);
+        }
+
+        return node.getRepetition();
+    }
+
+    /**
+     * Removes the repetition number for the given node. If it's still in the
+     * graph, its repetition will be 1.
+     */
+    private static void removeRepetition(SessionNode sessionNode) {
+        sessionNode.setRepetition(1);
+    }
+
+    public static Set getDescendants(SessionNode node) {
+        HashSet <SessionNode> descendants = new HashSet <SessionNode>();
+        doChildClosureVisit(node, descendants);
+        return descendants;
+    }
+
+    /**
+     * closure under the child relation
+     */
+    private static void doChildClosureVisit(SessionNode node, Set <SessionNode> closure) {
+        if (!closure.contains(node)) {
+            closure.add(node);
+            Collection <SessionNode> children = node.getChildren();
+
+            for (SessionNode child : children) {
+                doChildClosureVisit(child, closure);
+            }
+        }
+    }
 
     /**
      * Sets the number of times the given node (and all of its children) will be
@@ -95,19 +135,7 @@ public final class SimulationStudy {
         getSessionSupport().fireRepetitionChanged(node);
     }
 
-    /**
-     * Gets the repeition of the given node. If the repetition of a node has not
-     * been set, it is assumed to be 1.
-     *
-     * @see #setRepetition
-     */
-    public static int getRepetition(SessionNode node) {
-        if (node.getRepetition() < 1) {
-            node.setRepetition(1);
-        }
-
-        return node.getRepetition();
-    }
+    //===========================PRIVATE METHODS===========================//
 
     /**
      * Executes the given node the specified number of times.
@@ -125,7 +153,7 @@ public final class SimulationStudy {
 
         // Begin the execution, making sure that each node's children are
         // executed in the order of the given tier ordering.
-        LinkedList<SessionNode> tierOrdering = new LinkedList<SessionNode>(getTierOrdering(sessionNode));
+        LinkedList <SessionNode> tierOrdering = new LinkedList <SessionNode>(getTierOrdering(sessionNode));
         notifyDownstreamOfStart(sessionNode);
 
         boolean doRepetition = true;
@@ -152,7 +180,7 @@ public final class SimulationStudy {
 
         // Begin the execution, making sure that each node's children are
         // executed in the order of the given tier ordering.
-        LinkedList<SessionNode> tierOrdering = getTierOrdering(sessionNode);
+        LinkedList <SessionNode> tierOrdering = getTierOrdering(sessionNode);
 
         if (sessionNode.getModel() != null) {
             tierOrdering.remove(sessionNode);
@@ -171,10 +199,8 @@ public final class SimulationStudy {
         getSessionSupport().addSessionListener(l);
     }
 
-    //===========================PRIVATE METHODS===========================//
-
-    private HashSet<SessionNode> nodesWithModels() {
-        HashSet<SessionNode> nodesWithModels = new HashSet<SessionNode>();
+    private HashSet <SessionNode> nodesWithModels() {
+        HashSet <SessionNode> nodesWithModels = new HashSet <SessionNode>();
 
         for (SessionNode node : session.getNodes()) {
             if (node.getModel() != null) {
@@ -203,7 +229,7 @@ public final class SimulationStudy {
      *
      * @see #getRepetition
      */
-    private boolean execute(LinkedList<SessionNode> tierOrdering, boolean doRepetition,
+    private boolean execute(LinkedList <SessionNode> tierOrdering, boolean doRepetition,
                             boolean simulation, boolean overwrite) {
         if (tierOrdering.isEmpty()) {
             return true;
@@ -244,7 +270,7 @@ public final class SimulationStudy {
 
                 if (repetition > 1) {
                     TetradLogger.getInstance().forceLogMessage("\nREPETITION #" + (i + 1) + " FOR "
-                        + sessionNode.getDisplayName() + "\n");
+                            + sessionNode.getDisplayName() + "\n");
                 }
 
                 boolean created = sessionNode.createModel(simulation);
@@ -252,12 +278,11 @@ public final class SimulationStudy {
                 if (!created) {
                     return false;
                 }
-            }
-            catch (RuntimeException e) {
+            } catch (RuntimeException e) {
                 return false;
             }
 
-            LinkedList<SessionNode> _tierOrdering = new LinkedList<SessionNode>(tierOrdering);
+            LinkedList <SessionNode> _tierOrdering = new LinkedList <SessionNode>(tierOrdering);
             _tierOrdering.removeFirst();
             boolean success =
                     execute(_tierOrdering, doRepetition, simulation, overwrite);
@@ -271,33 +296,25 @@ public final class SimulationStudy {
     }
 
     /**
-     * Removes the repetition number for the given node. If it's still in the
-     * graph, its repetition will be 1.
-     */
-    private static void removeRepetition(SessionNode sessionNode) {
-        sessionNode.setRepetition(1);
-    }
-
-    /**
      * This method returns the nodes of a digraph in such an order that as one
      * iterates through the list, the parents of each node have already been
      * encountered in the list.
      *
      * @return a tier ordering for the nodes in this graph.
      */
-    private LinkedList<SessionNode> getTierOrdering(SessionNode node) {
+    private LinkedList <SessionNode> getTierOrdering(SessionNode node) {
         Session session = this.session;
-        Set<SessionNode> sessionNodes = session.getNodes();
+        Set <SessionNode> sessionNodes = session.getNodes();
 
-        LinkedList<SessionNode> found = new LinkedList<SessionNode>();
-        Set<SessionNode> notFound = new HashSet<SessionNode>();
+        LinkedList <SessionNode> found = new LinkedList <SessionNode>();
+        Set <SessionNode> notFound = new HashSet <SessionNode>();
 
         // The getVariableNodes() method already returns a copy, so there's no
         // need to make a new copy.
         notFound.addAll(sessionNodes);
 
         while (!notFound.isEmpty()) {
-            for (Iterator<SessionNode> it = notFound.iterator(); it.hasNext();) {
+            for (Iterator <SessionNode> it = notFound.iterator(); it.hasNext(); ) {
                 SessionNode sessionNode = it.next();
 
                 if (found.containsAll(sessionNode.getParents())) {
@@ -309,26 +326,6 @@ public final class SimulationStudy {
 
         found.retainAll(getDescendants(node));
         return found;
-    }
-
-    public static Set getDescendants(SessionNode node) {
-        HashSet<SessionNode> descendants = new HashSet<SessionNode>();
-        doChildClosureVisit(node, descendants);
-        return descendants;
-    }
-
-    /**
-     * closure under the child relation
-     */
-    private static void doChildClosureVisit(SessionNode node, Set<SessionNode> closure) {
-        if (!closure.contains(node)) {
-            closure.add(node);
-            Collection<SessionNode> children = node.getChildren();
-
-            for (SessionNode child : children) {
-                doChildClosureVisit(child, closure);
-            }
-        }
     }
 
     private SessionSupport getSessionSupport() {

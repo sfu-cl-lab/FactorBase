@@ -71,10 +71,6 @@ public final class SemProposition implements TetradSerializable {
         }
     }
 
-    public static SemProposition tautology(SemIm semIm) {
-        return new SemProposition(semIm);
-    }
-
     /**
      * Copies the info out of the old proposition into a new proposition for the
      * new BayesIm.
@@ -95,6 +91,10 @@ public final class SemProposition implements TetradSerializable {
         this.semIm = proposition.semIm;
         this.values = new double[proposition.values.length];
         System.arraycopy(proposition.values, 0, this.values, 0, values.length);
+    }
+
+    public static SemProposition tautology(SemIm semIm) {
+        return new SemProposition(semIm);
     }
 
     /**
@@ -133,7 +133,7 @@ public final class SemProposition implements TetradSerializable {
     }
 
     @Override
-	public boolean equals(Object o) {
+    public boolean equals(Object o) {
         if (o == null) {
             return false;
         }
@@ -147,8 +147,7 @@ public final class SemProposition implements TetradSerializable {
         for (int i = 0; i < values.length; i++) {
             if (Double.isNaN(values[i]) && Double.isNaN(proposition.values[i])) {
                 continue;
-            }
-            else if (values[i] != proposition.values[i]) {
+            } else if (values[i] != proposition.values[i]) {
                 return false;
             }
         }
@@ -157,7 +156,7 @@ public final class SemProposition implements TetradSerializable {
     }
 
     @Override
-	public int hashCode() {
+    public int hashCode() {
         int hashCode = 37;
         hashCode = 19 * hashCode + semIm.hashCode();
         hashCode = 19 * hashCode + values.hashCode();
@@ -165,7 +164,7 @@ public final class SemProposition implements TetradSerializable {
     }
 
     @Override
-	public String toString() {
+    public String toString() {
         List nodes = semIm.getVariableNodes();
         StringBuilder buf = new StringBuilder();
         buf.append("\nProposition: ");

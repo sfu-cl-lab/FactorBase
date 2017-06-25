@@ -46,8 +46,19 @@ public final class TestEndpointMatrixGraph extends TestCase {
         super(name);
     }
 
+    /**
+     * This method uses reflection to collect up all of the test methods from
+     * this class and return them to the test runner.
+     */
+    public static Test suite() {
+
+        // Edit the name of the class in the parens to match the name
+        // of this class.
+        return new TestSuite(TestEndpointMatrixGraph.class);
+    }
+
     @Override
-	public void setUp() {
+    public void setUp() {
         x1 = new GraphNode("x1");
         x2 = new GraphNode("x2");
         x3 = new GraphNode("x3");
@@ -71,13 +82,13 @@ public final class TestEndpointMatrixGraph extends TestCase {
         graph.addDirectedEdge(x2, x3);
         graph.addDirectedEdge(x3, x4);
 
-        List<Node> children = graph.getChildren(x1);
-        List<Node> parents = graph.getParents(x4);
+        List <Node> children = graph.getChildren(x1);
+        List <Node> parents = graph.getParents(x4);
 
         assertEquals(children, Collections.singletonList(x2));
         assertEquals(parents, Collections.singletonList(x3));
 
-        assertTrue(graph.isDConnectedTo(x1, x3, new LinkedList<Node>()));
+        assertTrue(graph.isDConnectedTo(x1, x3, new LinkedList <Node>()));
         graph.removeNode(x2);
 
         // No cycles.
@@ -108,8 +119,7 @@ public final class TestEndpointMatrixGraph extends TestCase {
         try {
             graph.addDirectedEdge(x1, x3);
             fail("Shouldn't have been able to add an edge already in the graph.");
-        }
-        catch (IllegalArgumentException e) {
+        } catch (IllegalArgumentException e) {
             // Ignore.
         }
 
@@ -128,17 +138,6 @@ public final class TestEndpointMatrixGraph extends TestCase {
         graph.removeEdge(graph.getEdge(x3, x4));
 
         System.out.println(graph);
-    }
-
-    /**
-     * This method uses reflection to collect up all of the test methods from
-     * this class and return them to the test runner.
-     */
-    public static Test suite() {
-
-        // Edit the name of the class in the parens to match the name
-        // of this class.
-        return new TestSuite(TestEndpointMatrixGraph.class);
     }
 }
 

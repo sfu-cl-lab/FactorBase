@@ -503,16 +503,12 @@ public class LogisticRegression {
 
     }
 
-    private void setCoefficients(double[] c) {
-        System.arraycopy(c, 0, coefficients, 0, c.length);
-    }
-
     public double[] getCoefficients() {
         return coefficients;
     }
 
-    private void setOutGraph(Graph g) {
-        outGraph = g;
+    private void setCoefficients(double[] c) {
+        System.arraycopy(c, 0, coefficients, 0, c.length);
     }
 
     /**
@@ -527,10 +523,14 @@ public class LogisticRegression {
 
     /**
      * @return The graph with a node for the target variable and edges from
-     *         significant regressors (if any) to the target.
+     * significant regressors (if any) to the target.
      */
     public Graph getOutGraph() {
         return outGraph;
+    }
+
+    private void setOutGraph(Graph g) {
+        outGraph = g;
     }
 
     /**

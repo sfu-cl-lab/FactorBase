@@ -93,26 +93,25 @@ public final class TestBDeMetricCache extends TestCase {
             //FactoredBayesStructuralEM fbsem = new FactoredBayesStructuralEM(dds, bayesPm);
             BdeMetricCache bdemc = new BdeMetricCache(ds, bayesPm);
 
-            Set<Node> s1 = new HashSet<Node>();
+            Set <Node> s1 = new HashSet <Node>();
             s1.add(x2);
             s1.add(x3);
             int c1 = bdemc.getScoreCount(x1, s1);
             assertEquals(c1, 3);
 
-            Set<Node> s2 = new HashSet<Node>();
+            Set <Node> s2 = new HashSet <Node>();
             s2.add(x3);
             int c2 = bdemc.getScoreCount(x4, s2);
             assertEquals(c2, 2);
 
-            Set<Node> s3 = new HashSet<Node>();
+            Set <Node> s3 = new HashSet <Node>();
             s3.add(x2);
             s3.add(x3);
             int c3 = bdemc.getScoreCount(x1, s3);
             assertEquals(c3, 3);
 
             System.out.println("c1, c2, c3 = " + c1 + " " + c2 + " " + c3);
-        }
-        catch (IOException e) {
+        } catch (IOException e) {
             e.printStackTrace();
         }
     }

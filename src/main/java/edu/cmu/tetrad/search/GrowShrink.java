@@ -43,7 +43,7 @@ public class GrowShrink implements MbSearch {
     /**
      * The list of variables being searched over. Must contain the target.
      */
-    private List<Node> variables;
+    private List <Node> variables;
 
     /**
      * Constructs a new search.
@@ -66,16 +66,16 @@ public class GrowShrink implements MbSearch {
      * @return the list of node in the Markov blanket.
      */
     @Override
-	public List<Node> findMb(String targetName) {
+    public List <Node> findMb(String targetName) {
         Node target = getVariableForName(targetName);
-        List<Node> blanket = new LinkedList<Node>();
+        List <Node> blanket = new LinkedList <Node>();
 
         boolean changed = true;
 
         while (changed) {
             changed = false;
 
-            List<Node> remaining = new LinkedList<Node>(variables);
+            List <Node> remaining = new LinkedList <Node>(variables);
             remaining.removeAll(blanket);
             remaining.remove(target);
 
@@ -92,7 +92,7 @@ public class GrowShrink implements MbSearch {
         while (changed) {
             changed = false;
 
-            for (Node node : new LinkedList<Node>(blanket)) {
+            for (Node node : new LinkedList <Node>(blanket)) {
                 blanket.remove(node);
 
                 if (independenceTest.isIndependent(node, target, blanket)) {
@@ -108,12 +108,12 @@ public class GrowShrink implements MbSearch {
     }
 
     @Override
-	public String getAlgorithmName() {
+    public String getAlgorithmName() {
         return "Grow Shrink";
     }
 
     @Override
-	public int getNumIndependenceTests() {
+    public int getNumIndependenceTests() {
         return 0;
     }
 
@@ -135,7 +135,7 @@ public class GrowShrink implements MbSearch {
         return target;
     }
 
-    public void setVariables(List<Node> variables) {
+    public void setVariables(List <Node> variables) {
         this.variables = variables;
     }
 }

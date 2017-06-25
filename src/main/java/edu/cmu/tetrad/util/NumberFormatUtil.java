@@ -32,7 +32,7 @@ import java.util.prefs.Preferences;
  */
 public class NumberFormatUtil {
     private static final NumberFormatUtil INSTANCE = new NumberFormatUtil();
-//    private NumberFormat nf = new DecimalFormat(Preferences.userRoot()
+    //    private NumberFormat nf = new DecimalFormat(Preferences.userRoot()
 //            .get("numberFormat", "0.0000"));
     private NumberFormat nf;
 
@@ -40,8 +40,7 @@ public class NumberFormatUtil {
 
         try {
             nf = new DecimalFormat(Preferences.userRoot().get("numberFormat", "0.0000"));
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             nf = new DecimalFormat("0.0000");
         }
 
@@ -57,6 +56,15 @@ public class NumberFormatUtil {
     }
 
     /**
+     * Returns the stored number format.
+     *
+     * @return Ibid.
+     */
+    public NumberFormat getNumberFormat() {
+        return nf;
+    }
+
+    /**
      * Sets the number format, <code>nf</code>.
      *
      * @param nf Ibid.
@@ -68,15 +76,6 @@ public class NumberFormatUtil {
         }
 
         this.nf = nf;
-    }
-
-    /**
-     * Returns the stored number format.
-     *
-     * @return Ibid.
-     */
-    public NumberFormat getNumberFormat() {
-        return nf;
     }
 }
 

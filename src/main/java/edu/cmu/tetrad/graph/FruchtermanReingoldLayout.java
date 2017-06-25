@@ -36,37 +36,31 @@ import java.util.List;
 public final class FruchtermanReingoldLayout {
 
     /**
+     * The number of iterations.
+     */
+    private final int numIterations = 6000;
+    /**
      * The graph being laid out.
      */
     private Graph graph;
-
     /**
      * Array of e for the graph. The ith edge is e[i][0]-->e[i][[1].
      */
     private int[][] edges;
-
     /**
      * The position of each node. The position of the ith node is (pos[i][0],
      * pos[i][1]).
      */
     private double[][] nodePosition;
-
     /**
      * The disposition of each node. The disposition of the ith node is
      * (disp[i][0], disp[i][1]).
      */
     private double[][] nodeDisposition;
-
     /**
      * Optimal distance between vertices.
      */
     private double optimalDistance;
-
-    /**
-     * The number of iterations.
-     */
-    private final int numIterations = 6000;
-
     /**
      * Temperature.
      */
@@ -90,24 +84,24 @@ public final class FruchtermanReingoldLayout {
     //============================PUBLIC METHODS==========================//
 
     public void doLayout() {
-        List<List<Node>> components =
+        List <List <Node>> components =
                 GraphUtils.connectedComponents(this.graph());
 
-        Collections.sort(components, new Comparator<List<Node>>() {
+        Collections.sort(components, new Comparator <List <Node>>() {
             @Override
-			public int compare(List<Node> o1, List<Node> o2) {
+            public int compare(List <Node> o1, List <Node> o2) {
                 int i1 = o1.size();
                 int i2 = o2.size();
                 return i2 < i1 ? -1 : i2 == i1 ? 0 : 1;
             }
         });
 
-        for (List<Node> component1 : components) {
+        for (List <Node> component1 : components) {
             layoutComponent(component1);
         }
     }
 
-    private void layoutComponent(List<Node> nodes) {
+    private void layoutComponent(List <Node> nodes) {
         int numNodes = nodes.size();
         nodePosition = new double[numNodes][2];
         nodeDisposition = new double[numNodes][2];
@@ -121,9 +115,9 @@ public final class FruchtermanReingoldLayout {
             //pos[i][1] = RandomUtil.nextInt(600);
         }
 
-        List<Edge> edges = graph().getEdges();
+        List <Edge> edges = graph().getEdges();
 
-        for (Iterator<Edge> i = edges.iterator(); i.hasNext();) {
+        for (Iterator <Edge> i = edges.iterator(); i.hasNext(); ) {
             Edge edge = i.next();
             if (!nodes.contains(edge.getNode1()) ||
                     !nodes.contains(edge.getNode2())) {
@@ -234,7 +228,7 @@ public final class FruchtermanReingoldLayout {
         shiftComponentToRight(nodes);
     }
 
-    private void shiftComponentToRight(List<Node> componentNodes) {
+    private void shiftComponentToRight(List <Node> componentNodes) {
         double minX = Double.MAX_VALUE, minY = Double.MAX_VALUE;
 
         for (int i = 0; i < componentNodes.size(); i++) {

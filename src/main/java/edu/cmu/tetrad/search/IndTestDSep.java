@@ -27,8 +27,6 @@ import edu.cmu.tetrad.graph.Node;
 import edu.cmu.tetrad.graph.NodeType;
 import edu.cmu.tetrad.util.TetradLogger;
 
-import java.util.*;
-
 /**
  * Checks independence facts for variables associated with the nodes in a given graph by checking d-separation facts on
  * the underlying nodes.
@@ -45,17 +43,17 @@ public class IndTestDSep implements IndependenceTest {
     /**
      * The map from nodes to variables.
      */
-    private Map<Node, Node> nodesToVariables;
+    private Map <Node, Node> nodesToVariables;
 
     /**
      * The map from variables to nodes.
      */
-    private Map<Node, Node> variablesToNodes;
+    private Map <Node, Node> variablesToNodes;
 
     /**
      * The list of observed variables (i.e. variables for observed nodes).
      */
-    private List<Node> observedVars;
+    private List <Node> observedVars;
 
     public IndTestDSep(Graph graph) {
         this(graph, false);
@@ -70,9 +68,9 @@ public class IndTestDSep implements IndependenceTest {
         }
 
         this.graph = graph;
-        this.nodesToVariables = new HashMap<Node, Node>();
-        this.variablesToNodes = new HashMap<Node, Node>();
-        List<Node> nodes = graph.getNodes();
+        this.nodesToVariables = new HashMap <Node, Node>();
+        this.variablesToNodes = new HashMap <Node, Node>();
+        List <Node> nodes = graph.getNodes();
 
         for (Node node : nodes) {
 //            Node variable = new GraphNode(node.getName());
@@ -90,7 +88,7 @@ public class IndTestDSep implements IndependenceTest {
      * Required by IndependenceTest.
      */
     @Override
-	public IndependenceTest indTestSubset(List<Node> vars) {
+    public IndependenceTest indTestSubset(List <Node> vars) {
         if (vars.isEmpty()) {
             throw new IllegalArgumentException("Subset may not be empty.");
         }
@@ -108,11 +106,11 @@ public class IndTestDSep implements IndependenceTest {
     /**
      * Returns the list of observed nodes in the given graph.
      */
-    private List<Node> calcVars(Graph graph, boolean keepLatents) {
+    private List <Node> calcVars(Graph graph, boolean keepLatents) {
         if (keepLatents) {
             return graph.getNodes();
         } else {
-            List<Node> observedVars = new ArrayList<Node>();
+            List <Node> observedVars = new ArrayList <Node>();
 
             for (Node node : graph.getNodes()) {
                 if (node.getNodeType() == NodeType.MEASURED) {
@@ -133,7 +131,7 @@ public class IndTestDSep implements IndependenceTest {
      * @return true iff x _||_ y | z
      */
     @Override
-	public boolean isIndependent(Node x, Node y, List<Node> z) {
+    public boolean isIndependent(Node x, Node y, List <Node> z) {
         if (z == null) {
             throw new NullPointerException();
         }
@@ -147,7 +145,7 @@ public class IndTestDSep implements IndependenceTest {
         Node nodex = getNode(x);
         Node nodey = getNode(y);
 
-        List<Node> nodesz = new ArrayList<Node>();
+        List <Node> nodesz = new ArrayList <Node>();
         for (Node aZ : z) {
             nodesz.add(getNode(aZ));
         }
@@ -166,26 +164,26 @@ public class IndTestDSep implements IndependenceTest {
     }
 
     @Override
-	public boolean isIndependent(Node x, Node y, Node... z) {
-        List<Node> zList = Arrays.asList(z);
+    public boolean isIndependent(Node x, Node y, Node... z) {
+        List <Node> zList = Arrays.asList(z);
         return isIndependent(x, y, zList);
     }
 
     @Override
-	public boolean isDependent(Node x, Node y, List<Node> z) {
+    public boolean isDependent(Node x, Node y, List <Node> z) {
         return !isIndependent(x, y, z);
     }
 
     @Override
-	public boolean isDependent(Node x, Node y, Node... z) {
-        List<Node> zList = Arrays.asList(z);
+    public boolean isDependent(Node x, Node y, Node... z) {
+        List <Node> zList = Arrays.asList(z);
         return isDependent(x, y, zList);
     }
 
     /**
      * Auxiliary method to calculate dseparation facts directly from nodes instead of from variables.
      */
-    public boolean isDSeparated(Node x, Node y, List<Node> z) {
+    public boolean isDSeparated(Node x, Node y, List <Node> z) {
         if (z == null) {
             throw new NullPointerException();
         }
@@ -196,7 +194,7 @@ public class IndTestDSep implements IndependenceTest {
             }
         }
 
-        List<Node> nodesz = new ArrayList<Node>();
+        List <Node> nodesz = new ArrayList <Node>();
 
         for (Node node : z) {
             nodesz.add(node);
@@ -209,7 +207,7 @@ public class IndTestDSep implements IndependenceTest {
      * Needed for IndependenceTest interface. P value is not meaningful here.
      */
     @Override
-	public double getPValue() {
+    public double getPValue() {
         return Double.NaN;
     }
 
@@ -218,7 +216,7 @@ public class IndTestDSep implements IndependenceTest {
      * relations-- that is, all the variables in the given graph or the given data set.
      */
     @Override
-	public List<Node> getVariables() {
+    public List <Node> getVariables() {
         return Collections.unmodifiableList(observedVars);
     }
 
@@ -226,9 +224,9 @@ public class IndTestDSep implements IndependenceTest {
      * Returns the list of variable varNames.
      */
     @Override
-	public List<String> getVariableNames() {
-        List<Node> nodes = getVariables();
-        List<String> nodeNames = new ArrayList<String>();
+    public List <String> getVariableNames() {
+        List <Node> nodes = getVariables();
+        List <String> nodeNames = new ArrayList <String>();
         for (Node var : nodes) {
             nodeNames.add(var.getName());
         }
@@ -236,22 +234,22 @@ public class IndTestDSep implements IndependenceTest {
     }
 
     @Override
-	public boolean determines(List z, Node x1) {
+    public boolean determines(List z, Node x1) {
         return z.contains(x1);
     }
 
     @Override
-	public double getAlpha() {
+    public double getAlpha() {
         throw new UnsupportedOperationException();
     }
 
     @Override
-	public void setAlpha(double alpha) {
+    public void setAlpha(double alpha) {
         throw new UnsupportedOperationException();
     }
 
     @Override
-	public Node getVariable(String name) {
+    public Node getVariable(String name) {
         for (int i = 0; i < getVariables().size(); i++) {
             Node variable = getVariables().get(i);
 
@@ -285,12 +283,12 @@ public class IndTestDSep implements IndependenceTest {
     }
 
     @Override
-	public String toString() {
+    public String toString() {
         return "D-separation";
     }
 
     @Override
-	public DataSet getData() {
+    public DataSet getData() {
         return null;
     }
 }

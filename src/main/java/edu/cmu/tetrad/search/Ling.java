@@ -114,6 +114,151 @@ public class Ling implements GraphGroupSearch {
     //==============================PUBLIC METHODS=========================//
 
     /**
+     * Processes the search algorithm.
+     *
+     * @param n The number of variables.
+     * @return StoredGraphs
+     */
+    private static DoubleMatrix1D getErrorCoeffsIdentity(int n) {
+        DoubleMatrix1D errorCoefficients = new DenseDoubleMatrix1D(n);
+        for (int i = 0; i < n; i++) {
+            errorCoefficients.set(i, 1);
+        }
+        return errorCoefficients;
+    }
+
+    private static DoubleMatrix2D simulateCyclic(GraphWithParameters dwp, DoubleMatrix1D errorCoefficients, int n, Distribution distribution) {
+        DoubleMatrix2D reducedForm = reducedForm(dwp);
+
+        DoubleMatrix2D vectors = new DenseDoubleMatrix2D(dwp.getGraph().getNumNodes(), n);
+        for (int j = 0; j < n; j++) {
+            DoubleMatrix1D vector = simulateReducedForm(reducedForm, errorCoefficients, distribution);
+            vectors.viewColumn(j).assign(vector);
+        }
+        return vectors;
+    }
+
+    private static DoubleMatrix2D reducedForm(GraphWithParameters graph) {
+        int n = graph.getGraph().getNumNodes();
+        DoubleMatrix2D graphMatrix = graph.getGraphMatrix().getDoubleData();
+        DoubleMatrix2D identityMinusGraphMatrix = MatrixUtils.linearCombination(MatrixUtils.identityMatrix(n), 1, graphMatrix, -1);
+        return MatrixUtils.inverse(identityMinusGraphMatrix);
+    }
+
+    private static DoubleMatrix1D simulateReducedForm(DoubleMatrix2D reducedForm, DoubleMatrix1D errorCoefficients, Distribution distr) {
+        int n = reducedForm.rows();
+        DoubleMatrix1D vector = new DenseDoubleMatrix1D(n);
+        DoubleMatrix1D samples = new DenseDoubleMatrix1D(n);
+
+        for (int j = 0; j < n; j++) { //sample from each noise term
+            double sample = distr.nextRandom();
+            double errorCoefficient = errorCoefficients.get(j);
+            samples.set(j, sample * errorCoefficient);
+        }
+
+        for (int i = 0; i < n; i++) { //for each observed variable, i.e. dimension
+            double sum = 0;
+            for (int j = 0; j < n; j++) {
+                double coefficient = reducedForm.get(i, j);
+                double sample = samples.get(j);
+                sum += coefficient * sample;
+            }
+            vector.set(i, sum);
+        }
+        return vector;
+    }
+
+    //==============================PRIVATE METHODS====================//
+
+    private static List <Integer> makeAllRows(int n) {
+        List <Integer> l = new ArrayList <Integer>();
+        for (int i = 0; i < n; i++) {
+            l.add(i);
+        }
+        return l;
+    }
+
+    private static List <List <Integer>> nRookColumnAssignments(DoubleMatrix2D mat, List <Integer> availableRows) {
+        List <List <Integer>> concats = new ArrayList <List <Integer>>();
+
+        int n = availableRows.size();
+
+        for (int i = 0; i < n; i++) {
+            int currentRowIndex = availableRows.get(i);
+
+            if (mat.get(currentRowIndex, 0) != 0) {
+                if (mat.columns() > 1) {
+                    Vector <Integer> newAvailableRows = (new Vector <Integer>(availableRows));
+                    newAvailableRows.removeElement(currentRowIndex);
+                    DoubleMatrix2D subMat = mat.viewPart(0, 1, mat.rows(), mat.columns() - 1);
+                    List <List <Integer>> allLater = nRookColumnAssignments(subMat, newAvailableRows);
+
+                    for (List <Integer> laterPerm : allLater) {
+                        laterPerm.add(0, currentRowIndex);
+                        concats.add(laterPerm);
+                    }
+                } else {
+                    List <Integer> l = new ArrayList <Integer>();
+                    l.add(currentRowIndex);
+                    concats.add(l);
+                }
+            }
+        }
+
+        return concats;
+    }
+
+    // used to produce dataset if one is not provided as the input to the constructor
+
+    private static DoubleMatrix2D permuteRows(DoubleMatrix2D mat, List <Integer> permutation) {
+        int n = mat.columns();
+
+        DoubleMatrix2D permutedMat = new DenseDoubleMatrix2D(n, n);
+        for (int j = 0; j < n; j++) {
+            DoubleMatrix1D row = mat.viewRow(j);
+            permutedMat.viewRow(permutation.get(j)).assign(row);
+        }
+        return permutedMat;
+    }
+
+    // graph matrix is B
+    // mixing matrix (reduced form) is A
+
+    private static DataSet computeBhatMatrix(DoubleMatrix2D normalizedZldW, int n, List <Node> nodes) {//, List<Integer> perm) {
+        DoubleMatrix2D mat = MatrixUtils.linearCombination(MatrixUtils.identityMatrix(n), 1, normalizedZldW, -1);
+        return ColtDataSet.makeContinuousData(nodes, mat);
+    }
+
+    //check against model in which: A =  ..... / (1 - xyzw)
+
+    private static boolean allEigenvaluesAreSmallerThanOneInModulus(DoubleMatrix2D mat) {
+
+        EigenvalueDecomposition dec = new EigenvalueDecomposition(mat);
+        DoubleMatrix1D realEigenvalues = dec.getRealEigenvalues();
+        DoubleMatrix1D imagEigenvalues = dec.getImagEigenvalues();
+
+        boolean allEigenvaluesSmallerThanOneInModulus = true;
+        for (int i = 0; i < realEigenvalues.size(); i++) {
+            double realEigenvalue = realEigenvalues.get(i);
+            double imagEigenvalue = imagEigenvalues.get(i);
+            double modulus = Math.sqrt(Math.pow(realEigenvalue, 2) + Math.pow(imagEigenvalue, 2));
+//			double argument = Math.atan(imagEigenvalue/realEigenvalue);
+//			double modulusCubed = Math.pow(modulus, 3);
+//			System.out.println("eigenvalue #"+i+" = " + realEigenvalue + "+" + imagEigenvalue + "i");
+//			System.out.println("eigenvalue #"+i+" has argument = " + argument);
+//			System.out.println("eigenvalue #"+i+" has modulus = " + modulus);
+//			System.out.println("eigenvalue #"+i+" has modulus^3 = " + modulusCubed);
+
+            if (modulus >= 1) {
+                allEigenvaluesSmallerThanOneInModulus = false;
+            }
+        }
+        return allEigenvaluesSmallerThanOneInModulus;
+    }
+
+    //given the W matrix, outputs the list of SEMs consistent with the observed distribution.
+
+    /**
      * Returns the DataSet that was either provided to the class or the DataSet that the class generated.
      *
      * @return DataSet   Returns a dataset of the data used by the algorithm.
@@ -126,7 +271,7 @@ public class Ling implements GraphGroupSearch {
      * The search method is used to process LiNG. Call search when you want to run the algorithm.
      */
     @Override
-	public StoredGraphs search() {
+    public StoredGraphs search() {
 
         DoubleMatrix2D ica_A, ica_W;
 
@@ -187,11 +332,13 @@ public class Ling implements GraphGroupSearch {
         return graphs;
     }
 
+    // uses the thresholding criterion
+
     /**
      * Calculates the time used when processing the search method.
      */
     @Override
-	public long getElapsedTime() {
+    public long getElapsedTime() {
         return elapsedTime;
     }
 
@@ -203,8 +350,6 @@ public class Ling implements GraphGroupSearch {
     public void setThreshold(double t) {
         threshold = t;
     }
-
-    //==============================PRIVATE METHODS====================//
 
     private void makeDataSet(GraphWithParameters graphWP) {
         //define the "Gaussian-squared" distribution
@@ -220,74 +365,10 @@ public class Ling implements GraphGroupSearch {
         dataSet = ColtDataSet.makeContinuousData(graphWP.getGraph().getNodes(), inVectors.viewDice());
     }
 
-    /**
-     * Processes the search algorithm.
-     *
-     * @param n The number of variables.
-     * @return StoredGraphs
-     */
-    private static DoubleMatrix1D getErrorCoeffsIdentity(int n) {
-        DoubleMatrix1D errorCoefficients = new DenseDoubleMatrix1D(n);
-        for (int i = 0; i < n; i++) {
-            errorCoefficients.set(i, 1);
-        }
-        return errorCoefficients;
-    }
-
-    // used to produce dataset if one is not provided as the input to the constructor
-
-    private static DoubleMatrix2D simulateCyclic(GraphWithParameters dwp, DoubleMatrix1D errorCoefficients, int n, Distribution distribution) {
-        DoubleMatrix2D reducedForm = reducedForm(dwp);
-
-        DoubleMatrix2D vectors = new DenseDoubleMatrix2D(dwp.getGraph().getNumNodes(), n);
-        for (int j = 0; j < n; j++) {
-            DoubleMatrix1D vector = simulateReducedForm(reducedForm, errorCoefficients, distribution);
-            vectors.viewColumn(j).assign(vector);
-        }
-        return vectors;
-    }
-
-    // graph matrix is B
-    // mixing matrix (reduced form) is A
-
-    private static DoubleMatrix2D reducedForm(GraphWithParameters graph) {
-        int n = graph.getGraph().getNumNodes();
-        DoubleMatrix2D graphMatrix = graph.getGraphMatrix().getDoubleData();
-        DoubleMatrix2D identityMinusGraphMatrix = MatrixUtils.linearCombination(MatrixUtils.identityMatrix(n), 1, graphMatrix, -1);
-        return MatrixUtils.inverse(identityMinusGraphMatrix);
-    }
-
-    //check against model in which: A =  ..... / (1 - xyzw)
-
-    private static DoubleMatrix1D simulateReducedForm(DoubleMatrix2D reducedForm, DoubleMatrix1D errorCoefficients, Distribution distr) {
-        int n = reducedForm.rows();
-        DoubleMatrix1D vector = new DenseDoubleMatrix1D(n);
-        DoubleMatrix1D samples = new DenseDoubleMatrix1D(n);
-
-        for (int j = 0; j < n; j++) { //sample from each noise term
-            double sample = distr.nextRandom();
-            double errorCoefficient = errorCoefficients.get(j);
-            samples.set(j, sample * errorCoefficient);
-        }
-
-        for (int i = 0; i < n; i++) { //for each observed variable, i.e. dimension
-            double sum = 0;
-            for (int j = 0; j < n; j++) {
-                double coefficient = reducedForm.get(i, j);
-                double sample = samples.get(j);
-                sum += coefficient * sample;
-            }
-            vector.set(i, sum);
-        }
-        return vector;
-    }
-
-    //given the W matrix, outputs the list of SEMs consistent with the observed distribution.
-
-    private StoredGraphs findCandidateModels(List<Node> variables, DoubleMatrix2D matrixW, int n, boolean approximateZeros) {
+    private StoredGraphs findCandidateModels(List <Node> variables, DoubleMatrix2D matrixW, int n, boolean approximateZeros) {
 
         DoubleMatrix2D normalizedZldW;
-        List<PermutationMatrixPair> zldPerms;
+        List <PermutationMatrixPair> zldPerms;
 
         StoredGraphs gs = new StoredGraphs();
 
@@ -348,9 +429,11 @@ public class Ling implements GraphGroupSearch {
         return gs;
     }
 
-    private List<PermutationMatrixPair> zerolessDiagonalPermutations(DoubleMatrix2D ica_W, boolean approximateZeros) {
+    //	B^ = I - W~'
 
-        List<PermutationMatrixPair> permutations = new Vector<PermutationMatrixPair>();
+    private List <PermutationMatrixPair> zerolessDiagonalPermutations(DoubleMatrix2D ica_W, boolean approximateZeros) {
+
+        List <PermutationMatrixPair> permutations = new Vector <PermutationMatrixPair>();
 
         if (approximateZeros) {
             setInsignificantEntriesToZero(ica_W);
@@ -362,12 +445,12 @@ public class Ling implements GraphGroupSearch {
 
         System.out.println("AAA");
 
-        List<List<Integer>> nRookAssignments = nRookColumnAssignments(mat, makeAllRows(mat.rows()));
+        List <List <Integer>> nRookAssignments = nRookColumnAssignments(mat, makeAllRows(mat.rows()));
 
         System.out.println("BBB");
 
         //for each assignment, add the corresponding permutation to 'permutations'
-        for (List<Integer> permutation : nRookAssignments) {
+        for (List <Integer> permutation : nRookAssignments) {
             DoubleMatrix2D matrixW = permuteRows(ica_W, permutation).viewDice();
             PermutationMatrixPair permMatrixPair = new PermutationMatrixPair(permutation, matrixW);
             permutations.add(permMatrixPair);
@@ -378,8 +461,6 @@ public class Ling implements GraphGroupSearch {
         return permutations;
     }
 
-    // uses the thresholding criterion
-
     private void setInsignificantEntriesToZero(DoubleMatrix2D mat) {
         int n = mat.rows();
         for (int i = 0; i < n; i++) {
@@ -388,87 +469,6 @@ public class Ling implements GraphGroupSearch {
                     mat.set(i, j, 0);
             }
         }
-    }
-
-    private static List<Integer> makeAllRows(int n) {
-        List<Integer> l = new ArrayList<Integer>();
-        for (int i = 0; i < n; i++) {
-            l.add(i);
-        }
-        return l;
-    }
-
-    private static List<List<Integer>> nRookColumnAssignments(DoubleMatrix2D mat, List<Integer> availableRows) {
-        List<List<Integer>> concats = new ArrayList<List<Integer>>();
-
-        int n = availableRows.size();
-
-        for (int i = 0; i < n; i++) {
-            int currentRowIndex = availableRows.get(i);
-
-            if (mat.get(currentRowIndex, 0) != 0) {
-                if (mat.columns() > 1) {
-                    Vector<Integer> newAvailableRows = (new Vector<Integer>(availableRows));
-                    newAvailableRows.removeElement(currentRowIndex);
-                    DoubleMatrix2D subMat = mat.viewPart(0, 1, mat.rows(), mat.columns() - 1);
-                    List<List<Integer>> allLater = nRookColumnAssignments(subMat, newAvailableRows);
-
-                    for (List<Integer> laterPerm : allLater) {
-                        laterPerm.add(0, currentRowIndex);
-                        concats.add(laterPerm);
-                    }
-                } else {
-                    List<Integer> l = new ArrayList<Integer>();
-                    l.add(currentRowIndex);
-                    concats.add(l);
-                }
-            }
-        }
-
-        return concats;
-    }
-
-    private static DoubleMatrix2D permuteRows(DoubleMatrix2D mat, List<Integer> permutation) {
-        int n = mat.columns();
-
-        DoubleMatrix2D permutedMat = new DenseDoubleMatrix2D(n, n);
-        for (int j = 0; j < n; j++) {
-            DoubleMatrix1D row = mat.viewRow(j);
-            permutedMat.viewRow(permutation.get(j)).assign(row);
-        }
-        return permutedMat;
-    }
-
-    //	B^ = I - W~'
-
-    private static DataSet computeBhatMatrix(DoubleMatrix2D normalizedZldW, int n, List<Node> nodes) {//, List<Integer> perm) {
-        DoubleMatrix2D mat = MatrixUtils.linearCombination(MatrixUtils.identityMatrix(n), 1, normalizedZldW, -1);
-        return ColtDataSet.makeContinuousData(nodes, mat);
-    }
-
-    private static boolean allEigenvaluesAreSmallerThanOneInModulus(DoubleMatrix2D mat) {
-
-        EigenvalueDecomposition dec = new EigenvalueDecomposition(mat);
-        DoubleMatrix1D realEigenvalues = dec.getRealEigenvalues();
-        DoubleMatrix1D imagEigenvalues = dec.getImagEigenvalues();
-
-        boolean allEigenvaluesSmallerThanOneInModulus = true;
-        for (int i = 0; i < realEigenvalues.size(); i++) {
-            double realEigenvalue = realEigenvalues.get(i);
-            double imagEigenvalue = imagEigenvalues.get(i);
-            double modulus = Math.sqrt(Math.pow(realEigenvalue, 2) + Math.pow(imagEigenvalue, 2));
-//			double argument = Math.atan(imagEigenvalue/realEigenvalue);
-//			double modulusCubed = Math.pow(modulus, 3);
-//			System.out.println("eigenvalue #"+i+" = " + realEigenvalue + "+" + imagEigenvalue + "i");
-//			System.out.println("eigenvalue #"+i+" has argument = " + argument);
-//			System.out.println("eigenvalue #"+i+" has modulus = " + modulus);
-//			System.out.println("eigenvalue #"+i+" has modulus^3 = " + modulusCubed);
-
-            if (modulus >= 1) {
-                allEigenvaluesSmallerThanOneInModulus = false;
-            }
-        }
-        return allEigenvaluesSmallerThanOneInModulus;
     }
 
     /**
@@ -500,18 +500,18 @@ public class Ling implements GraphGroupSearch {
         /**
          * Graph permutations are stored here.
          */
-        private List<Graph> graphs = new ArrayList<Graph>();
+        private List <Graph> graphs = new ArrayList <Graph>();
 
         /**
          * Store data for each graph in case the data is needed later
          */
-        private List<DataSet> dataSet = new ArrayList<DataSet>();
+        private List <DataSet> dataSet = new ArrayList <DataSet>();
 
         /**
          * Boolean valued vector that contains the stability information for its corresponding graph. stable = true
          * means the graph has all eigenvalues with modulus < 1.
          */
-        private List<Boolean> stable = new ArrayList<Boolean>();
+        private List <Boolean> stable = new ArrayList <Boolean>();
 
         /**
          * Gets the number of graphs stored by the class.
@@ -519,7 +519,7 @@ public class Ling implements GraphGroupSearch {
          * @return Returns the number of graphs stored in the class
          */
         @Override
-		public int getNumGraphs() {
+        public int getNumGraphs() {
             return graphs.size();
         }
 
@@ -530,7 +530,7 @@ public class Ling implements GraphGroupSearch {
          * @return Returns a Graph
          */
         @Override
-		public Graph getGraph(int g) {
+        public Graph getGraph(int g) {
             return graphs.get(g);
         }
 
@@ -560,7 +560,7 @@ public class Ling implements GraphGroupSearch {
          * @param g The graph to add
          */
         @Override
-		public void addGraph(Graph g) {
+        public void addGraph(Graph g) {
             graphs.add(g);
         }
 

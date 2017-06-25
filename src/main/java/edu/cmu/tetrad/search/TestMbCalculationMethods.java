@@ -57,11 +57,22 @@ public class TestMbCalculationMethods extends TestCase {
         super(name);
     }
 
-    public void testNothing() {
+    /**
+     * This method uses reflection to collect up all of the test methods from this class and return them to the test
+     * runner.
+     */
+    public static Test suite() {
 
+        // Edit the name of the class in the parens to match the name
+        // of this class.
+        return new TestSuite(TestMbCalculationMethods.class);
     }
 
     // Comparison of MBF with regression.
+
+    public void testNothing() {
+
+    }
 
     public void rtest1() {
         NumberFormat nf = NumberFormatUtil.getInstance().getNumberFormat();
@@ -104,8 +115,8 @@ public class TestMbCalculationMethods extends TestCase {
             Node t = randomGraph.getNodes().get(0);
             Graph trueMbDag = GraphUtils.markovBlanketDag(t, randomGraph);
 
-            List<Node> nodes2 = trueMbDag.getNodes();
-            List<String> truth = extractVarNames(nodes2, t);
+            List <Node> nodes2 = trueMbDag.getNodes();
+            List <String> truth = extractVarNames(nodes2, t);
 
             SemPm semPm1 = new SemPm(randomGraph);
             SemIm semIm1 = new SemIm(semPm1);
@@ -116,7 +127,7 @@ public class TestMbCalculationMethods extends TestCase {
             double[] target = data[0];
             System.arraycopy(data, 1, regressors, 0, regressors.length);
 
-            List<String> allNames = dataSet.getVariableNames();
+            List <String> allNames = dataSet.getVariableNames();
             String[] names = new String[allNames.size() - 1];
 
             for (int i1 = 1; i1 < allNames.size(); i1++) {
@@ -128,7 +139,7 @@ public class TestMbCalculationMethods extends TestCase {
             regression.setRegressorNames(names);
             RegressionResult result = regression.regress(target, "Target");
 
-            List<String> regressorNames = new ArrayList<String>();
+            List <String> regressorNames = new ArrayList <String>();
 
             for (int i1 = 0; i1 < result.getNumRegressors(); i1++) {
                 if (result.getP()[i1] < alphaRegr) {
@@ -150,36 +161,36 @@ public class TestMbCalculationMethods extends TestCase {
 //            System.out.println("Estimated 1: " + mbDag1);
 //            System.out.println("Estimated 2: " + mbDag2);
 
-            List<Node> nodes = mbDag1.getNodes();
-            List<String> mbf = extractVarNames(nodes, t);
+            List <Node> nodes = mbDag1.getNodes();
+            List <String> mbf = extractVarNames(nodes, t);
 
             // Calculate intersection(mbf, truth).
-            List<String> mbfAndTruth = new ArrayList<String>(mbf);
+            List <String> mbfAndTruth = new ArrayList <String>(mbf);
             mbfAndTruth.retainAll(truth);
 
             // Calculate intersection(regressorNames, truth).
-            List<String> regrAndTruth = new ArrayList<String>(regressorNames);
+            List <String> regrAndTruth = new ArrayList <String>(regressorNames);
             regrAndTruth.retainAll(truth);
 
             // Calculate MB false positives.
-            List<String> mbfFp = new ArrayList<String>(mbf);
+            List <String> mbfFp = new ArrayList <String>(mbf);
             mbfFp.removeAll(mbfAndTruth);
             int r1 = mbfFp.size();
             r1Sum += r1;
 
             // Calculate MB false negatives.
-            List<String> mbfFn = new ArrayList<String>(truth);
+            List <String> mbfFn = new ArrayList <String>(truth);
             mbfFn.removeAll(mbfAndTruth);
             int r2 = mbfFn.size();
             r2Sum += r2;
 
             // Calculate regression false positives.
-            List<String> regrFp = new ArrayList<String>(regressorNames);
+            List <String> regrFp = new ArrayList <String>(regressorNames);
             regrFp.removeAll(regrAndTruth);
             int r3 = regrFp.size();
 
             // Calculate regression false negatives.
-            List<String> regrFn = new ArrayList<String>(truth);
+            List <String> regrFn = new ArrayList <String>(truth);
             regrFn.removeAll(regrAndTruth);
             int r4 = regrFn.size();
 
@@ -242,8 +253,8 @@ public class TestMbCalculationMethods extends TestCase {
             Node t = randomGraph.getNodes().get(0);
             Graph trueMbDag = GraphUtils.markovBlanketDag(t, randomGraph);
 
-            List<Node> nodes2 = trueMbDag.getNodes();
-            List<String> truth = extractVarNames(nodes2, t);
+            List <Node> nodes2 = trueMbDag.getNodes();
+            List <String> truth = extractVarNames(nodes2, t);
 
             SemPm semPm1 = new SemPm(randomGraph);
             SemIm semIm1 = new SemIm(semPm1);
@@ -254,21 +265,21 @@ public class TestMbCalculationMethods extends TestCase {
             Mbfs mbSearch = new Mbfs(test, depth);
             Graph mbDag1 = mbSearch.search(t.getName());
 
-            List<Node> nodes = mbDag1.getNodes();
-            List<String> mbf = extractVarNames(nodes, t);
+            List <Node> nodes = mbDag1.getNodes();
+            List <String> mbf = extractVarNames(nodes, t);
 
             // Calculate intersection(mbf, truth).
-            List<String> mbfAndTruth = new ArrayList<String>(mbf);
+            List <String> mbfAndTruth = new ArrayList <String>(mbf);
             mbfAndTruth.retainAll(truth);
 
             // Calculate MB false positives.
-            List<String> mbfFp = new ArrayList<String>(mbf);
+            List <String> mbfFp = new ArrayList <String>(mbf);
             mbfFp.removeAll(mbfAndTruth);
             int r1 = mbfFp.size();
             r1Sum += r1;
 
             // Calculate MB false negatives.
-            List<String> mbfFn = new ArrayList<String>(truth);
+            List <String> mbfFn = new ArrayList <String>(truth);
             mbfFn.removeAll(mbfAndTruth);
             int r2 = mbfFn.size();
             r2Sum += r2;
@@ -325,8 +336,8 @@ public class TestMbCalculationMethods extends TestCase {
             Node target = randomGraph.getNodes().get(0);
             Graph trueMbDag = GraphUtils.markovBlanketDag(target, randomGraph);
 
-            List<Node> nodes2 = trueMbDag.getNodes();
-            List<String> truth = extractVarNames(nodes2, target);
+            List <Node> nodes2 = trueMbDag.getNodes();
+            List <String> truth = extractVarNames(nodes2, target);
 
             SemPm semPm1 = new SemPm(randomGraph);
             SemIm semIm1 = new SemIm(semPm1);
@@ -343,7 +354,7 @@ public class TestMbCalculationMethods extends TestCase {
                 Mbfs mbSearch = new Mbfs(test, depth);
                 Graph mbDag1 = mbSearch.search(target.getName());
 
-                List<Node> estimated = mbDag1.getNodes();
+                List <Node> estimated = mbDag1.getNodes();
                 estimated.remove(dataSet.getVariable(target.getName()));
                 System.out.println(nf.format(_alpha) + ": " + estimated);
 
@@ -403,21 +414,21 @@ public class TestMbCalculationMethods extends TestCase {
 
         System.out.println("\t FP(MB)\t FN(MB)\t Truth\tFound half?");
 
-        List<Node> graphNodes = randomGraph.getNodes();
+        List <Node> graphNodes = randomGraph.getNodes();
 
         for (int i = 0; i < graphNodes.size(); i++) {
             Node target = graphNodes.get(i);
             Graph trueMbDag = GraphUtils.markovBlanketDag(target, randomGraph);
 
-            List<Node> nodes2 = trueMbDag.getNodes();
-            List<String> truth = extractVarNames(nodes2, target);
+            List <Node> nodes2 = trueMbDag.getNodes();
+            List <String> truth = extractVarNames(nodes2, target);
 
 //            if (truth.size() < 6) {
 //                continue;
 //            }
 
             Graph estimatedMbd = mbSearch.search(target.getName());
-            List<Node> estimatedMb = estimatedMbd.getNodes();
+            List <Node> estimatedMb = estimatedMbd.getNodes();
 //            Variable targetVariable = null;
 //
 //            for (Iterator j = estimatedMb.iterator(); j.hasNext(); ) {
@@ -428,20 +439,20 @@ public class TestMbCalculationMethods extends TestCase {
 //                }
 //            }
 
-            List<String> mbf = extractVarNames(estimatedMb, target);
+            List <String> mbf = extractVarNames(estimatedMb, target);
 
             // Calculate intersection(mbf, truth).
-            List<String> mbfAndTruth = new ArrayList<String>(mbf);
+            List <String> mbfAndTruth = new ArrayList <String>(mbf);
             mbfAndTruth.retainAll(truth);
 
             // Calculate MB false positives.
-            List<String> mbfFp = new ArrayList<String>(mbf);
+            List <String> mbfFp = new ArrayList <String>(mbf);
             mbfFp.removeAll(mbfAndTruth);
             int r1 = mbfFp.size();
             r1Sum += r1;
 
             // Calculate MB false negatives.
-            List<String> mbfFn = new ArrayList<String>(truth);
+            List <String> mbfFn = new ArrayList <String>(truth);
             mbfFn.removeAll(mbfAndTruth);
             int r2 = mbfFn.size();
             r2Sum += r2;
@@ -524,21 +535,21 @@ public class TestMbCalculationMethods extends TestCase {
 
         System.out.println("\t FP(MB)\t FN(MB)\t Truth\tFound half?");
 
-        List<Node> graphNodes = randomGraph.getNodes();
+        List <Node> graphNodes = randomGraph.getNodes();
 
         for (int i = 0; i < graphNodes.size(); i++) {
             Node target = graphNodes.get(i);
             Graph trueMbDag = GraphUtils.markovBlanketDag(target, randomGraph);
 
-            List<Node> nodes2 = trueMbDag.getNodes();
-            List<String> truth = extractVarNames(nodes2, target);
+            List <Node> nodes2 = trueMbDag.getNodes();
+            List <String> truth = extractVarNames(nodes2, target);
 
 //            if (truth.size() < 6) {
 //                continue;
 //            }
 
             Graph estimatedMbd = mbSearch.search(target.getName());
-            List<Node> estimatedMb = estimatedMbd.getNodes();
+            List <Node> estimatedMb = estimatedMbd.getNodes();
 //            Variable targetVariable = null;
 //
 //            for (Iterator j = estimatedMb.iterator(); j.hasNext(); ) {
@@ -549,20 +560,20 @@ public class TestMbCalculationMethods extends TestCase {
 //                }
 //            }
 
-            List<String> mbf = extractVarNames(estimatedMb, target);
+            List <String> mbf = extractVarNames(estimatedMb, target);
 
             // Calculate intersection(mbf, truth).
-            List<String> mbfAndTruth = new ArrayList<String>(mbf);
+            List <String> mbfAndTruth = new ArrayList <String>(mbf);
             mbfAndTruth.retainAll(truth);
 
             // Calculate MB false positives.
-            List<String> mbfFp = new ArrayList<String>(mbf);
+            List <String> mbfFp = new ArrayList <String>(mbf);
             mbfFp.removeAll(mbfAndTruth);
             int r1 = mbfFp.size();
             r1Sum += r1;
 
             // Calculate MB false negatives.
-            List<String> mbfFn = new ArrayList<String>(truth);
+            List <String> mbfFn = new ArrayList <String>(truth);
             mbfFn.removeAll(mbfAndTruth);
             int r2 = mbfFn.size();
             r2Sum += r2;
@@ -652,27 +663,27 @@ public class TestMbCalculationMethods extends TestCase {
                 continue;
             }
 
-            List<Node> nodes2 = trueMbDag.getNodes();
-            List<String> truth = extractVarNames(nodes2, t);
+            List <Node> nodes2 = trueMbDag.getNodes();
+            List <String> truth = extractVarNames(nodes2, t);
 
             Mbfs mbSearch = new Mbfs(test, depth);
             Graph mbDag1 = mbSearch.search(t.getName());
 
-            List<Node> nodes = mbDag1.getNodes();
-            List<String> mbf = extractVarNames(nodes, t);
+            List <Node> nodes = mbDag1.getNodes();
+            List <String> mbf = extractVarNames(nodes, t);
 
             // Calculate intersection(mbf, truth).
-            List<String> mbfAndTruth = new ArrayList<String>(mbf);
+            List <String> mbfAndTruth = new ArrayList <String>(mbf);
             mbfAndTruth.retainAll(truth);
 
             // Calculate MB false positives.
-            List<String> mbfFp = new ArrayList<String>(mbf);
+            List <String> mbfFp = new ArrayList <String>(mbf);
             mbfFp.removeAll(mbfAndTruth);
             int r1 = mbfFp.size();
             r1Sum += r1;
 
             // Calculate MB false negatives.
-            List<String> mbfFn = new ArrayList<String>(truth);
+            List <String> mbfFn = new ArrayList <String>(truth);
             mbfFn.removeAll(mbfAndTruth);
             int r2 = mbfFn.size();
             r2Sum += r2;
@@ -737,7 +748,7 @@ public class TestMbCalculationMethods extends TestCase {
         Mbfs mbSearch = new Mbfs(test, depth);
         GesMbFilter gesFilter = new GesMbFilter(dataSet);
 
-        List<Node> graphNodes = randomGraph.getNodes();
+        List <Node> graphNodes = randomGraph.getNodes();
 
         for (int j = 0; j < 50; j++) {
             int i = RandomUtil.getInstance().nextInt(
@@ -755,8 +766,8 @@ public class TestMbCalculationMethods extends TestCase {
             System.out.println();
             System.out.println("True MB: " + trueMbDag);
 
-            List<Node> trueNodes = trueMbDag.getNodes();
-            List<String> truth = extractVarNames(trueNodes, target);
+            List <Node> trueNodes = trueMbDag.getNodes();
+            List <String> truth = extractVarNames(trueNodes, target);
 
             Graph untrimmed = mbSearch.search(target.getName());
             Node dataTarget = dataSet.getVariable(target.getName());
@@ -774,7 +785,7 @@ public class TestMbCalculationMethods extends TestCase {
             printReport7(mbResult, target, truth, "MBF");
 
             // Do result with GES filter, using all untrimmed nodes.
-            List<Node> untrimmedNodes = untrimmed.getNodes();
+            List <Node> untrimmedNodes = untrimmed.getNodes();
 
 //            System.out.println();
 //            System.out.println("Untrimmed MBF nodes: " + untrimmedNodes);
@@ -835,7 +846,7 @@ public class TestMbCalculationMethods extends TestCase {
         Mbfs mbSearch = new Mbfs(test, depth);
         GesMbFilter filter = new GesMbFilter(dataSet);
 
-        List<Node> graphNodes = randomGraph.getNodes();
+        List <Node> graphNodes = randomGraph.getNodes();
 
         for (int i = 0; i < graphNodes.size(); i++) {
             Node target = graphNodes.get(i);
@@ -848,11 +859,11 @@ public class TestMbCalculationMethods extends TestCase {
             System.out.println();
             System.out.println("True MB: " + trueMbDag);
 
-            List<Node> trueNodes = trueMbDag.getNodes();
-            List<String> truth = extractVarNames(trueNodes, target);
+            List <Node> trueNodes = trueMbDag.getNodes();
+            List <String> truth = extractVarNames(trueNodes, target);
 
             Graph estimate1 = mbSearch.search(target.getName());
-            List<Node> nodes = estimate1.getNodes();
+            List <Node> nodes = estimate1.getNodes();
             estimate1 = filter.filter(nodes, target);
 
             System.out.println();
@@ -872,35 +883,6 @@ public class TestMbCalculationMethods extends TestCase {
             System.out.println("Estimated by GES: " + estimate2);
             printReport7(estimate2, target, truth, "GES");
         }
-    }
-
-    private void printReport7(Graph estimatedMbd, Node target,
-                              List<String> truth, String label) {
-        List<Node> estimatedMb = estimatedMbd.getNodes();
-        List<String> mbf = extractVarNames(estimatedMb, target);
-
-        // Calculate intersection(mbf, truth).
-        List mbfAndTruth = new ArrayList<String>(mbf);
-        mbfAndTruth.retainAll(truth);
-
-        // Calculate MB false positives.
-        List<String> mbfFp = new ArrayList<String>(mbf);
-        mbfFp.removeAll(mbfAndTruth);
-        int r1 = mbfFp.size();
-
-        // Calculate MB false negatives.
-        List<String> mbfFn = new ArrayList<String>(truth);
-        mbfFn.removeAll(mbfAndTruth);
-        int r2 = mbfFn.size();
-
-        // Sum up truths.
-        int r5 = truth.size();
-
-        System.out.println(label + ": Nodes in MB (i.e. w/o target): FP = " +
-                r1 + ", FN = " + r2 + ", TRUTH = " + r5);
-
-//        System.out.println(nf2.format(r1) + "\t" + nf2.format(r2) + "\t" +
-//                nf2.format(r5) + "\t" + label);
     }
 
 //    private String markup(List markovBlanket, List falsePositives,
@@ -957,8 +939,37 @@ public class TestMbCalculationMethods extends TestCase {
 //        return bidirectedParents;
 //    }
 
-    private List<String> extractVarNames(List<Node> nodes, Node target) {
-        List<String> varNames = new ArrayList<String>();
+    private void printReport7(Graph estimatedMbd, Node target,
+                              List <String> truth, String label) {
+        List <Node> estimatedMb = estimatedMbd.getNodes();
+        List <String> mbf = extractVarNames(estimatedMb, target);
+
+        // Calculate intersection(mbf, truth).
+        List mbfAndTruth = new ArrayList <String>(mbf);
+        mbfAndTruth.retainAll(truth);
+
+        // Calculate MB false positives.
+        List <String> mbfFp = new ArrayList <String>(mbf);
+        mbfFp.removeAll(mbfAndTruth);
+        int r1 = mbfFp.size();
+
+        // Calculate MB false negatives.
+        List <String> mbfFn = new ArrayList <String>(truth);
+        mbfFn.removeAll(mbfAndTruth);
+        int r2 = mbfFn.size();
+
+        // Sum up truths.
+        int r5 = truth.size();
+
+        System.out.println(label + ": Nodes in MB (i.e. w/o target): FP = " +
+                r1 + ", FN = " + r2 + ", TRUTH = " + r5);
+
+//        System.out.println(nf2.format(r1) + "\t" + nf2.format(r2) + "\t" +
+//                nf2.format(r5) + "\t" + label);
+    }
+
+    private List <String> extractVarNames(List <Node> nodes, Node target) {
+        List <String> varNames = new ArrayList <String>();
 
         for (Node node : nodes) {
             varNames.add(node.getName());
@@ -967,17 +978,6 @@ public class TestMbCalculationMethods extends TestCase {
         varNames.remove(target.getName());
         Collections.sort(varNames);
         return varNames;
-    }
-
-    /**
-     * This method uses reflection to collect up all of the test methods from this class and return them to the test
-     * runner.
-     */
-    public static Test suite() {
-
-        // Edit the name of the class in the parens to match the name
-        // of this class.
-        return new TestSuite(TestMbCalculationMethods.class);
     }
 }
 

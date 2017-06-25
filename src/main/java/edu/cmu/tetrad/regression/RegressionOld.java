@@ -179,8 +179,7 @@ public class RegressionOld {
 
         if (target.length == sampleSize) {
             n = this.sampleSize;
-        }
-        else {
+        } else {
             throw new IllegalArgumentException(
                     "Target sample size must match regressor sample size.");
         }
@@ -302,7 +301,7 @@ public class RegressionOld {
 
     /**
      * @return The graph with a node for the target variable and edges from
-     *         significant regressors (if any) to the target.
+     * significant regressors (if any) to the target.
      */
     public Graph getOutGraph() {
         return outGraph;

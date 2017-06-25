@@ -44,6 +44,17 @@ public class TestDagScorer extends TestCase {
         super(name);
     }
 
+    /**
+     * This method uses reflection to collect up all of the test methods from
+     * this class and return them to the test runner.
+     */
+    public static Test suite() {
+
+        // Edit the name of the class in the parens to match the name
+        // of this class.
+        return new TestSuite(TestDagScorer.class);
+    }
+
     public void test1() {
         Graph dag = GraphUtils.randomDag(10, 10, false);
 
@@ -73,16 +84,5 @@ public class TestDagScorer extends TestCase {
 
         Graph newDag = GraphUtils.randomDag(data.getVariables(), 10, false);
         System.out.println("new FML " + scorer.score(newDag));
-    }
-
-    /**
-     * This method uses reflection to collect up all of the test methods from
-     * this class and return them to the test runner.
-     */
-    public static Test suite() {
-
-        // Edit the name of the class in the parens to match the name
-        // of this class.
-        return new TestSuite(TestDagScorer.class);
     }
 }

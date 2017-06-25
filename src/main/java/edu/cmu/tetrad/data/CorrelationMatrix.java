@@ -66,8 +66,8 @@ public final class CorrelationMatrix extends CovarianceMatrix
      * Constructs a correlation matrix data set using the given information. The
      * matrix matrix is internally converted to a correlation matrix.
      */
-    public CorrelationMatrix(List<Node> variables, DoubleMatrix2D matrix,
-            int sampleSize) {
+    public CorrelationMatrix(List <Node> variables, DoubleMatrix2D matrix,
+                             int sampleSize) {
         super(variables, MatrixUtils.convertCovToCorr(matrix), sampleSize);
     }
 
@@ -78,14 +78,14 @@ public final class CorrelationMatrix extends CovarianceMatrix
      * @see edu.cmu.tetradapp.util.TetradSerializableUtils
      */
     public static CorrelationMatrix serializableInstance() {
-        return new CorrelationMatrix(new LinkedList<Node>(),
+        return new CorrelationMatrix(new LinkedList <Node>(),
                 new DenseDoubleMatrix2D(0, 0), 1);
     }
 
     //=================================PUBLIC METHODS======================//
 
     @Override
-	public final void setMatrix(DoubleMatrix2D matrix) {
+    public final void setMatrix(DoubleMatrix2D matrix) {
         MatrixUtils.isSquareC(matrix);
 
         for (int i = 0; i < matrix.rows(); i++) {

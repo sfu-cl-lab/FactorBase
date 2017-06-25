@@ -31,9 +31,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 public final class TestCellTable extends TestCase {
-    private CellTable table;
     private final int[] dims = new int[]{2, 2, 2, 2};
-
     private final int[][] data = new int[][]{{1, 1, 1, 0}, {0, 0, 1, 0},
             {1, 1, 1, 0}, {0, 0, 1, 0}, {0, 0, 0, 0}, {1, 1, 1, 0},
             {1, 1, 1, 0}, {0, 1, 0, 1}, {0, 1, 1, 0}, {0, 0, 0, 1},
@@ -285,6 +283,7 @@ public final class TestCellTable extends TestCase {
             {0, 1, 0, 0}, {0, 0, 0, 1}, {0, 0, 0, 1}, {1, 1, 1, 0},
             {0, 0, 1, 0}, {0, 1, 0, 1}, {1, 1, 1, 0}, {0, 1, 0, 1},
             {0, 1, 0, 1}, {0, 0, 0, 1}};
+    private CellTable table;
 
     /**
      * Change the name of this constructor to match the name of the test class.
@@ -293,15 +292,37 @@ public final class TestCellTable extends TestCase {
         super(name);
     }
 
+    private static int[] pickRandomCell(int size) {
+
+        int[] cell = new int[size];
+
+        for (int i = 0; i < size; i++) {
+            cell[i] = RandomUtil.getInstance().nextInt(2);
+        }
+
+        return cell;
+    }
+
+    /**
+     * This method uses reflection to collect up all of the test methods from
+     * this class and return them to the test runner.
+     */
+    public static Test suite() {
+
+        // Edit the name of the class in the parens to match the name
+        // of this class.
+        return new TestSuite(TestCellTable.class);
+    }
+
     @Override
-	public final void setUp() {
+    public final void setUp() {
 
         this.table = new CellTable(dims);
 
 //        // Add data to table.
 //        this.table.addToTable(data, CellTable.ROW_MAJOR);
 
-        List<Node> variables = new LinkedList<Node>();
+        List <Node> variables = new LinkedList <Node>();
         variables.add(new DiscreteVariable("X1", 2));
         variables.add(new DiscreteVariable("X2", 2));
         variables.add(new DiscreteVariable("X3", 2));
@@ -392,8 +413,7 @@ public final class TestCellTable extends TestCase {
                 for (int j = 0; j < data[0].length; j++) {
                     if (testCell[j] == -1) {
                         // Do nothing.
-                    }
-                    else if (aData[j] != testCell[j]) {
+                    } else if (aData[j] != testCell[j]) {
                         inMargin = false;
                     }
                 }
@@ -408,28 +428,6 @@ public final class TestCellTable extends TestCase {
             assertEquals(myCount, this.table.calcMargin(testCell));
             assertEquals(myCount, this.table.calcMargin(cell, marginVars));
         }
-    }
-
-    private static int[] pickRandomCell(int size) {
-
-        int[] cell = new int[size];
-
-        for (int i = 0; i < size; i++) {
-            cell[i] = RandomUtil.getInstance().nextInt(2);
-        }
-
-        return cell;
-    }
-
-    /**
-     * This method uses reflection to collect up all of the test methods from
-     * this class and return them to the test runner.
-     */
-    public static Test suite() {
-
-        // Edit the name of the class in the parens to match the name
-        // of this class.
-        return new TestSuite(TestCellTable.class);
     }
 }
 

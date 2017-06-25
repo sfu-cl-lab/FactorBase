@@ -15,459 +15,455 @@ import edu.cmu.tetrad.bayes.BayesPm;
 import edu.cmu.tetrad.data.Knowledge;
 import edu.cmu.tetrad.graph.Graph;
 
-import javax.swing.*;
-import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
-import java.io.*;
 import java.sql.SQLException;
 
 public class JoinBayesNetEditor extends JPanel implements LayoutEditable {
 
-	private BayesImEditorWizard wizard;
-	private BayesPm bayesPm;
-	private GraphWorkbench workbench = null;
+    private BayesImEditorWizard wizard;
+    private BayesPm bayesPm;
+    private GraphWorkbench workbench = null;
 
-	public JoinBayesNetEditor(BayesIm bayesIm) {
-		if (bayesIm == null) {
-			throw new NullPointerException("Bayes IM must not be null.");
-		}
+    public JoinBayesNetEditor(BayesIm bayesIm) {
+        if (bayesIm == null) {
+            throw new NullPointerException("Bayes IM must not be null.");
+        }
 
-		bayesPm = bayesIm.getBayesPm();
-		Graph graph = bayesPm.getDag();
+        bayesPm = bayesIm.getBayesPm();
+        Graph graph = bayesPm.getDag();
 
-		// elwin added
+        // elwin added
 
-		workbench = new GraphWorkbench(graph);
+        workbench = new GraphWorkbench(graph);
 
-		JMenuBar menuBar = new JMenuBar();
+        JMenuBar menuBar = new JMenuBar();
 
-		JMenu file = new JMenu("File");
-		menuBar.add(file);
-		file.add(new SaveScreenshot(this, true, "Save Screenshot..."));
-		file.add(new SaveComponentImage(workbench, "Save Graph Image..."));
+        JMenu file = new JMenu("File");
+        menuBar.add(file);
+        file.add(new SaveScreenshot(this, true, "Save Screenshot..."));
+        file.add(new SaveComponentImage(workbench, "Save Graph Image..."));
 
-		// file.setAccelerator(
-		// KeyStroke.getKeyStroke(KeyEvent.VK_F, ActionEvent.CTRL_MASK));
-		file.setMnemonic('F');
+        // file.setAccelerator(
+        // KeyStroke.getKeyStroke(KeyEvent.VK_F, ActionEvent.CTRL_MASK));
+        file.setMnemonic('F');
 
-		JMenu export = new JMenu("Export");
-		menuBar.add(export);
+        JMenu export = new JMenu("Export");
+        menuBar.add(export);
 
-		export.setMnemonic('E');
+        export.setMnemonic('E');
 
-		JMenuItem sOut = new JMenuItem("Structure Output");
-		export.add(sOut);
+        JMenuItem sOut = new JMenuItem("Structure Output");
+        export.add(sOut);
 
-		sOut.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_S,
-				ActionEvent.CTRL_MASK));
+        sOut.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_S,
+                ActionEvent.CTRL_MASK));
 
-		JMenuItem pOut = new JMenuItem("Parameter Learning Output");
-		export.add(pOut);
+        JMenuItem pOut = new JMenuItem("Parameter Learning Output");
+        export.add(pOut);
 
-		pOut.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_P,
-				ActionEvent.CTRL_MASK));
+        pOut.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_P,
+                ActionEvent.CTRL_MASK));
 
-		JMenuItem dOut = new JMenuItem("Decision Tree with Weight");
-		export.add(dOut);
+        JMenuItem dOut = new JMenuItem("Decision Tree with Weight");
+        export.add(dOut);
 
-		dOut.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_W,
-				ActionEvent.CTRL_MASK));
+        dOut.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_W,
+                ActionEvent.CTRL_MASK));
 
-		JMenuItem dsOut = new JMenuItem("Decision Tree Structure");
-		export.add(dsOut);
+        JMenuItem dsOut = new JMenuItem("Decision Tree Structure");
+        export.add(dsOut);
 
-		dsOut.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_D,
-				ActionEvent.CTRL_MASK));
+        dsOut.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_D,
+                ActionEvent.CTRL_MASK));
 
-		JMenu tools = new JMenu("Tools");
-		/* Yuke disables the MLN analyzer on July 18, 2012 */
+        JMenu tools = new JMenu("Tools");
+        /* Yuke disables the MLN analyzer on July 18, 2012 */
 //		menuBar.add(tools);
 
-		tools.setMnemonic('T');
+        tools.setMnemonic('T');
 
-		// JMenuItem setConnection = new JMenuItem("Set Connection");
-		// tools.add(setConnection);
-		//		
-		// setConnection.addActionListener(new ActionListener() {
-		// public void actionPerformed(ActionEvent e) {
-		// openFile("config.xml");
-		//		
-		// }
-		// });
-		//		
-		JMenuItem mlncheck = new JMenuItem("MLN Analyzer");
-		tools.add(mlncheck);
+        // JMenuItem setConnection = new JMenuItem("Set Connection");
+        // tools.add(setConnection);
+        //
+        // setConnection.addActionListener(new ActionListener() {
+        // public void actionPerformed(ActionEvent e) {
+        // openFile("config.xml");
+        //
+        // }
+        // });
+        //
+        JMenuItem mlncheck = new JMenuItem("MLN Analyzer");
+        tools.add(mlncheck);
 
-		menuBar.add(new LayoutMenu(this));
+        menuBar.add(new LayoutMenu(this));
 
-		sOut.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				output("mbn");
-				openMLN();
-				msgbox("Export MLN successfully!");
-			}
-		});
+        sOut.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                output("mbn");
+                openMLN();
+                msgbox("Export MLN successfully!");
+            }
+        });
 
-		pOut.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				String method = inputBox("Input method (mbn/log/lsn)");
-				if (!method.equals(""))
-				{
-					output(method);
-					openMLN();
-					msgbox("Export MLN successfully!");
-				}
-			}
-		});
+        pOut.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                String method = inputBox("Input method (mbn/log/lsn)");
+                if (!method.equals("")) {
+                    output(method);
+                    openMLN();
+                    msgbox("Export MLN successfully!");
+                }
+            }
+        });
 
-		dOut.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				outputDecisionTree("Weight");
-				openMLN("DT");
-				msgbox("Export MLN successfully!");
-			}
-		});
+        dOut.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                outputDecisionTree("Weight");
+                openMLN("DT");
+                msgbox("Export MLN successfully!");
+            }
+        });
 
-		dsOut.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				outputDecisionTree("Structure");
-				openMLN("DT");
-				msgbox("Export MLN successfully!");
-			}
-		});
+        dsOut.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                outputDecisionTree("Structure");
+                openMLN("DT");
+                msgbox("Export MLN successfully!");
+            }
+        });
 
-		mlncheck.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				analyzeMln();
-			}
-		});
+        mlncheck.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                analyzeMln();
+            }
+        });
 
-		setLayout(new BorderLayout());
-		add(menuBar, BorderLayout.NORTH);
+        setLayout(new BorderLayout());
+        add(menuBar, BorderLayout.NORTH);
 
-		wizard = new BayesImEditorWizard(bayesIm, workbench);
+        wizard = new BayesImEditorWizard(bayesIm, workbench);
 
-		wizard.addPropertyChangeListener(new PropertyChangeListener() {
-			@Override
-			public void propertyChange(PropertyChangeEvent evt) {
-				if ("editorValueChanged".equals(evt.getPropertyName())) {
-					firePropertyChange("modelChanged", null, null);
-				}
-			}
-		});
+        wizard.addPropertyChangeListener(new PropertyChangeListener() {
+            @Override
+            public void propertyChange(PropertyChangeEvent evt) {
+                if ("editorValueChanged".equals(evt.getPropertyName())) {
+                    firePropertyChange("modelChanged", null, null);
+                }
+            }
+        });
 
-		JScrollPane workbenchScroll = new JScrollPane(workbench);
-		JScrollPane wizardScroll = new JScrollPane(getWizard());
+        JScrollPane workbenchScroll = new JScrollPane(workbench);
+        JScrollPane wizardScroll = new JScrollPane(getWizard());
 
-		workbenchScroll.setPreferredSize(new Dimension(450, 450));
+        workbenchScroll.setPreferredSize(new Dimension(450, 450));
 
-		JSplitPane splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT,
-				workbenchScroll, wizardScroll);
-		splitPane.setOneTouchExpandable(true);
-		splitPane.setDividerLocation(workbenchScroll.getPreferredSize().width);
-		add(splitPane, BorderLayout.CENTER);
+        JSplitPane splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT,
+                workbenchScroll, wizardScroll);
+        splitPane.setOneTouchExpandable(true);
+        splitPane.setDividerLocation(workbenchScroll.getPreferredSize().width);
+        add(splitPane, BorderLayout.CENTER);
 
-		setName("Bayes IM Editor");
-		getWizard().addPropertyChangeListener(new PropertyChangeListener() {
-			@Override
-			public void propertyChange(PropertyChangeEvent evt) {
-				if ("editorClosing".equals(evt.getPropertyName())) {
-					firePropertyChange("editorClosing", null, getName());
-				}
+        setName("Bayes IM Editor");
+        getWizard().addPropertyChangeListener(new PropertyChangeListener() {
+            @Override
+            public void propertyChange(PropertyChangeEvent evt) {
+                if ("editorClosing".equals(evt.getPropertyName())) {
+                    firePropertyChange("editorClosing", null, getName());
+                }
 
-				if ("closeFrame".equals(evt.getPropertyName())) {
-					firePropertyChange("closeFrame", null, null);
-					firePropertyChange("editorClosing", true, true);
-				}
+                if ("closeFrame".equals(evt.getPropertyName())) {
+                    firePropertyChange("closeFrame", null, null);
+                    firePropertyChange("editorClosing", true, true);
+                }
 
-				if ("modelChanged".equals(evt.getPropertyName())) {
-					firePropertyChange("modelChanged", evt.getOldValue(), evt
-							.getNewValue());
-				}
-			}
-		});
+                if ("modelChanged".equals(evt.getPropertyName())) {
+                    firePropertyChange("modelChanged", evt.getOldValue(), evt
+                            .getNewValue());
+                }
+            }
+        });
 
-	}
+    }
 
-	public void analyzeMln() {
-		String method = inputBox("See VJ or DT?");
-		String file = "";
-		if (method.equals("VJ")) {
-			file = global.WorkingDirectory + "/" + global.schema + "_VJ.mln";
-		} else if (method.equals("DT")) {
-			file = global.WorkingDirectory + "/" + global.schema
-					+ "_DecisionTree.mln";
-		}
-		analyze a = new analyze();
-		a.process(file);
-		openFile("result.txt");
-	}
+    /**
+     * Constructs a new instanted model editor from a Bayes IM wrapper.
+     */
 
-	public void openFile(String file) {
-		Runtime load = Runtime.getRuntime();
-		String program = "\"C:\\WINDOWS\\system32\\write.exe\"";
-		try {
-			load.exec(program + " " + file);
-		} catch (IOException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
-		}
+    public JoinBayesNetEditor(DirichletBayesImWrapper dirichletBayesImWrapper) {
+        this(dirichletBayesImWrapper.getDirichletBayesIm());
+    }
 
-	}
+    /**
+     * Constructs a new Bayes IM Editor from a Dirichlet Prior.
+     */
+    public JoinBayesNetEditor(JoinBayesNetEstimatorWrapper jbEstWrapper) {
 
-	public void openMLN() {
-		Runtime load = Runtime.getRuntime();
-		String program = "\"C:\\WINDOWS\\system32\\write.exe\"";
-		String file = global.WorkingDirectory + "/" + global.schema
-				+ "_VJ.mln";
-		try {
-			load.exec(program + " " + file);
-		} catch (IOException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
-		}
-	}
+        this(jbEstWrapper.getEstimatedBayesIm());
+    }
 
-	public void openMLN(String method) {
-		if (method.equals("DT")) {
-			Runtime load = Runtime.getRuntime();
-			String program = "\"C:\\WINDOWS\\system32\\write.exe\"";
-			String file = global.WorkingDirectory + "/" + global.schema
-					+ "_DecisionTree.mln";
-			try {
-				load.exec(program + " " + file);
-			} catch (IOException e1) {
-				// TODO Auto-generated catch block
-				e1.printStackTrace();
-			}
-		}
-	}
+    public void analyzeMln() {
+        String method = inputBox("See VJ or DT?");
+        String file = "";
+        if (method.equals("VJ")) {
+            file = global.WorkingDirectory + "/" + global.schema + "_VJ.mln";
+        } else if (method.equals("DT")) {
+            file = global.WorkingDirectory + "/" + global.schema
+                    + "_DecisionTree.mln";
+        }
+        analyze a = new analyze();
+        a.process(file);
+        openFile("result.txt");
+    }
 
-	public void outputDecisionTree(String method) {
+    public void openFile(String file) {
+        Runtime load = Runtime.getRuntime();
+        String program = "\"C:\\WINDOWS\\system32\\write.exe\"";
+        try {
+            load.exec(program + " " + file);
+        } catch (IOException e1) {
+            // TODO Auto-generated catch block
+            e1.printStackTrace();
+        }
 
-		// prepare
-		global.initialize();
+    }
 
-		System.out.println("Starting MLN parameter learning package on "
-				+ global.schema);
-		ReadXML sqlToXMLReader = new CorrelatedSQLToXML();
-		try {
-			sqlToXMLReader.initialize();
-		} catch (SQLException e1) {
-			System.out.println("SQLtoXML initialization problem");
-			e1.printStackTrace();
-		}
-		// xml file is ready
+    public void openMLN() {
+        Runtime load = Runtime.getRuntime();
+        String program = "\"C:\\WINDOWS\\system32\\write.exe\"";
+        String file = global.WorkingDirectory + "/" + global.schema
+                + "_VJ.mln";
+        try {
+            load.exec(program + " " + file);
+        } catch (IOException e1) {
+            // TODO Auto-generated catch block
+            e1.printStackTrace();
+        }
+    }
 
-		Parser.initialize();
+    public void openMLN(String method) {
+        if (method.equals("DT")) {
+            Runtime load = Runtime.getRuntime();
+            String program = "\"C:\\WINDOWS\\system32\\write.exe\"";
+            String file = global.WorkingDirectory + "/" + global.schema
+                    + "_DecisionTree.mln";
+            try {
+                load.exec(program + " " + file);
+            } catch (IOException e1) {
+                // TODO Auto-generated catch block
+                e1.printStackTrace();
+            }
+        }
+    }
 
-		ReadSQL_MLN_Files r = new ReadSQL_MLN_Files();
-		try {
-			r.initialize();
-			PrintStream out1 = new PrintStream(new FileOutputStream(
-					global.WorkingDirectory + "/" + global.schema + ".db"));
-			PrintStream out2 = new PrintStream(new FileOutputStream(
-					global.WorkingDirectory + "/" + global.schema
-							+ "predicate.mln"));
-			PrintStream out3 = new PrintStream(new FileOutputStream(
-					global.WorkingDirectory + "/" + global.schema
-							+ "predicate_temp.mln"));
+    public void outputDecisionTree(String method) {
 
-			r.read(out1, out2, out3);
+        // prepare
+        global.initialize();
 
-			System.out.println("DB file and MLN predicate file created");
+        System.out.println("Starting MLN parameter learning package on "
+                + global.schema);
+        ReadXML sqlToXMLReader = new CorrelatedSQLToXML();
+        try {
+            sqlToXMLReader.initialize();
+        } catch (SQLException e1) {
+            System.out.println("SQLtoXML initialization problem");
+            e1.printStackTrace();
+        }
+        // xml file is ready
 
-		} catch (SQLException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+        Parser.initialize();
 
-		long l = System.currentTimeMillis();
-		S_learning sLearn = new S_learning(2);
-		// System.out.println("Stucture learning begins");
-		BayesPm bayes = sLearn.major();
-		long l2 = System.currentTimeMillis();
-		System.out.print("SLtime(ms):   ");
-		System.out.println(l2 - l);
+        ReadSQL_MLN_Files r = new ReadSQL_MLN_Files();
+        try {
+            r.initialize();
+            PrintStream out1 = new PrintStream(new FileOutputStream(
+                    global.WorkingDirectory + "/" + global.schema + ".db"));
+            PrintStream out2 = new PrintStream(new FileOutputStream(
+                    global.WorkingDirectory + "/" + global.schema
+                            + "predicate.mln"));
+            PrintStream out3 = new PrintStream(new FileOutputStream(
+                    global.WorkingDirectory + "/" + global.schema
+                            + "predicate_temp.mln"));
 
-		// Preparing();
-		try {
-			System.out
-					.println("Structure learning using Decision Trees begins");
-			long l3 = System.currentTimeMillis();
-			Decisiontree tree = new Decisiontree(bayes);
-			String rules = null;
-			if (method.equals("Weight"))
-				rules = tree.decisionTreeLearner("dtlsn");
-			else 
-				rules = tree.decisionTreeLearner("dtmbn");
-			long l4 = System.currentTimeMillis();
-			System.out
-					.print("Structure learning using Decision Trees ends. Running time of Decision tree leasrning(ms)");
-			System.out.println(l4 - l3);
-			Writer output = null;
-			File file = new File(global.WorkingDirectory + "/" + global.schema
-					+ "_DecisionTree.mln");
-			try {
-				output = new BufferedWriter(new FileWriter(file));
-				output.write(rules.toString());
-				output.close();
-				System.out.println("MLN ready for use "
-						+ global.WorkingDirectory + "/" + global.schema
-						+ "_DecisionTree.mln");
-			} catch (Exception e) {
+            r.read(out1, out2, out3);
 
-			}
-		} catch (Exception e) {
+            System.out.println("DB file and MLN predicate file created");
 
-			e.printStackTrace();
-		}
+        } catch (SQLException e1) {
+            // TODO Auto-generated catch block
+            e1.printStackTrace();
+        } catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
 
-	}
+        long l = System.currentTimeMillis();
+        S_learning sLearn = new S_learning(2);
+        // System.out.println("Stucture learning begins");
+        BayesPm bayes = sLearn.major();
+        long l2 = System.currentTimeMillis();
+        System.out.print("SLtime(ms):   ");
+        System.out.println(l2 - l);
 
-	public void output(String method) {
+        // Preparing();
+        try {
+            System.out
+                    .println("Structure learning using Decision Trees begins");
+            long l3 = System.currentTimeMillis();
+            Decisiontree tree = new Decisiontree(bayes);
+            String rules = null;
+            if (method.equals("Weight"))
+                rules = tree.decisionTreeLearner("dtlsn");
+            else
+                rules = tree.decisionTreeLearner("dtmbn");
+            long l4 = System.currentTimeMillis();
+            System.out
+                    .print("Structure learning using Decision Trees ends. Running time of Decision tree leasrning(ms)");
+            System.out.println(l4 - l3);
+            Writer output = null;
+            File file = new File(global.WorkingDirectory + "/" + global.schema
+                    + "_DecisionTree.mln");
+            try {
+                output = new BufferedWriter(new FileWriter(file));
+                output.write(rules.toString());
+                output.close();
+                System.out.println("MLN ready for use "
+                        + global.WorkingDirectory + "/" + global.schema
+                        + "_DecisionTree.mln");
+            } catch (Exception e) {
 
-		Preparing();
-		ExportToMLN export = new ExportToMLN();
+            }
+        } catch (Exception e) {
 
-		StringBuffer rules;
-		try {
-			rules = export.export(method);
+            e.printStackTrace();
+        }
 
-			FileOutputStream outputStream = new FileOutputStream(
-					global.WorkingDirectory + "/" + global.schema + "_VJ.mln",
-					true);
-			outputStream.write(rules.toString().getBytes());
-			System.out.println("MLN ready for use " + global.WorkingDirectory
-					+ "/" + global.schema + "_VJ.mln");
-			outputStream.close();
-		} catch (Exception e) {
+    }
 
-		}
-	}
+    public void output(String method) {
 
-	public void Preparing() {
-		global.initialize();
+        Preparing();
+        ExportToMLN export = new ExportToMLN();
 
-		System.out.println("Starting MLN parameter learning package on "
-				+ global.schema);
-		ReadXML sqlToXMLReader = new CorrelatedSQLToXML();
-		try {
-			sqlToXMLReader.initialize();
-		} catch (SQLException e1) {
-			System.out.println("SQLtoXML initialization problem");
-			e1.printStackTrace();
-		}
-		// xml file is ready
+        StringBuffer rules;
+        try {
+            rules = export.export(method);
 
-		Parser.initialize();
+            FileOutputStream outputStream = new FileOutputStream(
+                    global.WorkingDirectory + "/" + global.schema + "_VJ.mln",
+                    true);
+            outputStream.write(rules.toString().getBytes());
+            System.out.println("MLN ready for use " + global.WorkingDirectory
+                    + "/" + global.schema + "_VJ.mln");
+            outputStream.close();
+        } catch (Exception e) {
 
-		ReadSQL_MLN_Files r = new ReadSQL_MLN_Files();
-		try {
-			r.initialize();
-			PrintStream out1 = new PrintStream(new FileOutputStream(
-					global.WorkingDirectory + "/" + global.schema + ".db"));
-			PrintStream out2 = new PrintStream(new FileOutputStream(
-					global.WorkingDirectory + "/" + global.schema + "_VJ.mln"));
-			PrintStream out3 = new PrintStream(new FileOutputStream(
-					global.WorkingDirectory + "/" + global.schema
-							+ "predicate_temp.mln"));
+        }
+    }
 
-			r.read(out1, out2, out3);
+    public void Preparing() {
+        global.initialize();
 
-			System.out.println("DB file and MLN predicate file created");
-		} catch (SQLException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-	}
+        System.out.println("Starting MLN parameter learning package on "
+                + global.schema);
+        ReadXML sqlToXMLReader = new CorrelatedSQLToXML();
+        try {
+            sqlToXMLReader.initialize();
+        } catch (SQLException e1) {
+            System.out.println("SQLtoXML initialization problem");
+            e1.printStackTrace();
+        }
+        // xml file is ready
 
-	/**
-	 * Constructs a new instanted model editor from a Bayes IM wrapper.
-	 */
+        Parser.initialize();
 
-	public JoinBayesNetEditor(DirichletBayesImWrapper dirichletBayesImWrapper) {
-		this(dirichletBayesImWrapper.getDirichletBayesIm());
-	}
+        ReadSQL_MLN_Files r = new ReadSQL_MLN_Files();
+        try {
+            r.initialize();
+            PrintStream out1 = new PrintStream(new FileOutputStream(
+                    global.WorkingDirectory + "/" + global.schema + ".db"));
+            PrintStream out2 = new PrintStream(new FileOutputStream(
+                    global.WorkingDirectory + "/" + global.schema + "_VJ.mln"));
+            PrintStream out3 = new PrintStream(new FileOutputStream(
+                    global.WorkingDirectory + "/" + global.schema
+                            + "predicate_temp.mln"));
 
-	/**
-	 * Constructs a new Bayes IM Editor from a Dirichlet Prior.
-	 */
-	public JoinBayesNetEditor(JoinBayesNetEstimatorWrapper jbEstWrapper) {
+            r.read(out1, out2, out3);
 
-		this(jbEstWrapper.getEstimatedBayesIm());
-	}
+            System.out.println("DB file and MLN predicate file created");
+        } catch (SQLException e1) {
+            // TODO Auto-generated catch block
+            e1.printStackTrace();
+        } catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+    }
 
-	/**
-	 * Sets the name of this editor.
-	 */
-	@Override
-	public void setName(String name) {
-		String oldName = getName();
-		super.setName(name);
-		this.firePropertyChange("name", oldName, getName());
-	}
+    /**
+     * Sets the name of this editor.
+     */
+    @Override
+    public void setName(String name) {
+        String oldName = getName();
+        super.setName(name);
+        this.firePropertyChange("name", oldName, getName());
+    }
 
-	public String inputBox(String title) {
-		String method = JOptionPane.showInputDialog(this, title);
-		return method;
+    public String inputBox(String title) {
+        String method = JOptionPane.showInputDialog(this, title);
+        return method;
 
-	}
+    }
 
-	public void msgbox(String information) {
-		JOptionPane.showMessageDialog(this, information);
-	}
+    public void msgbox(String information) {
+        JOptionPane.showMessageDialog(this, information);
+    }
 
-	/**
-	 * Returns a reference to this editor.
-	 */
+    /**
+     * Returns a reference to this editor.
+     */
 
-	public BayesImEditorWizard getWizard() {
-		return wizard;
-	}
+    public BayesImEditorWizard getWizard() {
+        return wizard;
+    }
 
-	@Override
-	public Graph getGraph() {
-		// TODO Auto-generated method stub
-		return bayesPm.getDag();
-	}
+    @Override
+    public Graph getGraph() {
+        // TODO Auto-generated method stub
+        return bayesPm.getDag();
+    }
 
-	@Override
-	public Knowledge getKnowledge() {
-		// TODO Auto-generated method stub
-		return null;
-	}
+    @Override
+    public Knowledge getKnowledge() {
+        // TODO Auto-generated method stub
+        return null;
+    }
 
-	@Override
-	public Graph getSourceGraph() {
-		// TODO Auto-generated method stub
-		return workbench.getGraph();
-	}
+    @Override
+    public Graph getSourceGraph() {
+        // TODO Auto-generated method stub
+        return workbench.getGraph();
+    }
 
-	@Override
-	public void layoutByGraph(Graph graph) {
-		// TODO Auto-generated method stub
-		workbench.layoutByGraph(graph);
-	}
+    @Override
+    public void layoutByGraph(Graph graph) {
+        // TODO Auto-generated method stub
+        workbench.layoutByGraph(graph);
+    }
 
-	@Override
-	public void layoutByKnowledge() {
-		// TODO Auto-generated method stub
+    @Override
+    public void layoutByKnowledge() {
+        // TODO Auto-generated method stub
 
-	}
+    }
 }

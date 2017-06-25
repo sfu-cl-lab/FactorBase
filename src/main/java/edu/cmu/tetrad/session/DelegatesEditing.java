@@ -21,9 +21,6 @@
 
 package edu.cmu.tetrad.session;
 
-import javax.swing.*;
-
-
 /**
  * An interface for editors that degate their editing responsibilities.
  *

@@ -107,7 +107,7 @@ public final class DirichletDataSetProbs implements DiscreteProbs {
      * variable values is the order of the variables in getVariable().
      */
     @Override
-	public double getCellProb(int[] variableValues) {
+    public double getCellProb(int[] variableValues) {
         int[] point = new int[dims.length];
         int count = 0;
 
@@ -128,7 +128,7 @@ public final class DirichletDataSetProbs implements DiscreteProbs {
      * Returns the estimated probability of the given proposition.
      */
     @Override
-	public double getProb(Proposition assertion) {
+    public double getProb(Proposition assertion) {
         int[] point = new int[dims.length];
         int count = 0;
 
@@ -150,16 +150,16 @@ public final class DirichletDataSetProbs implements DiscreteProbs {
      * conditional on the given condition.
      */
     @Override
-	public double getConditionalProb(Proposition assertion,
-            Proposition condition) {
+    public double getConditionalProb(Proposition assertion,
+                                     Proposition condition) {
         if (assertion.getVariableSource() != condition.getVariableSource()) {
             throw new IllegalArgumentException(
                     "Assertion and condition must be " +
                             "for the same Bayes IM.");
         }
 
-        List<Node> assertionVars = assertion.getVariableSource().getVariables();
-        List<Node> dataVars = dataSet.getVariables();
+        List <Node> assertionVars = assertion.getVariableSource().getVariables();
+        List <Node> dataVars = dataSet.getVariables();
 
         if (!assertionVars.equals(dataVars)) {
             throw new IllegalArgumentException(
@@ -202,7 +202,7 @@ public final class DirichletDataSetProbs implements DiscreteProbs {
     }
 
     @Override
-	public boolean isMissingValueCaseFound() {
+    public boolean isMissingValueCaseFound() {
         return false;
     }
 
@@ -218,7 +218,7 @@ public final class DirichletDataSetProbs implements DiscreteProbs {
      * probabilities for.
      */
     @Override
-	public List<Node> getVariables() {
+    public List <Node> getVariables() {
         return null;
     }
 

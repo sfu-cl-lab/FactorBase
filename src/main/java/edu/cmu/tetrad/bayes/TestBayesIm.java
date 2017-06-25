@@ -170,7 +170,7 @@ public final class TestBayesIm extends TestCase {
         System.out.println(bayesIm3);
 
         bayesPm.setNumCategories(b, 2);
-        BayesIm bayesIm4 = new MlBayesIm(bayesPm,MlBayesIm.RANDOM);
+        BayesIm bayesIm4 = new MlBayesIm(bayesPm, MlBayesIm.RANDOM);
 
         // At this point, a has 2 categories, b has 2 categories, and c has 4 categories.
 
@@ -232,7 +232,7 @@ public final class TestBayesIm extends TestCase {
     }
 
     private static boolean rowsEqual(BayesIm bayesIm, int node, int row1,
-            int row2) {
+                                     int row2) {
         for (int col = 0; col < bayesIm.getNumColumns(node); col++) {
             double prob1 = bayesIm.getProbability(node, row1, col);
             double prob2 = bayesIm.getProbability(node, row2, col);

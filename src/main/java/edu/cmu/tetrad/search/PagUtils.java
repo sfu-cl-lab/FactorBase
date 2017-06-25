@@ -24,8 +24,6 @@ package edu.cmu.tetrad.search;
 import edu.cmu.tetrad.graph.*;
 import edu.cmu.tetrad.util.ChoiceGenerator;
 
-import java.util.*;
-
 /**
  * This class contains methods which can be used to determine whether a directed graph is in the equivalence class
  * determined by the given PAG.  See p. 300 Def. 12.1.1 of CPS for a specification.
@@ -45,7 +43,7 @@ public final class PagUtils {
         System.out.println("DAG = " + dag);
 
         //(1) Every vertex in gamma is in O (measured nodes in dag)
-        List<Node> pagNodes = pag.getNodes();
+        List <Node> pagNodes = pag.getNodes();
 
         //If there is a node in pag that's not a measured node in dag return false.
         for (Node pagNode : pagNodes) {
@@ -65,8 +63,8 @@ public final class PagUtils {
         //If A and B are in O, there is an edge between A and B in gamma
         //iff for every W subset of O minus {A, B}, A and B are d-connected
         //given W union S in [every graph] in delta (dag).
-        List<Node> dagNodes = new LinkedList<Node>(dag.getNodes());
-        List<Node> dagONodes = new LinkedList<Node>();
+        List <Node> dagNodes = new LinkedList <Node>(dag.getNodes());
+        List <Node> dagONodes = new LinkedList <Node>();
 
         IndependenceTest test = new IndTestDSep(pag);
 
@@ -85,7 +83,7 @@ public final class PagUtils {
 
                 //System.out.println("A = " + Ad.getName() + " B = " + Bd.getName());
 
-                List<Node> OMinusAB = new ArrayList<Node>(dagONodes);
+                List <Node> OMinusAB = new ArrayList <Node>(dagONodes);
                 OMinusAB.remove(Ad);
                 OMinusAB.remove(Bd);
 
@@ -100,7 +98,7 @@ public final class PagUtils {
                 Node Bp = pag.getNode(Bd.getName());
 
                 //Is there an edge between A and B in gamma?
-                List<Edge> edgesABgamma = pag.getEdges(Ap, Bp);
+                List <Edge> edgesABgamma = pag.getEdges(Ap, Bp);
                 boolean existsEdgeABgamma = (edgesABgamma.size() > 0);
                 //if(existsEdgeABgamma) System.out.println("There are edges between " +
                 //        Ap.getName() + " and " + Bp.getName() + " in gamma.");
@@ -121,7 +119,7 @@ public final class PagUtils {
 
                     int[] indSet;
                     while ((indSet = cg.next()) != null) {
-                        List<Node> condSetW = GraphUtils.asList(indSet, OMinusAB);
+                        List <Node> condSetW = GraphUtils.asList(indSet, OMinusAB);
 
                         //System.out.println("Trying conditioning set:  ");
                         //for(Iterator it = condSetW.iterator(); it.hasNext(); )
@@ -151,7 +149,7 @@ public final class PagUtils {
     }
 
     public static boolean graphInPagStep3(Graph pag, Graph dag) {
-        List<Edge> pagEdges = pag.getEdges();
+        List <Edge> pagEdges = pag.getEdges();
 
         for (Edge edge : pagEdges) {
             if (edge.getEndpoint1() == Endpoint.TAIL) {
@@ -161,9 +159,9 @@ public final class PagUtils {
                 Node Ad = dag.getNode(A.getName());
                 Node Bd = dag.getNode(B.getName());
 
-                List<Node> singletonB = new ArrayList<Node>();
+                List <Node> singletonB = new ArrayList <Node>();
                 singletonB.add(Bd);
-                List<Node> ancestorsOfB = dag.getAncestors(singletonB);
+                List <Node> ancestorsOfB = dag.getAncestors(singletonB);
                 if (!ancestorsOfB.contains(Ad)) {
                     return false;
                 }
@@ -174,7 +172,7 @@ public final class PagUtils {
     }
 
     public static boolean graphInPagStep4(Graph pag, Graph dag) {
-        List<Edge> pagEdges = pag.getEdges();
+        List <Edge> pagEdges = pag.getEdges();
 
         for (Edge edge : pagEdges) {
             if (edge.getEndpoint2() == Endpoint.ARROW) {
@@ -184,9 +182,9 @@ public final class PagUtils {
                 Node Ad = dag.getNode(A.getName());
                 Node Bd = dag.getNode(B.getName());
 
-                List<Node> singletonA = new ArrayList<Node>();
+                List <Node> singletonA = new ArrayList <Node>();
                 singletonA.add(Ad);
-                List<Node> ancestorsOfA = dag.getAncestors(singletonA);
+                List <Node> ancestorsOfA = dag.getAncestors(singletonA);
                 if (ancestorsOfA.contains(Bd)) {
                     return false;
                 }
@@ -197,7 +195,7 @@ public final class PagUtils {
     }
 
     public static boolean graphInPagStep5(Graph pag, Graph dag) {
-        Set<Triple> pagUnderLines = pag.getUnderLines();
+        Set <Triple> pagUnderLines = pag.getUnderLines();
 
         for (Triple underline : pagUnderLines) {
             Node A = underline.getX();
@@ -208,13 +206,13 @@ public final class PagUtils {
             Node Bd = dag.getNode(B.getName());
             Node Cd = dag.getNode(C.getName());
 
-            List<Node> singletonA = new ArrayList<Node>();
+            List <Node> singletonA = new ArrayList <Node>();
             singletonA.add(Ad);
-            List<Node> singletonC = new ArrayList<Node>();
+            List <Node> singletonC = new ArrayList <Node>();
             singletonC.add(Cd);
 
-            List<Node> ancestorsOfA = dag.getAncestors(singletonA);
-            List<Node> ancestorsOfC = dag.getAncestors(singletonC);
+            List <Node> ancestorsOfA = dag.getAncestors(singletonA);
+            List <Node> ancestorsOfC = dag.getAncestors(singletonC);
 
             if (!ancestorsOfA.contains(Bd) && !ancestorsOfC.contains(Bd)) {
                 return false;
@@ -225,16 +223,16 @@ public final class PagUtils {
     }
 
     public static boolean graphInPagStep6(Graph pag, Graph dag) {
-        List<Node> pagNodes = pag.getNodes();
-        List<Node> dagNodes = dag.getNodes();
+        List <Node> pagNodes = pag.getNodes();
+        List <Node> dagNodes = dag.getNodes();
 
-        Set<Triple> pagDottedUnderlines = pag.getDottedUnderlines();
+        Set <Triple> pagDottedUnderlines = pag.getDottedUnderlines();
 
         for (Node B : pagNodes) {
-            List<Node> parentsOfB = pag.getParents(B);
+            List <Node> parentsOfB = pag.getParents(B);
 
             //Hack to make sure each parent occurs only once:
-            Set<Node> bParents = new HashSet<Node>(parentsOfB);
+            Set <Node> bParents = new HashSet <Node>(parentsOfB);
             Node[] parents = new Node[bParents.size()];
             for (int i = 0; i < parents.length; i++) {
                 parents[i] = (Node) (bParents.toArray()[i]);
@@ -260,10 +258,10 @@ public final class PagUtils {
                             Node Ad = dag.getNode(A.getName());
                             Node Cd = dag.getNode(C.getName());
 
-                            List<Node> childrenOfA = dag.getChildren(Ad);
-                            List<Node> childrenOfC = dag.getChildren(Cd);
+                            List <Node> childrenOfA = dag.getChildren(Ad);
+                            List <Node> childrenOfC = dag.getChildren(Cd);
 
-                            List<Node> commonChildrenAC = new ArrayList<Node>();
+                            List <Node> commonChildrenAC = new ArrayList <Node>();
 
                             for (Node childAC : dagNodes) {
                                 if (childrenOfA.contains(childAC) &&

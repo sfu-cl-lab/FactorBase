@@ -21,7 +21,6 @@ import java.util.Vector;
 //import com.microsoft.jdbc.*;
 
 /**
- * 
  * User: bahare bina Date: Jun 8, 2008 Time: 9:24:32 AM To change this template
  * use File | Settings | File Templates.
  */
@@ -29,10 +28,6 @@ public class db {
     public static Connection conn;
 
     public static db database = new db();
-
-    public static db getInstance() {
-        return database;
-    }
 
     public db() {
         try {
@@ -44,50 +39,61 @@ public class db {
         }
 
         try {
-        	//look for config.xml and read in connection info
-        	
-        	
-    			FileInputStream f = new FileInputStream("config.xml");
+            //look for config.xml and read in connection info
 
-    			DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-    			DocumentBuilder builder = factory.newDocumentBuilder();
-    			Document document = builder.parse(new InputSource((new InputStreamReader(f, "utf-8"))));
 
-    			Node root = document.getDocumentElement();
-    			
-    			
-    			NodeList rootChildNodes = root.getChildNodes();
-    			Node currentNode;
-    			
+            FileInputStream f = new FileInputStream("config.xml");
 
-    			for (int i = 0; i < rootChildNodes.getLength(); i++) {
-    				currentNode = rootChildNodes.item(i);
-    				if (currentNode.getNodeName().equals("dbURL")) {
-    					global.dbURL=currentNode.getTextContent().toString();
-    				}
-    				else if (currentNode.getNodeName().equals("user")) {
-    					global.dbUser=currentNode.getTextContent().toString();
-    				}
-    				else if (currentNode.getNodeName().equals("password")) {
-    					global.dbPassword=currentNode.getTextContent().toString();
-    				}
-    			}
+            DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+            DocumentBuilder builder = factory.newDocumentBuilder();
+            Document document = builder.parse(new InputSource((new InputStreamReader(f, "utf-8"))));
 
-    		
-    	
-        	
+            Node root = document.getDocumentElement();
+
+
+            NodeList rootChildNodes = root.getChildNodes();
+            Node currentNode;
+
+
+            for (int i = 0; i < rootChildNodes.getLength(); i++) {
+                currentNode = rootChildNodes.item(i);
+                if (currentNode.getNodeName().equals("dbURL")) {
+                    global.dbURL = currentNode.getTextContent().toString();
+                } else if (currentNode.getNodeName().equals("user")) {
+                    global.dbUser = currentNode.getTextContent().toString();
+                } else if (currentNode.getNodeName().equals("password")) {
+                    global.dbPassword = currentNode.getTextContent().toString();
+                }
+            }
+
+
             conn = DriverManager.getConnection(
-                    global.dbURL , global.dbUser, global.dbPassword);
+                    global.dbURL, global.dbUser, global.dbPassword);
 
-             //conn = (Connection)
+            //conn = (Connection)
             // DriverManager.getConnection("jdbc:mysql://kripke/Financial DRed",
             // "hassan", "");
             // conn = (Connection)
-          //  DriverManager.getConnection("jdbc:mysql://kripke/"+schema,
-           //  "hassan", "");
+            //  DriverManager.getConnection("jdbc:mysql://kripke/"+schema,
+            //  "hassan", "");
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    public static db getInstance() {
+        return database;
+    }
+
+    // ////////////////////////////
+    public static void closeDB() {
+        try {
+            conn.close();
+        } catch (SQLException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+
     }
 
     // ////////////////////////Select number of distinct values
@@ -96,10 +102,10 @@ public class db {
         java.sql.Statement myst = null;
         try {
             myst = conn.createStatement();
-            
+
             java.sql.ResultSet res3 = myst.executeQuery("SELECT COUNT(*) FROM "
                     + tableName + " where " + where + ";");
-            
+
             res3.next();
             return res3.getInt(1);
 
@@ -111,6 +117,24 @@ public class db {
         }
         return 0;
     }
+
+    // public java.sql.ResultSet selectAll(String tableName){
+    // java.sql.Statement myst = null;
+    // java.sql.ResultSet res3 = null;
+    // java.sql.ResultSet result = null;
+    //
+    // try {
+    // myst = conn.createStatement();
+    //
+    // res3 = myst.executeQuery("SELECT * FROM "+ tableName + ";");
+    // result = res3;
+    //          
+    // } catch (SQLException e1) {
+    // e1.printStackTrace(); // To change body of catch statement use
+    // // File | Settings | File Templates.
+    // }
+    // return result;
+    // }
 
     public ArrayList describeTable(String tableName) {
         ArrayList result = new ArrayList();
@@ -131,24 +155,6 @@ public class db {
         }
         return result;
     }
-
-    // public java.sql.ResultSet selectAll(String tableName){
-    // java.sql.Statement myst = null;
-    // java.sql.ResultSet res3 = null;
-    // java.sql.ResultSet result = null;
-    //
-    // try {
-    // myst = conn.createStatement();
-    //
-    // res3 = myst.executeQuery("SELECT * FROM "+ tableName + ";");
-    // result = res3;
-    //          
-    // } catch (SQLException e1) {
-    // e1.printStackTrace(); // To change body of catch statement use
-    // // File | Settings | File Templates.
-    // }
-    // return result;
-    // }
 
     // //////////////////////////////////////////////Select all values
     public ArrayList Values(String tableName, String fieldName) {
@@ -173,10 +179,10 @@ public class db {
         return result;
 
     }
-    
+
     // for specific whereClause, count the number of record for each node value, return as Arraylist<int>
-    public ArrayList<Integer> count(String tableName, String fieldName, ArrayList nodeValues, String whereClause) {
-        ArrayList<Integer> result = new ArrayList<Integer>();
+    public ArrayList <Integer> count(String tableName, String fieldName, ArrayList nodeValues, String whereClause) {
+        ArrayList <Integer> result = new ArrayList <Integer>();
         java.sql.Statement myst = null;
         java.sql.ResultSet res3 = null;
 
@@ -185,12 +191,12 @@ public class db {
             StringBuilder sb = new StringBuilder();
             sb.append("SELECT ");
             for (int i = 0; i < nodeValues.size(); i++) {
-            	if (i != 0) sb.append(", ");
-            	sb.append("SUM(IF("+fieldName+"=\""+nodeValues.get(i)+"\",1,0)) AS `"+fieldName+"_"+nodeValues.get(i)+"`");
+                if (i != 0) sb.append(", ");
+                sb.append("SUM(IF(" + fieldName + "=\"" + nodeValues.get(i) + "\",1,0)) AS `" + fieldName + "_" + nodeValues.get(i) + "`");
             }
             sb.append(" FROM " + tableName);
             if (whereClause.length() > 0) {
-            	sb.append(" WHERE " + whereClause + ";");
+                sb.append(" WHERE " + whereClause + ";");
             }
 
             //System.out.println(sb.toString());
@@ -198,7 +204,7 @@ public class db {
 
             while (res3.next()) {
                 for (int i = 1; i <= nodeValues.size(); i++) {
-                	result.add(res3.getInt(i));
+                    result.add(res3.getInt(i));
                 }
             }
 
@@ -286,6 +292,8 @@ public class db {
         return tableName;
     }
 
+    // //////////////////////////
+
     public String makeSQL(String table1, List tables) {
         ArrayList viewName = new ArrayList();
         String tempsql = "SELECT distinct * FROM ";
@@ -300,9 +308,7 @@ public class db {
                 tempsql += " natural JOIN " + tables.get(k);
             }
 
-        }
-       
-        else  {
+        } else {
             if (tables.size() != 0) {
                 tempsql += table1;
                 for (int i = 0; i < tables.size(); i++) {
@@ -313,8 +319,6 @@ public class db {
         //System.out.println(tempsql);
         return tempsql;
     }
-
-    // //////////////////////////
 
     // /////////////////////////////////////////
     public ArrayList getAllRows(String tableName) {
@@ -398,10 +402,10 @@ public class db {
 
     }
 
-    public ArrayList<String> getRows(String tableName,
-            ArrayList<String> columnNames) {
+    public ArrayList <String> getRows(String tableName,
+                                      ArrayList <String> columnNames) {
 
-        ArrayList<String> result = new ArrayList<String>();
+        ArrayList <String> result = new ArrayList <String>();
 
         java.sql.Statement myst = null;
         java.sql.ResultSet res3 = null;
@@ -426,7 +430,7 @@ public class db {
     }
 
     public String getRowsInString(String tableName,
-            ArrayList<String> columnNames) {
+                                  ArrayList <String> columnNames) {
         StringBuffer result = new StringBuffer("");
 
         java.sql.Statement myst = null;
@@ -592,6 +596,8 @@ public class db {
         return 0;
     }
 
+    // ///////////////////////
+
     // ///////////////////
     public String findJoinCond(String joinTableName) {
         Parser parser = new Parser();
@@ -601,7 +607,7 @@ public class db {
         ArrayList table = new ArrayList(Arrays.asList(tables));
         int ind = 0;
         for (int i = 0; i < tables.length; i++) {
-            //  
+            //
             if (parser.getRelations().contains(tables[i]))
                 // if(relation.containsKey(tables[i]))
                 relationships.add(tables[i]);
@@ -649,8 +655,6 @@ public class db {
 
     }
 
-    // ///////////////////////
-
     public void create(String tableName, String where) {
         java.sql.Statement myst = null;
         try {
@@ -676,37 +680,26 @@ public class db {
         try {
             myst = conn.createStatement();
             int res3 = myst.executeUpdate("drop schema if exists " + name);
-            
+
             res3 = myst.executeUpdate("create schema " + name);
-            
+
         } catch (SQLException e) {
             e.printStackTrace(); // To change body of catch statement use
             // File | Settings | File Templates.
         }
     }
 
-    // ////////////////////////////
-    public static void closeDB() {
-        try {
-            conn.close();
-        } catch (SQLException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
-
-    }
-
     // get the table name according to the given list of column names
-    public ArrayList<String> getTableNames() throws SQLException {
+    public ArrayList <String> getTableNames() throws SQLException {
         java.sql.ResultSet res3;
         java.sql.Statement myst = null;
-        ArrayList<String> result = new ArrayList<String>();
-        ArrayList<String> result2 = new ArrayList<String>();
+        ArrayList <String> result = new ArrayList <String>();
+        ArrayList <String> result2 = new ArrayList <String>();
         reconnect();
-       myst = conn.createStatement();
-   
-       
-       res3 = myst.executeQuery("show full tables");
+        myst = conn.createStatement();
+
+
+        res3 = myst.executeQuery("show full tables");
         while (res3.next()) {
             // store base tables and views seperately
             if ((res3.getString("Table_type")).equals("BASE TABLE"))
@@ -721,11 +714,11 @@ public class db {
         return result;
     }
 
-  
-    public ArrayList<String> getColumns(String tableName) throws SQLException {
+
+    public ArrayList <String> getColumns(String tableName) throws SQLException {
         java.sql.ResultSet res3;
         java.sql.Statement myst = null;
-        ArrayList<String> result = new ArrayList<String>();
+        ArrayList <String> result = new ArrayList <String>();
         //elwin
         //reconnect();
         myst = conn.createStatement();
@@ -736,6 +729,7 @@ public class db {
         }
         return result;
     }
+
     public void DoQuery(String query) {
         java.sql.Statement myst = null;
         try {
@@ -748,12 +742,13 @@ public class db {
         }
 
     }
- public void reconnect(){
-    	
-    	try {
-    		//conn.close();
+
+    public void reconnect() {
+
+        try {
+            //conn.close();
             //conn = (Connection) DriverManager.getConnection( global.dbURL + global.schema, global.dbUser, global.dbPassword);
-            conn = DriverManager.getConnection( global.dbURL + global.schema, global.dbUser, global.dbPassword);
+            conn = DriverManager.getConnection(global.dbURL + global.schema, global.dbUser, global.dbPassword);
 
             // conn = (Connection)
             // DriverManager.getConnection("jdbc:mysql://kripke/Financial DRed",
@@ -766,9 +761,9 @@ public class db {
         }
     }
 
-    public void reconnect(String schema){
-    	
-    	try {
+    public void reconnect(String schema) {
+
+        try {
 //    		conn.close();
             conn = DriverManager.getConnection(
                     global.dbURL + schema, global.dbUser, global.dbPassword);
@@ -782,7 +777,7 @@ public class db {
             e.printStackTrace();
         }
     }
-    
+
     public void DoQueryUnsafe(String query) {
         java.sql.Statement myst = null;
         try {
@@ -791,35 +786,34 @@ public class db {
 
         } catch (SQLException e) {
             // TODO Auto-generated catch block
-           // e.printStackTrace();
+            // e.printStackTrace();
         }
 
     }
 
     // returns the name of the table created as view
-    public String joinNatural1(String table1, List<String> possibleComb) {
+    public String joinNatural1(String table1, List <String> possibleComb) {
         String tableName = makeTableName(table1, possibleComb);
 
-        
+
         java.sql.Statement myst = null;
         java.sql.ResultSet res3;
         String tempsql = makeSQL(table1, possibleComb);
-    try {
-    	//reconnect(global.schema);
+        try {
+            //reconnect(global.schema);
             myst = conn.createStatement();
-            myst.executeUpdate("drop view if exists " +tableName);
+            myst.executeUpdate("drop view if exists " + tableName);
             int i = myst.executeUpdate("create  view  " + tableName + " as " + tempsql);
-            
-        }
-catch (Exception e) {
-                e.printStackTrace();
 
-            }
-return tableName;
+        } catch (Exception e) {
+            e.printStackTrace();
+
+        }
+        return tableName;
 
     }
 
-    public List<String> Select(String tableName, List<String> what,String where) {
+    public List <String> Select(String tableName, List <String> what, String where) {
         ArrayList result = new ArrayList();
 
         java.sql.Statement myst = null;
@@ -827,30 +821,30 @@ return tableName;
 
         try {
             myst = conn.createStatement();
-            
-            String query="SELECT ";
-            for(String one:what){
-            	query+=one+", ";
+
+            String query = "SELECT ";
+            for (String one : what) {
+                query += one + ", ";
             }
-            query=query.substring(0, query.lastIndexOf(","));
-            
-            query+=" FROM " + tableName + " WHERE "+where+" order by rand();";
-            
+            query = query.substring(0, query.lastIndexOf(","));
+
+            query += " FROM " + tableName + " WHERE " + where + " order by rand();";
+
 //            System.out.println(query);
             res3 = myst.executeQuery(query);
-            
+
             while (res3.next()) {
-            	for (String columnName : what) {
+                for (String columnName : what) {
                     result.add(res3.getString(columnName));
                 }
-               
+
             }
 
         } catch (SQLException e1) {
             e1.printStackTrace(); // To change body of catch statement use
             // File | Settings | File Templates.
         }
-        
+
         return result;
 
     }

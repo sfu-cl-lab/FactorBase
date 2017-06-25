@@ -38,7 +38,6 @@ import java.io.File;
 import java.io.PrintWriter;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
-import java.util.*;
 
 public class TestMarkovBlanketSearches extends TestCase {
     static Graph testGraphSub;
@@ -66,7 +65,7 @@ public class TestMarkovBlanketSearches extends TestCase {
         IndTestDSep test = new IndTestDSep(graph);
 
         MbSearch search = new GrowShrink(test);
-        List<Node> blanket = search.findMb("T");
+        List <Node> blanket = search.findMb("T");
 
         System.out.println(blanket);
     }
@@ -82,7 +81,7 @@ public class TestMarkovBlanketSearches extends TestCase {
         System.out.println("True graph is: " + graph);
         IndTestDSep test = new IndTestDSep(graph);
         MbSearch mbSearch = new GrowShrink(test);
-        List<Node> blanket = mbSearch.findMb("T");
+        List <Node> blanket = mbSearch.findMb("T");
 
         System.out.println(blanket);
     }
@@ -94,24 +93,24 @@ public class TestMarkovBlanketSearches extends TestCase {
 
         System.out.println("INDEPENDENT GRAPH: " + dag);
 
-        List<Node> nodes = dag.getNodes();
+        List <Node> nodes = dag.getNodes();
 
         for (Node node : nodes) {
-            List<Node> resultNodes = search.findMb(node.getName());
+            List <Node> resultNodes = search.findMb(node.getName());
             Graph trueMb = GraphUtils.markovBlanketDag(node, dag);
-            List<Node> trueNodes = trueMb.getNodes();
+            List <Node> trueNodes = trueMb.getNodes();
             trueNodes.remove(node);
 
-            Collections.sort(trueNodes, new Comparator<Node>() {
+            Collections.sort(trueNodes, new Comparator <Node>() {
                 @Override
-				public int compare(Node n1, Node n2) {
+                public int compare(Node n1, Node n2) {
                     return n1.getName().compareTo(n2.getName());
                 }
             });
 
-            Collections.sort(resultNodes, new Comparator<Node>() {
+            Collections.sort(resultNodes, new Comparator <Node>() {
                 @Override
-				public int compare(Node n1, Node n2) {
+                public int compare(Node n1, Node n2) {
                     return n1.getName().compareTo(n2.getName());
                 }
             });
@@ -120,6 +119,126 @@ public class TestMarkovBlanketSearches extends TestCase {
             System.out.println(trueNodes);
             System.out.println(resultNodes);
         }
+    }
+
+    public static void findExample() {
+        Dag dag = GraphUtils.randomDag(10, 0, 10, 5, 5, 5, false);
+        IndependenceTest test = new IndTestDSep(dag);
+        Mbfs search = new Mbfs(test, -1);
+
+        System.out.println("INDEPENDENT GRAPH: " + dag);
+
+        List <Node> nodes = dag.getNodes();
+
+        for (Node node : nodes) {
+            Graph resultMb = search.search(node.getName());
+            Graph trueMb = GraphUtils.markovBlanketDag(node, dag);
+
+            List <Node> resultNodes = resultMb.getNodes();
+            List <Node> trueNodes = trueMb.getNodes();
+
+            Set <String> resultNames = new HashSet <String>();
+
+            for (Node resultNode : resultNodes) {
+                resultNames.add(resultNode.getName());
+            }
+
+            Set <String> trueNames = new HashSet <String>();
+
+            for (Node v : trueNodes) {
+                trueNames.add(v.getName());
+            }
+
+            assertTrue(resultNames.equals(trueNames));
+
+            List <Edge> resultEdges = resultMb.getEdges();
+
+            for (Edge resultEdge : resultEdges) {
+                if (Edges.isDirectedEdge(resultEdge)) {
+                    String name1 = resultEdge.getNode1().getName();
+                    String name2 = resultEdge.getNode2().getName();
+
+                    Node node1 = trueMb.getNode(name1);
+                    Node node2 = trueMb.getNode(name2);
+
+                    // If one of these nodes is null, probably it's because some
+                    // parent of the target could not be oriented as such, and
+                    // extra nodes and edges are being included to cover the
+                    // possibility that the node is actually a child.
+                    if (node1 == null) {
+                        System.err.println(
+                                "Node " + name1 + " is not in the true graph.");
+                        continue;
+                    }
+
+                    if (node2 == null) {
+                        System.err.println(
+                                "Node " + name2 + " is not in the true graph.");
+                        continue;
+                    }
+
+                    Edge trueEdge = trueMb.getEdge(node1, node2);
+
+                    if (trueEdge == null) {
+                        Node resultNode1 = resultMb.getNode(node1.getName());
+                        Node resultNode2 = resultMb.getNode(node2.getName());
+                        Node resultTarget = resultMb.getNode(node.getName());
+
+                        Edge a = resultMb.getEdge(resultNode1, resultTarget);
+                        Edge b = resultMb.getEdge(resultNode2, resultTarget);
+
+                        if (a == null || b == null) {
+                            continue;
+                        }
+
+                        if ((Edges.isDirectedEdge(a) &&
+                                Edges.isUndirectedEdge(b)) || (
+                                Edges.isUndirectedEdge(a) &&
+                                        Edges.isDirectedEdge(b))) {
+                            continue;
+                        }
+
+                        fail("EXTRA EDGE: Edge in result MB but not true MB = " +
+                                resultEdge);
+                    }
+
+                    assertEquals(resultEdge.getEndpoint1(),
+                            trueEdge.getEndpoint1());
+                    assertEquals(resultEdge.getEndpoint2(),
+                            trueEdge.getEndpoint2());
+
+                    System.out.println("Result edge = " + resultEdge +
+                            ", true edge = " + trueEdge);
+                }
+            }
+
+            // Make sure that if adj(X, Y) in the true graph that adj(X, Y)
+            // in the result graph.
+            List <Edge> trueEdges = trueMb.getEdges();
+
+            for (Edge trueEdge : trueEdges) {
+                Node node1 = trueEdge.getNode1();
+                Node node2 = trueEdge.getNode2();
+
+                Node resultNode1 = resultMb.getNode(node1.getName());
+                Node resultNode2 = resultMb.getNode(node2.getName());
+
+                assertTrue("Expected adjacency " + resultNode1 + "---" +
+                                resultNode2,
+                        resultMb.isAdjacentTo(resultNode1, resultNode2));
+            }
+        }
+    }
+
+    /**
+     * This method uses reflection to collect up all of the test methods from this class and return them to the test
+     * runner.
+     */
+    public static Test suite() {
+
+        // Edit the name of the class in the parens to match the name
+        // of this class.
+        return new TestSuite(TestMarkovBlanketSearches.class);
     }
 
     public void overnight() {
@@ -170,8 +289,7 @@ public class TestMarkovBlanketSearches extends TestCase {
             testLoop(out, params);
 
             out.close();
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }
@@ -205,8 +323,7 @@ public class TestMarkovBlanketSearches extends TestCase {
             testLoop(out, params);
 
             out.close();
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }
@@ -240,15 +357,13 @@ public class TestMarkovBlanketSearches extends TestCase {
             testLoop(out, params);
 
             out.close();
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
-
     public void testLoop(PrintWriter out, SimulationParams params) {
-        List<String> algNames = new LinkedList<String>(params.getAlgNames());
+        List <String> algNames = new LinkedList <String>(params.getAlgNames());
 
         int numEdges = (int) (params.getEdgeMultipler() * params.getNumVars());
 
@@ -274,13 +389,13 @@ public class TestMarkovBlanketSearches extends TestCase {
 
 //        LogUtils.getInstance().add(System.out, Level.FINEST);
 
-        List<MbSearch> algorithms =
-                new LinkedList<MbSearch>();
+        List <MbSearch> algorithms =
+                new LinkedList <MbSearch>();
 
-        List<Stats> collectedStats = new ArrayList<Stats>();
+        List <Stats> collectedStats = new ArrayList <Stats>();
         Dag randomGraph = null;
         DataSet dataSet = null;
-        Set<Node> usedMbNodes = new HashSet<Node>();
+        Set <Node> usedMbNodes = new HashSet <Node>();
         boolean createRandomGraph = true;
         IndependenceTest test = null;
 
@@ -308,7 +423,7 @@ public class TestMarkovBlanketSearches extends TestCase {
                 }
             }
 
-            Set<Integer> visited = new HashSet<Integer>();
+            Set <Integer> visited = new HashSet <Integer>();
 
             int tried = 0;
             Graph trueMbDag = null;
@@ -351,14 +466,14 @@ public class TestMarkovBlanketSearches extends TestCase {
                 continue;
             }
 
-            List<Node> nodes2 = trueMbDag.getNodes();
+            List <Node> nodes2 = trueMbDag.getNodes();
             usedMbNodes.addAll(nodes2);
             nodes2.remove(t);
-            List<String> truth = extractVarNames(nodes2, t);
+            List <String> truth = extractVarNames(nodes2, t);
 
             println(out, "n = " + (n + 1));
 
-            for (MbSearch algorithm : new LinkedList<MbSearch>(algorithms)) {
+            for (MbSearch algorithm : new LinkedList <MbSearch>(algorithms)) {
 //                System.out.println("Running " + algorithm.getAlgorithmName() + "...");
                 Stats stats = printNodeStats(algorithm, t, truth, i, out, params.getTimeLimit());
 
@@ -478,12 +593,12 @@ public class TestMarkovBlanketSearches extends TestCase {
     }
 
     private Stats printNodeStats(MbSearch algorithm, Node t,
-                                 List<String> _truth, int i, PrintWriter out, long timeLimit) {
+                                 List <String> _truth, int i, PrintWriter out, long timeLimit) {
         final long time = System.currentTimeMillis();
 
         class MyThread extends Thread {
             private MbSearch algorithm;
-            private List<Node> nodes;
+            private List <Node> nodes;
             private Node t;
             private boolean done = false;
             private long startTime = System.currentTimeMillis();
@@ -495,14 +610,14 @@ public class TestMarkovBlanketSearches extends TestCase {
             }
 
             @Override
-			public void run() {
+            public void run() {
                 this.startTime = System.currentTimeMillis();
                 nodes = algorithm.findMb(t.getName());
                 done = true;
                 this.endTime = System.currentTimeMillis();
             }
 
-            public List<Node> getNodes() {
+            public List <Node> getNodes() {
                 return nodes;
             }
 
@@ -525,33 +640,32 @@ public class TestMarkovBlanketSearches extends TestCase {
 
             try {
                 Thread.sleep(100);
-            }
-            catch (InterruptedException e) {
+            } catch (InterruptedException e) {
                 e.printStackTrace();
             }
         }
 
 //        List<Node> nodes = algorithm.findMb(t.getName());
-        List<Node> nodes = thread.getNodes();
-        List<String> mbf = extractVarNames(nodes, t);
+        List <Node> nodes = thread.getNodes();
+        List <String> mbf = extractVarNames(nodes, t);
 
 //        if (algorithm instanceof MbFanSearch) {
 //            System.out.println("Estimated by MBFS: " + ((MbFanSearch)algorithm).search(t.getName()));
 //        }
 
         // Calculate intersection(mbf, truth).
-        List<String> mbfAndTruth = new ArrayList<String>(mbf);
+        List <String> mbfAndTruth = new ArrayList <String>(mbf);
         mbfAndTruth.retainAll(_truth);
 
         // Calculate MB false positives.
-        List<String> mbfFp = new ArrayList<String>(mbf);
+        List <String> mbfFp = new ArrayList <String>(mbf);
         mbfFp.removeAll(mbfAndTruth);
         int fp = mbfFp.size();
 
 //        System.out.println("FP" + mbfFp);
 
         // Calculate MB false negatives.
-        List<String> mbfFn = new ArrayList<String>(_truth);
+        List <String> mbfFn = new ArrayList <String>(_truth);
         mbfFn.removeAll(mbfAndTruth);
         int fn = mbfFn.size();
 
@@ -586,11 +700,11 @@ public class TestMarkovBlanketSearches extends TestCase {
         } else {
 
             // Algorithm is run here.
-            List<Node> nodes = algorithm.findMb(target.getName());
+            List <Node> nodes = algorithm.findMb(target.getName());
 
             nodes.add(target);
 
-            List<Node> _nodes = new ArrayList<Node>();
+            List <Node> _nodes = new ArrayList <Node>();
 
             for (Node node : nodes) {
                 _nodes.add(dataSet.getVariable(node.getName()));
@@ -749,6 +863,46 @@ public class TestMarkovBlanketSearches extends TestCase {
         return dataSet;
     }
 
+    private List <String> extractVarNames(List <Node> nodes, Node target) {
+        List <String> varNames = new ArrayList <String>();
+
+        for (Node node : nodes) {
+            varNames.add(node.getName());
+        }
+
+        varNames.remove(target.getName());
+        Collections.sort(varNames);
+        return varNames;
+    }
+
+//    public void test3() {
+//        Graph graph = new EdgeListGraph();
+//
+//        Node t = new GraphNode("t");
+//        Node x = new GraphNode("x");
+//        Node y = new GraphNode("y");
+//        Node w = new GraphNode("w");
+//
+//        graph.addIndex(t);
+//        graph.addIndex(x);
+//        graph.addIndex(y);
+//        graph.addIndex(w);
+//
+//        graph.addDirectedEdge(t, x);
+//        graph.addDirectedEdge(x, y);
+//        graph.addDirectedEdge(w, x);
+//        graph.addDirectedEdge(w, y);
+//
+//        IndependenceTest test = new IndTestGraph(graph);
+//
+//        Hiton search = new Hiton(test, 3);
+//
+//        search.findMb(t.getName());
+//        List<Node> mb = search.hitonPc(t);
+//
+//        System.out.println(mb);
+//    }
+
     private static class Stats {
         private MbSearch algorithm;
         private int fp;
@@ -792,166 +946,6 @@ public class TestMarkovBlanketSearches extends TestCase {
         }
     }
 
-    private List<String> extractVarNames(List<Node> nodes, Node target) {
-        List<String> varNames = new ArrayList<String>();
-
-        for (Node node : nodes) {
-            varNames.add(node.getName());
-        }
-
-        varNames.remove(target.getName());
-        Collections.sort(varNames);
-        return varNames;
-    }
-
-    public static void findExample() {
-        Dag dag = GraphUtils.randomDag(10, 0, 10, 5, 5, 5, false);
-        IndependenceTest test = new IndTestDSep(dag);
-        Mbfs search = new Mbfs(test, -1);
-
-        System.out.println("INDEPENDENT GRAPH: " + dag);
-
-        List<Node> nodes = dag.getNodes();
-
-        for (Node node : nodes) {
-            Graph resultMb = search.search(node.getName());
-            Graph trueMb = GraphUtils.markovBlanketDag(node, dag);
-
-            List<Node> resultNodes = resultMb.getNodes();
-            List<Node> trueNodes = trueMb.getNodes();
-
-            Set<String> resultNames = new HashSet<String>();
-
-            for (Node resultNode : resultNodes) {
-                resultNames.add(resultNode.getName());
-            }
-
-            Set<String> trueNames = new HashSet<String>();
-
-            for (Node v : trueNodes) {
-                trueNames.add(v.getName());
-            }
-
-            assertTrue(resultNames.equals(trueNames));
-
-            List<Edge> resultEdges = resultMb.getEdges();
-
-            for (Edge resultEdge : resultEdges) {
-                if (Edges.isDirectedEdge(resultEdge)) {
-                    String name1 = resultEdge.getNode1().getName();
-                    String name2 = resultEdge.getNode2().getName();
-
-                    Node node1 = trueMb.getNode(name1);
-                    Node node2 = trueMb.getNode(name2);
-
-                    // If one of these nodes is null, probably it's because some
-                    // parent of the target could not be oriented as such, and
-                    // extra nodes and edges are being included to cover the
-                    // possibility that the node is actually a child.
-                    if (node1 == null) {
-                        System.err.println(
-                                "Node " + name1 + " is not in the true graph.");
-                        continue;
-                    }
-
-                    if (node2 == null) {
-                        System.err.println(
-                                "Node " + name2 + " is not in the true graph.");
-                        continue;
-                    }
-
-                    Edge trueEdge = trueMb.getEdge(node1, node2);
-
-                    if (trueEdge == null) {
-                        Node resultNode1 = resultMb.getNode(node1.getName());
-                        Node resultNode2 = resultMb.getNode(node2.getName());
-                        Node resultTarget = resultMb.getNode(node.getName());
-
-                        Edge a = resultMb.getEdge(resultNode1, resultTarget);
-                        Edge b = resultMb.getEdge(resultNode2, resultTarget);
-
-                        if (a == null || b == null) {
-                            continue;
-                        }
-
-                        if ((Edges.isDirectedEdge(a) &&
-                                Edges.isUndirectedEdge(b)) || (
-                                Edges.isUndirectedEdge(a) &&
-                                        Edges.isDirectedEdge(b))) {
-                            continue;
-                        }
-
-                        fail("EXTRA EDGE: Edge in result MB but not true MB = " +
-                                resultEdge);
-                    }
-
-                    assertEquals(resultEdge.getEndpoint1(),
-                            trueEdge.getEndpoint1());
-                    assertEquals(resultEdge.getEndpoint2(),
-                            trueEdge.getEndpoint2());
-
-                    System.out.println("Result edge = " + resultEdge +
-                            ", true edge = " + trueEdge);
-                }
-            }
-
-            // Make sure that if adj(X, Y) in the true graph that adj(X, Y)
-            // in the result graph.
-            List<Edge> trueEdges = trueMb.getEdges();
-
-            for (Edge trueEdge : trueEdges) {
-                Node node1 = trueEdge.getNode1();
-                Node node2 = trueEdge.getNode2();
-
-                Node resultNode1 = resultMb.getNode(node1.getName());
-                Node resultNode2 = resultMb.getNode(node2.getName());
-
-                assertTrue("Expected adjacency " + resultNode1 + "---" +
-                        resultNode2,
-                        resultMb.isAdjacentTo(resultNode1, resultNode2));
-            }
-        }
-    }
-
-//    public void test3() {
-//        Graph graph = new EdgeListGraph();
-//
-//        Node t = new GraphNode("t");
-//        Node x = new GraphNode("x");
-//        Node y = new GraphNode("y");
-//        Node w = new GraphNode("w");
-//
-//        graph.addIndex(t);
-//        graph.addIndex(x);
-//        graph.addIndex(y);
-//        graph.addIndex(w);
-//
-//        graph.addDirectedEdge(t, x);
-//        graph.addDirectedEdge(x, y);
-//        graph.addDirectedEdge(w, x);
-//        graph.addDirectedEdge(w, y);
-//
-//        IndependenceTest test = new IndTestGraph(graph);
-//
-//        Hiton search = new Hiton(test, 3);
-//
-//        search.findMb(t.getName());
-//        List<Node> mb = search.hitonPc(t);
-//
-//        System.out.println(mb);
-//    }
-
-    /**
-     * This method uses reflection to collect up all of the test methods from this class and return them to the test
-     * runner.
-     */
-    public static Test suite() {
-
-        // Edit the name of the class in the parens to match the name
-        // of this class.
-        return new TestSuite(TestMarkovBlanketSearches.class);
-    }
-
     static class SimulationParams {
         private boolean discrete = false;
         private int numVars = 100;
@@ -965,7 +959,7 @@ public class TestMarkovBlanketSearches extends TestCase {
         private double alpha = 0.05;
         private int minNumCategories = 2;
         private int maxNumCategories = 4;
-        private List<String> algNames = new LinkedList<String>();
+        private List <String> algNames = new LinkedList <String>();
 
         public boolean isDiscrete() {
             return discrete;
@@ -1047,11 +1041,11 @@ public class TestMarkovBlanketSearches extends TestCase {
             this.maxNumCategories = maxNumCategories;
         }
 
-        public List<String> getAlgNames() {
+        public List <String> getAlgNames() {
             return algNames;
         }
 
-        public void setAlgNames(List<String> algNames) {
+        public void setAlgNames(List <String> algNames) {
             this.algNames = algNames;
         }
 

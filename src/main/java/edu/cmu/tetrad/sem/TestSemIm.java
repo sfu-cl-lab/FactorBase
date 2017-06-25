@@ -56,6 +56,113 @@ public class TestSemIm extends TestCase {
         super(name);
     }
 
+    public static SemIm modifySemImStandardizedInterventionOnTargetParents(SemIm semIm, Node
+            target) {
+        SemIm modifiedSemIm = new SemIm(semIm);
+        SemGraph graph = new SemGraph(modifiedSemIm.getSemPm().getGraph());
+
+        // remove <--> arrows from a copy of the graph so we can use the getParents function to get Nodes with edges into target
+        SemGraph removedDoubleArrowEdges = new SemGraph(graph);
+        ArrayList <Edge> edgesToRemove = new ArrayList <Edge>();
+        for (Edge e : removedDoubleArrowEdges.getEdges()) {
+            if ((e.getEndpoint1().equals(Endpoint.ARROW)) &&
+                    (e.getEndpoint2().equals(Endpoint.ARROW))) {
+                edgesToRemove.add(e);
+            }
+        }
+        for (Edge e : edgesToRemove) {
+            removedDoubleArrowEdges.removeEdge(e);
+        }
+
+        ArrayList <Node> targetParents = new
+                ArrayList <Node>(removedDoubleArrowEdges.getParents(removedDoubleArrowEdges.getNode(target.getName())));
+
+        System.out.println("ORIGINAL GRAPH");
+        System.out.println(graph);
+
+        SemEvidence semEvidence = new SemEvidence(modifiedSemIm);
+        for (Node n : targetParents) {
+            semEvidence.setManipulated(semEvidence.getNodeIndex(n.getName()),
+                    true);
+        }
+        SemUpdater semUpdater = new SemUpdater(modifiedSemIm);
+        semUpdater.setEvidence(semEvidence);
+        SemIm modifiedAndUpdatedSemIm = new
+                SemIm(semUpdater.getUpdatedSemIm());
+
+        for (Node n : targetParents) {
+            modifiedAndUpdatedSemIm.setErrVar(modifiedAndUpdatedSemIm.getVariableNode(n.getName()),
+                    1.0);
+            modifiedAndUpdatedSemIm.setMean(modifiedAndUpdatedSemIm.getVariableNode(n.getName()),
+                    0.0);
+        }
+
+        double varianceToAddToTargetAfterEdgeRemoval = 0.0;
+        for (Node n : targetParents) {
+            ArrayList <Node> nodesIntoTarget = new
+                    ArrayList <Node>(graph.getNodesInTo(graph.getNode(target.getName()),
+                    Endpoint.ARROW));
+
+            for (Node nodeIntoTarget : nodesIntoTarget) {
+                ArrayList <Edge> edgesConnectingParentAndTarget = new
+                        ArrayList <Edge>(modifiedAndUpdatedSemIm.getSemPm().getGraph().getEdges(modifiedAndUpdatedSemIm.getVariableNode(nodeIntoTarget.getName()),
+                        modifiedAndUpdatedSemIm.getVariableNode(target.getName())));
+                if (edgesConnectingParentAndTarget.size() > 1) {
+                    for (Edge e : edgesConnectingParentAndTarget) {
+                        System.out.println("Check Edge: " + e);
+                        if ((e.getEndpoint1().equals(Endpoint.ARROW)) &&
+                                (e.getEndpoint2().equals(Endpoint.ARROW))) {
+                            Edge directedEdge1 = new
+                                    Edge(modifiedAndUpdatedSemIm.getVariableNode(e.getNode1().getName()),
+                                    modifiedAndUpdatedSemIm.getVariableNode(e.getNode2().getName()),
+                                    Endpoint.TAIL, Endpoint.ARROW);
+                            double directedEdgeCoef = 0.0;
+                            if (edgesConnectingParentAndTarget.contains(directedEdge1)) {
+                                directedEdgeCoef =
+                                        modifiedAndUpdatedSemIm.getEdgeCoef(modifiedAndUpdatedSemIm.getVariableNode(e.getNode1().getName()),
+                                                modifiedAndUpdatedSemIm.getVariableNode(e.getNode2().getName()));
+                            } else {
+                                directedEdgeCoef =
+                                        modifiedAndUpdatedSemIm.getEdgeCoef(modifiedAndUpdatedSemIm.getVariableNode(e.getNode2().getName()),
+                                                modifiedAndUpdatedSemIm.getVariableNode(e.getNode1().getName()));
+                            }
+                            varianceToAddToTargetAfterEdgeRemoval += (2 *
+                                    directedEdgeCoef *
+                                    modifiedAndUpdatedSemIm.getErrCovar(modifiedAndUpdatedSemIm.getVariableNode(e.getNode1().getName()),
+                                            modifiedAndUpdatedSemIm.getVariableNode(e.getNode2().getName())));
+                            modifiedAndUpdatedSemIm.setErrCovar(modifiedAndUpdatedSemIm.getVariableNode(e.getNode1().getName()),
+                                    modifiedAndUpdatedSemIm.getVariableNode(e.getNode2().getName()),
+                                    0.0);
+                            System.out.println("REMOVING EDGE: " + e);
+                            modifiedAndUpdatedSemIm.getSemPm().getGraph().removeEdge(e);
+                        } else {
+                            System.out.println("DO NOTHING");
+                        }
+                    }
+                }
+            }
+        }
+        double oldTargetVariance =
+                modifiedAndUpdatedSemIm.getErrVar(modifiedAndUpdatedSemIm.getVariableNode(target.getName()));
+        modifiedAndUpdatedSemIm.setErrVar(modifiedAndUpdatedSemIm.getVariableNode(target.getName()),
+                (oldTargetVariance + varianceToAddToTargetAfterEdgeRemoval));
+
+        System.out.println("MODIFIED GRAPH");
+        System.out.println(modifiedAndUpdatedSemIm.getSemPm().getGraph());
+        return modifiedAndUpdatedSemIm;
+    }
+
+    /**
+     * This method uses reflection to collect up all of the test methods from
+     * this class and return them to the test runner.
+     */
+    public static Test suite() {
+
+        // Edit the name of the class in the parens to match the name
+        // of this class.
+        return new TestSuite(TestSemIm.class);
+    }
+
     /**
      * Tests whether the the correlation matrix of a simulated sample is close
      * to the implied covariance matrix.
@@ -131,6 +238,34 @@ public class TestSemIm extends TestCase {
         System.out.println("\nEstimated Sem #4: " + semIm5);
     }
 
+//    public void rtest9() {
+//        try {
+//            File file = new File("test_data/bigsemtest.txt");
+//            PrintWriter out = new PrintWriter(new FileWriter(file));
+//            int numVariables = 10000;
+//            int numRecords = 500;
+//            NumberFormat nf = new DecimalFormat("0.0000");
+//
+//            for (int j = 0; j < numVariables; j++) {
+//                out.print("V" + j + "\t");
+//            }
+//
+//            out.println();
+//
+//            for (int i = 0; i < numRecords; i++) {
+//                for (int j = 0; j < numVariables; j++) {
+//                    out.print(nf.format(RandomUtil.getInstance().nextDouble()) + "\t");
+//                }
+//
+//                out.println();
+//            }
+//
+//            out.close();
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        }
+//    }
+
     public void testCovariancesOfSimulated() {
         Graph randomGraph = GraphUtils.randomDagC(5, 0, 8);
         SemPm semPm1 = new SemPm(randomGraph);
@@ -170,34 +305,6 @@ public class TestSemIm extends TestCase {
 
         System.out.println(semIm);
     }
-
-//    public void rtest9() {
-//        try {
-//            File file = new File("test_data/bigsemtest.txt");
-//            PrintWriter out = new PrintWriter(new FileWriter(file));
-//            int numVariables = 10000;
-//            int numRecords = 500;
-//            NumberFormat nf = new DecimalFormat("0.0000");
-//
-//            for (int j = 0; j < numVariables; j++) {
-//                out.print("V" + j + "\t");
-//            }
-//
-//            out.println();
-//
-//            for (int i = 0; i < numRecords; i++) {
-//                for (int j = 0; j < numVariables; j++) {
-//                    out.print(nf.format(RandomUtil.getInstance().nextDouble()) + "\t");
-//                }
-//
-//                out.println();
-//            }
-//
-//            out.close();
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//        }
-//    }
 
     private void printIntercepts(SemIm semIm) {
         System.out.println();
@@ -304,7 +411,7 @@ public class TestSemIm extends TestCase {
 
         // X1 = e1
         // X2 = aX1 + e2
-        
+
         DoubleMatrix2D B = new DenseDoubleMatrix2D(2, 2);
         B.set(0, 0, 0);
         B.set(0, 1, 0);
@@ -458,114 +565,6 @@ public class TestSemIm extends TestCase {
 
         DataSet data = modified.simulateData(1000, false);
 
-    }
-
-    public static SemIm modifySemImStandardizedInterventionOnTargetParents(SemIm semIm, Node
-            target) {
-        SemIm modifiedSemIm = new SemIm(semIm);
-        SemGraph graph = new SemGraph(modifiedSemIm.getSemPm().getGraph());
-
-        // remove <--> arrows from a copy of the graph so we can use the getParents function to get Nodes with edges into target
-        SemGraph removedDoubleArrowEdges = new SemGraph(graph);
-        ArrayList<Edge> edgesToRemove = new ArrayList<Edge>();
-        for(Edge e : removedDoubleArrowEdges.getEdges()) {
-            if((e.getEndpoint1().equals(Endpoint.ARROW)) &&
-                    (e.getEndpoint2().equals(Endpoint.ARROW))) {
-                edgesToRemove.add(e);
-            }
-        }
-        for(Edge e : edgesToRemove) {
-            removedDoubleArrowEdges.removeEdge(e);
-        }
-
-        ArrayList<Node> targetParents = new
-                ArrayList<Node>(removedDoubleArrowEdges.getParents(removedDoubleArrowEdges.getNode(target.getName())));
-
-        System.out.println("ORIGINAL GRAPH");
-        System.out.println(graph);
-
-        SemEvidence semEvidence = new SemEvidence(modifiedSemIm);
-        for(Node n : targetParents) {
-            semEvidence.setManipulated(semEvidence.getNodeIndex(n.getName()),
-                    true);
-        }
-        SemUpdater semUpdater = new SemUpdater(modifiedSemIm);
-        semUpdater.setEvidence(semEvidence);
-        SemIm modifiedAndUpdatedSemIm = new
-                SemIm(semUpdater.getUpdatedSemIm());
-
-        for(Node n : targetParents) {
-            modifiedAndUpdatedSemIm.setErrVar(modifiedAndUpdatedSemIm.getVariableNode(n.getName()),
-                    1.0);
-            modifiedAndUpdatedSemIm.setMean(modifiedAndUpdatedSemIm.getVariableNode(n.getName()),
-                    0.0);
-        }
-
-        double varianceToAddToTargetAfterEdgeRemoval = 0.0;
-        for(Node n : targetParents) {
-            ArrayList<Node> nodesIntoTarget = new
-                    ArrayList<Node>(graph.getNodesInTo(graph.getNode(target.getName()),
-                    Endpoint.ARROW));
-
-            for(Node nodeIntoTarget : nodesIntoTarget) {
-                ArrayList<Edge> edgesConnectingParentAndTarget = new
-                        ArrayList<Edge>(modifiedAndUpdatedSemIm.getSemPm().getGraph().getEdges(modifiedAndUpdatedSemIm.getVariableNode(nodeIntoTarget.getName()),
-                        modifiedAndUpdatedSemIm.getVariableNode(target.getName())));
-                if(edgesConnectingParentAndTarget.size() > 1) {
-                    for(Edge e : edgesConnectingParentAndTarget) {
-                        System.out.println("Check Edge: " + e);
-                        if((e.getEndpoint1().equals(Endpoint.ARROW)) &&
-                                (e.getEndpoint2().equals(Endpoint.ARROW))) {
-                            Edge directedEdge1 = new
-                                    Edge(modifiedAndUpdatedSemIm.getVariableNode(e.getNode1().getName()),
-                                    modifiedAndUpdatedSemIm.getVariableNode(e.getNode2().getName()),
-                                    Endpoint.TAIL, Endpoint.ARROW);
-                            double directedEdgeCoef = 0.0;
-                            if(edgesConnectingParentAndTarget.contains(directedEdge1))
-                            {
-                                directedEdgeCoef =
-                                        modifiedAndUpdatedSemIm.getEdgeCoef(modifiedAndUpdatedSemIm.getVariableNode(e.getNode1().getName()),
-                                                modifiedAndUpdatedSemIm.getVariableNode(e.getNode2().getName()));
-                            }
-                            else {
-                                directedEdgeCoef =
-                                        modifiedAndUpdatedSemIm.getEdgeCoef(modifiedAndUpdatedSemIm.getVariableNode(e.getNode2().getName()),
-                                                modifiedAndUpdatedSemIm.getVariableNode(e.getNode1().getName()));
-                            }
-                            varianceToAddToTargetAfterEdgeRemoval += (2 *
-                                    directedEdgeCoef *
-                                    modifiedAndUpdatedSemIm.getErrCovar(modifiedAndUpdatedSemIm.getVariableNode(e.getNode1().getName()),
-                                            modifiedAndUpdatedSemIm.getVariableNode(e.getNode2().getName())));
-                            modifiedAndUpdatedSemIm.setErrCovar(modifiedAndUpdatedSemIm.getVariableNode(e.getNode1().getName()),
-                                    modifiedAndUpdatedSemIm.getVariableNode(e.getNode2().getName()),
-                                    0.0);
-                            System.out.println("REMOVING EDGE: " + e);
-                            modifiedAndUpdatedSemIm.getSemPm().getGraph().removeEdge(e);
-                        }
-                        else { System.out.println("DO NOTHING"); }
-                    }
-                }
-            }
-        }
-        double oldTargetVariance =
-                modifiedAndUpdatedSemIm.getErrVar(modifiedAndUpdatedSemIm.getVariableNode(target.getName()));
-        modifiedAndUpdatedSemIm.setErrVar(modifiedAndUpdatedSemIm.getVariableNode(target.getName()),
-                (oldTargetVariance + varianceToAddToTargetAfterEdgeRemoval));
-
-        System.out.println("MODIFIED GRAPH");
-        System.out.println(modifiedAndUpdatedSemIm.getSemPm().getGraph());
-        return modifiedAndUpdatedSemIm;
-    }
-
-    /**
-     * This method uses reflection to collect up all of the test methods from
-     * this class and return them to the test runner.
-     */
-    public static Test suite() {
-
-        // Edit the name of the class in the parens to match the name
-        // of this class.
-        return new TestSuite(TestSemIm.class);
     }
 }
 

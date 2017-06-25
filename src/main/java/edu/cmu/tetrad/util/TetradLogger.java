@@ -21,8 +21,6 @@
 
 package edu.cmu.tetrad.util;
 
-import java.io.*;
-import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.prefs.Preferences;
 import java.util.regex.Matcher;
@@ -53,60 +51,44 @@ public class TetradLogger {
 
 
     /**
+     * The singleton instance of the logger.
+     */
+    private static final TetradLogger INSTANCE = new TetradLogger();
+    /**
      * A mapping between output streams and writers used to wrap them.
      */
-    private final Map<OutputStream, Writer> writers = new LinkedHashMap<OutputStream, Writer>();
+    private final Map <OutputStream, Writer> writers = new LinkedHashMap <OutputStream, Writer>();
+    /**
+     * A mapping from model classes to their configured loggers.
+     */
+    private final Map <Class, TetradLoggerConfig> classConfigMap = new ConcurrentHashMap <Class, TetradLoggerConfig>();
 
-
+    /**
+     * A mapping from models to their configured loggers.
+     */
+    private final Map <Object, TetradLoggerConfig> nodeConfigMap = new ConcurrentHashMap <Object, TetradLoggerConfig>();
+    /**
+     * The listeners.
+     */
+    private final List <TetradLoggerListener> listeners = new ArrayList <TetradLoggerListener>();
     /**
      * States whether events should be logged, this allows one to turn off all loggers at once.
      * (Note, a field is used, since fast lookups are important)
      */
     private boolean logging = Preferences.userRoot().getBoolean("loggingActivated", false);
-
-
-    /**
-     * A mapping from model classes to their configured loggers.
-     */
-    private final Map<Class, TetradLoggerConfig> classConfigMap = new ConcurrentHashMap<Class, TetradLoggerConfig>();
-
-    /**
-     * A mapping from models to their configured loggers.
-     */
-    private final Map<Object, TetradLoggerConfig> nodeConfigMap = new ConcurrentHashMap<Object, TetradLoggerConfig>();
-
-
-    private Map<Object, Object> nodeModelMap = new ConcurrentHashMap<Object, Object>();
-
+    private Map <Object, Object> nodeModelMap = new ConcurrentHashMap <Object, Object>();
     /**
      * The configuration to use to determine which events to log.
      */
     private TetradLoggerConfig config;
-
-
-    /**
-     * The listeners.
-     */
-    private final List<TetradLoggerListener> listeners = new ArrayList<TetradLoggerListener>();
-
-
     /**
      * The current file stream that is being written to, this is set in "setNextOutputStream()".s
      */
     private OutputStream stream;
-
-
     /**
      * Forces the logger to log all output.
      */
     private boolean forceLog = false;
-
-
-    /**
-     * The singleton instance of the logger.
-     */
-    private static final TetradLogger INSTANCE = new TetradLogger();
-
     /**
      * The latest file path being written to.
      */
@@ -432,7 +414,7 @@ public class TetradLogger {
             }
             // get the next file name to use.
             String prefix = getLoggingFilePrefix();
-            List<String> files = Arrays.asList(dir.list());
+            List <String> files = Arrays.asList(dir.list());
             int index = 1;
             String name = prefix + (index++) + ".txt";
             while (files.contains(name)) {
@@ -482,23 +464,6 @@ public class TetradLogger {
         return Preferences.userRoot().get("loggingPrefix", "output");
     }
 
-
-    /**
-     * Sets whether the display log should be used or not.
-     */
-    public void setDisplayLogEnabled(boolean enabled) {
-        Preferences.userRoot().putBoolean("enableDisplayLogging", enabled);
-    }
-
-
-    /**
-     * States whether to display the log display.
-     */
-    public boolean isDisplayLogEnabled() {
-        return Preferences.userRoot().getBoolean("enableDisplayLogging", true);
-    }
-
-
     /**
      * Sets the logging prefix.
      *
@@ -516,6 +481,19 @@ public class TetradLogger {
         Preferences.userRoot().put("loggingPrefix", normalize(loggingFilePrefix));
     }
 
+    /**
+     * States whether to display the log display.
+     */
+    public boolean isDisplayLogEnabled() {
+        return Preferences.userRoot().getBoolean("enableDisplayLogging", true);
+    }
+
+    /**
+     * Sets whether the display log should be used or not.
+     */
+    public void setDisplayLogEnabled(boolean enabled) {
+        Preferences.userRoot().putBoolean("enableDisplayLogging", enabled);
+    }
 
     /**
      * States whether file logging is enabled or not.
@@ -662,6 +640,28 @@ public class TetradLogger {
     //================================ Inner classes ====================================//
 
     /**
+     * Represents an output stream that can get its own length.
+     */
+    public static interface LogDisplayOutputStream {
+
+
+        /**
+         * The total string length written to the text area.
+         *
+         * @return The total string length written to the text area.
+         */
+        @SuppressWarnings({"UnusedDeclaration"})
+        public int getLengthWritten();
+
+
+        /**
+         * Should move the log to the end of the stream.
+         */
+        public void moveToEnd();
+
+    }
+
+    /**
      * A empty config, where no event is active.
      */
     public static class EmptyConfig implements TetradLoggerConfig {
@@ -688,22 +688,22 @@ public class TetradLogger {
 
 
         @Override
-		public boolean isEventActive(String id) {
+        public boolean isEventActive(String id) {
             return this.active;
         }
 
         @Override
-		public boolean isActive() {
+        public boolean isActive() {
             return this.active;
         }
 
         @Override
-		public TetradLoggerConfig copy() {
+        public TetradLoggerConfig copy() {
             return new EmptyConfig(active);
         }
 
         @Override
-		public List<Event> getSupportedEvents() {
+        public List <Event> getSupportedEvents() {
             if (!this.active) {
                 return Collections.emptyList();
             }
@@ -711,32 +711,9 @@ public class TetradLogger {
         }
 
         @Override
-		public void setEventActive(String id, boolean active) {
+        public void setEventActive(String id, boolean active) {
             throw new UnsupportedOperationException("Can't modify the logger config");
         }
-    }
-
-
-    /**
-     * Represents an output stream that can get its own length.
-     */
-    public static interface LogDisplayOutputStream {
-
-
-        /**
-         * The total string length written to the text area.
-         *
-         * @return The total string length written to the text area.
-         */
-        @SuppressWarnings({"UnusedDeclaration"})
-        public int getLengthWritten();
-
-
-        /**
-         * Should move the log to the end of the stream.
-         */
-        public void moveToEnd();
-
     }
 
 

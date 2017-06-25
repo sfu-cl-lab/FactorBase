@@ -70,10 +70,10 @@ public class SemOptimizerRegression implements SemOptimizer {
      * Fit the parameters by doing local regressions.
      */
     @Override
-	public void optimize(SemIm semIm) {
+    public void optimize(SemIm semIm) {
         DoubleMatrix2D covar = semIm.getSampleCovar();
         SemGraph graph = semIm.getSemPm().getGraph();
-        List<Node> nodes = graph.getNodes();
+        List <Node> nodes = graph.getNodes();
         Algebra algebra = new Algebra();
 
 //        TetradLogger.getInstance().log("info", "FML = " + semIm.getScore());
@@ -86,7 +86,7 @@ public class SemOptimizerRegression implements SemOptimizer {
             if (!graph.isParameterizable(node)) continue;
 
             int idx = nodes.indexOf(node);
-            List<Node> parents = graph.getParents(node);
+            List <Node> parents = graph.getParents(node);
             Node errorParent = node;
 
             for (int i = 0; i < parents.size(); i++) {

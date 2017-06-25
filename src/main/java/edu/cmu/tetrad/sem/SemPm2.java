@@ -27,7 +27,6 @@ import edu.cmu.tetrad.util.dist.Split;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
-import java.util.*;
 
 /**
  * Parametric model for the extended SEM model. This is a linear model
@@ -56,39 +55,39 @@ public final class SemPm2 implements TetradSerializable {
      *
      * @serial Cannot be null.
      */
-    private List<Node> nodes;
+    private List <Node> nodes;
 
     /**
      * The list of Parameters (unmodifiable).
      *
      * @serial Cannot be null.
      */
-    private List<Parameter> parameters;
+    private List <Parameter> parameters;
 
     /**
      * The list of variable nodes (unmodifiable).
      *
      * @serial Cannot be null.
      */
-    private List<Node> variableNodes;
+    private List <Node> variableNodes;
 
     /**
      * Map from variable nodes to exogenous distributions.
      */
-    private Map<Node, DistributionType> distributionTypes;
+    private Map <Node, DistributionType> distributionTypes;
 
     /**
      * A map from exogenous distributions to parameters for those distributions.
      */
-    private HashMap<Node, List<Parameter>> distributionParameters;
+    private HashMap <Node, List <Parameter>> distributionParameters;
 
     /**
      * The set of parameter comparisons.
      *
      * @serial Cannot be null.
      */
-    private Map<ParameterPair, ParamComparison> paramComparisons =
-            new HashMap<ParameterPair, ParamComparison>();
+    private Map <ParameterPair, ParamComparison> paramComparisons =
+            new HashMap <ParameterPair, ParamComparison>();
 
     /**
      * The index of the most recent "B" parameter. (These are edge
@@ -149,12 +148,12 @@ public final class SemPm2 implements TetradSerializable {
      */
     public SemPm2(SemPm2 semPm2) {
         this.graph = semPm2.graph;
-        this.nodes = new LinkedList<Node>(semPm2.nodes);
-        this.parameters = new LinkedList<Parameter>(semPm2.parameters);
-        this.variableNodes = new LinkedList<Node>(semPm2.variableNodes);
-        this.distributionTypes = new HashMap<Node, DistributionType>(semPm2.distributionTypes);
-        this.distributionParameters = new HashMap<Node, List<Parameter>>(semPm2.distributionParameters);
-        this.paramComparisons = new HashMap<ParameterPair, ParamComparison>(
+        this.nodes = new LinkedList <Node>(semPm2.nodes);
+        this.parameters = new LinkedList <Parameter>(semPm2.parameters);
+        this.variableNodes = new LinkedList <Node>(semPm2.variableNodes);
+        this.distributionTypes = new HashMap <Node, DistributionType>(semPm2.distributionTypes);
+        this.distributionParameters = new HashMap <Node, List <Parameter>>(semPm2.distributionParameters);
+        this.paramComparisons = new HashMap <ParameterPair, ParamComparison>(
                 semPm2.paramComparisons);
         this.bIndex = semPm2.bIndex;
         this.dIndex = semPm2.dIndex;
@@ -186,23 +185,23 @@ public final class SemPm2 implements TetradSerializable {
      * Returns a list of all the parameters, including variance, covariance,
      * coefficient, and mean parameters.
      */
-    public List<Parameter> getParameters() {
-        return new ArrayList<Parameter>(this.parameters);
+    public List <Parameter> getParameters() {
+        return new ArrayList <Parameter>(this.parameters);
     }
 
     /**
      * Returns the list of variable nodes--that is, node that are not error
      * nodes.
      */
-    public List<Node> getVariableNodes() {
+    public List <Node> getVariableNodes() {
         return this.variableNodes;
     }
 
     /**
      * Returns the list of exogenous variableNodes.
      */
-    public List<Node> getErrorNodes() {
-        List<Node> errorNodes = new ArrayList<Node>();
+    public List <Node> getErrorNodes() {
+        List <Node> errorNodes = new ArrayList <Node>();
 
         for (Node node1 : this.nodes) {
             if (node1.getNodeType() == NodeType.ERROR) {
@@ -216,8 +215,8 @@ public final class SemPm2 implements TetradSerializable {
     /**
      * Returns the list of measured variableNodes.
      */
-    public List<Node> getMeasuredNodes() {
-        List<Node> measuredNodes = new ArrayList<Node>();
+    public List <Node> getMeasuredNodes() {
+        List <Node> measuredNodes = new ArrayList <Node>();
 
         for (Node variable : getVariableNodes()) {
             if (variable.getNodeType() == NodeType.MEASURED) {
@@ -231,8 +230,8 @@ public final class SemPm2 implements TetradSerializable {
     /**
      * Returns the list of latent variableNodes.
      */
-    public List<Node> getLatentNodes() {
-        List<Node> latentNodes = new ArrayList<Node>();
+    public List <Node> getLatentNodes() {
+        List <Node> latentNodes = new ArrayList <Node>();
 
         for (Node node1 : this.nodes) {
             if (node1.getNodeType() == NodeType.LATENT) {
@@ -332,8 +331,8 @@ public final class SemPm2 implements TetradSerializable {
      * appear in the list of nodes. (This order is fixed.)
      */
     public String[] getMeasuredVarNames() {
-        List<Node> semPmVars = getVariableNodes();
-        List<String> varNamesList = new ArrayList<String>();
+        List <Node> semPmVars = getVariableNodes();
+        List <String> varNamesList = new ArrayList <String>();
 
         for (Node semPmVar : semPmVars) {
             if (semPmVar.getNodeType() == NodeType.MEASURED) {
@@ -353,7 +352,7 @@ public final class SemPm2 implements TetradSerializable {
         return distributionTypes.get(node);
     }
 
-    public List<Parameter> getDistributionParameters(Node node) {
+    public List <Parameter> getDistributionParameters(Node node) {
         return distributionParameters.get(node);
     }
 
@@ -398,7 +397,7 @@ public final class SemPm2 implements TetradSerializable {
     }
 
     @Override
-	public String toString() {
+    public String toString() {
         StringBuilder buf = new StringBuilder();
         buf.append("\nSEM PM:");
         buf.append("\n\tParameters:");
@@ -431,7 +430,7 @@ public final class SemPm2 implements TetradSerializable {
     }
 
     private void initializeVariableNodes() {
-        List<Node> varNodes = new ArrayList<Node>();
+        List <Node> varNodes = new ArrayList <Node>();
 
         for (Node node1 : this.nodes) {
             Node node = (node1);
@@ -446,8 +445,8 @@ public final class SemPm2 implements TetradSerializable {
     }
 
     private void initializeParams() {
-        parameters = new ArrayList<Parameter>();
-        List<Edge> edges = graph.getEdges();
+        parameters = new ArrayList <Parameter>();
+        List <Edge> edges = graph.getEdges();
 
         // Add linear coefficient parameters for all directed edges that
         // aren't error edges.
@@ -470,8 +469,8 @@ public final class SemPm2 implements TetradSerializable {
             }
         }
 
-        distributionTypes = new HashMap<Node, DistributionType>();
-        distributionParameters = new HashMap<Node, List<Parameter>>();
+        distributionTypes = new HashMap <Node, DistributionType>();
+        distributionParameters = new HashMap <Node, List <Parameter>>();
 
         for (Node node : getVariableNodes()) {
             addExogenousDistribution(node, DistributionType.NORMAL);
@@ -482,7 +481,7 @@ public final class SemPm2 implements TetradSerializable {
         distributionTypes.put(node, type);
         int numArgs = DistributionType.NORMAL.getNumArgs();
 
-        List<Parameter> _parameters = new LinkedList<Parameter>();
+        List <Parameter> _parameters = new LinkedList <Parameter>();
 
         for (int i = 0; i < numArgs; i++) {
             Parameter parameter = new Parameter(newDName(), ParamType.DIST, node, node);

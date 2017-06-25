@@ -41,10 +41,10 @@ public class StringFunction implements ConnectionFunction {
     private Node[] inputs;
     private Expression expression;
 
-    public StringFunction(String formula, Node...parents) throws ParseException {
+    public StringFunction(String formula, Node... parents) throws ParseException {
         this.formula = formula;
 
-        List<String> varNames = new ArrayList<String>();
+        List <String> varNames = new ArrayList <String>();
 
         for (Node node : parents) {
             varNames.add(node.getName());
@@ -56,7 +56,7 @@ public class StringFunction implements ConnectionFunction {
     }
 
     @Override
-	public Node[] getInputNodes() {
+    public Node[] getInputNodes() {
         return inputs;
     }
 
@@ -67,10 +67,11 @@ public class StringFunction implements ConnectionFunction {
     /**
      * Returns the function value. The order of the input values must be the
      * same as the order of the input nodes.
+     *
      * @return Double.NaN, if not overridden.
      */
     @Override
-	public double valueAt(final double...inputValues) {
+    public double valueAt(final double... inputValues) {
         if (inputValues == null) {
             throw new NullPointerException();
         }
@@ -85,7 +86,7 @@ public class StringFunction implements ConnectionFunction {
                     Node node = inputs[i];
 
                     if (var.equals(node.getName())) {
-                       return inputValues[i];
+                        return inputValues[i];
                     }
                 }
 

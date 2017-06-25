@@ -36,14 +36,6 @@ import java.util.List;
  */
 public final class DataSetProbs implements DiscreteProbs {
     static final long serialVersionUID = 23L;
-
-    /**
-     * The data set that this is a cell count table for.
-     *
-     * @serial
-     */
-    private DataSet dataSet;
-
     /**
      * An array whose length is the number of dimensions of the cell and whose
      * contents, for each value dims[i], are the numbers of values for each
@@ -53,7 +45,18 @@ public final class DataSetProbs implements DiscreteProbs {
      * @serial
      */
     private final int[] dims;
-
+    /**
+     * The number of rows in the data.
+     *
+     * @serial
+     */
+    private final int numRows;
+    /**
+     * The data set that this is a cell count table for.
+     *
+     * @serial
+     */
+    private DataSet dataSet;
     /**
      * Indicates whether bounds on coordinate values are explicitly enforced.
      * This may slow down loops.
@@ -61,14 +64,6 @@ public final class DataSetProbs implements DiscreteProbs {
      * @serial
      */
     private boolean boundsEnforced = true;
-
-    /**
-     * The number of rows in the data.
-     *
-     * @serial
-     */
-    private final int numRows;
-
     /**
      * True iff a missing value case was found on the last run through the
      * data.
@@ -106,7 +101,7 @@ public final class DataSetProbs implements DiscreteProbs {
      * variable values is the order of the variables in getVariable().
      */
     @Override
-	public double getCellProb(int[] variableValues) {
+    public double getCellProb(int[] variableValues) {
         int[] point = new int[dims.length];
         int count = 0;
 
@@ -135,7 +130,7 @@ public final class DataSetProbs implements DiscreteProbs {
      * Returns the estimated probability of the given proposition.
      */
     @Override
-	public double getProb(Proposition assertion) {
+    public double getProb(Proposition assertion) {
         int[] point = new int[dims.length];
         int count = 0;
 
@@ -165,19 +160,19 @@ public final class DataSetProbs implements DiscreteProbs {
      * conditional on the given condition.
      */
     @Override
-	public double getConditionalProb(Proposition assertion,
-            Proposition condition) {
+    public double getConditionalProb(Proposition assertion,
+                                     Proposition condition) {
         if (assertion.getVariableSource() != condition.getVariableSource()) {
             throw new IllegalArgumentException(
                     "Assertion and condition must be " +
                             "for the same Bayes IM.");
         }
 
-        List<Node> assertionVars = assertion.getVariableSource().getVariables();
-        List<Node> dataVars = dataSet.getVariables();
+        List <Node> assertionVars = assertion.getVariableSource().getVariables();
+        List <Node> dataVars = dataSet.getVariables();
 
-        if (!new HashSet<Node>(assertionVars).equals(
-                new HashSet<Node>(dataVars))) {
+        if (!new HashSet <Node>(assertionVars).equals(
+                new HashSet <Node>(dataVars))) {
             throw new IllegalArgumentException(
                     "Assertion variable and data variables" +
                             " are either different or in a different order: " +
@@ -224,7 +219,7 @@ public final class DataSetProbs implements DiscreteProbs {
      * probabilities for.
      */
     @Override
-	public List<Node> getVariables() {
+    public List <Node> getVariables() {
         return null;
     }
 
@@ -243,7 +238,7 @@ public final class DataSetProbs implements DiscreteProbs {
     }
 
     @Override
-	public boolean isMissingValueCaseFound() {
+    public boolean isMissingValueCaseFound() {
         return missingValueCaseFound;
     }
 }

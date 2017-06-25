@@ -31,9 +31,9 @@ public class PermutationMatrixPair {
     private DoubleMatrix2D matrixW;
     private DataSet matrixBhat;
     private DoubleMatrix2D matrixA;
-    private List<Integer> permutation;
+    private List <Integer> permutation;
 
-    public PermutationMatrixPair(List<Integer> permutation, DoubleMatrix2D matrixW) {
+    public PermutationMatrixPair(List <Integer> permutation, DoubleMatrix2D matrixW) {
         this.permutation = permutation;
         this.matrixW = matrixW;
     }
@@ -58,12 +58,12 @@ public class PermutationMatrixPair {
         this.matrixA = matrixA;
     }
 
-    public List<Integer> getPermutation() {
+    public List <Integer> getPermutation() {
         return permutation;
     }
 
     @Override
-	public String toString() {
+    public String toString() {
         StringBuilder buf = new StringBuilder();
 
         buf.append("Permutation: " + permutation);
