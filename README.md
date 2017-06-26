@@ -1,7 +1,11 @@
 # FactorBase
 [![Build Status](https://travis-ci.org/sfu-cl-lab/FactorBase.svg?branch=master)](https://travis-ci.org/sfu-cl-lab/FactorBase)   
-The source code repository for the FactorBase system. The input to the system is a relational schema hosted on a MySQL. The output is a Bayes net that shows probabilistic dependencies between the relationships and attributes represented in the database. 
+The source code repository for the FactorBase system. 
 The code in this repository implements the learn-and-join algorithm (see [algorithm paper](http://www.cs.sfu.ca/~oschulte/pubs.html) on  ''Learning Graphical Models for Relational Data via Lattice Search''). 
+
+_Input_: A relational schema hosted on a MySQL server. 
+
+_Output_: A Bayesian network that shows probabilistic dependencies between the relationships and attributes represented in the database. Both network structure and parameters are computed by the system.
 
 ## Further Information
 
