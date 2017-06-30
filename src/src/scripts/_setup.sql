@@ -3,8 +3,8 @@
 DROP SCHEMA IF EXISTS unielwin_setup; 
 create schema unielwin_setup;
 
-create schema if not exists unielwin_BN;
-create schema if not exists unielwin_CT;
+
+
 
 USE unielwin_setup;
 SET storage_engine=INNODB;
