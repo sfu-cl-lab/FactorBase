@@ -352,7 +352,7 @@ public class BayesBaseCT_SortMerge {
 
 		//delete the tuples with MULT=0 in the biggest CT table
 		String BiggestRchain="";
-		Statement st _BN= con_BN.createStatement();
+		Statement st_BN= con_BN.createStatement();
 		ResultSet rs = st_BN.executeQuery("select name as RChain from lattice_set where lattice_set.length = (SELECT max(length)  FROM lattice_set);" );
 
 		boolean RChainCreated = false;
