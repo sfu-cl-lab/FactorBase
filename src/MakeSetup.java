@@ -2,6 +2,13 @@
   If setup = 0, we skip this step and use the existing setup database
   Yan Sept 10th*/
 
+
+//Assumption: 
+  // No suffix or *_std refers to the original database provided to FactorBase
+  // *_setup is the setup database
+
+
+
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import com.mysql.jdbc.Connection;
@@ -9,11 +16,11 @@ import com.mysql.jdbc.Connection;
 
 public class MakeSetup {
 
-	static Connection con1;
+	static Connection con;
 
 	//  to be read from config.cfg.
 	// The config.cfg file should  be the working directory.
-	static String databaseName, databaseName0;
+	static String databaseName, databaseName_setup;
 	static String dbUsername;
 	static String dbPassword;
 	static String dbaddress;
@@ -28,7 +35,7 @@ public class MakeSetup {
 		//analyze schema data to create setup database. This can be edited by the user before learning.
 		//If setup = 0, we skip this step and use the existing setup database
 		
-		BZScriptRunner bzsr = new BZScriptRunner(databaseName,con1);
+		BZScriptRunner bzsr = new BZScriptRunner(databaseName,con);
 		bzsr.runScript("src/scripts/setup.sql");  
 		bzsr.createSP("src/scripts/storedprocs.sql");
         bzsr.callSP("find_values");
@@ -40,27 +47,24 @@ public class MakeSetup {
 	public static void setVarsFromConfig(){
 		Config conf = new Config();
 		databaseName = conf.getProperty("dbname");
-		databaseName0 = databaseName + "_setup";
+		databaseName_setup = databaseName + "_setup";
 		dbUsername = conf.getProperty("dbusername");
 		dbPassword = conf.getProperty("dbpassword");
 		dbaddress = conf.getProperty("dbaddress");
 	}
 
 	public static void connectDB() throws SQLException {
-		//open database connections to the original database, the setup database, the bayes net database, and the contingency table database
-
-		String CONN_STR1 = "jdbc:" + dbaddress + "/" + databaseName;
+		//open database connections to the original database
+		String CONN_STR = "jdbc:" + dbaddress + "/" + databaseName;
 		try {
 			java.lang.Class.forName("com.mysql.jdbc.Driver");
 		} catch (Exception ex) {
 			System.err.println("Unable to load MySQL JDBC driver");
 		}
-		con1 = (Connection) DriverManager.getConnection(CONN_STR1, dbUsername, dbPassword);
-		
-		
+		con = (Connection) DriverManager.getConnection(CONN_STR, dbUsername, dbPassword);
 	}
 	
 	public static void disconnectDB() throws SQLException {
-		con1.close();
+		con.close();
 	}
 }

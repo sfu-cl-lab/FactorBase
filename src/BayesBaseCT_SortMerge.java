@@ -67,12 +67,14 @@ public class BayesBaseCT_SortMerge {
 
         setVarsFromConfig();
         //connect to db using jdbc
-        connectDB();
+        con_std = connectDB(databaseName_std);
+        con_setup = connectDB(databaseName_setup);
         //build _BN copy from _setup Nov 1st, 2013 Zqiancompute the subset given fid and it's parents
         BZScriptRunner bzsr = new BZScriptRunner(databaseName_std,con_setup);
         bzsr.runScript("src/scripts/transfer.sql");
 
-        connectDB1();
+        con_BN = connectDB(databaseName_BN);
+        con_CT = connectDB(databaseName_CT);
 
         //generate lattice tree
         //maxNumberOfMembers = LatticeGenerator.generate(con2);
@@ -110,16 +112,15 @@ public class BayesBaseCT_SortMerge {
 	 * @param cont
 	 * @throws Exception
 	 */
-	public static void buildCT(Connection con_std, Connection con_BN,
-                               Connection con_CT, Connection con_setup,
-                               String databaseName_std, String linkCorrelation,
-                               String cont) throws Exception {
+	public static void buildCT(Connection con_std, String databaseName_std, String linkCorrelation,
+								String cont) throws Exception {
 
-        setVars(con_std, con_BN,
-                con_CT, con_setup, databaseName_std,
+        setVars(con_std, databaseName_std,
                 linkCorrelation, cont);
 		System.out.println("@BayesBase : con_std: " + con_std);
-		
+        con_setup = connectDB(databaseName_setup);
+		con_BN = connectDB(databaseName_BN);
+        con_CT = connectDB(databaseName_CT);
         BZScriptRunner bzsr = new BZScriptRunner(databaseName_std,con_setup);
         bzsr.runScript("src/scripts/transfer.sql");
         maxNumberOfMembers = short_rnid_LatticeGenerator.generate(con_BN);
@@ -147,11 +148,13 @@ public class BayesBaseCT_SortMerge {
 	      
 		setVarsFromConfigForTarget();
 		//connect to db using jdbc
-		connectDB();
+		con_std = connectDB(databaseName_std);
+        con_setup = connectDB(databaseName_setup);
 		//build _BN part1 from metadata_1.sql
 		BZScriptRunner bzsr = new BZScriptRunner(databaseName_std,dbbase,con_setup);
 		bzsr.runScript("src/scripts/transfer2.sql");
-		connectDB1();
+		con_BN = connectDB(databaseName_BN);
+        con_CT = connectDB(databaseName_CT);
 		//generate lattice tree
 		maxNumberOfMembers = short_rnid_LatticeGenerator.generateTarget(con_BN);// rnid mapping. maxNumberofMembers = maximum size of lattice element. Should be called LatticeHeight
 		System.out.println(" ##### lattice is ready for use* ");
@@ -193,11 +196,13 @@ public class BayesBaseCT_SortMerge {
 	      
 		setVarsFromConfigForTarget();
 		//connect to db using jdbc
-		connectDB();
+		con_std = connectDB(databaseName_std);
+        con_setup = connectDB(databaseName_setup);
 		//build _BN part1 from metadata_1.sql
 		BZScriptRunner bzsr = new BZScriptRunner(databaseName_std,dbbase,con_setup);
 		bzsr.runScript("src/scripts/transfer2.sql");
-		connectDB1();
+		con_BN = connectDB(databaseName_BN);
+        con_CT = connectDB(databaseName_CT);
 		//generate lattice tree
 		maxNumberOfMembers = short_rnid_LatticeGenerator.generateTarget(con_BN);// rnid mapping. maxNumberofMembers = maximum size of lattice element. Should be called LatticeHeight
 		System.out.println(" ##### lattice is ready for use* ");
@@ -240,11 +245,14 @@ public class BayesBaseCT_SortMerge {
 	      
 		setVarsFromConfigForTarget();
 		//connect to db using jdbc
-		connectDB();
+		con_std = connectDB(databaseName_std);
+        con_setup = connectDB(databaseName_setup);
+
 		//build _BN part1 from metadata_1.sql
 		BZScriptRunner bzsr = new BZScriptRunner(databaseName_std,dbbase,con_setup);
 		bzsr.runScript("src/scripts/transfer2.sql");
-		connectDB1();
+		con_BN = connectDB(databaseName_BN);
+        con_CT = connectDB(databaseName_CT);
 		//generate lattice tree
 		maxNumberOfMembers = short_rnid_LatticeGenerator.generateTarget(con_BN);// rnid mapping. maxNumberofMembers = maximum size of lattice element. Should be called LatticeHeight
 		System.out.println(" ##### lattice is ready for use* ");
@@ -482,10 +490,11 @@ public class BayesBaseCT_SortMerge {
      * @param linkCorrelation
      * @param continuous
      */
-    public static void setVars(Connection connection_std, Connection connection_BN,
-                                         Connection connection_CT, Connection connection_setup,
-                                         String databaseName_std, String linkCorrelation,
-                                         String continuous){
+    public static void setVars(Connection connection_std, 
+                                String databaseName_std, 
+                                String linkCorrelation,
+                                String continuous){
+
 		BayesBaseCT_SortMerge.databaseName_std = databaseName_std;
 		BayesBaseCT_SortMerge.databaseName_BN = databaseName_std + "_BN";
 		BayesBaseCT_SortMerge.databaseName_CT = databaseName_std + "_CT";
@@ -493,15 +502,24 @@ public class BayesBaseCT_SortMerge {
 		BayesBaseCT_SortMerge.linkCorrelation = linkCorrelation;
 		BayesBaseCT_SortMerge.cont = continuous;
 		BayesBaseCT_SortMerge.con_std = connection_std;
-		BayesBaseCT_SortMerge.con_BN = connection_BN;
-		BayesBaseCT_SortMerge.con_CT = connection_CT;
-		BayesBaseCT_SortMerge.con_setup = connection_setup;
+		// BayesBaseCT_SortMerge.con_BN = connection_BN;
+		// BayesBaseCT_SortMerge.con_CT = connection_CT;
+		// BayesBaseCT_SortMerge.con_setup = connection_setup;
 	}
+    
     /**
-     * Connects to database via MySQL JDBC driver
-     * @throws SQLException
+     * Connect to database via MySQL JDBC driver
      */
-	 /**
+	public static Connection connectDB(String databaseName) throws SQLException{
+		String CONN_STR = "jdbc:" + dbaddress + "/" + databaseName;
+		try {
+			java.lang.Class.forName("com.mysql.jdbc.Driver");
+		} catch (Exception ex) {
+			System.err.println("Unable to load MySQL JDBC driver");
+		}
+		return (Connection) DriverManager.getConnection(CONN_STR, dbUsername, dbPassword);
+	}
+	/**
      * Connects to database via MySQL JDBC driver
      * @throws SQLException
      */
@@ -512,37 +530,41 @@ public class BayesBaseCT_SortMerge {
 		} catch (Exception ex) {
 			System.err.println("Unable to load MySQL JDBC driver");
 		}
-		con_std = (Connection) DriverManager.getConnection(CONN_STR1, dbUsername, dbPassword);
+		BayesBaseCT_SortMerge.con_std = (Connection) DriverManager.getConnection(CONN_STR1, dbUsername, dbPassword);
 		
+		
+	}
+
+	public static void connectDB_setup() throws SQLException{
 		String CONN_STR4 = "jdbc:" + dbaddress + "/" + databaseName_setup;
 		try {
 			java.lang.Class.forName("com.mysql.jdbc.Driver");
 		} catch (Exception ex) {
 			System.err.println("Unable to load MySQL JDBC driver");
 		}
-		con_setup = (Connection) DriverManager.getConnection(CONN_STR4, dbUsername, dbPassword);
+		BayesBaseCT_SortMerge.con_setup = (Connection) DriverManager.getConnection(CONN_STR4, dbUsername, dbPassword);
 	}
-
     /**
      * Connects to <databaseName>_BN (Bayesian Network)
      * @throws SQLException
      */
-	public static void connectDB1() throws SQLException {
+	public static void connectDB_BN() throws SQLException {
 		String CONN_STR2 = "jdbc:" + dbaddress + "/" + databaseName_BN;
 		try {
 			java.lang.Class.forName("com.mysql.jdbc.Driver");
 		} catch (Exception ex) {
 			System.err.println("Unable to load MySQL JDBC driver");
 		}
-		con_BN = (Connection) DriverManager.getConnection(CONN_STR2, dbUsername, dbPassword);
-		
+		BayesBaseCT_SortMerge.con_BN = (Connection) DriverManager.getConnection(CONN_STR2, dbUsername, dbPassword);
+	}
+	public static void connectDB_CT() throws  SQLException{
 		String CONN_STR3 = "jdbc:" + dbaddress + "/" + databaseName_CT;
 		try {
 			java.lang.Class.forName("com.mysql.jdbc.Driver");
 		} catch (Exception ex) {
 			System.err.println("Unable to load MySQL JDBC driver");
 		}
-		con_CT = (Connection) DriverManager.getConnection(CONN_STR3, dbUsername, dbPassword);
+		BayesBaseCT_SortMerge.con_CT = (Connection) DriverManager.getConnection(CONN_STR3, dbUsername, dbPassword);
 	}
 		
 		
