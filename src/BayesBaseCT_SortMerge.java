@@ -30,27 +30,27 @@ import java.util.ArrayList;
 
 public class BayesBaseCT_SortMerge {
 
-	static Connection con_std;
-    static Connection con_BN;
-    static Connection con_CT;
-    static Connection con_setup;
-	static String databaseName_std;
-    static String databaseName_BN;
-    static String databaseName_CT;
-    static String databaseName_setup;
-	static String dbbase;
-	static String dbUsername;
-	static String dbPassword;
-	static String dbaddress;
-    static String linkCorrelation;
+	private static Connection con_std;
+    private static Connection con_BN;
+    private static Connection con_CT;
+    private static Connection con_setup;
+	private static String databaseName_std;
+    private static String databaseName_BN;
+    private static String databaseName_CT;
+    private static String databaseName_setup;
+	private static String dbbase;
+	private static String dbUsername;
+	private static String dbPassword;
+	private static String dbaddress;
+    private static String linkCorrelation;
     private static String continuous;
     /*
      * cont is Continuous
      * ToDo: Refactor
      */
-    static String cont;
+    private static String cont;
 
-	static int maxNumberOfMembers = 0;
+	private static int maxNumberOfMembers = 0;
 
     public static void main(String[] args) throws Exception {
 		      
@@ -352,8 +352,8 @@ public class BayesBaseCT_SortMerge {
 
 		//delete the tuples with MULT=0 in the biggest CT table
 		String BiggestRchain="";
-		Statement st = con_BN.createStatement();
-		ResultSet rs = st.executeQuery("select name as RChain from lattice_set where lattice_set.length = (SELECT max(length)  FROM lattice_set);" );
+		Statement st _BN= con_BN.createStatement();
+		ResultSet rs = st_BN.executeQuery("select name as RChain from lattice_set where lattice_set.length = (SELECT max(length)  FROM lattice_set);" );
 
 		boolean RChainCreated = false;
 		while(rs.next())
@@ -363,21 +363,22 @@ public class BayesBaseCT_SortMerge {
 			System.out.println("\n BiggestRchain : " + BiggestRchain);
 		}
 		
-		st.close();
+		st_BN.close();
 		
 		if ( RChainCreated )
 		{
-			Statement st1 = con_CT.createStatement();
-			System.out.println("delete from `"+BiggestRchain.replace("`", "") +"_CT` where MULT='0';" );
+			Statement st_CT = con_CT.createStatement();
 			try
 			{
-				st1.execute("delete from `"+BiggestRchain.replace("`", "") +"_CT` where MULT='0';" );
+				st_CT.execute("delete from `"+BiggestRchain.replace("`", "") +"_CT` where MULT='0';" );
+				System.out.println("delete from `"+BiggestRchain.replace("`", "") +"_CT` where MULT='0';" );
+
 			}
 			catch ( MySQLSyntaxErrorException e )
 			{
 				//Do nothing
 			}
-			st1.close();
+			st_CT.close();
 		}
 		
 		long l2 = System.currentTimeMillis();  //@zqian
@@ -580,12 +581,10 @@ public class BayesBaseCT_SortMerge {
 			while(rs1.next())
 			{		
 				long l2 = System.currentTimeMillis(); 
-
 				String parent = rs1.getString("parent");
-			//	System.out.println("\n parent : " + parent);
+				//	System.out.println("\n parent : " + parent);
 				String rnid = rs1.getString("rnid");
-			//	System.out.println("\n rnid : " + rnid);
-				
+				//	System.out.println("\n rnid : " + rnid);	
 				String BaseName = "`"+rchain.replace("`", "")+"_"+rnid.replace("`", "")+"`";
 				System.out.println(" BaseName : " + BaseName );
 				
@@ -595,22 +594,22 @@ public class BayesBaseCT_SortMerge {
 				//  create select query string	
 				ResultSet rs2 = st2.executeQuery("SELECT DISTINCT Entries FROM ADT_RChain_Star_Select_List WHERE rchain = '" + rchain + "' and '"+rnid+"' = rnid;");
 				String selectString = makeCommaSepQuery(rs2, "Entries", " , ");			
-			//	System.out.println("Select String : " + selectString);
+				//	System.out.println("Select String : " + selectString);
 				rs2.close();
 				//  create mult query string
 				ResultSet rs3 = st2.executeQuery("SELECT DISTINCT Entries FROM  ADT_RChain_Star_From_List WHERE rchain = '" + rchain + "' and '"+rnid+"' = rnid;");
 				String MultString = makeStarSepQuery(rs3, "Entries", " * ");
-			//	System.out.println("Mult String : " + MultString+ " as `MULT`");
+				//	System.out.println("Mult String : " + MultString+ " as `MULT`");
 				rs3.close();
 				//  create from query string
 				ResultSet rs4 = st2.executeQuery("SELECT DISTINCT Entries FROM  ADT_RChain_Star_From_List WHERE rchain = '" + rchain + "' and '"+rnid+"' = rnid;");
 				String fromString = makeCommaSepQuery(rs4, "Entries", " , ");
-			//	System.out.println("From String : " + fromString);			
+				//	System.out.println("From String : " + fromString);			
 				rs4.close();
 				//  create where query string
 				ResultSet rs5 = st2.executeQuery("SELECT DISTINCT Entries FROM  ADT_RChain_Star_Where_List WHERE rchain = '" + rchain + "' and '"+rnid+"' = rnid;");
 				String whereString = makeCommaSepQuery(rs5, "Entries", " and ");
-			//	System.out.println("Where String : " + whereString);
+				//	System.out.println("Where String : " + whereString);
 				rs5.close();
 				//  create the final query
 				String queryString ="";
@@ -667,7 +666,7 @@ public class BayesBaseCT_SortMerge {
 				String cur_false_Table= "`"+rnid.replace("`", "")+len+"_"+fc+"_false`";
 				
 				//create false table					
-//				Sort_merge5.sort_merge(cur_star_Table,cur_flat_Table,cur_false_Table,con3);
+				//Sort_merge5.sort_merge(cur_star_Table,cur_flat_Table,cur_false_Table,con3);
 				//Sort_merge4.sort_merge(cur_star_Table,cur_flat_Table,cur_false_Table,con3);
 				Sort_merge3.sort_merge(cur_star_Table,cur_flat_Table,cur_false_Table,con_CT);
 
@@ -708,7 +707,7 @@ public class BayesBaseCT_SortMerge {
 				st3.execute("create  table "+Next_CT_Table+" as " + QueryStringCT);	 //create CT table	
 				rs1.previous();
 
-				 //adding  covering index May 21
+				//adding  covering index May 21
 				//create index string
 				ResultSet rs45 = st2.executeQuery("select column_name as Entries from information_schema.columns where table_schema = '"+databaseName_CT+"' and table_name = '"+Next_CT_Table.replace("`","")+"';");
 				String IndexString4 = makeIndexQuery(rs45, "Entries", " , ");
@@ -723,13 +722,9 @@ public class BayesBaseCT_SortMerge {
 				st3.close();
 				long l6 = System.currentTimeMillis(); 
 				System.out.print("Building Time(ms) for "+cur_CT_Table+ " : "+(l6-l5)+" ms.\n");
-		 
 			}
-			
 			st1.close();
 			rs1.close();
-
-
 		}
 		//System.out.println("count "+count+"\n");
 		rs.close();
@@ -737,12 +732,11 @@ public class BayesBaseCT_SortMerge {
 		long l2 = System.currentTimeMillis(); //@zqian : measure structure learning time
 		//System.out.print("Building Time(ms): "+(l2-l)+" ms.\n");
 		System.out.println("\n Build CT_RChain_TABLES for length = "+len+" are DONE \n" );
-
 	}
 	
-/* building pvars_counts*/
-public static void BuildCT_Pvars() throws SQLException, IOException {
-	long l = System.currentTimeMillis(); //@zqian : measure structure learning time
+	/* building pvars_counts*/
+	public static void BuildCT_Pvars() throws SQLException, IOException {
+		long l = System.currentTimeMillis(); //@zqian : measure structure learning time
 		Statement st = con_BN.createStatement();
 		st.execute("Drop schema if exists " + databaseName_CT + ";");
 		st.execute("Create schema if not exists " + databaseName_CT + ";");
@@ -860,7 +854,6 @@ public static void BuildCT_Pvars() throws SQLException, IOException {
 		long l2 = System.currentTimeMillis(); //@zqian : measure structure learning time
 		System.out.print("Building Time(ms) for Pvariables counts: "+(l2-l)+" ms.\n");
 		System.out.println("\n Pvariables are DONE \n" );
-
 	}
 
     /**
@@ -938,7 +931,6 @@ public static void BuildCT_Pvars() throws SQLException, IOException {
         st.close();
 
         System.out.println("\n Rnodes_counts are DONE \n" );
-
     }
 
     /**
@@ -1029,7 +1021,6 @@ public static void BuildCT_Pvars() throws SQLException, IOException {
         rs.close();
         st.close();
         System.out.println("\n Rnodes_counts are DONE \n" );
-
     }
 
     /**
@@ -1097,7 +1088,6 @@ public static void BuildCT_Pvars() throws SQLException, IOException {
         long l2 = System.currentTimeMillis(); //@zqian : measure structure learning time
         System.out.print("Building Time(ms) for Rnodes_flat: "+(l2-l)+" ms.\n");
         System.out.println("\n Rnodes_flat are DONE \n" );
-
     }
 
     /**
@@ -1167,7 +1157,6 @@ public static void BuildCT_Pvars() throws SQLException, IOException {
         long l2 = System.currentTimeMillis(); //@zqian : measure structure learning time
         System.out.print("Building Time(ms) for Rnodes_star: "+(l2-l)+" ms.\n");
         System.out.println("\n Rnodes_star are DONE \n" );
-
     }
 
     /**
@@ -1187,34 +1176,34 @@ public static void BuildCT_Pvars() throws SQLException, IOException {
             Statement st2 = con_BN.createStatement();
             Statement st3 = con_CT.createStatement();
             /**********starting to create _flase table***using sort_merge*******************************/
-    //		Sort_merge5.sort_merge("`"+rchain.replace("`", "")+"_star`","`"+rchain.replace("`", "") +"_flat`","`"+rchain.replace("`", "") +"_false`",con3);
+    		//Sort_merge5.sort_merge("`"+rchain.replace("`", "")+"_star`","`"+rchain.replace("`", "") +"_flat`","`"+rchain.replace("`", "") +"_false`",con3);
             //Sort_merge4.sort_merge("`"+rchain.replace("`", "")+"_star`","`"+rchain.replace("`", "") +"_flat`","`"+rchain.replace("`", "") +"_false`",con3);
             Sort_merge3.sort_merge("`"+rchain.replace("`", "")+"_star`","`"+rchain.replace("`", "") +"_flat`","`"+rchain.replace("`", "") +"_false`",con_CT);
 
-          //adding  covering index May 21
+          	//adding  covering index May 21
             //create index string
             ResultSet rs15 = st2.executeQuery("select column_name as Entries from information_schema.columns where table_schema = '"+databaseName_CT+"' and table_name = '"+rchain.replace("`", "") +"_false';");
             String IndexString = makeIndexQuery(rs15, "Entries", " , ");
             //System.out.println("Index String : " + IndexString);
-        //	System.out.println("alter table `"+rchain.replace("`", "") +"_false`"+" add index `"+rchain.replace("`", "") +"_false`   ( "+IndexString+" );");
+        	//	System.out.println("alter table `"+rchain.replace("`", "") +"_false`"+" add index `"+rchain.replace("`", "") +"_false`   ( "+IndexString+" );");
             st3.execute("alter table `"+rchain.replace("`", "") +"_false`"+" add index `"+rchain.replace("`", "") +"_false`   ( "+IndexString+" );");
 
 
 
             //building the _CT table        //expanding the columns // May 16
-           // must specify the columns, or there's will a mistake in the table that mismatch the columns
+           	// must specify the columns, or there's will a mistake in the table that mismatch the columns
             ResultSet rs5 = st3.executeQuery("select column_name as Entries from information_schema.columns where table_schema = '"+databaseName_CT+"' and table_name = '"+rchain.replace("`", "") +"_counts';");
             // reading the column names from information_schema.columns, and the output will remove the "`" automatically,
             // however some columns contain "()" and MySQL does not support "()" well, so we have to add the "`" back.
             String UnionColumnString = makeUnionSepQuery(rs5, "Entries", " , ");
-                //System.out.println("Union Column String : " + UnionColumnString);
+            //System.out.println("Union Column String : " + UnionColumnString);
 
             String createCTString = "create table `"+rchain.replace("`", "") +"_CT`"+" as select "+UnionColumnString+ " from `"+rchain.replace("`", "") +"_counts` union " +
             "select "+UnionColumnString+" from `"+rchain.replace("`", "") +"_false`, `"+rchain.replace("`", "") +"_join`;" ;
-                System.out.println("\n create CT table String : " + createCTString );
+            System.out.println("\n create CT table String : " + createCTString );
             st3.execute(createCTString);
 
-          //adding  covering index May 21
+          	//adding  covering index May 21
             //create index string
             ResultSet rs25 = st2.executeQuery("select column_name as Entries from information_schema.columns where table_schema = '"+databaseName_CT+"' and table_name = '"+rchain.replace("`", "") +"_CT';");
             String IndexString2 = makeIndexQuery(rs25, "Entries", " , ");
@@ -1235,7 +1224,6 @@ public static void BuildCT_Pvars() throws SQLException, IOException {
         long l2 = System.currentTimeMillis(); //@zqian : measure structure learning time
         System.out.print("Building Time(ms) for Rnodes_false and Rnodes_CT: "+(l2-l)+" ms.\n");
         System.out.println("\n Rnodes_false and Rnodes_CT  are DONE \n" );
-
     }
 
     /**
@@ -1281,8 +1269,6 @@ public static void BuildCT_Pvars() throws SQLException, IOException {
         rs.close();
         st.close();
         System.out.println("\n Rnodes_joins are DONE \n" );
-
-
     }
 
     /**
@@ -1342,7 +1328,7 @@ public static void BuildCT_Pvars() throws SQLException, IOException {
      * for _CT part, adding "`"
      * @param rs
      * @param colName
-     * @par"`"am del
+     * @param del
      * @return
      * @throws SQLException
      */

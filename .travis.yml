@@ -28,7 +28,7 @@ script:
   - javac -cp ".:./lib/*" RelationalClassification.java
   - java -cp ".:./lib/*" MakeSetup > a.txt
   - java -cp ".:./lib/*" RunBB > b.txt
-  - java -cp ".:./lib/*" RelationalClassifcation > c.txt
+  - java -cp ".:./lib/*" RelationalClassification > c.txt
   - tail a.txt
   - tail b.txt
   - tail c.txt
