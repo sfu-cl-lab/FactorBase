@@ -35,16 +35,15 @@ public class RelationalClassification {
         setVarsFromConfig();
         System.out.println("Set variables");
 
-        //take the target instance
-        connectDB();
-        //connectDB1();
-        System.out.println("DB connected");
+        con_std = connectDB(databaseName_std);
+        con_setup = connectDB(databaseName_setup);
+        con_BN = connectDB(databaseName_BN);
+        con_CT = connectDB(databaseName_CT);
+        System.out.println("DBs connected");
 
         //create a new setup copy corresponding to Markov Chain of the targetNode
-
-		System.out.println("@RelaClas: con_std: " + con_std);
 				
-        BayesBaseCT_SortMerge.buildCT(con_std, databaseName_std, linkCorrelation, continuous);
+        BayesBaseCT_SortMerge.buildCT(con_std, con_setup, con_BN, con_CT, databaseName_std, linkCorrelation, continuous);
     }
 
      /**
@@ -67,7 +66,7 @@ public class RelationalClassification {
         //functorid = conf.getProperty("functorid");
     }
 
-    public static void connectDB(Connection con, String database) throws Exception{
+    public static Connection connectDB(String database) throws Exception{
 
         String CONN_STR= "jdbc:" + dbaddress + "/" + database;
         try {
@@ -77,57 +76,12 @@ public class RelationalClassification {
         }
         try{
         	
-            con = (Connection) DriverManager.getConnection(CONN_STR, dbUsername, dbPassword);
-            System.out.println("@RelaClas: ConnectDB: "+ database + con_std);
+            return ((Connection) DriverManager.getConnection(CONN_STR, dbUsername, dbPassword));
+            
         }
         catch(Exception e){
             System.out.println("Could not conenct to the Database " + database);
         }
-        
+        return null;   
     }
-
-	 /**
-     * Connects to database via MySQL JDBC driver
-     * @throws SQLException
-     */
-	public static void connectDB() throws SQLException {
-		final String CONN_STR1 = "jdbc:" + dbaddress + "/" + databaseName_std;
-		try {
-			java.lang.Class.forName("com.mysql.jdbc.Driver");
-		} catch (Exception ex) {
-			System.err.println("Unable to load MySQL JDBC driver");
-		}
-		RelationalClassification.con_std = (Connection) DriverManager.getConnection(CONN_STR1, dbUsername, dbPassword);
-	}
-
-    /**
-     * Connects to <databaseName>_BN (Bayesian Network) and <databaseName>_CT (Contingency Table)
-     * @throws SQLException
-     */
-	public static void connectDB1() throws SQLException {
-        String CONN_STR4 = "jdbc:" + dbaddress + "/" + databaseName_setup;
-        try {
-            java.lang.Class.forName("com.mysql.jdbc.Driver");
-        } catch (Exception ex) {
-            System.err.println("Unable to load MySQL JDBC driver");
-        }
-        RelationalClassification.con_setup = (Connection) DriverManager.getConnection(CONN_STR4, dbUsername, dbPassword);
-		String CONN_STR2 = "jdbc:" + dbaddress + "/" + databaseName_BN;
-		try {
-			java.lang.Class.forName("com.mysql.jdbc.Driver");
-		} catch (Exception ex) {
-			System.err.println("Unable to load MySQL JDBC driver");
-		}
-		RelationalClassification.con_BN = (Connection) DriverManager.getConnection(CONN_STR2, dbUsername, dbPassword);
-		
-		String CONN_STR3 = "jdbc:" + dbaddress + "/" + databaseName_CT;
-		try {
-			java.lang.Class.forName("com.mysql.jdbc.Driver");
-		} catch (Exception ex) {
-			System.err.println("Unable to load MySQL JDBC driver");
-		}
-		RelationalClassification.con_CT = (Connection) DriverManager.getConnection(CONN_STR3, dbUsername, dbPassword);
-	}
-
-
 }

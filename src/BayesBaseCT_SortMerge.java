@@ -112,18 +112,20 @@ public class BayesBaseCT_SortMerge {
 	 * @param cont
 	 * @throws Exception
 	 */
-	public static void buildCT(Connection con_std, String databaseName_std, String linkCorrelation,
+	public static void buildCT( Connection con_std, Connection con_setup, Connection con_BN, Connection con_CT,
+								String databaseName_std, String linkCorrelation,
 								String cont) throws Exception {
 
-        setVars(con_std, databaseName_std,
+        setVars(con_std, con_setup, con_BN, con_CT, databaseName_std,
                 linkCorrelation, cont);
-		System.out.println("@BayesBase : con_std: " + con_std);
-        con_setup = connectDB(databaseName_setup);
-		con_BN = connectDB(databaseName_BN);
-        con_CT = connectDB(databaseName_CT);
+		
+
         BZScriptRunner bzsr = new BZScriptRunner(databaseName_std,con_setup);
         bzsr.runScript("src/scripts/transfer.sql");
+
+        
         maxNumberOfMembers = short_rnid_LatticeGenerator.generate(con_BN);
+        
         if (cont.equals("1")) {
             bzsr.runScript("src/scripts/metadata_2_cont.sql");
         } else if (linkCorrelation.equals("1")) { //LinkCorrelations
@@ -490,8 +492,9 @@ public class BayesBaseCT_SortMerge {
      * @param linkCorrelation
      * @param continuous
      */
-    public static void setVars(Connection connection_std, 
-                                String databaseName_std, 
+    public static void setVars( Connection connection_std, Connection connection_setup, 
+    							Connection connection_BN, Connection connection_CT, 
+    							String databaseName_std, 
                                 String linkCorrelation,
                                 String continuous){
 
@@ -501,10 +504,11 @@ public class BayesBaseCT_SortMerge {
 		BayesBaseCT_SortMerge.databaseName_setup = databaseName_std + "_setup";
 		BayesBaseCT_SortMerge.linkCorrelation = linkCorrelation;
 		BayesBaseCT_SortMerge.cont = continuous;
+		
 		BayesBaseCT_SortMerge.con_std = connection_std;
-		// BayesBaseCT_SortMerge.con_BN = connection_BN;
-		// BayesBaseCT_SortMerge.con_CT = connection_CT;
-		// BayesBaseCT_SortMerge.con_setup = connection_setup;
+		BayesBaseCT_SortMerge.con_BN = connection_BN;
+		BayesBaseCT_SortMerge.con_CT = connection_CT;
+		BayesBaseCT_SortMerge.con_setup = connection_setup;
 	}
     
     /**
@@ -518,53 +522,6 @@ public class BayesBaseCT_SortMerge {
 			System.err.println("Unable to load MySQL JDBC driver");
 		}
 		return (Connection) DriverManager.getConnection(CONN_STR, dbUsername, dbPassword);
-	}
-	/**
-     * Connects to database via MySQL JDBC driver
-     * @throws SQLException
-     */
-	public static void connectDB() throws SQLException {
-		String CONN_STR1 = "jdbc:" + dbaddress + "/" + databaseName_std;
-		try {
-			java.lang.Class.forName("com.mysql.jdbc.Driver");
-		} catch (Exception ex) {
-			System.err.println("Unable to load MySQL JDBC driver");
-		}
-		BayesBaseCT_SortMerge.con_std = (Connection) DriverManager.getConnection(CONN_STR1, dbUsername, dbPassword);
-		
-		
-	}
-
-	public static void connectDB_setup() throws SQLException{
-		String CONN_STR4 = "jdbc:" + dbaddress + "/" + databaseName_setup;
-		try {
-			java.lang.Class.forName("com.mysql.jdbc.Driver");
-		} catch (Exception ex) {
-			System.err.println("Unable to load MySQL JDBC driver");
-		}
-		BayesBaseCT_SortMerge.con_setup = (Connection) DriverManager.getConnection(CONN_STR4, dbUsername, dbPassword);
-	}
-    /**
-     * Connects to <databaseName>_BN (Bayesian Network)
-     * @throws SQLException
-     */
-	public static void connectDB_BN() throws SQLException {
-		String CONN_STR2 = "jdbc:" + dbaddress + "/" + databaseName_BN;
-		try {
-			java.lang.Class.forName("com.mysql.jdbc.Driver");
-		} catch (Exception ex) {
-			System.err.println("Unable to load MySQL JDBC driver");
-		}
-		BayesBaseCT_SortMerge.con_BN = (Connection) DriverManager.getConnection(CONN_STR2, dbUsername, dbPassword);
-	}
-	public static void connectDB_CT() throws  SQLException{
-		String CONN_STR3 = "jdbc:" + dbaddress + "/" + databaseName_CT;
-		try {
-			java.lang.Class.forName("com.mysql.jdbc.Driver");
-		} catch (Exception ex) {
-			System.err.println("Unable to load MySQL JDBC driver");
-		}
-		BayesBaseCT_SortMerge.con_CT = (Connection) DriverManager.getConnection(CONN_STR3, dbUsername, dbPassword);
 	}
 		
 		
