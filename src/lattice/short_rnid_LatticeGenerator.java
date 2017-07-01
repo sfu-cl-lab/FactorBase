@@ -32,8 +32,7 @@ public class short_rnid_LatticeGenerator {
         con2 = con;
         Statement tempst=con2.createStatement();
         //int len=tempst.execute("SELECT count(*) FROM unielwin_lattice.RNodes;");
-        
-        
+                
         //generate shorter rnid, from a to z
         int fc=97; 
         char short_rnid;
@@ -48,9 +47,6 @@ public class short_rnid_LatticeGenerator {
         	tempst.execute("update RNodes set rnid='`" + short_rnid + "`' where orig_rnid='" + tempList.get(i) + "';");
         }
         tempst.close();
-	
-
-
 
         //LATTICE read first sest from RFunctors
         readFirstSets();
@@ -116,17 +112,12 @@ public class short_rnid_LatticeGenerator {
         wholeSets = new ArrayList<String>();
         Statement st = con2.createStatement();
         ResultSet rs = st.executeQuery("select rnid from RNodes;");
-        
-        // while(rs.next())
-        //System.out.println(rs.getString(1));
      
         while(rs.next()){
             /*firstSets.add(rs.getString("rnid"));*/
         	firstSets.add(rs.getString("rnid").substring(1,rs.getString("rnid").length()-1));
         }
-/*        System.out.println("***********");
-        for(String g:firstSets)
-        	System.out.println(g);*/
+
         st.close();
     }
 
@@ -163,13 +154,6 @@ public class short_rnid_LatticeGenerator {
                 sets.add(h);
                 //System.out.println(rs.getString("name").length());
             }
-            
-//            System.out.println(sets.size());
-//            for (String s : sets)
-//            System.out.println(s);
-//            System.out.println(setLength);
-//            System.out.println(sets);
-            
             createNewSets(sets);
         }
         st.close();
@@ -178,26 +162,11 @@ public class short_rnid_LatticeGenerator {
     public static void createNewSets(ArrayList<String> sets) throws SQLException {
         for(String firstSet : firstSets){
             for(String secondSet : sets){
-            	//System.out.println(secondSet);
+
                 HashSet<String> newSet = new HashSet<String>();
                 String[] secondSetParts = nodeSplit(secondSet);
-                //String[] secondSetParts = secondSet;
-                
-                
-                //System.out.println("size of secondset:"+ secondSet.length());
-                
-//                System.out.println("********************");
-//                System.out.println();
-//                System.out.println(secondSetParts);
- //               for (String s : secondSetParts)
- //               System.out.print(s + " ");
-//                System.out.println();
-//                System.out.println(checkConstraints(firstSet, secondSetParts));
-//                System.out.println("********************");
-                
-                //System.out.println(checkConstraints(firstSet, secondSetParts));
+
                 if (!checkConstraints(firstSet, secondSetParts)) continue;
-                //System.out.println("*****()*****");
 
                 //add set with length 1
                 newSet.add(firstSet);
@@ -207,7 +176,6 @@ public class short_rnid_LatticeGenerator {
 
                 int newSetLength = newSet.size();
                 String newSetName = nodeJoin(newSet);  
-                //System.out.println(newSetName.compareTo(secondSet));
 
                 //add it to db and createdSet
                 if(newSetName.compareTo(secondSet) != 0) {
@@ -216,8 +184,7 @@ public class short_rnid_LatticeGenerator {
                     // is this really necessary? I'd like to enforce foreign key constraints. O.S.
                     Statement st = con2.createStatement();
                     // add new set
-                    //System.out.print(newSetName+"     ");
-                    
+                 
                     //adding apostrophe `
                     newSetName="`"+newSetName+"`";
                     secondSet = "`" + secondSet + "`";
@@ -239,7 +206,7 @@ public class short_rnid_LatticeGenerator {
         }
     }
 
-    /*   orig_rnid													rind
+    /*   orig_rnid													rnid
      *	`RA(prof0,student0),registration(course0,student0)`		 	`a,b`
 		`RA(prof0,student0)` 										`a`
 		`registration(course0,student0)` 							`b`
@@ -261,19 +228,18 @@ public static void mapping_rnid() throws SQLException{
     		
     		String temp="";
     		
-    			for(int i=0;i<rst.getString(1).length()-1;i++)
-    			{if(rst.getString(1).charAt(i)!='`') 
-    				temp=temp+rst.getString(1).charAt(i);
-    			}
+			for(int i=0;i<rst.getString(1).length()-1;i++)
+			{
+                if(rst.getString(1).charAt(i)!='`') 
+				temp=temp+rst.getString(1).charAt(i);
+			}
     		
     		temp="`"+temp+"`";
     		list_rnid.add(temp);
     		//System.out.println(temp);
     	
-    		  	}
-    	
-    	
-    	
+    	}
+
     	for(int i=0;i<list_rnid.size();i++){
     		
     		String n[]=list_rnid.get(i).substring(1, list_rnid.get(i).length()-1).split(",");
@@ -312,8 +278,6 @@ public static void mapping_rnid() throws SQLException{
     
     public static boolean checkConstraints(String firstSet, String[] secondSetParts) throws SQLException {
         
-//    	System.out.println(firstSet);
-    	
     	HashSet<String> firstSetKeys = new HashSet<String>();
         HashSet<String> secondSetKeys = new HashSet<String>();
         Statement st = con2.createStatement();
@@ -328,7 +292,7 @@ public static void mapping_rnid() throws SQLException{
         }
 
         // get primary key for second set
-        //System.out.println(secondSetParts);
+
         for (String secondSet : secondSetParts)
         {
             rs = st.executeQuery("select pvid1, pvid2 from RNodes where rnid = '`" + secondSet + "`';");
@@ -344,11 +308,6 @@ public static void mapping_rnid() throws SQLException{
         unionSetKeys.addAll(secondSetKeys);
         if (unionSetKeys.size() > maxNumberOfPVars) return false;
 
-//        System.out.println("*************************");
-//        System.out.println(firstSetKeys);
-//        System.out.println(secondSetKeys);
-//        System.out.println("*************************");
-        
         // check if there is a shared primary key
         firstSetKeys.retainAll(secondSetKeys);
         return !firstSetKeys.isEmpty();
@@ -365,7 +324,7 @@ public static void mapping_rnid() throws SQLException{
         for (String listItem : newList)
             joinStr = joinStr + delimiter + listItem;
         if (joinStr.length() > 0) joinStr = joinStr.substring(1);
-        //System.out.println(joinStr);
+
         return joinStr;
     }
 
@@ -373,37 +332,8 @@ public static void mapping_rnid() throws SQLException{
     
     public static String[] nodeSplit(String node) {
     //some portion of original code deleted	
-        String[] nodes = node.split( delimiter );
-        
-//        System.out.println("*********************");
-//        System.out.println(node);
-//        System.out.println("nodes:");
-//        for (String s : nodes)
-//        	System.out.println(s);
-//        System.out.println("*********************");
-        
+        String[] nodes = node.split( delimiter );        
         return nodes;
-    }
-    
-    
-    
-    
-    //main, connect to database
-    public static void main(String[] args) throws Exception {
-		databaseName = "UW_std";
-		databaseName2 = databaseName + "_lattice";
-		dbUsername = "sfu";
-		dbPassword = "joinBayes";
-		dbaddress = "mysql://kripke.cs.sfu.ca";
-
-        //connect to db using jdbc
-		connectDB();
-
-		//generate lattice tree
-		maxNumberOfMembers = short_rnid_LatticeGenerator.generate(con2);
-		System.out.println(" ##### lattice is ready for use* ");
-		
-		disconnectDB();
     }
 
 	public static void connectDB() throws SQLException {
