@@ -60,10 +60,12 @@ public class BayesBaseCT_SortMerge {
 		connectDB();
 		//build _BN copy from _setup Nov 1st, 2013 Zqian
        BZScriptRunner bzsr = new BZScriptRunner(databaseName,con4);
+		//what is con4 pointing to? Any particular database? OS. July3, 2017
        bzsr.runScript("src/scripts/transfer.sql");
+		//transfer metadata from setup_db to bn_db //
        connectDB1();
      
-		//generate lattice tree
+		//generate lattice tree in con2 = bn_db
 		//maxNumberOfMembers = LatticeGenerator.generate(con2);
 		maxNumberOfMembers = short_rnid_LatticeGenerator.generate(con2);// rnid mapping. maxNumberofMembers = maximum size of lattice element. Should be called LatticeHeight
 		System.out.println(" ##### lattice is ready for use* ");
@@ -628,6 +630,7 @@ public class BayesBaseCT_SortMerge {
 /* building pvars_counts*/
 public static void BuildCT_Pvars() throws SQLException, IOException {
 	long l = System.currentTimeMillis(); //@zqian : measure structure learning time
+	//what are con2 and databaseName3? O.S. July 7, 2017
 		Statement st = con2.createStatement();
 		st.execute("Drop schema if exists " + databaseName3 + ";");
 		st.execute("Create schema if not exists " + databaseName3 + ";");
