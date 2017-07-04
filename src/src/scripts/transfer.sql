@@ -11,13 +11,15 @@ SET storage_engine=INNODB;
 /*copy tables from setup metadata database into learning database
 /*copy subset as specified in setup  rather than full functor set */
 
-create table Fnodes as select * from @database@_setup.FunctorSet; /*create subset of functor nodes */
-create table 1Nodes as select * from @database@_setup.1Nodes N, Fnodes F where N.1nid = F.fid;
-create table 2Nodes as select * from @database@_setup.2Nodes N, Fnodes F where N.2nid = F.Fid;
-create table RNodes as select * from @database@_setup.RNodes N, Fnodes F where N.rnid = F.Fid;
-create table FNodes_pvars select * from @database@_setup.FNodes_pvars FP where FP.fid in (select fid from Fnodes);
+create table FunctorSet as select * from @database@_setup.FunctorSet; /*create subset of functor nodes */
+create table 1Nodes as select * from @database@_setup.1Nodes N, FunctorSet F where N.1nid = F.fid;
+create table 2Nodes as select * from @database@_setup.2Nodes N, FunctorSet F where N.2nid = F.Fid;
+create table RNodes as select * from @database@_setup.RNodes N, FunctorSet F where N.orig_rnid = F.Fid;
+create table PVariables as select * from @database@_setup.PVariables;
+/* better:
 create table PVariables as select * from @database@_setup.PVariables P where P.pvid in (select pvid from FNodes_pvars);
 /*copy only Pvariables that appear in functor subset */
+/*create table FNodes_pvars select * from @database@_setup.FNodes_pvars FP where FP.fid in (select fid from FunctorSet); */
 create table Expansions like @database@_setup.Expansions; 
 insert into Expansions select * from @database@_setup.Expansions;
 /* the like construct should preserve foreign key pointers to Pvariables from the setup database. 
