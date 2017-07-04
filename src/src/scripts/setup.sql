@@ -3,6 +3,8 @@ Analyze schema information to prepare for statistical analysis.
 @database@ stands for a generic database. This is replaced with the name of the actual target database schema by the program that calls this sql script.
 */
 
+/*TODO: use more views or drop less important tables after creation to make setup easier to read */
+
 DROP SCHEMA IF EXISTS @database@_setup; 
 create schema @database@_setup;
 
@@ -480,7 +482,95 @@ CREATE TABLE 2Nodes AS SELECT CONCAT('`',
 ALTER TABLE 2Nodes ADD PRIMARY KEY (2nid);
 
 
-/*CREATE TABLE Groundings (pvid varchar(40) not null, id varchar(256) not null, primary key (pvid, id));*/
+/****************************************************/
+/* Now create tables that support extra functionality for learning
+/* 1. restrict functors to a subset in FunctorSet
+/* 2. enumerate counts for a given set of population variables (table Groundings)
+/***************************************************************/
+
+CREATE TABLE Groundings (pvid varchar(40) not null, id varchar(256) not null, primary key (pvid, id));
+
+/*TODO: add foreign key pointer to Pvariables */
+
+
+/* Set up a table that contains all functor nodes of any arity, useful for Bayes net learning later. */
+CREATE TABLE FNodes (   
+  `Fid` varchar(199) ,
+  `FunctorName` varchar(64) ,
+  `Type` varchar(5) ,
+  `main` int(11) ,
+  PRIMARY KEY  (`Fid`)
+);
+
+insert into FNodes
+SELECT 
+    1nid AS Fid,
+    COLUMN_NAME as FunctorName,
+    '1Node' as Type,
+    main
+FROM
+    1Nodes 
+UNION SELECT 
+    2nid AS Fid,
+    COLUMN_NAME as FunctorName,
+    '2Node' as Type,
+    main
+FROM
+    2Nodes 
+union select 
+    rnid as FID,
+    TABLE_NAME as FunctorName,
+    'Rnode' as Type,
+    main
+from
+    RNodes;
+
+/* for each functor node, find the population variables contained in it */
+
+create table FNodes_pvars as 
+SELECT FNodes.Fid, PVariables.pvid FROM
+    FNodes,
+    2Nodes,
+    PVariables
+where
+    FNodes.Type = '2Node'
+    and FNodes.Fid = 2Nodes.2nid
+    and PVariables.pvid = 2Nodes.pvid1 
+union 
+SELECT 
+    FNodes.Fid, PVariables.pvid
+FROM
+    FNodes,
+    2Nodes,
+    PVariables
+where
+    FNodes.Type = '2Node'
+    and FNodes.Fid = 2Nodes.2nid
+    and PVariables.pvid = 2Nodes.pvid2 
+union 
+SELECT 
+    FNodes.Fid, PVariables.pvid
+FROM
+    FNodes,
+    1Nodes,
+    PVariables
+where
+    FNodes.Type = '1Node'
+    and FNodes.Fid = 1Nodes.1nid
+    and PVariables.pvid = 1Nodes.pvid;
+
+/* allow restriction to subset of Functor Nodes */
+
+CREATE TABLE FunctorSet like FNodes;
+
+/*TODO: add foreign key pointers to FunctorSet to ensure consistency with FNodes */
+
+insert into FunctorSet select * from FNodes;
+/* by default, FNodes contains all functor nodes
+/* an application program can change this table before running the transfer.sql script to transfer metadata to the learning database */
+/*TODO: if a 2Node is in FunctorSet, add the corresponding RNode */
+
+
 
 
 /*Added by zqian  Apr. 4th 2013
