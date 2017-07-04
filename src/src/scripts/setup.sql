@@ -485,10 +485,10 @@ ALTER TABLE 2Nodes ADD PRIMARY KEY (2nid);
 /****************************************************/
 /* Now create tables that support extra functionality for learning
 /* 1. restrict functors to a subset in FunctorSet
-/* 2. enumerate counts for a given set of population variables (table Groundings)
+/* 2. enumerate counts for a given set of population variables (table Expansions)
 /***************************************************************/
 
-CREATE TABLE Groundings (pvid varchar(40) not null, id varchar(256) not null, primary key (pvid, id));
+CREATE TABLE Expansions (pvid varchar(40), primary key (pvid));
 
 /*TODO: add foreign key pointer to Pvariables */
 
