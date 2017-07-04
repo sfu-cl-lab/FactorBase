@@ -494,7 +494,7 @@ CREATE TABLE Expansions (pvid varchar(40), primary key (pvid));
 
 
 /* Set up a table that contains all functor nodes of any arity, useful for Bayes net learning later. */
-CREATE TABLE FNodes (   
+CREATE TABLE FunctorSet (   
   `Fid` varchar(199) ,
   `FunctorName` varchar(64) ,
   `Type` varchar(5) ,
@@ -502,7 +502,7 @@ CREATE TABLE FNodes (
   PRIMARY KEY  (`Fid`)
 );
 
-insert into FNodes
+insert into FunctorSet
 SELECT 
     1nid AS Fid,
     COLUMN_NAME as FunctorName,
@@ -518,7 +518,7 @@ UNION SELECT
 FROM
     2Nodes 
 union select 
-    rnid as FID,
+    orig_rnid as FID,
     TABLE_NAME as FunctorName,
     'Rnode' as Type,
     main
@@ -526,7 +526,7 @@ from
     RNodes;
 
 /* for each functor node, find the population variables contained in it */
-
+/*
 create table FNodes_pvars as 
 SELECT FNodes.Fid, PVariables.pvid FROM
     FNodes,
@@ -558,10 +558,12 @@ where
     FNodes.Type = '1Node'
     and FNodes.Fid = 1Nodes.1nid
     and PVariables.pvid = 1Nodes.pvid;
+    
+    */
 
 /* allow restriction to subset of Functor Nodes */
 
-CREATE TABLE FunctorSet like FNodes;
+/* CREATE TABLE FunctorSet like FNodes;
 
 /*TODO: add foreign key pointers to FunctorSet to ensure consistency with FNodes */
 
