@@ -1,108 +1,109 @@
 /*adding covering index to speed up the query, however hash index does not support this technique, so replace it with default index, ie. B_Tree @ zqian May 22nd*/
 USE @database@_BN;
 SET storage_engine=INNODB;
+DROP TABLE IF EXISTS PVariables;
+CREATE TABLE PVariables AS SELECT * FROM
+    unielwin_setup.PVariables;
 
-/* Set up a table that contains all functor nodes of any arity, useful for Bayes net learning later. */
-CREATE TABLE FNodes (   /*May 10th */
-  `Fid` varchar(199) ,
-  `FunctorName` varchar(64) ,
-  `Type` varchar(5) ,
-  `main` int(11) ,
-  PRIMARY KEY  (`Fid`)
+DROP TABLE IF EXISTS FNodes;
+CREATE TABLE FNodes (
+    `Fid` VARCHAR(199),
+    `FunctorName` VARCHAR(64),
+    `Type` VARCHAR(5),
+    `main` INT(11),
+    PRIMARY KEY (`Fid`)
 );
-
-insert into FNodes
+INSERT INTO FNodes
 SELECT 
     1nid AS Fid,
-    COLUMN_NAME as FunctorName,
-    '1Node' as Type,
+    COLUMN_NAME AS FunctorName,
+    '1Node' AS Type,
     main
 FROM
     1Nodes 
 UNION SELECT 
     2nid AS Fid,
-    COLUMN_NAME as FunctorName,
-    '2Node' as Type,
+    COLUMN_NAME AS FunctorName,
+    '2Node' AS Type,
     main
 FROM
     2Nodes 
-union select 
-    rnid as FID,
-    TABLE_NAME as FunctorName,
-    'Rnode' as Type,
+UNION SELECT 
+    rnid AS FID,
+    TABLE_NAME AS FunctorName,
+    'Rnode' AS Type,
     main
-from
+FROM
     RNodes;
-
-
-create table FNodes_pvars as 
-SELECT FNodes.Fid, PVariables.pvid FROM
+DROP TABLE IF EXISTS FNodes_pvars;
+CREATE TABLE FNodes_pvars AS SELECT FNodes.Fid, PVariables.pvid FROM
     FNodes,
     2Nodes,
     PVariables
-where
+WHERE
     FNodes.Type = '2Node'
-    and FNodes.Fid = 2Nodes.2nid
-    and PVariables.pvid = 2Nodes.pvid1 
-union 
-SELECT 
+        AND FNodes.Fid = 2Nodes.2nid
+        AND PVariables.pvid = 2Nodes.pvid1 
+UNION SELECT 
     FNodes.Fid, PVariables.pvid
 FROM
     FNodes,
     2Nodes,
     PVariables
-where
+WHERE
     FNodes.Type = '2Node'
-    and FNodes.Fid = 2Nodes.2nid
-    and PVariables.pvid = 2Nodes.pvid2 
-union 
-SELECT 
+        AND FNodes.Fid = 2Nodes.2nid
+        AND PVariables.pvid = 2Nodes.pvid2 
+UNION SELECT 
     FNodes.Fid, PVariables.pvid
 FROM
     FNodes,
     1Nodes,
     PVariables
-where
+WHERE
     FNodes.Type = '1Node'
-    and FNodes.Fid = 1Nodes.1nid
-    and PVariables.pvid = 1Nodes.pvid;
+        AND FNodes.Fid = 1Nodes.1nid
+        AND PVariables.pvid = 1Nodes.pvid;
 
-create table 1Nodes_Select_List as select 1nid,
-    concat(1Nodes.pvid,
+DROP TABLE IF EXISTS 1Nodes_Select_List;
+CREATE TABLE 1Nodes_Select_List AS SELECT 1nid,
+    CONCAT(1Nodes.pvid,
             '.',
             1Nodes.COLUMN_NAME,
             ' AS ',
-            1nid) as Entries from
+            1nid) AS Entries FROM
     1Nodes,
     PVariables
-where
+WHERE
     1Nodes.pvid = PVariables.pvid;
 
-create table 1Nodes_From_List select 1nid,
-    concat(PVariables.TABLE_NAME,
+DROP TABLE IF EXISTS 1Nodes_From_List;
+CREATE TABLE 1Nodes_From_List SELECT 1nid,
+    CONCAT(PVariables.TABLE_NAME,
             ' AS ',
-            PVariables.pvid) as Entries from
+            PVariables.pvid) AS Entries FROM
     1Nodes,
     PVariables
-where
+WHERE
     1Nodes.pvid = PVariables.pvid;
-
-create table 2Nodes_Select_List as select 2nid,
-    concat(RNodes.rnid,
+DROP TABLE IF EXISTS 2Nodes_Select_List;
+CREATE TABLE 2Nodes_Select_List AS SELECT 2nid,
+    CONCAT(RNodes.rnid,
             '.',
             2Nodes.COLUMN_NAME,
             ' AS ',
-            2nid) as Entries from
+            2nid) AS Entries FROM
     2Nodes
         NATURAL JOIN
     RNodes;
-
-create table 2Nodes_From_List as select 2nid,
-    concat(2Nodes.TABLE_NAME, ' AS ', RNodes.rnid) as Entries from
+DROP TABLE IF EXISTS 2Nodes_From_List;
+CREATE TABLE 2Nodes_From_List AS SELECT 2nid,
+    CONCAT(2Nodes.TABLE_NAME, 
+            ' AS ', 
+            RNodes.rnid) AS Entries FROM
     2Nodes
         NATURAL JOIN
     RNodes;
-
 /******************************************************
 Reformat table information, to support easy formulation of data queries for sufficient statistics.
 The goal is to create join data tables that can be given as input to a Bayes net learner. 
@@ -111,27 +112,26 @@ The join queries themselves are encoded in tables, where one table lists the ent
 */
 
 
-CREATE TABLE PVariables_From_List AS SELECT pvid, CONCAT(TABLE_NAME, ' AS ', pvid) AS Entries FROM
+CREATE TABLE PVariables_From_List AS SELECT pvid, 
+    CONCAT(TABLE_NAME, ' AS ', pvid) AS Entries FROM
     PVariables
 WHERE
     index_number = 0;
 /* use entity tables for main variables only (index = 0). 
 Other entity tables have empty Bayes nets by the main functor constraint. */
 
-CREATE TABLE PVariables_Select_List AS 
-SELECT 
-    pvid, CONCAT('count(*)',' as "MULT"') AS Entries
+CREATE TABLE PVariables_Select_List AS SELECT pvid, 
+    CONCAT('count(*)', ' as "MULT"') AS Entries FROM
+    PVariables 
+UNION SELECT 
+    pvid,
+    CONCAT(pvid, '.', COLUMN_NAME, ' AS ', 1nid) AS Entries
 FROM
-    PVariables
-UNION
-SELECT pvid,
-    CONCAT(pvid, '.', COLUMN_NAME, ' AS ', 1nid) AS Entries FROM
     1Nodes
         NATURAL JOIN
     PVariables
 WHERE
     PVariables.index_number = 0;
-
 /**********
 Now we make data join tables for each relationship functor node.
 ***********/
@@ -185,8 +185,7 @@ select distinct
             ') as ',
             concat('`temp_', replace(rnid, '`', ''), '`')) as Entries
 from
-    RNodes
-;
+    RNodes;
 /** we add a table that has a single column and single row contain "T" for "true", whose header is the rnid. This simulates the case where all the relationships are true.
 We need to replace the apostrophes in rnid to make the rnid a valid name for the temporary table 
 **/

@@ -1,7 +1,9 @@
 
 
+
+
 DROP SCHEMA IF EXISTS unielwin_setup; 
-create schema unielwin_setup;
+CREATE SCHEMA unielwin_setup;
 
 
 
@@ -11,7 +13,8 @@ SET storage_engine=INNODB;
 
 
 
-CREATE TABLE Schema_Key_Info AS SELECT TABLE_NAME,
+CREATE OR REPLACE VIEW Schema_Key_Info AS 
+SELECT TABLE_NAME,
     COLUMN_NAME,
     REFERENCED_TABLE_NAME,
     REFERENCED_COLUMN_NAME,
@@ -21,10 +24,8 @@ WHERE
     (KEY_COLUMN_USAGE.TABLE_SCHEMA = 'unielwin')
 ORDER BY TABLE_NAME;
 
-
-
-
-CREATE TABLE Schema_Position_Info AS SELECT COLUMNS.TABLE_NAME,
+CREATE OR REPLACE VIEW Schema_Position_Info AS 
+SELECT COLUMNS.TABLE_NAME,
     COLUMNS.COLUMN_NAME,
     COLUMNS.ORDINAL_POSITION FROM
     INFORMATION_SCHEMA.COLUMNS,
@@ -36,9 +37,7 @@ WHERE
         AND TABLES.TABLE_TYPE = 'BASE TABLE')
 ORDER BY TABLE_NAME;
 
-
-
-CREATE TABLE NoPKeys AS SELECT TABLE_NAME FROM
+CREATE OR REPLACE VIEW NoPKeys AS SELECT TABLE_NAME FROM
     Schema_Key_Info
 WHERE
     TABLE_NAME NOT IN (SELECT 
@@ -48,10 +47,7 @@ WHERE
         WHERE
             CONSTRAINT_NAME LIKE 'PRIMARY');
 
-
-
-
-CREATE table NumEntityColumns AS
+CREATE OR REPLACE VIEW NumEntityColumns AS
     SELECT 
         TABLE_NAME, COUNT(DISTINCT COLUMN_NAME) num
     FROM
@@ -61,14 +57,13 @@ CREATE table NumEntityColumns AS
             OR REFERENCED_COLUMN_NAME IS NOT NULL
     GROUP BY TABLE_NAME;
 
-CREATE TABLE TernaryRelations as SELECT TABLE_NAME FROM
+CREATE OR REPLACE VIEW TernaryRelations as 
+SELECT TABLE_NAME FROM
     NumEntityColumns
 WHERE
     num > 2;
-
-
-
-CREATE TABLE KeyColumns AS SELECT * FROM
+    
+CREATE OR REPLACE VIEW KeyColumns AS SELECT * FROM
     (Schema_Key_Info
     NATURAL JOIN Schema_Position_Info)
 WHERE
@@ -81,13 +76,16 @@ WHERE
         FROM
             TernaryRelations);
 
+CREATE OR REPLACE VIEW InputColumns AS SELECT * FROM
+    KeyColumns
+WHERE
+    CONSTRAINT_NAME = 'PRIMARY'
+ORDER BY TABLE_NAME;
 
 
-
-
-
-
-CREATE TABLE AttributeColumns AS SELECT TABLE_NAME, COLUMN_NAME FROM
+CREATE TABLE AttributeColumns AS 
+SELECT TABLE_NAME, COLUMN_NAME 
+FROM
     Schema_Position_Info
 WHERE
     (TABLE_NAME , COLUMN_NAME) NOT IN (SELECT 
@@ -104,18 +102,6 @@ WHERE
             TernaryRelations);
 
 ALTER TABLE AttributeColumns ADD PRIMARY KEY (TABLE_NAME,COLUMN_NAME);
-
-
-
-
-CREATE TABLE InputColumns AS SELECT * FROM
-    KeyColumns
-WHERE
-    CONSTRAINT_NAME = 'PRIMARY'
-ORDER BY TABLE_NAME;
-
-
-
 
 CREATE TABLE ForeignKeyColumns AS SELECT * FROM
     KeyColumns
@@ -149,7 +135,7 @@ ALTER TABLE EntityTables ADD PRIMARY KEY (TABLE_NAME,COLUMN_NAME);
 
 
 
-CREATE TABLE SelfRelationships AS SELECT DISTINCT RTables1.TABLE_NAME AS TABLE_NAME,
+CREATE OR REPLACE VIEW SelfRelationships AS SELECT DISTINCT RTables1.TABLE_NAME AS TABLE_NAME,
     RTables1.REFERENCED_TABLE_NAME AS REFERENCED_TABLE_NAME,
     RTables1.REFERENCED_COLUMN_NAME AS REFERENCED_COLUMN_NAME FROM
     KeyColumns AS RTables1,
@@ -160,11 +146,11 @@ WHERE
         AND (RTables1.REFERENCED_COLUMN_NAME = RTables2.REFERENCED_COLUMN_NAME)
         AND (RTables1.ORDINAL_POSITION < RTables2.ORDINAL_POSITION);
 
-ALTER TABLE SelfRelationships ADD PRIMARY KEY (TABLE_NAME);
 
 
 
-CREATE TABLE Many_OneRelationships AS SELECT KeyColumns1.TABLE_NAME FROM
+
+CREATE OR REPLACE VIEW Many_OneRelationships AS SELECT KeyColumns1.TABLE_NAME FROM
     KeyColumns AS KeyColumns1,
     KeyColumns AS KeyColumns2
 WHERE
@@ -186,7 +172,8 @@ WHERE
 
 
 
-CREATE TABLE PVariables AS SELECT CONCAT(EntityTables.TABLE_NAME, '0') AS pvid,
+CREATE TABLE PVariables AS 
+SELECT CONCAT(EntityTables.TABLE_NAME, '0') AS pvid,
     EntityTables.TABLE_NAME,
     0 AS index_number FROM
     EntityTables 
@@ -212,7 +199,7 @@ ALTER TABLE PVariables ADD PRIMARY KEY (pvid);
 
 
 
-CREATE TABLE RelationTables AS SELECT DISTINCT ForeignKeyColumns.TABLE_NAME,
+CREATE OR REPLACE VIEW RelationTables AS SELECT DISTINCT ForeignKeyColumns.TABLE_NAME,
     ForeignKeyColumns.TABLE_NAME IN (SELECT 
             TABLE_NAME
         FROM
@@ -223,7 +210,7 @@ CREATE TABLE RelationTables AS SELECT DISTINCT ForeignKeyColumns.TABLE_NAME,
             Many_OneRelationships) AS Many_OneRelationship FROM
     ForeignKeyColumns;
 
-ALTER TABLE RelationTables ADD PRIMARY KEY (TABLE_NAME);
+
 
 
 
@@ -257,7 +244,7 @@ ALTER TABLE ForeignKeys_pvars ADD PRIMARY KEY (TABLE_NAME,pvid,ARGUMENT_POSITION
 
 
 
-CREATE table RNodes_MM_NotSelf AS
+CREATE OR REPLACE VIEW RNodes_MM_NotSelf AS
     SELECT 
         CONCAT('`',
                 ForeignKeys_pvars1.TABLE_NAME,
@@ -288,7 +275,7 @@ CREATE table RNodes_MM_NotSelf AS
 
 
 
-CREATE table RNodes_MM_Self AS
+CREATE OR REPLACE VIEW RNodes_MM_Self AS
     SELECT 
         CONCAT('`',
                 ForeignKeys_pvars1.TABLE_NAME,
@@ -319,7 +306,7 @@ CREATE table RNodes_MM_Self AS
 
 
 
-CREATE table RNodes_MO_NotSelf AS
+CREATE OR REPLACE VIEW RNodes_MO_NotSelf AS
     SELECT 
         CONCAT('`',
                 ForeignKeys_pvars.REFERENCED_TABLE_NAME,
@@ -350,7 +337,7 @@ CREATE table RNodes_MO_NotSelf AS
 
 
 
-CREATE table RNodes_MO_Self AS
+CREATE OR REPLACE VIEW RNodes_MO_Self AS
     SELECT 
         CONCAT('`',
                 ForeignKeys_pvars.REFERENCED_TABLE_NAME,
@@ -421,6 +408,59 @@ CREATE TABLE 2Nodes AS SELECT CONCAT('`',
     AttributeColumns;
 
 ALTER TABLE 2Nodes ADD PRIMARY KEY (2nid);
+
+
+
+
+
+CREATE TABLE Expansions (
+    pvid varchar(40), 
+    primary key (pvid)
+);
+
+
+
+
+
+CREATE TABLE FunctorSet (   
+  `Fid` varchar(199) ,
+  `FunctorName` varchar(64) ,
+  `Type` varchar(5) ,
+  `main` int(11) ,
+  PRIMARY KEY  (`Fid`)
+);
+
+INSERT INTO FunctorSet
+SELECT 
+    1nid AS Fid,
+    COLUMN_NAME AS FunctorName,
+    '1Node' AS Type,
+    main
+FROM
+    1Nodes 
+UNION SELECT 
+    2nid AS Fid,
+    COLUMN_NAME AS FunctorName,
+    '2Node' AS Type,
+    main
+FROM
+    2Nodes 
+UNION SELECT 
+    orig_rnid AS FID,
+    TABLE_NAME AS FunctorName,
+    'Rnode' AS Type,
+    main
+FROM
+    RNodes;
+
+
+
+
+
+
+
+
+
 
 
 

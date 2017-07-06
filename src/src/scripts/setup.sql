@@ -6,7 +6,7 @@ Analyze schema information to prepare for statistical analysis.
 /*TODO: use more views or drop less important tables after creation to make setup easier to read */
 
 DROP SCHEMA IF EXISTS @database@_setup; 
-create schema @database@_setup;
+CREATE SCHEMA @database@_setup;
 
 /*-- create schema if not exists @database@_BN;*/
 /*-- create schema if not exists @database@_CT;*/
@@ -16,7 +16,8 @@ SET storage_engine=INNODB;
 /* allows adding foreign key constraints */
 
 
-CREATE TABLE Schema_Key_Info AS SELECT TABLE_NAME,
+CREATE OR REPLACE VIEW Schema_Key_Info AS 
+SELECT TABLE_NAME,
     COLUMN_NAME,
     REFERENCED_TABLE_NAME,
     REFERENCED_COLUMN_NAME,
@@ -26,10 +27,8 @@ WHERE
     (KEY_COLUMN_USAGE.TABLE_SCHEMA = '@database@')
 ORDER BY TABLE_NAME;
 
-
-/* find information about the argument ordinal position, so we know how to order the arguments.  */
-
-CREATE TABLE Schema_Position_Info AS SELECT COLUMNS.TABLE_NAME,
+CREATE OR REPLACE VIEW Schema_Position_Info AS 
+SELECT COLUMNS.TABLE_NAME,
     COLUMNS.COLUMN_NAME,
     COLUMNS.ORDINAL_POSITION FROM
     INFORMATION_SCHEMA.COLUMNS,
@@ -41,9 +40,7 @@ WHERE
         AND TABLES.TABLE_TYPE = 'BASE TABLE')
 ORDER BY TABLE_NAME;
 
-/* end of reading information from the database schema */
-
-CREATE TABLE NoPKeys AS SELECT TABLE_NAME FROM
+CREATE OR REPLACE VIEW NoPKeys AS SELECT TABLE_NAME FROM
     Schema_Key_Info
 WHERE
     TABLE_NAME NOT IN (SELECT 
@@ -53,11 +50,7 @@ WHERE
         WHERE
             CONSTRAINT_NAME LIKE 'PRIMARY');
 
-/* WISHLIST: write trigger that warns when something is inserted here.
-Row-based as proposed by Tim */
-
-/*CREATE OR REPLACE VIEW NumEntityColumns AS */
-CREATE table NumEntityColumns AS
+CREATE OR REPLACE VIEW NumEntityColumns AS
     SELECT 
         TABLE_NAME, COUNT(DISTINCT COLUMN_NAME) num
     FROM
@@ -67,15 +60,13 @@ CREATE table NumEntityColumns AS
             OR REFERENCED_COLUMN_NAME IS NOT NULL
     GROUP BY TABLE_NAME;
 
-CREATE TABLE TernaryRelations as SELECT TABLE_NAME FROM
+CREATE OR REPLACE VIEW TernaryRelations as 
+SELECT TABLE_NAME FROM
     NumEntityColumns
 WHERE
     num > 2;
-
-/* WISHLIST: write trigger that warns when something is inserted here.
-Row-based as proposed by Tim */
-
-CREATE TABLE KeyColumns AS SELECT * FROM
+    
+CREATE OR REPLACE VIEW KeyColumns AS SELECT * FROM
     (Schema_Key_Info
     NATURAL JOIN Schema_Position_Info)
 WHERE
@@ -88,13 +79,16 @@ WHERE
         FROM
             TernaryRelations);
 
+CREATE OR REPLACE VIEW InputColumns AS SELECT * FROM
+    KeyColumns
+WHERE
+    CONSTRAINT_NAME = 'PRIMARY'
+ORDER BY TABLE_NAME;
 
-/*ALTER TABLE KeyColumns ADD PRIMARY KEY (TABLE_NAME,COLUMN_NAME,REFERENCED_TABLE_NAME);  May 1, should be commented before running the new BayesBayes.java*/
-/* Ali create a warning for this problem on May 3rd */
 
-/* natural join adds information about ordinal position so we can tell which argument (column) comes first */
-
-CREATE TABLE AttributeColumns AS SELECT TABLE_NAME, COLUMN_NAME FROM
+CREATE TABLE AttributeColumns AS 
+SELECT TABLE_NAME, COLUMN_NAME 
+FROM
     Schema_Position_Info
 WHERE
     (TABLE_NAME , COLUMN_NAME) NOT IN (SELECT 
@@ -111,35 +105,6 @@ WHERE
             TernaryRelations);
 
 ALTER TABLE AttributeColumns ADD PRIMARY KEY (TABLE_NAME,COLUMN_NAME);
-
-
-/* WISHLIST: add triggers to inform the user about omissions like this.
-change to row-based.
-
-create trigger
-after insert on KeyColumns
-when exists (select * from TablesWithoutPKeys)
-issue message "some tables have been ommitted from analysis because they lack primary keys. Please see view TablesWithoutPKeys.")
-
-create trigger
-after insert on KeyColumns
-when exists (SELECT 
-            TABLE_NAME
-        FROM
-            NumEntityColumns
-        WHERE
-            num > 2)
-issue message "some tables have been ommitted from analysis because they represent ternary relationships. Please see view NumEntityColumns.")
-*/
-
-CREATE TABLE InputColumns AS SELECT * FROM
-    KeyColumns
-WHERE
-    CONSTRAINT_NAME = 'PRIMARY'
-ORDER BY TABLE_NAME;
-
-/*ALTER TABLE InputColumns ADD PRIMARY KEY (TABLE_NAME,COLUMN_NAME,REFERENCED_TABLE_NAME); May 1, should be commented before running the new BayesBayes.java*/
-/* Ali create a warning for this problem on May 3rd */
 
 CREATE TABLE ForeignKeyColumns AS SELECT * FROM
     KeyColumns
@@ -180,7 +145,7 @@ ALTER TABLE EntityTables ADD PRIMARY KEY (TABLE_NAME,COLUMN_NAME);
 
 /* next, look for SelfRelationships, where two different foreign key columns refer to the same table. */
 
-CREATE TABLE SelfRelationships AS SELECT DISTINCT RTables1.TABLE_NAME AS TABLE_NAME,
+CREATE OR REPLACE VIEW SelfRelationships AS SELECT DISTINCT RTables1.TABLE_NAME AS TABLE_NAME,
     RTables1.REFERENCED_TABLE_NAME AS REFERENCED_TABLE_NAME,
     RTables1.REFERENCED_COLUMN_NAME AS REFERENCED_COLUMN_NAME FROM
     KeyColumns AS RTables1,
@@ -191,11 +156,11 @@ WHERE
         AND (RTables1.REFERENCED_COLUMN_NAME = RTables2.REFERENCED_COLUMN_NAME)
         AND (RTables1.ORDINAL_POSITION < RTables2.ORDINAL_POSITION);
 
-ALTER TABLE SelfRelationships ADD PRIMARY KEY (TABLE_NAME);
+/*ALTER TABLE SelfRelationships ADD PRIMARY KEY (TABLE_NAME);*/
 
 /* Second, find Many-one relationships, where we have a foreign key that is not a primary key (i.e., the foreign key entry is a function of other columns) */
 
-CREATE TABLE Many_OneRelationships AS SELECT KeyColumns1.TABLE_NAME FROM
+CREATE OR REPLACE VIEW Many_OneRelationships AS SELECT KeyColumns1.TABLE_NAME FROM
     KeyColumns AS KeyColumns1,
     KeyColumns AS KeyColumns2
 WHERE
@@ -223,7 +188,8 @@ If an entity type is involved in a self relationship, then we make three "copies
 so that we can represent transitivity.
 */
 
-CREATE TABLE PVariables AS SELECT CONCAT(EntityTables.TABLE_NAME, '0') AS pvid,
+CREATE TABLE PVariables AS 
+SELECT CONCAT(EntityTables.TABLE_NAME, '0') AS pvid,
     EntityTables.TABLE_NAME,
     0 AS index_number FROM
     EntityTables 
@@ -262,7 +228,7 @@ and tables that come from self-relationships. */
 
 
 
-CREATE TABLE RelationTables AS SELECT DISTINCT ForeignKeyColumns.TABLE_NAME,
+CREATE OR REPLACE VIEW RelationTables AS SELECT DISTINCT ForeignKeyColumns.TABLE_NAME,
     ForeignKeyColumns.TABLE_NAME IN (SELECT 
             TABLE_NAME
         FROM
@@ -273,7 +239,7 @@ CREATE TABLE RelationTables AS SELECT DISTINCT ForeignKeyColumns.TABLE_NAME,
             Many_OneRelationships) AS Many_OneRelationship FROM
     ForeignKeyColumns;
 
-ALTER TABLE RelationTables ADD PRIMARY KEY (TABLE_NAME);
+/*ALTER TABLE RelationTables ADD PRIMARY KEY (TABLE_NAME);*/
 
 /************************
 Now we start working on defining functor random variables, which eventually become the nodes in the Bayes nets.
@@ -312,7 +278,7 @@ this view is just a temporary table for creating the relationship nodes. We coul
 Materializing it speeds up processing. */
 
 /*CREATE OR REPLACE VIEW RNodes_MM_NotSelf AS*/
-CREATE table RNodes_MM_NotSelf AS
+CREATE OR REPLACE VIEW RNodes_MM_NotSelf AS
     SELECT 
         CONCAT('`',
                 ForeignKeys_pvars1.TABLE_NAME,
@@ -344,7 +310,7 @@ CREATE table RNodes_MM_NotSelf AS
 functor nodes whose first argument has a lower index than the second. */
 
 /*CREATE OR REPLACE VIEW RNodes_MM_Self AS*/
-CREATE table RNodes_MM_Self AS
+CREATE OR REPLACE VIEW RNodes_MM_Self AS
     SELECT 
         CONCAT('`',
                 ForeignKeys_pvars1.TABLE_NAME,
@@ -376,7 +342,7 @@ CREATE table RNodes_MM_Self AS
 /* third case: many-one, not a self-relationship. Now we need to include the primary key as an argument. 
 Also, we switch to functional notation for legibility. */
 /*CREATE OR REPLACE VIEW RNodes_MO_NotSelf AS*/
-CREATE table RNodes_MO_NotSelf AS
+CREATE OR REPLACE VIEW RNodes_MO_NotSelf AS
     SELECT 
         CONCAT('`',
                 ForeignKeys_pvars.REFERENCED_TABLE_NAME,
@@ -407,7 +373,7 @@ CREATE table RNodes_MO_NotSelf AS
 /*fourth case: many-one, self-relationship */
 
 /*CREATE OR REPLACE VIEW RNodes_MO_Self AS*/
-CREATE table RNodes_MO_Self AS
+CREATE OR REPLACE VIEW RNodes_MO_Self AS
     SELECT 
         CONCAT('`',
                 ForeignKeys_pvars.REFERENCED_TABLE_NAME,
@@ -488,7 +454,10 @@ ALTER TABLE 2Nodes ADD PRIMARY KEY (2nid);
 /* 2. enumerate counts for a given set of population variables (table Expansions)
 /***************************************************************/
 
-CREATE TABLE Expansions (pvid varchar(40), primary key (pvid));
+CREATE TABLE Expansions (
+    pvid varchar(40), 
+    primary key (pvid)
+);
 
 /*TODO: add foreign key pointer to Pvariables */
 
@@ -502,27 +471,27 @@ CREATE TABLE FunctorSet (
   PRIMARY KEY  (`Fid`)
 );
 
-insert into FunctorSet
+INSERT INTO FunctorSet
 SELECT 
     1nid AS Fid,
-    COLUMN_NAME as FunctorName,
-    '1Node' as Type,
+    COLUMN_NAME AS FunctorName,
+    '1Node' AS Type,
     main
 FROM
     1Nodes 
 UNION SELECT 
     2nid AS Fid,
-    COLUMN_NAME as FunctorName,
-    '2Node' as Type,
+    COLUMN_NAME AS FunctorName,
+    '2Node' AS Type,
     main
 FROM
     2Nodes 
-union select 
-    orig_rnid as FID,
-    TABLE_NAME as FunctorName,
-    'Rnode' as Type,
+UNION SELECT 
+    orig_rnid AS FID,
+    TABLE_NAME AS FunctorName,
+    'Rnode' AS Type,
     main
-from
+FROM
     RNodes;
 
 /* for each functor node, find the population variables contained in it */
@@ -567,7 +536,7 @@ where
 
 /*TODO: add foreign key pointers to FunctorSet to ensure consistency with FNodes */
 
-insert into FunctorSet select * from FNodes;
+/*insert into FunctorSet select * from FNodes;
 /* by default, FNodes contains all functor nodes
 /* an application program can change this table before running the transfer.sql script to transfer metadata to the learning database */
 /*TODO: if a 2Node is in FunctorSet, add the corresponding RNode */

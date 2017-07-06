@@ -26,7 +26,14 @@ public class MakeSetup {
 	static String dbaddress;
 
 	public static void main(String args[]) throws Exception {
-		runMS();
+		try{
+			runMS();
+			System.out.println("Setup successful");
+		}
+		catch(Exception e){
+			System.out.println("ERROR in setup");
+		}
+
 	}
 	
 	public static void runMS() throws Exception {
