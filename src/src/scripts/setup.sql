@@ -24,7 +24,7 @@ SELECT TABLE_NAME,
     CONSTRAINT_NAME FROM
     INFORMATION_SCHEMA.KEY_COLUMN_USAGE
 WHERE
-    (KEY_COLUMN_USAGE.TABLE_SCHEMA = '@database@')
+    (KEY_COLUMN_USAGE.TABLE_SCHEMA = 'unielwin')
 ORDER BY TABLE_NAME;
 
 CREATE OR REPLACE VIEW Schema_Position_Info AS 
@@ -34,8 +34,8 @@ SELECT COLUMNS.TABLE_NAME,
     INFORMATION_SCHEMA.COLUMNS,
     INFORMATION_SCHEMA.TABLES
 WHERE
-    (COLUMNS.TABLE_SCHEMA = '@database@'
-        AND TABLES.TABLE_SCHEMA = '@database@'
+    (COLUMNS.TABLE_SCHEMA = 'unielwin'
+        AND TABLES.TABLE_SCHEMA = 'unielwin'
         AND TABLES.TABLE_NAME = COLUMNS.TABLE_NAME
         AND TABLES.TABLE_TYPE = 'BASE TABLE')
 ORDER BY TABLE_NAME;
@@ -117,17 +117,10 @@ ALTER TABLE ForeignKeyColumns ADD PRIMARY KEY (TABLE_NAME,COLUMN_NAME,REFERENCED
 
 
 
-/*********************************************************************************
-Find the possible values of attributes that appear in the data.
-This works but seems to slow down the script a lot. Why? Could comment out if too slow.
-ALIBZ: CREATE AND CALL SP FROM JAVA
-*/
 
 
-/*****************************************************
-Now start setting up the elements of Bayes nets. 
-We begin with the populations or entities. These have only one primary key.
-******/
+
+
 
 CREATE TABLE EntityTables AS SELECT distinct TABLE_NAME, COLUMN_NAME FROM
     KeyColumns T
@@ -143,7 +136,7 @@ WHERE
 ALTER TABLE EntityTables ADD PRIMARY KEY (TABLE_NAME,COLUMN_NAME);
 
 
-/* next, look for SelfRelationships, where two different foreign key columns refer to the same table. */
+
 
 CREATE OR REPLACE VIEW SelfRelationships AS SELECT DISTINCT RTables1.TABLE_NAME AS TABLE_NAME,
     RTables1.REFERENCED_TABLE_NAME AS REFERENCED_TABLE_NAME,
@@ -156,9 +149,9 @@ WHERE
         AND (RTables1.REFERENCED_COLUMN_NAME = RTables2.REFERENCED_COLUMN_NAME)
         AND (RTables1.ORDINAL_POSITION < RTables2.ORDINAL_POSITION);
 
-/*ALTER TABLE SelfRelationships ADD PRIMARY KEY (TABLE_NAME);*/
 
-/* Second, find Many-one relationships, where we have a foreign key that is not a primary key (i.e., the foreign key entry is a function of other columns) */
+
+
 
 CREATE OR REPLACE VIEW Many_OneRelationships AS SELECT KeyColumns1.TABLE_NAME FROM
     KeyColumns AS KeyColumns1,
@@ -180,13 +173,7 @@ WHERE
 
 
 
-/*********************************************************************
-Now set up tables recording information about populations (entities) and link types (relations).
-First, set up table that represent entity types (sets of individuals)/
-We extract table name and the name of the primary key column. 
-If an entity type is involved in a self relationship, then we make three "copies" of the population variable,
-so that we can represent transitivity.
-*/
+
 
 CREATE TABLE PVariables AS 
 SELECT CONCAT(EntityTables.TABLE_NAME, '0') AS pvid,
@@ -204,27 +191,14 @@ FROM
 WHERE
     EntityTables.TABLE_NAME = SelfRelationships.REFERENCED_TABLE_NAME
         AND EntityTables.COLUMN_NAME = SelfRelationships.REFERENCED_COLUMN_NAME ;
-/*zqian,Oct-02-13, reduce copies from 3 to 2*/
-/*
-UNION  
-SELECT 
-    CONCAT(EntityTables.TABLE_NAME, '2') AS pvid,
-    EntityTables.TABLE_NAME,
-    2 AS index_number
-FROM
-    EntityTables,
-    SelfRelationships
-WHERE
-    EntityTables.TABLE_NAME = SelfRelationships.REFERENCED_TABLE_NAME
-        AND EntityTables.COLUMN_NAME = SelfRelationships.REFERENCED_COLUMN_NAME;
-  */    
+
+    
 ALTER TABLE PVariables ADD PRIMARY KEY (pvid);
 
 
 
 
-/* Next, we work on relationship tables. There are two kinds: link tables that come from binary relationships, 
-and tables that come from self-relationships. */
+
 
 
 
@@ -239,12 +213,9 @@ CREATE OR REPLACE VIEW RelationTables AS SELECT DISTINCT ForeignKeyColumns.TABLE
             Many_OneRelationships) AS Many_OneRelationship FROM
     ForeignKeyColumns;
 
-/*ALTER TABLE RelationTables ADD PRIMARY KEY (TABLE_NAME);*/
 
-/************************
-Now we start working on defining functor random variables, which eventually become the nodes in the Bayes nets.
-First, unary functors apply to entities defined by Population variables.
-*/
+
+
 
 CREATE TABLE 1Nodes AS SELECT CONCAT('`', COLUMN_NAME, '(', pvid, ')', '`') AS 1nid,
     COLUMN_NAME,
@@ -253,12 +224,12 @@ CREATE TABLE 1Nodes AS SELECT CONCAT('`', COLUMN_NAME, '(', pvid, ')', '`') AS 1
     PVariables
         NATURAL JOIN
     AttributeColumns;
-/* natural join on table name */
-/* Unfortunately MYSQL doesn't seem to like having parentheses in field names, so we have to escape the functor Ids with single quotes */
+
+
 
 ALTER TABLE 1Nodes ADD PRIMARY KEY (1nid);
 ALTER TABLE 1Nodes ADD UNIQUE(pvid,COLUMN_NAME);
-/* for each population variable, there ought to be at most one function returning a given attribute for the population */
+
 
 CREATE TABLE ForeignKeys_pvars AS SELECT ForeignKeyColumns.TABLE_NAME,
     ForeignKeyColumns.REFERENCED_TABLE_NAME,
@@ -273,11 +244,9 @@ WHERE
 
 ALTER TABLE ForeignKeys_pvars ADD PRIMARY KEY (TABLE_NAME,pvid,ARGUMENT_POSITION);
 
-/* The table lists which relationship tables can have which population variables in which argument place. 
-this view is just a temporary table for creating the relationship nodes. We could drop it after use. 
-Materializing it speeds up processing. */
 
-/*CREATE OR REPLACE VIEW RNodes_MM_NotSelf AS*/
+
+
 CREATE OR REPLACE VIEW RNodes_MM_NotSelf AS
     SELECT 
         CONCAT('`',
@@ -306,10 +275,9 @@ CREATE OR REPLACE VIEW RNodes_MM_NotSelf AS
             AND RelationTables.SelfRelationship = 0
             AND RelationTables.Many_OneRelationship = 0;
 
-/* second case: many-many relationship, and self-relationship. One difference is that we have a main variable if and only if the first argument is a main population variable, and the second is the second variable. Also, we consider only
-functor nodes whose first argument has a lower index than the second. */
 
-/*CREATE OR REPLACE VIEW RNodes_MM_Self AS*/
+
+
 CREATE OR REPLACE VIEW RNodes_MM_Self AS
     SELECT 
         CONCAT('`',
@@ -339,9 +307,8 @@ CREATE OR REPLACE VIEW RNodes_MM_Self AS
             AND RelationTables.SelfRelationship = 1
             AND RelationTables.Many_OneRelationship = 0;
 
-/* third case: many-one, not a self-relationship. Now we need to include the primary key as an argument. 
-Also, we switch to functional notation for legibility. */
-/*CREATE OR REPLACE VIEW RNodes_MO_NotSelf AS*/
+
+
 CREATE OR REPLACE VIEW RNodes_MO_NotSelf AS
     SELECT 
         CONCAT('`',
@@ -370,9 +337,9 @@ CREATE OR REPLACE VIEW RNodes_MO_NotSelf AS
             AND RelationTables.SelfRelationship = 0
             AND RelationTables.Many_OneRelationship = 1;
 
-/*fourth case: many-one, self-relationship */
 
-/*CREATE OR REPLACE VIEW RNodes_MO_Self AS*/
+
+
 CREATE OR REPLACE VIEW RNodes_MO_Self AS
     SELECT 
         CONCAT('`',
@@ -403,10 +370,10 @@ CREATE OR REPLACE VIEW RNodes_MO_Self AS
             AND RelationTables.Many_OneRelationship = 1;
 
 
-CREATE TABLE RNodes AS SELECT * FROM  /*@ zqian May 22nd*/
-    RNodes_MM_NotSelf    /*when we generate the RNodes, we replace rnid with orig_rnid, and replace short_rnid with rnid,*/
-UNION SELECT            /* and we do not need to modify the latter code when it refering the RNodes/rnid */
-    *                   /* so that we minimize the modification of java code and scripts*/
+CREATE TABLE RNodes AS SELECT * FROM  
+    RNodes_MM_NotSelf    
+UNION SELECT            
+    *                   
 FROM
     RNodes_MM_Self 
 UNION SELECT 
@@ -419,14 +386,11 @@ FROM
     RNodes_MO_Self;
 
 ALTER TABLE RNodes ADD PRIMARY KEY (orig_rnid);
+ALTER TABLE RNodes ADD COLUMN `rnid` VARCHAR(10) NULL , ADD UNIQUE INDEX `rnid_UNIQUE` (`rnid` ASC) ; 
+ALTER TABLE RNodes ADD INDEX `Index`  (`pvid1` ASC, `pvid2` ASC, `TABLE_NAME` ASC) ;
 
-ALTER TABLE `RNodes` ADD COLUMN `rnid` VARCHAR(10) NULL , ADD UNIQUE INDEX `rnid_UNIQUE` (`rnid` ASC) ; 
-/*May 16th, for shorter name of Rchain*/
 
 
-/* Make tables for binary functor nodes that record attributes of links. 
-By default, all ***nonkey columns*** of a relation table are possible attribute functors, with the appropriate population ids.
-*/
 
 CREATE TABLE 2Nodes AS SELECT CONCAT('`',
             COLUMN_NAME,
@@ -446,23 +410,21 @@ CREATE TABLE 2Nodes AS SELECT CONCAT('`',
     AttributeColumns;
 
 ALTER TABLE 2Nodes ADD PRIMARY KEY (2nid);
+ALTER TABLE 2Nodes ADD INDEX `index`  (`pvid1` ASC, `pvid2` ASC, `TABLE_NAME` ASC) ; 
 
 
-/****************************************************/
-/* Now create tables that support extra functionality for learning
-/* 1. restrict functors to a subset in FunctorSet
-/* 2. enumerate counts for a given set of population variables (table Expansions)
-/***************************************************************/
+
+
+
 
 CREATE TABLE Expansions (
     pvid varchar(40), 
     primary key (pvid)
 );
 
-/*TODO: add foreign key pointer to Pvariables */
 
 
-/* Set up a table that contains all functor nodes of any arity, useful for Bayes net learning later. */
+
 CREATE TABLE FunctorSet (   
   `Fid` varchar(199) ,
   `FunctorName` varchar(64) ,
@@ -493,85 +455,3 @@ UNION SELECT
     main
 FROM
     RNodes;
-
-/* for each functor node, find the population variables contained in it */
-/*
-create table FNodes_pvars as 
-SELECT FNodes.Fid, PVariables.pvid FROM
-    FNodes,
-    2Nodes,
-    PVariables
-where
-    FNodes.Type = '2Node'
-    and FNodes.Fid = 2Nodes.2nid
-    and PVariables.pvid = 2Nodes.pvid1 
-union 
-SELECT 
-    FNodes.Fid, PVariables.pvid
-FROM
-    FNodes,
-    2Nodes,
-    PVariables
-where
-    FNodes.Type = '2Node'
-    and FNodes.Fid = 2Nodes.2nid
-    and PVariables.pvid = 2Nodes.pvid2 
-union 
-SELECT 
-    FNodes.Fid, PVariables.pvid
-FROM
-    FNodes,
-    1Nodes,
-    PVariables
-where
-    FNodes.Type = '1Node'
-    and FNodes.Fid = 1Nodes.1nid
-    and PVariables.pvid = 1Nodes.pvid;
-    
-    */
-
-/* allow restriction to subset of Functor Nodes */
-
-/* CREATE TABLE FunctorSet like FNodes;
-
-/*TODO: add foreign key pointers to FunctorSet to ensure consistency with FNodes */
-
-/*insert into FunctorSet select * from FNodes;
-/* by default, FNodes contains all functor nodes
-/* an application program can change this table before running the transfer.sql script to transfer metadata to the learning database */
-/*TODO: if a 2Node is in FunctorSet, add the corresponding RNode */
-
-
-
-
-/*Added by zqian  Apr. 4th 2013
-Column, index, and stored routine names are not case sensitive on any platform, nor are column aliases. Trigger names are case sensitive, which differs from standard SQL. */
-
-
-/*
-
-CREATE TABLE IF NOT EXISTS lattice_membership (
-    name VARCHAR(256),
-    member VARCHAR(256),
-    PRIMARY KEY (name , member)
-);
-*/
-/* Lists for each relationship chain in the lattice, the singleton relationship functors contained in the chain.
-TODO: check with Ali if this description is correct. */
-/*
-CREATE TABLE IF NOT EXISTS lattice_rel (
-    parent VARCHAR(256),
-    child VARCHAR(256),
-    PRIMARY KEY (parent , child)
-);*/
-/* Lists for each relationship chain in the lattice, the singleton relationship functors contained in the chain, its immediate predecessor (parent). */
-/*
-CREATE TABLE IF NOT EXISTS lattice_set (
-    name VARCHAR(256),
-    length INT(11),
-    PRIMARY KEY (name , length)
-);*/
-/* Lists each relationship chain in the lattice and its length. */
-
-
-

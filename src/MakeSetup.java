@@ -28,7 +28,6 @@ public class MakeSetup {
 	public static void main(String args[]) throws Exception {
 		try{
 			runMS();
-			System.out.println("Setup successful");
 		}
 		catch(Exception e){
 			System.out.println("ERROR in setup");
@@ -42,10 +41,15 @@ public class MakeSetup {
 		//analyze schema data to create setup database. This can be edited by the user before learning.
 		//If setup = 0, we skip this step and use the existing setup database
 		
-		BZScriptRunner bzsr = new BZScriptRunner(databaseName,con);
-		bzsr.runScript("src/scripts/setup.sql");  
-		bzsr.createSP("src/scripts/storedprocs.sql");
-        bzsr.callSP("find_values");
+		try{
+			BZScriptRunner bzsr = new BZScriptRunner(databaseName,con);
+			bzsr.runScript("src/scripts/setup.sql");  
+			bzsr.createSP("src/scripts/storedprocs.sql");
+	        bzsr.callSP("find_values");
+	    }
+	    catch(Exception e){
+	    	System.out.println("\n Delete the setup and restart!" + e);
+	    }
         
 		disconnectDB();
 	}
