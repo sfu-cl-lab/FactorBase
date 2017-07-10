@@ -17,7 +17,7 @@ CREATE OR REPLACE VIEW 1Nodes AS SELECT N.1nid, N.COLUMN_NAME, N.pvid, N.main FR
 WHERE
     N.1nid = F.fid;
 
-CREATE OR REPLACE VIEW 2Nodes AS SELECT N.2nid,
+CREATE TABLE 2Nodes AS SELECT N.2nid,
     N.COLUMN_NAME,
     N.pvid1,
     N.pvid2,
@@ -27,7 +27,7 @@ CREATE OR REPLACE VIEW 2Nodes AS SELECT N.2nid,
     unielwin_setup.FunctorSet F
 WHERE
     N.2nid = F.Fid;
-CREATE OR REPLACE VIEW RNodes AS SELECT N.orig_rnid,
+CREATE TABLE RNodes AS SELECT N.orig_rnid,
     N.TABLE_NAME,
     N.pvid1,
     N.pvid2,
