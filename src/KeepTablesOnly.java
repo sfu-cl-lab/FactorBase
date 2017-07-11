@@ -31,7 +31,12 @@ public class KeepTablesOnly{
 		
 		setVarsFromConfig();
 		String dbname = "UW_std";
-		String tablename = "a_b";
+		/*ArrayList<String> tablenames = new ArrayList<String>();
+		tablenames.add("a_b");
+		tablenames.add("a_CT");
+		tablenames.add("b_CT");*/
+		String[] tablenames = new String[]{"a_b","a_CT","b_CT"};
+		System.out.println(tablenames.length);
 
 		String CONN_STR = "jdbc:" + dbaddress + "/" + dbname;
 		try {
@@ -42,7 +47,7 @@ public class KeepTablesOnly{
 		tmp_con = (Connection) DriverManager.getConnection(CONN_STR, dbUsername, dbPassword);
 
 	
-		Drop_tmpTables(tmp_con,dbname,tablename);
+		Drop_tmpTables(tmp_con,dbname,tablenames);
 
 	}
 	
@@ -50,20 +55,20 @@ public class KeepTablesOnly{
 	
 
 
-	public static void Drop_tmpTables(Connection con,String dbname,String tablename) throws SQLException {
+	public static void Drop_tmpTables(Connection con,String dbname,String[] tablenames) throws SQLException {
         //drop temporary CT tables
-		//1.0 keep one table 
+		//Keep tables which given by String[] tablenames
 		
-        /*String tmp_con = "jdbc:" + "mysql://cs-oschulte-03.cs.sfu.ca" + "/" + dbname;
-        try {
-            java.lang.Class.forName("com.mysql.jdbc.Driver");
-        } catch (Exception ex) {
-            System.err.println("Unable to load MySQL JDBC driver");
-        }
-
-        con = (Connection) DriverManager.getConnection(tmp_con, "root", "joinbayes");*/
+        
         Statement st = con.createStatement();
-		String NewSQL = "select concat('drop table ',table_name,';') as result FROM information_schema.tables where table_schema = '" +dbname+ "' and table_name != '" +tablename+ "';";
+		String NewSQL = "select concat('drop table ',table_name,';') as result FROM information_schema.tables where table_schema = '" 
+		+dbname;
+
+		for(int i=0;i<tablenames.length;i++){
+			NewSQL = NewSQL + "' and table_name != '" +tablenames[i];
+		}
+		NewSQL += "';";
+
 		System.out.println(NewSQL);
 		ArrayList<String> sets = new ArrayList<String>();
 		try{
@@ -75,6 +80,7 @@ public class KeepTablesOnly{
             }
 
 			for(String set : sets){
+				st.execute(set);
 				System.out.println(set+" OK!");
 			}
 			//String DropSQL = res.getString("result");
