@@ -71,7 +71,7 @@ public class BayesBaseCT_SortMerge {
         con_setup = connectDB(databaseName_setup);
         //build _BN copy from _setup Nov 1st, 2013 Zqiancompute the subset given fid and it's parents
         BZScriptRunner bzsr = new BZScriptRunner(databaseName_std,con_setup);
-        bzsr.runScript("src/scripts/transfer.sql");
+        bzsr.runScript("scripts/transfer.sql");
 
         con_BN = connectDB(databaseName_BN);
         con_CT = connectDB(databaseName_CT);
@@ -88,13 +88,13 @@ public class BayesBaseCT_SortMerge {
         // empty query error,fixed by removing one duplicated semicolon. Oct 30, 2013
         //ToDo: No support for executing LinkCorrelation=0;
         if (cont.equals("1")) {
-            bzsr.runScript("src/scripts/metadata_2_cont.sql");
+            bzsr.runScript("scripts/metadata_2_cont.sql");
         } else if (linkCorrelation.equals("1")) { //LinkCorrelations
-            bzsr.runScript("src/scripts/metadata_2.sql");
+            bzsr.runScript("scripts/metadata_2.sql");
         } else {
-            bzsr.runScript("src/scripts/metadata_2.sql");
+            bzsr.runScript("scripts/metadata_2.sql");
             // modified on Feb. 3rd, 2015, zqian, to include rnode as columns
-        //			bzsr.runScript("src/scripts/metadata_2_nolink.sql");
+        //			bzsr.runScript("scripts/metadata_2_nolink.sql");
         }
         // building CT tables for Rchain
         CTGenerator();
@@ -121,19 +121,19 @@ public class BayesBaseCT_SortMerge {
 		
 
         BZScriptRunner bzsr = new BZScriptRunner(databaseName_std,con_setup);
-        bzsr.runScript("src/scripts/transfer.sql");
+        bzsr.runScript("scripts/transfer.sql");
 
         
         maxNumberOfMembers = short_rnid_LatticeGenerator.generate(con_BN);
         
         if (cont.equals("1")) {
-            bzsr.runScript("src/scripts/metadata_2_cont.sql");
+            bzsr.runScript("scripts/metadata_2_cont.sql");
         } else if (linkCorrelation.equals("1")) { //LinkCorrelations
-            bzsr.runScript("src/scripts/metadata_2.sql");
+            bzsr.runScript("scripts/metadata_2.sql");
         } else {
-            bzsr.runScript("src/scripts/metadata_2.sql");
+            bzsr.runScript("scripts/metadata_2.sql");
             // modified on Feb. 3rd, 2015, zqian, to include rnode as columns
-            //			bzsr.runScript("src/scripts/metadata_2_nolink.sql");
+            //			bzsr.runScript("scripts/metadata_2_nolink.sql");
         }
         // building CT tables for Rchain
         CTGenerator();
@@ -154,7 +154,7 @@ public class BayesBaseCT_SortMerge {
         con_setup = connectDB(databaseName_setup);
 		//build _BN part1 from metadata_1.sql
 		BZScriptRunner bzsr = new BZScriptRunner(databaseName_std,dbbase,con_setup);
-		bzsr.runScript("src/scripts/transfer2.sql");
+		bzsr.runScript("scripts/transfer2.sql");
 		con_BN = connectDB(databaseName_BN);
         con_CT = connectDB(databaseName_CT);
 		//generate lattice tree
@@ -163,11 +163,11 @@ public class BayesBaseCT_SortMerge {
 		
 		//build _BN part2: from metadata_2.sql      
 		if (cont.equals("1")) {
-			bzsr.runScript("src/scripts/metadata_3_cont.sql");
+			bzsr.runScript("scripts/metadata_3_cont.sql");
 		} else if (linkCorrelation.equals("1")) { //LinkCorrelations
-			bzsr.runScript("src/scripts/metadata_3.sql");
+			bzsr.runScript("scripts/metadata_3.sql");
 		} else {
-			bzsr.runScript("src/scripts/metadata_3_nolink.sql");
+			bzsr.runScript("scripts/metadata_3_nolink.sql");
 			// modified on Feb. 3rd, 2015, zqian, to include rnode as columns
 		}
 		
@@ -202,7 +202,7 @@ public class BayesBaseCT_SortMerge {
         con_setup = connectDB(databaseName_setup);
 		//build _BN part1 from metadata_1.sql
 		BZScriptRunner bzsr = new BZScriptRunner(databaseName_std,dbbase,con_setup);
-		bzsr.runScript("src/scripts/transfer2.sql");
+		bzsr.runScript("scripts/transfer2.sql");
 		con_BN = connectDB(databaseName_BN);
         con_CT = connectDB(databaseName_CT);
 		//generate lattice tree
@@ -211,11 +211,11 @@ public class BayesBaseCT_SortMerge {
 		
 		//build _BN part2: from metadata_2.sql      
 		if (cont.equals("1")) {
-			bzsr.runScript("src/scripts/metadata_3_cont.sql");
+			bzsr.runScript("scripts/metadata_3_cont.sql");
 		} else if (linkCorrelation.equals("1")) { //LinkCorrelations
-			bzsr.runScript("src/scripts/metadata_3.sql");
+			bzsr.runScript("scripts/metadata_3.sql");
 		} else {
-			bzsr.runScript("src/scripts/metadata_3_nolink.sql");
+			bzsr.runScript("scripts/metadata_3_nolink.sql");
 			//buildSubCTTarget modified on Feb. 3rd, 2015, zqian, to include rnode as columns
 		}
 
@@ -252,7 +252,7 @@ public class BayesBaseCT_SortMerge {
 
 		//build _BN part1 from metadata_1.sql
 		BZScriptRunner bzsr = new BZScriptRunner(databaseName_std,dbbase,con_setup);
-		bzsr.runScript("src/scripts/transfer2.sql");
+		bzsr.runScript("scripts/transfer2.sql");
 		con_BN = connectDB(databaseName_BN);
         con_CT = connectDB(databaseName_CT);
 		//generate lattice tree
@@ -261,13 +261,13 @@ public class BayesBaseCT_SortMerge {
 		
 		//build _BN part2: from metadata_2.sql      
 		if (cont.equals("1")) {
-			bzsr.runScript("src/scripts/metadata_3_cont.sql");
+			bzsr.runScript("scripts/metadata_3_cont.sql");
 		}
 		else if (linkCorrelation.equals("1")) {
-			bzsr.runScript("src/scripts/metadata_3.sql");
+			bzsr.runScript("scripts/metadata_3.sql");
 		}
 		else {
-			bzsr.runScript("src/scripts/metadata_3_nolink.sql");
+			bzsr.runScript("scripts/metadata_3_nolink.sql");
 
 			// modified on Feb. 3rd, 2015, zqian, to include rnode as columns
 		}
