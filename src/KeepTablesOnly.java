@@ -1,4 +1,5 @@
-import java.sql.Connection;
+import com.mysql.jdbc.Connection;
+import com.mysql.jdbc.exceptions.jdbc4.MySQLSyntaxErrorException;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.Statement;
@@ -6,7 +7,7 @@ import java.sql.SQLException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.lang.*;
-
+//import java.sql.Connection;
 
 public class KeepTablesOnly{
 	static String databaseName;
@@ -14,43 +15,37 @@ public class KeepTablesOnly{
 	static String dbUsername;
 	static String dbPassword;
 	static String dbaddress;
+	//static String dbname;
 	//static String databaseName1="PPLRuleDetectionJan23Movies";
 	//static String databaseName2="PPLRuleDetectionJan23Movies";
 
 
-	public static void setVarsFromConfig(){
-		Config conf = new Config();
-		databaseName = conf.getProperty("dbname");
-		dbUsername = conf.getProperty("dbusername");
-		dbPassword = conf.getProperty("dbpassword");
-		dbaddress = conf.getProperty("dbaddress");
-	}
+	// public static void setVarsFromConfig(){
+	// 	Config conf = new Config();
+	// 	databaseName = conf.getProperty("dbname");
+	// 	dbUsername = conf.getProperty("dbusername");
+	// 	dbPassword = conf.getProperty("dbpassword");
+	// 	dbaddress = conf.getProperty("dbaddress");
+	// }
 
 
-	public static void main(String[] args) throws SQLException, IOException{
+	// public static void main(String[] args) throws SQLException, IOException{
 		
-		setVarsFromConfig();
-		String dbname = "UW_std";
-		/*ArrayList<String> tablenames = new ArrayList<String>();
-		tablenames.add("a_b");
-		tablenames.add("a_CT");
-		tablenames.add("b_CT");*/
-		String[] tablenames = new String[]{"a_b","a_CT","b_CT"};
-		System.out.println(tablenames.length);
+	// 	setVarsFromConfig();
+	// 	String dbname = "UW_std";
+	// 	String[] tablenames = new String[]{"a_b","a_CT","b_CT"};
 
-		String CONN_STR = "jdbc:" + dbaddress + "/" + dbname;
-		try {
-			java.lang.Class.forName("com.mysql.jdbc.Driver");
-		} catch (Exception ex) {
-			System.err.println("Unable to load MySQL JDBC driver");
-		}
-		tmp_con = (Connection) DriverManager.getConnection(CONN_STR, dbUsername, dbPassword);
+	// 	String CONN_STR = "jdbc:" + dbaddress + "/" + dbname;
+	// 	try {
+	// 		java.lang.Class.forName("com.mysql.jdbc.Driver");
+	// 	} catch (Exception ex) {
+	// 		System.err.println("Unable to load MySQL JDBC driver");
+	// 	}
+	// 	tmp_con = (Connection) DriverManager.getConnection(CONN_STR, dbUsername, dbPassword);
 
-	
-		Drop_tmpTables(tmp_con,dbname,tablenames);
+	// 	Drop_tmpTables(tmp_con,dbname,tablenames);
 
-	}
-	
+	// }
 	
 	
 
