@@ -1,7 +1,6 @@
 DROP SCHEMA IF EXISTS unielwin_BN; 
 CREATE SCHEMA unielwin_BN;
-DROP SCHEMA IF EXISTS unielwin_CT; 
-CREATE SCHEMA unielwin_CT;
+
 USE unielwin_BN;
 SET storage_engine=INNODB;
 
@@ -40,7 +39,7 @@ CREATE TABLE RNodes AS SELECT N.orig_rnid,
 WHERE
     N.orig_rnid = F.Fid;
 
-CREATE TABLE PVariables AS SELECT * FROM
+CREATE OR REPLACE VIEW PVariables AS SELECT * FROM
     unielwin_setup.PVariables;
 
 

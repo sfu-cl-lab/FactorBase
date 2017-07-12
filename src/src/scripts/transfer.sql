@@ -1,7 +1,6 @@
 DROP SCHEMA IF EXISTS @database@_BN; 
 CREATE SCHEMA @database@_BN;
-DROP SCHEMA IF EXISTS @database@_CT; 
-CREATE SCHEMA @database@_CT;
+
 USE @database@_BN;
 SET storage_engine=INNODB;
 
@@ -41,7 +40,7 @@ CREATE TABLE RNodes AS SELECT N.orig_rnid,
 WHERE
     N.orig_rnid = F.Fid;
 /* better:*/
-CREATE TABLE PVariables AS SELECT * FROM
+CREATE OR REPLACE VIEW PVariables AS SELECT * FROM
     unielwin_setup.PVariables;
 
 /*copy only Pvariables that appear in functor subset */
