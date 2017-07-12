@@ -41,6 +41,7 @@ public class MakeSetup {
 		//analyze schema data to create setup database. This can be edited by the user before learning.
 		//If setup = 0, we skip this step and use the existing setup database
 		
+
 		try{
 			BZScriptRunner bzsr = new BZScriptRunner(databaseName,con);
 			bzsr.runScript("src/scripts/setup.sql");  
@@ -50,6 +51,7 @@ public class MakeSetup {
 	    catch(Exception e){
 	    	System.out.println("\n Delete the setup and restart!" + e);
 	    }
+
         
 		disconnectDB();
 	}

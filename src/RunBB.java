@@ -8,7 +8,7 @@
  * 
  * */
 public class RunBB {
-	private static String isAutomaticSetup;
+	static String isAutomaticSetup;
 	
 	public static void main(String[] args) throws Exception {
 		long t1 = System.currentTimeMillis(); 
