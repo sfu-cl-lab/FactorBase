@@ -26,6 +26,9 @@ script:
   - javac -cp ".:./lib/*" Config.java BZScriptRunner.java MakeSetup.java
   - javac -cp ".:./lib/*" RunBB.java
   - javac -cp ".:./lib/*" KeepTablesOnly.java
+  - mkdir src
+  - mv config.cfg src/
+  - mv scripts src/ 
   - java -cp ".:./lib/*" MakeSetup > a.txt
   - java -cp ".:./lib/*" RunBB > b.txt
   - java -cp ".:./lib/*" KeepTablesOnly > c.txt
@@ -33,7 +36,7 @@ script:
   - tail a.txt
   - tail b.txt
   - tail c.txt
-  - cd ../
+  - tail dag_.txt
 
 after_script:
   - mysql -e "show databases;" -uroot -p123456
