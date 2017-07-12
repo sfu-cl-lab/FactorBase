@@ -81,9 +81,9 @@ public class BayesBaseCT_SortMerge {
         // rnid mapping. maxNumberofMembers = maximum size of lattice element. Should be called LatticeHeight
         maxNumberOfMembers = short_rnid_LatticeGenerator.generate(con_BN);
 
-        bzsr.runScript("src/scripts/functorNode.sql");
-        bzsr.runScript("src/scripts/contingencyTables.sql");
-        bzsr.runScript("src/scripts/bayesNetLearning.sql");
+        bzsr.runScript("scripts/functorNode.sql");
+        bzsr.runScript("scripts/contingencyTables.sql");
+        bzsr.runScript("scripts/bayesNetLearning.sql");
 
         // System.out.println("INFO: \n\nLattice is ready for use...\n\n");
 
