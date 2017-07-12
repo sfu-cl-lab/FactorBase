@@ -9,10 +9,10 @@ SET storage_engine=INNODB;
 /*copy tables from setup metadata database into learning database
 /*copy subset as specified in setup  rather than full functor set */
 
-CREATE OR REPLACE VIEW FunctorSet AS SELECT * FROM
+CREATE TABLE FunctorSet AS SELECT * FROM
     unielwin_setup.FunctorSet;
 
-CREATE OR REPLACE VIEW 1Nodes AS SELECT N.1nid, N.COLUMN_NAME, N.pvid, N.main FROM
+CREATE TABLE 1Nodes AS SELECT N.1nid, N.COLUMN_NAME, N.pvid, N.main FROM
     unielwin_setup.1Nodes N,
     unielwin_setup.FunctorSet F
 WHERE
@@ -49,23 +49,23 @@ CREATE TABLE PVariables AS SELECT * FROM
 /* the like construct should preserve foreign key pointers to Pvariables from the setup database. 
 /* Want to force groundings to target Pvariables that appear in the functor subset.*/
 
-CREATE OR REPLACE VIEW EntityTables AS SELECT * FROM
+CREATE TABLE EntityTables AS SELECT * FROM
     unielwin_setup.EntityTables;
-CREATE OR REPLACE VIEW AttributeColumns AS SELECT * FROM
+CREATE TABLE AttributeColumns AS SELECT * FROM
     unielwin_setup.AttributeColumns;
-CREATE OR REPLACE VIEW TernaryRelations AS SELECT * FROM
+CREATE TABLE TernaryRelations AS SELECT * FROM
     unielwin_setup.TernaryRelations;
-CREATE OR REPLACE VIEW RelationTables AS SELECT * FROM
+CREATE TABLE RelationTables AS SELECT * FROM
     unielwin_setup.RelationTables;
-CREATE OR REPLACE VIEW NoPKeys AS SELECT * FROM
+CREATE TABLE NoPKeys AS SELECT * FROM
     unielwin_setup.NoPKeys;
-CREATE OR REPLACE VIEW ForeignKeyColumns AS SELECT * FROM
+CREATE TABLE ForeignKeyColumns AS SELECT * FROM
     unielwin_setup.ForeignKeyColumns;
-CREATE OR REPLACE VIEW ForeignKeys_pvars AS SELECT * FROM
+CREATE TABLE ForeignKeys_pvars AS SELECT * FROM
     unielwin_setup.ForeignKeys_pvars;
-CREATE OR REPLACE VIEW InputColumns AS SELECT * FROM
+CREATE TABLE InputColumns AS SELECT * FROM
     unielwin_setup.InputColumns;
-CREATE OR REPLACE VIEW Attribute_Value AS SELECT * FROM
+CREATE TABLE Attribute_Value AS SELECT * FROM
     unielwin_setup.Attribute_Value;
 
 
