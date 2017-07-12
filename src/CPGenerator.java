@@ -67,7 +67,7 @@ public class CPGenerator {
 		
 	/*	//build stored procedure in _BN        
         BZScriptRunner bzsr = new BZScriptRunner(databaseName2,con2);
-        bzsr.CP_createSP("src/scripts/CPGenerator.sql");
+        bzsr.CP_createSP("scripts/CPGenerator.sql");
         //System.out.println("creating the stored procedure is done "+databaseName);
         bzsr.callSP("CP_Generator");
         //System.out.println("CP_Generator is done for "+databaseName);

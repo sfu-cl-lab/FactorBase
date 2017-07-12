@@ -65,7 +65,7 @@ public static void setVarsFromConfig(){
 	    Reader reader;
 	 configFile = new java.util.Properties();
      try {
-     	fr = new FileReader("src/config.cfg"); 
+     	fr = new FileReader("config.cfg"); 
          reader = new BufferedReader(fr);
          configFile.load( reader );
      }catch(Exception eta){
