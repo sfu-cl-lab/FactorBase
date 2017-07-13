@@ -1,0 +1,148 @@
+<?xml version="1.0"?>
+<!-- DTD for the XMLBIF 0.3 format -->
+<!DOCTYPE BIF [
+	<!ELEMENT BIF ( NETWORK )*>
+		<!ATTLIST BIF VERSION CDATA #REQUIRED>
+	<!ELEMENT NETWORK ( NAME, ( PROPERTY | VARIABLE | DEFINITION )* )>
+	<!ELEMENT NAME (#PCDATA)>
+	<!ELEMENT VARIABLE ( NAME, ( OUTCOME |  PROPERTY )* ) >
+		<!ATTLIST VARIABLE TYPE (nature|decision|utility) "nature">
+	<!ELEMENT OUTCOME (#PCDATA)>
+	<!ELEMENT DEFINITION ( FOR | GIVEN | TABLE | PROPERTY )* >
+	<!ELEMENT FOR (#PCDATA)>
+	<!ELEMENT GIVEN (#PCDATA)>
+	<!ELEMENT TABLE (#PCDATA)>
+	<!ELEMENT PROPERTY (#PCDATA)>
+]>
+
+<BIF VERSION="0.3">
+<NETWORK>
+<NAME>BayesNet</NAME>
+<VARIABLE TYPE="nature">
+	<NAME>`diff(course0)`</NAME>
+	<OUTCOME>1</OUTCOME>
+	<OUTCOME>2</OUTCOME>
+</VARIABLE>
+<VARIABLE TYPE="nature">
+	<NAME>`popularity(prof0)`</NAME>
+	<OUTCOME>1</OUTCOME>
+	<OUTCOME>2</OUTCOME>
+</VARIABLE>
+<VARIABLE TYPE="nature">
+	<NAME>`rating(course0)`</NAME>
+	<OUTCOME>1</OUTCOME>
+	<OUTCOME>2</OUTCOME>
+</VARIABLE>
+<VARIABLE TYPE="nature">
+	<NAME>`teachingability(prof0)`</NAME>
+	<OUTCOME>2</OUTCOME>
+	<OUTCOME>3</OUTCOME>
+</VARIABLE>
+<VARIABLE TYPE="nature">
+	<NAME>`intelligence(student0)`</NAME>
+	<OUTCOME>1</OUTCOME>
+	<OUTCOME>2</OUTCOME>
+	<OUTCOME>3</OUTCOME>
+</VARIABLE>
+<VARIABLE TYPE="nature">
+	<NAME>`ranking(student0)`</NAME>
+	<OUTCOME>1</OUTCOME>
+	<OUTCOME>2</OUTCOME>
+	<OUTCOME>3</OUTCOME>
+	<OUTCOME>4</OUTCOME>
+	<OUTCOME>5</OUTCOME>
+</VARIABLE>
+<VARIABLE TYPE="nature">
+	<NAME>`capability(prof0,student0)`</NAME>
+	<OUTCOME>1</OUTCOME>
+	<OUTCOME>N/A</OUTCOME>
+	<OUTCOME>2</OUTCOME>
+	<OUTCOME>3</OUTCOME>
+	<OUTCOME>4</OUTCOME>
+	<OUTCOME>5</OUTCOME>
+</VARIABLE>
+<VARIABLE TYPE="nature">
+	<NAME>`salary(prof0,student0)`</NAME>
+	<OUTCOME>N/A</OUTCOME>
+	<OUTCOME>high</OUTCOME>
+	<OUTCOME>low</OUTCOME>
+	<OUTCOME>med</OUTCOME>
+</VARIABLE>
+<VARIABLE TYPE="nature">
+	<NAME>`grade(course0,student0)`</NAME>
+	<OUTCOME>N/A</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+	<OUTCOME>2</OUTCOME>
+	<OUTCOME>3</OUTCOME>
+	<OUTCOME>4</OUTCOME>
+</VARIABLE>
+<VARIABLE TYPE="nature">
+	<NAME>`sat(course0,student0)`</NAME>
+	<OUTCOME>N/A</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+	<OUTCOME>2</OUTCOME>
+	<OUTCOME>3</OUTCOME>
+</VARIABLE>
+<VARIABLE TYPE="nature">
+	<NAME>`a`</NAME>
+	<OUTCOME>T</OUTCOME>
+	<OUTCOME>F</OUTCOME>
+</VARIABLE>
+<VARIABLE TYPE="nature">
+	<NAME>`b`</NAME>
+	<OUTCOME>T</OUTCOME>
+	<OUTCOME>F</OUTCOME>
+</VARIABLE>
+<DEFINITION>
+	<FOR>`diff(course0)`</FOR>
+	<GIVEN>`grade(course0,student0)`</GIVEN>
+</DEFINITION>
+<DEFINITION>
+	<FOR>`popularity(prof0)`</FOR>
+	<GIVEN>`teachingability(prof0)`</GIVEN>
+	<GIVEN>`a`</GIVEN>
+</DEFINITION>
+<DEFINITION>
+	<FOR>`rating(course0)`</FOR>
+</DEFINITION>
+<DEFINITION>
+	<FOR>`teachingability(prof0)`</FOR>
+	<GIVEN>`a`</GIVEN>
+</DEFINITION>
+<DEFINITION>
+	<FOR>`intelligence(student0)`</FOR>
+	<GIVEN>`b`</GIVEN>
+	<GIVEN>`a`</GIVEN>
+</DEFINITION>
+<DEFINITION>
+	<FOR>`ranking(student0)`</FOR>
+	<GIVEN>`intelligence(student0)`</GIVEN>
+	<GIVEN>`a`</GIVEN>
+</DEFINITION>
+<DEFINITION>
+	<FOR>`capability(prof0,student0)`</FOR>
+	<GIVEN>`a`</GIVEN>
+</DEFINITION>
+<DEFINITION>
+	<FOR>`salary(prof0,student0)`</FOR>
+	<GIVEN>`a`</GIVEN>
+	<GIVEN>`capability(prof0,student0)`</GIVEN>
+</DEFINITION>
+<DEFINITION>
+	<FOR>`grade(course0,student0)`</FOR>
+	<GIVEN>`b`</GIVEN>
+	<GIVEN>`intelligence(student0)`</GIVEN>
+</DEFINITION>
+<DEFINITION>
+	<FOR>`sat(course0,student0)`</FOR>
+	<GIVEN>`b`</GIVEN>
+	<GIVEN>`grade(course0,student0)`</GIVEN>
+</DEFINITION>
+<DEFINITION>
+	<FOR>`a`</FOR>
+</DEFINITION>
+<DEFINITION>
+	<FOR>`b`</FOR>
+</DEFINITION>
+</NETWORK>
+</BIF>

@@ -92,7 +92,7 @@ public class BayesBaseH {
 
 		//build tables for structure learning
         BZScriptRunner bzsr = new BZScriptRunner(databaseName,con2);
-        bzsr.runScript("src/scripts/bayesedges.sql");
+        bzsr.runScript("scripts/bayesedges.sql");
         //get maxNumberOfMembers (max length of rchain)
         Statement st = con2.createStatement();
         ResultSet rst = st.executeQuery("SELECT max(length) FROM lattice_set;");

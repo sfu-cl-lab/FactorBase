@@ -1,12 +1,12 @@
 
 
-DROP SCHEMA IF EXISTS jeffery_prozon_three_setup; 
-create schema jeffery_prozon_three_setup;
+DROP SCHEMA IF EXISTS unielwin_setup; 
+create schema unielwin_setup;
 
-create schema if not exists jeffery_prozon_three_BN;
-create schema if not exists jeffery_prozon_three_CT;
 
-USE jeffery_prozon_three_setup;
+
+
+USE unielwin_setup;
 SET storage_engine=INNODB;
 
 
@@ -18,7 +18,7 @@ CREATE TABLE Schema_Key_Info AS SELECT TABLE_NAME,
     CONSTRAINT_NAME FROM
     INFORMATION_SCHEMA.KEY_COLUMN_USAGE
 WHERE
-    (KEY_COLUMN_USAGE.TABLE_SCHEMA = 'jeffery_prozon_three')
+    (KEY_COLUMN_USAGE.TABLE_SCHEMA = 'unielwin')
 ORDER BY TABLE_NAME;
 
 
@@ -30,8 +30,8 @@ CREATE TABLE Schema_Position_Info AS SELECT COLUMNS.TABLE_NAME,
     INFORMATION_SCHEMA.COLUMNS,
     INFORMATION_SCHEMA.TABLES
 WHERE
-    (COLUMNS.TABLE_SCHEMA = 'jeffery_prozon_three'
-        AND TABLES.TABLE_SCHEMA = 'jeffery_prozon_three'
+    (COLUMNS.TABLE_SCHEMA = 'unielwin'
+        AND TABLES.TABLE_SCHEMA = 'unielwin'
         AND TABLES.TABLE_NAME = COLUMNS.TABLE_NAME
         AND TABLES.TABLE_TYPE = 'BASE TABLE')
 ORDER BY TABLE_NAME;

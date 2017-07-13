@@ -27,9 +27,6 @@ script:
   - javac -cp ".:./lib/*" RunBB.java
   - javac -cp ".:./lib/*" MakeTargetSetup.java
   - javac -cp ".:./lib/*" FunctorWrapper.java
-  - mkdir src
-  - mv config.cfg src/
-  - mv scripts src/
   - java -cp ".:./lib/*" MakeSetup > a.txt
   - java -cp ".:./lib/*" RunBB > b.txt
   - java -cp ".:./lib/*" MakeTargetSetup > c.txt

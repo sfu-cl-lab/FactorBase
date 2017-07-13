@@ -1,0 +1,50 @@
+<?xml version="1.0"?>
+<!-- DTD for the XMLBIF 0.3 format -->
+<!DOCTYPE BIF [
+	<!ELEMENT BIF ( NETWORK )*>
+		<!ATTLIST BIF VERSION CDATA #REQUIRED>
+	<!ELEMENT NETWORK ( NAME, ( PROPERTY | VARIABLE | DEFINITION )* )>
+	<!ELEMENT NAME (#PCDATA)>
+	<!ELEMENT VARIABLE ( NAME, ( OUTCOME |  PROPERTY )* ) >
+		<!ATTLIST VARIABLE TYPE (nature|decision|utility) "nature">
+	<!ELEMENT OUTCOME (#PCDATA)>
+	<!ELEMENT DEFINITION ( FOR | GIVEN | TABLE | PROPERTY )* >
+	<!ELEMENT FOR (#PCDATA)>
+	<!ELEMENT GIVEN (#PCDATA)>
+	<!ELEMENT TABLE (#PCDATA)>
+	<!ELEMENT PROPERTY (#PCDATA)>
+]>
+
+<BIF VERSION="0.3">
+<NETWORK>
+<NAME>`a`</NAME>
+<VARIABLE TYPE="nature">
+	<NAME>capability(prof0,student0)</NAME>
+</VARIABLE>
+<VARIABLE TYPE="nature">
+	<NAME>popularity(prof0)</NAME>
+</VARIABLE>
+<VARIABLE TYPE="nature">
+	<NAME>ranking(student0)</NAME>
+</VARIABLE>
+<VARIABLE TYPE="nature">
+	<NAME>salary(prof0,student0)</NAME>
+</VARIABLE>
+<DEFINITION>
+	<FOR>capability(prof0,student0)</FOR>
+	<GIVEN>a</GIVEN>
+</DEFINITION>
+<DEFINITION>
+	<FOR>popularity(prof0)</FOR>
+	<GIVEN>teachingability(prof0)</GIVEN>
+</DEFINITION>
+<DEFINITION>
+	<FOR>ranking(student0)</FOR>
+	<GIVEN>intelligence(student0)</GIVEN>
+</DEFINITION>
+<DEFINITION>
+	<FOR>salary(prof0,student0)</FOR>
+	<GIVEN>a</GIVEN>
+</DEFINITION>
+</NETWORK>
+</BIF>

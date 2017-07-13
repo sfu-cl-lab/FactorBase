@@ -8,13 +8,13 @@
  * 
  * */
 public class RunBB {
-	static String opt1;
+	static String isAutomaticSetup;
 	
 	public static void main(String[] args) throws Exception {
 		long t1 = System.currentTimeMillis(); 
 		System.out.println("Start Program...");
 		setVarsFromConfig();
-		if (opt1.equals("1")) {
+		if (isAutomaticSetup.equals("1")) {
 			MakeSetup.runMS();
 			System.out.println("Setup database is ready.");
 		} else {
@@ -30,7 +30,7 @@ public class RunBB {
 	public static void setVarsFromConfig(){
 		Config conf = new Config();
 		//1: run Setup; 0: not run
-		opt1 = conf.getProperty("AutomaticSetup");
+		isAutomaticSetup = conf.getProperty("AutomaticSetup");
 	}
 	
 	public static void runBBLearner() throws Exception {
