@@ -6,8 +6,8 @@ Analyze schema information to prepare for statistical analysis.
 DROP SCHEMA IF EXISTS @database@_setup; 
 create schema @database@_setup;
 
-create schema if not exists @database@_BN;
-create schema if not exists @database@_CT;
+/*-- create schema if not exists @database@_BN;*/
+/*-- create schema if not exists @database@_CT;*/
 
 USE @database@_setup;
 SET storage_engine=INNODB;

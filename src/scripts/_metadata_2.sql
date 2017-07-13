@@ -1,5 +1,5 @@
 
-USE jeffery_prozon_three_BN;
+USE unielwin_BN;
 SET storage_engine=INNODB;
 
 
@@ -162,11 +162,11 @@ WHERE
 
 
 
-CREATE TABLE RNodes_From_List AS SELECT DISTINCT rnid, CONCAT('jeffery_prozon_three.',TABLE_NAME, ' AS ', pvid) AS Entries FROM
+CREATE TABLE RNodes_From_List AS SELECT DISTINCT rnid, CONCAT('unielwin.',TABLE_NAME, ' AS ', pvid) AS Entries FROM
     RNodes_pvars 
 UNION DISTINCT 
 SELECT DISTINCT
-    rnid, CONCAT('jeffery_prozon_three.',TABLE_NAME, ' AS ', rnid) AS Entries
+    rnid, CONCAT('unielwin.',TABLE_NAME, ' AS ', rnid) AS Entries
 FROM
     RNodes 
 union distinct 
@@ -259,7 +259,7 @@ from
 
 CREATE TABLE RNodes_BN_Nodes AS 
 SELECT DISTINCT 
-	rnid, 1nid AS Fid, FNodes.main 
+    rnid, 1nid AS Fid, FNodes.main 
 FROM
     RNodes_1Nodes,
     FNodes
@@ -271,7 +271,10 @@ SELECT DISTINCT
 FROM
     2Nodes
         NATURAL JOIN
-    RNodes;
+    RNodes
+    
+    union
+    select distinct rnid, rnid as Fid, main from RNodes;
 
 
 CREATE TABLE  Entity_BayesNets (
@@ -324,6 +327,9 @@ CREATE table Path_Aux_Edges as SELECT
         BN_nodes1.Rchain = BN_nodes2.Rchain
             AND FNodes.Fid = BN_nodes1.node
             AND FNodes.main = 0;
+          
+
+
 ALTER TABLE Path_Aux_Edges ADD PRIMARY KEY (`Rchain`, `child`, `parent`);  
 
 
@@ -450,7 +456,7 @@ CREATE table Path_Complement_Edges like Path_BayesNets;
 
 
 
-USE jeffery_prozon_three_BN;
+USE unielwin_BN;
 
 
 CREATE TABLE ADT_PVariables_Select_List AS 
@@ -472,7 +478,7 @@ FROM
 
 
 
-CREATE TABLE ADT_PVariables_From_List AS SELECT pvid, CONCAT('jeffery_prozon_three.',TABLE_NAME, ' AS ', pvid) AS Entries FROM
+CREATE TABLE ADT_PVariables_From_List AS SELECT pvid, CONCAT('unielwin.',TABLE_NAME, ' AS ', pvid) AS Entries FROM
     PVariables;
 
 
@@ -565,76 +571,76 @@ select distinct rnid,concat(2nid, ' varchar(5)  default ',' "N/A" ') as Entries 
 
 CREATE TABLE RChain_pvars AS
 select  distinct 
-	lattice_membership.name as rchain, 
-	pvid 
+    lattice_membership.name as rchain, 
+    pvid 
 from 
-	lattice_membership, RNodes_pvars 
+    lattice_membership, RNodes_pvars 
 where 
-	RNodes_pvars.rnid = lattice_membership.member;
+    RNodes_pvars.rnid = lattice_membership.member;
  
 
 CREATE TABLE ADT_RChain_Star_From_List AS 
 SELECT DISTINCT 
-	lattice_rel.child as rchain, 
-	lattice_rel.removed as rnid, 
-	concat('`',replace(lattice_rel.parent,'`',''),'_CT`')  AS Entries 
+    lattice_rel.child as rchain, 
+    lattice_rel.removed as rnid, 
+    concat('`',replace(lattice_rel.parent,'`',''),'_CT`')  AS Entries 
 FROM
-	lattice_rel
+    lattice_rel
 where 
-	lattice_rel.parent <>'EmptySet'
+    lattice_rel.parent <>'EmptySet'
 union
 SELECT DISTINCT 
-	lattice_rel.child as rchain, 
-	lattice_rel.removed as rnid, 
+    lattice_rel.child as rchain, 
+    lattice_rel.removed as rnid, 
 concat('`',replace(RNodes_pvars.pvid, '`', ''),'_counts`')    AS Entries 
 FROM
     lattice_rel,RNodes_pvars
 where lattice_rel.parent <>'EmptySet'
 and RNodes_pvars.rnid = lattice_rel.removed and
-RNodes_pvars.pvid not in (select pvid from RChain_pvars where RChain_pvars.rchain = 	lattice_rel.parent)
+RNodes_pvars.pvid not in (select pvid from RChain_pvars where RChain_pvars.rchain =     lattice_rel.parent)
 ;
 
 
 CREATE TABLE ADT_RChain_Star_Where_List AS 
 SELECT DISTINCT 
-	lattice_rel.child as rchain, 
-	lattice_rel.removed as rnid, 
-	concat(lattice_membership.member,' = "T"')  AS Entries 
+    lattice_rel.child as rchain, 
+    lattice_rel.removed as rnid, 
+    concat(lattice_membership.member,' = "T"')  AS Entries 
 FROM
-	lattice_rel,    lattice_membership
+    lattice_rel,    lattice_membership
 where 
-	lattice_rel.child = lattice_membership.name
-	and  lattice_membership.member > lattice_rel.removed
-	and lattice_rel.parent <>'EmptySet';
+    lattice_rel.child = lattice_membership.name
+    and  lattice_membership.member > lattice_rel.removed
+    and lattice_rel.parent <>'EmptySet';
 
 
 
 CREATE TABLE ADT_RChain_Star_Select_List AS 
 SELECT DISTINCT 
-	lattice_rel.child as rchain, 
-	lattice_rel.removed as rnid, 
-	RNodes_GroupBy_List.Entries 
+    lattice_rel.child as rchain, 
+    lattice_rel.removed as rnid, 
+    RNodes_GroupBy_List.Entries 
 FROM
-	lattice_rel,lattice_membership,RNodes_GroupBy_List
+    lattice_rel,lattice_membership,RNodes_GroupBy_List
 where 
-	lattice_rel.parent <>'EmptySet'  and lattice_membership.name = lattice_rel.parent
+    lattice_rel.parent <>'EmptySet'  and lattice_membership.name = lattice_rel.parent
 and RNodes_GroupBy_List.rnid = lattice_membership.member
 union
 SELECT DISTINCT 
-	lattice_rel.child as rchain, 
-	lattice_rel.removed as rnid, 
-	1Nodes.1nid    AS Entries 
+    lattice_rel.child as rchain, 
+    lattice_rel.removed as rnid, 
+    1Nodes.1nid    AS Entries 
 FROM
     lattice_rel,RNodes_pvars,1Nodes
 
 where lattice_rel.parent <>'EmptySet' 
 and RNodes_pvars.rnid = lattice_rel.removed and
-RNodes_pvars.pvid = 1Nodes.pvid and  1Nodes.pvid not in (select pvid from RChain_pvars where RChain_pvars.rchain = 	lattice_rel.parent)
+RNodes_pvars.pvid = 1Nodes.pvid and  1Nodes.pvid not in (select pvid from RChain_pvars where RChain_pvars.rchain =  lattice_rel.parent)
 union
 SELECT DISTINCT  
-	lattice_rel.removed as rchain, 
-	lattice_rel.removed as rnid, 
-	1Nodes.1nid    AS Entries 
+    lattice_rel.removed as rchain, 
+    lattice_rel.removed as rnid, 
+    1Nodes.1nid    AS Entries 
 FROM
     lattice_rel,RNodes_pvars,1Nodes
 

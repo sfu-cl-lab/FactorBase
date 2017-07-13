@@ -33,8 +33,6 @@ script:
   - nohup java -cp ".:./lib/*" FunctorWrapper > d.txt &
   - sleep 8m
   - ls -lh d.txt
-  - sleep 8m
-  - ls -lh d.txt
   - echo 'FunctorWrapper cannot finish in 2 hours, to save time, kill it.'
   - tail a.txt
   - tail b.txt

@@ -1,4 +1,4 @@
-USE jeffery_prozon_three_BN;
+USE unielwin_BN;
 SET storage_engine=INNODB;
 
 DROP TABLE IF EXISTS Entity_BayesNets;
@@ -52,6 +52,7 @@ CREATE table Path_Aux_Edges as SELECT
         BN_nodes1.Rchain = BN_nodes2.Rchain
             AND FNodes.Fid = BN_nodes1.node
             AND FNodes.main = 0;
+          
 ALTER TABLE Path_Aux_Edges ADD PRIMARY KEY (`Rchain`, `child`, `parent`);  
 
 
