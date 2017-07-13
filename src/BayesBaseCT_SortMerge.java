@@ -65,6 +65,7 @@ public class BayesBaseCT_SortMerge {
      */
 	public static void buildCT() throws Exception {
 
+
         setVarsFromConfig();
         //connect to db using jdbc
         con_std = connectDB(databaseName_std);
@@ -102,6 +103,23 @@ public class BayesBaseCT_SortMerge {
         // // building CT tables for Rchain
         con_CT = connectDB(databaseName_CT);
 
+
+        System.out.println(" ##### lattice is ready for use* ");
+
+        //build _BN part2: from metadata_2.sql
+        // empty query error,fixed by removing one duplicated semicolon. Oct 30, 2013
+        //ToDo: No support for executing LinkCorrelation=0;
+        if (cont.equals("1")) {
+            bzsr.runScript("scripts/metadata_2_cont.sql");
+        } else if (linkCorrelation.equals("1")) { //LinkCorrelations
+            bzsr.runScript("scripts/metadata_2.sql");
+        } else {
+            bzsr.runScript("scripts/metadata_2.sql");
+            // modified on Feb. 3rd, 2015, zqian, to include rnode as columns
+        //			bzsr.runScript("scripts/metadata_2_nolink.sql");
+        }
+
+        // building CT tables for Rchain
         CTGenerator();
         disconnectDB();
 	}
@@ -717,7 +735,7 @@ public class BayesBaseCT_SortMerge {
 		//System.out.print("Building Time(ms): "+(l2-l)+" ms.\n");
 		System.out.println("\n Build CT_RChain_TABLES for length = "+len+" are DONE \n" );
 	}
-	
+
 	/* building pvars_counts*/
 	public static void BuildCT_Pvars() throws SQLException, IOException {
 		long l = System.currentTimeMillis(); //@zqian : measure structure learning time
@@ -725,6 +743,7 @@ public class BayesBaseCT_SortMerge {
 		st.execute("Drop schema if exists " + databaseName_CT + ";");
 		st.execute("Create schema if not exists " + databaseName_CT + ";");
 		ResultSet rs = st.executeQuery("select * from PVariables;");
+
 		while(rs.next()){
 			//  get pvid for further use
 			String pvid = rs.getString("pvid");
