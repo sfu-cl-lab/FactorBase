@@ -83,7 +83,7 @@ public class BayesBaseCT_SortMerge {
         maxNumberOfMembers = short_rnid_LatticeGenerator.generate(con_BN);
 
         bzsr.runScript("scripts/functorNode.sql");
-        bzsr.runScript("scripts/contingencyTables.sql");
+        bzsr.runScript("scripts/select_from_where_groupby_lists.sql");
         bzsr.runScript("scripts/bayesNetLearning.sql");
 
         // System.out.println("INFO: \n\nLattice is ready for use...\n\n");
@@ -104,20 +104,20 @@ public class BayesBaseCT_SortMerge {
         con_CT = connectDB(databaseName_CT);
 
 
-        System.out.println(" ##### lattice is ready for use* ");
+        // System.out.println(" ##### lattice is ready for use* ");
 
-        //build _BN part2: from metadata_2.sql
-        // empty query error,fixed by removing one duplicated semicolon. Oct 30, 2013
-        //ToDo: No support for executing LinkCorrelation=0;
-        if (cont.equals("1")) {
-            bzsr.runScript("scripts/metadata_2_cont.sql");
-        } else if (linkCorrelation.equals("1")) { //LinkCorrelations
-            bzsr.runScript("scripts/metadata_2.sql");
-        } else {
-            bzsr.runScript("scripts/metadata_2.sql");
-            // modified on Feb. 3rd, 2015, zqian, to include rnode as columns
-        //			bzsr.runScript("scripts/metadata_2_nolink.sql");
-        }
+        // //build _BN part2: from metadata_2.sql
+        // // empty query error,fixed by removing one duplicated semicolon. Oct 30, 2013
+        // //ToDo: No support for executing LinkCorrelation=0;
+        // if (cont.equals("1")) {
+        //     bzsr.runScript("scripts/metadata_2_cont.sql");
+        // } else if (linkCorrelation.equals("1")) { //LinkCorrelations
+        //     bzsr.runScript("scripts/metadata_2.sql");
+        // } else {
+        //     bzsr.runScript("scripts/metadata_2.sql");
+        //     // modified on Feb. 3rd, 2015, zqian, to include rnode as columns
+        // //			bzsr.runScript("scripts/metadata_2_nolink.sql");
+        // }
 
         // building CT tables for Rchain
         CTGenerator();
