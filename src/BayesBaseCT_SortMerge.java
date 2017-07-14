@@ -65,7 +65,6 @@ public class BayesBaseCT_SortMerge {
      */
 	public static void buildCT() throws Exception {
 
-
         setVarsFromConfig();
         //connect to db using jdbc
         con_std = connectDB(databaseName_std);
@@ -155,10 +154,12 @@ public class BayesBaseCT_SortMerge {
 		con_std = connectDB(databaseName_std);
         con_setup = connectDB(databaseName_setup);
 		//build _BN part1 from metadata_1.sql
+
 		BZScriptRunner bzsr = new BZScriptRunner(databaseName_std,dbbase,con_setup);
 		bzsr.runScript("scripts/transfer2.sql");
 		con_BN = connectDB(databaseName_BN);
-        con_CT = connectDB(databaseName_CT);
+    con_CT = connectDB(databaseName_CT);
+
 		//generate lattice tree
 		maxNumberOfMembers = short_rnid_LatticeGenerator.generateTarget(con_BN);// rnid mapping. maxNumberofMembers = maximum size of lattice element. Should be called LatticeHeight
 		System.out.println(" ##### lattice is ready for use* ");
@@ -203,10 +204,12 @@ public class BayesBaseCT_SortMerge {
 		con_std = connectDB(databaseName_std);
         con_setup = connectDB(databaseName_setup);
 		//build _BN part1 from metadata_1.sql
+
 		BZScriptRunner bzsr = new BZScriptRunner(databaseName_std,dbbase,con_setup);
 		bzsr.runScript("scripts/transfer2.sql");
 		con_BN = connectDB(databaseName_BN);
         con_CT = connectDB(databaseName_CT);
+
 		//generate lattice tree
 		maxNumberOfMembers = short_rnid_LatticeGenerator.generateTarget(con_BN);// rnid mapping. maxNumberofMembers = maximum size of lattice element. Should be called LatticeHeight
 		System.out.println(" ##### lattice is ready for use* ");
@@ -253,10 +256,12 @@ public class BayesBaseCT_SortMerge {
         con_setup = connectDB(databaseName_setup);
 
 		//build _BN part1 from metadata_1.sql
+
 		BZScriptRunner bzsr = new BZScriptRunner(databaseName_std,dbbase,con_setup);
 		bzsr.runScript("scripts/transfer2.sql");
 		con_BN = connectDB(databaseName_BN);
-        con_CT = connectDB(databaseName_CT);
+    con_CT = connectDB(databaseName_CT);
+
 		//generate lattice tree
 		maxNumberOfMembers = short_rnid_LatticeGenerator.generateTarget(con_BN);// rnid mapping. maxNumberofMembers = maximum size of lattice element. Should be called LatticeHeight
 		System.out.println(" ##### lattice is ready for use* ");

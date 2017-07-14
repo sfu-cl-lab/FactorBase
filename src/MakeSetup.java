@@ -36,6 +36,7 @@ public class MakeSetup {
 		//If setup = 0, we skip this step and use the existing setup database
 		
 		BZScriptRunner bzsr = new BZScriptRunner(databaseName,con);
+
 		bzsr.runScript("scripts/setup.sql");  
 		bzsr.createSP("scripts/storedprocs.sql");
         bzsr.callSP("find_values");
