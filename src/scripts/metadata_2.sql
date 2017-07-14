@@ -67,6 +67,12 @@ where
     and FNodes.Fid = 1Nodes.1nid
     and PVariables.pvid = 1Nodes.pvid;
 
+
+---------- Starting Metaqueries for Contingency Table Generation -------------------
+
+/**********************************************************************************/
+
+---map 1Nodes to column names for entity attributes---- 
 create table 1Nodes_Select_List as select 1nid,
     concat(1Nodes.pvid,
             '.',
@@ -77,6 +83,8 @@ create table 1Nodes_Select_List as select 1nid,
     PVariables
 where
     1Nodes.pvid = PVariables.pvid;
+    
+---map Pvariables in 1Node to entity table name---
 
 create table 1Nodes_From_List select 1nid,
     concat(PVariables.TABLE_NAME,
@@ -87,6 +95,8 @@ create table 1Nodes_From_List select 1nid,
 where
     1Nodes.pvid = PVariables.pvid;
 
+----map 2Nodes to column names in relationship tables---
+
 create table 2Nodes_Select_List as select 2nid,
     concat(RNodes.rnid,
             '.',
@@ -96,7 +106,8 @@ create table 2Nodes_Select_List as select 2nid,
     2Nodes
         NATURAL JOIN
     RNodes;
-
+    
+----find the Relationship table for the 2nid----
 create table 2Nodes_From_List as select 2nid,
     concat(2Nodes.TABLE_NAME, ' AS ', RNodes.rnid) as Entries from
     2Nodes
@@ -104,7 +115,7 @@ create table 2Nodes_From_List as select 2nid,
     RNodes;
 
 /******************************************************
-Reformat table information, to support easy formulation of data queries for sufficient statistics.
+Reformat table information, to support easy formulation of metaqueries for sufficient statistics.
 The goal is to create join data tables that can be given as input to a Bayes net learner. 
 We create queries that represent the join data tables.
 The join queries themselves are encoded in tables, where one table lists the entries in the select clause, one lists those in the from clause, one lists those in the where clause.
