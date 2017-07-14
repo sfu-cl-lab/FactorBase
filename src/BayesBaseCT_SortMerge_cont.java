@@ -61,10 +61,10 @@ public class BayesBaseCT_SortMerge_cont {
        bzsr.runScript("scripts/transfer.sql");
        
        /*
-       bzsr.runScript("src/scripts_ADT/metadata_1.sql");
+       bzsr.runScript("scripts_ADT/metadata_1.sql");
        
       
-        bzsr.createSP("src/scripts_ADT/storedprocs.sql");
+        bzsr.createSP("scripts_ADT/storedprocs.sql");
         bzsr.callSP("find_values");
 */
 		//generate lattice tree

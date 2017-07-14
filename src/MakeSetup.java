@@ -42,11 +42,13 @@ public class MakeSetup {
 		//If setup = 0, we skip this step and use the existing setup database
 		
 
+
 		try{
 			BZScriptRunner bzsr = new BZScriptRunner(databaseName,con);
-			bzsr.runScript("src/scripts/setup.sql");  
-			bzsr.createSP("src/scripts/storedprocs.sql");
-	        bzsr.callSP("find_values");
+
+		  bzsr.runScript("scripts/setup.sql");  
+		  bzsr.createSP("scripts/storedprocs.sql");
+        bzsr.callSP("find_values");
 	    }
 	    catch(Exception e){
 	    	System.out.println("\n Delete the setup and restart!" + e);
