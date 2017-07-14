@@ -26,8 +26,12 @@ public class MakeSetup {
 	static String dbaddress;
 
 	public static void main(String args[]) throws Exception {
-		
-		runMS();
+		try{
+			runMS();
+		}
+		catch(Exception e){
+			System.out.println("ERROR in setup");
+		}
 
 	}
 	
@@ -38,16 +42,14 @@ public class MakeSetup {
 		//If setup = 0, we skip this step and use the existing setup database
 		
 
-
 		try{
 			BZScriptRunner bzsr = new BZScriptRunner(databaseName,con);
-
-			bzsr.runScript("scripts/setup.sql");  
-			bzsr.createSP("scripts/storedprocs.sql");
-			bzsr.callSP("find_values");
+			bzsr.runScript("src/scripts/setup.sql");  
+			bzsr.createSP("src/scripts/storedprocs.sql");
+	        bzsr.callSP("find_values");
 	    }
 	    catch(Exception e){
-			throw new Exception();
+	    	System.out.println("\n Delete the setup and restart!" + e);
 	    }
 
         
