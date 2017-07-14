@@ -149,6 +149,19 @@ WHERE
  SELECT E.pvid, CONCAT(E.pvid,'.',REFERENCED_COLUMN_NAME) AS Entries FROM
  RNodes_pvars RP, Expansions E where E.pvid = RP.pvid;
  
+ /* add a where clause to eliminate states with 0 count, trying to make the contigency table smaller */
+create table PVariables_GroupBy_List as
+SELECT pvid,
+    1nid AS Entries FROM
+    1Nodes
+        NATURAL JOIN
+    PVariables
+     UNION
+ /*for each pvariable in expansion, find the primary column and add it to the group by list */
+ SELECT E.pvid, CONCAT(E.pvid,'.',REFERENCED_COLUMN_NAME) AS Entries FROM
+ RNodes_pvars RP, Expansions E where E.pvid = RP.pvid;
+
+ 
 
 /**********
 Now we make data join tables for each relationship functor node.
@@ -702,13 +715,6 @@ WHERE
     index_number = 0;
 *. May 13rd*/
 
-/* add a where clause to eliminate states with 0 count, trying to make the contigency table smaller */
-create table PVariables_GroupBy_List as
-SELECT pvid,
-    1nid AS Entries FROM
-    1Nodes
-        NATURAL JOIN
-    PVariables;
 
 create table ADT_PVariables_GroupBy_List as
 SELECT pvid,
