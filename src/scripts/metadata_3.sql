@@ -2,14 +2,17 @@
 USE @database@_BN;
 SET storage_engine=INNODB;
 
-/* Set up a table that contains all functor nodes of any arity, useful for Bayes net learning later. */
-CREATE TABLE FNodes (   /*May 10th */
+/* Set up a table that contains all functor nodes of any arity, useful for Bayes net learning later. 
+/* This is now done in setup.sql OS July 4, 2017
+
+CREATE TABLE FNodes (   
   `Fid` varchar(199) ,
   `FunctorName` varchar(64) ,
   `Type` varchar(5) ,
   `main` int(11) ,
   PRIMARY KEY  (`Fid`)
 );
+
 
 insert into FNodes
 SELECT 
@@ -66,6 +69,7 @@ where
     FNodes.Type = '1Node'
     and FNodes.Fid = 1Nodes.1nid
     and PVariables.pvid = 1Nodes.pvid;
+    */
 
 create table 1Nodes_Select_List as select 1nid,
     concat(1Nodes.pvid,

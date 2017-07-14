@@ -74,28 +74,33 @@ public class BayesBaseCT_SortMerge {
         bzsr.runScript("scripts/transfer.sql");
 
         con_BN = connectDB(databaseName_BN);
-        con_CT = connectDB(databaseName_CT);
+        
 
         //generate lattice tree
         //maxNumberOfMembers = LatticeGenerator.generate(con2);
         // rnid mapping. maxNumberofMembers = maximum size of lattice element. Should be called LatticeHeight
         maxNumberOfMembers = short_rnid_LatticeGenerator.generate(con_BN);
 
+        bzsr.runScript("scripts/functorNode.sql");
+        bzsr.runScript("scripts/contingencyTables.sql");
+        bzsr.runScript("scripts/bayesNetLearning.sql");
 
-        System.out.println(" ##### lattice is ready for use* ");
+        // System.out.println("INFO: \n\nLattice is ready for use...\n\n");
 
-        //build _BN part2: from metadata_2.sql
-        // empty query error,fixed by removing one duplicated semicolon. Oct 30, 2013
-        //ToDo: No support for executing LinkCorrelation=0;
-        if (cont.equals("1")) {
-            bzsr.runScript("scripts/metadata_2_cont.sql");
-        } else if (linkCorrelation.equals("1")) { //LinkCorrelations
-            bzsr.runScript("scripts/metadata_2.sql");
-        } else {
-            bzsr.runScript("scripts/metadata_2.sql");
-            // modified on Feb. 3rd, 2015, zqian, to include rnode as columns
-        //			bzsr.runScript("scripts/metadata_2_nolink.sql");
-        }
+        // //build _BN part2: from metadata_2.sql
+        // // empty query error,fixed by removing one duplicated semicolon. Oct 30, 2013
+        // //ToDo: No support for executing LinkCorrelation=0;
+        // if (cont.equals("1")) {
+        //     bzsr.runScript("src/scripts/metadata_2_cont.sql");
+        // } else if (linkCorrelation.equals("1")) { //LinkCorrelations
+        //     bzsr.runScript("src/scripts/metadata_2.sql");
+        // } else {
+        //     bzsr.runScript("src/scripts/metadata_2.sql");
+        //     // modified on Feb. 3rd, 2015, zqian, to include rnode as columns
+        // //			bzsr.runScript("src/scripts/metadata_2_nolink.sql");
+        // }
+        // // building CT tables for Rchain
+        con_CT = connectDB(databaseName_CT);
 
         // building CT tables for Rchain
         CTGenerator();

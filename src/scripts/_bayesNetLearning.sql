@@ -1,260 +1,6 @@
-
+-- bayesNetLearning.sql
 USE unielwin_BN;
 SET storage_engine=INNODB;
-DROP TABLE IF EXISTS PVariables;
-CREATE TABLE PVariables AS SELECT * FROM
-    unielwin_setup.PVariables;
-
-DROP TABLE IF EXISTS FNodes;
-CREATE TABLE FNodes (
-    `Fid` VARCHAR(199),
-    `FunctorName` VARCHAR(64),
-    `Type` VARCHAR(5),
-    `main` INT(11),
-    PRIMARY KEY (`Fid`)
-);
-INSERT INTO FNodes
-SELECT 
-    1nid AS Fid,
-    COLUMN_NAME AS FunctorName,
-    '1Node' AS Type,
-    main
-FROM
-    1Nodes 
-UNION SELECT 
-    2nid AS Fid,
-    COLUMN_NAME AS FunctorName,
-    '2Node' AS Type,
-    main
-FROM
-    2Nodes 
-UNION SELECT 
-    rnid AS FID,
-    TABLE_NAME AS FunctorName,
-    'Rnode' AS Type,
-    main
-FROM
-    RNodes;
-DROP TABLE IF EXISTS FNodes_pvars;
-CREATE TABLE FNodes_pvars AS SELECT FNodes.Fid, PVariables.pvid FROM
-    FNodes,
-    2Nodes,
-    PVariables
-WHERE
-    FNodes.Type = '2Node'
-        AND FNodes.Fid = 2Nodes.2nid
-        AND PVariables.pvid = 2Nodes.pvid1 
-UNION SELECT 
-    FNodes.Fid, PVariables.pvid
-FROM
-    FNodes,
-    2Nodes,
-    PVariables
-WHERE
-    FNodes.Type = '2Node'
-        AND FNodes.Fid = 2Nodes.2nid
-        AND PVariables.pvid = 2Nodes.pvid2 
-UNION SELECT 
-    FNodes.Fid, PVariables.pvid
-FROM
-    FNodes,
-    1Nodes,
-    PVariables
-WHERE
-    FNodes.Type = '1Node'
-        AND FNodes.Fid = 1Nodes.1nid
-        AND PVariables.pvid = 1Nodes.pvid;
-
-DROP TABLE IF EXISTS 1Nodes_Select_List;
-CREATE TABLE 1Nodes_Select_List AS SELECT 1nid,
-    CONCAT(1Nodes.pvid,
-            '.',
-            1Nodes.COLUMN_NAME,
-            ' AS ',
-            1nid) AS Entries FROM
-    1Nodes,
-    PVariables
-WHERE
-    1Nodes.pvid = PVariables.pvid;
-
-DROP TABLE IF EXISTS 1Nodes_From_List;
-CREATE TABLE 1Nodes_From_List SELECT 1nid,
-    CONCAT(PVariables.TABLE_NAME,
-            ' AS ',
-            PVariables.pvid) AS Entries FROM
-    1Nodes,
-    PVariables
-WHERE
-    1Nodes.pvid = PVariables.pvid;
-DROP TABLE IF EXISTS 2Nodes_Select_List;
-CREATE TABLE 2Nodes_Select_List AS SELECT 2nid,
-    CONCAT(RNodes.rnid,
-            '.',
-            2Nodes.COLUMN_NAME,
-            ' AS ',
-            2nid) AS Entries FROM
-    2Nodes
-        NATURAL JOIN
-    RNodes;
-DROP TABLE IF EXISTS 2Nodes_From_List;
-CREATE TABLE 2Nodes_From_List AS SELECT 2nid,
-    CONCAT(2Nodes.TABLE_NAME, 
-            ' AS ', 
-            RNodes.rnid) AS Entries FROM
-    2Nodes
-        NATURAL JOIN
-    RNodes;
-
-
-
-CREATE TABLE PVariables_From_List AS SELECT pvid, 
-    CONCAT(TABLE_NAME, ' AS ', pvid) AS Entries FROM
-    PVariables
-WHERE
-    index_number = 0;
-
-
-CREATE TABLE PVariables_Select_List AS SELECT pvid, 
-    CONCAT('count(*)', ' as "MULT"') AS Entries FROM
-    PVariables 
-UNION SELECT 
-    pvid,
-    CONCAT(pvid, '.', COLUMN_NAME, ' AS ', 1nid) AS Entries
-FROM
-    1Nodes
-        NATURAL JOIN
-    PVariables
-WHERE
-    PVariables.index_number = 0;
-
-
-CREATE TABLE RNodes_pvars AS SELECT DISTINCT rnid,
-    pvid,
-    PVariables.TABLE_NAME,
-    ForeignKeyColumns.COLUMN_NAME,
-    ForeignKeyColumns.REFERENCED_COLUMN_NAME 
-FROM
-    ForeignKeyColumns,
-    RNodes,
-    PVariables
-WHERE
-    pvid1 = pvid
-        AND ForeignKeyColumns.TABLE_NAME = RNodes.TABLE_NAME
-        AND ForeignKeyColumns.COLUMN_NAME = RNodes.COLUMN_NAME1
-        AND ForeignKeyColumns.REFERENCED_TABLE_NAME = PVariables.TABLE_NAME 
-UNION 
-SELECT DISTINCT
-    rnid,
-    pvid,
-    PVariables.TABLE_NAME,
-    ForeignKeyColumns.COLUMN_NAME,
-    ForeignKeyColumns.REFERENCED_COLUMN_NAME
-FROM
-    ForeignKeyColumns,
-    RNodes,
-    PVariables
-WHERE
-    pvid2 = pvid
-        AND ForeignKeyColumns.TABLE_NAME = RNodes.TABLE_NAME
-        AND ForeignKeyColumns.COLUMN_NAME = RNodes.COLUMN_NAME2
-        AND ForeignKeyColumns.REFERENCED_TABLE_NAME = PVariables.TABLE_NAME;
-
-
-
-
-CREATE TABLE RNodes_From_List AS SELECT DISTINCT rnid, CONCAT('unielwin.',TABLE_NAME, ' AS ', pvid) AS Entries FROM
-    RNodes_pvars 
-UNION DISTINCT 
-SELECT DISTINCT
-    rnid, CONCAT('unielwin.',TABLE_NAME, ' AS ', rnid) AS Entries
-FROM
-    RNodes 
-union distinct 
-select distinct
-    rnid,
-    concat('(select "T" as ',
-            rnid,
-            ') as ',
-            concat('`temp_', replace(rnid, '`', ''), '`')) as Entries
-from
-    RNodes;
-
-
-CREATE TABLE RNodes_Where_List AS SELECT rnid,
-    CONCAT(rnid,
-            '.',
-            COLUMN_NAME,
-            ' = ',
-            pvid,
-            '.',
-            REFERENCED_COLUMN_NAME) AS Entries 
-FROM
-    RNodes_pvars;
-
-    
-    
-
-CREATE TABLE RNodes_1Nodes AS SELECT rnid, TABLE_NAME, 1nid, COLUMN_NAME, pvid1 AS pvid FROM
-    RNodes,
-    1Nodes
-WHERE
-    1Nodes.pvid = RNodes.pvid1 
-UNION SELECT 
-    rnid, TABLE_NAME, 1nid, COLUMN_NAME, pvid2 AS pvid
-FROM
-    RNodes,
-    1Nodes
-WHERE
-    1Nodes.pvid = RNodes.pvid2;
-
-Create TABLE RNodes_2Nodes as 
-select RNodes.rnid, 2Nodes.2nid from 2Nodes, RNodes where 2Nodes.TABLE_NAME = RNodes.TABLE_NAME; 
-
-
-
-CREATE TABLE RNodes_Select_List AS 
-select 
-    rnid, concat('count(*)',' as "MULT"') AS Entries
-from
-    RNodes
-union
-SELECT DISTINCT rnid,
-    CONCAT(pvid, '.', COLUMN_NAME, ' AS ', 1nid) AS Entries 
-FROM
-    RNodes_1Nodes 
-UNION DISTINCT 
-select temp.rnid,temp.Entries from (
-SELECT DISTINCT
-    rnid,
-    CONCAT(rnid, '.', COLUMN_NAME, ' AS ', 2nid) AS Entries
-FROM
-    2Nodes
-        NATURAL JOIN
-    RNodes order by RNodes.rnid,COLUMN_NAME
-) as temp
-UNION distinct 
-select 
-    rnid, rnid AS Entries
-from
-    RNodes 
-;
-
-CREATE TABLE RNodes_GroupBy_List AS SELECT DISTINCT rnid, 1nid AS Entries FROM
-    RNodes_1Nodes 
-UNION DISTINCT 
-SELECT DISTINCT
-    rnid, 2nid AS Entries
-FROM
-    2Nodes
-        NATURAL JOIN
-    RNodes 
-UNION distinct 
-select 
-    rnid, rnid
-from
-    RNodes;
-
-
 
 CREATE TABLE RNodes_BN_Nodes AS 
 SELECT DISTINCT 
@@ -274,7 +20,7 @@ FROM
     
     union
     select distinct rnid, rnid as Fid, main from RNodes;
-
+ALTER TABLE `RNodes_BN_Nodes` ADD INDEX `Index_rnid`  (`rnid` ASC) ;
 
 CREATE TABLE  Entity_BayesNets (
     pvid VARCHAR(65) NOT NULL,
@@ -298,7 +44,7 @@ CREATE TABLE NewLearnedEdges LIKE Path_BayesNets;
 
 
 
-ALTER TABLE `RNodes_BN_Nodes` ADD INDEX `Index_rnid`  (`rnid` ASC) ;
+
 CREATE TABLE Path_BN_nodes AS 
 SELECT DISTINCT lattice_membership.name AS Rchain, Fid AS node
     FROM
@@ -331,9 +77,6 @@ CREATE table Path_Aux_Edges as SELECT
 
 ALTER TABLE Path_Aux_Edges ADD PRIMARY KEY (`Rchain`, `child`, `parent`);  
 
-
-ALTER TABLE `2Nodes` ADD INDEX `index`  (`pvid1` ASC, `pvid2` ASC, `TABLE_NAME` ASC) ; 
-ALTER TABLE `RNodes` ADD INDEX `Index`  (`pvid1` ASC, `pvid2` ASC, `TABLE_NAME` ASC) ;
 
 create table SchemaEdges as 
 select distinct 
@@ -455,7 +198,6 @@ CREATE table Path_Complement_Edges like Path_BayesNets;
 
 
 
-USE unielwin_BN;
 
 
 CREATE TABLE ADT_PVariables_Select_List AS 
@@ -647,5 +389,3 @@ where lattice_rel.parent ='EmptySet'
 and RNodes_pvars.rnid = lattice_rel.removed and
 RNodes_pvars.pvid = 1Nodes.pvid 
 ;
-
-
