@@ -69,7 +69,10 @@ where
 
 
 ---------- Starting Metaqueries for Contingency Table Generation -------------------
-
+/* The goal is to create join data tables that can be given as input to a Bayes net learner. 
+We create queries that represent the join data tables.
+The join queries themselves are encoded in tables, where one table lists the entries in the select clause, one lists those in the from clause, one lists those in the where clause.
+*/
 /**********************************************************************************/
 
 ---map 1Nodes to column names for entity attributes---- 
@@ -116,11 +119,9 @@ create table 2Nodes_From_List as select 2nid,
 
 /******************************************************
 Reformat table information, to support easy formulation of metaqueries for sufficient statistics.
-The goal is to create join data tables that can be given as input to a Bayes net learner. 
-We create queries that represent the join data tables.
-The join queries themselves are encoded in tables, where one table lists the entries in the select clause, one lists those in the from clause, one lists those in the where clause.
-*/
+******************************************************/
 
+---map Pvariables to entity tables---
 
 CREATE TABLE PVariables_From_List AS SELECT pvid, CONCAT(TABLE_NAME, ' AS ', pvid) AS Entries FROM
     PVariables
@@ -135,13 +136,19 @@ SELECT
 FROM
     PVariables
 UNION
+/*for each pvariable, find the select list for the associated attributes = 1Nodes*/
 SELECT pvid,
     CONCAT(pvid, '.', COLUMN_NAME, ' AS ', 1nid) AS Entries FROM
     1Nodes
         NATURAL JOIN
     PVariables
 WHERE
-    PVariables.index_number = 0;
+    PVariables.index_number = 0
+    UNION
+ /*for each pvariable in expansion, find the primary column and add it to the select list */
+ SELECT E.pvid, CONCAT(E.pvid,'.',REFERENCED_COLUMN_NAME) AS Entries FROM
+ RNodes_pvars RP, Expansions E where E.pvid = RP.pvid;
+ 
 
 /**********
 Now we make data join tables for each relationship functor node.
