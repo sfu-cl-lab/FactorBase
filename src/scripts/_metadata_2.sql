@@ -67,6 +67,12 @@ where
     and FNodes.Fid = 1Nodes.1nid
     and PVariables.pvid = 1Nodes.pvid;
 
+
+---------- Starting Metaqueries for Contingency Table Generation -------------------
+
+
+
+---map 1Nodes to column names for entity attributes---- 
 create table 1Nodes_Select_List as select 1nid,
     concat(1Nodes.pvid,
             '.',
@@ -77,6 +83,8 @@ create table 1Nodes_Select_List as select 1nid,
     PVariables
 where
     1Nodes.pvid = PVariables.pvid;
+    
+---map Pvariables in 1Node to entity table name---
 
 create table 1Nodes_From_List select 1nid,
     concat(PVariables.TABLE_NAME,
@@ -87,6 +95,8 @@ create table 1Nodes_From_List select 1nid,
 where
     1Nodes.pvid = PVariables.pvid;
 
+----map 2Nodes to column names in relationship tables---
+
 create table 2Nodes_Select_List as select 2nid,
     concat(RNodes.rnid,
             '.',
@@ -96,7 +106,8 @@ create table 2Nodes_Select_List as select 2nid,
     2Nodes
         NATURAL JOIN
     RNodes;
-
+    
+----find the Relationship table for the 2nid----
 create table 2Nodes_From_List as select 2nid,
     concat(2Nodes.TABLE_NAME, ' AS ', RNodes.rnid) as Entries from
     2Nodes
@@ -105,6 +116,7 @@ create table 2Nodes_From_List as select 2nid,
 
 
 
+---map Pvariables to entity tables---
 
 CREATE TABLE PVariables_From_List AS SELECT pvid, CONCAT(TABLE_NAME, ' AS ', pvid) AS Entries FROM
     PVariables
@@ -118,13 +130,32 @@ SELECT
 FROM
     PVariables
 UNION
+
 SELECT pvid,
     CONCAT(pvid, '.', COLUMN_NAME, ' AS ', 1nid) AS Entries FROM
     1Nodes
         NATURAL JOIN
     PVariables
 WHERE
-    PVariables.index_number = 0;
+    PVariables.index_number = 0
+    UNION
+ 
+ SELECT E.pvid, CONCAT(E.pvid,'.',REFERENCED_COLUMN_NAME) AS Entries FROM
+ RNodes_pvars RP, Expansions E where E.pvid = RP.pvid;
+ 
+ 
+create table PVariables_GroupBy_List as
+SELECT pvid,
+    1nid AS Entries FROM
+    1Nodes
+        NATURAL JOIN
+    PVariables
+     UNION
+ 
+ SELECT E.pvid, CONCAT(E.pvid,'.',REFERENCED_COLUMN_NAME) AS Entries FROM
+ RNodes_pvars RP, Expansions E where E.pvid = RP.pvid;
+
+ 
 
 
 
@@ -486,13 +517,6 @@ CREATE TABLE ADT_PVariables_From_List AS SELECT pvid, CONCAT('unielwin.',TABLE_N
 
 
 
-
-create table PVariables_GroupBy_List as
-SELECT pvid,
-    1nid AS Entries FROM
-    1Nodes
-        NATURAL JOIN
-    PVariables;
 
 create table ADT_PVariables_GroupBy_List as
 SELECT pvid,
