@@ -454,7 +454,7 @@ ALTER TABLE RNodes ADD PRIMARY KEY (orig_rnid);
 
 ALTER TABLE `RNodes` ADD COLUMN `rnid` VARCHAR(10) NULL , ADD UNIQUE INDEX `rnid_UNIQUE` (`rnid` ASC) ; 
 /*May 16th, for shorter name of Rchain*/
-
+ALTER TABLE `RNodes` ADD INDEX `Index`  (`pvid1` ASC, `pvid2` ASC, `TABLE_NAME` ASC) ;/*July 17 vidhij--moved from metadata_2*/
 
 /* Make tables for binary functor nodes that record attributes of links. 
 By default, all ***nonkey columns*** of a relation table are possible attribute functors, with the appropriate population ids.
@@ -479,6 +479,7 @@ CREATE TABLE 2Nodes AS SELECT CONCAT('`',
 
 ALTER TABLE 2Nodes ADD PRIMARY KEY (2nid);
 
+ALTER TABLE `2Nodes` ADD INDEX `index`  (`pvid1` ASC, `pvid2` ASC, `TABLE_NAME` ASC) ; /*July 17 vidhij--moved from metadata_2*/
 
 /*CREATE TABLE Groundings (pvid varchar(40) not null, id varchar(256) not null, primary key (pvid, id));*/
 
