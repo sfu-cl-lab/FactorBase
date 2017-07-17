@@ -27,6 +27,7 @@ create table ForeignKeyColumns as select * from  @database@_setup.ForeignKeyColu
 create table ForeignKeys_pvars as select * from  @database@_setup.ForeignKeys_pvars;
 create table InputColumns as select * from  @database@_setup.InputColumns;
 create table Attribute_Value as select * from  @database@_setup.Attribute_Value;
+create table Expansions as select * from @database@_setup.Expansions;
 /*
 create table Groundings like @database@_setup.Groundings; 
 insert into Groundings select * from @database@_setup.Groundings;
