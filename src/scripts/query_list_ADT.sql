@@ -63,18 +63,7 @@ CREATE TABLE ADT_PVariables_WHERE_List AS SELECT pvid, '"MULT" > 0' AS Entries F
 WHERE
     index_number = 0;
 *. May 13rd*/
-
-
-create table ADT_PVariables_GroupBy_List as
-SELECT pvid,
-    1nid AS Entries FROM
-    1Nodes
-        NATURAL JOIN
-    PVariables;
-/*WHERE
-    PVariables.index_number = 0;
-* May 13rd/
-/** now to build tables for the relationship nodes **/
+/* good question, do we need to drop instances with 0 occurrences? */
 
 
 /*****************************
