@@ -1,3 +1,5 @@
+/******* extracting more metadata to support learning ***/
+
 /*adding covering index to speed up the query, however hash index does not support this technique, so replace it with default index, ie. B_Tree @ zqian May 22nd*/
 USE @database@_BN;
 SET storage_engine=INNODB;
