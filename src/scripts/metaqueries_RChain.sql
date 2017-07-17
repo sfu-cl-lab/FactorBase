@@ -20,7 +20,11 @@ Other entity tables have empty Bayes nets by the main functor constraint.
 We currently don't use this because it causes problems in the lattice. Should restrict to main functors however, for efficiency. OS July 17, 2017.
 */
 
-create table ADT_PVariables_Select_List as
+create table ADT_
+
+
+
+_List as
 SELECT distinct
     pvid, CONCAT('count(*)',' as "MULT"') AS Entries
 FROM
@@ -106,7 +110,10 @@ SELECT DISTINCT rnid,
 CREATE TABLE ADT_RNodes_Star_Select_List AS 
 SELECT DISTINCT rnid,
     1nid AS Entries FROM
-    RNodes_1Nodes;
+    RNodes_1Nodes
+    UNION DISTINCT
+    SELECT distinct rnid, PV.Entries
+FROM RNodes_pvars RP, PVariables_GroupBy_List PV where RP.pvid = PV.pvid;
 
 /** TODO: Also need to multiply the mult columns from the different tables, e.g. 
 select (t1.mult * t2.mult * t3.mult) as "MULT"
@@ -126,7 +133,12 @@ from RNodes
 union
 SELECT DISTINCT rnid,
     concat('`',replace(rnid, '`', ''),'_star`.',1nid) AS Entries FROM
-    RNodes_1Nodes;
+    RNodes_1Nodes
+    UNION DISTINCT
+    /*for each associated to rnode pvariable in expansion , find the primary column and add it to the group by list */
+ /* don't use this for continuous, but do use it for the no_link case */
+    SELECT distinct rnid, concat('`',replace(rnid, '`', ''),'_star`.',PV.Entries) AS Entries
+FROM RNodes_pvars RP, PVariables_GroupBy_List PV where RP.pvid = PV.pvid;
 
 create table ADT_RNodes_False_FROM_List as
 SELECT DISTINCT rnid, concat('`',replace(rnid, '`', ''),'_star`') as Entries from RNodes
@@ -226,6 +238,14 @@ FROM
 where lattice_rel.parent ='EmptySet' 
 and RNodes_pvars.rnid = lattice_rel.removed and
 RNodes_pvars.pvid = 1Nodes.pvid 
-;
+UNION DISTINCT
+SELECT DISTINCT  /*May 21*/
+    lattice_rel.removed as rchain, 
+    lattice_rel.removed as rnid, 
+    PV.Entries   
+    from lattice_rel,RNodes_pvars RP,PVariables_GroupBy_List PV
+    where lattice_rel.parent ='EmptySet' 
+and RNodes_pvars.rnid = lattice_rel.removed and
+RP.pvid = PV.pvid;
 
 
