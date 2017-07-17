@@ -91,8 +91,6 @@ Given a relational database and a target entity set, rank each entity according 
 + modify `config.cfg`  with your own configuration according to format explained [here]
 + `javac -cp ".:./lib/*" Config.java BZScriptRunner.java MakeSetup.java`  
 + `javac -cp ".:./lib/*" RunBB.java`  
-+ `mkdir src`  
-+ `mv scripts src/`  
 + `java -cp ".:./lib/*" MakeSetup`  
 + `java -cp ".:./lib/*" RunBB`  
 + Optionally set up the target database and run FunctorWrapper  
