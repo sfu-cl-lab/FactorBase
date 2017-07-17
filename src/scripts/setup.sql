@@ -514,4 +514,8 @@ CREATE TABLE IF NOT EXISTS lattice_set (
 /* Lists each relationship chain in the lattice and its length. */
 
 
+CREATE TABLE `Expansions` (
+  `pvid` varchar(40) NOT NULL DEFAULT '',
+  PRIMARY KEY (`pvid`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 

@@ -86,7 +86,11 @@ public class BayesBaseCT_SortMerge {
 
         bzsr.runScript("scripts/add_orig_rnid.sql");
         //build _BN part2: from metadata_2.sql
+
         bzsr.runScript("scripts/FNodes.sql");
+
+        bzsr.runScript("scripts/create_Expansions.sql");
+
         // empty query error,fixed by removing one duplicated semicolon. Oct 30, 2013
         //ToDo: No support for executing LinkCorrelation=0;
         if (cont.equals("1")) {
@@ -162,7 +166,7 @@ public class BayesBaseCT_SortMerge {
 		BZScriptRunner bzsr = new BZScriptRunner(databaseName_std,dbbase,con_setup);
 		bzsr.runScript("scripts/transfer2.sql");
 		con_BN = connectDB(databaseName_BN);
-    con_CT = connectDB(databaseName_CT);
+    	con_CT = connectDB(databaseName_CT);
 
 		//generate lattice tree
 		maxNumberOfMembers = short_rnid_LatticeGenerator.generateTarget(con_BN);// rnid mapping. maxNumberofMembers = maximum size of lattice element. Should be called LatticeHeight
