@@ -66,6 +66,8 @@ WHERE
     PVariables.index_number = 0
     UNION
  /*for each pvariable in expansion, find the primary column and add it to the select list */
+ /* don't use this for continuous, but do use it for the no_link case */
+ 
  SELECT E.pvid, CONCAT(E.pvid,'.',REFERENCED_COLUMN_NAME) AS Entries FROM
  RNodes_pvars RP, Expansions E where E.pvid = RP.pvid;
  
@@ -78,6 +80,7 @@ SELECT pvid,
     PVariables
      UNION
  /*for each pvariable in expansion, find the primary column and add it to the group by list */
+ /* don't use this for continuous, but do use it for the no_link case */
  SELECT E.pvid, CONCAT(E.pvid,'.',REFERENCED_COLUMN_NAME) AS Entries FROM
  RNodes_pvars RP, Expansions E where E.pvid = RP.pvid;
 
