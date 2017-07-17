@@ -1,3 +1,5 @@
+/******* extracting more metadata to support learning ***/
+
 /*adding covering index to speed up the query, however hash index does not support this technique, so replace it with default index, ie. B_Tree @ zqian May 22nd*/
 USE @database@_BN;
 SET storage_engine=INNODB;
@@ -10,6 +12,8 @@ CREATE TABLE FNodes (   /*May 10th */
   `main` int(11) ,
   PRIMARY KEY  (`Fid`)
 );
+
+/******* make comprehensive table for all functor nodes *****/
 
 insert into FNodes
 SELECT 
@@ -34,6 +38,7 @@ union select
 from
     RNodes;
 
+/*** for each functor node, record which population variables appear in it ***/
 
 create table FNodes_pvars as 
 SELECT FNodes.Fid, PVariables.pvid FROM
@@ -66,3 +71,39 @@ where
     FNodes.Type = '1Node'
     and FNodes.Fid = 1Nodes.1nid
     and PVariables.pvid = 1Nodes.pvid;
+    
+    
+/*** for each relationship node, record which population variables appear in it. 
+Plus metadata about those variable, e.g. the name of the id column associated with them.    
+***************/
+
+    CREATE TABLE RNodes_pvars AS SELECT DISTINCT rnid,
+    pvid,
+    PVariables.TABLE_NAME,
+    ForeignKeyColumns.COLUMN_NAME,
+    ForeignKeyColumns.REFERENCED_COLUMN_NAME 
+FROM
+    ForeignKeyColumns,
+    RNodes,
+    PVariables
+WHERE
+    pvid1 = pvid
+        AND ForeignKeyColumns.TABLE_NAME = RNodes.TABLE_NAME
+        AND ForeignKeyColumns.COLUMN_NAME = RNodes.COLUMN_NAME1
+        AND ForeignKeyColumns.REFERENCED_TABLE_NAME = PVariables.TABLE_NAME 
+UNION 
+SELECT DISTINCT
+    rnid,
+    pvid,
+    PVariables.TABLE_NAME,
+    ForeignKeyColumns.COLUMN_NAME,
+    ForeignKeyColumns.REFERENCED_COLUMN_NAME
+FROM
+    ForeignKeyColumns,
+    RNodes,
+    PVariables
+WHERE
+    pvid2 = pvid
+        AND ForeignKeyColumns.TABLE_NAME = RNodes.TABLE_NAME
+        AND ForeignKeyColumns.COLUMN_NAME = RNodes.COLUMN_NAME2
+        AND ForeignKeyColumns.REFERENCED_TABLE_NAME = PVariables.TABLE_NAME;
