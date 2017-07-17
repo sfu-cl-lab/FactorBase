@@ -84,18 +84,26 @@ public class BayesBaseCT_SortMerge {
 
         System.out.println(" ##### lattice is ready for use* ");
 
+        bzsr.runScript("scripts/add_orig_rnid.sql");
         //build _BN part2: from metadata_2.sql
+
+        bzsr.runScript("scripts/FNodes.sql");
+
+        bzsr.runScript("scripts/create_Expansions.sql");
+
         // empty query error,fixed by removing one duplicated semicolon. Oct 30, 2013
         //ToDo: No support for executing LinkCorrelation=0;
         if (cont.equals("1")) {
-            bzsr.runScript("scripts/metadata_2_cont.sql");
+            bzsr.runScript("scripts/query_list_cont.sql");
         } else if (linkCorrelation.equals("1")) { //LinkCorrelations
-            bzsr.runScript("scripts/metadata_2.sql");
+            bzsr.runScript("scripts/query_list.sql");
         } else {
-            bzsr.runScript("scripts/metadata_2.sql");
+            bzsr.runScript("scripts/query_list.sql");
             // modified on Feb. 3rd, 2015, zqian, to include rnode as columns
         //			bzsr.runScript("scripts/metadata_2_nolink.sql");
         }
+        bzsr.runScript("scripts/metadata_bayesNet.sql");
+        bzsr.runScript("scripts/query_list_ADT.sql");
 
         // building CT tables for Rchain
         CTGenerator();
@@ -158,7 +166,7 @@ public class BayesBaseCT_SortMerge {
 		BZScriptRunner bzsr = new BZScriptRunner(databaseName_std,dbbase,con_setup);
 		bzsr.runScript("scripts/transfer2.sql");
 		con_BN = connectDB(databaseName_BN);
-    con_CT = connectDB(databaseName_CT);
+    	con_CT = connectDB(databaseName_CT);
 
 		//generate lattice tree
 		maxNumberOfMembers = short_rnid_LatticeGenerator.generateTarget(con_BN);// rnid mapping. maxNumberofMembers = maximum size of lattice element. Should be called LatticeHeight
