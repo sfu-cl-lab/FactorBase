@@ -399,7 +399,7 @@ ALTER TABLE RNodes ADD PRIMARY KEY (orig_rnid);
 
 ALTER TABLE `RNodes` ADD COLUMN `rnid` VARCHAR(10) NULL , ADD UNIQUE INDEX `rnid_UNIQUE` (`rnid` ASC) ; 
 
-
+ALTER TABLE `RNodes` ADD INDEX `Index`  (`pvid1` ASC, `pvid2` ASC, `TABLE_NAME` ASC) ;
 
 
 
@@ -422,6 +422,7 @@ CREATE TABLE 2Nodes AS SELECT CONCAT('`',
 
 ALTER TABLE 2Nodes ADD PRIMARY KEY (2nid);
 
+ALTER TABLE `2Nodes` ADD INDEX `index`  (`pvid1` ASC, `pvid2` ASC, `TABLE_NAME` ASC) ; 
 
 
 
