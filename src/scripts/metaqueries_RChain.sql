@@ -20,11 +20,7 @@ Other entity tables have empty Bayes nets by the main functor constraint.
 We currently don't use this because it causes problems in the lattice. Should restrict to main functors however, for efficiency. OS July 17, 2017.
 */
 
-create table ADT_
-
-
-
-_List as
+create table ADT_PVariables_Select_List as
 SELECT distinct
     pvid, CONCAT('count(*)',' as "MULT"') AS Entries
 FROM
