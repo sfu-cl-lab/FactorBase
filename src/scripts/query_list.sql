@@ -205,8 +205,7 @@ from
     /*for each associated to rnode pvariable in expansion , find the primary column and add it to the group by list */
  /* don't use this for continuous, but do use it for the no_link case */
     SELECT distinct rnid, PV.Entries
-FROM unielwin_BN.RNodes_pvars RP, PVariables_Select_List PV where RP.pvid = PV.pvid;
-;
+FROM RNodes_pvars RP, PVariables_Select_List PV where RP.pvid = PV.pvid;
 
 CREATE TABLE RNodes_GroupBy_List AS SELECT DISTINCT rnid, 1nid AS Entries FROM
     RNodes_1Nodes 
@@ -224,4 +223,4 @@ from
     RNodes
     UNION DISTINCT
     SELECT distinct rnid, PV.Entries
-FROM unielwin_BN.RNodes_pvars RP, PVariables_GroupBy_List PV where RP.pvid = PV.pvid;
+FROM RNodes_pvars RP, PVariables_GroupBy_List PV where RP.pvid = PV.pvid;
