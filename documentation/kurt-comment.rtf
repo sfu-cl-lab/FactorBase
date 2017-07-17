@@ -1,0 +1,94 @@
+{\rtf1\ansi\ansicpg1252\cocoartf1265\cocoasubrtf210
+{\fonttbl\f0\fswiss\fcharset0 Helvetica;\f1\fnil\fcharset0 Calibri;\f2\froman\fcharset0 TimesNewRomanPSMT;
+\f3\fswiss\fcharset0 ArialMT;}
+{\colortbl;\red255\green255\blue255;\red0\green0\blue0;}
+\pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural
+
+\f0\fs36 \cf2 From: Kurt Routley <kurtroutley@hotmail.com>\
+Subject: RE: New scoring method\
+Date: February 14, 2014 at 13:24:28 PST\
+To: Zhensong Qian <zqian@sfu.ca>\
+Cc: XiaoQian Yin <xya46@sfu.ca>, Nicole Li <nicoleli0606@gmail.com>, Oliver Schulte <oschulte@cs.sfu.ca>, "sunyans@sfu.ca" <sunyans@sfu.ca>, Fatemeh Riahi <friahi65@gmail.com>\
+\pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural
+
+\fs24 \cf2 \
+\pard\pardeftab720
+
+\f1\fs32 \cf2 Hi all,\
+\
+Initial checkin for score computation is completed:\
+join-bayes/laj-implement/branches/BayesBaseNew/cfg/scorecomputation.cfg\
+join-bayes/laj-implement/branches/BayesBaseNew/src/ScoreComputation.java\
+join-bayes/laj-implement/branches/BayesBaseNew/src/TestScoreComputation.java\
+\
+TestScoreComputation can be used to test all three steps (CT, CP, LL)\
+\
+Outstanding issues:\
+-No parameters and AIC/BIC scores for RNodes in FID_<rchain>_Scores table\
+\
+Let me know if you have any questions.\
+-Kurt Routley\
+\
+\pard\pardeftab720\sa160
+\cf2 \
+\pard\pardeftab720
+\cf2 Date: Fri, 14 Feb 2014 11:20:26 -0800\
+From: zqian@sfu.ca\
+To: kurtroutley@hotmail.com\
+CC: xya46@sfu.ca; nicoleli0606@gmail.com; oschulte@cs.sfu.ca; sunyans@sfu.ca; friahi65@gmail.com\
+Subject: Re: New scoring method\
+\
+\pard\pardeftab720
+
+\f2\fs28 \cf2 Hi Kurt,
+\fs38 \
+\pard\pardeftab720
+
+\f3\fs28 \cf2 \
+Currently for the scoring part, we only need the\'a0<FID_local_CP> \'a0 CP tables for the largest rchain.
+\f2\fs38 \
+
+\f3\fs28 If we want to compute the scores for BayesNet of each lattice point,\'a0
+\f2\fs38 \
+
+\f3\fs28 all the other CP tables could also be computed with Yan's code very easily.
+\f2\fs38 \
+\
+
+\f3\fs28 \
+Best,\
+Zhensong\
+\pard\pardeftab720
+
+\f2\fs38 \cf2 \
+\pard\pardeftab720\sa186
+\cf2 \
+\pard\pardeftab720
+
+\f0\b\fs32 \cf2 \uc0\u21457 \u20214 \u20154 : 
+\b0 "Kurt Routley" <kurtroutley@hotmail.com>\
+
+\b \uc0\u25910 \u20214 \u20154 : 
+\b0 sunyans@sfu.ca, "Fatemeh Riahi" <friahi65@gmail.com>\
+
+\b \uc0\u25220 \u36865 : 
+\b0 "Zhensong Qian" <zqian@sfu.ca>, "XiaoQian Yin" <xya46@sfu.ca>, "Nicole Li" <nicoleli0606@gmail.com>, "Oliver Schulte" <oschulte@cs.sfu.ca>\
+
+\b \uc0\u21457 \u36865 \u26102 \u38388 : 
+\b0 \uc0\u26143 \u26399 \u20116 , 2014\u24180  2 \u26376  14\u26085  \u19978 \u21320  11:10:29\
+
+\b \uc0\u20027 \u39064 : 
+\b0 RE: New scoring method\
+\
+Hi all,\
+\
+Have we finalized a naming convention for the tables? I'm currently seeing <FID_rchain_CT> for the CT tables and <FID_local_CP> \'a0for the CP tables. Should these be <FID_rchain_CP>? The CP tables appear to only be created with respect to the largest rchain.\
+\
+-Kurt Routley\
+\
+> Date: Thu, 13 Feb 2014 14:35:57 -0800\
+\
+\pard\pardeftab720
+
+\f2\fs38 \cf2 \
+}
