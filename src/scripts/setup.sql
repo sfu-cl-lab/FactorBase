@@ -519,3 +519,14 @@ CREATE TABLE `Expansions` (
   PRIMARY KEY (`pvid`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
+/*CREATE TABLE FunctorSet (   
+  `Fid` varchar(199) ,
+   PRIMARY KEY  (`Fid`)
+);
+INSERT  INTO FunctorSet 
+SELECT 1nid AS Fid FROM 1Nodes
+UNION
+SELECT 2nid AS Fid FROM 2Nodes
+UNION
+SELECT rnid AS Fid FROM RNodes;
+*/
