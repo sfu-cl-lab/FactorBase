@@ -31,10 +31,11 @@ script:
   - java -cp ".:./lib/*" MakeSetup > a.txt
   - java -cp ".:./lib/*" RunBB > b.txt
   - java -cp ".:./lib/*" KeepTablesOnly > c.txt
+  - sleep 8m
   - tail a.txt
   - tail b.txt
   - tail c.txt
-  - cd ../
+  - tail dag_.txt
 
 after_script:
   - mysql -e "show databases;" -uroot -p123456
