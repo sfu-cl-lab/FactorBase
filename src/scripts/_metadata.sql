@@ -1,4 +1,6 @@
 
+
+
 USE unielwin_BN;
 SET storage_engine=INNODB;
 
@@ -10,6 +12,8 @@ CREATE TABLE FNodes (
   `main` int(11) ,
   PRIMARY KEY  (`Fid`)
 );
+
+
 
 insert into FNodes
 SELECT 
@@ -33,6 +37,7 @@ union select
     main
 from
     RNodes;
+
 
 
 create table FNodes_pvars as 
@@ -66,3 +71,37 @@ where
     FNodes.Type = '1Node'
     and FNodes.Fid = 1Nodes.1nid
     and PVariables.pvid = 1Nodes.pvid;
+    
+    
+
+
+    CREATE TABLE RNodes_pvars AS SELECT DISTINCT rnid,
+    pvid,
+    PVariables.TABLE_NAME,
+    ForeignKeyColumns.COLUMN_NAME,
+    ForeignKeyColumns.REFERENCED_COLUMN_NAME 
+FROM
+    ForeignKeyColumns,
+    RNodes,
+    PVariables
+WHERE
+    pvid1 = pvid
+        AND ForeignKeyColumns.TABLE_NAME = RNodes.TABLE_NAME
+        AND ForeignKeyColumns.COLUMN_NAME = RNodes.COLUMN_NAME1
+        AND ForeignKeyColumns.REFERENCED_TABLE_NAME = PVariables.TABLE_NAME 
+UNION 
+SELECT DISTINCT
+    rnid,
+    pvid,
+    PVariables.TABLE_NAME,
+    ForeignKeyColumns.COLUMN_NAME,
+    ForeignKeyColumns.REFERENCED_COLUMN_NAME
+FROM
+    ForeignKeyColumns,
+    RNodes,
+    PVariables
+WHERE
+    pvid2 = pvid
+        AND ForeignKeyColumns.TABLE_NAME = RNodes.TABLE_NAME
+        AND ForeignKeyColumns.COLUMN_NAME = RNodes.COLUMN_NAME2
+        AND ForeignKeyColumns.REFERENCED_TABLE_NAME = PVariables.TABLE_NAME;

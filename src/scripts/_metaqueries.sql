@@ -1,6 +1,3 @@
-USE @database@_BN;
-SET storage_engine=INNODB;
-
 create table 1Nodes_Select_List as select 1nid,
     concat(1Nodes.pvid,
             '.',
@@ -50,8 +47,9 @@ CREATE TABLE PVariables_From_List AS SELECT pvid, CONCAT(TABLE_NAME, ' AS ', pvi
     PVariables
 WHERE
     index_number = 0;
-/* use entity tables for main variables only (index = 0). 
-Other entity tables have empty Bayes nets by the main functor constraint. */
+
+
+
 
 CREATE TABLE PVariables_Select_List AS 
 SELECT 
@@ -59,7 +57,7 @@ SELECT
 FROM
     PVariables
 UNION
-/*for each pvariable, find the select list for the associated attributes = 1Nodes*/
+
 SELECT pvid,
     CONCAT(pvid, '.', COLUMN_NAME, ' AS ', 1nid) AS Entries FROM
     1Nodes
@@ -68,11 +66,12 @@ SELECT pvid,
 WHERE
     PVariables.index_number = 0
     UNION
- /*for each pvariable in expansion, find the primary column and add it to the select list */
+ 
+ 
  SELECT E.pvid, CONCAT(E.pvid,'.',REFERENCED_COLUMN_NAME) AS Entries FROM
  RNodes_pvars RP, Expansions E where E.pvid = RP.pvid;
  
- /* add a where clause to eliminate states with 0 count, trying to make the contigency table smaller */
+ 
 create table PVariables_GroupBy_List as
 SELECT pvid,
     1nid AS Entries FROM
@@ -80,25 +79,25 @@ SELECT pvid,
         NATURAL JOIN
     PVariables
      UNION
- /*for each pvariable in expansion, find the primary column and add it to the group by list */
+ 
+ 
  SELECT E.pvid, CONCAT(E.pvid,'.',REFERENCED_COLUMN_NAME) AS Entries FROM
  RNodes_pvars RP, Expansions E where E.pvid = RP.pvid;
 
  
 
-/**********
-Now we make data join tables for each relationship functor node.
-***********/
-
-/* for each relationship functor, for each population variable, find the column name that is a foreign key pointer to the Entity table for the population, and find the name the referenced column in the Entity table. */
 
 
 
-CREATE TABLE RNodes_From_List AS SELECT DISTINCT rnid, CONCAT('@database@.',TABLE_NAME, ' AS ', pvid) AS Entries FROM
+
+
+
+
+CREATE TABLE RNodes_From_List AS SELECT DISTINCT rnid, CONCAT('unielwin.',TABLE_NAME, ' AS ', pvid) AS Entries FROM
     RNodes_pvars 
 UNION DISTINCT 
 SELECT DISTINCT
-    rnid, CONCAT('@database@.',TABLE_NAME, ' AS ', rnid) AS Entries
+    rnid, CONCAT('unielwin.',TABLE_NAME, ' AS ', rnid) AS Entries
 FROM
     RNodes 
 union distinct 
@@ -111,9 +110,9 @@ select distinct
 from
     RNodes
 ;
-/** we add a table that has a single column and single row contain "T" for "true", whose header is the rnid. This simulates the case where all the relationships are true.
-We need to replace the apostrophes in rnid to make the rnid a valid name for the temporary table 
-**/
+
+
+
 
 CREATE TABLE RNodes_Where_List AS SELECT rnid,
     CONCAT(rnid,
@@ -125,17 +124,11 @@ CREATE TABLE RNodes_Where_List AS SELECT rnid,
             REFERENCED_COLUMN_NAME) AS Entries 
 FROM
     RNodes_pvars;
-/*    union
-    select rnid, CONCAT(rnid,
-            '.',
-            COLUMN_NAME,
-            ' = ',
-           Groundings.id) AS Entries 
-FROM
-    RNodes_pvars natural join Groundings;
-    */
+
     
-    /* the table RNodes_pvars is such useful | added by zqian*/
+    
+
+
 
 CREATE TABLE RNodes_1Nodes AS SELECT rnid, TABLE_NAME, 1nid, COLUMN_NAME, pvid1 AS pvid FROM
     RNodes,
@@ -150,12 +143,14 @@ FROM
 WHERE
     1Nodes.pvid = RNodes.pvid2;
 
+
+
 Create TABLE RNodes_2Nodes as 
 select RNodes.rnid, 2Nodes.2nid from 2Nodes, RNodes where 2Nodes.TABLE_NAME = RNodes.TABLE_NAME; 
 
 
-/** Each unary functor, and each binary functor, becomes an attribute to be retrieved in the select list.
-Make a table to record this. **/
+
+
 CREATE TABLE RNodes_Select_List AS 
 select 
     rnid, concat('count(*)',' as "MULT"') AS Entries
@@ -181,7 +176,11 @@ select
     rnid, rnid AS Entries
 from
     RNodes 
-;
+    UNION DISTINCT
+    
+ 
+    SELECT distinct rnid, PV.Entries
+FROM RNodes_pvars RP, PVariables_Select_List PV where RP.pvid = PV.pvid;
 
 CREATE TABLE RNodes_GroupBy_List AS SELECT DISTINCT rnid, 1nid AS Entries FROM
     RNodes_1Nodes 
@@ -196,4 +195,7 @@ UNION distinct
 select 
     rnid, rnid
 from
-    RNodes;
+    RNodes
+    UNION DISTINCT
+    SELECT distinct rnid, PV.Entries
+FROM RNodes_pvars RP, PVariables_GroupBy_List PV where RP.pvid = PV.pvid;
