@@ -1,3 +1,6 @@
+USE @database@_BN;
+SET storage_engine=INNODB;
+
 create table 1Nodes_Select_List as select 1nid,
     concat(1Nodes.pvid,
             '.',
@@ -39,40 +42,8 @@ create table 2Nodes_From_List as select 2nid,
         NATURAL JOIN
     RNodes;
 
-/******************************************************
-Reformat table information, to support easy formulation of metaqueries for sufficient statistics.
-******************************************************/
 
-CREATE TABLE RNodes_pvars AS SELECT DISTINCT rnid,
-    pvid,
-    PVariables.TABLE_NAME,
-    ForeignKeyColumns.COLUMN_NAME,
-    ForeignKeyColumns.REFERENCED_COLUMN_NAME 
-FROM
-    ForeignKeyColumns,
-    RNodes,
-    PVariables
-WHERE
-    pvid1 = pvid
-        AND ForeignKeyColumns.TABLE_NAME = RNodes.TABLE_NAME
-        AND ForeignKeyColumns.COLUMN_NAME = RNodes.COLUMN_NAME1
-        AND ForeignKeyColumns.REFERENCED_TABLE_NAME = PVariables.TABLE_NAME 
-UNION 
-SELECT DISTINCT
-    rnid,
-    pvid,
-    PVariables.TABLE_NAME,
-    ForeignKeyColumns.COLUMN_NAME,
-    ForeignKeyColumns.REFERENCED_COLUMN_NAME
-FROM
-    ForeignKeyColumns,
-    RNodes,
-    PVariables
-WHERE
-    pvid2 = pvid
-        AND ForeignKeyColumns.TABLE_NAME = RNodes.TABLE_NAME
-        AND ForeignKeyColumns.COLUMN_NAME = RNodes.COLUMN_NAME2
-        AND ForeignKeyColumns.REFERENCED_TABLE_NAME = PVariables.TABLE_NAME;
+
 ---map Pvariables to entity tables---
 
 CREATE TABLE PVariables_From_List AS SELECT pvid, CONCAT(TABLE_NAME, ' AS ', pvid) AS Entries FROM
