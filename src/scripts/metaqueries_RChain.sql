@@ -219,7 +219,6 @@ SELECT DISTINCT
     1Nodes.1nid    AS Entries 
 FROM
     lattice_rel,RNodes_pvars,1Nodes
-
 where lattice_rel.parent <>'EmptySet' 
 and RNodes_pvars.rnid = lattice_rel.removed and
 RNodes_pvars.pvid = 1Nodes.pvid and  1Nodes.pvid not in (select pvid from RChain_pvars where RChain_pvars.rchain =  lattice_rel.parent)
@@ -230,7 +229,6 @@ SELECT DISTINCT  /*May 21*/
     1Nodes.1nid    AS Entries 
 FROM
     lattice_rel,RNodes_pvars,1Nodes
-
 where lattice_rel.parent ='EmptySet' 
 and RNodes_pvars.rnid = lattice_rel.removed and
 RNodes_pvars.pvid = 1Nodes.pvid 
@@ -241,7 +239,7 @@ SELECT DISTINCT  /*May 21*/
     PV.Entries   
     from lattice_rel,RNodes_pvars RP,PVariables_GroupBy_List PV
     where lattice_rel.parent ='EmptySet' 
-and RNodes_pvars.rnid = lattice_rel.removed and
+and RP.rnid = lattice_rel.removed and
 RP.pvid = PV.pvid;
 
 
