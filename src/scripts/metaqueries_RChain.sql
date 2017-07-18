@@ -1,6 +1,6 @@
 USE @database@_BN;
 
-CREATE TABLE ADT_PVariables_GroupBy_List AS 
+CREATE TABLE ADT_PVariables_Select_List AS 
 SELECT 
     pvid,CONCAT(pvid, '.', COLUMN_NAME, ' AS ', 1nid) AS Entries 
 FROM
@@ -12,7 +12,11 @@ FROM
  /* don't use this for continuous, but do use it for the no_link case.  */
  /* It's awkward doing this via Rnodes, maybe can use different metadata to link pvids to database column */
  SELECT E.pvid, CONCAT(E.pvid,'.',REFERENCED_COLUMN_NAME) AS Entries FROM
- RNodes_pvars RP, Expansions E where E.pvid = RP.pvid;
+ RNodes_pvars RP, Expansions E where E.pvid = RP.pvid
+ union distinct
+ SELECT distinct
+    pvid, CONCAT('count(*)',' as "MULT"') AS Entries
+    from PVariables;
 /*WHERE
     PVariables.index_number = 0;
     /* use entity tables for main variables only (index = 0). 
@@ -20,16 +24,21 @@ Other entity tables have empty Bayes nets by the main functor constraint.
 We currently don't use this because it causes problems in the lattice. Should restrict to main functors however, for efficiency. OS July 17, 2017.
 */
 
-create table ADT_PVariables_Select_List as
-SELECT distinct
-    pvid, CONCAT('count(*)',' as "MULT"') AS Entries
+create table ADT_PVariables_GroupBy_List as
+SELECT 
+    pvid,1nid AS Entries 
 FROM
+    1Nodes
+        NATURAL JOIN
     PVariables
-UNION distinct
-SELECT pvid, Entries
-FROM 
-    ADT_PVariables_GroupBy_List;
+    UNION
+ /*for each pvariable in expansion, find the primary column and add it to the select list */
+ /* don't use this for continuous, but do use it for the no_link case.  */
+ /* It's awkward doing this via Rnodes, maybe can use different metadata to link pvids to database column */
+ SELECT E.pvid, CONCAT(E.pvid,'.',REFERENCED_COLUMN_NAME) AS Entries FROM
+ RNodes_pvars RP, Expansions E where E.pvid = RP.pvid;
 /* select list = groupby list + count aggregate */
+/* columns have been renamed as 1nid ids in select list */
 
 
 /* For The Testing databses, need the primary key, June 19, 2014 */
