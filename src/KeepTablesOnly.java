@@ -11,41 +11,45 @@ import java.lang.*;
 
 public class KeepTablesOnly{
 	static String databaseName;
-	static Connection tmp_con;
 	static String dbUsername;
 	static String dbPassword;
 	static String dbaddress;
-	//static String dbname;
-	//static String databaseName1="PPLRuleDetectionJan23Movies";
-	//static String databaseName2="PPLRuleDetectionJan23Movies";
+	static String dbname;
+	private static Connection tmp_con;
+	private static String dbname_CT;
+	private static String dbname_BN;
+	private static String dbname_setup;
+	private static String[] keep_CT_tablenames = new String[]{"a,b_CT","a,b_a_CT","b_CT","a_CT"};
 
 
-	 public static void setVarsFromConfig(){
-	 	Config conf = new Config();
-	 	databaseName = conf.getProperty("dbname");
-	 	dbUsername = conf.getProperty("dbusername");
-	 	dbPassword = conf.getProperty("dbpassword");
-	 	dbaddress = conf.getProperty("dbaddress");
-	 }
+
+	public static void setVarsFromConfig(){
+		Config conf = new Config();
+		databaseName = conf.getProperty("dbname");
+		dbUsername = conf.getProperty("dbusername");
+		dbPassword = conf.getProperty("dbpassword");
+		dbaddress = conf.getProperty("dbaddress");
+		dbname_CT = databaseName + "_CT";
+		dbname_BN = databaseName + "_BN";
+		dbname_setup = databaseName + "_setup";
+	}
 
 
-	 public static void main(String[] args) throws SQLException, IOException{
+	public static void main(String[] args) throws SQLException, IOException{
 		
-	 	setVarsFromConfig();
-	 	String dbname = "UW_std";
-	 	String[] tablenames = new String[]{"a_b","a_CT","b_CT"};
+		setVarsFromConfig();
+		System.out.println("Set variables");
 
-	 	String CONN_STR = "jdbc:" + dbaddress + "/" + dbname;
-	 	try {
-	 		java.lang.Class.forName("com.mysql.jdbc.Driver");
-	 	} catch (Exception ex) {
-	 		System.err.println("Unable to load MySQL JDBC driver");
-	 	}
-	 	tmp_con = (Connection) DriverManager.getConnection(CONN_STR, dbUsername, dbPassword);
+		try{
+			tmp_con = connectDB(dbname_CT);
+		} catch (Exception e) {
+			System.err.println("Could not connect to the database " + dbname_CT );
+		}
+		
+		//keep tables in CT database
+		Drop_tmpTables(tmp_con,dbname_CT,keep_CT_tablenames);
 
-	 	Drop_tmpTables(tmp_con,dbname,tablenames);
-
-	 }
+	}
 	
 	
 
@@ -56,11 +60,11 @@ public class KeepTablesOnly{
 		
         
         Statement st = con.createStatement();
-		String NewSQL = "select concat('drop table ',table_name,';') as result FROM information_schema.tables where table_schema = '" 
+		String NewSQL = "select concat('drop table `',table_name,'`;') as result FROM information_schema.tables where table_schema = '" 
 		+dbname;
 
 		for(int i=0;i<tablenames.length;i++){
-			NewSQL = NewSQL + "' and table_name != '" +tablenames[i];
+			NewSQL = NewSQL + "' and table_name != '" + tablenames[i];
 		}
 		NewSQL += "';";
 
@@ -71,32 +75,47 @@ public class KeepTablesOnly{
 			while(res.next()){
  
                 sets.add(res.getString("result"));
- 				//System.out.println(sets+" OK!");
+ 				//System.out.println(sets+" +++ ");
             }
 
 			for(String set : sets){
 				st.execute(set);
 				System.out.println(set+" OK!");
 			}
-			//String DropSQL = res.getString("result");
+		
 			
 			//st.close();
 		}
 		catch(SQLException e){
 			System.out.println("ERROR"+ e);
-		}
-			
-		/*while(res.next()){
-			sets.add(res.getString("dropsql"));
-			Statement tmp = con.createStatement();
-			String DropSQL = res.getString();
-			Boolean rs = tmp.execute(DropSQL);
-			System.out.println(" OK!");
-		}*/
-		//result.close();
-		//st.close();
+		}		
 
 	}
+
+
+
+	public static Connection connectDB(String database) throws Exception{
+
+		String CONN_STR = "jdbc:" + dbaddress + "/" + database;
+
+		try {
+			java.lang.Class.forName("com.mysql.jdbc.Driver");
+		} catch (Exception ex) {
+			System.err.println("Unable to load MySQL JDBC driver");
+		}
+
+		try{
+			return ((Connection) DriverManager.getConnection(CONN_STR, dbUsername, dbPassword));
+		} catch (Exception e){
+			System.err.println("Could not connect to the database " + database );
+		}
+		
+		return null;
+
+	}
+
+
+
  
 
 		//select the delete tablenames,return a strinng
