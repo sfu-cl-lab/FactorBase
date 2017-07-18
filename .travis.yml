@@ -26,10 +26,11 @@ script:
   - javac -cp ".:./lib/*" Config.java BZScriptRunner.java MakeSetup.java
   - javac -cp ".:./lib/*" RunBB.java
   - javac -cp ".:./lib/*" KeepTablesOnly.java
+  - javac -cp ".:./lib/*" MakeTargetSetup.java
+  - javac -cp ".:./lib/*" FunctorWrapper.java
   - java -cp ".:./lib/*" MakeSetup > a.txt
   - java -cp ".:./lib/*" RunBB > b.txt
   - java -cp ".:./lib/*" KeepTablesOnly > c.txt
-
   - tail a.txt
   - tail b.txt
   - tail c.txt

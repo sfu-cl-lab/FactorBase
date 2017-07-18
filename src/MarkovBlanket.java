@@ -54,7 +54,7 @@ public class MarkovBlanket {
 		}
 		
 		BZScriptRunner bzsr = new BZScriptRunner( databaseName, con1, rchain );  // unielwin_BN
-		bzsr.runScript("src/scripts/markov_blanket.sql");  
+		bzsr.runScript("scripts/markov_blanket.sql");  
         
 		disconnectDB();
 
@@ -78,7 +78,7 @@ public class MarkovBlanket {
 		connectDB();
 		
 		BZScriptRunner bzsr = new BZScriptRunner( databaseName, con1, rchain );
-		bzsr.runScript("src/scripts/markov_blanket.sql");  
+		bzsr.runScript("scripts/markov_blanket.sql");  
         
 		disconnectDB();
 

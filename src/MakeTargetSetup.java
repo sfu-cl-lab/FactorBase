@@ -83,7 +83,7 @@ public class MakeTargetSetup {
 		connectDB();
 		
 		BZScriptRunner bzsr = new BZScriptRunner(databaseName,con1);
-		bzsr.runScript("src/scripts/transfer_to_target.sql");  
+		bzsr.runScript("scripts/transfer_to_target.sql");  
 
 		Statement st = con1.createStatement();
 		

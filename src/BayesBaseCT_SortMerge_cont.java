@@ -58,13 +58,13 @@ public class BayesBaseCT_SortMerge_cont {
 		connectDB();
 		//build _BN part1 from metadata_1.sql
        BZScriptRunner bzsr = new BZScriptRunner(databaseName,con2);
-       bzsr.runScript("src/scripts/transfer.sql");
+       bzsr.runScript("scripts/transfer.sql");
        
        /*
-       bzsr.runScript("src/scripts_ADT/metadata_1.sql");
+       bzsr.runScript("scripts_ADT/metadata_1.sql");
        
       
-        bzsr.createSP("src/scripts_ADT/storedprocs.sql");
+        bzsr.createSP("scripts_ADT/storedprocs.sql");
         bzsr.callSP("find_values");
 */
 		//generate lattice tree
@@ -75,18 +75,18 @@ public class BayesBaseCT_SortMerge_cont {
 		//build _BN part2: from metadata_2.sql 
 		if(indi.equals("0")) {
 			if(cont.equals("1")) {
-				bzsr.runScript("src/scripts/metadata_2_cont.sql");
+				bzsr.runScript("scripts/metadata_2_cont.sql");
 		}
 		else {
-			bzsr.runScript("src/scripts/metadata_2_nolink.sql");
+			bzsr.runScript("scripts/metadata_2_nolink.sql");
 		}
 		}
 		else {
 			if(cont.equals("1")) {
-				bzsr.runScript("src/scripts/metadata_2_cont_2.sql");
+				bzsr.runScript("scripts/metadata_2_cont_2.sql");
 			}
 			else {
-				bzsr.runScript("src/scripts/metadata_2_nolink.sql");
+				bzsr.runScript("scripts/metadata_2_nolink.sql");
 			}
 		}
 
