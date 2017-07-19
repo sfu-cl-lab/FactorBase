@@ -94,8 +94,10 @@ from
 union
 SELECT DISTINCT rnid,
     1nid AS Entries FROM
-    RNodes_1Nodes 
-;
+    RNodes_1Nodes
+    UNION DISTINCT
+    SELECT distinct rnid, PV.Entries
+FROM RNodes_pvars RP, PVariables_GroupBy_List PV where RP.pvid = PV.pvid;
 
 CREATE TABLE ADT_RNodes_1Nodes_FROM_List AS 
 select 
@@ -107,7 +109,9 @@ CREATE TABLE ADT_RNodes_1Nodes_GroupBY_List AS
 SELECT DISTINCT rnid,
     1nid AS Entries FROM
     RNodes_1Nodes 
-;
+    UNION DISTINCT
+    SELECT distinct rnid, PV.Entries
+FROM RNodes_pvars RP, PVariables_GroupBy_List PV where RP.pvid = PV.pvid;
 
 
 
