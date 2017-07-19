@@ -31,12 +31,15 @@ script:
   - java -cp ".:./lib/*" MakeSetup > a.txt
   - java -cp ".:./lib/*" RunBB > b.txt
   - java -cp ".:./lib/*" KeepTablesOnly > c.txt
+  - java -cp ".:./lib/*" MakeTargetSetup > d.txt
+  - nohup java -cp ".:./lib/*" FunctorWrapper > e.txt &
   - sleep 8m
-  - ls -lh d.txt
+  - ls -lh e.txt
   - echo 'FunctorWrapper cannot finish in 2 hours, to save time, kill it.'
   - tail a.txt
   - tail b.txt
   - tail c.txt
+  - tail d.txt
   - tail dag_.txt
 
 after_script:
