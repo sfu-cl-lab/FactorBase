@@ -1,20 +1,22 @@
-USE unielwin_BN;
-SET storage_engine=INNODB;
 
-DROP TABLE IF EXISTS Entity_BayesNets;
-DROP TABLE IF EXISTS Path_BayesNets;
-DROP TABLE IF EXISTS Knowledge_Forbidden_Edges;
-DROP TABLE IF EXISTS Knowledge_Required_Edges;
-DROP TABLE IF EXISTS Path_Aux_Edges;
-DROP TABLE IF EXISTS SchemaEdges;
-DROP TABLE IF EXISTS Path_Required_Edges;
-DROP TABLE IF EXISTS Path_Forbidden_Edges;
-DROP TABLE IF EXISTS LearnedEdges;
-DROP TABLE IF EXISTS ContextEdges;
-DROP TABLE IF EXISTS InheritedEdges;
-DROP TABLE IF EXISTS Entity_Complement_Edges;
-DROP TABLE IF EXISTS Path_Complement_Edges;
-
+CREATE TABLE RNodes_BN_Nodes AS 
+SELECT DISTINCT 
+    rnid, 1nid AS Fid, FNodes.main 
+FROM
+    RNodes_1Nodes,
+    FNodes
+WHERE
+    FNodes.Fid = 1nid 
+UNION DISTINCT 
+SELECT DISTINCT
+    rnid, 2nid AS Fid, main
+FROM
+    2Nodes
+        NATURAL JOIN
+    RNodes
+    
+    union
+    select distinct rnid, rnid as Fid, main from RNodes;
 
 
 CREATE TABLE  Entity_BayesNets (
@@ -26,15 +28,30 @@ CREATE TABLE  Entity_BayesNets (
 
 
 
+
+
 CREATE TABLE Path_BayesNets (
-    Rchain VARCHAR(256) NOT NULL,
-    child VARCHAR(197) NOT NULL,
+    Rchain VARCHAR(255) NOT NULL,     child VARCHAR(197) NOT NULL,
     parent VARCHAR(197) NOT NULL,
     PRIMARY KEY (Rchain , child , parent)
 );
 
+CREATE TABLE NewLearnedEdges LIKE Path_BayesNets;
 
 
+
+
+ALTER TABLE `RNodes_BN_Nodes` ADD INDEX `Index_rnid`  (`rnid` ASC) ;
+CREATE TABLE Path_BN_nodes AS 
+SELECT DISTINCT lattice_membership.name AS Rchain, Fid AS node
+    FROM
+        lattice_membership,
+        RNodes_BN_Nodes
+    WHERE
+        RNodes_BN_Nodes.rnid = lattice_membership.member
+    ORDER BY lattice_membership.name;
+
+ALTER TABLE Path_BN_nodes ADD INDEX `HashIndex`  (`Rchain`,`node`); 
 
 
 CREATE TABLE IF NOT EXISTS Knowledge_Forbidden_Edges like Path_BayesNets;
@@ -53,6 +70,8 @@ CREATE table Path_Aux_Edges as SELECT
             AND FNodes.Fid = BN_nodes1.node
             AND FNodes.main = 0;
           
+
+
 ALTER TABLE Path_Aux_Edges ADD PRIMARY KEY (`Rchain`, `child`, `parent`);  
 
 
@@ -73,9 +92,12 @@ where
         AND lattice_membership.name in (select 
             lattice_set.name
         from
-            lattice_set);
-                   
-                 
+            lattice_set
+        where
+            length = (select 
+                    max(length)
+                from
+                    lattice_set));
 ALTER TABLE SchemaEdges ADD INDEX `HashIn`  (`Rchain`,`child`,`parent`);
 
 CREATE TABLE  Path_Required_Edges like Path_BayesNets;
@@ -150,4 +172,24 @@ ALTER TABLE `Entity_Complement_Edges` ADD PRIMARY KEY (`pvid`, `child`, `parent`
 CREATE table Path_Complement_Edges like Path_BayesNets; 
 
  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 

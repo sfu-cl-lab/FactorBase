@@ -1,6 +1,3 @@
-
-
-
 DROP SCHEMA IF EXISTS unielwin_BN; 
 create schema unielwin_BN;
 
@@ -27,7 +24,6 @@ create table ForeignKeyColumns as select * from  unielwin_setup.ForeignKeyColumn
 create table ForeignKeys_pvars as select * from  unielwin_setup.ForeignKeys_pvars;
 create table InputColumns as select * from  unielwin_setup.InputColumns;
 create table Attribute_Value as select * from  unielwin_setup.Attribute_Value;
-create table Expansions as select * from unielwin_setup.Expansions;
 
 
 

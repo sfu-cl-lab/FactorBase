@@ -32,6 +32,8 @@ script:
   - java -cp ".:./lib/*" RunBB > b.txt
   - java -cp ".:./lib/*" KeepTablesOnly > c.txt
   - sleep 8m
+  - ls -lh d.txt
+  - echo 'FunctorWrapper cannot finish in 2 hours, to save time, kill it.'
   - tail a.txt
   - tail b.txt
   - tail c.txt

@@ -12,7 +12,38 @@ SET storage_engine=INNODB;
 
 
 /*copy tables from setup database */
+/*CREATE TABLE FunctorSet AS SELECT * FROM
+    unielwin_setup.FunctorSet;
 
+CREATE TABLE 1Nodes AS SELECT N.1nid, N.COLUMN_NAME, N.pvid, N.main FROM
+    unielwin_setup.1Nodes N,
+    unielwin_setup.FunctorSet F
+WHERE
+    N.1nid = F.fid;
+
+CREATE TABLE 2Nodes AS SELECT N.2nid,
+    N.COLUMN_NAME,
+    N.pvid1,
+    N.pvid2,
+    N.TABLE_NAME,
+    N.main FROM
+    unielwin_setup.2Nodes N,
+    unielwin_setup.FunctorSet F
+WHERE
+    N.2nid = F.Fid;
+CREATE TABLE RNodes AS SELECT N.orig_rnid,
+    N.TABLE_NAME,
+    N.pvid1,
+    N.pvid2,
+    N.COLUMN_NAME1,
+    N.COLUMN_NAME2,
+    N.rnid,
+    N.main FROM
+    unielwin_setup.RNodes N,
+    unielwin_setup.FunctorSet F
+WHERE
+    N.orig_rnid = F.Fid;
+    */
 
 create table 1Nodes as select * from @database@_setup.1Nodes;
 create table 2Nodes as select * from @database@_setup.2Nodes;
@@ -27,6 +58,7 @@ create table ForeignKeyColumns as select * from  @database@_setup.ForeignKeyColu
 create table ForeignKeys_pvars as select * from  @database@_setup.ForeignKeys_pvars;
 create table InputColumns as select * from  @database@_setup.InputColumns;
 create table Attribute_Value as select * from  @database@_setup.Attribute_Value;
+create table Expansions as select * from @database@_setup.Expansions;
 /*
 create table Groundings like @database@_setup.Groundings; 
 insert into Groundings select * from @database@_setup.Groundings;

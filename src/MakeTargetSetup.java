@@ -48,7 +48,7 @@ public class MakeTargetSetup {
 		 Isn't this redundant? Mayb we can just assume that setup database exists? June 16 2017
 		 */
 		RunBB.setVarsFromConfig();
-		if ( RunBB.opt1.equals( "1" ) )
+		if ( RunBB.isAutomaticSetup.equals( "1" ) )
 		{
 			MakeSetup.runMS();
 			System.out.println( "Setup database is ready." );

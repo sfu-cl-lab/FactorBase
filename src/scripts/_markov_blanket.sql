@@ -1,6 +1,6 @@
 
 
-use MovieLens_Small_Training1_BN;
+use unielwin_BN;
 
 
 
@@ -10,7 +10,7 @@ drop table if exists TargetParents;
 create table TargetParents as 
 select child as TargetNode, parent as TargetParent
 from Path_BayesNets
-where rchain='`a`' 
+where rchain='`a,b`' 
 and ( child in ( select 1nid from 1Nodes ) or
 	  child in ( select 2nid from 2Nodes ) or
 	  child in ( select rnid from RNodes ) )
@@ -23,7 +23,7 @@ drop table if exists TargetChildren;
 create table TargetChildren as
 select parent as TargetNode, child as TargetChild
 from Path_BayesNets
-where rchain='`a`'
+where rchain='`a,b`'
 and ( parent in ( select 1nid from 1Nodes ) or
 	  parent in ( select 2nid from 2Nodes ) or
 	  parent in ( select rnid from RNodes ) )
