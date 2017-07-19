@@ -1,6 +1,6 @@
 USE unielwin_BN;
 
-CREATE TABLE ADT_PVariables_GroupBy_List AS 
+CREATE TABLE ADT_PVariables_Select_List AS 
 SELECT 
     pvid,CONCAT(pvid, '.', COLUMN_NAME, ' AS ', 1nid) AS Entries 
 FROM
@@ -11,19 +11,29 @@ FROM
  
  
  
- SELECT E.pvid, CONCAT(E.pvid,'.',REFERENCED_COLUMN_NAME) AS Entries FROM
+ SELECT E.pvid, CONCAT(E.pvid,'.',REFERENCED_COLUMN_NAME, ' AS `', REFERENCED_COLUMN_NAME, '`') AS Entries FROM
+ RNodes_pvars RP, Expansions E where E.pvid = RP.pvid
+ union distinct
+ SELECT distinct
+    pvid, CONCAT('count(*)',' as "MULT"') AS Entries
+    from PVariables;
+
+
+create table ADT_PVariables_GroupBy_List as
+SELECT 
+    pvid,1nid AS Entries 
+FROM
+    1Nodes
+        NATURAL JOIN
+    PVariables
+    UNION
+ 
+ 
+ 
+SELECT E.pvid, CONCAT('`', REFERENCED_COLUMN_NAME, '`') AS Entries FROM
  RNodes_pvars RP, Expansions E where E.pvid = RP.pvid;
 
 
-create table ADT_PVariables_Select_List as
-SELECT distinct
-    pvid, CONCAT('count(*)',' as "MULT"') AS Entries
-FROM
-    PVariables
-UNION distinct
-SELECT pvid, Entries
-FROM 
-    ADT_PVariables_GroupBy_List;
 
 
 
