@@ -11,7 +11,7 @@ FROM
  
  
  
- SELECT E.pvid, CONCAT(E.pvid,'.',REFERENCED_COLUMN_NAME, ' AS `', REFERENCED_COLUMN_NAME, '`') AS Entries FROM
+ SELECT E.pvid, CONCAT(E.pvid,'.',REFERENCED_COLUMN_NAME, ' AS `ID(', E.pvid, ')`') AS Entries FROM
  RNodes_pvars RP, Expansions E where E.pvid = RP.pvid
  union distinct
  SELECT distinct
@@ -30,7 +30,7 @@ FROM
  
  
  
-SELECT E.pvid, CONCAT('`', REFERENCED_COLUMN_NAME, '`') AS Entries FROM
+SELECT E.pvid, CONCAT('`ID(', E.pvid, ')`') AS Entries FROM
  RNodes_pvars RP, Expansions E where E.pvid = RP.pvid;
 
 
@@ -62,8 +62,10 @@ from
 union
 SELECT DISTINCT rnid,
     1nid AS Entries FROM
-    RNodes_1Nodes 
-;
+    RNodes_1Nodes
+    UNION DISTINCT
+    SELECT distinct rnid, PV.Entries
+FROM RNodes_pvars RP, PVariables_GroupBy_List PV where RP.pvid = PV.pvid;
 
 CREATE TABLE ADT_RNodes_1Nodes_FROM_List AS 
 select 
@@ -75,7 +77,9 @@ CREATE TABLE ADT_RNodes_1Nodes_GroupBY_List AS
 SELECT DISTINCT rnid,
     1nid AS Entries FROM
     RNodes_1Nodes 
-;
+    UNION DISTINCT
+    SELECT distinct rnid, PV.Entries
+FROM RNodes_pvars RP, PVariables_GroupBy_List PV where RP.pvid = PV.pvid;
 
 
 

@@ -11,7 +11,7 @@ FROM
  /*for each pvariable in expansion, find the primary column and add it to the select list */
  /* don't use this for continuous, but do use it for the no_link case.  */
  /* It's awkward doing this via Rnodes, maybe can use different metadata to link pvids to database column */
- SELECT E.pvid, CONCAT(E.pvid,'.',REFERENCED_COLUMN_NAME, ' AS `', REFERENCED_COLUMN_NAME, '`') AS Entries FROM
+ SELECT E.pvid, CONCAT(E.pvid,'.',REFERENCED_COLUMN_NAME, ' AS `ID(', E.pvid, ')`') AS Entries FROM
  RNodes_pvars RP, Expansions E where E.pvid = RP.pvid
  union distinct
  SELECT distinct
@@ -35,7 +35,7 @@ FROM
  /*for each pvariable in expansion, find the primary column and add it to the select list */
  /* don't use this for continuous, but do use it for the no_link case.  */
  /* It's awkward doing this via Rnodes, maybe can use different metadata to link pvids to database column */
-SELECT E.pvid, CONCAT('`', REFERENCED_COLUMN_NAME, '`') AS Entries FROM
+SELECT E.pvid, CONCAT('`ID(', E.pvid, ')`') AS Entries FROM
  RNodes_pvars RP, Expansions E where E.pvid = RP.pvid;
 
 /* select list = groupby list + count aggregate */

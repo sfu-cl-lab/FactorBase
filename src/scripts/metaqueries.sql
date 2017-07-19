@@ -1,3 +1,6 @@
+USE @database@_BN;
+
+
 create table 1Nodes_Select_List as select 1nid,
     concat(1Nodes.pvid,
             '.',
@@ -69,7 +72,7 @@ WHERE
     UNION
  /*for each pvariable in expansion, find the primary column and add it to the select list */
  /* don't use this for continuous, but do use it for the no_link case */
- SELECT E.pvid, CONCAT(E.pvid,'.',REFERENCED_COLUMN_NAME, ' AS `', REFERENCED_COLUMN_NAME,'`') AS Entries FROM
+ SELECT E.pvid, CONCAT(E.pvid,'.',REFERENCED_COLUMN_NAME, ' AS `ID(', E.pvid, ')`') AS Entries FROM
  RNodes_pvars RP, Expansions E where E.pvid = RP.pvid;
  
  /* add a where clause to eliminate states with 0 count, trying to make the contigency table smaller */
@@ -82,7 +85,7 @@ SELECT pvid,
      UNION
  /*for each pvariable in expansion, find the primary column and add it to the group by list */
  /* don't use this for continuous, but do use it for the no_link case */
- SELECT E.pvid, CONCAT('`',REFERENCED_COLUMN_NAME,'`') AS Entries FROM
+ SELECT E.pvid, CONCAT('`ID(', E.pvid, ')`') AS Entries FROM
  RNodes_pvars RP, Expansions E where E.pvid = RP.pvid;
 
  
