@@ -260,7 +260,7 @@ WHERE
 /* can this just be the PVariables GroupBY list? Like below for the empty parent case? */
 UNION SELECT DISTINCT
     lattice_rel.child AS rchain,
-    E.pvid,
+    lattice_rel.removed AS rnid,
     CONCAT('`ID(', E.pvid, ')`') AS Entries
 FROM
     lattice_rel,
