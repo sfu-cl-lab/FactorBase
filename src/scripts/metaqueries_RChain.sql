@@ -301,4 +301,4 @@ FROM
 WHERE
     lattice_rel.parent = 'EmptySet'
         AND RP.rnid = lattice_rel.removed
-        AND RP.pvid = PV.pvid
+        AND RP.pvid = PV.pvid;
