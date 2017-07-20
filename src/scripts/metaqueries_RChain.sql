@@ -225,52 +225,80 @@ where
 
 CREATE TABLE ADT_RChain_Star_Select_List AS 
 SELECT DISTINCT 
-    lattice_rel.child as rchain, 
-    lattice_rel.removed as rnid, 
+    lattice_rel.child AS rchain,
+    lattice_rel.removed AS rnid,
     RNodes_GroupBy_List.Entries 
 FROM
-    lattice_rel,lattice_membership,RNodes_GroupBy_List
-where 
-    lattice_rel.parent <>'EmptySet'  and lattice_membership.name = lattice_rel.parent
-and RNodes_GroupBy_List.rnid = lattice_membership.member
+    lattice_rel,
+    lattice_membership,
+    RNodes_GroupBy_List
+WHERE
+    lattice_rel.parent <> 'EmptySet'
+        AND lattice_membership.name = lattice_rel.parent
+        AND RNodes_GroupBy_List.rnid = lattice_membership.member 
 /* find all elements in the groupBy List for the big parent rchain */
 /* should this be just the ones for groupby except for the removed rnid? */
-union
-SELECT DISTINCT 
-    lattice_rel.child as rchain, 
-    lattice_rel.removed as rnid, 
-    1Nodes.1nid    AS Entries 
+UNION SELECT DISTINCT
+    lattice_rel.child AS rchain,
+    lattice_rel.removed AS rnid,
+    1Nodes.1nid AS Entries
 FROM
-    lattice_rel,RNodes_pvars,1Nodes
-where lattice_rel.parent <>'EmptySet' 
-and RNodes_pvars.rnid = lattice_rel.removed and
-RNodes_pvars.pvid = 1Nodes.pvid and  1Nodes.pvid not in (select pvid from RChain_pvars where RChain_pvars.rchain =  lattice_rel.parent)
-union
+    lattice_rel,
+    RNodes_pvars,
+    1Nodes
+WHERE
+    lattice_rel.parent <> 'EmptySet'
+        AND RNodes_pvars.rnid = lattice_rel.removed
+        AND RNodes_pvars.pvid = 1Nodes.pvid
+        AND 1Nodes.pvid NOT IN (SELECT 
+            pvid
+        FROM
+            RChain_pvars
+        WHERE
+            RChain_pvars.rchain = lattice_rel.parent) 
 /* July 19, 2017 O.S. If we are going to add the 1nodes for the pvariable we also need to add the ID column if any*/
 /* can this just be the PVariables GroupBY list? Like below for the empty parent case? */
-SELECT distinct E.pvid, CONCAT('`ID(', E.pvid, ')`') AS Entries FROM
- lattice_rel, RNodes_pvars RP, Expansions E 
- where lattice_rel.parent <>'EmptySet' 
-and RNodes_pvars.rnid = lattice_rel.removed and
-RNodes_pvars.pvid = E.pvid and  E.pvid not in (select pvid from RChain_pvars where RChain_pvars.rchain =  lattice_rel.parent)
-SELECT DISTINCT  /* The case where the parent is empty.*/
-    lattice_rel.removed as rchain, 
-    lattice_rel.removed as rnid, 
-    1Nodes.1nid    AS Entries 
+UNION SELECT DISTINCT
+    lattice_rel.child AS rchain,
+    E.pvid,
+    CONCAT('`ID(', E.pvid, ')`') AS Entries
 FROM
-    lattice_rel,RNodes_pvars,1Nodes
-where lattice_rel.parent ='EmptySet' 
-and RNodes_pvars.rnid = lattice_rel.removed and
-RNodes_pvars.pvid = 1Nodes.pvid 
-UNION DISTINCT
-SELECT DISTINCT  /*May 21*/
-    lattice_rel.removed as rchain, 
-    lattice_rel.removed as rnid, 
-    PV.Entries   
-    from lattice_rel,RNodes_pvars RP,PVariables_GroupBy_List PV
+    lattice_rel,
+    RNodes_pvars,
+    Expansions E
+WHERE
+    lattice_rel.parent <> 'EmptySet'
+        AND RNodes_pvars.rnid = lattice_rel.removed
+        AND RNodes_pvars.pvid = E.pvid
+        AND E.pvid NOT IN (SELECT 
+            pvid
+        FROM
+            RChain_pvars
+        WHERE
+            RChain_pvars.rchain = lattice_rel.parent) 
+/* The case where the parent is empty.*/
+UNION SELECT DISTINCT
+    lattice_rel.removed AS rchain,
+    lattice_rel.removed AS rnid,
+    1Nodes.1nid AS Entries
+FROM
+    lattice_rel,
+    RNodes_pvars,
+    1Nodes
+WHERE
+    lattice_rel.parent = 'EmptySet'
+        AND RNodes_pvars.rnid = lattice_rel.removed
+        AND RNodes_pvars.pvid = 1Nodes.pvid 
+UNION DISTINCT SELECT DISTINCT
+    lattice_rel.removed AS rchain,
+    lattice_rel.removed AS rnid,
+    PV.Entries
+FROM
+    lattice_rel,
+    RNodes_pvars RP,
+    PVariables_GroupBy_List PV
     /* check that PVariablesGroupByList includes the ID column */
-    where lattice_rel.parent ='EmptySet' 
-and RP.rnid = lattice_rel.removed and
-RP.pvid = PV.pvid;
-
-
+WHERE
+    lattice_rel.parent = 'EmptySet'
+        AND RP.rnid = lattice_rel.removed
+        AND RP.pvid = PV.pvid
