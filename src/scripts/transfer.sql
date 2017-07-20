@@ -12,7 +12,7 @@ SET storage_engine=INNODB;
 
 
 /*copy tables from setup database */
-/*CREATE TABLE FunctorSet AS SELECT * FROM
+CREATE TABLE FunctorSet AS SELECT * FROM
     unielwin_setup.FunctorSet;
 
 CREATE TABLE 1Nodes AS SELECT N.1nid, N.COLUMN_NAME, N.pvid, N.main FROM
@@ -43,7 +43,7 @@ CREATE TABLE RNodes AS SELECT N.orig_rnid,
     unielwin_setup.FunctorSet F
 WHERE
     N.orig_rnid = F.Fid;
-    */
+
 
 create table 1Nodes as select * from @database@_setup.1Nodes;
 create table 2Nodes as select * from @database@_setup.2Nodes;
