@@ -1,3 +1,6 @@
+USE unielwin_BN;
+
+
 create table 1Nodes_Select_List as select 1nid,
     concat(1Nodes.pvid,
             '.',
