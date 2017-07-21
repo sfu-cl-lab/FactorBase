@@ -1,3 +1,6 @@
+USE unielwin_BN;
+
+
 create table 1Nodes_Select_List as select 1nid,
     concat(1Nodes.pvid,
             '.',
@@ -68,7 +71,7 @@ WHERE
     UNION
  
  
- SELECT E.pvid, CONCAT(E.pvid,'.',REFERENCED_COLUMN_NAME) AS Entries FROM
+ SELECT E.pvid, CONCAT(E.pvid,'.',REFERENCED_COLUMN_NAME, ' AS `ID(', E.pvid, ')`') AS Entries FROM
  RNodes_pvars RP, Expansions E where E.pvid = RP.pvid;
  
  
@@ -81,7 +84,7 @@ SELECT pvid,
      UNION
  
  
- SELECT E.pvid, CONCAT(E.pvid,'.',REFERENCED_COLUMN_NAME) AS Entries FROM
+ SELECT E.pvid, CONCAT('`ID(', E.pvid, ')`') AS Entries FROM
  RNodes_pvars RP, Expansions E where E.pvid = RP.pvid;
 
  
