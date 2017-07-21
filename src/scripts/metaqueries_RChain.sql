@@ -1,5 +1,6 @@
 USE @database@_BN;
 
+
 CREATE TABLE ADT_PVariables_Select_List AS 
 SELECT 
     pvid,CONCAT(pvid, '.', COLUMN_NAME, ' AS ', 1nid) AS Entries 
@@ -64,7 +65,7 @@ CREATE TABLE ADT_PVariables_From_List AS SELECT pvid, CONCAT('@database@.',TABLE
     index_number = 0;*/
 /* use entity tables for main variables only (index = 0). 
 Other entity tables have empty Bayes nets by the main functor constraint. */
-
+/* Should put this back in, see comment above */
 
 /*
 CREATE TABLE ADT_PVariables_WHERE_List AS SELECT pvid, '"MULT" > 0' AS Entries FROM
@@ -72,6 +73,7 @@ CREATE TABLE ADT_PVariables_WHERE_List AS SELECT pvid, '"MULT" > 0' AS Entries F
 WHERE
     index_number = 0;
 *. May 13rd*/
+/* good question, do we need to drop instances with 0 occurrences? */
 
 
 /*create table ADT_PVariables_GroupBy_List as
