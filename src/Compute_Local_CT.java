@@ -42,6 +42,33 @@ public class Compute_Local_CT {
 		}
 		con4 = (Connection) DriverManager.getConnection(CONN_STR2, dbUsername, dbPassword);
 	}
+
+	/*
+	public static void KeepTablesOnly(Connection con,String dbname,String tablename) throws SQLException {
+        //drop temporary CT tables
+		//1.0 keep one table 
+        String CONN_tmp = "jdbc:" + dbaddress + "/" + dbname;
+        try {
+            java.lang.Class.forName("com.mysql.jdbc.Driver");
+        } catch (Exception ex) {
+            System.err.println("Unable to load MySQL JDBC driver");
+        }
+
+        con = (Connection) DriverManager.getConnection(CONN_tmp, dbUsername, dbPassword);
+        Statement st = con.createStatement();
+
+		//select the delete tablenames,return a strinng
+        st.execute("select concat('drop table ',table_name,';') as result FROM information_schema.tables where table_schema = " +dbname+ " and table_name != " +tablename+ ";" );  
+
+		Statement tmp = con.createStatement();
+		for(int i = 0; i< result.length();i++){
+			system.out.print(result[i]+"\n");
+			//tmp.execute(result[i]);
+		}
+
+
+	}*/
+ 
 }
  
 

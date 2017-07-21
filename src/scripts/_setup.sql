@@ -4,8 +4,6 @@ DROP SCHEMA IF EXISTS unielwin_setup;
 create schema unielwin_setup;
 
 
-
-
 USE unielwin_setup;
 SET storage_engine=INNODB;
 
@@ -403,6 +401,7 @@ ALTER TABLE `RNodes` ADD INDEX `Index`  (`pvid1` ASC, `pvid2` ASC, `TABLE_NAME` 
 
 
 
+
 CREATE TABLE 2Nodes AS SELECT CONCAT('`',
             COLUMN_NAME,
             '(',
@@ -424,23 +423,10 @@ ALTER TABLE 2Nodes ADD PRIMARY KEY (2nid);
 
 ALTER TABLE `2Nodes` ADD INDEX `index`  (`pvid1` ASC, `pvid2` ASC, `TABLE_NAME` ASC) ; 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 CREATE TABLE `Expansions` (
   `pvid` varchar(40) NOT NULL DEFAULT '',
   PRIMARY KEY (`pvid`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+
 
 

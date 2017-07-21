@@ -25,6 +25,7 @@ script:
   - cd ../src
   - javac -cp ".:./lib/*" Config.java BZScriptRunner.java MakeSetup.java
   - javac -cp ".:./lib/*" RunBB.java
+  - javac -cp ".:./lib/*" KeepTablesOnly.java
   - javac -cp ".:./lib/*" MakeTargetSetup.java
   - javac -cp ".:./lib/*" FunctorWrapper.java
   - java -cp ".:./lib/*" MakeSetup > a.txt
@@ -39,6 +40,7 @@ script:
   - tail c.txt
   - tail d.txt
   - tail dag_.txt
+
 after_script:
   - mysql -e "show databases;" -uroot -p123456
   - mysql -e "use unielwin_BN; show tables;" -uroot -p123456
