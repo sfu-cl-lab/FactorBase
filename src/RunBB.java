@@ -45,6 +45,9 @@ public class RunBB {
 		System.out.println("*********************************************************");
 		BayesBaseH.runBBH();
 		System.out.println("\nFinish running BayesBaseH.");
+		System.out.println("*********************************************************");
+		System.out.println("Cleaning CT database");
+		KeepTablesOnly.Drop_tmpTables();
 
 	}
 
