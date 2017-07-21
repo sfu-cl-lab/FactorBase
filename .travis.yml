@@ -30,11 +30,10 @@ script:
   - javac -cp ".:./lib/*" FunctorWrapper.java
   - java -cp ".:./lib/*" MakeSetup > a.txt
   - java -cp ".:./lib/*" RunBB > b.txt
-  - java -cp ".:./lib/*" KeepTablesOnly > c.txt
-  - java -cp ".:./lib/*" MakeTargetSetup > d.txt
-  - nohup java -cp ".:./lib/*" FunctorWrapper > e.txt &
+  - java -cp ".:./lib/*" MakeTargetSetup > c.txt
+  - nohup java -cp ".:./lib/*" FunctorWrapper > d.txt &
   - sleep 8m
-  - ls -lh e.txt
+  - ls -lh d.txt
   - echo 'FunctorWrapper cannot finish in 2 hours, to save time, kill it.'
   - tail a.txt
   - tail b.txt
