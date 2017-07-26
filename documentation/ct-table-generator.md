@@ -32,3 +32,8 @@ where
    + `Expansions` is empty by default. Insert first-order variables for expansions. The table `Pvariables` lists the available first-order variables (called population variables).
    + `Groundings` is empty by default. Insert first-order variables and constants for groundings. The table `Pvariables` lists the available first-order variables (called population variables).
  3. Run `BayesBaseCT_SortMerge.buildCT()`. This writes the contingency table to a database called `datadb_ct`.
+ 
+ ## Implementation Notes
+ 
+ + The system first generates counts for conditions that involve only natural joins among existing tables. These counts correspond to contingency table entries where all relationships indicator variables are set to true. They are computed by automatically generating the appropriate `select count(*)` sql queries and executing the queries. If the option "LinkCorrelations" is set to 0, the system stops.
+ + If the option "LinkCorrelations" is set to 1, the system uses the [Moebius Join Algorithm](http://www.cs.sfu.ca/~oschulte/files/pubs/Qian2014.pdf) to compute the correct counts for negated relationships (representing nonexisting links).
