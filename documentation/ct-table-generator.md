@@ -4,26 +4,31 @@ Implements an efficient SQL-based method for computing instantiation counts for 
 
 ### Input
 
-+ A relational database `data_db`
-+ A set of first-order terms _t<sub>1</sub>,..,t<sub>n</sub>_. Default: all terms associated with the relational schema.
-+ Optional Expansion: A first-order variable _A_. Default: unspecified.
-+ Optional Grounding: A first-order variable _A_ and a constant _a_. Default: unspecified.
++ A relational database `datadb`
++ A set of first-order terms _t<sub>1</sub>,..,t<sub>n</sub>_. Default: complete, contains all terms associated with the relational schema.
++ Optional Expansion: A set of first-order variables _A<sub>1</sub>,...,A<sub>e</sub>,_. Default: empty.
++ Optional Grounding: A set of groundings first-order variable _A<sub>1</sub>=a<sub>1</sub>,...,_A<sub>g</sub>=a<sub>g</sub>. Default: empty.
 
 ### Output
 
 A contingency table of the form
 
-count | t<sub>1</sub> | ... | t<sub>n</sub>|(A_id)|
------| ---------------|-----|--------------|-------|
-integer| value<sub>1</sub>|....| value<sub>n</sub>|_a_|
+count | t<sub>1</sub> | ... | t<sub>n</sub>|(A<sub>1</sub>)|...|(A<sub>e</sub>)|
+-----| ---------------|-----|--------------|---------------|----|---------------|
+integer| value<sub>1</sub>|....| value<sub>n</sub>|_a<sub>1</sub>_|....|_a<sub>e</sub>_|
 
 where
 
 + the values in each row define a conjunctive query _t<sub>1</sub>=value<sub>1</sub>,..,t<sub>n</sub>=value<sub>n</sub>_
 + `count` is the number of times that the query is instantiated in the database `data_db` (i.e. the size of the query's result set).
-+ If a grounding _A = a_ is specified, the system adds the condition _A = a_ to the query; the contingency table represents the query instantiation counts for the individual _a_ only.
-+ If a first-order variable is specified, then _a_ is a constant denoting an individual from the domain of the first-order variable _A_. The contingency table represents the query instantiation counts for each individual in the domain of _A_.
++ If groundings of the form _A = a_ are specified, the system adds each condition _A = a_ to the query; the contingency table represents the query instantiation counts for the individuals named _a_ only.
++ If first-order variables are specified, then _a_ is a constant denoting an individual from the domain of each give first-order variable _A_. The contingency table represents the query instantiation counts for each tuple (_a<sub>1</sub>_,_a<sub>e</sub>_) of individuals in the respective domains of (A<sub>1</sub>,...,A<sub>e</sub>).
 
 ## Usage
 
-Modify `jar/config.cfg` with your own configuration according to the sample format explained in the image. ![Sample Configuration](/images/configuration.png). See our [project website](https://sfu-cl-lab.github.io/FactorBase/options.html) for an explanation of the options.
+1. Specify the input database `datadb`: Modify `jar/config.cfg` with your own configuration as explained in the [repository readme](https://github.com/sfu-cl-lab/FactorBase/blob/master/README.md). See our [project website](https://sfu-cl-lab.github.io/FactorBase/options.html) for an explanation of the options. 
+2. Run `MakeSetup.runMS()`. This creates a database named `datadb_setup` containing metadata. Edit the following tables (using SQL).
+   + `FunctorSet` contains a list of all first-order terms for the database (called Fnodes). Delete all terms that should _not_ be in the contingency table.
+   + `Expansions` is empty by default. Insert first-order variables for expansions. The table `Pvariables` lists the available first-order variables (called population variables).
+   + `Groundings` is empty by default. Insert first-order variables and constants for groundings. The table `Pvariables` lists the available first-order variables (called population variables).
+ 3. Run `BayesBaseCT_SortMerge.buildCT()`. This writes the contingency table to a database called `datadb_ct`.
