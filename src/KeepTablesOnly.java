@@ -70,7 +70,7 @@ public class KeepTablesOnly{
 		return sets;
 	}
 
-
+//the main function. Keeps the tables in ArrayList and drops the others //
 	//@Overload
 	public static void Drop_tmpTables(Connection con,String dbname,ArrayList<String> tablenames) throws SQLException {
         //drop temporary CT tables
