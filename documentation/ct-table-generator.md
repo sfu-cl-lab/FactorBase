@@ -26,7 +26,7 @@ where
 
 ## Usage
 
-1. Specify the input database `datadb`: Modify `jar/config.cfg` with your own configuration as explained in the [repository readme](https://github.com/sfu-cl-lab/FactorBase/blob/master/README.md). See our [project website](https://sfu-cl-lab.github.io/FactorBase/options.html) for an explanation of the options. 
+1. Specify the input database `datadb`: Modify `jar/config.cfg` with your own configuration as explained in the [repository readme](https://github.com/sfu-cl-lab/FactorBase/blob/master/README.md). See our [project website](https://sfu-cl-lab.github.io/FactorBase/options.html) for an explanation of the options. Make sure that _the "AutomaticSetUp" option is set to 0._
 2. Run `MakeSetup.runMS()`. This creates a database named `datadb_setup` containing metadata. Edit the following tables (using SQL).
    + `FunctorSet` contains a list of all first-order terms for the database (called Fnodes). Delete all terms that should _not_ be in the contingency table.
    + `Expansions` is empty by default. Insert first-order variables for expansions. The table `Pvariables` lists the available first-order variables (called population variables).
