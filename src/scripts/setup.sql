@@ -527,9 +527,10 @@ CREATE TABLE IF NOT EXISTS lattice_set (
 
 
 CREATE TABLE `Expansions` (
-  `pvid` varchar(40) NOT NULL DEFAULT '',
-  PRIMARY KEY (`pvid`)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+  `pvid` varchar(40),
+  PRIMARY KEY (`pvid`),
+  FOREIGN KEY (pvid) REFERENCES PVariables(pvid)
+);
 
 CREATE TABLE FunctorSet (   
   `Fid` varchar(199) ,
