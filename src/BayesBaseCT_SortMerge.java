@@ -84,18 +84,25 @@ public class BayesBaseCT_SortMerge {
 
         System.out.println(" ##### lattice is ready for use* ");
 
+        bzsr.runScript("scripts/add_orig_rnid.sql");
         //build _BN part2: from metadata_2.sql
+
+        bzsr.runScript("scripts/metadata.sql");
+
         // empty query error,fixed by removing one duplicated semicolon. Oct 30, 2013
         //ToDo: No support for executing LinkCorrelation=0;
         if (cont.equals("1")) {
-            bzsr.runScript("scripts/metadata_2_cont.sql");
+            bzsr.runScript("scripts/metaqueries_cont.sql");
         } else if (linkCorrelation.equals("1")) { //LinkCorrelations
-            bzsr.runScript("scripts/metadata_2.sql");
+            bzsr.runScript("scripts/metaqueries.sql");
         } else {
-            bzsr.runScript("scripts/metadata_2.sql");
+            bzsr.runScript("scripts/metaqueries.sql");
             // modified on Feb. 3rd, 2015, zqian, to include rnode as columns
         //			bzsr.runScript("scripts/metadata_2_nolink.sql");
         }
+        bzsr.runScript("scripts/model_manager.sql");
+        bzsr.runScript("scripts/metaqueries_RChain.sql");
+
         // building CT tables for Rchain
         CTGenerator();
         disconnectDB();
@@ -153,10 +160,12 @@ public class BayesBaseCT_SortMerge {
 		con_std = connectDB(databaseName_std);
         con_setup = connectDB(databaseName_setup);
 		//build _BN part1 from metadata_1.sql
+
 		BZScriptRunner bzsr = new BZScriptRunner(databaseName_std,dbbase,con_setup);
 		bzsr.runScript("scripts/transfer2.sql");
 		con_BN = connectDB(databaseName_BN);
-        con_CT = connectDB(databaseName_CT);
+    	con_CT = connectDB(databaseName_CT);
+
 		//generate lattice tree
 		maxNumberOfMembers = short_rnid_LatticeGenerator.generateTarget(con_BN);// rnid mapping. maxNumberofMembers = maximum size of lattice element. Should be called LatticeHeight
 		System.out.println(" ##### lattice is ready for use* ");
@@ -201,10 +210,12 @@ public class BayesBaseCT_SortMerge {
 		con_std = connectDB(databaseName_std);
         con_setup = connectDB(databaseName_setup);
 		//build _BN part1 from metadata_1.sql
+
 		BZScriptRunner bzsr = new BZScriptRunner(databaseName_std,dbbase,con_setup);
 		bzsr.runScript("scripts/transfer2.sql");
 		con_BN = connectDB(databaseName_BN);
         con_CT = connectDB(databaseName_CT);
+
 		//generate lattice tree
 		maxNumberOfMembers = short_rnid_LatticeGenerator.generateTarget(con_BN);// rnid mapping. maxNumberofMembers = maximum size of lattice element. Should be called LatticeHeight
 		System.out.println(" ##### lattice is ready for use* ");
@@ -251,10 +262,12 @@ public class BayesBaseCT_SortMerge {
         con_setup = connectDB(databaseName_setup);
 
 		//build _BN part1 from metadata_1.sql
+
 		BZScriptRunner bzsr = new BZScriptRunner(databaseName_std,dbbase,con_setup);
 		bzsr.runScript("scripts/transfer2.sql");
 		con_BN = connectDB(databaseName_BN);
-        con_CT = connectDB(databaseName_CT);
+    con_CT = connectDB(databaseName_CT);
+
 		//generate lattice tree
 		maxNumberOfMembers = short_rnid_LatticeGenerator.generateTarget(con_BN);// rnid mapping. maxNumberofMembers = maximum size of lattice element. Should be called LatticeHeight
 		System.out.println(" ##### lattice is ready for use* ");
@@ -712,7 +725,7 @@ public class BayesBaseCT_SortMerge {
 		//System.out.print("Building Time(ms): "+(l2-l)+" ms.\n");
 		System.out.println("\n Build CT_RChain_TABLES for length = "+len+" are DONE \n" );
 	}
-	
+
 	/* building pvars_counts*/
 	public static void BuildCT_Pvars() throws SQLException, IOException {
 		long l = System.currentTimeMillis(); //@zqian : measure structure learning time
@@ -720,6 +733,7 @@ public class BayesBaseCT_SortMerge {
 		st.execute("Drop schema if exists " + databaseName_CT + ";");
 		st.execute("Create schema if not exists " + databaseName_CT + ";");
 		ResultSet rs = st.executeQuery("select * from PVariables;");
+
 		while(rs.next()){
 			//  get pvid for further use
 			String pvid = rs.getString("pvid");

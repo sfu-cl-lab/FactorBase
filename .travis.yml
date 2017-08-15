@@ -25,6 +25,7 @@ script:
   - cd ../src
   - javac -cp ".:./lib/*" Config.java BZScriptRunner.java MakeSetup.java
   - javac -cp ".:./lib/*" RunBB.java
+  - javac -cp ".:./lib/*" KeepTablesOnly.java
   - javac -cp ".:./lib/*" MakeTargetSetup.java
   - javac -cp ".:./lib/*" FunctorWrapper.java
   - java -cp ".:./lib/*" MakeSetup > a.txt
@@ -33,14 +34,13 @@ script:
   - nohup java -cp ".:./lib/*" FunctorWrapper > d.txt &
   - sleep 8m
   - ls -lh d.txt
-  - sleep 8m
-  - ls -lh d.txt
   - echo 'FunctorWrapper cannot finish in 2 hours, to save time, kill it.'
   - tail a.txt
   - tail b.txt
   - tail c.txt
   - tail d.txt
   - tail dag_.txt
+
 after_script:
   - mysql -e "show databases;" -uroot -p123456
   - mysql -e "use unielwin_BN; show tables;" -uroot -p123456

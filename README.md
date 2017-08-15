@@ -3,15 +3,23 @@
 The source code repository for the FactorBase system. 
 The code in this repository implements the learn-and-join algorithm (see [algorithm paper](http://www.cs.sfu.ca/~oschulte/pubs.html) on  ''Learning Graphical Models for Relational Data via Lattice Search''). 
 
-_Input_: A relational schema hosted on a MySQL server. 
 
-_Output_: A Bayesian network that shows probabilistic dependencies between the relationships and attributes represented in the database. Both network structure and parameters are computed by the system.
++ _Input_: A relational schema hosted on a MySQL server. 
+
++ _Output_: A Bayesian network that shows probabilistic dependencies between the relationships and attributes represented in the database. Both network structure and parameters are computed by the system.
+
+## Contingency Table Generator
+
+One of the key computational problems in relational learning and inference is to compute how many times a conjunctive condition is instantiated in a relational structure. FactorBase computes _relational contingency tables_, which store for a given set of first-order terms/predicates how many times different value combinations of the terms are instantiated in the input database. Given the general importance of this problem in pretty much any relational data problem, we provide [stand-alone code](https://github.com/sfu-cl-lab/FactorBase/blob/master/documentation/ct-table-generator.md) for computing contingency tables that can be  used independently of our Bayesian network learning system.
+
 
 ## Further Information
 
 + Our [project website](https://sfu-cl-lab.github.io/FactorBase/) contains various helpful information such as pointers to datasets, a gallery of learned models, and system tips. 
 + The [tutorial](https://oschulte.github.io/srl-tutorial-slides/) explains the concepts underlying the algorithm and our other tools 
 + Our [system paper](http://www.cs.sfu.ca/~oschulte/pubs.html) titled '' FactorBase: Multi-Relational Model Learning with SQL All The Way'' explains the system components.
+
+-------------------------------------
 
 ## How to Use - Overview
 
@@ -31,7 +39,7 @@ _Output_: A Bayesian network that shows probabilistic dependencies between the r
 
 3. **Point to the required database in your MySQL server** 
 
-	Modify `jar/config.cfg` with your own configuration according to the sample format explained in the image. ![Sample Configuration](/images/configuration.png).  
+	Modify `jar/config.cfg` with your own configuration according to the sample format explained in the image. ![Sample Configuration](/images/configuration.png). See our [project website](https://sfu-cl-lab.github.io/FactorBase/options.html) for an explanation of the options.
 
 4. **Learn a Bayesian network structure** 
 
@@ -70,8 +78,9 @@ The learned BN structure can be exported from the database to support a number o
 	
 	+ [Outlier detection](https://github.com/sfu-cl-lab/etl-outlier-detection). Given a target entity class, this tool produces a single-table data with relational features. 
 
+-------------------------------------------------
 
-## Model-based Tools for Other Applications
+## Other Applications (May Be Under Construction) 
 
 After running the learn-and-join algorithm, the learned Bayesian network can be leveraged for various applications. 
 
@@ -85,14 +94,12 @@ Given a relational database, rank the database values according to their (im)pro
 + [Exception Mining](https://github.com/sfu-cl-lab/exception-mining) 
 Given a relational database and a target entity set, rank each entity according to how exceptional it is within its class. This tool implements our expected **log-distance metric** from our paper [Model-based Outlier Detection for Object-Relational Data](http://www.cs.sfu.ca/~oschulte/pubs.html). Our approach fits within the general framework of [exceptional model mining](http://www.cs.uu.nl/groups/ADA/emm/), also see the [tutorial on Anomaly Detection](https://oschulte.github.io/srl-tutorial-slides/ch6-anomaly.pptx). 
 
-  
-### Compile & Run  
+  --------------------------
+## Compile & Run  
 + Go into `src` folder 
 + modify `config.cfg`  with your own configuration according to format explained [here]
 + `javac -cp ".:./lib/*" Config.java BZScriptRunner.java MakeSetup.java`  
 + `javac -cp ".:./lib/*" RunBB.java`  
-+ `mkdir src`  
-+ `mv scripts src/`  
 + `java -cp ".:./lib/*" MakeSetup`  
 + `java -cp ".:./lib/*" RunBB`  
 + Optionally set up the target database and run FunctorWrapper  

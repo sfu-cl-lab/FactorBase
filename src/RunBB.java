@@ -45,6 +45,10 @@ public class RunBB {
 		System.out.println("*********************************************************");
 		BayesBaseH.runBBH();
 		System.out.println("\nFinish running BayesBaseH.");
+		System.out.println("*********************************************************");
+		System.out.println("Cleaning CT database");
+		//Now eliminate temporary tables. Keep only the tables for the longest Rchain. Turn this off for debugging.//
+		KeepTablesOnly.Drop_tmpTables();
 
 	}
 
