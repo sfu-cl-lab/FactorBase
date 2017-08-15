@@ -3,6 +3,7 @@
 The source code repository for the FactorBase system. 
 The code in this repository implements the learn-and-join algorithm (see [algorithm paper](http://www.cs.sfu.ca/~oschulte/pubs.html) on  ''Learning Graphical Models for Relational Data via Lattice Search''). 
 
+
 + _Input_: A relational schema hosted on a MySQL server. 
 
 + _Output_: A Bayesian network that shows probabilistic dependencies between the relationships and attributes represented in the database. Both network structure and parameters are computed by the system.
@@ -10,6 +11,7 @@ The code in this repository implements the learn-and-join algorithm (see [algori
 ## Contingency Table Generator
 
 One of the key computational problems in relational learning and inference is to compute how many times a conjunctive condition is instantiated in a relational structure. FactorBase computes _relational contingency tables_, which store for a given set of first-order terms/predicates how many times different value combinations of the terms are instantiated in the input database. Given the general importance of this problem in pretty much any relational data problem, we provide [stand-alone code](https://github.com/sfu-cl-lab/FactorBase/blob/master/documentation/ct-table-generator.md) for computing contingency tables that can be  used independently of our Bayesian network learning system.
+
 
 ## Further Information
 
