@@ -31,7 +31,8 @@ UNION SELECT
 FROM
     2Nodes 
 union select 
-    rnid as FID,
+    orig_rnid as FID,
+    /* was rnid as FID */
     TABLE_NAME as FunctorName,
     'Rnode' as Type,
     main
