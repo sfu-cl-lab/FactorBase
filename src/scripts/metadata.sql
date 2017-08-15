@@ -78,7 +78,7 @@ where
 Plus metadata about those variable, e.g. the name of the id column associated with them.    
 ***************/
 
-    CREATE TABLE RNodes_pvars AS SELECT DISTINCT rnid,
+    CREATE TABLE RNodes_pvars AS SELECT DISTINCT orig_rnid,
     pvid,
     PVariables.TABLE_NAME,
     ForeignKeyColumns.COLUMN_NAME,
@@ -94,7 +94,7 @@ WHERE
         AND ForeignKeyColumns.REFERENCED_TABLE_NAME = PVariables.TABLE_NAME 
 UNION 
 SELECT DISTINCT
-    rnid,
+    orig_rnid,
     pvid,
     PVariables.TABLE_NAME,
     ForeignKeyColumns.COLUMN_NAME,
