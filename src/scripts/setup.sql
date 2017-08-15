@@ -374,6 +374,8 @@ CREATE table RNodes_MM_Self AS
 /* third case: many-one, not a self-relationship. Now we need to include the primary key as an argument. 
 Also, we switch to functional notation for legibility. */
 /*CREATE OR REPLACE VIEW RNodes_MO_NotSelf AS*/
+/* OS August 15. Why does this refer to Referenced_Table_Name, n ot Table_Name? */
+
 CREATE table RNodes_MO_NotSelf AS
     SELECT 
         CONCAT('`',
@@ -450,11 +452,18 @@ UNION SELECT
 FROM
     RNodes_MO_Self;
 
-ALTER TABLE RNodes ADD PRIMARY KEY (orig_rnid);
+
+/* ALTER TABLE RNodes ADD PRIMARY KEY (orig_rnid);
+ * OS August 15 can exceed byte limit. Maybe better use table name, pvid, pvid as primary key
+ */
+ /* ALTER TABLE `RNodes` ADD INDEX `Index`  (`pvid1` ASC, `pvid2` ASC, `TABLE_NAME` ASC) ;/*July 17 vidhij--moved from metadata_2
+ */
+    */
+ALTER TABLE RNodes ADD PRIMARY KEY (TABLE_NAME, pvid1, pvid2);
 
 ALTER TABLE `RNodes` ADD COLUMN `rnid` VARCHAR(10) NULL , ADD UNIQUE INDEX `rnid_UNIQUE` (`rnid` ASC) ; 
 /*May 16th, for shorter name of Rchain*/
-ALTER TABLE `RNodes` ADD INDEX `Index`  (`pvid1` ASC, `pvid2` ASC, `TABLE_NAME` ASC) ;/*July 17 vidhij--moved from metadata_2*/
+
 
 /* Make tables for binary functor nodes that record attributes of links. 
 By default, all ***nonkey columns*** of a relation table are possible attribute functors, with the appropriate population ids.
