@@ -486,7 +486,10 @@ CREATE TABLE 2Nodes AS SELECT CONCAT('`',
         NATURAL JOIN
     AttributeColumns;
 
-ALTER TABLE 2Nodes ADD PRIMARY KEY (2nid);
+/* ALTER TABLE 2Nodes ADD PRIMARY KEY (2nid); */
+/* violates key length restriction. OS August 15 */
+    
+ALTER TABLE 2Nodes ADD PRIMARY KEY (COLUMN_NAME,pvid1,pvid2); 
 
 ALTER TABLE `2Nodes` ADD INDEX `index`  (`pvid1` ASC, `pvid2` ASC, `TABLE_NAME` ASC) ; /*July 17 vidhij--moved from metadata_2*/
 
