@@ -1,15 +1,15 @@
 /****************************************************
 Analyze schema information to prepare for statistical analysis.
-@database@ stands for a generic database. This is replaced with the name of the actual target database schema by the program that calls this sql script.
+unielwin stands for a generic database. This is replaced with the name of the actual target database schema by the program that calls this sql script.
 */
 
-DROP SCHEMA IF EXISTS @database@_setup; 
-create schema @database@_setup;
+DROP SCHEMA IF EXISTS test_setup; 
+create schema test_setup;
 
-/*-- create schema if not exists @database@_BN;*/
-/*-- create schema if not exists @database@_CT;*/
+/*-- create schema if not exists unielwin_BN;*/
+/*-- create schema if not exists unielwin_CT;*/
 
-USE @database@_setup;
+USE test_setup;
 SET storage_engine=INNODB;
 /* allows adding foreign key constraints */
 
@@ -21,7 +21,7 @@ CREATE TABLE Schema_Key_Info AS SELECT TABLE_NAME,
     CONSTRAINT_NAME FROM
     INFORMATION_SCHEMA.KEY_COLUMN_USAGE
 WHERE
-    (KEY_COLUMN_USAGE.TABLE_SCHEMA = '@database@')
+    (KEY_COLUMN_USAGE.TABLE_SCHEMA = 'unielwin')
 ORDER BY TABLE_NAME;
 
 
@@ -33,8 +33,8 @@ CREATE TABLE Schema_Position_Info AS SELECT COLUMNS.TABLE_NAME,
     INFORMATION_SCHEMA.COLUMNS,
     INFORMATION_SCHEMA.TABLES
 WHERE
-    (COLUMNS.TABLE_SCHEMA = '@database@'
-        AND TABLES.TABLE_SCHEMA = '@database@'
+    (COLUMNS.TABLE_SCHEMA = 'unielwin'
+        AND TABLES.TABLE_SCHEMA = 'unielwin'
         AND TABLES.TABLE_NAME = COLUMNS.TABLE_NAME
         AND TABLES.TABLE_TYPE = 'BASE TABLE')
 ORDER BY TABLE_NAME;
@@ -221,7 +221,15 @@ If an entity type is involved in a self relationship, then we make three "copies
 so that we can represent transitivity.
 */
 
-CREATE TABLE PVariables AS SELECT CONCAT(EntityTables.TABLE_NAME, '0') AS pvid,
+CREATE TABLE PVariables (
+  `pvid` varchar(100),
+  `TABLE_NAME` varchar(100),
+   `index_number` varchar(1), 
+  PRIMARY KEY (`pvid`)
+);
+
+INSERT  INTO PVariables 
+SELECT CONCAT(EntityTables.TABLE_NAME, '0') AS pvid,
     EntityTables.TABLE_NAME,
     0 AS index_number FROM
     EntityTables 
@@ -235,7 +243,8 @@ FROM
     SelfRelationships
 WHERE
     EntityTables.TABLE_NAME = SelfRelationships.REFERENCED_TABLE_NAME
-        AND EntityTables.COLUMN_NAME = SelfRelationships.REFERENCED_COLUMN_NAME ;
+AND EntityTables.COLUMN_NAME = SelfRelationships.REFERENCED_COLUMN_NAME ;
+            
 /*zqian,Oct-02-13, reduce copies from 3 to 2*/
 /*
 UNION  
@@ -250,7 +259,6 @@ WHERE
     EntityTables.TABLE_NAME = SelfRelationships.REFERENCED_TABLE_NAME
         AND EntityTables.COLUMN_NAME = SelfRelationships.REFERENCED_COLUMN_NAME;
   */    
-ALTER TABLE PVariables ADD PRIMARY KEY (pvid);
 
 
 
@@ -460,7 +468,9 @@ FROM
  */
  
 ALTER TABLE RNodes ADD PRIMARY KEY (TABLE_NAME, pvid1, pvid2);
-ALTER TABLE `RNodes` ADD UNIQUE INDEX `rnid_UNIQUE` (`rnid` ASC) ; 
+
+/* this key exceeds maximum byte length. OS august 17, 2017. Too bad, we could definitely use an index */
+/*ALTER TABLE `RNodes` ADD UNIQUE INDEX `rnid_UNIQUE` (`rnid` ASC) ; */
 
 /*OS August 16, 2017. Get rid of that virtual rnid business */
 /*ALTER TABLE `RNodes` ADD COLUMN `rnid` VARCHAR(10) NULL , ADD UNIQUE INDEX `rnid_UNIQUE` (`rnid` ASC) ; */
@@ -495,12 +505,41 @@ ALTER TABLE 2Nodes ADD PRIMARY KEY (COLUMN_NAME,pvid1,pvid2);
 
 ALTER TABLE `2Nodes` ADD INDEX `index`  (`pvid1` ASC, `pvid2` ASC, `TABLE_NAME` ASC) ; /*July 17 vidhij--moved from metadata_2*/
 
-/*CREATE TABLE Groundings (pvid varchar(40) not null, id varchar(256) not null, primary key (pvid, id));*/
+/* Set up a table that contains all functor nodes of any arity. summarizes all the work we've done. CAn also be used for foreign key constraints */
+
+CREATE TABLE FNodes (   
+  `Fid` varchar(199) ,
+  `FunctorName` varchar(64) ,
+  `Type` varchar(5) ,
+  `main` int(11) ,
+  PRIMARY KEY  (`Fid`)
+);
 
 
-/*Added by zqian  Apr. 4th 2013
-Column, index, and stored routine names are not case sensitive on any platform, nor are column aliases. Trigger names are case sensitive, which differs from standard SQL. */
+/******* make comprehensive table for all functor nodes *****/
 
+insert into FNodes
+SELECT 
+    1nid AS Fid,
+    COLUMN_NAME as FunctorName,
+    '1Node' as Type,
+    main
+FROM
+    1Nodes 
+UNION SELECT 
+    2nid AS Fid,
+    COLUMN_NAME as FunctorName,
+    '2Node' as Type,
+    main
+FROM
+    2Nodes 
+union select 
+    rnid as FID,
+    TABLE_NAME as FunctorName,
+    'Rnode' as Type,
+    main
+from
+    RNodes;
 
 /*
 
@@ -527,6 +566,9 @@ CREATE TABLE IF NOT EXISTS lattice_set (
 );*/
 /* Lists each relationship chain in the lattice and its length. */
 
+/*************************************************************************/
+/* Now add tables that support user input: counting for contingency tables, classification, outlier detection */
+/**********************************************************************/
 
 CREATE TABLE `Expansions` (
   `pvid` varchar(40),
@@ -534,13 +576,14 @@ CREATE TABLE `Expansions` (
   FOREIGN KEY (pvid) REFERENCES PVariables(pvid)
 );
 
+CREATE TABLE Groundings (pvid varchar(40), id varchar(256), primary key (pvid, id), FOREIGN KEY (pvid) REFERENCES PVariables(pvid));
+
+
 CREATE TABLE FunctorSet (   
-  `Fid` varchar(199) ,
-   PRIMARY KEY  (`Fid`)
+  `Fid` varchar(199),
+   PRIMARY KEY  (Fid), FOREIGN KEY (Fid) REFERENCES FNodes(Fid)
 );
+
+/* By default, FunctorSet contains all Fnodes */
 INSERT  INTO FunctorSet 
-SELECT 1nid AS Fid FROM 1Nodes
-UNION
-SELECT 2nid AS Fid FROM 2Nodes
-UNION
-SELECT rnid AS Fid FROM RNodes;
+SELECT DISTINCT Fid from FNodes;
