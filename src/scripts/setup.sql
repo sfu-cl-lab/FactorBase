@@ -319,7 +319,7 @@ CREATE table RNodes_MM_NotSelf AS
                 ',',
                 ForeignKeys_pvars2.pvid,
                 ')',
-                '`') AS orig_rnid,
+                '`') AS rnid,
         ForeignKeys_pvars1.TABLE_NAME,
         ForeignKeys_pvars1.pvid AS pvid1,
         ForeignKeys_pvars2.pvid AS pvid2,
@@ -351,7 +351,7 @@ CREATE table RNodes_MM_Self AS
                 ',',
                 ForeignKeys_pvars2.pvid,
                 ')',
-                '`') AS orig_rnid,
+                '`') AS rnid,
         ForeignKeys_pvars1.TABLE_NAME,
         ForeignKeys_pvars1.pvid AS pvid1,
         ForeignKeys_pvars2.pvid AS pvid2,
@@ -384,7 +384,7 @@ CREATE table RNodes_MO_NotSelf AS
                 PVariables.pvid,
                 ')=',
                 ForeignKeys_pvars.pvid,
-                '`') AS orig_rnid,
+                '`') AS rnid,
         ForeignKeys_pvars.TABLE_NAME,
         PVariables.pvid AS pvid1,
         ForeignKeys_pvars.pvid AS pvid2,
@@ -415,7 +415,7 @@ CREATE table RNodes_MO_Self AS
                 PVariables.pvid,
                 ')=',
                 ForeignKeys_pvars.pvid,
-                '`') AS orig_rnid,
+                '`') AS rnid,
         ForeignKeys_pvars.TABLE_NAME,
         PVariables.pvid AS pvid1,
         ForeignKeys_pvars.pvid AS pvid2,
@@ -456,12 +456,14 @@ FROM
 /* ALTER TABLE RNodes ADD PRIMARY KEY (orig_rnid);
  * OS August 15 can exceed byte limit. Maybe better use table name, pvid, pvid as primary key
  */
- /* ALTER TABLE `RNodes` ADD INDEX `Index`  (`pvid1` ASC, `pvid2` ASC, `TABLE_NAME` ASC) ;/*July 17 vidhij--moved from metadata_2
+ /* ALTER TABLE `RNodes` ADD INDEX `Index`  (`pvid1` ASC, `pvid2` ASC, `TABLE_NAME` ASC) ;/*July 17 vidhij--moved from metadata_2*/
  */
-    */
+ 
 ALTER TABLE RNodes ADD PRIMARY KEY (TABLE_NAME, pvid1, pvid2);
+ALTER TABLE `RNodes` ADD UNIQUE INDEX `rnid_UNIQUE` (`rnid` ASC) ; 
 
-ALTER TABLE `RNodes` ADD COLUMN `rnid` VARCHAR(10) NULL , ADD UNIQUE INDEX `rnid_UNIQUE` (`rnid` ASC) ; 
+/*OS August 16, 2017. Get rid of that virtual rnid business */
+/*ALTER TABLE `RNodes` ADD COLUMN `rnid` VARCHAR(10) NULL , ADD UNIQUE INDEX `rnid_UNIQUE` (`rnid` ASC) ; */
 /*May 16th, for shorter name of Rchain*/
 
 
@@ -541,4 +543,4 @@ SELECT 1nid AS Fid FROM 1Nodes
 UNION
 SELECT 2nid AS Fid FROM 2Nodes
 UNION
-SELECT orig_rnid AS Fid FROM RNodes;
+SELECT rnid AS Fid FROM RNodes;
