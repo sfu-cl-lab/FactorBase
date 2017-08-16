@@ -3,13 +3,13 @@ Analyze schema information to prepare for statistical analysis.
 unielwin stands for a generic database. This is replaced with the name of the actual target database schema by the program that calls this sql script.
 */
 
-DROP SCHEMA IF EXISTS test_setup; 
-create schema test_setup;
+DROP SCHEMA IF EXISTS @database@_setup; 
+create schema @database@_setup;
 
 /*-- create schema if not exists unielwin_BN;*/
 /*-- create schema if not exists unielwin_CT;*/
 
-USE test_setup;
+USE @database@_setup;
 SET storage_engine=INNODB;
 /* allows adding foreign key constraints */
 
