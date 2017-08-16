@@ -167,6 +167,7 @@ WHERE
     1Nodes.pvid = RNodes.pvid2;
 
 /** now link each rnode 2node, i.e. each attribute of the relationship to the associated 2nodes **/
+    /* this should be superseded by transfer script August 16, 2017 */
 
 Create TABLE RNodes_2Nodes as 
 select RNodes.rnid, 2Nodes.2nid from 2Nodes, RNodes where 2Nodes.TABLE_NAME = RNodes.TABLE_NAME; 

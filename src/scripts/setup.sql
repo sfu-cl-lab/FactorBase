@@ -465,7 +465,7 @@ FROM
  * OS August 15 can exceed byte limit. Maybe better use table name, pvid, pvid as primary key
  */
  /* ALTER TABLE `RNodes` ADD INDEX `Index`  (`pvid1` ASC, `pvid2` ASC, `TABLE_NAME` ASC) ;/*July 17 vidhij--moved from metadata_2*/
- */
+
  
 ALTER TABLE RNodes ADD PRIMARY KEY (TABLE_NAME, pvid1, pvid2);
 
@@ -587,3 +587,87 @@ CREATE TABLE FunctorSet (
 /* By default, FunctorSet contains all Fnodes */
 INSERT  INTO FunctorSet 
 SELECT DISTINCT Fid from FNodes;
+
+CREATE TABLE TargetNode (   
+  `Fid` varchar(199),
+   PRIMARY KEY  (Fid), FOREIGN KEY (Fid) REFERENCES FNodes(Fid)
+);
+
+/**************************************************************
+/* Adding more views for more metadata. useful for learning later */
+/*********************************************************************/
+
+/** now link each rnode 2node, i.e. each attribute of the relationship to the associated 2nodes **/
+create or replace view RNodes_2Nodes as select RNodes.rnid, 2Nodes.2nid from 2Nodes, RNodes where 2Nodes.TABLE_NAME = RNodes.TABLE_NAME; 
+
+/*** for each functor node, record which population variables appear in it ***/
+
+create or replace VIEW FNodes_pvars as 
+SELECT FNodes.Fid, PVariables.pvid FROM
+    FNodes,
+    2Nodes,
+    PVariables
+where
+    FNodes.Type = '2Node'
+    and FNodes.Fid = 2Nodes.2nid
+    and PVariables.pvid = 2Nodes.pvid1 
+union 
+SELECT 
+    FNodes.Fid, PVariables.pvid
+FROM
+    FNodes,
+    2Nodes,
+    PVariables
+where
+    FNodes.Type = '2Node'
+    and FNodes.Fid = 2Nodes.2nid
+    and PVariables.pvid = 2Nodes.pvid2 
+union 
+SELECT 
+    FNodes.Fid, PVariables.pvid
+FROM
+    FNodes,
+    1Nodes,
+    PVariables
+where
+    FNodes.Type = '1Node'
+    and FNodes.Fid = 1Nodes.1nid
+    and PVariables.pvid = 1Nodes.pvid;
+
+ /*** for each relationship node, record which population variables appear in it. 
+Plus metadata about those variable, e.g. the name of the id column associated with them.  
+*/
+
+CREATE or replace VIEW RNodes_pvars AS
+SELECT DISTINCT rnid,
+    pvid,
+    PVariables.TABLE_NAME,
+    ForeignKeyColumns.COLUMN_NAME,
+    ForeignKeyColumns.REFERENCED_COLUMN_NAME 
+FROM
+    ForeignKeyColumns,
+    RNodes,
+    PVariables
+WHERE
+    pvid1 = pvid
+        AND ForeignKeyColumns.TABLE_NAME = RNodes.TABLE_NAME
+        AND ForeignKeyColumns.COLUMN_NAME = RNodes.COLUMN_NAME1
+        AND ForeignKeyColumns.REFERENCED_TABLE_NAME = PVariables.TABLE_NAME 
+UNION 
+SELECT DISTINCT
+    rnid,
+    pvid,
+    PVariables.TABLE_NAME,
+    ForeignKeyColumns.COLUMN_NAME,
+    ForeignKeyColumns.REFERENCED_COLUMN_NAME
+FROM
+    ForeignKeyColumns,
+    RNodes,
+    PVariables
+WHERE
+    pvid2 = pvid
+        AND ForeignKeyColumns.TABLE_NAME = RNodes.TABLE_NAME
+        AND ForeignKeyColumns.COLUMN_NAME = RNodes.COLUMN_NAME2
+        AND ForeignKeyColumns.REFERENCED_TABLE_NAME = PVariables.TABLE_NAME;
+
+

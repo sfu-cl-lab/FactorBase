@@ -40,7 +40,8 @@ from
     RNodes;
 
 /*** for each functor node, record which population variables appear in it ***/
-
+    /* this should be superseded by transfer script August 16, 2017 */
+    
 create table FNodes_pvars as 
 SELECT FNodes.Fid, PVariables.pvid FROM
     FNodes,
@@ -76,6 +77,7 @@ where
     
 /*** for each relationship node, record which population variables appear in it. 
 Plus metadata about those variable, e.g. the name of the id column associated with them.    
+/* this should be superseded by transfer script August 16, 2017 */
 ***************/
 
     CREATE TABLE RNodes_pvars AS SELECT DISTINCT orig_rnid,
