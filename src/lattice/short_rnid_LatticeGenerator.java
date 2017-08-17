@@ -12,6 +12,8 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 
+// assumes that a table LatticeRnodes has been generated. See transfer.sql //
+
 public class short_rnid_LatticeGenerator {
 
     static Connection con2;
