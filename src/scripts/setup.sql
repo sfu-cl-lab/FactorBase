@@ -632,10 +632,30 @@ FROM
 where
     FNodes.Type = '1Node'
     and FNodes.Fid = 1Nodes.1nid
-    and PVariables.pvid = 1Nodes.pvid;
-
+    and PVariables.pvid = 1Nodes.pvid
+UNION
+SELECT DISTINCT rnid,
+    pvid
+FROM
+    RNodes,
+    PVariables
+WHERE
+    pvid1 = pvid
+UNION 
+SELECT DISTINCT
+    rnid,
+    pvid
+FROM
+    RNodes,
+    PVariables
+WHERE
+    pvid2 = pvid;
+    
+    
+    
+    
  /*** for each relationship node, record which population variables appear in it. 
-Plus metadata about those variable, e.g. the name of the id column associated with them.  
+Plus metadata about those variable, e.g. the name of the id column associated with them.  (August 17, 2017) This seems inelegant.
 */
 
 CREATE or replace VIEW RNodes_pvars AS
