@@ -221,14 +221,7 @@ If an entity type is involved in a self relationship, then we make three "copies
 so that we can represent transitivity.
 */
 
-CREATE TABLE PVariables (
-  `pvid` varchar(100),
-  `TABLE_NAME` varchar(100),
-   `index_number` varchar(1), 
-  PRIMARY KEY (`pvid`)
-);
-INSERT  INTO PVariables 
-SELECT CONCAT(EntityTables.TABLE_NAME, '0') AS pvid,
+CREATE TABLE PVariables AS SELECT CONCAT(EntityTables.TABLE_NAME, '0') AS pvid,
     EntityTables.TABLE_NAME,
     0 AS index_number FROM
     EntityTables 
@@ -257,7 +250,7 @@ WHERE
     EntityTables.TABLE_NAME = SelfRelationships.REFERENCED_TABLE_NAME
         AND EntityTables.COLUMN_NAME = SelfRelationships.REFERENCED_COLUMN_NAME;
   */    
-/*ALTER TABLE PVariables ADD PRIMARY KEY (pvid); */
+ALTER TABLE PVariables ADD PRIMARY KEY (pvid);
 
 
 
