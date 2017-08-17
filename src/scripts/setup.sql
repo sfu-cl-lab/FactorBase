@@ -529,3 +529,8 @@ UNION
 SELECT 2nid AS Fid FROM 2Nodes
 UNION
 SELECT orig_rnid AS Fid FROM RNodes;
+
+CREATE TABLE `Target` (
+    `Fid` varchar(199) ,
+    PRIMARY KEY  (`Fid`)
+);
