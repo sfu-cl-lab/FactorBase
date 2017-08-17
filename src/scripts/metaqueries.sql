@@ -1,6 +1,14 @@
 USE @database@_BN;
 SET storage_engine=INNODB;
 
+/***********************************/
+/* Script for creating metaqueries that are executed to compute contingency tables
+/* can only be understood by reading our DSAA paper or at least the github documentation
+/* Assumes the presence of the following tables, to be created by transfer.sql:
+/* RNodes_2Nodes
+/* RNodes_pvars
+ */
+ */
 
 create table 1Nodes_Select_List as select 1nid,
     concat(1Nodes.pvid,
@@ -169,9 +177,10 @@ WHERE
 /** now link each rnode 2node, i.e. each attribute of the relationship to the associated 2nodes **/
     /* this should be superseded by transfer script August 16, 2017 */
 
-Create TABLE RNodes_2Nodes as 
+/* Create TABLE RNodes_2Nodes as 
 select RNodes.rnid, 2Nodes.2nid from 2Nodes, RNodes where 2Nodes.TABLE_NAME = RNodes.TABLE_NAME; 
-
+*/
+/* should be created by Transfer */
 
 /** The select list for an rnode contains
 1) the rnid itself

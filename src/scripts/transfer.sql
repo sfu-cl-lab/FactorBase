@@ -123,6 +123,8 @@ FROM @database@_setup.PVariables N, RNodes_pvars F where F.pvid = N.pvid;
 
 
 
+
+
 /*********
 /* transfer the rest. Not sure if I need all of these actually
 */
