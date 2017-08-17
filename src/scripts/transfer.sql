@@ -35,11 +35,12 @@ CREATE TABLE 2Nodes AS SELECT N.2nid,
 WHERE
     N.2nid = F.Fid;
     
-     /*copy the rnodes to 2 nodes for the given 2Nodes in the functor set*/
+     /*map the 2nodes to rnodes for the given 2Nodes in the functor set*/
     
 CREATE TABLE RNodes_2Nodes AS 
 select N.rnid, N.`2nid` from @database@_setup.RNodes_2Nodes N, 2Nodes F where N.2nid = F.2nid;
 
+     /*copy the rnodes for the functor set*/
     
 CREATE TABLE RNodes AS SELECT 
     N.rnid,
@@ -102,7 +103,7 @@ from
     RNodes;
 
 /**********
-/* transfer links to pvariables. restrict only to functor nodes in functor set */
+/* transfer links to pvariables. restrict only to functor nodes in functor set, now known as FNodes */
     
 create table FNodes_pvars AS SELECT N.Fid, N.pvid
 FROM @database@_setup.FNodes_pvars N, FNodes F where N.Fid = F.Fid;
@@ -113,10 +114,12 @@ FROM @database@_setup.RNodes_pvars N, RNodes F where N.rnid = F.rnid;
 /* transfer pvariables. Only those that occur in functor set */
 
 create table PVariables as SELECT DISTINCT N.pvid, N.TABLE_NAME, N.index_number
-FROM @database@_setup.PVariables N, FNodes_pvars F where F.pvid = N.pvid
-union distinct 
+FROM @database@_setup.PVariables N, FNodes_pvars F where F.pvid = N.pvid;
+/* next clause should no longer be necessary given that FNodes_Pvars now includes RNodes as well */
+/*union distinct 
 select N.pvid, N.TABLE_NAME, N.index_number
 FROM @database@_setup.PVariables N, RNodes_pvars F where F.pvid = N.pvid;
+*/
 
 
 
