@@ -12,6 +12,8 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 
+// assumes that a table LatticeRnodes has been generated. See transfer.sql //
+
 public class short_rnid_LatticeGenerator {
 
     static Connection con2;
@@ -37,7 +39,7 @@ public class short_rnid_LatticeGenerator {
         //generate shorter rnid, from a to z
         int fc=97; 
         char short_rnid;
-        ResultSet temprs=tempst.executeQuery("select orig_rnid from RNodes;");
+        ResultSet temprs=tempst.executeQuery("select orig_rnid from LatticeRNodes;");
         ArrayList<String> tempList=new ArrayList<String>();
         while(temprs.next()) {
             tempList.add(temprs.getString("orig_rnid"));
@@ -45,7 +47,7 @@ public class short_rnid_LatticeGenerator {
         for(int i=0;i<tempList.size();i++) {
         	short_rnid=(char)fc;           //explict type casting to convert integer to character
         	fc++;
-        	tempst.execute("update RNodes set rnid='`" + short_rnid + "`' where orig_rnid='" + tempList.get(i) + "';");
+        	tempst.execute("update LatticeRNodes set short_rnid='`" + short_rnid + "`' where orig_rnid='" + tempList.get(i) + "';");
         }
         tempst.close();
 	
@@ -115,14 +117,14 @@ public class short_rnid_LatticeGenerator {
         firstSets = new ArrayList<String>();
         wholeSets = new ArrayList<String>();
         Statement st = con2.createStatement();
-        ResultSet rs = st.executeQuery("select rnid from RNodes;");
+        ResultSet rs = st.executeQuery("select short_rnid from LatticeRNodes;");
         
         // while(rs.next())
         //System.out.println(rs.getString(1));
      
         while(rs.next()){
             /*firstSets.add(rs.getString("rnid"));*/
-        	firstSets.add(rs.getString("rnid").substring(1,rs.getString("rnid").length()-1));
+        	firstSets.add(rs.getString("short_rnid").substring(1,rs.getString("rnid").length()-1));
         }
 /*        System.out.println("***********");
         for(String g:firstSets)
@@ -134,7 +136,7 @@ public class short_rnid_LatticeGenerator {
         
         maxNumberOfMembers = firstSets.size();
         Statement st = con2.createStatement();
-        /* The create statements should already have been done, I'm leaving them in for now (O.S.) */
+    
         st.execute("create table if not exists lattice_membership (name VARCHAR(20), member VARCHAR(20), orig_rnid VARCHAR(199), PRIMARY KEY (name, member));");
         st.execute("create table if not exists lattice_rel (parent VARCHAR(20), child VARCHAR(20), removed VARCHAR(20), orig_rnid VARCHAR(199), PRIMARY KEY (parent, child));");
         st.execute("create table if not exists lattice_set (name VARCHAR(20), length INT(11), PRIMARY KEY (name, length));");
@@ -244,12 +246,12 @@ public class short_rnid_LatticeGenerator {
 		`RA(prof0,student0)` 										`a`
 		`registration(course0,student0)` 							`b`
       * */
-    
+// record mapping between original and short rnids //
 public static void mapping_rnid() throws SQLException{
     	
     	Statement st=con2.createStatement();
     	st.execute("drop table if exists lattice_mapping ;");
-    	st.execute("create table if not exists lattice_mapping(orig_rnid VARCHAR(200), rnid VARCHAR(20), PRIMARY KEY(orig_rnid,rnid));"); //zqian, max key length limitation, Oct 11, 2013
+    	st.execute("create table if not exists lattice_mapping(orig_rnid VARCHAR(200), short_rnid VARCHAR(20), PRIMARY KEY(orig_rnid,short_rnid));"); //zqian, max key length limitation, Oct 11, 2013
     
     	
     	ResultSet rst=st.executeQuery("select name from lattice_set order by length;");//getting nodes from lattice_set table
@@ -281,7 +283,7 @@ public static void mapping_rnid() throws SQLException{
     		
     		for(int j=0;j<n.length;j++){
     			n[j]="`"+n[j]+"`";
-    			ResultSet rst2=st.executeQuery("select orig_rnid from RNodes where rnid='"+n[j]+"';" );//getting orignal Rnodes from Rnodes table
+    			ResultSet rst2=st.executeQuery("select orig_rnid from LatticeRNodes where short_rnid='"+n[j]+"';" );//getting orignal Rnodes from Rnodes table
     			  rst2.absolute(1);			
     		     
     			temp=temp+rst2.getString(1)+",";
@@ -300,7 +302,7 @@ public static void mapping_rnid() throws SQLException{
     		
     		
     		
-    		st.execute("insert into lattice_mapping (orig_rnid,rnid) values('"+orig_rnid+"','"+list_rnid.get(i)+"');");
+    		st.execute("insert into lattice_mapping (orig_rnid,short_rnid) values('"+orig_rnid+"','"+list_rnid.get(i)+"');");
     		//System.out.println(temp+"  "+list.get(i));
     	}
     	
@@ -321,7 +323,7 @@ public static void mapping_rnid() throws SQLException{
         // get primary key for first set
         
         //use rnid, the shorter one
-        ResultSet rs = st.executeQuery("select pvid1, pvid2 from RNodes where rnid = '`" + firstSet + "`';");
+        ResultSet rs = st.executeQuery("select pvid1, pvid2 from LatticeRNodes where short_rnid = '`" + firstSet + "`';");
         while(rs.next()){
             firstSetKeys.add(rs.getString("pvid1"));
             firstSetKeys.add(rs.getString("pvid2"));
@@ -331,7 +333,7 @@ public static void mapping_rnid() throws SQLException{
         //System.out.println(secondSetParts);
         for (String secondSet : secondSetParts)
         {
-            rs = st.executeQuery("select pvid1, pvid2 from RNodes where rnid = '`" + secondSet + "`';");
+            rs = st.executeQuery("select pvid1, pvid2 from LatticeRNodes where short_rnid = '`" + secondSet + "`';");
             while(rs.next()){
                 secondSetKeys.add(rs.getString("pvid1"));
                 secondSetKeys.add(rs.getString("pvid2"));
@@ -387,7 +389,7 @@ public static void mapping_rnid() throws SQLException{
     
     
     
-    
+    // why is this hard-coded? //
     //main, connect to database
     public static void main(String[] args) throws Exception {
 		databaseName = "UW_std";
