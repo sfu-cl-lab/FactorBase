@@ -87,7 +87,8 @@ public class BayesBaseCT_SortMerge {
         bzsr.runScript("scripts/add_orig_rnid.sql");
         //build _BN part2: from metadata_2.sql
 
-        bzsr.runScript("scripts/metadata.sql");
+       // bzsr.runScript("scripts/metadata.sql");
+       // this metadata is now created as views in db_setup, transferred by transfer.sql
 
         // empty query error,fixed by removing one duplicated semicolon. Oct 30, 2013
         //ToDo: No support for executing LinkCorrelation=0;
