@@ -1,4 +1,5 @@
 USE unielwin_BN;
+SET storage_engine=INNODB;
 
 CREATE TABLE ADT_PVariables_Select_List AS 
 SELECT 
@@ -44,6 +45,7 @@ SELECT E.pvid, CONCAT('`ID(', E.pvid, ')`') AS Entries FROM
 
 CREATE TABLE ADT_PVariables_From_List AS SELECT pvid, CONCAT('unielwin.',TABLE_NAME, ' AS ', pvid) AS Entries FROM
     PVariables;
+
 
 
 
@@ -140,7 +142,7 @@ select  distinct
 from 
     lattice_membership, RNodes_pvars 
 where 
-    RNodes_pvars.rnid = lattice_membership.member;
+    RNodes_pvars.rnid = lattice_membership.orig_rnid;
  
 
 
@@ -148,7 +150,7 @@ where
 CREATE TABLE ADT_RChain_Star_From_List AS 
 SELECT DISTINCT 
     lattice_rel.child as rchain, 
-    lattice_rel.removed as rnid, 
+    lattice_rel.orig_rnid as rnid, 
     
     concat('`',replace(lattice_rel.parent,'`',''),'_CT`')  AS Entries 
     
@@ -159,13 +161,13 @@ where
 union
 SELECT DISTINCT 
     lattice_rel.child as rchain, 
-    lattice_rel.removed as rnid, 
+    lattice_rel.orig_rnid as rnid, 
 concat('`',replace(RNodes_pvars.pvid, '`', ''),'_counts`')    AS Entries 
 
 FROM
     lattice_rel, RNodes_pvars
 where lattice_rel.parent <>'EmptySet'
-and RNodes_pvars.rnid = lattice_rel.removed and
+and RNodes_pvars.rnid = lattice_rel.orig_rnid and
 RNodes_pvars.pvid not in (select pvid from RChain_pvars where RChain_pvars.rchain =     lattice_rel.parent)
 
 ;
@@ -174,13 +176,13 @@ RNodes_pvars.pvid not in (select pvid from RChain_pvars where RChain_pvars.rchai
 CREATE TABLE ADT_RChain_Star_Where_List AS 
 SELECT DISTINCT 
     lattice_rel.child as rchain, 
-    lattice_rel.removed as rnid, 
-    concat(lattice_membership.member,' = "T"')  AS Entries 
+    lattice_rel.orig_rnid as rnid, 
+    concat(lattice_membership.orig_rnid,' = "T"')  AS Entries 
 FROM
     lattice_rel,    lattice_membership
 where 
     lattice_rel.child = lattice_membership.name
-    and  lattice_membership.member > lattice_rel.removed
+    and  lattice_membership.orig_rnid > lattice_rel.orig_rnid
     
     and lattice_rel.parent <>'EmptySet';
 
@@ -189,7 +191,7 @@ where
 CREATE TABLE ADT_RChain_Star_Select_List AS 
 SELECT DISTINCT 
     lattice_rel.child AS rchain,
-    lattice_rel.removed AS rnid,
+    lattice_rel.orig_rnid AS rnid,
     RNodes_GroupBy_List.Entries 
 FROM
     lattice_rel,
@@ -198,12 +200,12 @@ FROM
 WHERE
     lattice_rel.parent <> 'EmptySet'
         AND lattice_membership.name = lattice_rel.parent
-        AND RNodes_GroupBy_List.rnid = lattice_membership.member 
+        AND RNodes_GroupBy_List.rnid = lattice_membership.orig_rnid 
 
 
 UNION SELECT DISTINCT
     lattice_rel.child AS rchain,
-    lattice_rel.removed AS rnid,
+    lattice_rel.orig_rnid AS rnid,
     1Nodes.1nid AS Entries
 FROM
     lattice_rel,
@@ -211,7 +213,7 @@ FROM
     1Nodes
 WHERE
     lattice_rel.parent <> 'EmptySet'
-        AND RNodes_pvars.rnid = lattice_rel.removed
+        AND RNodes_pvars.rnid = lattice_rel.orig_rnid
         AND RNodes_pvars.pvid = 1Nodes.pvid
         AND 1Nodes.pvid NOT IN (SELECT 
             pvid
@@ -223,7 +225,7 @@ WHERE
 
 UNION SELECT DISTINCT
     lattice_rel.child AS rchain,
-    lattice_rel.removed AS rnid,
+    lattice_rel.orig_rnid AS rnid,
     CONCAT('`ID(', E.pvid, ')`') AS Entries
 FROM
     lattice_rel,
@@ -231,7 +233,7 @@ FROM
     Expansions E
 WHERE
     lattice_rel.parent <> 'EmptySet'
-        AND RNodes_pvars.rnid = lattice_rel.removed
+        AND RNodes_pvars.rnid = lattice_rel.orig_rnid
         AND RNodes_pvars.pvid = E.pvid
         AND E.pvid NOT IN (SELECT 
             pvid
@@ -241,8 +243,8 @@ WHERE
             RChain_pvars.rchain = lattice_rel.parent) 
 
 UNION SELECT DISTINCT
-    lattice_rel.removed AS rchain,
-    lattice_rel.removed AS rnid,
+    lattice_rel.orig_rnid AS rchain,
+    lattice_rel.orig_rnid AS rnid,
     1Nodes.1nid AS Entries
 FROM
     lattice_rel,
@@ -250,11 +252,11 @@ FROM
     1Nodes
 WHERE
     lattice_rel.parent = 'EmptySet'
-        AND RNodes_pvars.rnid = lattice_rel.removed
+        AND RNodes_pvars.rnid = lattice_rel.orig_rnid
         AND RNodes_pvars.pvid = 1Nodes.pvid 
 UNION DISTINCT SELECT DISTINCT
-    lattice_rel.removed AS rchain,
-    lattice_rel.removed AS rnid,
+    lattice_rel.orig_rnid AS rchain,
+    lattice_rel.orig_rnid AS rnid,
     PV.Entries
 FROM
     lattice_rel,
@@ -263,5 +265,5 @@ FROM
     
 WHERE
     lattice_rel.parent = 'EmptySet'
-        AND RP.rnid = lattice_rel.removed
+        AND RP.rnid = lattice_rel.orig_rnid
         AND RP.pvid = PV.pvid;

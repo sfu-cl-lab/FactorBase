@@ -1,4 +1,8 @@
 USE unielwin_BN;
+SET storage_engine=INNODB;
+
+
+
 
 
 create table 1Nodes_Select_List as select 1nid,
@@ -147,9 +151,9 @@ WHERE
     1Nodes.pvid = RNodes.pvid2;
 
 
+    
 
-Create TABLE RNodes_2Nodes as 
-select RNodes.rnid, 2Nodes.2nid from 2Nodes, RNodes where 2Nodes.TABLE_NAME = RNodes.TABLE_NAME; 
+
 
 
 

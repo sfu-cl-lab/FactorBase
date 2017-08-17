@@ -3,16 +3,16 @@ SET storage_engine=INNODB;
 
 UPDATE `lattice_membership`
         JOIN
-    `RNodes` ON `lattice_membership`.member = `RNodes`.rnid 
+    `LatticeRNodes` ON `lattice_membership`.member = `LatticeRNodes`.short_rnid 
 SET 
-    `lattice_membership`.orig_rnid = `RNodes`.orig_rnid
+    `lattice_membership`.orig_rnid = `LatticeRNodes`.orig_rnid
 WHERE
-    `lattice_membership`.member = `RNodes`.rnid;
+    `lattice_membership`.member = `LatticeRNodes`.short_rnid;
 
 UPDATE `lattice_rel`
         JOIN
-    `RNodes` ON `lattice_rel`.removed = `RNodes`.rnid 
+    `LatticeRNodes` ON `lattice_rel`.removed = `LatticeRNodes`.short_rnid 
 SET 
-    `lattice_rel`.orig_rnid = `RNodes`.orig_rnid
+    `lattice_rel`.orig_rnid = `LatticeRNodes`.orig_rnid
 WHERE
-    `lattice_rel`.removed = `RNodes`.rnid;
+    `lattice_rel`.removed = `LatticeRNodes`.short_rnid;

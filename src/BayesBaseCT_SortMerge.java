@@ -873,18 +873,19 @@ public class BayesBaseCT_SortMerge {
                                               "lattice_membership, " + "" +
                                               "RNodes_Select_List WHERE NAME = '" +
                                               rchain + "' AND lattice_membership." +
-                                              "member = RNodes_Select_List.rnid;" );
+                                              "orig_rnid = RNodes_Select_List.rnid;" );
 
             String selectString = makeCommaSepQuery(rs2, "Entries", " , ");
             //System.out.println("Select String : " + selectString);
 
             //  create from query string
-            ResultSet rs3 = st2.executeQuery("SELECT DISTINCT Entries FROM lattice_membership, RNodes_From_List WHERE NAME = '" + rchain + "' AND lattice_membership.member = RNodes_From_List.rnid;");
+            ResultSet rs3 = st2.executeQuery("SELECT DISTINCT Entries FROM lattice_membership, RNodes_From_List WHERE NAME = '" + rchain +
+             "' AND lattice_membership.orig_rnid = RNodes_From_List.rnid;");
             String fromString = makeCommaSepQuery(rs3, "Entries", " , ");
             //System.out.println("From String : " + fromString);
 
             //  create where query string
-            ResultSet rs4 = st2.executeQuery("SELECT DISTINCT Entries FROM lattice_membership, RNodes_Where_List WHERE NAME = '" + rchain + "' AND lattice_membership.member = RNodes_Where_List.rnid;");
+            ResultSet rs4 = st2.executeQuery("SELECT DISTINCT Entries FROM lattice_membership, RNodes_Where_List WHERE NAME = '" + rchain + "' AND lattice_membership.orig_rnid = RNodes_Where_List.rnid;");
             String whereString = makeCommaSepQuery(rs4, "Entries", " and ");
             //System.out.println("Where String : " + whereString);
 
@@ -893,7 +894,7 @@ public class BayesBaseCT_SortMerge {
 
             //  create group by query string
             if (!cont.equals("1")) {
-                ResultSet rs_6 = st2.executeQuery("SELECT DISTINCT Entries FROM lattice_membership, RNodes_GroupBy_List WHERE NAME = '" + rchain + "' AND lattice_membership.member = RNodes_GroupBy_List.rnid;");
+                ResultSet rs_6 = st2.executeQuery("SELECT DISTINCT Entries FROM lattice_membership, RNodes_GroupBy_List WHERE NAME = '" + rchain + "' AND lattice_membership.orig_rnid = RNodes_GroupBy_List.rnid;");
                 String GroupByString = makeCommaSepQuery(rs_6, "Entries", " , ");
                 //System.out.println("GroupBy String : " + GroupByString);
 
@@ -944,7 +945,7 @@ public class BayesBaseCT_SortMerge {
             Statement st3 = con_CT.createStatement();
 
             //  create select query string
-            ResultSet rs2 = st2.executeQuery("SELECT DISTINCT Entries FROM lattice_membership, RNodes_Select_List WHERE NAME = '" + rchain + "' AND lattice_membership.member = RNodes_Select_List.rnid;");
+            ResultSet rs2 = st2.executeQuery("SELECT DISTINCT Entries FROM lattice_membership, RNodes_Select_List WHERE NAME = '" + rchain + "' AND lattice_membership.orig_rnid = RNodes_Select_List.rnid;");
 
             //Exit if there are no rnodes
             if ( !rs2.first() )
@@ -960,12 +961,12 @@ public class BayesBaseCT_SortMerge {
             //System.out.println("Select String : " + selectString);
 
             //  create from query string
-            ResultSet rs3 = st2.executeQuery("SELECT DISTINCT Entries FROM lattice_membership, RNodes_From_List WHERE NAME = '" + rchain + "' AND lattice_membership.member = RNodes_From_List.rnid;");
+            ResultSet rs3 = st2.executeQuery("SELECT DISTINCT Entries FROM lattice_membership, RNodes_From_List WHERE NAME = '" + rchain + "' AND lattice_membership.orig_rnid = RNodes_From_List.rnid;");
             String fromString = makeCommaSepQuery(rs3, "Entries", " , ");
             //System.out.println("From String : " + fromString);
 
             //  create where query string
-            ResultSet rs4 = st2.executeQuery("SELECT DISTINCT Entries FROM lattice_membership, RNodes_Where_List WHERE NAME = '" + rchain + "' AND lattice_membership.member = RNodes_Where_List.rnid;");
+            ResultSet rs4 = st2.executeQuery("SELECT DISTINCT Entries FROM lattice_membership, RNodes_Where_List WHERE NAME = '" + rchain + "' AND lattice_membership.orig_rnid = RNodes_Where_List.rnid;");
             String whereString = makeCommaSepQuery(rs4, "Entries", " and ");
             //System.out.println("Where String : " + whereString);
 
@@ -974,7 +975,7 @@ public class BayesBaseCT_SortMerge {
 
             //  create group by query string
             if (!cont.equals("1")) {
-                ResultSet rs_6 = st2.executeQuery("SELECT DISTINCT Entries FROM lattice_membership, RNodes_GroupBy_List WHERE NAME = '" + rchain + "' AND lattice_membership.member = RNodes_GroupBy_List.rnid;");
+                ResultSet rs_6 = st2.executeQuery("SELECT DISTINCT Entries FROM lattice_membership, RNodes_GroupBy_List WHERE NAME = '" + rchain + "' AND lattice_membership.orig_rnid = RNodes_GroupBy_List.rnid;");
                 String GroupByString = makeCommaSepQuery(rs_6, "Entries", " , ");
                 //System.out.println("GroupBy String : " + GroupByString);
 
@@ -1036,12 +1037,12 @@ public class BayesBaseCT_SortMerge {
 
 
             //  create select query string
-            ResultSet rs2 = st2.executeQuery("SELECT DISTINCT Entries FROM lattice_membership, ADT_RNodes_1Nodes_Select_List  WHERE NAME = '" + rchain + "' AND lattice_membership.member = ADT_RNodes_1Nodes_Select_List.rnid;");
+            ResultSet rs2 = st2.executeQuery("SELECT DISTINCT Entries FROM lattice_membership, ADT_RNodes_1Nodes_Select_List  WHERE NAME = '" + rchain + "' AND lattice_membership.orig_rnid = ADT_RNodes_1Nodes_Select_List.rnid;");
             String selectString = makeCommaSepQuery(rs2, "Entries", " , ");
             //System.out.println("Select String : " + selectString);
 
             //  create from query string
-            ResultSet rs3 = st2.executeQuery("SELECT DISTINCT Entries FROM lattice_membership, ADT_RNodes_1Nodes_FROM_List WHERE NAME = '" + rchain + "' AND lattice_membership.member = ADT_RNodes_1Nodes_FROM_List.rnid;");
+            ResultSet rs3 = st2.executeQuery("SELECT DISTINCT Entries FROM lattice_membership, ADT_RNodes_1Nodes_FROM_List WHERE NAME = '" + rchain + "' AND lattice_membership.orig_rnid = ADT_RNodes_1Nodes_FROM_List.rnid;");
             String fromString = makeCommaSepQuery(rs3, "Entries", " , ");
             //System.out.println("From String : " + fromString);
 
@@ -1050,7 +1051,7 @@ public class BayesBaseCT_SortMerge {
 
             //  create group by query string
             if (!cont.equals("1")) {
-                ResultSet rs_6 = st2.executeQuery("SELECT DISTINCT Entries FROM lattice_membership, ADT_RNodes_1Nodes_GroupBY_List WHERE NAME = '" + rchain + "' AND lattice_membership.member = ADT_RNodes_1Nodes_GroupBY_List.rnid;");
+                ResultSet rs_6 = st2.executeQuery("SELECT DISTINCT Entries FROM lattice_membership, ADT_RNodes_1Nodes_GroupBY_List WHERE NAME = '" + rchain + "' AND lattice_membership.orig_rnid = ADT_RNodes_1Nodes_GroupBY_List.rnid;");
                 String GroupByString = makeCommaSepQuery(rs_6, "Entries", " , ");
                 //System.out.println("GroupBy String : " + GroupByString);
 
@@ -1102,17 +1103,17 @@ public class BayesBaseCT_SortMerge {
             Statement st3 = con_CT.createStatement();
 
             //  create select query string
-            ResultSet rs2 = st2.executeQuery("SELECT DISTINCT Entries FROM lattice_membership, ADT_RNodes_Star_Select_List  WHERE NAME = '" + rchain + "' AND lattice_membership.member = ADT_RNodes_Star_Select_List.rnid;");
+            ResultSet rs2 = st2.executeQuery("SELECT DISTINCT Entries FROM lattice_membership, ADT_RNodes_Star_Select_List  WHERE NAME = '" + rchain + "' AND lattice_membership.orig_rnid = ADT_RNodes_Star_Select_List.rnid;");
             String selectString = makeCommaSepQuery(rs2, "Entries", " , ");
             //System.out.println("Select String : " + selectString);
 
             //  create from MULT string
-            ResultSet rs3 = st2.executeQuery("SELECT DISTINCT Entries FROM lattice_membership, ADT_RNodes_Star_From_List WHERE NAME = '" + rchain + "' AND lattice_membership.member = ADT_RNodes_Star_From_List.rnid;");
+            ResultSet rs3 = st2.executeQuery("SELECT DISTINCT Entries FROM lattice_membership, ADT_RNodes_Star_From_List WHERE NAME = '" + rchain + "' AND lattice_membership.orig_rnid = ADT_RNodes_Star_From_List.rnid;");
             String MultString = makeStarSepQuery(rs3, "Entries", " * ");
             //System.out.println("Mult String : " + MultString+ " as `MULT`");
 
             //  create from query string
-            ResultSet rs4 = st2.executeQuery("SELECT DISTINCT Entries FROM lattice_membership, ADT_RNodes_Star_From_List WHERE NAME = '" + rchain + "' AND lattice_membership.member = ADT_RNodes_Star_From_List.rnid;");
+            ResultSet rs4 = st2.executeQuery("SELECT DISTINCT Entries FROM lattice_membership, ADT_RNodes_Star_From_List WHERE NAME = '" + rchain + "' AND lattice_membership.orig_rnid = ADT_RNodes_Star_From_List.rnid;");
             String fromString = makeCommaSepQuery(rs4, "Entries", " , ");
             //System.out.println("From String : " + fromString);
 

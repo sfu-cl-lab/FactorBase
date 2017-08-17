@@ -4,6 +4,8 @@ DROP SCHEMA IF EXISTS unielwin_setup;
 create schema unielwin_setup;
 
 
+
+
 USE unielwin_setup;
 SET storage_engine=INNODB;
 
@@ -184,7 +186,15 @@ WHERE
 
 
 
-CREATE TABLE PVariables AS SELECT CONCAT(EntityTables.TABLE_NAME, '0') AS pvid,
+CREATE TABLE PVariables (
+  `pvid` varchar(100),
+  `TABLE_NAME` varchar(100),
+   `index_number` varchar(1), 
+  PRIMARY KEY (`pvid`)
+);
+
+INSERT  INTO PVariables 
+SELECT CONCAT(EntityTables.TABLE_NAME, '0') AS pvid,
     EntityTables.TABLE_NAME,
     0 AS index_number FROM
     EntityTables 
@@ -198,10 +208,10 @@ FROM
     SelfRelationships
 WHERE
     EntityTables.TABLE_NAME = SelfRelationships.REFERENCED_TABLE_NAME
-        AND EntityTables.COLUMN_NAME = SelfRelationships.REFERENCED_COLUMN_NAME ;
+AND EntityTables.COLUMN_NAME = SelfRelationships.REFERENCED_COLUMN_NAME ;
+            
 
     
-ALTER TABLE PVariables ADD PRIMARY KEY (pvid);
 
 
 
@@ -264,7 +274,7 @@ CREATE table RNodes_MM_NotSelf AS
                 ',',
                 ForeignKeys_pvars2.pvid,
                 ')',
-                '`') AS orig_rnid,
+                '`') AS rnid,
         ForeignKeys_pvars1.TABLE_NAME,
         ForeignKeys_pvars1.pvid AS pvid1,
         ForeignKeys_pvars2.pvid AS pvid2,
@@ -295,7 +305,7 @@ CREATE table RNodes_MM_Self AS
                 ',',
                 ForeignKeys_pvars2.pvid,
                 ')',
-                '`') AS orig_rnid,
+                '`') AS rnid,
         ForeignKeys_pvars1.TABLE_NAME,
         ForeignKeys_pvars1.pvid AS pvid1,
         ForeignKeys_pvars2.pvid AS pvid2,
@@ -317,6 +327,8 @@ CREATE table RNodes_MM_Self AS
 
 
 
+
+
 CREATE table RNodes_MO_NotSelf AS
     SELECT 
         CONCAT('`',
@@ -325,7 +337,7 @@ CREATE table RNodes_MO_NotSelf AS
                 PVariables.pvid,
                 ')=',
                 ForeignKeys_pvars.pvid,
-                '`') AS orig_rnid,
+                '`') AS rnid,
         ForeignKeys_pvars.TABLE_NAME,
         PVariables.pvid AS pvid1,
         ForeignKeys_pvars.pvid AS pvid2,
@@ -356,7 +368,7 @@ CREATE table RNodes_MO_Self AS
                 PVariables.pvid,
                 ')=',
                 ForeignKeys_pvars.pvid,
-                '`') AS orig_rnid,
+                '`') AS rnid,
         ForeignKeys_pvars.TABLE_NAME,
         PVariables.pvid AS pvid1,
         ForeignKeys_pvars.pvid AS pvid2,
@@ -393,11 +405,19 @@ UNION SELECT
 FROM
     RNodes_MO_Self;
 
-ALTER TABLE RNodes ADD PRIMARY KEY (orig_rnid);
 
-ALTER TABLE `RNodes` ADD COLUMN `rnid` VARCHAR(10) NULL , ADD UNIQUE INDEX `rnid_UNIQUE` (`rnid` ASC) ; 
 
-ALTER TABLE `RNodes` ADD INDEX `Index`  (`pvid1` ASC, `pvid2` ASC, `TABLE_NAME` ASC) ;
+ 
+
+ 
+ALTER TABLE RNodes ADD PRIMARY KEY (TABLE_NAME, pvid1, pvid2);
+
+
+
+
+
+
+
 
 
 
@@ -419,14 +439,175 @@ CREATE TABLE 2Nodes AS SELECT CONCAT('`',
         NATURAL JOIN
     AttributeColumns;
 
-ALTER TABLE 2Nodes ADD PRIMARY KEY (2nid);
+
+
+    
+ALTER TABLE 2Nodes ADD PRIMARY KEY (COLUMN_NAME,pvid1,pvid2); 
 
 ALTER TABLE `2Nodes` ADD INDEX `index`  (`pvid1` ASC, `pvid2` ASC, `TABLE_NAME` ASC) ; 
 
-CREATE TABLE `Expansions` (
-  `pvid` varchar(40) NOT NULL DEFAULT '',
-  PRIMARY KEY (`pvid`)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
+
+CREATE TABLE FNodes (   
+  `Fid` varchar(199) ,
+  `FunctorName` varchar(64) ,
+  `Type` varchar(5) ,
+  `main` int(11) ,
+  PRIMARY KEY  (`Fid`)
+);
+
+
+
+
+insert into FNodes
+SELECT 
+    1nid AS Fid,
+    COLUMN_NAME as FunctorName,
+    '1Node' as Type,
+    main
+FROM
+    1Nodes 
+UNION SELECT 
+    2nid AS Fid,
+    COLUMN_NAME as FunctorName,
+    '2Node' as Type,
+    main
+FROM
+    2Nodes 
+union select 
+    rnid as FID,
+    TABLE_NAME as FunctorName,
+    'Rnode' as Type,
+    main
+from
+    RNodes;
+
+
+
+
+
+
+
+
+
+
+
+
+CREATE TABLE `Expansions` (
+  `pvid` varchar(40),
+  PRIMARY KEY (`pvid`),
+  FOREIGN KEY (pvid) REFERENCES PVariables(pvid)
+);
+
+CREATE TABLE Groundings (pvid varchar(40), id varchar(256), primary key (pvid, id), FOREIGN KEY (pvid) REFERENCES PVariables(pvid));
+
+
+CREATE TABLE FunctorSet (   
+  `Fid` varchar(199),
+   PRIMARY KEY  (Fid), FOREIGN KEY (Fid) REFERENCES FNodes(Fid)
+);
+
+
+INSERT  INTO FunctorSet 
+SELECT DISTINCT Fid from FNodes;
+
+CREATE TABLE TargetNode (   
+  `Fid` varchar(199),
+   PRIMARY KEY  (Fid), FOREIGN KEY (Fid) REFERENCES FNodes(Fid)
+);
+
+
+
+
+
+create or replace view RNodes_2Nodes as select RNodes.rnid, 2Nodes.2nid from 2Nodes, RNodes where 2Nodes.TABLE_NAME = RNodes.TABLE_NAME; 
+
+
+
+create or replace VIEW FNodes_pvars as 
+SELECT FNodes.Fid, PVariables.pvid FROM
+    FNodes,
+    2Nodes,
+    PVariables
+where
+    FNodes.Type = '2Node'
+    and FNodes.Fid = 2Nodes.2nid
+    and PVariables.pvid = 2Nodes.pvid1 
+union 
+SELECT 
+    FNodes.Fid, PVariables.pvid
+FROM
+    FNodes,
+    2Nodes,
+    PVariables
+where
+    FNodes.Type = '2Node'
+    and FNodes.Fid = 2Nodes.2nid
+    and PVariables.pvid = 2Nodes.pvid2 
+union 
+SELECT 
+    FNodes.Fid, PVariables.pvid
+FROM
+    FNodes,
+    1Nodes,
+    PVariables
+where
+    FNodes.Type = '1Node'
+    and FNodes.Fid = 1Nodes.1nid
+    and PVariables.pvid = 1Nodes.pvid
+UNION
+SELECT DISTINCT rnid,
+    pvid
+FROM
+    RNodes,
+    PVariables
+WHERE
+    pvid1 = pvid
+UNION 
+SELECT DISTINCT
+    rnid,
+    pvid
+FROM
+    RNodes,
+    PVariables
+WHERE
+    pvid2 = pvid;
+    
+    
+    
+    
+ 
+
+CREATE or replace VIEW RNodes_pvars AS
+SELECT DISTINCT rnid,
+    pvid,
+    PVariables.TABLE_NAME,
+    ForeignKeyColumns.COLUMN_NAME,
+    ForeignKeyColumns.REFERENCED_COLUMN_NAME 
+FROM
+    ForeignKeyColumns,
+    RNodes,
+    PVariables
+WHERE
+    pvid1 = pvid
+        AND ForeignKeyColumns.TABLE_NAME = RNodes.TABLE_NAME
+        AND ForeignKeyColumns.COLUMN_NAME = RNodes.COLUMN_NAME1
+        AND ForeignKeyColumns.REFERENCED_TABLE_NAME = PVariables.TABLE_NAME 
+UNION 
+SELECT DISTINCT
+    rnid,
+    pvid,
+    PVariables.TABLE_NAME,
+    ForeignKeyColumns.COLUMN_NAME,
+    ForeignKeyColumns.REFERENCED_COLUMN_NAME
+FROM
+    ForeignKeyColumns,
+    RNodes,
+    PVariables
+WHERE
+    pvid2 = pvid
+        AND ForeignKeyColumns.TABLE_NAME = RNodes.TABLE_NAME
+        AND ForeignKeyColumns.COLUMN_NAME = RNodes.COLUMN_NAME2
+        AND ForeignKeyColumns.REFERENCED_TABLE_NAME = PVariables.TABLE_NAME;
 
 

@@ -35,11 +35,12 @@ public class short_rnid_LatticeGenerator {
         Statement tempst=con2.createStatement();
         //int len=tempst.execute("SELECT count(*) FROM unielwin_lattice.RNodes;");
         
-        
+        System.out.println("ENTER INTO SHORT LATTICE generate");
         //generate shorter rnid, from a to z
         int fc=97; 
         char short_rnid;
         ResultSet temprs=tempst.executeQuery("select orig_rnid from LatticeRNodes;");
+        System.out.println("about to execute the following query: select orig_rnid from LatticeRNodes");
         ArrayList<String> tempList=new ArrayList<String>();
         while(temprs.next()) {
             tempList.add(temprs.getString("orig_rnid"));
@@ -123,8 +124,8 @@ public class short_rnid_LatticeGenerator {
         //System.out.println(rs.getString(1));
      
         while(rs.next()){
-            /*firstSets.add(rs.getString("rnid"));*/
-        	firstSets.add(rs.getString("short_rnid").substring(1,rs.getString("rnid").length()-1));
+        	firstSets.add(rs.getString("short_rnid").substring(1,rs.getString("short_rnid").length()-1));
+            System.out.println("The short_rnid is : " + rs.getString("short_rnid"));
         }
 /*        System.out.println("***********");
         for(String g:firstSets)

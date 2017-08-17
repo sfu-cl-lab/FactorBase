@@ -8,7 +8,7 @@ SET storage_engine=INNODB;
 /* RNodes_2Nodes
 /* RNodes_pvars
  */
- */
+
 
 create table 1Nodes_Select_List as select 1nid,
     concat(1Nodes.pvid,
