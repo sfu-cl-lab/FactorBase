@@ -141,6 +141,14 @@ create table Expansions as select * from @database@_setup.Expansions;
 create table Groundings as select * from @database@_setup.Groundings;
 create table TargetNode as select * from @database@_setup.TargetNode;
 
+/*********
+ * prepare lattice generator by copying information from Rnodes to a new temporary table
+ * The temporary table will replace the original rnids by shortrnids
+ */
+create table LatticeRNodes as SELECT rnid as orig_rnid, TABLE_NAME, pvid1, pvid2, COLUMN_NAME1, COLUMN_NAME2, main
+FROM RNodes;
+
+ALTER TABLE LatticeRNodes ADD COLUMN `short_rnid` VARCHAR(10) NULL , ADD UNIQUE INDEX `rnid_UNIQUE` (`short_rnid` ASC) ;
 
 /*
 create table Path_BN_nodes as select * from  @database@_setup.Path_BN_nodes;
