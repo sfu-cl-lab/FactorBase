@@ -224,19 +224,20 @@ so that we can represent transitivity.
 CREATE TABLE PVariables (
   `pvid` varchar(100),
   `TABLE_NAME` varchar(100),
+  `COLUMN_NAME` varchar(100),
    `index_number` varchar(1), 
   PRIMARY KEY (`pvid`)
 );
 
 INSERT  INTO PVariables 
 SELECT CONCAT(EntityTables.TABLE_NAME, '0') AS pvid,
-    EntityTables.TABLE_NAME,
+    EntityTables.TABLE_NAME, EntityTables.COLUMN_NAME,
     0 AS index_number FROM
     EntityTables 
 UNION 
 SELECT 
     CONCAT(EntityTables.TABLE_NAME, '1') AS pvid,
-    EntityTables.TABLE_NAME,
+    EntityTables.TABLE_NAME, EntityTables.COLUMN_NAME,
     1 AS index_number
 FROM
     EntityTables,
