@@ -868,7 +868,7 @@ public class BayesBaseCT_SortMerge {
             Statement st2 = con_BN.createStatement();
             Statement st3 = con_CT.createStatement();
 
-            //  create select query string
+            //  create select query stringt
             ResultSet rs2 = st2.executeQuery( "SELECT DISTINCT Entries FROM " +
                                               "lattice_membership, " + "" +
                                               "RNodes_Select_List WHERE NAME = '" +
@@ -1051,12 +1051,12 @@ public class BayesBaseCT_SortMerge {
 
             //  create group by query string
             if (!cont.equals("1")) {
-                ResultSet rs_6 = st2.executeQuery("SELECT DISTINCT Entries FROM lattice_membership, ADT_RNodes_1Nodes_GroupBY_List WHERE NAME = '" + rchain + "' AND lattice_membership.orig_rnid = ADT_RNodes_1Nodes_GroupBY_List.rnid;");
+                ResultSet rs_6 = st2.executeQuery("SELECT DISTINCT Entries FROM lattice_membership, ADT_RNodes_1Nodes_GroupBY_List WHERE NAME = 	'" + rchain + "' AND lattice_membership.orig_rnid = ADT_RNodes_1Nodes_GroupBY_List.rnid;");
                 String GroupByString = makeCommaSepQuery(rs_6, "Entries", " , ");
                 //System.out.println("GroupBy String : " + GroupByString);
 
                 if (!GroupByString.isEmpty()) queryString = queryString + " group by"  + GroupByString;
-                //System.out.println("Query String : " + queryString );
+                System.out.println("Query String : " + queryString );
             }
 
             String createString = "create table `"+rchain.replace("`", "") +"_flat`"+" as "+queryString;
