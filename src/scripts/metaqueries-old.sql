@@ -1,90 +1,103 @@
-USE test_BN;
+USE @database@_BN;
 SET storage_engine=INNODB;
 
 /***********************************/
 /* Script for creating metaqueries that are executed to compute contingency tables
-/* can only be understood by reading our DSAA paper or at least the github documentation.
- * See also https://github.com/sfu-cl-lab/FactorBase/issues/46
- */
+/* can only be understood by reading our DSAA paper or at least the github documentation
 /* Assumes the presence of the following tables, to be created by transfer.sql:
 /* RNodes_2Nodes
 /* RNodes_pvars
  */
 
-DROP TABLE IF EXISTS MetaQueries;
 
-CREATE TABLE MetaQueries (   
-  Lattice_Point varchar(199) , /* e.g. pvid, rchain, prof0, a */
-  TableType varchar(100) , /*e.g. star, flat, counts */
-  ClauseType varchar(10) , /* from, where, select, group by */
-  EntryType varchar(100), /* e.g. 1node, aggregate like count */
-  Entries varchar(150)
-);
-
-/***********************************/
-/* metaqueries for population variables */
-/*************************************
- * 
- */
---- map Pvariables to entity tables ---
-
-INSERT into MetaQueries
-SELECT distinct pvid as Lattice_Point, 'Counts' as TableType, 'FROM' as ClauseType, 'table' as EntryType, CONCAT(TABLE_NAME, ' AS ', pvid) AS Entries FROM
-    PVariables;
+create table 1Nodes_Select_List as select 1nid,
+    concat(1Nodes.pvid,
+            '.',
+            1Nodes.COLUMN_NAME,
+            ' AS ',
+            1nid) as Entries from
+    1Nodes,
+    PVariables
+where
+    1Nodes.pvid = PVariables.pvid;
     
-/* August 18, 2017 OS. Could consider optimizing by using only main pvids */
-    /* WHERE
-    index_number = 0;*/
+---map Pvariables in 1Node to entity table name---
 
-/* Pvariable select list */
-/* contains 1nodes with renaming, and mult for aggregating, and id columns in case these are selected in the expansions table */  
-    
+create table 1Nodes_From_List select 1nid,
+    concat(PVariables.TABLE_NAME,
+            ' AS ',
+            PVariables.pvid) as Entries from
+    1Nodes,
+    PVariables
+where
+    1Nodes.pvid = PVariables.pvid;
 
+----map 2Nodes to column names in relationship tables---
+
+create table 2Nodes_Select_List as select 2nid,
+    concat(RNodes.rnid,
+            '.',
+            2Nodes.COLUMN_NAME,
+            ' AS ',
+            2nid) as Entries from
+    2Nodes
+        NATURAL JOIN
+    RNodes;
     
-INSERT into MetaQueries
-SELECT DISTINCT
-    pvid as Lattice_Point, 'Counts' as TableType, 'SELECT' as ClauseType, 'aggregate' as EntryType, CONCAT('count(*)',' as "MULT"') AS Entries
+----find the Relationship table for the 2nid----
+create table 2Nodes_From_List as select 2nid,
+    concat(2Nodes.TABLE_NAME, ' AS ', RNodes.rnid) as Entries from
+    2Nodes
+        NATURAL JOIN
+    RNodes;
+
+
+
+---map Pvariables to entity tables---
+
+CREATE TABLE PVariables_From_List AS SELECT pvid, CONCAT(TABLE_NAME, ' AS ', pvid) AS Entries FROM
+    PVariables
+WHERE
+    index_number = 0;
+/* use entity tables for main variables only (index = 0). 
+Other entity tables have empty Bayes nets by the main functor constraint. */
+
+/* the pvariable select list contains the union of select list for each 1node associated with the pvariable */
+
+CREATE TABLE PVariables_Select_List AS 
+SELECT 
+    pvid, CONCAT('count(*)',' as "MULT"') AS Entries
 FROM
-    PVariables;
- 
-  
+    PVariables
+UNION
 /*for each pvariable, find the select list for the associated attributes = 1Nodes*/
-    
-INSERT into MetaQueries
-SELECT DISTINCT P.pvid as Lattice_Point, 'Counts' as TableType, '1node' as EntryType, 'SELECT' as ClauseType,
-    CONCAT(P.pvid, '.', N.COLUMN_NAME, ' AS ', 1nid) AS Entries FROM
-    1Nodes N, PVariables P where N.pvid = P.pvid;
-
-
+SELECT pvid,
+    CONCAT(pvid, '.', COLUMN_NAME, ' AS ', 1nid) AS Entries FROM
+    1Nodes
+        NATURAL JOIN
+    PVariables
+WHERE
+    PVariables.index_number = 0
+    UNION
  /*for each pvariable in expansion, find the primary column and add it to the select list */
  /* don't use this for continuous, but do use it for the no_link case */
- INSERT into MetaQueries
- SELECT distinct E.pvid AS Lattice_Point, 'Counts' as TableType, 'id' as EntryType, 'SELECT' as ClauseType, CONCAT(E.pvid,'.',P.COLUMN_NAME, ' AS `ID(', E.pvid, ')`') AS Entries FROM
- PVariables P, Expansions E where E.pvid = P.pvid;
+ SELECT E.pvid, CONCAT(E.pvid,'.',REFERENCED_COLUMN_NAME, ' AS `ID(', E.pvid, ')`') AS Entries FROM
+ RNodes_pvars RP, Expansions E where E.pvid = RP.pvid;
  
- 
- /* Pvariable GroupBY  list */
- 
-/* contains 1nodes without renaming */  
- INSERT into MetaQueries
- SELECT DISTINCT P.pvid as Lattice_Point, 'Counts' as TableType, '1node' as EntryType, 'GROUPBY' as ClauseType,
-    1nid  AS Entries FROM
-    1Nodes N, PVariables P where N.pvid = P.pvid;
-    
-/* add id columns for expansions without renaming */
-    
-INSERT into MetaQueries
-SELECT distinct E.pvid AS Lattice_Point, 'Counts' as TableType, 'id' as EntryType, 'GROUPBY' as ClauseType, CONCAT('`ID(', E.pvid, ')`') AS Entries FROM
-PVariables P, Expansions E where E.pvid = P.pvid;
- 
- /* Pvariable where  list */
-/* the only thing to add is any grounding constraints */
+ /* add a where clause to eliminate states with 0 count, trying to make the contigency table smaller */
+create table PVariables_GroupBy_List as
+SELECT pvid,
+    1nid AS Entries FROM
+    1Nodes
+        NATURAL JOIN
+    PVariables
+     UNION
+ /*for each pvariable in expansion, find the primary column and add it to the group by list */
+ /* don't use this for continuous, but do use it for the no_link case */
+ SELECT E.pvid, CONCAT('`ID(', E.pvid, ')`') AS Entries FROM
+ RNodes_pvars RP, Expansions E where E.pvid = RP.pvid;
 
-INSERT into MetaQueries
-SELECT distinct G.pvid AS Lattice_Point, 'Counts' as TableType, 'id' as EntryType, 'WHERE' as ClauseType, CONCAT('`ID(', G.pvid, ')` = ', G.id) AS Entries FROM
-Groundings G;
  
-/*I'm a bit worried about the type of g.id, integer or string? */
 
 /**********
 Now we make data join tables for each relationship functor node.
