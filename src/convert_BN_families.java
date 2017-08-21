@@ -21,6 +21,7 @@ public class convert_BN_families{
 	private static String dbname_CT;
 	private static String dbname_BN;
 	private static String dbname_setup;
+	private static String target;
 
 
 
@@ -30,14 +31,21 @@ public class convert_BN_families{
 		System.out.println("Set variables from config...");
 		con_BN = connectDB(dbname_BN);
 		con_setup = connectDB(dbname_setup);
+
+		//MakeSetup.runMS();
+		//System.out.println("The MakeSetup complete.");
+
 		//STEP 1 
 		String longest_rchain = findLongestRChain(con_BN);
 		System.out.println("Longest Rchain is : " + longest_rchain );
 		//STEP 2
-		target_parent_set(con_BN);
+		//Firstly, read fid from setup.target table
+		target = get_target(con_setup);
+		System.out.println("The Target is : " + target);
+		target_parent_set(con_BN,target);
 		System.out.println("Create view target_parent_set...");
 		//STEP 3
-		FID_pvariables(con_BN);
+		FID_pvariables(con_BN,target);
 		System.out.println("Create view FID_pvariables...");
 		//STEP 4 
 		insert_FunctorSet(con_setup);
@@ -45,6 +53,12 @@ public class convert_BN_families{
 		//STEP 5
 		insert_Expansions(con_setup);
 		System.out.println("Insert FID-pvariables into setup.Expansions...");
+
+
+		//RUN CT-GENERATOR--according to the process of the document
+		BayesBaseCT_SortMerge.buildCT();
+		System.out.println("The CT database is ready for use.");
+
 
 	}
 
@@ -85,25 +99,42 @@ public class convert_BN_families{
 	}
 
 
+	public static String get_target(Connection con) throws SQLException{ // should be modified after test
+
+		Statement st = con.createStatement();
+		ResultSet rst = st.executeQuery("SELECT Fid FROM Target limit 1; ");
+		String target = "";
+
+		while(rst.next()){
+			System.out.println(rst.getString("Fid"));
+			//sets.add(rst.getString("name"));
+			target = rst.getString("Fid");
+		}
+
+		return target;
+
+	} 
+
+
 	//STEP 2 : Create view for single FID in target, contains the parents of FID in FinalDAG and the child. 
-	public static void target_parent_set(Connection con) throws SQLException{ // should be modified after test
+	public static void target_parent_set(Connection con, String target) throws SQLException{ // should be modified after test
 
 		Statement st = con.createStatement();
 		String newsql="DROP VIEW  IF EXISTS target_parent_set; "; 
 		int rs = st.executeUpdate(newsql);
-		newsql = "CREATE VIEW target_parent_set AS SELECT parent AS Fid FROM Path_BayesNets WHERE child = '`grade(course0,student0)`' UNION SELECT '`grade(course0,student0)`' AS Fid; ";
+		newsql = "CREATE VIEW target_parent_set AS SELECT parent AS Fid FROM Path_BayesNets WHERE child = '" + target + "' UNION SELECT child AS Fid FROM Path_BayesNets WHERE parent = '" + target + "' UNION SELECT '" + target + "' AS Fid; ";
 		rs = st.executeUpdate(newsql);
 
 	}
 
 
 	//STEP 3 : Create view for single FID in target, contains the pvid of the FID
-	public static void FID_pvariables(Connection con) throws SQLException{  // should be modified after test
+	public static void FID_pvariables(Connection con, String target) throws SQLException{  // should be modified after test
 
 		Statement st = con.createStatement();
 		String newsql="DROP VIEW  IF EXISTS FID_pvariables; "; 
 		int rs = st.executeUpdate(newsql);
-		newsql = "CREATE VIEW FID_pvariables AS SELECT pvid FROM FNodes_pvars WHERE Fid = '`grade(course0,student0)`'; ";
+		newsql = "CREATE VIEW FID_pvariables AS SELECT pvid FROM FNodes_pvars WHERE Fid = '" + target + "'; ";
 		rs = st.executeUpdate(newsql);
 
 	}
