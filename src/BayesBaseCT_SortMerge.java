@@ -745,15 +745,15 @@ public class BayesBaseCT_SortMerge {
 			Statement st2 = con_BN.createStatement();
 			Statement st3 = con_CT.createStatement();
 			//  create select query string
-			ResultSet rs2 = st2.executeQuery("select Entries from ADT_PVariables_Select_List where pvid = '" + pvid + "';");
+			ResultSet rs2 = st2.executeQuery("select distinct Entries from MetaQueries where Lattice_Point = '" + pvid + "' and ClauseType = 'SELECT';");
 			String selectString = makeCommaSepQuery(rs2, "Entries", " , ");
 			//System.out.println("Select String : " + selectString);
 			//  create from query string
-			ResultSet rs3 = st2.executeQuery("select Entries from ADT_PVariables_From_List where pvid = '" + pvid + "';");
+			ResultSet rs3 = st2.executeQuery("select distinct Entries from MetaQueries where Lattice_Point = '" + pvid + "' and ClauseType = 'FROM';");
 			String fromString = makeCommaSepQuery(rs3, "Entries", " , ");
 			//System.out.println("From String : " + fromString);
 
-			ResultSet rs_6 = st2.executeQuery("select Entries from ADT_PVariables_GroupBy_List where pvid = '" + pvid + "';");
+			ResultSet rs_6 = st2.executeQuery("select distinct Entries from MetaQueries where Lattice_Point = '" + pvid + "' and ClauseType = 'GROUPBY';");
 			String GroupByString = makeCommaSepQuery(rs_6, "Entries", " , ");
 			//System.out.println("GroupBy String : " + GroupByString);
 
@@ -762,6 +762,28 @@ public class BayesBaseCT_SortMerge {
 			 *  If exist, add as where clause
 			 */
 			System.out.println( "con_BN:SELECT id FROM Groundings WHERE pvid = '"+pvid+"';" );
+			
+			ResultSet rsGrounding = null;
+			String whereString = "";
+			
+			try
+			{
+				rsGrounding = st2.executeQuery("select distinct Entries from MetaQueries where Lattice_Point = '" + pvid + "' and ClauseType = 'WHERE';");
+			}
+			catch( MySQLSyntaxErrorException e )
+			{
+				System.out.println( "No WHERE clause for groundings" );
+			}
+			
+			if ( null != rsGrounding )
+			{
+				String whereString = makeCommaSepQuery(rsGrounding, "Entries", " , ");
+			}
+			
+			System.out.println( "whereString:" + whereString );
+			
+			// OLD CODE
+			
 			ResultSet rsGrounding = null;
 			try
 			{
@@ -822,6 +844,7 @@ public class BayesBaseCT_SortMerge {
 
 				rsGrounding.close();
 			}
+// stop old code here
 
 			//  create the final query
 			String queryString = "Select " + selectString + " from " +
