@@ -7,6 +7,9 @@ create schema @database@_BN;
 DROP SCHEMA IF EXISTS @database@_CT; 
 create schema @database@_CT;
 
+DROP SCHEMA IF EXISTS @database@_convert_CT; 
+create schema @database@_convert_CT;
+
 USE @database@_BN;
 SET storage_engine=INNODB;
 
@@ -45,9 +48,9 @@ WHERE
     N.orig_rnid = F.Fid;
 
 
-create table 1Nodes as select * from @database@_setup.1Nodes;
+/*create table 1Nodes as select * from @database@_setup.1Nodes;
 create table 2Nodes as select * from @database@_setup.2Nodes;
-create table RNodes as select * from @database@_setup.RNodes;
+create table RNodes as select * from @database@_setup.RNodes;*/
 create table PVariables as select * from @database@_setup.PVariables;
 create table EntityTables as select * from @database@_setup.EntityTables;
 create table AttributeColumns as select * from @database@_setup.AttributeColumns;
