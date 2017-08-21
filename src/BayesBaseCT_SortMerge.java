@@ -84,6 +84,7 @@ public class BayesBaseCT_SortMerge {
 
         System.out.println(" ##### lattice is ready for use* ");
 
+// may not need to run this script any more, using LatticeRnodes table //
         bzsr.runScript("scripts/add_orig_rnid.sql");
         //build _BN part2: from metadata_2.sql
 
@@ -102,6 +103,7 @@ public class BayesBaseCT_SortMerge {
         //			bzsr.runScript("scripts/metadata_2_nolink.sql");
         }
         bzsr.runScript("scripts/model_manager.sql");
+        //why are we running the model manager first? //
         bzsr.runScript("scripts/metaqueries_RChain.sql");
 
         // building CT tables for Rchain

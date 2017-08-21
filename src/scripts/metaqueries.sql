@@ -176,3 +176,9 @@ Finally, propage to Rnode meta query all the metaquery components of the two ass
 This includes the count(*) aggregation
 *************************************/
 
+INSERT into MetaQueries
+SELECT distinct short_rnid as Lattice_Point, TableType, ClauseType, EntryType, Entries FROM
+    LatticeRNodes L, RNodes_pvars R, MetaQueries M
+WHERE
+    L.orig_rnid = R.rnid and M.Lattice_Point = R.pvid;
+
