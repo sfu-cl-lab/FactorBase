@@ -1,4 +1,4 @@
-USE test_BN;
+USE @database@_BN;
 SET storage_engine=INNODB;
 
 /***********************************/
@@ -59,7 +59,7 @@ SELECT DISTINCT P.pvid as Lattice_Point, 'Counts' as TableType,  'SELECT' as Cla
  /*for each pvariable in expansion, find the primary column and add it to the select list */
  /* don't use this for continuous, but do use it for the no_link case */
  INSERT into MetaQueries
- SELECT distinct E.pvid AS Lattice_Point, 'Counts' as TableType,  'SELECT' as ClauseType, 'id' as EntryType, CONCAT(E.pvid,'.',P.COLUMN_NAME, ' AS `ID(', E.pvid, ')`') AS Entries FROM
+ SELECT distinct E.pvid AS Lattice_Point, 'Counts' as TableType,  'SELECT' as ClauseType, 'id' as EntryType, CONCAT(E.pvid,'.',P.ID_COLUMN_NAME, ' AS `ID(', E.pvid, ')`') AS Entries FROM
  PVariables P, Expansions E where E.pvid = P.pvid;
  
  
