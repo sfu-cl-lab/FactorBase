@@ -22,6 +22,7 @@ public class convert_BN_families{
 	private static String dbname_BN;
 	private static String dbname_setup;
 	private static String target;
+	private static String maxRchain;
 
 
 
@@ -36,13 +37,13 @@ public class convert_BN_families{
 		//System.out.println("The MakeSetup complete.");
 
 		//STEP 1 
-		String longest_rchain = findLongestRChain(con_BN);
-		System.out.println("Longest Rchain is : " + longest_rchain );
+		String maxRchain = findLongestRChain(con_BN);
+		System.out.println("Longest Rchain is : " + maxRchain );
 		//STEP 2
 		//Firstly, read fid from setup.target table
 		target = get_target(con_setup);
 		System.out.println("The Target is : " + target);
-		target_parent_set(con_BN,target);
+		target_parent_set(con_BN,target,maxRchain);
 		System.out.println("Create view target_parent_set...");
 		//STEP 3
 		FID_pvariables(con_BN,target);
@@ -99,6 +100,7 @@ public class convert_BN_families{
 	}
 
 
+	//read fid from setup.target table
 	public static String get_target(Connection con) throws SQLException{ // should be modified after test
 
 		Statement st = con.createStatement();
@@ -117,12 +119,12 @@ public class convert_BN_families{
 
 
 	//STEP 2 : Create view for single FID in target, contains the parents of FID in FinalDAG and the child. 
-	public static void target_parent_set(Connection con, String target) throws SQLException{ // should be modified after test
+	public static void target_parent_set(Connection con, String target, String maxRchain) throws SQLException{ // should be modified after test
 
 		Statement st = con.createStatement();
 		String newsql="DROP VIEW  IF EXISTS target_parent_set; "; 
 		int rs = st.executeUpdate(newsql);
-		newsql = "CREATE VIEW target_parent_set AS SELECT parent AS Fid FROM Path_BayesNets WHERE child = '" + target + "' UNION SELECT child AS Fid FROM Path_BayesNets WHERE parent = '" + target + "' UNION SELECT '" + target + "' AS Fid; ";
+		newsql = "CREATE VIEW target_parent_set AS SELECT parent AS Fid FROM Path_BayesNets WHERE child = '" + target + "' and Rchain = '" + maxRchain + "' UNION SELECT '" + target + "' AS Fid; ";
 		rs = st.executeUpdate(newsql);
 
 	}
