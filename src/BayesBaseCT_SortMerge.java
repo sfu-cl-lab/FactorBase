@@ -777,11 +777,9 @@ public class BayesBaseCT_SortMerge {
 			
 			if ( null != rsGrounding )
 			{
-<<<<<<< HEAD
-				whereString = makeCommaSepQuery(rsGrounding, "Entries", " , ");
-=======
-				String whereString = makeCommaSepQuery(rsGrounding, "Entries", " AND ");
->>>>>>> e0786ce17690180e1a87e254adf34c6493181046
+
+				whereString = makeCommaSepQuery(rsGrounding, "Entries", " AND ");
+
 			}
 			
 			System.out.println( "whereString:" + whereString );
@@ -853,6 +851,8 @@ public class BayesBaseCT_SortMerge {
 			//  create the final query
 			String queryString = "Select " + selectString + " from " +
 								 fromString + whereString;
+								 
+//this seems unnecessarily complicated even to deal with continuos variables. OS August 22, 2017
 
 			if (!cont.equals("1"))
 				if (!GroupByString.isEmpty()) queryString = queryString + " group by"  + GroupByString;
