@@ -777,7 +777,11 @@ public class BayesBaseCT_SortMerge {
 			
 			if ( null != rsGrounding )
 			{
+<<<<<<< HEAD
 				whereString = makeCommaSepQuery(rsGrounding, "Entries", " , ");
+=======
+				String whereString = makeCommaSepQuery(rsGrounding, "Entries", " AND ");
+>>>>>>> e0786ce17690180e1a87e254adf34c6493181046
 			}
 			
 			System.out.println( "whereString:" + whereString );
@@ -894,23 +898,18 @@ public class BayesBaseCT_SortMerge {
             Statement st3 = con_CT.createStatement();
 
             //  create select query stringt
-            ResultSet rs2 = st2.executeQuery( "SELECT DISTINCT Entries FROM " +
-                                              "lattice_membership, " + "" +
-                                              "RNodes_Select_List WHERE NAME = '" +
-                                              rchain + "' AND lattice_membership." +
-                                              "orig_rnid = RNodes_Select_List.rnid;" );
-
+            ResultSet rs2 = st2.executeQuery("select distinct Entries from MetaQueries where Lattice_Point = '" + rchain + "' and ClauseType = 'SELECT';");
+                                              
             String selectString = makeCommaSepQuery(rs2, "Entries", " , ");
             //System.out.println("Select String : " + selectString);
 
             //  create from query string
-            ResultSet rs3 = st2.executeQuery("SELECT DISTINCT Entries FROM lattice_membership, RNodes_From_List WHERE NAME = '" + rchain +
-             "' AND lattice_membership.orig_rnid = RNodes_From_List.rnid;");
+            ResultSet rs3 = st2.executeQuery("select distinct Entries from MetaQueries where Lattice_Point = '" + rchain + "' and ClauseType = 'FROM';" );
             String fromString = makeCommaSepQuery(rs3, "Entries", " , ");
             //System.out.println("From String : " + fromString);
 
             //  create where query string
-            ResultSet rs4 = st2.executeQuery("SELECT DISTINCT Entries FROM lattice_membership, RNodes_Where_List WHERE NAME = '" + rchain + "' AND lattice_membership.orig_rnid = RNodes_Where_List.rnid;");
+            ResultSet rs4 = st2.executeQuery("select distinct Entries from MetaQueries where Lattice_Point = '" + rchain + "' and ClauseType = 'WHERE';" );
             String whereString = makeCommaSepQuery(rs4, "Entries", " and ");
             //System.out.println("Where String : " + whereString);
 
@@ -918,8 +917,9 @@ public class BayesBaseCT_SortMerge {
             String queryString = "Select " + selectString + " from " + fromString + " where " + whereString;
 
             //  create group by query string
+            // this seems unnecessarily complicated - isn't there always a group by clause? Okay not with continuous data, but still. Continuous probably requires a different approach. OS August 22
             if (!cont.equals("1")) {
-                ResultSet rs_6 = st2.executeQuery("SELECT DISTINCT Entries FROM lattice_membership, RNodes_GroupBy_List WHERE NAME = '" + rchain + "' AND lattice_membership.orig_rnid = RNodes_GroupBy_List.rnid;");
+                ResultSet rs_6 = st2.executeQuery("select distinct Entries from MetaQueries where Lattice_Point = '" + rchain + "' and ClauseType = 'GROUPBY';");
                 String GroupByString = makeCommaSepQuery(rs_6, "Entries", " , ");
                 //System.out.println("GroupBy String : " + GroupByString);
 
