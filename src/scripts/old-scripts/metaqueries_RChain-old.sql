@@ -1,7 +1,93 @@
 USE @database@_BN;
 SET storage_engine=INNODB;
 
+CREATE TABLE ADT_PVariables_Select_List AS 
+SELECT 
+    pvid,CONCAT(pvid, '.', COLUMN_NAME, ' AS ', 1nid) AS Entries 
+FROM
+    1Nodes
+        NATURAL JOIN
+    PVariables
+    UNION
+ /*for each pvariable in expansion, find the primary column and add it to the select list */
+ /* don't use this for continuous, but do use it for the no_link case.  */
+ /* It's awkward doing this via Rnodes, maybe can use different metadata to link pvids to database column */
+ SELECT E.pvid, CONCAT(E.pvid,'.',REFERENCED_COLUMN_NAME, ' AS `ID(', E.pvid, ')`') AS Entries FROM
+ RNodes_pvars RP, Expansions E where E.pvid = RP.pvid
+ union distinct
+ SELECT distinct
+    pvid, CONCAT('count(*)',' as "MULT"') AS Entries
+    from PVariables;
+/*WHERE
+    PVariables.index_number = 0;
+    /* use entity tables for main variables only (index = 0). 
+Other entity tables have empty Bayes nets by the main functor constraint. 
+We currently don't use this because it causes problems in the lattice. Should restrict to main functors however, for efficiency. OS July 17, 2017.
+*/
 
+create table ADT_PVariables_GroupBy_List as
+SELECT 
+    pvid,1nid AS Entries 
+FROM
+    1Nodes
+        NATURAL JOIN
+    PVariables
+    UNION
+ /*for each pvariable in expansion, find the primary column and add it to the select list */
+ /* don't use this for continuous, but do use it for the no_link case.  */
+ /* It's awkward doing this via Rnodes, maybe can use different metadata to link pvids to database column */
+SELECT E.pvid, CONCAT('`ID(', E.pvid, ')`') AS Entries FROM
+ RNodes_pvars RP, Expansions E where E.pvid = RP.pvid;
+
+/* select list = groupby list + count aggregate */
+/* columns have been renamed as 1nid ids in select list */
+
+
+/* For The Testing databses, need the primary key, June 19, 2014 */
+/* We want to add the primary key for the target instances to keep a table of all groundings at the same time. */
+
+/*CREATE TABLE Test_PVariables_Select_List AS
+SELECT pvid, column_name as Entries 
+FROM `PVariables`  natural join  `EntityTables`;
+
+create table pvid_rnode_Select_List as
+SELECT distinct pvid, CONCAT(rnid,'.',COLUMN_NAME)  as Entries  FROM FNodes_pvars_UNION_RNodes_pvars
+natural join RNodes_pvars;
+
+CREATE TABLE Test_RNodes_Select_List as 
+select Fid,rnid,Entries from FNodes_pvars_UNION_RNodes_pvars 
+natural join  pvid_rnode_Select_List;
+*/
+
+CREATE TABLE ADT_PVariables_From_List AS SELECT pvid, CONCAT('@database@.',TABLE_NAME, ' AS ', pvid) AS Entries FROM
+    PVariables;
+/*WHERE
+    index_number = 0;*/
+/* use entity tables for main variables only (index = 0). 
+Other entity tables have empty Bayes nets by the main functor constraint. */
+/* Should put this back in, see comment above */
+
+/*
+CREATE TABLE ADT_PVariables_WHERE_List AS SELECT pvid, '"MULT" > 0' AS Entries FROM
+    PVariables
+WHERE
+    index_number = 0;
+*. May 13rd*/
+/* good question, do we need to drop instances with 0 occurrences? */
+
+
+/*create table ADT_PVariables_GroupBy_List as
+SELECT pvid,
+    1nid AS Entries FROM
+    1Nodes
+        NATURAL JOIN
+    PVariables;
+/*WHERE
+    PVariables.index_number = 0;
+* May 13rd/
+/** now to build tables for the relationship nodes **/
+/*****************************
+/* making metaqueries for rnodes. See comments in query.sql */
 
 CREATE TABLE ADT_RNodes_1Nodes_Select_List AS 
 select 
