@@ -113,7 +113,7 @@ FROM @database@_setup.RNodes_pvars N, RNodes F where N.rnid = F.rnid;
 
 /* transfer pvariables. Only those that occur in functor set */
 
-create table PVariables as SELECT DISTINCT N.pvid, N.TABLE_NAME, N.index_number
+create table PVariables as SELECT DISTINCT N.pvid, N.ID_COLUMN_NAME ,N.TABLE_NAME, N.index_number
 FROM @database@_setup.PVariables N, FNodes_pvars F where F.pvid = N.pvid;
 /* next clause should no longer be necessary given that FNodes_Pvars now includes RNodes as well */
 /*union distinct 

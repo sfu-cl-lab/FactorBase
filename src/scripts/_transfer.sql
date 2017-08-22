@@ -110,7 +110,7 @@ FROM unielwin_setup.RNodes_pvars N, RNodes F where N.rnid = F.rnid;
 
 
 
-create table PVariables as SELECT DISTINCT N.pvid, N.TABLE_NAME, N.index_number
+create table PVariables as SELECT DISTINCT N.pvid, N.ID_COLUMN_NAME ,N.TABLE_NAME, N.index_number
 FROM unielwin_setup.PVariables N, FNodes_pvars F where F.pvid = N.pvid;
 
 
