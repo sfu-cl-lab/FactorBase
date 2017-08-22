@@ -347,6 +347,7 @@ public class BayesBaseCT_SortMerge {
 			for(int len = 1; len <= maxNumberOfMembers; len++)
 				BuildCT_Rnodes_counts2(len);
 			//count2 simply copies the counts to the CT tables
+			//copying the code seems very inelegant OS August 22
 
 		}
                                                                       
@@ -889,7 +890,7 @@ public class BayesBaseCT_SortMerge {
         ResultSet rs = st.executeQuery("select name as RChain from lattice_set where lattice_set.length = " + len + ";");
         while(rs.next()){
 
-            //  get pvid for further use
+            //  get rnid for further use
             String rchain = rs.getString("RChain");
             System.out.println("\n RChain : " + rchain);
 
@@ -957,11 +958,12 @@ public class BayesBaseCT_SortMerge {
      * building the RNodes_counts tables,count2 simply copies the counts to the CT tables
      */
     public static void BuildCT_Rnodes_counts2(int len) throws SQLException, IOException {
-        Statement st = con_BN.createStatement();
+       
+         Statement st = con_BN.createStatement();
         ResultSet rs = st.executeQuery("select name as RChain from lattice_set where lattice_set.length = " + len + ";");
         while(rs.next()){
 
-            //  get pvid for further use
+            //  get rnid for further use
             String rchain = rs.getString("RChain");
             System.out.println("\n RChain : " + rchain);
 
@@ -969,29 +971,19 @@ public class BayesBaseCT_SortMerge {
             Statement st2 = con_BN.createStatement();
             Statement st3 = con_CT.createStatement();
 
-            //  create select query string
-            ResultSet rs2 = st2.executeQuery("SELECT DISTINCT Entries FROM lattice_membership, RNodes_Select_List WHERE NAME = '" + rchain + "' AND lattice_membership.orig_rnid = RNodes_Select_List.rnid;");
-
-            //Exit if there are no rnodes
-            if ( !rs2.first() )
-            {
-                rs2.close();
-                st2.close();
-                st3.close();
-                break;
-            }
-
-            rs2.beforeFirst();
+            //  create select query stringt
+            ResultSet rs2 = st2.executeQuery("select distinct Entries from MetaQueries where Lattice_Point = '" + rchain + "' and ClauseType = 'SELECT';");
+                                              
             String selectString = makeCommaSepQuery(rs2, "Entries", " , ");
             //System.out.println("Select String : " + selectString);
 
             //  create from query string
-            ResultSet rs3 = st2.executeQuery("SELECT DISTINCT Entries FROM lattice_membership, RNodes_From_List WHERE NAME = '" + rchain + "' AND lattice_membership.orig_rnid = RNodes_From_List.rnid;");
+            ResultSet rs3 = st2.executeQuery("select distinct Entries from MetaQueries where Lattice_Point = '" + rchain + "' and ClauseType = 'FROM';" );
             String fromString = makeCommaSepQuery(rs3, "Entries", " , ");
             //System.out.println("From String : " + fromString);
 
             //  create where query string
-            ResultSet rs4 = st2.executeQuery("SELECT DISTINCT Entries FROM lattice_membership, RNodes_Where_List WHERE NAME = '" + rchain + "' AND lattice_membership.orig_rnid = RNodes_Where_List.rnid;");
+            ResultSet rs4 = st2.executeQuery("select distinct Entries from MetaQueries where Lattice_Point = '" + rchain + "' and ClauseType = 'WHERE';" );
             String whereString = makeCommaSepQuery(rs4, "Entries", " and ");
             //System.out.println("Where String : " + whereString);
 
@@ -999,8 +991,9 @@ public class BayesBaseCT_SortMerge {
             String queryString = "Select " + selectString + " from " + fromString + " where " + whereString;
 
             //  create group by query string
+            // this seems unnecessarily complicated - isn't there always a group by clause? Okay not with continuous data, but still. Continuous probably requires a different approach. OS August 22
             if (!cont.equals("1")) {
-                ResultSet rs_6 = st2.executeQuery("SELECT DISTINCT Entries FROM lattice_membership, RNodes_GroupBy_List WHERE NAME = '" + rchain + "' AND lattice_membership.orig_rnid = RNodes_GroupBy_List.rnid;");
+                ResultSet rs_6 = st2.executeQuery("select distinct Entries from MetaQueries where Lattice_Point = '" + rchain + "' and ClauseType = 'GROUPBY';");
                 String GroupByString = makeCommaSepQuery(rs_6, "Entries", " , ");
                 //System.out.println("GroupBy String : " + GroupByString);
 
@@ -1012,10 +1005,6 @@ public class BayesBaseCT_SortMerge {
             System.out.println("create String : " + createString );
             st3.execute(createString);
 
-            String createString_CT = "create table `"+rchain.replace("`", "") +"_CT`"+" as "+queryString;
-            System.out.println("create String : " + createString_CT );
-            st3.execute(createString_CT);
-
             //adding  covering index May 21
             //create index string
             ResultSet rs5 = st2.executeQuery("select column_name as Entries from information_schema.columns where table_schema = '"+databaseName_CT+"' and table_name = '"+rchain.replace("`", "") +"_counts';");
@@ -1024,6 +1013,13 @@ public class BayesBaseCT_SortMerge {
             //System.out.println("alter table `"+rchain.replace("`", "") +"_counts`"+" add index `"+rchain.replace("`", "") +"_Index`   ( "+IndexString+" );");
             st3.execute("alter table `"+rchain.replace("`", "") +"_counts`"+" add index `"+rchain.replace("`", "") +"_Index`   ( "+IndexString+" );");
 
+            String createString_CT = "create table `"+rchain.replace("`", "") +"_CT`"+" as "+queryString;
+            System.out.println("create String : " + createString_CT );
+            st3.execute(createString_CT);
+
+            //adding  covering index May 21
+            //create index string
+            
             ResultSet rs5_CT = st2.executeQuery("select column_name as Entries from information_schema.columns where table_schema = '"+databaseName_CT+"' and table_name = '"+rchain.replace("`", "") +"_CT';");
             String IndexString_CT = makeIndexQuery(rs5_CT, "Entries", " , ");
             //System.out.println("Index String : " + IndexString);
@@ -1255,32 +1251,34 @@ public class BayesBaseCT_SortMerge {
         //set up the join tables that represent the case where a relationship is false and its attributes are undefined //
 
         Statement st = con_BN.createStatement();
-        ResultSet rs = st.executeQuery("select rnid from RNodes ;");
+        ResultSet rs = st.executeQuery("select orig_rnid, short_rnid from LatticeRNodes ;");
 
         while(rs.next()){
-        //  get rvid
-            String rnid = rs.getString("rnid");
-                System.out.println("\n rnid : " + rnid);
+        //  get rnid
+            String short_rnid = rs.getString("short_rnid");
+            System.out.println("\n short_rnid : " + rnid);
+            String orig_rnid = rs.getString("orig_rnid");
+            System.out.println("\n orig_rnid : " + rnid);
 
             Statement st2 = con_BN.createStatement();
             Statement st3 = con_CT.createStatement();
 
             //  create ColumnString
-            ResultSet rs2 = st2.executeQuery("SELECT DISTINCT Entries FROM Rnodes_join_columnname_list WHERE rnid = '" + rnid +"';");
+            ResultSet rs2 = st2.executeQuery("select distinct Entries from MetaQueries where Lattice_Point = '" + short_rnid + "' and TableType = 'JOIN';");
 
             String ColumnString = makeCommaSepQuery(rs2, "Entries", " , ");
-            ColumnString = rnid + " varchar(5) ," + ColumnString;
+            ColumnString = orig_rnid + " varchar(5) ," + ColumnString;
             //if there's no relational attribute, then should remove the "," in the ColumnString
             if (ColumnString.length() > 0 && ColumnString.charAt(ColumnString.length()-1)==',')
             {
                 ColumnString = ColumnString.substring(0, ColumnString.length()-1);
             }
                 //System.out.println("Column String : " + ColumnString);
-            String createString = "create table `"+rnid.replace("`", "") +"_join` ("+ ColumnString +");";
+            String createString = "create table `"+short_rnid.replace("`", "") +"_join` ("+ ColumnString +");";
                 System.out.println("create String : " + createString);
 
             st3.execute(createString);
-            st3.execute("INSERT INTO `"+rnid.replace("`","")+"_join` ( "+rnid + ") values ('F');");
+            st3.execute("INSERT INTO `"+short_rnid.replace("`","")+"_join` ( "+orig_rnid + ") values ('F');");
 
             st2.close();
             st3.close();

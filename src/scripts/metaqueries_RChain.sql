@@ -1,6 +1,11 @@
 USE @database@_BN;
 SET storage_engine=INNODB;
 
+/* May 16th, last step for _CT tables, preparing the colunmname_list */
+
+INSERT into MetaQueries
+select distinct short_rnid as Lattice_Point, 'Join' as TableType, 'COLUMN' as ClauseType, 'column' as EntryType,concat(2nid,
+' varchar(5)  default ',' "N/A" ') as Entries from RNodes_2Nodes N, LatticeRNodes L where N.rnid = L.orig_rnid;
 
 
 CREATE TABLE ADT_RNodes_1Nodes_Select_List AS 
@@ -73,11 +78,6 @@ select distinct rnid, concat('`',replace(rnid, '`', ''),'_flat`') as Entries fro
 
 create table ADT_RNodes_False_WHERE_List as
 SELECT DISTINCT rnid, concat('`',replace(rnid, '`', ''),'_star`.',1nid,'=','`',replace(rnid, '`', ''),'_flat`.',1nid) as Entries from RNodes_1Nodes; 
-
-/* May 16th, last step for _CT tables, preparing the colunmname_list */
-create table Rnodes_join_columnname_list as 
-select distinct rnid,concat(2nid, ' varchar(5)  default ',' "N/A" ') as Entries from 2Nodes natural join RNodes;
-
 
 
 /*May 17th*/
