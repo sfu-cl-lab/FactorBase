@@ -777,74 +777,74 @@ public class BayesBaseCT_SortMerge {
 			
 			if ( null != rsGrounding )
 			{
-				String whereString = makeCommaSepQuery(rsGrounding, "Entries", " , ");
+				whereString = makeCommaSepQuery(rsGrounding, "Entries", " , ");
 			}
 			
 			System.out.println( "whereString:" + whereString );
 			
 			// OLD CODE
 			
-			ResultSet rsGrounding = null;
-			try
-			{
-				rsGrounding = st2.executeQuery("SELECT id FROM Groundings WHERE pvid = '"+pvid+"';");
-			}
-			catch( MySQLSyntaxErrorException e )
-			{
-				System.out.println( "No Groundings table." );
-			}
+// 			ResultSet rsGrounding = null;
+// 			try
+// 			{
+// 				rsGrounding = st2.executeQuery("SELECT id FROM Groundings WHERE pvid = '"+pvid+"';");
+// 			}
+// 			catch( MySQLSyntaxErrorException e )
+// 			{
+// 				System.out.println( "No Groundings table." );
+// 			}
 
-			String whereString = "";
+// 			String whereString = "";
 
-			if ( null != rsGrounding )
-			{
-				if ( rsGrounding.absolute(1) )
-				{
-					System.out.println( "Grounding for pvid=" + pvid + ":" +
-										rsGrounding.getString(1) );
+// 			if ( null != rsGrounding )
+// 			{
+// 				if ( rsGrounding.absolute(1) )
+// 				{
+// 					System.out.println( "Grounding for pvid=" + pvid + ":" +
+// 										rsGrounding.getString(1) );
 
-					/*
-					 * Get pvar id name
-					 */
-					Statement st0 = con_BN.createStatement();
+// 					/*
+// 					 * Get pvar id name
+// 					 */
+// 					Statement st0 = con_BN.createStatement();
 
-					ResultSet rs0 = st0.executeQuery( "SELECT TABLE_NAME FROM PVariables " +
-													  "WHERE pvid = '" + pvid + "';" );
+// 					ResultSet rs0 = st0.executeQuery( "SELECT TABLE_NAME FROM PVariables " +
+// 													  "WHERE pvid = '" + pvid + "';" );
 
-					if ( !rs0.first() )
-					{
-						System.out.println( "Failed to get pvid." );
-						return;
-					}
+// 					if ( !rs0.first() )
+// 					{
+// 						System.out.println( "Failed to get pvid." );
+// 						return;
+// 					}
 
-					String pvidTableName = rs0.getString( 1 );
+// 					String pvidTableName = rs0.getString( 1 );
 
-					rs0.close();
+// 					rs0.close();
 
-					rs0 = st0.executeQuery( "SELECT COLUMN_NAME FROM EntityTables " +
-							  				"WHERE TABLE_NAME = '" + pvidTableName + "';" );
+// 					rs0 = st0.executeQuery( "SELECT COLUMN_NAME FROM EntityTables " +
+// 							  				"WHERE TABLE_NAME = '" + pvidTableName + "';" );
 
-					if ( !rs0.first() )
-					{
-						System.out.println( "Failed to get pvid." );
-						return;
-					}
+// 					if ( !rs0.first() )
+// 					{
+// 						System.out.println( "Failed to get pvid." );
+// 						return;
+// 					}
 
-					String pvidActualId = rs0.getString( 1 );
+// 					String pvidActualId = rs0.getString( 1 );
 
-					rs0.close();
+// 					rs0.close();
 
-					st0.close();
+// 					st0.close();
 
-					whereString += " where " + pvid + "." +
-								   pvidActualId + " = " +
-								   rsGrounding.getString(1);
-					System.out.println( "whereString:" + whereString );
-				}
+// 					whereString += " where " + pvid + "." +
+// 								   pvidActualId + " = " +
+// 								   rsGrounding.getString(1);
+// 					System.out.println( "whereString:" + whereString );
+// 				}
 
-				rsGrounding.close();
-			}
-// stop old code here
+// 				rsGrounding.close();
+// 			}
+// // stop old code here
 
 			//  create the final query
 			String queryString = "Select " + selectString + " from " +
