@@ -102,8 +102,8 @@ public class BayesBaseCT_SortMerge {
             // modified on Feb. 3rd, 2015, zqian, to include rnode as columns
         //			bzsr.runScript("scripts/metadata_2_nolink.sql");
         }
-        bzsr.runScript("scripts/model_manager.sql");
-        //why are we running the model manager first? //
+      //  bzsr.runScript("scripts/model_manager.sql");
+        //why are we running the model manager first? // commenting this out for now August 22
         bzsr.runScript("scripts/metaqueries_RChain.sql");
 
         // building CT tables for Rchain
