@@ -2,11 +2,17 @@ USE @database@_BN;
 SET storage_engine=INNODB;
 
 /* May 16th, last step for _CT tables, preparing the colunmname_list */
+/* set up the join tables that represent the case where a relationship is false and its attributes are undefined */
 
 INSERT into MetaQueries
 select distinct short_rnid as Lattice_Point, 'Join' as TableType, 'COLUMN' as ClauseType, 'column' as EntryType,concat(2nid,
 ' varchar(5)  default ',' "N/A" ') as Entries from RNodes_2Nodes N, LatticeRNodes L where N.rnid = L.orig_rnid;
 
+/**************
+ * The ADT_Rnodes_x tables correspond to the flat tables in our paper
+ * That is, the counts are conditional on Rnode = T but we drop the rnid and 2nid ids.
+ * so we have to sum over them
+ */
 
 CREATE TABLE ADT_RNodes_1Nodes_Select_List AS 
 select 
@@ -35,7 +41,10 @@ SELECT DISTINCT rnid,
     SELECT distinct rnid, PV.Entries
 FROM RNodes_pvars RP, PVariables_GroupBy_List PV where RP.pvid = PV.pvid;
 
-
+/****************
+ * Now we work on the star tables. These are the ones were the Rnode value is unspecified. 
+ * so we just need the union of the pvariable columns (except for the aggregate count)
+ */
 
 
 CREATE TABLE ADT_RNodes_Star_Select_List AS 
@@ -46,6 +55,8 @@ SELECT DISTINCT rnid,
     SELECT distinct rnid, PV.Entries
 FROM RNodes_pvars RP, PVariables_GroupBy_List PV where RP.pvid = PV.pvid;
 
+/****group by list does not have the renaming that the select list does ****/
+
 /** TODO: Also need to multiply the mult columns from the different tables, e.g. 
 select (t1.mult * t2.mult * t3.mult) as "MULT"
 **/
@@ -55,9 +66,9 @@ SELECT DISTINCT rnid, concat('`',replace(pvid, '`', ''),'_counts`')
     AS Entries FROM
     RNodes_pvars;
 
-
-
-
+/********************
+ * now compute the False table. This is the difference of the star and R_counts table (R = F = R=* - R=T)
+ */
 create table ADT_RNodes_False_Select_List as
 SELECT DISTINCT rnid, concat('(`',replace(rnid, '`', ''),'_star`.MULT','-','`',replace(rnid, '`', ''),'_flat`.MULT)',' AS "MULT"') as Entries
 from RNodes
