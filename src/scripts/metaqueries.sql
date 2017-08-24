@@ -141,16 +141,16 @@ WHERE R.rnid = L.orig_rnid;
 
 INSERT into MetaQueries
 select 
-    short_rnid as Lattice_Point, 'Counts' as TableType, 'SELECT' as ClauseType, 'rtable' as EntryType, orig_rnid AS Entries
+    short_rnid as Lattice_Point, 'Counts' as TableType, 'SELECT' as ClauseType, 'rnid' as EntryType, orig_rnid AS Entries
 from
     LatticeRNodes;
 
 INSERT into MetaQueries
 SELECT DISTINCT
-short_rnid as Lattice_Point, 'Counts' as TableType, 'SELECT' as ClauseType, 'rtable' as EntryType, CONCAT(L.orig_rnid, '.', COLUMN_NAME, ' AS ', N.2nid) AS Entries
+short_rnid as Lattice_Point, 'Counts' as TableType, 'SELECT' as ClauseType, '2nid' as EntryType, CONCAT(L.orig_rnid, '.', COLUMN_NAME, ' AS ', N.2nid) AS Entries
 FROM
     LatticeRNodes L, RNodes_2Nodes RN, 2Nodes N
-where RN.rnid = L.orig_rnid and N.2nid = RN.2nid order by RN.rnid,COLUMN_NAME;
+where RN.rnid = L.orig_rnid and N.2nid = RN.2nid;
 
 
 /***************
@@ -159,13 +159,13 @@ where RN.rnid = L.orig_rnid and N.2nid = RN.2nid order by RN.rnid,COLUMN_NAME;
 
 INSERT into MetaQueries
 select 
-    short_rnid as Lattice_Point, 'Counts' as TableType, 'GROUPBY' as ClauseType, 'rtable' as EntryType, orig_rnid AS Entries
+    short_rnid as Lattice_Point, 'Counts' as TableType, 'GROUPBY' as ClauseType, 'rnid' as EntryType, orig_rnid AS Entries
 from
     LatticeRNodes;
     
 INSERT into MetaQueries
 SELECT DISTINCT
-short_rnid as Lattice_Point, 'Counts' as TableType, 'GROUPBY' as ClauseType, 'rtable' as EntryType, N.2nid AS Entries
+short_rnid as Lattice_Point, 'Counts' as TableType, 'GROUPBY' as ClauseType, '2nid' as EntryType, N.2nid AS Entries
 FROM
     LatticeRNodes L, RNodes_2Nodes RN, 2Nodes N
 where RN.rnid = L.orig_rnid and N.2nid = RN.2nid order by RN.rnid,COLUMN_NAME;

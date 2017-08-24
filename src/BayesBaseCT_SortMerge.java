@@ -1063,7 +1063,7 @@ public class BayesBaseCT_SortMerge {
             //System.out.println("Select String : " + selectString);
 
             //  create from query string
-            ResultSet rs3 = st2.executeQuery("SELECT DISTINCT Entries FROM lattice_membership, ADT_RNodes_1Nodes_FROM_List WHERE NAME = '" + rchain + "' AND lattice_membership.orig_rnid = ADT_RNodes_1Nodes_FROM_List.rnid;");
+            ResultSet rs3 = st2.executeQuery("select distinct Entries from MetaQueries where Lattice_Point = '" + rchain + "' and TableType = 'Flat' and ClauseType = 'FROM';" );
             String fromString = makeCommaSepQuery(rs3, "Entries", " , ");
             //System.out.println("From String : " + fromString);
 
@@ -1072,7 +1072,7 @@ public class BayesBaseCT_SortMerge {
 
             //  create group by query string
             if (!cont.equals("1")) {
-                ResultSet rs_6 = st2.executeQuery("SELECT DISTINCT Entries FROM lattice_membership, ADT_RNodes_1Nodes_GroupBY_List WHERE NAME = 	'" + rchain + "' AND lattice_membership.orig_rnid = ADT_RNodes_1Nodes_GroupBY_List.rnid;");
+                ResultSet rs_6 = st2.executeQuery("select distinct Entries from MetaQueries where Lattice_Point = '" + rchain + "' and TableType = 'Flat' and ClauseType = 'GROUPBY';");
                 String GroupByString = makeCommaSepQuery(rs_6, "Entries", " , ");
                 //System.out.println("GroupBy String : " + GroupByString);
 
@@ -1279,7 +1279,7 @@ public class BayesBaseCT_SortMerge {
 
             st3.execute(createString);
             st3.execute("INSERT INTO `"+short_rnid.replace("`","")+"_join` ( "+orig_rnid + ") values ('F');");
-
+// should probably make this an insertion in the script: add a column for rnid with default value 'F' OS August 24, 2017
             st2.close();
             st3.close();
 

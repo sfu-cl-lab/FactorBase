@@ -5,7 +5,7 @@ SET storage_engine=INNODB;
 /* set up the join tables that represent the case where a relationship is false and its attributes are undefined */
 
 INSERT into MetaQueries
-select distinct short_rnid as Lattice_Point, 'Join' as TableType, 'COLUMN' as ClauseType, 'column' as EntryType,concat(2nid,
+select distinct short_rnid as Lattice_Point, 'Join' as TableType, 'COLUMN' as ClauseType, '2nid' as EntryType, concat(2nid,
 ' varchar(5)  default ',' "N/A" ') as Entries from RNodes_2Nodes N, LatticeRNodes L where N.rnid = L.orig_rnid;
 
 /**************
@@ -13,6 +13,32 @@ select distinct short_rnid as Lattice_Point, 'Join' as TableType, 'COLUMN' as Cl
  * That is, the counts are conditional on Rnode = T but we drop the rnid and 2nid ids.
  * so we have to sum over them
  */
+
+/**********************************
+ * Generating metqueries for the flat table.
+ * For each rnode, the flat table drops the rnid and the 2nids from the rnodes_counts table. Then it sums up the remaining mults to get marginal sums.
+ */
+
+/* the base table is the rnode counts
+ * 
+ */
+INSERT into MetaQueries
+select DISTINCT 
+    short_rnid as Lattice_Point, 'Flat' as TableType, 'FROM' as ClauseType , 'table' as EntryType, 
+    concat('`',replace(short_rnid, '`', ''),'_counts`') AS Entries
+from LatticeRNodes;
+
+/********
+ * copy group by columns from Rnodes_counts to Rnodes_flat
+ * The groupby columns are renamed properly and do not contain the aggregate function
+ * do NOT copy rnodes and associated 2nodes
+ */
+INSERT into MetaQueries
+SELECT distinct Lattice_Point, 'Flat' as TableType, ClauseType, EntryType, Entries
+FROM LatticeRNodes L, MetaQueries M where L.short_rnid = M.Lattice_Point and TableType = 'Counts' and ClauseType = 'GROUPBY'
+and EntryType <> 'rnid' and EntryType <> '2nid';
+
+
 
 CREATE TABLE ADT_RNodes_1Nodes_Select_List AS 
 select 
