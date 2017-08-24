@@ -665,7 +665,8 @@ public class BayesBaseCT_SortMerge {
 				//Sort_merge5.sort_merge(cur_star_Table,cur_flat_Table,cur_false_Table,con3);
 				//Sort_merge4.sort_merge(cur_star_Table,cur_flat_Table,cur_false_Table,con3);
 				Sort_merge3.sort_merge(cur_star_Table,cur_flat_Table,cur_false_Table,con_CT);
-
+                 // a separate procedure for computing the false table as the mult difference between star and flat
+                 // trying to optimize this big join
 				
 				 //adding  covering index May 21
 				//create index string
@@ -683,6 +684,7 @@ public class BayesBaseCT_SortMerge {
 				//System.out.println("select column_name as Entries from information_schema.columns where table_schema = '"+databaseName3+"' and table_name = '"+cur_CT_Table.replace("`","")+"';");
 				System.out.println("CT Join String : " + CTJoinString);
 				
+				//join false table with join table to add in rnid (= F) and 2nid (= n/a). then can union with CT table
 				String QueryStringCT = "select "+CTJoinString+" from "+cur_CT_Table + " union " + "select "+CTJoinString+" from " + cur_false_Table +", `" + rnid_or.replace("`", "") +"_join`";
 				//System.out.println("\n Query String for CT Table: "+ QueryStringCT);
 				
@@ -1058,7 +1060,7 @@ public class BayesBaseCT_SortMerge {
 
 
             //  create select query string
-            ResultSet rs2 = st2.executeQuery("SELECT DISTINCT Entries FROM lattice_membership, ADT_RNodes_1Nodes_Select_List  WHERE NAME = '" + rchain + "' AND lattice_membership.orig_rnid = ADT_RNodes_1Nodes_Select_List.rnid;");
+            ResultSet rs2 = st2.executeQuery("select distinct Entries from MetaQueries where Lattice_Point = '" + rchain + "' and TableType = 'Flat' and ClauseType = 'SELECT';");
             String selectString = makeCommaSepQuery(rs2, "Entries", " , ");
             //System.out.println("Select String : " + selectString);
 
@@ -1124,17 +1126,21 @@ public class BayesBaseCT_SortMerge {
             Statement st3 = con_CT.createStatement();
 
             //  create select query string
-            ResultSet rs2 = st2.executeQuery("SELECT DISTINCT Entries FROM lattice_membership, ADT_RNodes_Star_Select_List  WHERE NAME = '" + rchain + "' AND lattice_membership.orig_rnid = ADT_RNodes_Star_Select_List.rnid;");
+            
+            ResultSet rs2 = st2.executeQuery("select distinct Entries from MetaQueries where Lattice_Point = '" + rchain + "' and TableType = 'Star' and ClauseType = 'SELECT';");
             String selectString = makeCommaSepQuery(rs2, "Entries", " , ");
             //System.out.println("Select String : " + selectString);
 
+
             //  create from MULT string
-            ResultSet rs3 = st2.executeQuery("SELECT DISTINCT Entries FROM lattice_membership, ADT_RNodes_Star_From_List WHERE NAME = '" + rchain + "' AND lattice_membership.orig_rnid = ADT_RNodes_Star_From_List.rnid;");
+            ResultSet rs3 = st2.executeQuery("select distinct Entries from MetaQueries where Lattice_Point = '" + rchain + "' and TableType = 'Star' and ClauseType = 'FROM';");
             String MultString = makeStarSepQuery(rs3, "Entries", " * ");
+            //makes the aggregate function to be used in the select clause //
             //System.out.println("Mult String : " + MultString+ " as `MULT`");
+            // looks like rs3 and rs4 contain the same data. Ugly! OS August 24, 2017
 
             //  create from query string
-            ResultSet rs4 = st2.executeQuery("SELECT DISTINCT Entries FROM lattice_membership, ADT_RNodes_Star_From_List WHERE NAME = '" + rchain + "' AND lattice_membership.orig_rnid = ADT_RNodes_Star_From_List.rnid;");
+            ResultSet rs4 = st2.executeQuery("select distinct Entries from MetaQueries where Lattice_Point = '" + rchain + "' and TableType = 'Star' and ClauseType = 'FROM';");
             String fromString = makeCommaSepQuery(rs4, "Entries", " , ");
             //System.out.println("From String : " + fromString);
 
@@ -1195,7 +1201,8 @@ public class BayesBaseCT_SortMerge {
     		//Sort_merge5.sort_merge("`"+rchain.replace("`", "")+"_star`","`"+rchain.replace("`", "") +"_flat`","`"+rchain.replace("`", "") +"_false`",con3);
             //Sort_merge4.sort_merge("`"+rchain.replace("`", "")+"_star`","`"+rchain.replace("`", "") +"_flat`","`"+rchain.replace("`", "") +"_false`",con3);
             Sort_merge3.sort_merge("`"+rchain.replace("`", "")+"_star`","`"+rchain.replace("`", "") +"_flat`","`"+rchain.replace("`", "") +"_false`",con_CT);
-
+            // computing false table as mult difference between star and false. Separate procedure for optimizing this big join.
+            
           	//adding  covering index May 21
             //create index string
             ResultSet rs15 = st2.executeQuery("select column_name as Entries from information_schema.columns where table_schema = '"+databaseName_CT+"' and table_name = '"+rchain.replace("`", "") +"_false';");
@@ -1214,6 +1221,7 @@ public class BayesBaseCT_SortMerge {
             String UnionColumnString = makeUnionSepQuery(rs5, "Entries", " , ");
             //System.out.println("Union Column String : " + UnionColumnString);
 
+            //join false table with join table to introduce rnid (=F) and 2nids (= n/a). Then union result with counts table.
             String createCTString = "create table `"+rchain.replace("`", "") +"_CT`"+" as select "+UnionColumnString+ " from `"+rchain.replace("`", "") +"_counts` union " +
             "select "+UnionColumnString+" from `"+rchain.replace("`", "") +"_false`, `"+rchain.replace("`", "") +"_join`;" ;
             System.out.println("\n create CT table String : " + createCTString );
