@@ -75,6 +75,7 @@ select (t1.mult * t2.mult * t3.mult) as "MULT". Currently done in code
 **/
 
 /***
+ * working on from list
  * insert all count tables from associated populations in from list for join
  */
 INSERT into MetaQueries
@@ -121,138 +122,133 @@ SELECT DISTINCT rnid, concat('`',replace(rnid, '`', ''),'_star`.',1nid,'=','`',r
  */
 
 
-/** TODO: Also need to multiply the mult columns from the different tables, e.g. 
-select (t1.mult * t2.mult * t3.mult) as "MULT"
-**/
-CREATE TABLE RChain_pvars AS
-select  distinct 
-    lattice_membership.name as rchain, 
-    pvid 
-from 
-    lattice_membership, RNodes_pvars 
-where 
-    RNodes_pvars.rnid = lattice_membership.orig_rnid;
- 
 /***** I hope this follows our paper from http://www.cs.sfu.ca/~oschulte/files/pubs/Qian2014.pdf */
 /* Star table to be used in Pivot operation */
-
-CREATE TABLE ADT_RChain_Star_From_List AS 
+    /* lattice_rel child = current rchain
+     * lattice_rel removed = current rnodeid i
+     * lattice_rel . parent = curent rchain - current rnodeid
+     */ 
+/* the code needs us to record both the long rchain and the current rnodeid
+ * We do that by using EntryType for the current rnode is. A bit awkward
+ */
+/*****************
+ * start with from list
+ */
+    
+CREATE or REPLACE VIEW RChain_pvars AS
+select  distinct 
+    M.name as rchain, 
+    pvid 
+from 
+    lattice_membership M, LatticeRNodes L, RNodes_pvars R
+where 
+    R.rnid = L.orig_rnid and L.short_rnid = M.member;
+    
+insert into MetaQueries
 SELECT DISTINCT 
-    lattice_rel.child as rchain, 
-    lattice_rel.orig_rnid as rnid, 
+    lattice_rel.child as Lattice_Point, 
+    'STAR' as TableType, 
+    'FROM' as ClauseType,
+    lattice_rel.removed as EntryType, 
     /** rnid = lattice_rel.removed should now point to the R_i of our paper **/
+    /* a bit awkward to call it entry type */
     concat('`',replace(lattice_rel.parent,'`',''),'_CT`')  AS Entries 
     /* current CT should be like conditioning on all other relationships being true */
+    /* the parent represents the shortened Rchain */
 FROM
     lattice_rel
 where 
     lattice_rel.parent <>'EmptySet'
-union
+    /* i.e. child = rchain has length > 1; */
+
+
+insert into MetaQueries
 SELECT DISTINCT 
-    lattice_rel.child as rchain, 
-    lattice_rel.orig_rnid as rnid, 
-concat('`',replace(RNodes_pvars.pvid, '`', ''),'_counts`')    AS Entries 
+    LR.child as Lattice_Point, 
+    'STAR' as TableType, 
+    'FROM' as ClauseType,
+    LR.removed as EntryType,
+concat('`',replace(R.pvid, '`', ''),'_counts`')    AS Entries 
 /* should check that this includes expansion for pvid = course 0 */
 FROM
-    lattice_rel, RNodes_pvars
-where lattice_rel.parent <>'EmptySet'
-and RNodes_pvars.rnid = lattice_rel.orig_rnid and
-RNodes_pvars.pvid not in (select pvid from RChain_pvars where RChain_pvars.rchain =     lattice_rel.parent)
+    lattice_rel LR, LatticeRNodes L, RNodes_pvars R
+where LR.parent <>'EmptySet' and LR.removed = L.short_rnid and L.orig_rnid = R.rnid and
+R.pvid not in (select pvid from RChain_pvars where RChain_pvars.rchain = LR.parent);
 /* this seems to implement the "differing first-order variable rule" from the paper */
-;
+/* find pvids that are associated with the removed rnode but not with the shortened rchain = parent */
+
+/***********
+ * now doing the where list for the from list.
+ * simply need to find the rows in the CT table for the shortened Rchain where all rnodes are set to T
+ */
 
 
-CREATE TABLE ADT_RChain_Star_Where_List AS 
+insert into MetaQueries
 SELECT DISTINCT 
-    lattice_rel.child as rchain, 
-    lattice_rel.orig_rnid as rnid, 
-    concat(lattice_membership.orig_rnid,' = "T"')  AS Entries 
+     lattice_rel.child as Lattice_Point, 
+    'STAR' as TableType, 
+    'WHERE' as ClauseType,
+    lattice_rel.removed as EntryType, 
+    concat(L.orig_rnid,' = "T"')  AS Entries 
 FROM
-    lattice_rel,    lattice_membership
+    lattice_rel,    lattice_membership, LatticeRNodes L
 where 
     lattice_rel.child = lattice_membership.name
-    and  lattice_membership.orig_rnid > lattice_rel.orig_rnid
+    and  lattice_membership.member > lattice_rel.removed
     /* going through rnids in order, find the rows in current CT-table where the remaining rnids are true */
-    and lattice_rel.parent <>'EmptySet';
+    and lattice_rel.parent <>'EmptySet'
+    and L.short_rnid = lattice_membership.member;
 
+/****************
+ * now the select clause. This finds the group by columns for all rnids in the shortened parent rchain
+ */
 
-
-CREATE TABLE ADT_RChain_Star_Select_List AS 
+insert into MetaQueries
 SELECT DISTINCT 
-    lattice_rel.child AS rchain,
-    lattice_rel.orig_rnid AS rnid,
-    RNodes_GroupBy_List.Entries 
+    lattice_rel.child AS Lattice_Point, 
+    lattice_rel.removed AS EntryType,
+    'STAR' as TableType, 
+    'SELECT' as ClauseType,
+    M.Entries 
 FROM
     lattice_rel,
     lattice_membership,
-    RNodes_GroupBy_List
+    MetaQueries M
 WHERE
     lattice_rel.parent <> 'EmptySet'
         AND lattice_membership.name = lattice_rel.parent
-        AND RNodes_GroupBy_List.rnid = lattice_membership.orig_rnid 
-/* find all elements in the groupBy List for the big parent rchain */
-/* should this be just the ones for groupby except for the removed rnid? */
-UNION SELECT DISTINCT
-    lattice_rel.child AS rchain,
-    lattice_rel.orig_rnid AS rnid,
-    1Nodes.1nid AS Entries
+        AND M.Lattice_Point = lattice_membership.`member`
+        AND M.ClauseType = 'GROUPBY'
+        AND M.TableType = 'COUNTS';
+/* find all elements in the groupBy List for the shortened parent rchain */
+
+    insert into MetaQueries
+    SELECT DISTINCT 
+    LR.child as Lattice_Point, 
+    'STAR' as TableType, 
+    'SELECT' as ClauseType,
+    LR.removed as EntryType,
+    M.Entries 
 FROM
-    lattice_rel,
-    RNodes_pvars,
-    1Nodes
-WHERE
-    lattice_rel.parent <> 'EmptySet'
-        AND RNodes_pvars.rnid = lattice_rel.orig_rnid
-        AND RNodes_pvars.pvid = 1Nodes.pvid
-        AND 1Nodes.pvid NOT IN (SELECT 
-            pvid
-        FROM
-            RChain_pvars
-        WHERE
-            RChain_pvars.rchain = lattice_rel.parent) 
-/* July 19, 2017 O.S. If we are going to add the 1nodes for the pvariable we also need to add the ID column if any*/
-/* can this just be the PVariables GroupBY list? Like below for the empty parent case? */
-UNION SELECT DISTINCT
-    lattice_rel.child AS rchain,
-    lattice_rel.orig_rnid AS rnid,
-    CONCAT('`ID(', E.pvid, ')`') AS Entries
-FROM
-    lattice_rel,
-    RNodes_pvars,
-    Expansions E
-WHERE
-    lattice_rel.parent <> 'EmptySet'
-        AND RNodes_pvars.rnid = lattice_rel.orig_rnid
-        AND RNodes_pvars.pvid = E.pvid
-        AND E.pvid NOT IN (SELECT 
-            pvid
-        FROM
-            RChain_pvars
-        WHERE
-            RChain_pvars.rchain = lattice_rel.parent) 
-/* The case where the parent is empty.*/
-UNION SELECT DISTINCT
-    lattice_rel.orig_rnid AS rchain,
-    lattice_rel.orig_rnid AS rnid,
-    1Nodes.1nid AS Entries
-FROM
-    lattice_rel,
-    RNodes_pvars,
-    1Nodes
-WHERE
-    lattice_rel.parent = 'EmptySet'
-        AND RNodes_pvars.rnid = lattice_rel.orig_rnid
-        AND RNodes_pvars.pvid = 1Nodes.pvid 
-UNION DISTINCT SELECT DISTINCT
-    lattice_rel.orig_rnid AS rchain,
-    lattice_rel.orig_rnid AS rnid,
-    PV.Entries
-FROM
-    lattice_rel,
-    RNodes_pvars RP,
-    PVariables_GroupBy_List PV
-    /* check that PVariablesGroupByList includes the ID column */
-WHERE
-    lattice_rel.parent = 'EmptySet'
-        AND RP.rnid = lattice_rel.orig_rnid
-        AND RP.pvid = PV.pvid;
+    lattice_rel LR, LatticeRNodes L, RNodes_pvars R
+where LR.parent <>'EmptySet' and LR.removed = L.short_rnid and L.orig_rnid = R.rnid and
+R.pvid not in (select pvid from RChain_pvars where RChain_pvars.rchain = LR.parent)
+AND M.Lattice_Point = R.pvid
+AND M.ClauseType = 'GROUPBY'
+AND M.TableType = 'COUNTS';
+ 
+/* The case where the parent is empty.*
+ * In this case the rchain child contains just one rnid.
+ * in this case we just insert the select entries from the star table for the rnide.
+ * Not sure we need this - should try leaving it out. OS. August 25, 2017
+ * 
+ */
+ insert into MetaQueries
+SELECT DISTINCT 
+    lattice_rel.removed AS Lattice_Point, 
+    lattice_rel.removed AS EntryType,
+    'STAR' as TableType, 
+    'SELECT' as ClauseType,
+    M.Entries 
+FROM lattice_rel, MetaQueries M
+WHERE lattice_rel.parent = 'EmptySet' AND M.Lattice_Point = lattice_rel.removed AND M.TableType = 'STAR' and M.ClauseType = 'SELECT';

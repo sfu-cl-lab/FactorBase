@@ -84,7 +84,7 @@ public class BayesBaseCT_SortMerge {
 
         System.out.println(" ##### lattice is ready for use* ");
 
-// may not need to run this script any more, using LatticeRnodes table //
+// may not need to run this script any more, using LatticeRnodes table OS August 25, 2017//
         bzsr.runScript("scripts/add_orig_rnid.sql");
         //build _BN part2: from metadata_2.sql
 
@@ -569,41 +569,44 @@ public class BayesBaseCT_SortMerge {
 			// initialize the cur_CT_Table, at very beginning we will use _counts table to create the _flat table
 			String 	cur_CT_Table="`"+rchain.replace("`", "")+"_counts`";  
 			System.out.println(" cur_CT_Table : " + cur_CT_Table);
+			// counts represents the ct tables where all relationships in Rchain are true
 
 			//  create new statement
 			Statement st1 = con_BN.createStatement();
-			ResultSet rs1 = st1.executeQuery("SELECT distinct parent, removed as rnid FROM lattice_rel  where child = '"+rchain+"' order by rnid ASC;"); // memebers of rchain
+			ResultSet rs1 = st1.executeQuery("SELECT distinct parent, removed FROM lattice_rel  where child = '"+rchain+"' order by removed ASC;"); // members of rchain
 			
 			while(rs1.next())
 			{		
 				long l2 = System.currentTimeMillis(); 
 				String parent = rs1.getString("parent");
 				//	System.out.println("\n parent : " + parent);
-				String rnid = rs1.getString("rnid");
-				//	System.out.println("\n rnid : " + rnid);	
-				String BaseName = "`"+rchain.replace("`", "")+"_"+rnid.replace("`", "")+"`";
+				String removed = rs1.getString("removed");
+				//	System.out.println("\n removed : " + removed);	
+				String BaseName = "`"+rchain.replace("`", "")+"_"+removed.replace("`", "")+"`";
 				System.out.println(" BaseName : " + BaseName );
 				
 				Statement st2 = con_BN.createStatement();
 				Statement st3 = con_CT.createStatement();
 					
 				//  create select query string	
-				ResultSet rs2 = st2.executeQuery("SELECT DISTINCT Entries FROM ADT_RChain_Star_Select_List WHERE rchain = '" + rchain + "' and '"+rnid+"' = rnid;");
+				
+							
+				ResultSet rs2 = st2.executeQuery("SELECT DISTINCT Entries FROM MetaQueries WHERE Lattice_Point = '" + rchain + "' and '"+removed+"' = EntryType and ClauseType = 'SELECT';");
 				String selectString = makeCommaSepQuery(rs2, "Entries", " , ");			
 				//	System.out.println("Select String : " + selectString);
 				rs2.close();
 				//  create mult query string
-				ResultSet rs3 = st2.executeQuery("SELECT DISTINCT Entries FROM  ADT_RChain_Star_From_List WHERE rchain = '" + rchain + "' and '"+rnid+"' = rnid;");
+				ResultSet rs3 = st2.executeQuery("SELECT DISTINCT Entries FROM MetaQueries WHERE Lattice_Point = '" + rchain + "' and '"+removed+"' = EntryType and ClauseType = 'FROM';");
 				String MultString = makeStarSepQuery(rs3, "Entries", " * ");
 				//	System.out.println("Mult String : " + MultString+ " as `MULT`");
 				rs3.close();
 				//  create from query string
-				ResultSet rs4 = st2.executeQuery("SELECT DISTINCT Entries FROM  ADT_RChain_Star_From_List WHERE rchain = '" + rchain + "' and '"+rnid+"' = rnid;");
+				ResultSet rs4 = st2.executeQuery("SELECT DISTINCT Entries FROM MetaQueries WHERE Lattice_Point = '" + rchain + "' and '"+removed+"' = EntryType and ClauseType = 'FROM';");
 				String fromString = makeCommaSepQuery(rs4, "Entries", " , ");
 				//	System.out.println("From String : " + fromString);			
 				rs4.close();
 				//  create where query string
-				ResultSet rs5 = st2.executeQuery("SELECT DISTINCT Entries FROM  ADT_RChain_Star_Where_List WHERE rchain = '" + rchain + "' and '"+rnid+"' = rnid;");
+				ResultSet rs5 = st2.executeQuery("SELECT DISTINCT Entries FROM MetaQueries WHERE Lattice_Point = '" + rchain + "' and '"+removed+"' = EntryType and ClauseType = 'WHERE';");
 				String whereString = makeCommaSepQuery(rs5, "Entries", " and ");
 				//	System.out.println("Where String : " + whereString);
 				rs5.close();
