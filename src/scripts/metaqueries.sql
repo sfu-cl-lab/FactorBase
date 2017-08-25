@@ -172,7 +172,7 @@ where RN.rnid = L.orig_rnid and N.2nid = RN.2nid order by RN.rnid,COLUMN_NAME;
     
  
 /*********************
-Finally, propage to Rnode meta query all the metaquery components of the two associated population variables
+Propagate to Rnode meta query all the metaquery components of the two associated population variables
 This includes the count(*) aggregation
 *************************************/
 
@@ -181,4 +181,16 @@ SELECT distinct short_rnid as Lattice_Point, TableType, ClauseType, EntryType, E
     LatticeRNodes L, RNodes_pvars R, MetaQueries M
 WHERE
     L.orig_rnid = R.rnid and M.Lattice_Point = R.pvid;
+    
+/***********
+ * Build the whole Rchain
+ * Propagate Rnode meta queries to Rchains containing the rnode. make sure we do this for proper rchains only
+ */
+
+
+ INSERT into MetaQueries
+ select L.name AS Lattice_Point, 'Counts' as TableType, M.ClauseType, M.EntryType, M.Entries
+ from lattice_membership L, MetaQueries M
+ where L.name <> L.`member` and Lattice_Point = L.`member` and M.TableType = 'COUNTS';
+ 
 
