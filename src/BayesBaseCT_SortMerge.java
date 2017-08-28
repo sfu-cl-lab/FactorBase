@@ -1267,9 +1267,9 @@ public class BayesBaseCT_SortMerge {
         while(rs.next()){
         //  get rnid
             String short_rnid = rs.getString("short_rnid");
-            System.out.println("\n short_rnid : " + rnid);
+            System.out.println("\n short_rnid : " + short_rnid);
             String orig_rnid = rs.getString("orig_rnid");
-            System.out.println("\n orig_rnid : " + rnid);
+            System.out.println("\n orig_rnid : " + orig_rnid);
 
             Statement st2 = con_BN.createStatement();
             Statement st3 = con_CT.createStatement();
