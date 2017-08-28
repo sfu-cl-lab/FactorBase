@@ -29,9 +29,10 @@ CREATE TABLE MetaQueries (
 --- map Pvariables to entity tables ---
 
 INSERT into MetaQueries
-SELECT distinct pvid as Lattice_Point, 'Counts' as TableType, 'FROM' as ClauseType, 'table' as EntryType, CONCAT(TABLE_NAME, ' AS ', pvid) AS Entries FROM
+SELECT distinct pvid as Lattice_Point, 'Counts' as TableType, 'FROM' as ClauseType, 'table' as EntryType, CONCAT('@database@.',TABLE_NAME, ' AS ', pvid) AS Entries FROM
     PVariables;
     
+   
 /* August 18, 2017 OS. Could consider optimizing by using only main pvids */
     /* WHERE
     index_number = 0;*/
