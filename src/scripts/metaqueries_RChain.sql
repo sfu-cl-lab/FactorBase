@@ -17,7 +17,7 @@ select distinct short_rnid as Lattice_Point, 'Join' as TableType, 'COLUMN' as Cl
  * That is, the counts are conditional on Rnode = T but we drop the rnid and 2nid ids.
  * so we have to sum over them
  */
- */
+
 
 /* the base table is the rnode counts
  * 
@@ -158,7 +158,7 @@ SELECT DISTINCT
 FROM
     lattice_rel
 where 
-    lattice_rel.parent <>'EmptySet'
+    lattice_rel.parent <>'EmptySet';
     /* i.e. child = rchain has length > 1; */
 
 
@@ -230,7 +230,8 @@ WHERE
     LR.removed as EntryType,
     M.Entries 
 FROM
-    lattice_rel LR, LatticeRNodes L, RNodes_pvars R
+    lattice_rel LR, LatticeRNodes L, RNodes_pvars R,
+    MetaQueries M
 where LR.parent <>'EmptySet' and LR.removed = L.short_rnid and L.orig_rnid = R.rnid and
 R.pvid not in (select pvid from RChain_pvars where RChain_pvars.rchain = LR.parent)
 AND M.Lattice_Point = R.pvid
