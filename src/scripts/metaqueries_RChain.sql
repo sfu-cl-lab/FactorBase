@@ -222,7 +222,7 @@ WHERE
         AND lattice_membership.name = lattice_rel.parent
         AND M.Lattice_Point = lattice_membership.`member`
         AND M.ClauseType = 'GROUPBY'
-        AND M.TableType = 'COUNTS'
+        AND M.TableType = 'COUNTS';
 
 
 /* find all elements in the groupBy List for the shortened parent rchain */
