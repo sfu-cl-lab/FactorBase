@@ -1,9 +1,10 @@
-USE @database@_BN;
+USE unielwin_BN;
 SET storage_engine=INNODB;
 /******************************************************
-Also, these attributes become nodes in the Bayes net for later analysis.
+find columns associated with Rnodes. These should be the same as used in group by clauses except that you also use the main auxilliary information.
+TODO: should reconcile Rnodes_BN_NOdes and Path_BN_Nodes with metaqueries at some point
 ****/
-CREATE TABLE RNodes_BN_Nodes AS 
+/*CREATE TABLE RNodes_BN_Nodes AS 
 SELECT DISTINCT 
     rnid, 1nid AS Fid, FNodes.main 
 FROM
@@ -19,8 +20,15 @@ FROM
         NATURAL JOIN
     RNodes
     /*OS: next add the rnode as a functor node for itself Oct 13, 2016; */
-    union
+  /*  union
     select distinct rnid, rnid as Fid, main from RNodes;
+    */
+
+CREATE TABLE RNodes_BN_Nodes AS select distinct rnid, 1nid, N.main from RNodes_pvars R, PVariables P, `1Nodes` N where R.pvid = P.pvid and R.pvid = N.pvid
+UNION DISTINCT
+select distinct rnid, 2nid as Fid, main from RNodes_2Nodes
+UNION DISTINCT
+select distinct rnid, rnid as Fid, main from RNodes;
 
 
 CREATE TABLE  Entity_BayesNets (
@@ -45,7 +53,7 @@ CREATE TABLE Path_BayesNets (
 CREATE TABLE NewLearnedEdges LIKE Path_BayesNets;
 
 /****************
-Create tables that allow us to represent background knowledge
+Propagate BNnodes to rchains
 *****************/
 
 /*CREATE OR REPLACE VIEW Path_BN_nodes AS*/
@@ -61,6 +69,9 @@ SELECT DISTINCT lattice_membership.name AS Rchain, Fid AS node
 
 ALTER TABLE Path_BN_nodes ADD INDEX `HashIndex`  (`Rchain`,`node`); /* May 7*/
 
+/******************
+ * Create tables that allow us to represent background knowledge. 
+ */
 
 CREATE TABLE IF NOT EXISTS Knowledge_Forbidden_Edges like Path_BayesNets;
 CREATE TABLE IF NOT EXISTS Knowledge_Required_Edges like Path_BayesNets;
