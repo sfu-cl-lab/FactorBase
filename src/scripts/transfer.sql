@@ -38,7 +38,7 @@ WHERE
      /*map the 2nodes to rnodes for the given 2Nodes in the functor set*/
     
 CREATE TABLE RNodes_2Nodes AS 
-select N.rnid, N.`2nid` from @database@_setup.RNodes_2Nodes N, 2Nodes F where N.2nid = F.2nid;
+select N.rnid, N.`2nid`, N.main from @database@_setup.RNodes_2Nodes N, 2Nodes F where N.2nid = F.2nid;
 
      /*copy the rnodes for the functor set*/
     

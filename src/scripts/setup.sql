@@ -464,6 +464,9 @@ FROM
 
 /* ALTER TABLE RNodes ADD PRIMARY KEY (orig_rnid);
  * OS August 15 can exceed byte limit. Maybe better use table name, pvid, pvid as primary key
+ * //zqian, max key length limitation "The maximum column size is 767 bytes", 
+enable "innodb_large_prefix" to allow index key prefixes longer than 767 bytes (up to 3072 bytes).
+ Oct 17, 2013 
  */
  /* ALTER TABLE `RNodes` ADD INDEX `Index`  (`pvid1` ASC, `pvid2` ASC, `TABLE_NAME` ASC) ;/*July 17 vidhij--moved from metadata_2*/
 
@@ -599,7 +602,7 @@ CREATE TABLE TargetNode (
 /*********************************************************************/
 
 /** now link each rnode 2node, i.e. each attribute of the relationship to the associated 2nodes **/
-create or replace view RNodes_2Nodes as select RNodes.rnid, 2Nodes.2nid from 2Nodes, RNodes where 2Nodes.TABLE_NAME = RNodes.TABLE_NAME; 
+create or replace view RNodes_2Nodes as select RNodes.rnid, 2Nodes.2nid, 2Nodes.main from 2Nodes, RNodes where 2Nodes.TABLE_NAME = RNodes.TABLE_NAME; 
 
 /*** for each functor node, record which population variables appear in it ***/
 
