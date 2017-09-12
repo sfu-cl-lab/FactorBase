@@ -581,9 +581,9 @@ public class BayesBaseCT_SortMerge {
 			{		
 				long l2 = System.currentTimeMillis(); 
 				String parent = rs1.getString("parent");
-				//	System.out.println("\n parent : " + parent);
+					System.out.println("\n parent : " + parent);
 				String removed = rs1.getString("removed");
-				//	System.out.println("\n removed : " + removed);	
+					System.out.println("\n removed : " + removed);	
 				String BaseName = "`"+rchain.replace("`", "")+"_"+removed.replace("`", "")+"`";
 				System.out.println(" BaseName : " + BaseName );
 				
@@ -593,24 +593,24 @@ public class BayesBaseCT_SortMerge {
 				//  create select query string	
 				
 							
-				ResultSet rs2 = st2.executeQuery("SELECT DISTINCT Entries FROM MetaQueries WHERE Lattice_Point = '" + rchain + "' and '"+removed+"' = EntryType and ClauseType = 'SELECT';");
+				ResultSet rs2 = st2.executeQuery("SELECT DISTINCT Entries FROM MetaQueries WHERE Lattice_Point = '" + rchain + "' and '"+removed+"' = EntryType and ClauseType = 'SELECT' and TableType = 'Star';");
 				String selectString = makeCommaSepQuery(rs2, "Entries", " , ");			
-				//	System.out.println("Select String : " + selectString);
+					System.out.println("Select String : " + selectString);
 				rs2.close();
 				//  create mult query string
-				ResultSet rs3 = st2.executeQuery("SELECT DISTINCT Entries FROM MetaQueries WHERE Lattice_Point = '" + rchain + "' and '"+removed+"' = EntryType and ClauseType = 'FROM';");
+				ResultSet rs3 = st2.executeQuery("SELECT DISTINCT Entries FROM MetaQueries WHERE Lattice_Point = '" + rchain + "' and '"+removed+"' = EntryType and ClauseType = 'FROM' and TableType = 'Star';");
 				String MultString = makeStarSepQuery(rs3, "Entries", " * ");
-				//	System.out.println("Mult String : " + MultString+ " as `MULT`");
+					System.out.println("Mult String : " + MultString+ " as `MULT`");
 				rs3.close();
 				//  create from query string
-				ResultSet rs4 = st2.executeQuery("SELECT DISTINCT Entries FROM MetaQueries WHERE Lattice_Point = '" + rchain + "' and '"+removed+"' = EntryType and ClauseType = 'FROM';");
+				ResultSet rs4 = st2.executeQuery("SELECT DISTINCT Entries FROM MetaQueries WHERE Lattice_Point = '" + rchain + "' and '"+removed+"' = EntryType and ClauseType = 'FROM' and TableType = 'Star';");
 				String fromString = makeCommaSepQuery(rs4, "Entries", " , ");
-				//	System.out.println("From String : " + fromString);			
+					System.out.println("From String : " + fromString);			
 				rs4.close();
 				//  create where query string
-				ResultSet rs5 = st2.executeQuery("SELECT DISTINCT Entries FROM MetaQueries WHERE Lattice_Point = '" + rchain + "' and '"+removed+"' = EntryType and ClauseType = 'WHERE';");
+				ResultSet rs5 = st2.executeQuery("SELECT DISTINCT Entries FROM MetaQueries WHERE Lattice_Point = '" + rchain + "' and '"+removed+"' = EntryType and ClauseType = 'WHERE' and TableType = 'Star';");
 				String whereString = makeCommaSepQuery(rs5, "Entries", " and ");
-				//	System.out.println("Where String : " + whereString);
+					System.out.println("Where String : " + whereString);
 				rs5.close();
 				//  create the final query
 				String queryString ="";
@@ -618,7 +618,7 @@ public class BayesBaseCT_SortMerge {
 					queryString = "Select " +  MultString+ " as `MULT` ,"+selectString + " from " + fromString  + " where " + whereString;
 				else 
 					queryString = "Select " +  MultString+ " as `MULT` ,"+selectString + " from " + fromString;
-				//System.out.println("Query String : " + queryString );	
+				System.out.println("Query String : " + queryString );	
 				
 				//make the rnid shorter 
 				String rnid_or=removed;
@@ -753,15 +753,15 @@ public class BayesBaseCT_SortMerge {
 			Statement st2 = con_BN.createStatement();
 			Statement st3 = con_CT.createStatement();
 			//  create select query string
-			ResultSet rs2 = st2.executeQuery("select distinct Entries from MetaQueries where Lattice_Point = '" + pvid + "' and ClauseType = 'SELECT';");
+			ResultSet rs2 = st2.executeQuery("select distinct Entries from MetaQueries where Lattice_Point = '" + pvid + "' and ClauseType = 'SELECT' and TableType = 'Counts' ;");
 			String selectString = makeCommaSepQuery(rs2, "Entries", " , ");
 			//System.out.println("Select String : " + selectString);
 			//  create from query string
-			ResultSet rs3 = st2.executeQuery("select distinct Entries from MetaQueries where Lattice_Point = '" + pvid + "' and ClauseType = 'FROM';");
+			ResultSet rs3 = st2.executeQuery("select distinct Entries from MetaQueries where Lattice_Point = '" + pvid + "' and ClauseType = 'FROM' and TableType = 'Counts' ;");
 			String fromString = makeCommaSepQuery(rs3, "Entries", " , ");
-			//System.out.println("From String : " + fromString);
+			//System.out.println("From String : " + fromString);and TableType = 'Counts'and TableType = 'Counts'
 
-			ResultSet rs_6 = st2.executeQuery("select distinct Entries from MetaQueries where Lattice_Point = '" + pvid + "' and ClauseType = 'GROUPBY';");
+			ResultSet rs_6 = st2.executeQuery("select distinct Entries from MetaQueries where Lattice_Point = '" + pvid + "' and ClauseType = 'GROUPBY' and TableType = 'Counts' ;");
 			String GroupByString = makeCommaSepQuery(rs_6, "Entries", " , ");
 			//System.out.println("GroupBy String : " + GroupByString);
 
@@ -776,7 +776,7 @@ public class BayesBaseCT_SortMerge {
 			
 			try
 			{
-				rsGrounding = st2.executeQuery("select distinct Entries from MetaQueries where Lattice_Point = '" + pvid + "' and ClauseType = 'WHERE';");
+				rsGrounding = st2.executeQuery("select distinct Entries from MetaQueries where Lattice_Point = '" + pvid + "' and ClauseType = 'WHERE' and TableType = 'Counts' ;");
 			}
 			catch( MySQLSyntaxErrorException e )
 			{
@@ -906,18 +906,18 @@ public class BayesBaseCT_SortMerge {
             Statement st3 = con_CT.createStatement();
 
             //  create select query stringt
-            ResultSet rs2 = st2.executeQuery("select distinct Entries from MetaQueries where Lattice_Point = '" + rchain + "' and ClauseType = 'SELECT';");
+            ResultSet rs2 = st2.executeQuery("select distinct Entries from MetaQueries where Lattice_Point = '" + rchain + "' and ClauseType = 'SELECT' and TableType = 'Counts' ;");
                                               
             String selectString = makeCommaSepQuery(rs2, "Entries", " , ");
-            //System.out.println("Select String : " + selectString);
+            System.out.println("Select String : " + selectString);
 
             //  create from query string
-            ResultSet rs3 = st2.executeQuery("select distinct Entries from MetaQueries where Lattice_Point = '" + rchain + "' and ClauseType = 'FROM';" );
+            ResultSet rs3 = st2.executeQuery("select distinct Entries from MetaQueries where Lattice_Point = '" + rchain + "' and ClauseType = 'FROM' and TableType = 'Counts' ;" );
             String fromString = makeCommaSepQuery(rs3, "Entries", " , ");
-            //System.out.println("From String : " + fromString);
+            System.out.println("From String : " + fromString);
 
             //  create where query string
-            ResultSet rs4 = st2.executeQuery("select distinct Entries from MetaQueries where Lattice_Point = '" + rchain + "' and ClauseType = 'WHERE';" );
+            ResultSet rs4 = st2.executeQuery("select distinct Entries from MetaQueries where Lattice_Point = '" + rchain + "' and ClauseType = 'WHERE' and TableType = 'Counts' ;" );
             String whereString = makeCommaSepQuery(rs4, "Entries", " and ");
             //System.out.println("Where String : " + whereString);
 
@@ -927,7 +927,7 @@ public class BayesBaseCT_SortMerge {
             //  create group by query string
             // this seems unnecessarily complicated - isn't there always a group by clause? Okay not with continuous data, but still. Continuous probably requires a different approach. OS August 22
             if (!cont.equals("1")) {
-                ResultSet rs_6 = st2.executeQuery("select distinct Entries from MetaQueries where Lattice_Point = '" + rchain + "' and ClauseType = 'GROUPBY';");
+                ResultSet rs_6 = st2.executeQuery("select distinct Entries from MetaQueries where Lattice_Point = '" + rchain + "' and ClauseType = 'GROUPBY' and TableType = 'Counts' ;");
                 String GroupByString = makeCommaSepQuery(rs_6, "Entries", " , ");
                 //System.out.println("GroupBy String : " + GroupByString);
 
@@ -979,18 +979,18 @@ public class BayesBaseCT_SortMerge {
             Statement st3 = con_CT.createStatement();
 
             //  create select query stringt
-            ResultSet rs2 = st2.executeQuery("select distinct Entries from MetaQueries where Lattice_Point = '" + rchain + "' and ClauseType = 'SELECT';");
+            ResultSet rs2 = st2.executeQuery("select distinct Entries from MetaQueries where Lattice_Point = '" + rchain + "' and ClauseType = 'SELECT' and TableType = 'Counts';");
                                               
             String selectString = makeCommaSepQuery(rs2, "Entries", " , ");
             //System.out.println("Select String : " + selectString);
 
             //  create from query string
-            ResultSet rs3 = st2.executeQuery("select distinct Entries from MetaQueries where Lattice_Point = '" + rchain + "' and ClauseType = 'FROM';" );
+            ResultSet rs3 = st2.executeQuery("select distinct Entries from MetaQueries where Lattice_Point = '" + rchain + "' and ClauseType = 'FROM' and TableType = 'Counts';" );
             String fromString = makeCommaSepQuery(rs3, "Entries", " , ");
             //System.out.println("From String : " + fromString);
 
             //  create where query string
-            ResultSet rs4 = st2.executeQuery("select distinct Entries from MetaQueries where Lattice_Point = '" + rchain + "' and ClauseType = 'WHERE';" );
+            ResultSet rs4 = st2.executeQuery("select distinct Entries from MetaQueries where Lattice_Point = '" + rchain + "' and ClauseType = 'WHERE' and TableType = 'Counts';" );
             String whereString = makeCommaSepQuery(rs4, "Entries", " and ");
             //System.out.println("Where String : " + whereString);
 
@@ -1000,7 +1000,7 @@ public class BayesBaseCT_SortMerge {
             //  create group by query string
             // this seems unnecessarily complicated - isn't there always a group by clause? Okay not with continuous data, but still. Continuous probably requires a different approach. OS August 22
             if (!cont.equals("1")) {
-                ResultSet rs_6 = st2.executeQuery("select distinct Entries from MetaQueries where Lattice_Point = '" + rchain + "' and ClauseType = 'GROUPBY';");
+                ResultSet rs_6 = st2.executeQuery("select distinct Entries from MetaQueries where Lattice_Point = '" + rchain + "' and ClauseType = 'GROUPBY' and TableType = 'Counts';");
                 String GroupByString = makeCommaSepQuery(rs_6, "Entries", " , ");
                 //System.out.println("GroupBy String : " + GroupByString);
 
@@ -1277,7 +1277,7 @@ public class BayesBaseCT_SortMerge {
             Statement st3 = con_CT.createStatement();
 
             //  create ColumnString
-            ResultSet rs2 = st2.executeQuery("select distinct Entries from MetaQueries where Lattice_Point = '" + short_rnid + "' and TableType = 'JOIN';");
+            ResultSet rs2 = st2.executeQuery("select distinct Entries from MetaQueries where Lattice_Point = '" + short_rnid + "' and TableType = 'Join';");
 
             String ColumnString = makeCommaSepQuery(rs2, "Entries", " , ");
             ColumnString = orig_rnid + " varchar(5) ," + ColumnString;

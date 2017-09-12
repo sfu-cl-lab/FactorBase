@@ -33,6 +33,7 @@ from LatticeRNodes;
  * The groupby columns are renamed properly and do not contain the aggregate function
  * do NOT copy rnodes and associated 2nodes
  */
+
 INSERT into MetaQueries
 SELECT distinct Lattice_Point, 'Flat' as TableType, ClauseType, EntryType, Entries
 FROM LatticeRNodes L, MetaQueries M where L.short_rnid = M.Lattice_Point and TableType = 'Counts' and ClauseType = 'GROUPBY'
@@ -201,14 +202,16 @@ where
 
 /****************
  * now the select clause. This finds the group by columns for all rnids in the shortened parent rchain
+ Problem: for some reason the insertion fails. Inserting into the same table? But it worked for the rnid
+ now need to change java code to call this view
  */
 
 insert into MetaQueries
 SELECT DISTINCT 
     lattice_rel.child AS Lattice_Point, 
-    lattice_rel.removed AS EntryType,
     'STAR' as TableType, 
     'SELECT' as ClauseType,
+    lattice_rel.removed AS EntryType,
     M.Entries 
 FROM
     lattice_rel,
@@ -220,10 +223,11 @@ WHERE
         AND M.Lattice_Point = lattice_membership.`member`
         AND M.ClauseType = 'GROUPBY'
         AND M.TableType = 'COUNTS';
-/* find all elements in the groupBy List for the shortened parent rchain */
 
-    insert into MetaQueries
-    SELECT DISTINCT 
+
+/* find all elements in the groupBy List for the shortened parent rchain */
+insert into MetaQueries
+SELECT DISTINCT 
     LR.child as Lattice_Point, 
     'STAR' as TableType, 
     'SELECT' as ClauseType,
@@ -237,19 +241,19 @@ R.pvid not in (select pvid from RChain_pvars where RChain_pvars.rchain = LR.pare
 AND M.Lattice_Point = R.pvid
 AND M.ClauseType = 'GROUPBY'
 AND M.TableType = 'COUNTS';
- 
 /* The case where the parent is empty.*
  * In this case the rchain child contains just one rnid.
  * in this case we just insert the select entries from the star table for the rnide.
  * Not sure we need this - should try leaving it out. OS. August 25, 2017
- * 
+/* again should be able to make it a call to itself but have to make it a view
  */
- insert into MetaQueries
+
+insert into MetaQueries
 SELECT DISTINCT 
     lattice_rel.removed AS Lattice_Point, 
-    lattice_rel.removed AS EntryType,
     'STAR' as TableType, 
     'SELECT' as ClauseType,
+    lattice_rel.removed AS EntryType,
     M.Entries 
 FROM lattice_rel, MetaQueries M
 WHERE lattice_rel.parent = 'EmptySet' AND M.Lattice_Point = lattice_rel.removed AND M.TableType = 'STAR' and M.ClauseType = 'SELECT';
