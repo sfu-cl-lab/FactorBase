@@ -85,7 +85,9 @@ public class BayesBaseCT_SortMerge {
         System.out.println(" ##### lattice is ready for use* ");
 
 // may not need to run this script any more, using LatticeRnodes table OS August 25, 2017//
-        bzsr.runScript("scripts/add_orig_rnid.sql");
+       // bzsr.runScript("scripts/add_orig_rnid.sql");
+       // add_orig_rnid should be superseded by using Lattice Rnodes table in metaqueries script
+       // OS Sep 12, 2017
         //build _BN part2: from metadata_2.sql
 
        // bzsr.runScript("scripts/metadata.sql");
