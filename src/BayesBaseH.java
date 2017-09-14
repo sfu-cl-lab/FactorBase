@@ -122,7 +122,7 @@ public class BayesBaseH {
 				+ "')");
 		
 		//mapping the orig_rnid back and create a new table: Final_Path_BayesNets. //Sep 19, zqian
-		//BIF_Generator.Final_Path_BayesNets(con2,rchain);
+		BIF_Generator.Final_Path_BayesNets(con2,rchain);
 		//parameter learning
 		//Add setup options  Yan Sept. 10th
 				//Continuous

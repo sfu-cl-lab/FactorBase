@@ -905,7 +905,7 @@ public class BayesBaseCT_SortMerge {
             Statement st2 = con_BN.createStatement();
             Statement st3 = con_CT.createStatement();
 
-            //  create select query stringt
+            //  create select query stringt                                                                                                                                                                                         
             ResultSet rs2 = st2.executeQuery("select distinct Entries from MetaQueries where Lattice_Point = '" + rchain + "' and ClauseType = 'SELECT' and TableType = 'Counts'  and EntryType = 'aggregate' union select distinct Entries from MetaQueries where Lattice_Point = '" + rchain + "' and ClauseType = 'SELECT' and TableType = 'Counts'  and EntryType <> 'aggregate';");
                                               
             String selectString = makeCommaSepQuery(rs2, "Entries", " , ");
@@ -979,7 +979,7 @@ public class BayesBaseCT_SortMerge {
             Statement st3 = con_CT.createStatement();
 
             //  create select query stringt
-            ResultSet rs2 = st2.executeQuery("select distinct Entries from MetaQueries where Lattice_Point = '" + rchain + "' and ClauseType = 'SELECT' and TableType = 'Counts';");
+            ResultSet rs2 = st2.executeQuery("select distinct Entries from MetaQueries where Lattice_Point = '" + rchain + "' and ClauseType = 'SELECT' and TableType = 'Counts' and EntryType = 'aggregate' union select distinct Entries from MetaQueries where Lattice_Point = '" + rchain + "' and ClauseType = 'SELECT' and TableType = 'Counts' and EntryType <> 'aggregate';;");
                                               
             String selectString = makeCommaSepQuery(rs2, "Entries", " , ");
             //System.out.println("Select String : " + selectString);

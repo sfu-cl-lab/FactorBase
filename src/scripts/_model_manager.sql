@@ -28,7 +28,7 @@ CREATE TABLE Path_BayesNets (
     PRIMARY KEY (Rchain , child , parent)
 );
 
-create or replace view Final_Path_BayesNets as select * from Path_BayesNets where character_length(Rchain) = (select max(character_length(Rchain)) from Path_BayesNets);
+create or replace view Final_Path_BayesNets_view as select * from Path_BayesNets where character_length(Rchain) = (select max(character_length(Rchain)) from Path_BayesNets);
 
 
 
