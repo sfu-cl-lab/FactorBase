@@ -21,9 +21,10 @@ CREATE TABLE MetaQueries (
 --- map Pvariables to entity tables ---
 
 INSERT into MetaQueries
-SELECT distinct pvid as Lattice_Point, 'Counts' as TableType, 'FROM' as ClauseType, 'table' as EntryType, CONCAT(TABLE_NAME, ' AS ', pvid) AS Entries FROM
+SELECT distinct pvid as Lattice_Point, 'Counts' as TableType, 'FROM' as ClauseType, 'table' as EntryType, CONCAT('unielwin.',TABLE_NAME, ' AS ', pvid) AS Entries FROM
     PVariables;
     
+   
 
     
 
@@ -124,29 +125,29 @@ WHERE R.rnid = L.orig_rnid;
 
 INSERT into MetaQueries
 select 
-    short_rnid as Lattice_Point, 'Counts' as TableType, 'SELECT' as ClauseType, 'rtable' as EntryType, orig_rnid AS Entries
+    short_rnid as Lattice_Point, 'Counts' as TableType, 'SELECT' as ClauseType, 'rnid' as EntryType, orig_rnid AS Entries
 from
     LatticeRNodes;
 
 INSERT into MetaQueries
 SELECT DISTINCT
-short_rnid as Lattice_Point, 'Counts' as TableType, 'SELECT' as ClauseType, 'rtable' as EntryType, CONCAT(L.orig_rnid, '.', COLUMN_NAME, ' AS ', N.2nid) AS Entries
+short_rnid as Lattice_Point, 'Counts' as TableType, 'SELECT' as ClauseType, '2nid' as EntryType, CONCAT(L.orig_rnid, '.', COLUMN_NAME, ' AS ', N.2nid) AS Entries
 FROM
     LatticeRNodes L, RNodes_2Nodes RN, 2Nodes N
-where RN.rnid = L.orig_rnid and N.2nid = RN.2nid order by RN.rnid,COLUMN_NAME;
+where RN.rnid = L.orig_rnid and N.2nid = RN.2nid;
 
 
 
 
 INSERT into MetaQueries
 select 
-    short_rnid as Lattice_Point, 'Counts' as TableType, 'GROUPBY' as ClauseType, 'rtable' as EntryType, orig_rnid AS Entries
+    short_rnid as Lattice_Point, 'Counts' as TableType, 'GROUPBY' as ClauseType, 'rnid' as EntryType, orig_rnid AS Entries
 from
     LatticeRNodes;
     
 INSERT into MetaQueries
 SELECT DISTINCT
-short_rnid as Lattice_Point, 'Counts' as TableType, 'GROUPBY' as ClauseType, 'rtable' as EntryType, N.2nid AS Entries
+short_rnid as Lattice_Point, 'Counts' as TableType, 'GROUPBY' as ClauseType, '2nid' as EntryType, N.2nid AS Entries
 FROM
     LatticeRNodes L, RNodes_2Nodes RN, 2Nodes N
 where RN.rnid = L.orig_rnid and N.2nid = RN.2nid order by RN.rnid,COLUMN_NAME;
@@ -159,4 +160,13 @@ SELECT distinct short_rnid as Lattice_Point, TableType, ClauseType, EntryType, E
     LatticeRNodes L, RNodes_pvars R, MetaQueries M
 WHERE
     L.orig_rnid = R.rnid and M.Lattice_Point = R.pvid;
+    
+
+
+
+ INSERT into MetaQueries
+ select L.name AS Lattice_Point, 'Counts' as TableType, M.ClauseType, M.EntryType, M.Entries
+ from lattice_membership L, MetaQueries M
+ where L.name <> L.`member` and Lattice_Point = L.`member` and M.TableType = 'COUNTS';
+ 
 

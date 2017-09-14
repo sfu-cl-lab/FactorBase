@@ -24,7 +24,7 @@ FROM
     select distinct rnid, rnid as Fid, main from RNodes;
     */
 
-CREATE TABLE RNodes_BN_Nodes AS select distinct rnid, 1nid, N.main from RNodes_pvars R, PVariables P, `1Nodes` N where R.pvid = P.pvid and R.pvid = N.pvid
+CREATE TABLE RNodes_BN_Nodes AS select distinct rnid, 1nid as Fid, N.main from RNodes_pvars R, PVariables P, `1Nodes` N where R.pvid = P.pvid and R.pvid = N.pvid
 UNION DISTINCT
 select distinct rnid, 2nid as Fid, main from RNodes_2Nodes
 UNION DISTINCT
@@ -50,6 +50,10 @@ CREATE TABLE Path_BayesNets (
     PRIMARY KEY (Rchain , child , parent)
 );
 
+create or replace view Final_Path_BayesNets as select * from Path_BayesNets where character_length(Rchain) = (select max(character_length(Rchain)) from Path_BayesNets);
+
+/* parepare output view with longest rchain only */
+
 CREATE TABLE NewLearnedEdges LIKE Path_BayesNets;
 
 /****************
@@ -58,6 +62,7 @@ Propagate BNnodes to rchains
 
 /*CREATE OR REPLACE VIEW Path_BN_nodes AS*/
 ALTER TABLE `RNodes_BN_Nodes` ADD INDEX `Index_rnid`  (`rnid` ASC) ;/* May 10th*/
+
 CREATE TABLE Path_BN_nodes AS 
 SELECT DISTINCT lattice_membership.name AS Rchain, Fid AS node
     FROM
@@ -105,8 +110,11 @@ union distinct
             AND FNodes.main = 0;
 /*zqian Oct 20, 2016*/
 
+/* the next primary key makes an index that's too long. innodb_enable_large_prefix would fix that. But will be deprecated. 
+For now we comment out, may slow down learning. */
 
-ALTER TABLE Path_Aux_Edges ADD PRIMARY KEY (`Rchain`, `child`, `parent`); /* May 10th*/ 
+/*ALTER TABLE Path_Aux_Edges99 ADD PRIMARY KEY (`Rchain`, `child`, `parent`);*/ /* May 10th*/ 
+
 
 
 create table SchemaEdges as 

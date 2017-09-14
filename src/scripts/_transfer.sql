@@ -36,7 +36,7 @@ WHERE
      
     
 CREATE TABLE RNodes_2Nodes AS 
-select N.rnid, N.`2nid` from unielwin_setup.RNodes_2Nodes N, 2Nodes F where N.2nid = F.2nid;
+select N.rnid, N.`2nid`, N.main from unielwin_setup.RNodes_2Nodes N, 2Nodes F where N.2nid = F.2nid;
 
      
     
@@ -123,6 +123,7 @@ FROM unielwin_setup.PVariables N, FNodes_pvars F where F.pvid = N.pvid;
 
 create table EntityTables as select * from unielwin_setup.EntityTables;
 create table AttributeColumns as select * from unielwin_setup.AttributeColumns;
+    create table Attribute_Value as select * from unielwin_setup.Attribute_Value;
 
 create table RelationTables as select * from unielwin_setup.RelationTables;
 

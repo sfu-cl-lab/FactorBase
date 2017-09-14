@@ -521,7 +521,7 @@ CREATE TABLE TargetNode (
 
 
 
-create or replace view RNodes_2Nodes as select RNodes.rnid, 2Nodes.2nid from 2Nodes, RNodes where 2Nodes.TABLE_NAME = RNodes.TABLE_NAME; 
+create or replace view RNodes_2Nodes as select RNodes.rnid, 2Nodes.2nid, 2Nodes.main from 2Nodes, RNodes where 2Nodes.TABLE_NAME = RNodes.TABLE_NAME; 
 
 
 

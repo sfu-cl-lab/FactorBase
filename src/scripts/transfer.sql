@@ -131,6 +131,7 @@ FROM @database@_setup.PVariables N, RNodes_pvars F where F.pvid = N.pvid;
 
 create table EntityTables as select * from @database@_setup.EntityTables;
 create table AttributeColumns as select * from @database@_setup.AttributeColumns;
+    create table Attribute_Value as select * from @database@_setup.Attribute_Value;
 /* create table TernaryRelations as select * from @database@_setup.TernaryRelations; */
 create table RelationTables as select * from @database@_setup.RelationTables;
 /* create table NoPKeys as select * from  @database@_setup.NoPKeys; */

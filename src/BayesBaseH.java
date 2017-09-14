@@ -94,7 +94,7 @@ public class BayesBaseH {
         BZScriptRunner bzsr = new BZScriptRunner(databaseName,con2);
         //set up the bayes net models O.S. Sep 12, 2017
         bzsr.runScript("scripts/model_manager.sql");
-        bzsr.runScript("scripts/bayesedges.sql");
+        //bzsr.runScript("scripts/bayesedges.sql");
         //get maxNumberOfMembers (max length of rchain)
         Statement st = con2.createStatement();
         ResultSet rst = st.executeQuery("SELECT max(length) FROM lattice_set;");
@@ -122,7 +122,7 @@ public class BayesBaseH {
 				+ "')");
 		
 		//mapping the orig_rnid back and create a new table: Final_Path_BayesNets. //Sep 19, zqian
-		BIF_Generator.Final_Path_BayesNets(con2,rchain);
+		//BIF_Generator.Final_Path_BayesNets(con2,rchain);
 		//parameter learning
 		//Add setup options  Yan Sept. 10th
 				//Continuous
