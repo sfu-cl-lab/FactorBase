@@ -1,4 +1,5 @@
-# FactorBase
+# FactorBase: Learning Graphical Models from multi-relational data
+
 [![Build Status](https://travis-ci.org/sfu-cl-lab/FactorBase.svg?branch=master)](https://travis-ci.org/sfu-cl-lab/FactorBase)   
 The source code repository for the FactorBase system. 
 The code in this repository implements the learn-and-join algorithm (see [algorithm paper](http://www.cs.sfu.ca/~oschulte/pubs.html) on  ''Learning Graphical Models for Relational Data via Lattice Search''). 
