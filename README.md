@@ -41,6 +41,7 @@ One of the key computational problems in relational learning and inference is to
 3. **Point to the required database in your MySQL server** 
 
 	Modify `jar/config.cfg` with your own configuration according to the sample format explained in the image. ![Sample Configuration](/images/configuration.png). 
+	
 	See our [project website](https://sfu-cl-lab.github.io/FactorBase/options.html) for an explanation of the options.
 
 4. **Learn a Bayesian Network Structure** 
