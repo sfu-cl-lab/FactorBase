@@ -101,7 +101,7 @@ Given a relational database and a target entity set, rank each entity according 
   --------------------------
 ## Compile & Run  
 + Go into `src` folder 
-+ modify `config.cfg`  with your own configuration according to format explained [here](https://sfu-cl-lab.github.io/FactorBase/options.html)
++ Update `config.cfg`  with your own configuration according to format explained [here](https://sfu-cl-lab.github.io/FactorBase/options.html)
   + `javac -cp ".:./lib/*" Config.java BZScriptRunner.java MakeSetup.java`  
   + `javac -cp ".:./lib/*" RunBB.java`  
   + `java -cp ".:./lib/*" MakeSetup`  
