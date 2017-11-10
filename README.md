@@ -40,9 +40,10 @@ One of the key computational problems in relational learning and inference is to
 
 3. **Point to the required database in your MySQL server** 
 
-	Modify `jar/config.cfg` with your own configuration according to the sample format explained in the image. ![Sample Configuration](/images/configuration.png). See our [project website](https://sfu-cl-lab.github.io/FactorBase/options.html) for an explanation of the options.
+	Modify `jar/config.cfg` with your own configuration according to the sample format explained in the image. ![Sample Configuration](/images/configuration.png). 
+	See our [project website](https://sfu-cl-lab.github.io/FactorBase/options.html) for an explanation of the options.
 
-4. **Learn a Bayesian network structure** 
+4. **Learn a Bayesian Network Structure** 
 
 	In the `FactorBase/jar` folder, run 
 		
@@ -59,13 +60,14 @@ One of the key computational problems in relational learning and inference is to
 	1. The network structure is stored in `<db_BN>.Final_Path_BayesNets` where `<db_BN>` is the model database specified in your configuration file.
 	2. The conditional probability tables are stored in tables named `<db_BN.nodename>_CP` where `nodename` is the name of the child node.
 
+===============
 ## Other Output Formats: BIF, MLN, ETL
 
 The learned BN structure can be exported from the database to support a number of other applications.
 
 + **[BIF_Generator](https://github.com/sfu-cl-lab/BIF_Generator)**
 	* Bayesian Interchange Format (BIF) Generator produces an .xml file that can be loaded into a standard **Bayesian Network** tool (like [AIspace tool](http://aispace.org/bayes/).) 
-	*This is the best way to visualize the learned graph structure.* 
+	*This is the *best* way to visualize the learned graph structure.* 
 	* Queries in the learned Bayesian networks can be used as a Statistical-Relational Model to estimate frequencies in the database as explained [here](https://www.researchgate.net/publication/2919745_Selectivity_Estimation_using_Probabilistic_Models) and in our paper on [Modelling Relational Statistics With Bayes Nets](http://www.cs.sfu.ca/%7Eoschulte/files/pubs/ilp2012.pdf). 
 
 + **[MLN_Generator](https://github.com/sfu-cl-lab/MLN_Generator)**
@@ -75,9 +77,9 @@ The learned BN structure can be exported from the database to support a number o
 + **[Extract, Transform, Load](https://en.wikipedia.org/wiki/Extract,_transform,_load)**
 	* The learned BN structure defines a set of features that can be used to transform the information in relational data into a single table format. The single table can then be loaded into standard machine learning tools. In the relational learning literature, this process is called [Propositionalization](http://link.springer.com/referenceworkentry/10.1007%2F978-0-387-30164-8_680). See also the [tutorial on Relational Bayes Net Classifier](https://oschulte.github.io/srl-tutorial-slides/ch5-rel-bayes-net-classifier.pptx).
 
-	+ [Classification](https://github.com/sfu-cl-lab/etl-classification). Given a target predicate (DB column), this tool produces a single-table data with relational features. 
+	+ [Feature Generation for Classification](https://github.com/sfu-cl-lab/etl-classification). Given a target predicate (DB column), this tool produces a single-table data with relational features. 
 	
-	+ [Outlier detection](https://github.com/sfu-cl-lab/etl-outlier-detection). Given a target entity class, this tool produces a single-table data with relational features. 
+	+ [Feature Generation for Outlier detection](https://github.com/sfu-cl-lab/etl-outlier-detection). Given a target entity table/class, this tool produces a single-table data with relational features. 
 
 -------------------------------------------------
 
