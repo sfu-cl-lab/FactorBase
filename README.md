@@ -40,7 +40,7 @@ One of the key computational problems in relational learning and inference is to
 
 3. **Point to the required database in your MySQL server** 
 
-	Modify `jar/config.cfg` with your own configuration according to the sample format explained in the image. ![Sample Configuration](/images/configuration.png). 
+	Modify `jar/src/config.cfg` with your own configuration according to the sample format explained in the image. ![Sample Configuration](/images/configuration.png). 
 	
 	See our [project website](https://sfu-cl-lab.github.io/FactorBase/options.html) for an explanation of the options.
 
@@ -58,8 +58,8 @@ One of the key computational problems in relational learning and inference is to
 
 	We follow the [BayesStore](http://dl.acm.org/citation.cfm?id=1453896) design philosphy where statistical objects are treated as managed within the database. 
 	
-	1. The network structure is stored in `<db_BN>.Final_Path_BayesNets` where `<db_BN>` is the model database specified in your configuration file.
-	2. The conditional probability tables are stored in tables named `<db_BN.nodename>_CP` where `nodename` is the name of the child node.
+	1. The network structure is stored in the table `Final_Path_BayesNets` of the `<db>_BN` database where `<db>` is the model database specified in your configuration file.
+	2. The conditional probability tables are stored in tables named `<nodename>_CP` of the `<db>_BN` database where `<db>` is the model database specified in your configuration file and `<nodename>` is the name of the child node.
 
 ===============
 ## Other Output Formats: BIF, MLN, ETL
