@@ -21,7 +21,11 @@
 
 package edu.cmu.tetrad.search;
 
+import java.util.Map;
+import java.util.Set;
+
 import edu.cmu.tetrad.graph.Graph;
+import edu.cmu.tetrad.graph.Node;
 
 /**
  * Created by IntelliJ IDEA. User: jdramsey Date: Jan 27, 2006 Time: 10:15:26 AM To change this template use File |
@@ -29,6 +33,7 @@ import edu.cmu.tetrad.graph.Graph;
  */
 public interface GraphSearch {
     Graph search();
+    Graph search(Map<Node, Map<Set<Node>, Double>> globalScoreHash);
 
     long getElapsedTime();
 }
