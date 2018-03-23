@@ -31,11 +31,15 @@ import edu.cmu.tetrad.util.*;
 
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.text.NumberFormat;
 import java.util.*;
 
 /**
- * GesSearch is an implentation of the GES algorithm, as specified in Chickering (2002) "Optimal structure
+ * GesSearch is an implementation of the GES algorithm, as specified in Chickering (2002) "Optimal structure
  * identification with greedy search" Journal of Machine Learning Research. It works for both BayesNets and SEMs.
  * <p/>
  * Some code optimization could be done for the scoring part of the graph for discrete models (method scoreGraphChange).
@@ -276,7 +280,8 @@ public final class Ges3 implements GraphSearch, GraphScorer {
         return graph;
 
     }
-    
+
+    // TODO: Remove this method if tetradLearner_BES in BayesNet_Learning_main is removed.
     /*pruning phase using BES search @ zqian, Oct 23, 2013*/
     public Graph Pruning_BES() {
         long startTime = System.currentTimeMillis();
@@ -348,12 +353,174 @@ public final class Ges3 implements GraphSearch, GraphScorer {
         return graph;
     }
 
+    /**
+     * Greedy equivalence search: Start from the empty graph, add edges till model is significant. Then start deleting
+     * edges till a minimum is achieved.
+     *
+     * @return the resulting Pattern.
+     */
+    /**
+     * Diljot&Chris :the function uses the global score hash from BayesBase.h. All the calls
+     *  to the scoring function ,forward search and backward search use this
+     *  globalScoreHash
+     */
+    public Graph search(Map<Node, Map<Set<Node>, Double>> globalScoreHash) {
+        long startTime = System.currentTimeMillis();
+
+        // Diljot,Chris :don't clear the hash as we want to reuse the old scores.
+        // if(globalScoreHash != null)
+        //	globalScoreHash.clear();
+
+        // Check for missing values.
+        if (covariances != null && DataUtils.containsMissingValue(covariances)) {
+            throw new IllegalArgumentException(
+                    "Please remove or impute missing values first.");
+        }
+
+        // Check for missing values.
+        if (dataSet != null && DataUtils.containsMissingValue(dataSet)) {
+            throw new IllegalArgumentException(
+                    "Please remove or impute missing values first.");
+        }
+
+        Graph graph = new EdgeListGraph(new LinkedList<Node>(getVariables()));
+
+        /**
+         * Diljot,Chris :don't clear the hash as we want to reuse the old scores.
+         * uncommenting the for loop would clear the score in each call to the tetrad and
+         * thus fix all the problems in the structure of the bayesnet. Although after that
+         * won't be any hits in the hash.
+         */
+        //globalScoreHash = new WeakHashMap<Node, Map<Set<Node>, Double>>();
+
+       //   for (Node node : graph.getNodes()) {
+       //       globalScoreHash.put(node, new HashMap<Set<Node>, Double>());
+       // }
+
+        fireGraphChange(graph);
+        buildIndexing(graph);
+        addRequiredEdges(graph);
+
+        // Method 1-- original.
+
+        // Don't need to score the original graph; the BIC scores all up to a constant.
+        // double score = 0;
+
+        /**
+         * Using the globlScoreHash from BayesBase.h; will check if the score exists in hash,
+         * else compute the score
+         * same for the forward and the backward search parts
+         */
+        double score = scoreGraph(graph, globalScoreHash);
+
+        storeGraph(new EdgeListGraph(graph), score);
+
+        // Do forward search.
+        score = fes(graph, score, globalScoreHash);
+
+        // Do backward search.
+        bes(graph, score, globalScoreHash);
+
+//        score = fes(graph, score);
+//        bes(graph, score);
+
+        long endTime = System.currentTimeMillis();
+        this.elapsedTime = endTime - startTime;
+        this.logger.log("graph", "\nReturning this graph: " + graph);
+        TetradLogger.getInstance().log("info", "Final Model BIC = " + nf.format(score));
+
+        this.logger.log("info", "Elapsed time = " + (elapsedTime) / 1000. + " s");
+        this.logger.flush();
+
+//        return new ArrayList<ScoredGraph>(topGraphs).get(topGraphs.size() - 1).getGraph();
+
+        return graph;
+
+//        // Method 2-- Ricardo's tweak.
+//        double score = scoreGraph(graph), newScore;
+//
+//        storeGraph(graph, score);
+//
+//        int iter = 0;
+//        do {
+//            newScore = fes(graph, score);
+//            if (newScore > score) {
+//                score = newScore;
+//                newScore = bes(graph, score);
+//
+//                if (newScore > score) {
+//                    score = newScore;
+//                }
+//                else {
+//                    break;
+//                }
+//            }
+//            else {
+//                break;
+//            }
+//            //System.out.println("Current score = " + score);
+//            iter++;
+//        } while (iter < 100);
+//
+//        long endTime = System.currentTimeMillis();
+//        this.elapsedTime = endTime - startTime;
+//        this.logger.log("graph", "\nReturning this graph: " + graph);
+//
+//        this.logger.log("info", "Elapsed time = " + (elapsedTime) / 1000. + " s");
+//        this.logger.flush();
+//
+//        return graph;
+    }
+
+
+    /**
+     * Diljot,Chris:
+     *  search function uses the globalScoreCache; not clearing the the globalScoreHash
+     *  since we will be using the scores from the previous runs.
+     *
+     */
+    public Graph search(List<Node> nodes, Map<Node, Map<Set<Node>, Double>> globalScoreHash) {
+        long startTime = System.currentTimeMillis();
+
+        //diljot,Chris: don't clear the hash
+       // globalScoreHash.clear();
+
+        if (!dataSet().getVariables().containsAll(nodes)) {
+            throw new IllegalArgumentException(
+                    "All of the nodes must be in " + "the supplied data set.");
+        }
+
+        Graph graph = new EdgeListGraph(nodes);
+        buildIndexing(graph);
+        addRequiredEdges(graph);
+        double score = 0; //scoreGraph(graph);
+
+        // Do forward search.
+        // Use the globalScoreHash inside the function
+        score = fes(graph, score, globalScoreHash);
+
+        // Do backward search.
+        // we need to pass the globalScoreHash to the bes.
+        bes(graph, score, globalScoreHash);
+
+        long endTime = System.currentTimeMillis();
+        this.elapsedTime = endTime - startTime;
+
+        this.logger.log("graph", "\nReturning this graph: " + graph);
+
+        this.logger.log("info", "Elapsed time = " + (elapsedTime) / 1000. + " s");
+        this.logger.flush();
+
+        return graph;
+    }
+
     public Knowledge getKnowledge() {
         return knowledge;
     }
 
     /**
-     * Sets the background knowledge.     *
+     * Sets the background knowledge.
+     *
      * @param knowledge the knowledge object, specifying forbidden and required edges.
      */
     public void setKnowledge(Knowledge knowledge) {
@@ -378,7 +545,7 @@ public final class Ges3 implements GraphSearch, GraphScorer {
     }
 
     @Override
-	public long getElapsedTime() {
+    public long getElapsedTime() {
         return elapsedTime;
     }
 
@@ -415,6 +582,11 @@ public final class Ges3 implements GraphSearch, GraphScorer {
 
     public void setTrueGraph(Graph trueGraph) {
         this.trueGraph = trueGraph;
+    }
+
+    /* Diljot,Chris : using the globalScoreHash from BayesBase.java in the function.*/
+    public double getScore(Graph dag, Map<Node, Map<Set<Node>, Double>> globalScoreHash) {
+        return scoreGraph(dag, globalScoreHash);
     }
 
     public double getScore(Graph dag) {
@@ -545,6 +717,101 @@ public final class Ges3 implements GraphSearch, GraphScorer {
         return score;
     }
 
+    /**
+     * Forward equivalence search.
+     *
+     * @param graph The graph in the state prior to the forward equivalence search.
+     * @param score The score in the state prior to the forward equivalence search
+     * @return the score in the state after the forward equivelance search. Note that the graph is changed as a
+     *         side-effect to its state after the forward equivelance search.
+     */
+    /* Diljot,Chris : using the globalScoreHash from BayesBase.java in the function.*/
+    private double fes(Graph graph, double score,Map<Node, Map<Set<Node>, Double>> globalScoreHash) {
+
+        List<Node> nodes = graph.getNodes();
+
+        sortedArrows = new TreeSet<Arrow>();
+        lookupArrows = new HashSet[nodes.size()][nodes.size()];
+
+        nodesHash = new HashMap<Node, Integer>();
+        int index = -1;
+
+        for (Node node : nodes) {
+            nodesHash.put(node, ++index);
+        }
+
+        TetradLogger.getInstance().log("info", "** FORWARD EQUIVALENCE SEARCH");
+        TetradLogger.getInstance().log("info", "Initial Model BIC = " + nf.format(score));
+
+        /* Diljot,Chris : using the globalScoreHash from BayesBase.java in the function.*/
+        initializeArrowsForward(nodes, graph,globalScoreHash);
+
+        while (!sortedArrows.isEmpty()) {
+            Arrow arrow = sortedArrows.first();
+            sortedArrows.remove(arrow);
+
+            Node _x = nodes.get(arrow.getX());
+            Node _y = nodes.get(arrow.getY());
+
+            if (graph.isAdjacentTo(_x, _y)) {
+                continue;
+            }
+
+            if (!findNaYX(_x, _y, graph).equals(arrow.getNaYX())) {
+                /* Diljot,Chris : using the globalScoreHash from BayesBase.java in the function.*/
+                reevaluateFoward(graph, nodes, arrow, globalScoreHash);
+                continue;
+            }
+
+            if (!new HashSet<Node>(getTNeighbors(_x, _y, graph)).containsAll(arrow.getHOrT())) {
+                /* Diljot,Chris : using the globalScoreHash from BayesBase.java in the function.*/
+                reevaluateFoward(graph, nodes, arrow,globalScoreHash);
+                continue;
+            }
+
+            if (!validInsert(_x, _y, arrow.getHOrT(), arrow.getNaYX(), graph)) {
+                continue;
+            }
+
+            Node x = nodes.get(arrow.getX());
+            Node y = nodes.get(arrow.getY());
+            Set<Node> t = arrow.getHOrT();
+            double bump = arrow.getBump();
+
+            if (covariances != null && minJump == 0 && isUseFCutoff()) {
+                double _p = getfCutoffP();
+                double v;
+
+                // Find the value for v that will yield p = _p
+                for (v = 0.0; ; v += 0.25) {
+                    int n = sampleSize();
+                    double f = Math.exp((v - Math.log(n)) / n);
+                    double p = 1 - ProbUtils.fCdf(f, n, n);
+
+                    if (p <= _p) {
+                        break;
+                    }
+                }
+
+                minJump = v;
+            }
+
+            score = score + bump;
+            insert(x, y, t, graph, score, true, bump);
+            rebuildPattern(graph);
+
+            storeGraph(graph, score);
+            /* Diljot,Chris : using the globalScoreHash from BayesBase.java in the function.*/
+            reevaluateFoward(graph, nodes, arrow, globalScoreHash);
+
+            if (getMaxEdgesAdded() != -1 && graph.getNumEdges() >= getMaxEdgesAdded()) {
+                break;
+            }
+        }
+
+        return score;
+    }
+
     double minJump = 0;
     private double minNeg = 0; //-1000000;
 
@@ -656,7 +923,59 @@ public final class Ges3 implements GraphSearch, GraphScorer {
         return score;
     }
 
-    
+    /* Diljot,Chris : using the globalScoreHash from BayesBase.java in the function.*/
+    private double bes(Graph graph, double score,Map<Node, Map<Set<Node>, Double>> globalScoreHash) {
+        List<Node> nodes = graph.getNodes();
+
+        TetradLogger.getInstance().log("info", "** BACKWARD EQUIVALENCE SEARCH");
+        TetradLogger.getInstance().log("info", "Initial Model BIC = " + nf.format(score));
+        /* Diljot,Chris : using the globalScoreHash from BayesBase.java in the function.*/
+        initializeArrowsBackward(graph,globalScoreHash);
+
+        while (!sortedArrowsBackwards.isEmpty()) {
+            Arrow arrow = sortedArrowsBackwards.first();
+            sortedArrowsBackwards.remove(arrow);
+
+            Node _x = nodes.get(arrow.getX());
+            Node _y = nodes.get(arrow.getY());
+
+            if (!graph.isAdjacentTo(_x, _y)) {
+                continue;
+            }
+
+            if (!findNaYX(_x, _y, graph).equals(arrow.getNaYX())) {
+                /* Diljot,Chris : using the globalScoreHash from BayesBase.java in the function.*/
+                reevaluateBackward(graph, nodes, arrow,globalScoreHash);
+                continue;
+            }
+
+            if (!new HashSet<Node>(getHNeighbors(_x, _y, graph)).containsAll(arrow.getHOrT())) {
+                /* Diljot,Chris : using the globalScoreHash from BayesBase.java in the function.*/
+                reevaluateBackward(graph, nodes, arrow,globalScoreHash);
+                continue;
+            }
+
+            if (!validDelete(arrow.getHOrT(), arrow.getNaYX(), graph)) {
+                continue;
+            }
+
+            Node x = nodes.get(arrow.getX());
+            Node y = nodes.get(arrow.getY());
+            Set<Node> h = arrow.getHOrT();
+            double bump = arrow.getBump();
+
+            score = score + bump;
+            delete(x, y, h, graph, score, true, bump);
+            rebuildPattern(graph);
+
+            storeGraph(graph, score);
+            /* Diljot,Chris : using the globalScoreHash from BayesBase.java in the function.*/
+            reevaluateBackward(graph, nodes, arrow,globalScoreHash);
+        }
+
+        return score;
+    }
+
     private void initializeArrowsForward(List<Node> nodes, Graph graph) {
         Set<Node> empty = Collections.emptySet();
 
@@ -693,6 +1012,41 @@ public final class Ges3 implements GraphSearch, GraphScorer {
 
     }
 
+    /* Diljot,Chris : using the globalScoreHash from BayesBase.java in the function.*/
+    private void initializeArrowsForward(List<Node> nodes, Graph graph, Map<Node, Map<Set<Node>, Double>> globalScoreHash) {
+        Set<Node> empty = Collections.emptySet();
+
+        for (int j = 0; j < nodes.size(); j++) {
+            for (int i = 0; i < nodes.size(); i++) {
+                if (j == i) continue;
+
+                Node _x = nodes.get(i);
+                Node _y = nodes.get(j);
+
+                if (getKnowledge().edgeForbidden(_x.getName(),
+                        _y.getName())) {
+                    continue;
+                }
+
+                Set<Node> naYX = empty;
+                Set<Node> t = empty;
+
+                if (!validSetByKnowledge(_x, _y, t, true)) {
+                    continue;
+                }
+                /* Diljot,Chris : using the globalScoreHash from BayesBase.java in the function.*/
+                double bump = insertEval(_x, _y, t, naYX, graph,globalScoreHash);
+
+                if (bump > minJump) {
+                    Arrow arrow = new Arrow(bump, i, j, t, naYX, nodes);
+                    lookupArrows[i][j] = new HashSet<Arrow>();
+                    sortedArrows.add(arrow);
+                    lookupArrows[i][j].add(arrow);
+                }
+            }
+        }
+    }
+
     private void initializeArrowsBackward(Graph graph) {
         List<Node> nodes = graph.getNodes();
         sortedArrowsBackwards = new TreeSet<Arrow>();
@@ -722,6 +1076,35 @@ public final class Ges3 implements GraphSearch, GraphScorer {
                 calculateArrowsBackward(j, i, nodes, graph);
             }
 
+        }
+    }
+
+    /* Diljot,Chris : using the globalScoreHash from BayesBase.java in the function.*/
+    private void initializeArrowsBackward(Graph graph, Map<Node, Map<Set<Node>, Double>> globalScoreHash) {
+        List<Node> nodes = graph.getNodes();
+        sortedArrowsBackwards = new TreeSet<Arrow>();
+        lookupArrowsBackwards = new HashSet[nodes.size()][nodes.size()];
+
+        List<Edge> graphEdges = graph.getEdges();
+
+        for (Edge edge : graphEdges) {
+            Node _x = edge.getNode1();
+            Node _y = edge.getNode2();
+
+            int i = nodesHash.get(edge.getNode1());
+            int j = nodesHash.get(edge.getNode2());
+
+            if (!getKnowledge().noEdgeRequired(_x.getName(),
+                    _y.getName())) {
+                continue;
+            }
+            /* Diljot,Chris : using the globalScoreHash from BayesBase.java in the function.*/
+            if (Edges.isDirectedEdge(edge)) {
+                calculateArrowsBackward(i, j, nodes, graph, globalScoreHash);
+            } else {
+                calculateArrowsBackward(i, j, nodes, graph, globalScoreHash);
+                calculateArrowsBackward(j, i, nodes, graph, globalScoreHash);
+            }
         }
     }
 
@@ -787,6 +1170,35 @@ public final class Ges3 implements GraphSearch, GraphScorer {
         }
     }
 
+    /* Diljot,Chris : using the globalScoreHash from BayesBase.java in the function.*/
+    private void reevaluateFoward(Graph graph, List<Node> nodes, Arrow arrow, Map<Node, Map<Set<Node>, Double>> globalScoreHash) {
+        Node x = nodes.get(arrow.getX());
+        Node y = nodes.get(arrow.getY());
+
+        for (int _w = 0; _w < nodes.size(); _w++) {
+            Node w = nodes.get(_w);
+            if (w == x) continue;
+            if (w == y) continue;
+
+            /* Diljot,Chris : using the globalScoreHash from BayesBase.java in the function.*/
+            if (!graph.isAdjacentTo(w, x)) {
+                calculateArrowsForward(_w, arrow.getX(), nodes, graph, globalScoreHash);
+
+                if (graph.isAdjacentTo(w, y)) {
+                    calculateArrowsForward(arrow.getX(), _w, nodes, graph, globalScoreHash);
+                }
+            }
+            /* Diljot,Chris : using the globalScoreHash from BayesBase.java in the function.*/
+            if (!graph.isAdjacentTo(w, y)) {
+                calculateArrowsForward(_w, arrow.getY(), nodes, graph, globalScoreHash);
+
+                if (graph.isAdjacentTo(w, x)) {
+                    calculateArrowsForward(arrow.getY(), _w, nodes, graph, globalScoreHash);
+                }
+            }
+        }
+    }
+
     private void reevaluateBackward(Graph graph, List<Node> nodes, Arrow arrow) {
         Node x = nodes.get(arrow.getX());
         Node y = nodes.get(arrow.getY());
@@ -803,6 +1215,28 @@ public final class Ges3 implements GraphSearch, GraphScorer {
 
             calculateArrowsBackward(_w, arrow.getX(), nodes, graph);
             calculateArrowsBackward(arrow.getX(), _w, nodes, graph);
+        }
+    }
+
+    /* Diljot,Chris : using the globalScoreHash from BayesBase.java in the function.*/
+    private void reevaluateBackward(Graph graph, List<Node> nodes, Arrow arrow, Map<Node, Map<Set<Node>, Double>> globalScoreHash) {
+        Node x = nodes.get(arrow.getX());
+        Node y = nodes.get(arrow.getY());
+
+        for (Node w : graph.getAdjacentNodes(x)) {
+            int _w = nodesHash.get(w);
+
+            /* Diljot,Chris : using the globalScoreHash from BayesBase.java in the function.*/
+            calculateArrowsBackward(_w, arrow.getX(), nodes, graph,globalScoreHash);
+            calculateArrowsBackward(arrow.getX(), _w, nodes, graph,globalScoreHash);
+        }
+
+        for (Node w : graph.getAdjacentNodes(y)) {
+            int _w = nodesHash.get(w);
+
+            /* Diljot,Chris : using the globalScoreHash from BayesBase.java in the function.*/
+            calculateArrowsBackward(_w, arrow.getX(), nodes, graph,globalScoreHash);
+            calculateArrowsBackward(arrow.getX(), _w, nodes, graph,globalScoreHash);
         }
     }
 
@@ -825,7 +1259,6 @@ public final class Ges3 implements GraphSearch, GraphScorer {
         }
     }
 
-    
     private void calculateArrowsForward(int i, int j, List<Node> nodes, Graph graph) {
         if (i == j) {
             return;
@@ -876,6 +1309,57 @@ public final class Ges3 implements GraphSearch, GraphScorer {
         }
     }
 
+    /* Diljot,Chris : using the globalScoreHash from BayesBase.java in the function.*/
+    private void calculateArrowsForward(int i, int j, List<Node> nodes, Graph graph, Map<Node, Map<Set<Node>, Double>> globalScoreHash) {
+        if (i == j) {
+            return;
+        }
+
+        Node _x = nodes.get(i);
+        Node _y = nodes.get(j);
+
+        if (graph.isAdjacentTo(_x, _y)) {
+            return;
+        }
+
+        if (getKnowledge().edgeForbidden(_x.getName(),
+                _y.getName())) {
+            return;
+        }
+
+        Set<Node> naYX = findNaYX(_x, _y, graph);
+
+        if (lookupArrows[i][j] != null) {
+            for (Arrow arrow : lookupArrows[i][j]) {
+                sortedArrows.remove(arrow);
+            }
+
+            lookupArrows[i][j] = null;
+        }
+
+        List<Node> tNeighbors = getTNeighbors(_x, _y, graph);
+        List<Set<Node>> tSubsets = powerSet(tNeighbors);
+
+        for (Set<Node> t : tSubsets) {
+            if (!validSetByKnowledge(_x, _y, t, true)) {
+                continue;
+            }
+
+            double bump = insertEval(_x, _y, t, naYX, graph,globalScoreHash);
+            Arrow arrow = new Arrow(bump, i, j, t, naYX, nodes);
+
+//            System.out.println(arrow);
+
+            if (bump > minJump) {
+                if (lookupArrows[i][j] == null) {
+                    lookupArrows[i][j] = new HashSet<Arrow>();
+                }
+                sortedArrows.add(arrow);
+                lookupArrows[i][j].add(arrow);
+            }
+        }
+    }
+
     private void calculateArrowsBackward(int i, int j, List<Node> nodes, Graph graph) {
         if (i == j) {
             return;
@@ -909,6 +1393,54 @@ public final class Ges3 implements GraphSearch, GraphScorer {
 
         for (Set<Node> h : hSubsets) {
             double bump = deleteEval(_x, _y, h, naYX, graph);
+            Arrow arrow = new Arrow(bump, i, j, h, naYX, nodes);
+
+//            System.out.println("Calculate backwards " + arrow);
+
+            if (bump > minNeg) {
+                if (lookupArrowsBackwards[i][j] == null) {
+                    lookupArrowsBackwards[i][j] = new HashSet<Arrow>();
+                }
+
+                sortedArrowsBackwards.add(arrow);
+                lookupArrowsBackwards[i][j].add(arrow);
+            }
+        }
+    }
+
+    /* Diljot,Chris : using the globalScoreHash from BayesBase.java in the function.*/
+    private void calculateArrowsBackward(int i, int j, List<Node> nodes, Graph graph,Map<Node, Map<Set<Node>, Double>> globalScoreHash) {
+        if (i == j) {
+            return;
+        }
+
+        Node _x = nodes.get(i);
+        Node _y = nodes.get(j);
+
+        if (!graph.isAdjacentTo(_x, _y)) {
+            return;
+        }
+
+        if (!getKnowledge().noEdgeRequired(_x.getName(), _y.getName())) {
+            return;
+        }
+
+        Set<Node> naYX = findNaYX(_x, _y, graph);
+
+        if (lookupArrowsBackwards[i][j] != null) {
+            for (Arrow arrow : lookupArrowsBackwards[i][j]) {
+                sortedArrowsBackwards.remove(arrow);
+            }
+
+            lookupArrowsBackwards[i][j] = null;
+        }
+
+        List<Node> hNeighbors = getHNeighbors(_x, _y, graph);
+        List<Set<Node>> hSubsets = powerSet(hNeighbors);
+
+        for (Set<Node> h : hSubsets) {
+            /* Diljot,Chris : using the globalScoreHash from BayesBase.java in the function.*/
+            double bump = deleteEval(_x, _y, h, naYX, graph,globalScoreHash);
             Arrow arrow = new Arrow(bump, i, j, h, naYX, nodes);
 
 //            System.out.println("Calculate backwards " + arrow);
@@ -1106,6 +1638,27 @@ public final class Ges3 implements GraphSearch, GraphScorer {
     }
 
     /**
+     * Evaluate the Insert(X, Y, T) operator (Definition 12 from Chickering, 2002).
+     */
+    /** Diljot,Chris : using the globalScoreHash from BayesBase.java in the function.
+     * Gets passed to the scoring function which checks hash before computing the
+     * new scores
+     */
+    private double insertEval(Node x, Node y, Set<Node> t, Set<Node> naYX, Graph graph,Map<Node, Map<Set<Node>, Double>> globalScoreHash) {
+
+        // set1 contains x; set2 does not.
+        Set<Node> set2 = new HashSet<Node>(naYX);
+        set2.addAll(t);
+        set2.addAll(graph.getParents(y));
+        Set<Node> set1 = new HashSet<Node>(set2);
+        set1.add(x);
+        /* Diljot,Chris : using the globalScoreHash from BayesBase.java in the function.*/
+        double score = scoreGraphChange(y, set1, set2,globalScoreHash);
+
+        return score;
+    }
+
+    /**
      * Evaluate the Delete(X, Y, T) operator (Definition 12 from Chickering, 2002).
      */
     private double deleteEval(Node x, Node y, Set<Node> h, Set<Node> naYX, Graph graph) {
@@ -1121,8 +1674,27 @@ public final class Ges3 implements GraphSearch, GraphScorer {
         return scoreGraphChange(y, set1, set2);
     }
 
-    /** Do an actual insertion , (Definition 12 from Chickering, 2002).   
-     *  **/
+    /**
+     * Evaluate the Delete(X, Y, T) operator (Definition 12 from Chickering, 2002).
+     */
+    /** the call for localScoreCache replaced. @Diljot,Chris
+     *Gets passed to the scoring function to check the hash if we have the scores before computing
+     */
+    private double deleteEval(Node x, Node y, Set<Node> h, Set<Node> naYX, Graph graph,Map<Node, Map<Set<Node>, Double>> globalScoreHash) {
+        // set2 contains x; set1 does not.
+        Set<Node> set2 = new HashSet<Node>(naYX);
+        set2.removeAll(h);
+        set2.addAll(graph.getParents(y));
+        set2.add(x);
+        Set<Node> set1 = new HashSet<Node>(set2);
+        set1.remove(x);
+        /* Diljot,Chris : using the globalScoreHash from BayesBase.java in the function.*/
+        return scoreGraphChange(y, set1, set2, globalScoreHash);
+    }
+
+    /**
+     * Do an actual insertion , (Definition 12 from Chickering, 2002).
+     **/
     private void insert(Node x, Node y, Set<Node> t, Graph graph, double score, boolean log, double bump) {
         if (graph.isAdjacentTo(x, y)) {
             throw new IllegalArgumentException(x + " and " + y + " are already adjacent in the graph.");
@@ -1580,6 +2152,66 @@ public final class Ges3 implements GraphSearch, GraphScorer {
         return score;
     }
 
+    /* Diljot,Chris : using the globalScoreHash from BayesBase.java in the function.*/
+    public double scoreGraph(Graph graph, Map<Node, Map<Set<Node>, Double>> globalScoreHash) {
+        Graph dag = SearchGraphUtils.dagFromPattern(graph);
+        double score = 0.;
+
+        for (Node y : dag.getNodes()) {
+            Set<Node> parents = new HashSet<Node>(dag.getParents(y));
+            int nextIndex = -1;
+            for (int i = 0; i < getVariables().size(); i++) {
+                if (this.varNames[i].equals(y.getName())) {
+                    nextIndex = i;
+                    break;
+                }
+            }
+            int parentIndices[] = new int[parents.size()];
+            Iterator<Node> pi = parents.iterator();
+            int count = 0;
+            while (pi.hasNext()) {
+                Node nextParent = pi.next();
+                for (int i = 0; i < getVariables().size(); i++) {
+                    if (this.varNames[i].equals(nextParent.getName())) {
+                        parentIndices[count++] = i;
+                        break;
+                    }
+                }
+            }
+
+            if (this.isDiscrete()) {
+                /* Diljot,Chris : using the globalScoreHash from BayesBase.java in the function.*/
+                score += localDiscreteScore(nextIndex, parentIndices,y,parents, globalScoreHash);
+            } else {
+                score += localSemScore(nextIndex, parentIndices);
+            }
+
+            // ==================Writing to the file=====================
+            //
+            //This part is not required, just writing all the scores calculated to the file
+            //to make the comparison easier (after making changes to code).
+            try{
+                File file =new File("GlobalScoreHash-Final");
+
+                if(!file.exists()){
+                    file.createNewFile();
+                }
+
+                FileWriter fileWriter = new FileWriter(file.getName(),true);
+                BufferedWriter bufferWriter = new BufferedWriter(fileWriter);
+                bufferWriter.write("The Node:" +y +"\n The Parents: "+ parents+ "\n The Score:" +score);
+                bufferWriter.write("\n_______________________________________________________________________________\n");
+                bufferWriter.close();
+            }
+            catch(Exception e)
+            {System.out.println("Error Writing");}
+
+            //=======End Writing to File =======================
+            //
+        }
+        return score;
+    }
+
     private double scoreGraphChange(Node y, Set<Node> parents1,Set<Node> parents2) {
         int yIndex = hashIndices.get(y);
 
@@ -1626,6 +2258,113 @@ public final class Ges3 implements GraphSearch, GraphScorer {
         return score1 - score2;
     }
 
+    /* Diljot,Chris : using the globalScoreHash from BayesBase.java in the function.*/
+    private double scoreGraphChange(Node y, Set<Node> parents1,
+                                    Set<Node> parents2, Map<Node, Map<Set<Node>, Double>> globalScoreHash) {
+        int yIndex = hashIndices.get(y);
+
+        Double score1 = null;
+        if(globalScoreHash.containsKey(y)){
+            if(globalScoreHash.get(y).containsKey(parents1)){
+                score1 = globalScoreHash.get(y).get(parents1);
+            }
+        }
+
+        if (score1 == null) {
+            int parentIndices1[] = new int[parents1.size()];
+
+            int count = 0;
+            for (Node aParents1 : parents1) {
+                parentIndices1[count++] = (hashIndices.get(aParents1));
+            }
+
+            if (isDiscrete()) {
+                /* Diljot,Chris : using the globalScoreHash from BayesBase.java in the function.*/
+                score1 = localDiscreteScore(yIndex, parentIndices1,y,parents1, globalScoreHash);
+            } else {
+                score1 = localSemScore(yIndex, parentIndices1);
+            }
+
+            // ==================Writing to the file=====================
+            //
+            //This part is not required, just writing all the scores calculated to the file
+            //to make the comparison easier (after making changes to code).
+            try{
+                File file =new File("GlobalScoreHash-Final");
+
+                if(!file.exists()){
+                    file.createNewFile();
+                }
+
+                FileWriter fileWriter = new FileWriter(file.getName(),true);
+                BufferedWriter bufferWriter = new BufferedWriter(fileWriter);
+                bufferWriter.write("The Node:" +y +"\n The Parents: "+ parents1+ "\n The Score:" +score1);
+                bufferWriter.write("\n_______________________________________________________________________________\n");
+                bufferWriter.close();
+            }
+            catch(Exception e) {
+                System.out.println("Error Writing");
+            }
+
+            //=======End File =========================
+
+            //We are not going to add the scores to the hash yet. The score will
+            //be added later inside the BdeuScore.java file.
+            //globalScoreHash.get(y).put(parents1, score1);
+        }
+
+        Double score2 = null;
+        if(globalScoreHash.containsKey(y)){
+            if(globalScoreHash.get(y).containsKey(parents2)){
+                score2 = globalScoreHash.get(y).get(parents2);
+            }
+        }
+
+        if (score2 == null) {
+            int parentIndices2[] = new int[parents2.size()];
+
+            int count2 = 0;
+            for (Node aParents2 : parents2) {
+                parentIndices2[count2++] = (hashIndices.get(aParents2));
+            }
+
+            if (isDiscrete()) {
+                /* Diljot,Chris : using the globalScoreHash from BayesBase.java in the function.*/
+                score2 = localDiscreteScore(yIndex, parentIndices2,y,parents2, globalScoreHash);
+            } else {
+                score2 = localSemScore(yIndex, parentIndices2);
+            }
+            //Not adding the scores into the hash. All the score hashing is done in BdeuScore.java
+            //globalScoreHash.get(y).put(parents2, score2);
+
+          //===========Writing File =======================//
+            //This part writes the scores and the concerned parents and the children to the file
+            //makes it easy to compare the results.
+            try{
+                File file =new File("GlobalScoreHash-Final");
+
+                if(!file.exists()) {
+                    file.createNewFile();
+                }
+
+                FileWriter fileWriter = new FileWriter(file.getName(),true);
+                BufferedWriter bufferWriter = new BufferedWriter(fileWriter);
+                bufferWriter.write("The Node:" +y +"\n The Parents: "+ parents2+ "\n The Score:" +score2);
+                bufferWriter.write("\n_______________________________________________________________________________\n");
+                bufferWriter.close();
+            }
+            catch(Exception e) {
+                System.out.println("Error Writing");
+            }
+
+           //=======End File =========================
+        }
+
+        // That is, the score for the variable set that contains x minus the score
+        // for the variable set that does not contain x.
+        return score1 - score2;
+    }
+
     /**
      * Compute the local BDeu score of (i, parents(i)). See (Chickering, 2002).
      */
@@ -1633,7 +2372,16 @@ public final class Ges3 implements GraphSearch, GraphScorer {
         return getDiscreteScore().localScore(i, parents);
     }
 
-
+    /**
+     * Compute the local BDeu score of (i, parents(i)). See (Chickering, 2002).
+     */
+    /** Diljot,Chris : using the globalScoreHash from BayesBase.java in the function.
+     * The function is in BDeuScore.java and it uses the globalScoreHash to hash the scores.The hashing
+     * done in the BdeuScore.java file.
+     */
+    private double localDiscreteScore(int i, int parents[], Node y, Set<Node> parentNodes, Map<Node, Map<Set<Node>, Double>> globalScoreHash) {
+        return getDiscreteScore().localScore(i, parents, y, parentNodes, globalScoreHash);
+    }
 
     private int numCategories(int i) {
         return ((DiscreteVariable) dataSet().getVariable(i)).getNumCategories();
@@ -1813,7 +2561,6 @@ public final class Ges3 implements GraphSearch, GraphScorer {
                 topGraphs.remove(topGraphs.first());
             }
         }
-       
     }
 
     public LocalDiscreteScore getDiscreteScore() {
@@ -1827,7 +2574,3 @@ public final class Ges3 implements GraphSearch, GraphScorer {
         this.discreteScore = discreteScore;
     }
 }
-
-
-
-
