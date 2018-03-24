@@ -21,7 +21,11 @@
 
 package edu.cmu.tetrad.search;
 
+import java.util.Map;
+import java.util.Set;
+
 import edu.cmu.tetrad.data.DataSet;
+import edu.cmu.tetrad.graph.Node;
 
 /**
  * Created by IntelliJ IDEA. User: jdramsey Date: Jul 6, 2009 Time: 3:58:26 PM To change this template use File |
@@ -33,6 +37,9 @@ public interface LocalDiscreteScore {
     void setSamplePrior(double samplePrior);
 
     double localScore(int i, int[] parents);
+
+    double localScore(int i, int[] parents, Node y, Set<Node> parentNodes,
+            Map<Node, Map<Set<Node>, Double>> globalScoreHash);
 
     DataSet getDataSet();
 }

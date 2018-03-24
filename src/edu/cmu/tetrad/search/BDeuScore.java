@@ -164,6 +164,7 @@ public class BDeuScore implements LocalDiscreteScore {
         return score;
     }
 
+    @Override
     public double localScore(int i, int parents[], Node y, Set<Node> parentNodes, Map<Node, Map<Set<Node>, Double>> globalScoreHash) {
         Double oldscore = null;
         if(globalScoreHash.containsKey(y)) {
