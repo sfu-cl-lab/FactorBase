@@ -1,267 +1,185 @@
 USE unielwin_BN;
-
-CREATE TABLE ADT_PVariables_Select_List AS 
-SELECT 
-    pvid,CONCAT(pvid, '.', COLUMN_NAME, ' AS ', 1nid) AS Entries 
-FROM
-    1Nodes
-        NATURAL JOIN
-    PVariables
-    UNION
- 
- 
- 
- SELECT E.pvid, CONCAT(E.pvid,'.',REFERENCED_COLUMN_NAME, ' AS `ID(', E.pvid, ')`') AS Entries FROM
- RNodes_pvars RP, Expansions E where E.pvid = RP.pvid
- union distinct
- SELECT distinct
-    pvid, CONCAT('count(*)',' as "MULT"') AS Entries
-    from PVariables;
+SET storage_engine=INNODB;
 
 
-create table ADT_PVariables_GroupBy_List as
-SELECT 
-    pvid,1nid AS Entries 
-FROM
-    1Nodes
-        NATURAL JOIN
-    PVariables
-    UNION
- 
- 
- 
-SELECT E.pvid, CONCAT('`ID(', E.pvid, ')`') AS Entries FROM
- RNodes_pvars RP, Expansions E where E.pvid = RP.pvid;
+
+
+INSERT into MetaQueries
+select distinct short_rnid as Lattice_Point, 'Join' as TableType, 'COLUMN' as ClauseType, '2nid' as EntryType, concat(2nid,
+' varchar(5)  default ',' "N/A" ') as Entries from RNodes_2Nodes N, LatticeRNodes L where N.rnid = L.orig_rnid;
 
 
 
 
 
+INSERT into MetaQueries
+select DISTINCT 
+    short_rnid as Lattice_Point, 'Flat' as TableType, 'FROM' as ClauseType , 'table' as EntryType, 
+    concat('`',replace(short_rnid, '`', ''),'_counts`') AS Entries
+from LatticeRNodes;
 
 
 
-
-
-CREATE TABLE ADT_PVariables_From_List AS SELECT pvid, CONCAT('unielwin.',TABLE_NAME, ' AS ', pvid) AS Entries FROM
-    PVariables;
-
-
-
+INSERT into MetaQueries
+SELECT distinct Lattice_Point, 'Flat' as TableType, ClauseType, EntryType, Entries
+FROM LatticeRNodes L, MetaQueries M where L.short_rnid = M.Lattice_Point and TableType = 'Counts' and ClauseType = 'GROUPBY'
+and EntryType <> 'rnid' and EntryType <> '2nid';
 
 
 
+INSERT into MetaQueries
+SELECT distinct Lattice_Point, 'Flat' as TableType, 'SELECT' AS ClauseType, EntryType, Entries
+FROM LatticeRNodes L, MetaQueries M where L.short_rnid = M.Lattice_Point and TableType = 'Counts' and ClauseType = 'GROUPBY'
+and EntryType <> 'rnid' and EntryType <> '2nid';
 
 
-
-
-CREATE TABLE ADT_RNodes_1Nodes_Select_List AS 
-select 
-    rnid, concat('sum(`',replace(rnid, '`', ''),'_counts`.`MULT`)',' as "MULT"') AS Entries
+INSERT into MetaQueries
+SELECT distinct short_rnid as Lattice_Point, 'Flat' as TableType, 'SELECT' AS ClauseType, 'aggregate' as EntryType,
+    concat('sum(`',replace(short_rnid, '`', ''),'_counts`.`MULT`)',' as "MULT"') AS Entries
 from
-    RNodes
-union
-SELECT DISTINCT rnid,
-    1nid AS Entries FROM
-    RNodes_1Nodes
-    UNION DISTINCT
-    SELECT distinct rnid, PV.Entries
-FROM RNodes_pvars RP, PVariables_GroupBy_List PV where RP.pvid = PV.pvid;
+    LatticeRNodes;
 
-CREATE TABLE ADT_RNodes_1Nodes_FROM_List AS 
-select 
-    rnid, concat('`',replace(rnid, '`', ''),'_counts`') AS Entries
-from RNodes
-;
 
-CREATE TABLE ADT_RNodes_1Nodes_GroupBY_List AS 
-SELECT DISTINCT rnid,
-    1nid AS Entries FROM
-    RNodes_1Nodes 
-    UNION DISTINCT
-    SELECT distinct rnid, PV.Entries
-FROM RNodes_pvars RP, PVariables_GroupBy_List PV where RP.pvid = PV.pvid;
+
+INSERT into MetaQueries
+SELECT distinct short_rnid as Lattice_Point, 'Star' as TableType, 'SELECT' as ClauseType, '1nid' as EntryType, Entries FROM
+    LatticeRNodes L, RNodes_pvars R, MetaQueries M
+WHERE
+    L.orig_rnid = R.rnid and M.Lattice_Point = R.pvid and ClauseType = 'GROUPBY';
+    
 
 
 
 
-CREATE TABLE ADT_RNodes_Star_Select_List AS 
-SELECT DISTINCT rnid,
-    1nid AS Entries FROM
-    RNodes_1Nodes
-    UNION DISTINCT
-    SELECT distinct rnid, PV.Entries
-FROM RNodes_pvars RP, PVariables_GroupBy_List PV where RP.pvid = PV.pvid;
 
 
-
-CREATE TABLE ADT_RNodes_Star_From_List AS 
-SELECT DISTINCT rnid, concat('`',replace(pvid, '`', ''),'_counts`')
+INSERT into MetaQueries
+SELECT DISTINCT short_rnid as Lattice_Point, 'Star' as TableType, 'FROM' as ClauseType, 'table' as EntryType, 
+concat('`',replace(pvid, '`', ''),'_counts`')
     AS Entries FROM
-    RNodes_pvars;
+    LatticeRNodes L, RNodes_pvars R
+    where L.orig_rnid = R.rnid;
+    
+   
 
-
-
-
-create table ADT_RNodes_False_Select_List as
-SELECT DISTINCT rnid, concat('(`',replace(rnid, '`', ''),'_star`.MULT','-','`',replace(rnid, '`', ''),'_flat`.MULT)',' AS "MULT"') as Entries
-from RNodes
-union
-SELECT DISTINCT rnid,
-    concat('`',replace(rnid, '`', ''),'_star`.',1nid) AS Entries FROM
-    RNodes_1Nodes
-    UNION DISTINCT
+    
     
  
-    SELECT distinct rnid, concat('`',replace(rnid, '`', ''),'_star`.',PV.Entries) AS Entries
-FROM RNodes_pvars RP, PVariables_GroupBy_List PV where RP.pvid = PV.pvid;
-
-create table ADT_RNodes_False_FROM_List as
-SELECT DISTINCT rnid, concat('`',replace(rnid, '`', ''),'_star`') as Entries from RNodes
-union 
-select distinct rnid, concat('`',replace(rnid, '`', ''),'_flat`') as Entries from RNodes;
-
-create table ADT_RNodes_False_WHERE_List as
-SELECT DISTINCT rnid, concat('`',replace(rnid, '`', ''),'_star`.',1nid,'=','`',replace(rnid, '`', ''),'_flat`.',1nid) as Entries from RNodes_1Nodes; 
-
-
-create table Rnodes_join_columnname_list as 
-select distinct rnid,concat(2nid, ' varchar(5)  default ',' "N/A" ') as Entries from 2Nodes natural join RNodes;
+    
 
 
 
 
+     
 
 
-
-CREATE TABLE RChain_pvars AS
+    
+CREATE or REPLACE VIEW RChain_pvars AS
 select  distinct 
-    lattice_membership.name as rchain, 
+    M.name as rchain, 
     pvid 
 from 
-    lattice_membership, RNodes_pvars 
+    lattice_membership M, LatticeRNodes L, RNodes_pvars R
 where 
-    RNodes_pvars.rnid = lattice_membership.member;
- 
-
-
-
-CREATE TABLE ADT_RChain_Star_From_List AS 
+    R.rnid = L.orig_rnid and L.short_rnid = M.member;
+    
+insert into MetaQueries
 SELECT DISTINCT 
-    lattice_rel.child as rchain, 
-    lattice_rel.removed as rnid, 
+    lattice_rel.child as Lattice_Point, 
+    'STAR' as TableType, 
+    'FROM' as ClauseType,
+    lattice_rel.removed as EntryType, 
+    
     
     concat('`',replace(lattice_rel.parent,'`',''),'_CT`')  AS Entries 
+    
     
 FROM
     lattice_rel
 where 
-    lattice_rel.parent <>'EmptySet'
-union
+    lattice_rel.parent <>'EmptySet';
+    
+
+
+insert into MetaQueries
 SELECT DISTINCT 
-    lattice_rel.child as rchain, 
-    lattice_rel.removed as rnid, 
-concat('`',replace(RNodes_pvars.pvid, '`', ''),'_counts`')    AS Entries 
+    LR.child as Lattice_Point, 
+    'STAR' as TableType, 
+    'FROM' as ClauseType,
+    LR.removed as EntryType,
+concat('`',replace(R.pvid, '`', ''),'_counts`')    AS Entries 
 
 FROM
-    lattice_rel, RNodes_pvars
-where lattice_rel.parent <>'EmptySet'
-and RNodes_pvars.rnid = lattice_rel.removed and
-RNodes_pvars.pvid not in (select pvid from RChain_pvars where RChain_pvars.rchain =     lattice_rel.parent)
-
-;
+    lattice_rel LR, LatticeRNodes L, RNodes_pvars R
+where LR.parent <>'EmptySet' and LR.removed = L.short_rnid and L.orig_rnid = R.rnid and
+R.pvid not in (select pvid from RChain_pvars where RChain_pvars.rchain = LR.parent);
 
 
-CREATE TABLE ADT_RChain_Star_Where_List AS 
+
+
+
+
+insert into MetaQueries
 SELECT DISTINCT 
-    lattice_rel.child as rchain, 
-    lattice_rel.removed as rnid, 
-    concat(lattice_membership.member,' = "T"')  AS Entries 
+     lattice_rel.child as Lattice_Point, 
+    'STAR' as TableType, 
+    'WHERE' as ClauseType,
+    lattice_rel.removed as EntryType, 
+    concat(L.orig_rnid,' = "T"')  AS Entries 
 FROM
-    lattice_rel,    lattice_membership
+    lattice_rel,    lattice_membership, LatticeRNodes L
 where 
     lattice_rel.child = lattice_membership.name
     and  lattice_membership.member > lattice_rel.removed
     
-    and lattice_rel.parent <>'EmptySet';
+    and lattice_rel.parent <>'EmptySet'
+    and L.short_rnid = lattice_membership.member;
 
 
 
-CREATE TABLE ADT_RChain_Star_Select_List AS 
+insert into MetaQueries
 SELECT DISTINCT 
-    lattice_rel.child AS rchain,
-    lattice_rel.removed AS rnid,
-    RNodes_GroupBy_List.Entries 
+    lattice_rel.child AS Lattice_Point, 
+    'STAR' as TableType, 
+    'SELECT' as ClauseType,
+    lattice_rel.removed AS EntryType,
+    M.Entries 
 FROM
     lattice_rel,
     lattice_membership,
-    RNodes_GroupBy_List
+    MetaQueries M
 WHERE
     lattice_rel.parent <> 'EmptySet'
         AND lattice_membership.name = lattice_rel.parent
-        AND RNodes_GroupBy_List.rnid = lattice_membership.member 
+        AND M.Lattice_Point = lattice_membership.`member`
+        AND M.ClauseType = 'GROUPBY'
+        AND M.TableType = 'COUNTS';
 
 
-UNION SELECT DISTINCT
-    lattice_rel.child AS rchain,
-    lattice_rel.removed AS rnid,
-    1Nodes.1nid AS Entries
+
+insert into MetaQueries
+SELECT DISTINCT 
+    LR.child as Lattice_Point, 
+    'STAR' as TableType, 
+    'SELECT' as ClauseType,
+    LR.removed as EntryType,
+    M.Entries 
 FROM
-    lattice_rel,
-    RNodes_pvars,
-    1Nodes
-WHERE
-    lattice_rel.parent <> 'EmptySet'
-        AND RNodes_pvars.rnid = lattice_rel.removed
-        AND RNodes_pvars.pvid = 1Nodes.pvid
-        AND 1Nodes.pvid NOT IN (SELECT 
-            pvid
-        FROM
-            RChain_pvars
-        WHERE
-            RChain_pvars.rchain = lattice_rel.parent) 
+    lattice_rel LR, LatticeRNodes L, RNodes_pvars R,
+    MetaQueries M
+where LR.parent <>'EmptySet' and LR.removed = L.short_rnid and L.orig_rnid = R.rnid and
+R.pvid not in (select pvid from RChain_pvars where RChain_pvars.rchain = LR.parent)
+AND M.Lattice_Point = R.pvid
+AND M.ClauseType = 'GROUPBY'
+AND M.TableType = 'COUNTS';
 
 
-UNION SELECT DISTINCT
-    lattice_rel.child AS rchain,
-    lattice_rel.removed AS rnid,
-    CONCAT('`ID(', E.pvid, ')`') AS Entries
-FROM
-    lattice_rel,
-    RNodes_pvars,
-    Expansions E
-WHERE
-    lattice_rel.parent <> 'EmptySet'
-        AND RNodes_pvars.rnid = lattice_rel.removed
-        AND RNodes_pvars.pvid = E.pvid
-        AND E.pvid NOT IN (SELECT 
-            pvid
-        FROM
-            RChain_pvars
-        WHERE
-            RChain_pvars.rchain = lattice_rel.parent) 
-
-UNION SELECT DISTINCT
-    lattice_rel.removed AS rchain,
-    lattice_rel.removed AS rnid,
-    1Nodes.1nid AS Entries
-FROM
-    lattice_rel,
-    RNodes_pvars,
-    1Nodes
-WHERE
-    lattice_rel.parent = 'EmptySet'
-        AND RNodes_pvars.rnid = lattice_rel.removed
-        AND RNodes_pvars.pvid = 1Nodes.pvid 
-UNION DISTINCT SELECT DISTINCT
-    lattice_rel.removed AS rchain,
-    lattice_rel.removed AS rnid,
-    PV.Entries
-FROM
-    lattice_rel,
-    RNodes_pvars RP,
-    PVariables_GroupBy_List PV
-    
-WHERE
-    lattice_rel.parent = 'EmptySet'
-        AND RP.rnid = lattice_rel.removed
-        AND RP.pvid = PV.pvid;
+insert into MetaQueries
+SELECT DISTINCT 
+    lattice_rel.removed AS Lattice_Point, 
+    'STAR' as TableType, 
+    'SELECT' as ClauseType,
+    lattice_rel.removed AS EntryType,
+    M.Entries 
+FROM lattice_rel, MetaQueries M
+WHERE lattice_rel.parent = 'EmptySet' AND M.Lattice_Point = lattice_rel.removed AND M.TableType = 'STAR' and M.ClauseType = 'SELECT';

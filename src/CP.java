@@ -190,7 +190,7 @@ public CP(String databaseName, String databaseName2){
  	 st.execute("drop table if exists RNodes_2Nodes_Family;");
  	 st.execute("create table RNodes_2Nodes_Family as select RNodes_inFamily.ChildNode, RNodes_inFamily.Rnode, 2Nodes_inFamily.2Node, 2Nodes_inFamily.NumAtts " +
  	 	 	 	 " from RNodes_inFamily, 2Nodes_inFamily where RNodes_inFamily.ChildNode = 2Nodes_inFamily.ChildNode and " +
- 	 	 	 	 " (RNodes_inFamily.Rnode, 2Nodes_inFamily.2Node) in (select * from RNodes_2Nodes);");
+ 	 	 	 	 " (RNodes_inFamily.Rnode, 2Nodes_inFamily.2Node) in (select rnid, 2nid from RNodes_2Nodes);");
  	 
  	 st.execute("drop table if exists ChildPars;");
  	 st.execute("create table ChildPars as SELECT distinct (NumAtts-1) as NumPars, FNodes.Fid as ChildNode FROM " +

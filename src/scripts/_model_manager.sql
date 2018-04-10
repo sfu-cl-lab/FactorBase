@@ -1,22 +1,14 @@
+USE unielwin_BN;
+SET storage_engine=INNODB;
 
-CREATE TABLE RNodes_BN_Nodes AS 
-SELECT DISTINCT 
-    rnid, 1nid AS Fid, FNodes.main 
-FROM
-    RNodes_1Nodes,
-    FNodes
-WHERE
-    FNodes.Fid = 1nid 
-UNION DISTINCT 
-SELECT DISTINCT
-    rnid, 2nid AS Fid, main
-FROM
-    2Nodes
-        NATURAL JOIN
-    RNodes
-    
-    union
-    select distinct rnid, rnid as Fid, main from RNodes;
+
+  
+
+CREATE TABLE RNodes_BN_Nodes AS select distinct rnid, 1nid as Fid, N.main from RNodes_pvars R, PVariables P, `1Nodes` N where R.pvid = P.pvid and R.pvid = N.pvid
+UNION DISTINCT
+select distinct rnid, 2nid as Fid, main from RNodes_2Nodes
+UNION DISTINCT
+select distinct rnid, rnid as Fid, main from RNodes;
 
 
 CREATE TABLE  Entity_BayesNets (
@@ -36,22 +28,28 @@ CREATE TABLE Path_BayesNets (
     PRIMARY KEY (Rchain , child , parent)
 );
 
+create or replace view Final_Path_BayesNets_view as select * from Path_BayesNets where character_length(Rchain) = (select max(character_length(Rchain)) from Path_BayesNets);
+
+
+
 CREATE TABLE NewLearnedEdges LIKE Path_BayesNets;
 
 
 
 
 ALTER TABLE `RNodes_BN_Nodes` ADD INDEX `Index_rnid`  (`rnid` ASC) ;
+
 CREATE TABLE Path_BN_nodes AS 
 SELECT DISTINCT lattice_membership.name AS Rchain, Fid AS node
     FROM
         lattice_membership,
         RNodes_BN_Nodes
     WHERE
-        RNodes_BN_Nodes.rnid = lattice_membership.member
+        RNodes_BN_Nodes.rnid = lattice_membership.orig_rnid
     ORDER BY lattice_membership.name;
 
 ALTER TABLE Path_BN_nodes ADD INDEX `HashIndex`  (`Rchain`,`node`); 
+
 
 
 CREATE TABLE IF NOT EXISTS Knowledge_Forbidden_Edges like Path_BayesNets;
@@ -72,7 +70,9 @@ CREATE table Path_Aux_Edges as SELECT
           
 
 
-ALTER TABLE Path_Aux_Edges ADD PRIMARY KEY (`Rchain`, `child`, `parent`);  
+
+  
+
 
 
 create table SchemaEdges as 
@@ -85,7 +85,7 @@ from
     2Nodes,
     lattice_membership
 where
-    lattice_membership.member = RNodes.rnid
+    lattice_membership.orig_rnid = RNodes.rnid
         and RNodes.pvid1 = 2Nodes.pvid1
         and RNodes.pvid2 = 2Nodes.pvid2
         and RNodes.TABLE_NAME = 2Nodes.TABLE_NAME

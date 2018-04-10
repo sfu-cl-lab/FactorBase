@@ -84,9 +84,9 @@ public class BIF_Generator {
         
         ArrayList<String> rnid=new ArrayList<String>();//rnid
         ArrayList<String> orig_rnid=new ArrayList<String>();//orig_rnid
-        ResultSet rst=st.executeQuery("select orig_rnid,rnid from lattice_mapping");
+        ResultSet rst=st.executeQuery("select * from lattice_mapping");
         while(rst.next()){
-        	rnid.add(rst.getString("rnid").substring(1,rst.getString("rnid").length()-1 ));//removing apostrophe and then adding
+        	rnid.add(rst.getString("short_rnid").substring(1,rst.getString("short_rnid").length()-1 ));//removing apostrophe and then adding
         	orig_rnid.add(rst.getString("orig_rnid").substring(1,rst.getString("orig_rnid").length()-1));//removing apostrophe and then adding
         }
         
@@ -272,21 +272,23 @@ public class BIF_Generator {
 	
 	public static void Final_Path_BayesNets( Connection conn, String rchain) throws SQLException, IOException{
 		
+		//OS Sep 13, 2017. This should be unncessary since we can make a view instead
 		ArrayList<String>orig_rnid=new ArrayList<String>();
 		ArrayList<String>rnid=new ArrayList<String>();
 		Statement st1=(Statement) conn.createStatement();
-		st1.execute("drop table if exists `Final_Path_BayesNets` ;");
+		//st1.execute("drop table if exists `Final_Path_BayesNets` ;");
 		//creating table Final_Path_BayesNets
 		String query1="CREATE TABLE `Final_Path_BayesNets` ( Select * from `Path_BayesNets` where Rchain='"+rchain+"' and parent<>'' ) ;";
-		//System.out.println(query1);
+		System.out.println(query1);
 		st1.execute(query1);
 		//adding primary key to Final_Path_BayesNets
 		st1.execute("alter table `Final_Path_BayesNets` add primary key (  `Rchain`,`child`,`parent`)  ;");
 		
 		ResultSet rst=st1.executeQuery("select * from lattice_mapping ;");
+		
 		while(rst.next()){
 			orig_rnid.add(rst.getString("orig_rnid"));
-			rnid.add(rst.getString("rnid"));
+			rnid.add(rst.getString("short_rnid"));
 		}
 		for(int i=0;i<rnid.size();i++){
 			String query2="update  `Final_Path_BayesNets` set Rchain= '"+orig_rnid.get(i)+"' where Rchain = '"+rnid.get(i)+"' ;";
