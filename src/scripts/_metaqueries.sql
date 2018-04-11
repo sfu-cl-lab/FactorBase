@@ -1,123 +1,113 @@
 USE unielwin_BN;
+SET storage_engine=INNODB;
 
 
-create table 1Nodes_Select_List as select 1nid,
-    concat(1Nodes.pvid,
-            '.',
-            1Nodes.COLUMN_NAME,
-            ' AS ',
-            1nid) as Entries from
-    1Nodes,
-    PVariables
-where
-    1Nodes.pvid = PVariables.pvid;
+
+
+
+DROP TABLE IF EXISTS MetaQueries;
+
+CREATE TABLE MetaQueries (   
+  Lattice_Point varchar(199) , 
+  TableType varchar(100) , 
+  ClauseType varchar(10) , 
+  EntryType varchar(100), 
+  Entries varchar(150)
+);
+
+
+
+
+--- map Pvariables to entity tables ---
+
+INSERT into MetaQueries
+SELECT distinct pvid as Lattice_Point, 'Counts' as TableType, 'FROM' as ClauseType, 'table' as EntryType, CONCAT('unielwin.',TABLE_NAME, ' AS ', pvid) AS Entries FROM
+    PVariables;
     
----map Pvariables in 1Node to entity table name---
+   
 
-create table 1Nodes_From_List select 1nid,
-    concat(PVariables.TABLE_NAME,
-            ' AS ',
-            PVariables.pvid) as Entries from
-    1Nodes,
-    PVariables
-where
-    1Nodes.pvid = PVariables.pvid;
-
-----map 2Nodes to column names in relationship tables---
-
-create table 2Nodes_Select_List as select 2nid,
-    concat(RNodes.rnid,
-            '.',
-            2Nodes.COLUMN_NAME,
-            ' AS ',
-            2nid) as Entries from
-    2Nodes
-        NATURAL JOIN
-    RNodes;
     
-----find the Relationship table for the 2nid----
-create table 2Nodes_From_List as select 2nid,
-    concat(2Nodes.TABLE_NAME, ' AS ', RNodes.rnid) as Entries from
-    2Nodes
-        NATURAL JOIN
-    RNodes;
 
 
+  
+    
 
----map Pvariables to entity tables---
-
-CREATE TABLE PVariables_From_List AS SELECT pvid, CONCAT(TABLE_NAME, ' AS ', pvid) AS Entries FROM
-    PVariables
-WHERE
-    index_number = 0;
-
-
-
-
-CREATE TABLE PVariables_Select_List AS 
-SELECT 
-    pvid, CONCAT('count(*)',' as "MULT"') AS Entries
-FROM
-    PVariables
-UNION
-
-SELECT pvid,
-    CONCAT(pvid, '.', COLUMN_NAME, ' AS ', 1nid) AS Entries FROM
-    1Nodes
-        NATURAL JOIN
-    PVariables
-WHERE
-    PVariables.index_number = 0
-    UNION
- 
- 
- SELECT E.pvid, CONCAT(E.pvid,'.',REFERENCED_COLUMN_NAME, ' AS `ID(', E.pvid, ')`') AS Entries FROM
- RNodes_pvars RP, Expansions E where E.pvid = RP.pvid;
- 
- 
-create table PVariables_GroupBy_List as
-SELECT pvid,
-    1nid AS Entries FROM
-    1Nodes
-        NATURAL JOIN
-    PVariables
-     UNION
- 
- 
- SELECT E.pvid, CONCAT('`ID(', E.pvid, ')`') AS Entries FROM
- RNodes_pvars RP, Expansions E where E.pvid = RP.pvid;
-
- 
-
-
-
-
-
-
-
-
-CREATE TABLE RNodes_From_List AS SELECT DISTINCT rnid, CONCAT('unielwin.',TABLE_NAME, ' AS ', pvid) AS Entries FROM
-    RNodes_pvars 
-UNION DISTINCT 
+    
+INSERT into MetaQueries
 SELECT DISTINCT
-    rnid, CONCAT('unielwin.',TABLE_NAME, ' AS ', rnid) AS Entries
+    pvid as Lattice_Point, 'Counts' as TableType, 'SELECT' as ClauseType, 'aggregate' as EntryType, CONCAT('count(*)',' as "MULT"') AS Entries
 FROM
-    RNodes 
-union distinct 
-select distinct
-    rnid,
+    PVariables;
+ 
+  
+
+    
+INSERT into MetaQueries
+SELECT DISTINCT P.pvid as Lattice_Point, 'Counts' as TableType,  'SELECT' as ClauseType, '1node' as EntryType,
+    CONCAT(P.pvid, '.', N.COLUMN_NAME, ' AS ', 1nid) AS Entries FROM
+    1Nodes N, PVariables P where N.pvid = P.pvid;
+
+
+ 
+ 
+ INSERT into MetaQueries
+ SELECT distinct E.pvid AS Lattice_Point, 'Counts' as TableType,  'SELECT' as ClauseType, 'id' as EntryType, CONCAT(E.pvid,'.',P.ID_COLUMN_NAME, ' AS `ID(', E.pvid, ')`') AS Entries FROM
+ PVariables P, Expansions E where E.pvid = P.pvid;
+ 
+ 
+ 
+ 
+  
+ INSERT into MetaQueries
+ SELECT DISTINCT P.pvid as Lattice_Point, 'Counts' as TableType,  'GROUPBY' as ClauseType, '1node' as EntryType,
+    1nid  AS Entries FROM
+    1Nodes N, PVariables P where N.pvid = P.pvid;
+    
+
+    
+INSERT into MetaQueries
+SELECT distinct E.pvid AS Lattice_Point, 'Counts' as TableType, 'GROUPBY' as ClauseType, 'id' as EntryType, CONCAT('`ID(', E.pvid, ')`') AS Entries FROM
+PVariables P, Expansions E where E.pvid = P.pvid;
+ 
+ 
+
+
+INSERT into MetaQueries
+SELECT distinct G.pvid AS Lattice_Point, 'Counts' as TableType,  'WHERE' as ClauseType, 'id' as EntryType, CONCAT('`ID(', G.pvid, ')` = ', G.id) AS Entries FROM
+Groundings G;
+ 
+
+
+
+
+
+
+
+
+INSERT into MetaQueries
+SELECT DISTINCT
+    short_rnid as Lattice_Point,'Counts' as TableType, 'FROM' as ClauseType, 'rtable' as EntryType, CONCAT('unielwin.',R.TABLE_NAME, ' AS ', rnid) AS Entries
+FROM
+    RNodes R, LatticeRNodes L 
+WHERE R.rnid = L.orig_rnid;
+
+
+
+INSERT into MetaQueries
+SELECT DISTINCT
+    short_rnid as Lattice_Point,'Counts' as TableType, 'FROM' as ClauseType, 'rtable' as EntryType,
     concat('(select "T" as ',
             rnid,
             ') as ',
             concat('`temp_', replace(rnid, '`', ''), '`')) as Entries
 from
-    RNodes
-;
+    RNodes R, LatticeRNodes L 
+WHERE R.rnid = L.orig_rnid; 
 
 
 
-
-CREATE TABLE RNodes_Where_List AS SELECT rnid,
+INSERT into MetaQueries
+SELECT DISTINCT short_rnid as Lattice_Point,'Counts' as TableType, 'WHERE' as ClauseType, 'rtable' as EntryType,
     CONCAT(rnid,
             '.',
             COLUMN_NAME,
@@ -126,79 +116,57 @@ CREATE TABLE RNodes_Where_List AS SELECT rnid,
             '.',
             REFERENCED_COLUMN_NAME) AS Entries 
 FROM
-    RNodes_pvars;
-
-    
-    
-
-
-
-CREATE TABLE RNodes_1Nodes AS SELECT rnid, TABLE_NAME, 1nid, COLUMN_NAME, pvid1 AS pvid FROM
-    RNodes,
-    1Nodes
-WHERE
-    1Nodes.pvid = RNodes.pvid1 
-UNION SELECT 
-    rnid, TABLE_NAME, 1nid, COLUMN_NAME, pvid2 AS pvid
-FROM
-    RNodes,
-    1Nodes
-WHERE
-    1Nodes.pvid = RNodes.pvid2;
-
-
-
-Create TABLE RNodes_2Nodes as 
-select RNodes.rnid, 2Nodes.2nid from 2Nodes, RNodes where 2Nodes.TABLE_NAME = RNodes.TABLE_NAME; 
+    RNodes_pvars R, LatticeRNodes L 
+WHERE R.rnid = L.orig_rnid;
 
 
 
 
-CREATE TABLE RNodes_Select_List AS 
+
+INSERT into MetaQueries
 select 
-    rnid, concat('count(*)',' as "MULT"') AS Entries
+    short_rnid as Lattice_Point, 'Counts' as TableType, 'SELECT' as ClauseType, 'rnid' as EntryType, orig_rnid AS Entries
 from
-    RNodes
-union
-SELECT DISTINCT rnid,
-    CONCAT(pvid, '.', COLUMN_NAME, ' AS ', 1nid) AS Entries 
-FROM
-    RNodes_1Nodes 
-UNION DISTINCT 
-select temp.rnid,temp.Entries from (
+    LatticeRNodes;
+
+INSERT into MetaQueries
 SELECT DISTINCT
-    rnid,
-    CONCAT(rnid, '.', COLUMN_NAME, ' AS ', 2nid) AS Entries
+short_rnid as Lattice_Point, 'Counts' as TableType, 'SELECT' as ClauseType, '2nid' as EntryType, CONCAT(L.orig_rnid, '.', COLUMN_NAME, ' AS ', N.2nid) AS Entries
 FROM
-    2Nodes
-        NATURAL JOIN
-    RNodes order by RNodes.rnid,COLUMN_NAME
-) as temp
-UNION distinct 
+    LatticeRNodes L, RNodes_2Nodes RN, 2Nodes N
+where RN.rnid = L.orig_rnid and N.2nid = RN.2nid;
+
+
+
+
+INSERT into MetaQueries
 select 
-    rnid, rnid AS Entries
+    short_rnid as Lattice_Point, 'Counts' as TableType, 'GROUPBY' as ClauseType, 'rnid' as EntryType, orig_rnid AS Entries
 from
-    RNodes 
-    UNION DISTINCT
+    LatticeRNodes;
+    
+INSERT into MetaQueries
+SELECT DISTINCT
+short_rnid as Lattice_Point, 'Counts' as TableType, 'GROUPBY' as ClauseType, '2nid' as EntryType, N.2nid AS Entries
+FROM
+    LatticeRNodes L, RNodes_2Nodes RN, 2Nodes N
+where RN.rnid = L.orig_rnid and N.2nid = RN.2nid order by RN.rnid,COLUMN_NAME;
     
  
-    SELECT distinct rnid, PV.Entries
-FROM RNodes_pvars RP, PVariables_Select_List PV where RP.pvid = PV.pvid;
 
-CREATE TABLE RNodes_GroupBy_List AS SELECT DISTINCT rnid, 1nid AS Entries FROM
-    RNodes_1Nodes 
-UNION DISTINCT 
-SELECT DISTINCT
-    rnid, 2nid AS Entries
-FROM
-    2Nodes
-        NATURAL JOIN
-    RNodes 
-UNION distinct 
-select 
-    rnid, rnid
-from
-    RNodes
-    UNION DISTINCT
-    SELECT distinct rnid, PV.Entries
-FROM RNodes_pvars RP, PVariables_GroupBy_List PV where RP.pvid = PV.pvid;
+
+INSERT into MetaQueries
+SELECT distinct short_rnid as Lattice_Point, TableType, ClauseType, EntryType, Entries FROM
+    LatticeRNodes L, RNodes_pvars R, MetaQueries M
+WHERE
+    L.orig_rnid = R.rnid and M.Lattice_Point = R.pvid;
+    
+
+
+
+ INSERT into MetaQueries
+ select L.name AS Lattice_Point, 'Counts' as TableType, M.ClauseType, M.EntryType, M.Entries
+ from lattice_membership L, MetaQueries M
+ where L.name <> L.`member` and Lattice_Point = L.`member` and M.TableType = 'COUNTS';
+ 
+

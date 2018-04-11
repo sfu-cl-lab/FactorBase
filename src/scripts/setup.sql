@@ -1,13 +1,13 @@
 /****************************************************
 Analyze schema information to prepare for statistical analysis.
-@database@ stands for a generic database. This is replaced with the name of the actual target database schema by the program that calls this sql script.
+unielwin stands for a generic database. This is replaced with the name of the actual target database schema by the program that calls this sql script.
 */
 
 DROP SCHEMA IF EXISTS @database@_setup; 
 create schema @database@_setup;
 
-/*-- create schema if not exists @database@_BN;*/
-/*-- create schema if not exists @database@_CT;*/
+/*-- create schema if not exists unielwin_BN;*/
+/*-- create schema if not exists unielwin_CT;*/
 
 USE @database@_setup;
 SET storage_engine=INNODB;
@@ -21,7 +21,7 @@ CREATE TABLE Schema_Key_Info AS SELECT TABLE_NAME,
     CONSTRAINT_NAME FROM
     INFORMATION_SCHEMA.KEY_COLUMN_USAGE
 WHERE
-    (KEY_COLUMN_USAGE.TABLE_SCHEMA = '@database@')
+    (KEY_COLUMN_USAGE.TABLE_SCHEMA = 'unielwin')
 ORDER BY TABLE_NAME;
 
 
@@ -33,8 +33,8 @@ CREATE TABLE Schema_Position_Info AS SELECT COLUMNS.TABLE_NAME,
     INFORMATION_SCHEMA.COLUMNS,
     INFORMATION_SCHEMA.TABLES
 WHERE
-    (COLUMNS.TABLE_SCHEMA = '@database@'
-        AND TABLES.TABLE_SCHEMA = '@database@'
+    (COLUMNS.TABLE_SCHEMA = 'unielwin'
+        AND TABLES.TABLE_SCHEMA = 'unielwin'
         AND TABLES.TABLE_NAME = COLUMNS.TABLE_NAME
         AND TABLES.TABLE_TYPE = 'BASE TABLE')
 ORDER BY TABLE_NAME;
@@ -221,21 +221,31 @@ If an entity type is involved in a self relationship, then we make three "copies
 so that we can represent transitivity.
 */
 
-CREATE TABLE PVariables AS SELECT CONCAT(EntityTables.TABLE_NAME, '0') AS pvid,
-    EntityTables.TABLE_NAME,
+CREATE TABLE PVariables (
+  `pvid` varchar(100),
+  `TABLE_NAME` varchar(100),
+  `ID_COLUMN_NAME` varchar(100),
+   `index_number` varchar(1), 
+  PRIMARY KEY (`pvid`)
+);
+
+INSERT  INTO PVariables 
+SELECT CONCAT(EntityTables.TABLE_NAME, '0') AS pvid,
+    EntityTables.TABLE_NAME, EntityTables.COLUMN_NAME as ID_COLUMN_NAME,
     0 AS index_number FROM
     EntityTables 
 UNION 
 SELECT 
     CONCAT(EntityTables.TABLE_NAME, '1') AS pvid,
-    EntityTables.TABLE_NAME,
+    EntityTables.TABLE_NAME, EntityTables.COLUMN_NAME as ID_COLUMN_NAME,
     1 AS index_number
 FROM
     EntityTables,
     SelfRelationships
 WHERE
     EntityTables.TABLE_NAME = SelfRelationships.REFERENCED_TABLE_NAME
-        AND EntityTables.COLUMN_NAME = SelfRelationships.REFERENCED_COLUMN_NAME ;
+AND EntityTables.COLUMN_NAME = SelfRelationships.REFERENCED_COLUMN_NAME ;
+            
 /*zqian,Oct-02-13, reduce copies from 3 to 2*/
 /*
 UNION  
@@ -250,7 +260,6 @@ WHERE
     EntityTables.TABLE_NAME = SelfRelationships.REFERENCED_TABLE_NAME
         AND EntityTables.COLUMN_NAME = SelfRelationships.REFERENCED_COLUMN_NAME;
   */    
-ALTER TABLE PVariables ADD PRIMARY KEY (pvid);
 
 
 
@@ -319,7 +328,7 @@ CREATE table RNodes_MM_NotSelf AS
                 ',',
                 ForeignKeys_pvars2.pvid,
                 ')',
-                '`') AS orig_rnid,
+                '`') AS rnid,
         ForeignKeys_pvars1.TABLE_NAME,
         ForeignKeys_pvars1.pvid AS pvid1,
         ForeignKeys_pvars2.pvid AS pvid2,
@@ -351,7 +360,7 @@ CREATE table RNodes_MM_Self AS
                 ',',
                 ForeignKeys_pvars2.pvid,
                 ')',
-                '`') AS orig_rnid,
+                '`') AS rnid,
         ForeignKeys_pvars1.TABLE_NAME,
         ForeignKeys_pvars1.pvid AS pvid1,
         ForeignKeys_pvars2.pvid AS pvid2,
@@ -374,6 +383,8 @@ CREATE table RNodes_MM_Self AS
 /* third case: many-one, not a self-relationship. Now we need to include the primary key as an argument. 
 Also, we switch to functional notation for legibility. */
 /*CREATE OR REPLACE VIEW RNodes_MO_NotSelf AS*/
+/* OS August 15. Why does this refer to Referenced_Table_Name, n ot Table_Name? */
+
 CREATE table RNodes_MO_NotSelf AS
     SELECT 
         CONCAT('`',
@@ -382,7 +393,7 @@ CREATE table RNodes_MO_NotSelf AS
                 PVariables.pvid,
                 ')=',
                 ForeignKeys_pvars.pvid,
-                '`') AS orig_rnid,
+                '`') AS rnid,
         ForeignKeys_pvars.TABLE_NAME,
         PVariables.pvid AS pvid1,
         ForeignKeys_pvars.pvid AS pvid2,
@@ -413,7 +424,7 @@ CREATE table RNodes_MO_Self AS
                 PVariables.pvid,
                 ')=',
                 ForeignKeys_pvars.pvid,
-                '`') AS orig_rnid,
+                '`') AS rnid,
         ForeignKeys_pvars.TABLE_NAME,
         PVariables.pvid AS pvid1,
         ForeignKeys_pvars.pvid AS pvid2,
@@ -450,11 +461,25 @@ UNION SELECT
 FROM
     RNodes_MO_Self;
 
-ALTER TABLE RNodes ADD PRIMARY KEY (orig_rnid);
 
-ALTER TABLE `RNodes` ADD COLUMN `rnid` VARCHAR(10) NULL , ADD UNIQUE INDEX `rnid_UNIQUE` (`rnid` ASC) ; 
+/* ALTER TABLE RNodes ADD PRIMARY KEY (orig_rnid);
+ * OS August 15 can exceed byte limit. Maybe better use table name, pvid, pvid as primary key
+ * //zqian, max key length limitation "The maximum column size is 767 bytes", 
+enable "innodb_large_prefix" to allow index key prefixes longer than 767 bytes (up to 3072 bytes).
+ Oct 17, 2013 
+ */
+ /* ALTER TABLE `RNodes` ADD INDEX `Index`  (`pvid1` ASC, `pvid2` ASC, `TABLE_NAME` ASC) ;/*July 17 vidhij--moved from metadata_2*/
+
+ 
+ALTER TABLE RNodes ADD PRIMARY KEY (TABLE_NAME, pvid1, pvid2);
+
+/* this key exceeds maximum byte length. OS august 17, 2017. Too bad, we could definitely use an index */
+/*ALTER TABLE `RNodes` ADD UNIQUE INDEX `rnid_UNIQUE` (`rnid` ASC) ; */
+
+/*OS August 16, 2017. Get rid of that virtual rnid business */
+/*ALTER TABLE `RNodes` ADD COLUMN `rnid` VARCHAR(10) NULL , ADD UNIQUE INDEX `rnid_UNIQUE` (`rnid` ASC) ; */
 /*May 16th, for shorter name of Rchain*/
-ALTER TABLE `RNodes` ADD INDEX `Index`  (`pvid1` ASC, `pvid2` ASC, `TABLE_NAME` ASC) ;/*July 17 vidhij--moved from metadata_2*/
+
 
 /* Make tables for binary functor nodes that record attributes of links. 
 By default, all ***nonkey columns*** of a relation table are possible attribute functors, with the appropriate population ids.
@@ -477,16 +502,48 @@ CREATE TABLE 2Nodes AS SELECT CONCAT('`',
         NATURAL JOIN
     AttributeColumns;
 
-ALTER TABLE 2Nodes ADD PRIMARY KEY (2nid);
+/* ALTER TABLE 2Nodes ADD PRIMARY KEY (2nid); */
+/* violates key length restriction. OS August 15 */
+    
+ALTER TABLE 2Nodes ADD PRIMARY KEY (COLUMN_NAME,pvid1,pvid2); 
 
 ALTER TABLE `2Nodes` ADD INDEX `index`  (`pvid1` ASC, `pvid2` ASC, `TABLE_NAME` ASC) ; /*July 17 vidhij--moved from metadata_2*/
 
-/*CREATE TABLE Groundings (pvid varchar(40) not null, id varchar(256) not null, primary key (pvid, id));*/
+/* Set up a table that contains all functor nodes of any arity. summarizes all the work we've done. CAn also be used for foreign key constraints */
+
+CREATE TABLE FNodes (   
+  `Fid` varchar(199) ,
+  `FunctorName` varchar(64) ,
+  `Type` varchar(5) ,
+  `main` int(11) ,
+  PRIMARY KEY  (`Fid`)
+);
 
 
-/*Added by zqian  Apr. 4th 2013
-Column, index, and stored routine names are not case sensitive on any platform, nor are column aliases. Trigger names are case sensitive, which differs from standard SQL. */
+/******* make comprehensive table for all functor nodes *****/
 
+insert into FNodes
+SELECT 
+    1nid AS Fid,
+    COLUMN_NAME as FunctorName,
+    '1Node' as Type,
+    main
+FROM
+    1Nodes 
+UNION SELECT 
+    2nid AS Fid,
+    COLUMN_NAME as FunctorName,
+    '2Node' as Type,
+    main
+FROM
+    2Nodes 
+union select 
+    rnid as FID,
+    TABLE_NAME as FunctorName,
+    'Rnode' as Type,
+    main
+from
+    RNodes;
 
 /*
 
@@ -513,24 +570,127 @@ CREATE TABLE IF NOT EXISTS lattice_set (
 );*/
 /* Lists each relationship chain in the lattice and its length. */
 
+/*************************************************************************/
+/* Now add tables that support user input: counting for contingency tables, classification, outlier detection */
+/**********************************************************************/
 
 CREATE TABLE `Expansions` (
-  `pvid` varchar(40) NOT NULL DEFAULT '',
-  PRIMARY KEY (`pvid`)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+  `pvid` varchar(40),
+  PRIMARY KEY (`pvid`),
+  FOREIGN KEY (pvid) REFERENCES PVariables(pvid)
+);
+
+CREATE TABLE Groundings (pvid varchar(40), id varchar(256), primary key (pvid, id), FOREIGN KEY (pvid) REFERENCES PVariables(pvid));
+
 
 CREATE TABLE FunctorSet (   
-  `Fid` varchar(199) ,
-   PRIMARY KEY  (`Fid`)
+  `Fid` varchar(199),
+   PRIMARY KEY  (Fid), FOREIGN KEY (Fid) REFERENCES FNodes(Fid)
 );
-INSERT  INTO FunctorSet 
-SELECT 1nid AS Fid FROM 1Nodes
-UNION
-SELECT 2nid AS Fid FROM 2Nodes
-UNION
-SELECT orig_rnid AS Fid FROM RNodes;
 
-CREATE TABLE `Target` (
-    `Fid` varchar(199) ,
-    PRIMARY KEY  (`Fid`)
+/* By default, FunctorSet contains all Fnodes */
+INSERT  INTO FunctorSet 
+SELECT DISTINCT Fid from FNodes;
+
+CREATE TABLE TargetNode (   
+  `Fid` varchar(199),
+   PRIMARY KEY  (Fid), FOREIGN KEY (Fid) REFERENCES FNodes(Fid)
 );
+
+/**************************************************************
+/* Adding more views for more metadata. useful for learning later */
+/*********************************************************************/
+
+/** now link each rnode 2node, i.e. each attribute of the relationship to the associated 2nodes **/
+create or replace view RNodes_2Nodes as select RNodes.rnid, 2Nodes.2nid, 2Nodes.main from 2Nodes, RNodes where 2Nodes.TABLE_NAME = RNodes.TABLE_NAME; 
+
+/*** for each functor node, record which population variables appear in it ***/
+
+create or replace VIEW FNodes_pvars as 
+SELECT FNodes.Fid, PVariables.pvid FROM
+    FNodes,
+    2Nodes,
+    PVariables
+where
+    FNodes.Type = '2Node'
+    and FNodes.Fid = 2Nodes.2nid
+    and PVariables.pvid = 2Nodes.pvid1 
+union 
+SELECT 
+    FNodes.Fid, PVariables.pvid
+FROM
+    FNodes,
+    2Nodes,
+    PVariables
+where
+    FNodes.Type = '2Node'
+    and FNodes.Fid = 2Nodes.2nid
+    and PVariables.pvid = 2Nodes.pvid2 
+union 
+SELECT 
+    FNodes.Fid, PVariables.pvid
+FROM
+    FNodes,
+    1Nodes,
+    PVariables
+where
+    FNodes.Type = '1Node'
+    and FNodes.Fid = 1Nodes.1nid
+    and PVariables.pvid = 1Nodes.pvid
+UNION
+SELECT DISTINCT rnid,
+    pvid
+FROM
+    RNodes,
+    PVariables
+WHERE
+    pvid1 = pvid
+UNION 
+SELECT DISTINCT
+    rnid,
+    pvid
+FROM
+    RNodes,
+    PVariables
+WHERE
+    pvid2 = pvid;
+    
+    
+    
+    
+ /*** for each relationship node, record which population variables appear in it. 
+Plus metadata about those variable, e.g. the name of the id column associated with them.  (August 17, 2017) This seems inelegant.
+*/
+
+CREATE or replace VIEW RNodes_pvars AS
+SELECT DISTINCT rnid,
+    pvid,
+    PVariables.TABLE_NAME,
+    ForeignKeyColumns.COLUMN_NAME,
+    ForeignKeyColumns.REFERENCED_COLUMN_NAME 
+FROM
+    ForeignKeyColumns,
+    RNodes,
+    PVariables
+WHERE
+    pvid1 = pvid
+        AND ForeignKeyColumns.TABLE_NAME = RNodes.TABLE_NAME
+        AND ForeignKeyColumns.COLUMN_NAME = RNodes.COLUMN_NAME1
+        AND ForeignKeyColumns.REFERENCED_TABLE_NAME = PVariables.TABLE_NAME 
+UNION 
+SELECT DISTINCT
+    rnid,
+    pvid,
+    PVariables.TABLE_NAME,
+    ForeignKeyColumns.COLUMN_NAME,
+    ForeignKeyColumns.REFERENCED_COLUMN_NAME
+FROM
+    ForeignKeyColumns,
+    RNodes,
+    PVariables
+WHERE
+    pvid2 = pvid
+        AND ForeignKeyColumns.TABLE_NAME = RNodes.TABLE_NAME
+        AND ForeignKeyColumns.COLUMN_NAME = RNodes.COLUMN_NAME2
+        AND ForeignKeyColumns.REFERENCED_TABLE_NAME = PVariables.TABLE_NAME;
+

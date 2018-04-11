@@ -1,4 +1,5 @@
 /******* extracting more metadata to support learning ***/
+/* should be superseded */
 
 /*adding covering index to speed up the query, however hash index does not support this technique, so replace it with default index, ie. B_Tree @ zqian May 22nd*/
 USE @database@_BN;
@@ -31,7 +32,8 @@ UNION SELECT
 FROM
     2Nodes 
 union select 
-    rnid as FID,
+    orig_rnid as FID,
+    /* was rnid as FID */
     TABLE_NAME as FunctorName,
     'Rnode' as Type,
     main
@@ -39,7 +41,8 @@ from
     RNodes;
 
 /*** for each functor node, record which population variables appear in it ***/
-
+    /* this should be superseded by transfer script August 16, 2017 */
+    
 create table FNodes_pvars as 
 SELECT FNodes.Fid, PVariables.pvid FROM
     FNodes,
@@ -75,9 +78,10 @@ where
     
 /*** for each relationship node, record which population variables appear in it. 
 Plus metadata about those variable, e.g. the name of the id column associated with them.    
+/* this should be superseded by transfer script August 16, 2017 */
 ***************/
 
-    CREATE TABLE RNodes_pvars AS SELECT DISTINCT rnid,
+    CREATE TABLE RNodes_pvars AS SELECT DISTINCT orig_rnid,
     pvid,
     PVariables.TABLE_NAME,
     ForeignKeyColumns.COLUMN_NAME,
@@ -93,7 +97,7 @@ WHERE
         AND ForeignKeyColumns.REFERENCED_TABLE_NAME = PVariables.TABLE_NAME 
 UNION 
 SELECT DISTINCT
-    rnid,
+    orig_rnid,
     pvid,
     PVariables.TABLE_NAME,
     ForeignKeyColumns.COLUMN_NAME,

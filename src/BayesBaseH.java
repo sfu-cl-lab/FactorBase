@@ -92,7 +92,9 @@ public class BayesBaseH {
 
 		//build tables for structure learning
         BZScriptRunner bzsr = new BZScriptRunner(databaseName,con2);
-        bzsr.runScript("scripts/bayesedges.sql");
+        //set up the bayes net models O.S. Sep 12, 2017
+        bzsr.runScript("scripts/model_manager.sql");
+        //bzsr.runScript("scripts/bayesedges.sql");
         //get maxNumberOfMembers (max length of rchain)
         Statement st = con2.createStatement();
         ResultSet rst = st.executeQuery("SELECT max(length) FROM lattice_set;");
@@ -134,7 +136,7 @@ public class BayesBaseH {
 		//	Pruning();
 
 			//	@zqian	for TestScoreComputation, use local ct to compute local cp.		
-			if (Flag_UseLocal_CT){
+			/*if (Flag_UseLocal_CT){
 				System.out.println("\n For BN_ScoreComputation.  use local_CT to compute the local_CP. ");
 			}
 			else {
@@ -145,7 +147,7 @@ public class BayesBaseH {
 				System.out.println("\n Parameter learning is done.");
 				//  for FuncotrWrapper	
 				
-			}
+			}*/
 			
 			// Export to .mln file,banff workshop demo, 2015
 			//Exporter.strBuilder(con1,con2,databaseName);
@@ -153,18 +155,18 @@ public class BayesBaseH {
 //May 7th, zqian, For RDN do not need to do the smoothing
 			//COMPUTE KLD
 			long l = System.currentTimeMillis(); //@zqian : measure structure learning time
-
+			/*
 			if (opt3.equals("1")) {
 				System.out.println("\n KLD_generator.KLDGenerator.");
 				KLD_generator.KLDGenerator(databaseName,con2);
 			} else {
 				System.out.println("\n KLD_generator.smoothed_CP.");
 				KLD_generator.smoothed_CP(rchain, con2);
-			}
+			}*/
 
 			//generating the bif file, in order to feed into UBC tool (bayes.jar). Based on the largest relationship chain.
 			//need cp tables
-			BIF_Generator.generate_bif(databaseName,"Bif_"+databaseName+".xml",con2);
+			//BIF_Generator.generate_bif(databaseName,"Bif_"+databaseName+".xml",con2);
 
 			long l2 = System.currentTimeMillis();  //@zqian : measure structure learning time
 			System.out.print("smoothed_CP Time(ms): "+(l2-l)+" ms.\n");

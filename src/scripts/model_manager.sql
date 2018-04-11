@@ -1,7 +1,10 @@
+USE unielwin_BN;
+SET storage_engine=INNODB;
 /******************************************************
-Also, these attributes become nodes in the Bayes net for later analysis.
+find columns associated with Rnodes. These should be the same as used in group by clauses except that you also use the main auxilliary information.
+TODO: should reconcile Rnodes_BN_NOdes and Path_BN_Nodes with metaqueries at some point
 ****/
-CREATE TABLE RNodes_BN_Nodes AS 
+/*CREATE TABLE RNodes_BN_Nodes AS 
 SELECT DISTINCT 
     rnid, 1nid AS Fid, FNodes.main 
 FROM
@@ -17,8 +20,15 @@ FROM
         NATURAL JOIN
     RNodes
     /*OS: next add the rnode as a functor node for itself Oct 13, 2016; */
-    union
+  /*  union
     select distinct rnid, rnid as Fid, main from RNodes;
+    */
+
+CREATE TABLE RNodes_BN_Nodes AS select distinct rnid, 1nid as Fid, N.main from RNodes_pvars R, PVariables P, `1Nodes` N where R.pvid = P.pvid and R.pvid = N.pvid
+UNION DISTINCT
+select distinct rnid, 2nid as Fid, main from RNodes_2Nodes
+UNION DISTINCT
+select distinct rnid, rnid as Fid, main from RNodes;
 
 
 CREATE TABLE  Entity_BayesNets (
@@ -40,25 +50,33 @@ CREATE TABLE Path_BayesNets (
     PRIMARY KEY (Rchain , child , parent)
 );
 
+create or replace view Final_Path_BayesNets_view as select * from Path_BayesNets where character_length(Rchain) = (select max(character_length(Rchain)) from Path_BayesNets);
+
+/* parepare output view with longest rchain only */
+
 CREATE TABLE NewLearnedEdges LIKE Path_BayesNets;
 
 /****************
-Create tables that allow us to represent background knowledge
+Propagate BNnodes to rchains
 *****************/
 
 /*CREATE OR REPLACE VIEW Path_BN_nodes AS*/
 ALTER TABLE `RNodes_BN_Nodes` ADD INDEX `Index_rnid`  (`rnid` ASC) ;/* May 10th*/
+
 CREATE TABLE Path_BN_nodes AS 
 SELECT DISTINCT lattice_membership.name AS Rchain, Fid AS node
     FROM
         lattice_membership,
         RNodes_BN_Nodes
     WHERE
-        RNodes_BN_Nodes.rnid = lattice_membership.member
+        RNodes_BN_Nodes.rnid = lattice_membership.orig_rnid
     ORDER BY lattice_membership.name;
 
 ALTER TABLE Path_BN_nodes ADD INDEX `HashIndex`  (`Rchain`,`node`); /* May 7*/
 
+/******************
+ * Create tables that allow us to represent background knowledge. 
+ */
 
 CREATE TABLE IF NOT EXISTS Knowledge_Forbidden_Edges like Path_BayesNets;
 CREATE TABLE IF NOT EXISTS Knowledge_Required_Edges like Path_BayesNets;
@@ -92,8 +110,11 @@ union distinct
             AND FNodes.main = 0;
 /*zqian Oct 20, 2016*/
 
+/* the next primary key makes an index that's too long. innodb_enable_large_prefix would fix that. But will be deprecated. 
+For now we comment out, may slow down learning. */
 
-ALTER TABLE Path_Aux_Edges ADD PRIMARY KEY (`Rchain`, `child`, `parent`); /* May 10th*/ 
+/*ALTER TABLE Path_Aux_Edges99 ADD PRIMARY KEY (`Rchain`, `child`, `parent`);*/ /* May 10th*/ 
+
 
 
 create table SchemaEdges as 
@@ -106,7 +127,7 @@ from
     2Nodes,
     lattice_membership
 where
-    lattice_membership.member = RNodes.rnid
+    lattice_membership.orig_rnid = RNodes.rnid
         and RNodes.pvid1 = 2Nodes.pvid1
         and RNodes.pvid2 = 2Nodes.pvid2
         and RNodes.TABLE_NAME = 2Nodes.TABLE_NAME
