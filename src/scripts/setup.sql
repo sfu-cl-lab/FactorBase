@@ -694,4 +694,3 @@ WHERE
         AND ForeignKeyColumns.COLUMN_NAME = RNodes.COLUMN_NAME2
         AND ForeignKeyColumns.REFERENCED_TABLE_NAME = PVariables.TABLE_NAME;
 
-

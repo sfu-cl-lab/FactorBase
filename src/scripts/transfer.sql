@@ -7,6 +7,9 @@ create schema @database@_BN;
 DROP SCHEMA IF EXISTS @database@_CT; 
 create schema @database@_CT;
 
+DROP SCHEMA IF EXISTS @database@_convert_CT; 
+create schema @database@_convert_CT;
+
 USE @database@_BN;
 SET storage_engine=INNODB;
 
