@@ -21,7 +21,11 @@
 
 package edu.cmu.tetrad.search;
 
+import java.util.Map;
+import java.util.Set;
+
 import edu.cmu.tetrad.graph.Graph;
+import edu.cmu.tetrad.graph.Node;
 
 /**
  * Scores a pattern.
@@ -30,5 +34,6 @@ import edu.cmu.tetrad.graph.Graph;
  */
 public interface GraphScorer {
     double scoreGraph(Graph graph);
+    double scoreGraph(Graph graph, Map<Node, Map<Set<Node>, Double>> globalScoreHash);
 }
 
