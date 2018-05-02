@@ -177,7 +177,8 @@ public class fmt
 		//Transfer tables to working schema
 		System.out.println( "Transfering necessary setup tables to working schema..." );
 		
-		if ( BZScriptRunner.runScript( "scripts/fmt_transfer.sql", 
+		if ( BZScriptRunner.runScript(
+			Config.SCRIPTS_DIRECTORY + "fmt_transfer.sql",
 									   SetupDBName, 
 									   WorkDBName, 
 									   DataDBName, 
@@ -214,7 +215,8 @@ public class fmt
 		}
 		
 		//Add necessary entry tables
-		if ( BZScriptRunner.runScript( "scripts/fmt_entries.sql", 
+		if ( BZScriptRunner.runScript(
+			Config.SCRIPTS_DIRECTORY + "fmt_entries.sql",
 									   SetupDBName, 
 									   WorkDBName, 
 									   DataDBName, 
