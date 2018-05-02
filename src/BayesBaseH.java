@@ -93,7 +93,7 @@ public class BayesBaseH {
 		//build tables for structure learning
         BZScriptRunner bzsr = new BZScriptRunner(databaseName,con2);
         //set up the bayes net models O.S. Sep 12, 2017
-        bzsr.runScript("scripts/model_manager.sql");
+        bzsr.runScript(Config.SCRIPTS_DIRECTORY + "model_manager.sql");
         //bzsr.runScript("scripts/bayesedges.sql");
         //get maxNumberOfMembers (max length of rchain)
         Statement st = con2.createStatement();

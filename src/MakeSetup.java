@@ -37,8 +37,8 @@ public class MakeSetup {
 		
 		BZScriptRunner bzsr = new BZScriptRunner(databaseName,con);
 
-		bzsr.runScript("scripts/setup.sql");  
-		bzsr.createSP("scripts/storedprocs.sql");
+		bzsr.runScript(Config.SCRIPTS_DIRECTORY + "setup.sql");
+		bzsr.createSP(Config.SCRIPTS_DIRECTORY + "storedprocs.sql");
         bzsr.callSP("find_values");
         
 		disconnectDB();

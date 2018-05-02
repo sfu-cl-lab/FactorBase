@@ -58,7 +58,7 @@ public class BayesBaseCT_SortMerge_cont {
 		connectDB();
 		//build _BN part1 from metadata_1.sql
        BZScriptRunner bzsr = new BZScriptRunner(databaseName,con2);
-       bzsr.runScript("scripts/transfer.sql");
+       bzsr.runScript(Config.SCRIPTS_DIRECTORY + "transfer.sql");
        
        /*
        bzsr.runScript("scripts_ADT/metadata_1.sql");
@@ -75,18 +75,18 @@ public class BayesBaseCT_SortMerge_cont {
 		//build _BN part2: from metadata_2.sql 
 		if(indi.equals("0")) {
 			if(cont.equals("1")) {
-				bzsr.runScript("scripts/metadata_2_cont.sql");
+				bzsr.runScript(Config.SCRIPTS_DIRECTORY + "metadata_2_cont.sql");
 		}
 		else {
-			bzsr.runScript("scripts/metadata_2_nolink.sql");
+			bzsr.runScript(Config.SCRIPTS_DIRECTORY + "metadata_2_nolink.sql");
 		}
 		}
 		else {
 			if(cont.equals("1")) {
-				bzsr.runScript("scripts/metadata_2_cont_2.sql");
+				bzsr.runScript(Config.SCRIPTS_DIRECTORY + "metadata_2_cont_2.sql");
 			}
 			else {
-				bzsr.runScript("scripts/metadata_2_nolink.sql");
+				bzsr.runScript(Config.SCRIPTS_DIRECTORY + "metadata_2_nolink.sql");
 			}
 		}
 

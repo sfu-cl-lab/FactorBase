@@ -6,6 +6,9 @@ import java.util.Properties;
 
 public class Config
 {
+    public static final String SCRIPTS_DIRECTORY = "scripts/";
+    public static final String CONFIG_DIRECTORY = "";
+
     Properties configFile;
     FileReader fr;
     Reader reader;
@@ -14,7 +17,7 @@ public class Config
     {
         configFile = new java.util.Properties();
         try {
-        	fr = new FileReader("config.cfg"); 
+            fr = new FileReader(CONFIG_DIRECTORY + "config.cfg");
             reader = new BufferedReader(fr);
             configFile.load( reader );
         }catch(Exception eta){
