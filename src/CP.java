@@ -268,9 +268,16 @@ public CP(String databaseName, String databaseName2){
 	 String table_name = nodeName.substring(0, nodeName.length()-1) + "_CP`";
 	 st.execute("drop table if exists " + table_name+ ";");
 	 System.out.println(table_name+"\n");
+        ResultSet queryResult = st.executeQuery("select orig_rnid from lattice_mapping where short_rnid='" + nodeName + "'");
+        String mappedName;
+        if(queryResult.next()) {
+            mappedName = queryResult.getString("orig_rnid");
+        } else {
+            mappedName = nodeName;
+        }
 	 //change the ChildValue to FID -- Jan 23 Yan
 	 st.execute("create table " + table_name + " ( " + nodeName + " varchar(200) NOT NULL, CP float(7,6), MULT bigint(20), local_mult bigint(20))");
-	 st.execute("insert into " + table_name + "(" + nodeName + ") select distinct " + nodeName + " from " +databaseName2 + "." + bigTable + ";");
+        st.execute("insert into " + table_name + "(" + nodeName + ") select distinct " + mappedName + " from " +databaseName2 + "." + bigTable + ";");
 	 
 	 ResultSet rst=st.executeQuery("select " + nodeName + " from " + table_name + ";");
 	 ArrayList<String> column_value = new ArrayList<String>();
@@ -280,7 +287,7 @@ public CP(String databaseName, String databaseName2){
 	 }
 	 
 	 for(int i=0; i<column_value.size(); i++) {
-	 	 String sql = "select sum(MULT) from " +databaseName2 + "." + bigTable + " where " + nodeName + " = '" + column_value.get(i) + "';";
+            String sql = "select sum(MULT) from " +databaseName2 + "." + bigTable + " where " + mappedName + " = '" + column_value.get(i) + "';";
 	 	 System.out.println(sql+"\n");
 	 	 ResultSet nume = st2.executeQuery(sql);
 	 	 //nume is the sum over all contingency table rows for a specific value.
