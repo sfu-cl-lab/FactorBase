@@ -728,7 +728,13 @@ public class BayesBaseH {
          st_largest.close();
          
          Statement st1 = con2.createStatement();
-     	 ResultSet rs = st1.executeQuery("select name as RChain from lattice_set where lattice_set.length = 1 ;");
+        ResultSet rs = st1.executeQuery(
+            "select orig_rnid as RChain " +
+            "from lattice_set " +
+            "join lattice_mapping " +
+            "on lattice_set.name = lattice_mapping.short_rnid " +
+            "where lattice_set.length = 1;"
+        );
      	 while(rs.next()){
      		//  get rvid for further use
      		String rchain = rs.getString("RChain");
