@@ -728,6 +728,7 @@ public class BayesBaseH {
          st_largest.close();
          
          Statement st1 = con2.createStatement();
+        // TODO: Revisit how the orig_rnids are retrieved.
         ResultSet rs = st1.executeQuery(
             "select orig_rnid as RChain " +
             "from lattice_set " +

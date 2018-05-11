@@ -69,7 +69,7 @@ SELECT DISTINCT lattice_membership.name AS Rchain, Fid AS node
         lattice_membership,
         RNodes_BN_Nodes
     WHERE
-        RNodes_BN_Nodes.rnid = lattice_membership.orig_rnid
+        RNodes_BN_Nodes.rnid = lattice_membership.rnid
     ORDER BY lattice_membership.name;
 
 ALTER TABLE Path_BN_nodes ADD INDEX `HashIndex`  (`Rchain`,`node`); /* May 7*/
@@ -127,7 +127,7 @@ from
     2Nodes,
     lattice_membership
 where
-    lattice_membership.orig_rnid = RNodes.rnid
+    lattice_membership.rnid = RNodes.rnid
         and RNodes.pvid1 = 2Nodes.pvid1
         and RNodes.pvid2 = 2Nodes.pvid2
         and RNodes.TABLE_NAME = 2Nodes.TABLE_NAME

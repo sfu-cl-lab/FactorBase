@@ -138,8 +138,8 @@ public class short_rnid_LatticeGenerator {
         maxNumberOfMembers = firstSets.size();
         Statement st = con2.createStatement();
     
-        st.execute("create table if not exists lattice_membership (name VARCHAR(20), member VARCHAR(20), orig_rnid VARCHAR(199), PRIMARY KEY (name, member));");
-        st.execute("create table if not exists lattice_rel (parent VARCHAR(20), child VARCHAR(20), removed VARCHAR(20), orig_rnid VARCHAR(199), PRIMARY KEY (parent, child));");
+        st.execute("create table if not exists lattice_membership (name VARCHAR(20), member VARCHAR(20), rnid VARCHAR(199), PRIMARY KEY (name, member));");
+        st.execute("create table if not exists lattice_rel (parent VARCHAR(20), child VARCHAR(20), removed VARCHAR(20), rnid VARCHAR(199), PRIMARY KEY (parent, child));");
         st.execute("create table if not exists lattice_set (name VARCHAR(20), length INT(11), PRIMARY KEY (name, length));");
 
         st.execute("truncate lattice_rel;");
