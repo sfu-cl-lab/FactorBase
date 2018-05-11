@@ -5,7 +5,7 @@ UPDATE `lattice_membership`
         JOIN
     `LatticeRNodes` ON `lattice_membership`.member = `LatticeRNodes`.short_rnid 
 SET 
-    `lattice_membership`.orig_rnid = `LatticeRNodes`.orig_rnid
+    `lattice_membership`.rnid = `LatticeRNodes`.orig_rnid
 WHERE
     `lattice_membership`.member = `LatticeRNodes`.short_rnid;
 
