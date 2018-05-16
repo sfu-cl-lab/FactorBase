@@ -64,13 +64,13 @@ Propagate BNnodes to rchains
 ALTER TABLE `RNodes_BN_Nodes` ADD INDEX `Index_rnid`  (`rnid` ASC) ;/* May 10th*/
 
 CREATE TABLE Path_BN_nodes AS 
-SELECT DISTINCT lattice_membership.name AS Rchain, Fid AS node
+SELECT DISTINCT orig_rnid AS Rchain, Fid AS node
     FROM
-        lattice_membership,
+        LatticeRNodes,
         RNodes_BN_Nodes
     WHERE
-        RNodes_BN_Nodes.rnid = lattice_membership.rnid
-    ORDER BY lattice_membership.name;
+        RNodes_BN_Nodes.rnid = LatticeRNodes.orig_rnid
+    ORDER BY LatticeRNodes.orig_rnid;
 
 ALTER TABLE Path_BN_nodes ADD INDEX `HashIndex`  (`Rchain`,`node`); /* May 7*/
 
