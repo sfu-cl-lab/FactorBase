@@ -151,6 +151,7 @@ public class BayesBaseCT_SortMerge {
         CTGenerator();
 	}
     /**
+    ** O.S. May 16: Starting here, we shouldn't implement the functionality below here. This is now part of the functionality in the new CT generator.
      * Populates the <databaseName>_BN schema with tables. (Refer transfer2.sql)
      * Generates lattice  tree. (Refer Class: short_rnid_LatticeGenerator , Method: generateTarget())
      * Executes metadata_3.sql
@@ -300,7 +301,7 @@ public class BayesBaseCT_SortMerge {
 		return maxNumberOfMembers;
 	}
 	
-	
+	/*** this part we do need O.s. May 16, 2018 ***/
 	/**
 	 *  Building the _CT tables for length >=2
 	 * 	For each length
