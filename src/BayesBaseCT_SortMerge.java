@@ -1133,12 +1133,20 @@ public class BayesBaseCT_SortMerge {
     public static void BuildCT_Rnodes_star(int len) throws SQLException, IOException {
         long l = System.currentTimeMillis(); //@zqian : measure structure learning time
         Statement st = con_BN.createStatement();
-        ResultSet rs = st.executeQuery("select name as RChain from lattice_set where lattice_set.length = " + len + ";");
+        ResultSet rs = st.executeQuery(
+            "SELECT short_rnid AS short_RChain, orig_rnid AS RChain " +
+            "FROM lattice_set " +
+            "JOIN lattice_mapping " +
+            "ON lattice_set.name = lattice_mapping.orig_rnid " +
+            "WHERE lattice_set.length = " + len + ";"
+        );
         while(rs.next()){
 
-            //  get pvid for further use
+            // Get the short and full form rnids for further use.
             String rchain = rs.getString("RChain");
-            System.out.println("\n rchain String : " + rchain );
+            System.out.println("\n RChain : " + rchain);
+            String shortRchain = rs.getString("short_RChain");
+            System.out.println(" Short RChain : " + shortRchain);
 
             //  create new statement
             Statement st2 = con_BN.createStatement();
@@ -1173,17 +1181,25 @@ public class BayesBaseCT_SortMerge {
             }
             //System.out.println("Query String : " + queryString );
 
-            String createString = "create table `"+rchain.replace("`", "") +"_star`"+" as "+queryString;
+            String createString = "CREATE TABLE `" + shortRchain.replace("`", "") + "_star`" + " as " + queryString;
             System.out.println("\n create String : " + createString );
             st3.execute(createString);
 
             //adding  covering index May 21
             //create index string
-            ResultSet rs5 = st2.executeQuery("select column_name as Entries from information_schema.columns where table_schema = '"+databaseName_CT+"' and table_name = '"+rchain.replace("`", "") +"_star';");
+            ResultSet rs5 = st2.executeQuery(
+                "SELECT column_name AS Entries " +
+                "FROM information_schema.columns " +
+                "WHERE table_schema = '" + databaseName_CT + "' " +
+                "AND table_name = '" + shortRchain.replace("`", "") + "_star';"
+            );
             String IndexString = makeIndexQuery(rs5, "Entries", " , ");
             //System.out.println("Index String : " + IndexString);
             //System.out.println("alter table `"+rchain.replace("`", "") +"_star`"+" add index `"+rchain.replace("`", "") +"_star`   ( "+IndexString+" );");
-            st3.execute("alter table `"+rchain.replace("`", "") +"_star`"+" add index `"+rchain.replace("`", "") +"_star`   ( "+IndexString+" );");
+            st3.execute(
+                "ALTER TABLE `" + shortRchain.replace("`", "") + "_star` " +
+                "ADD INDEX `" + shortRchain.replace("`", "") + "_star` (" + IndexString + ");"
+            );
 
 
             //  close statements
