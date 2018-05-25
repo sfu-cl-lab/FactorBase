@@ -214,17 +214,25 @@ public class CSVPrecomputor {
 
 	public static void readRNodesFromLattice(int len) throws SQLException, IOException {
 		Statement st = con2.createStatement();
-		ResultSet rs = st.executeQuery("select name as RChain from lattice_set where lattice_set.length = " + len + ";");
+        ResultSet rs = st.executeQuery(
+            "SELECT short_rnid AS short_RChain, orig_rnid AS RChain " +
+            "FROM lattice_set " +
+            "JOIN lattice_mapping " +
+            "ON lattice_set.name = lattice_mapping.orig_rnid " +
+            "WHERE lattice_set.length = " + len + ";"
+        );
 		while(rs.next()){
 
-			//  get pvid for further use
-			String rchain = rs.getString("RChain");
-			System.out.println("\n RChain : " + rchain);
+            // Get the short and full form rnids for further use.
+            String rchain = rs.getString("RChain");
+            System.out.println("\n RChain : " + rchain);
+            String shortRchain = rs.getString("short_RChain");
+            System.out.println(" Short RChain : " + shortRchain);
 
 			//  create new statement
 			Statement st3 = con3.createStatement();
 			
-			String queryString= "SELECT * FROM `"+rchain.replace("`", "")+"_CT` where mult>0;";
+            String queryString= "SELECT * FROM `" + shortRchain.replace("`", "") + "_CT` WHERE MULT > 0;";
 			ResultSet rs5 = null;
 			try
 			{
