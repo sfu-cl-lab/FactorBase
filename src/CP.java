@@ -82,6 +82,7 @@ public class CP {
     static String dbPassword="";
     static String dbaddress="";
     static String rchain;
+    static String shortRchain;
 
     public CP(String databaseName, String databaseName2) {
         CP.databaseName = databaseName;
@@ -254,7 +255,7 @@ public class CP {
         );
         ArrayList<String> noparent_tables = new ArrayList<String>();
 
-        String bigTable = rchain.substring(0, rchain.length() - 1) + "_CT`";
+        String bigTable = shortRchain.substring(0, shortRchain.length() - 1) + "_CT`";
         System.out.println("bigTable Name: " + bigTable + "\n");
         while(rst.next()) {
             System.out.println("noparent node: " + rst.getString(1));
@@ -370,7 +371,7 @@ public class CP {
         ResultSet rst = st.executeQuery("select distinct child FROM Path_BayesNets where Rchain = '" + rchain + "' and parent <> ''");
         ArrayList<String> hasparent_tables = new ArrayList<String>();
 
-        String bigTable = rchain.substring(0, rchain.length() - 1) + "_CT`";
+        String bigTable = shortRchain.substring(0, shortRchain.length() - 1) + "_CT`";
         // find name of contingency table that has the data we need for the chain
 
         while(rst.next()) {
@@ -611,10 +612,19 @@ public class CP {
         }
         con1 = DriverManager.getConnection(CONN_STR1, dbUsername, dbPassword);
         java.sql.Statement st = con1.createStatement();
-        ResultSet myrchain = st.executeQuery("select name as RChain from lattice_set where lattice_set.length = (SELECT max(length) FROM lattice_set);");
+        // TODO: Check to see if other queries are more efficient.
+        ResultSet myrchain = st.executeQuery(
+            "SELECT short_rnid AS short_RChain, orig_rnid AS RChain " +
+            "FROM lattice_set " +
+            "JOIN lattice_mapping " +
+            "ON lattice_set.name = lattice_mapping.orig_rnid " +
+            "WHERE lattice_set.length = (SELECT max(length) FROM lattice_set);"
+        );
         myrchain.absolute(1);
-        rchain = myrchain.getString(1);
+        rchain = myrchain.getString("RChain");
+        shortRchain = myrchain.getString("short_RChain");
         System.out.println("rchain: " + rchain + "\n");
+        System.out.println("short rchain: " + shortRchain + "\n");
         st.close();
     }
 }

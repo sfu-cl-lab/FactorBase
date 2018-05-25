@@ -558,25 +558,40 @@ public class BayesBaseCT_SortMerge {
 		long l = System.currentTimeMillis(); 
 
 		Statement st = con_BN.createStatement();
-		ResultSet rs = st.executeQuery("select name as RChain from lattice_set where lattice_set.length = " + len + ";");
+        ResultSet rs = st.executeQuery(
+            "SELECT short_rnid AS short_RChain, orig_rnid AS RChain " +
+            "FROM lattice_set " +
+            "JOIN lattice_mapping " +
+            "ON lattice_set.name = lattice_mapping.orig_rnid " +
+            "WHERE lattice_set.length = " + len + ";"
+        );
         int fc=0;
 		while(rs.next())
 		{
 			long l1 = System.currentTimeMillis(); 
 
 			//System.out.print("fc ::"+ fc);
-			//  get pvid for further use
-			String rchain = rs.getString("RChain");
-			System.out.println("\n rchain String : " + rchain );
+            // Get the short and full form rnids for further use.
+            String rchain = rs.getString("RChain");
+            System.out.println("\n RChain : " + rchain);
+            String shortRchain = rs.getString("short_RChain");
+            System.out.println(" Short RChain : " + shortRchain);
 			// Oct 16 2013
 			// initialize the cur_CT_Table, at very beginning we will use _counts table to create the _flat table
-			String 	cur_CT_Table="`"+rchain.replace("`", "")+"_counts`";  
+            String cur_CT_Table = "`" + shortRchain.replace("`", "") + "_counts`";
 			System.out.println(" cur_CT_Table : " + cur_CT_Table);
 			// counts represents the ct tables where all relationships in Rchain are true
 
 			//  create new statement
 			Statement st1 = con_BN.createStatement();
-			ResultSet rs1 = st1.executeQuery("SELECT distinct parent, removed FROM lattice_rel  where child = '"+rchain+"' order by removed ASC;"); // members of rchain
+            ResultSet rs1 = st1.executeQuery(
+                "SELECT DISTINCT parent, removed, short_rnid " +
+                "FROM lattice_rel " +
+                "JOIN lattice_mapping " +
+                "ON lattice_rel.removed = lattice_mapping.orig_rnid " +
+                "WHERE child = '" + rchain + "' " +
+                "ORDER BY removed ASC;"
+            ); // members of rchain
 			
 			while(rs1.next())
 			{		
@@ -585,7 +600,9 @@ public class BayesBaseCT_SortMerge {
 					System.out.println("\n parent : " + parent);
 				String removed = rs1.getString("removed");
 					System.out.println("\n removed : " + removed);	
-				String BaseName = "`"+rchain.replace("`", "")+"_"+removed.replace("`", "")+"`";
+                String removedShort = rs1.getString("short_rnid");
+                System.out.println("\n removed short : " + removedShort);
+                String BaseName = "`" + shortRchain.replace("`", "") + "_" + removedShort.replace("`", "") + "`";
 				System.out.println(" BaseName : " + BaseName );
 				
 				Statement st2 = con_BN.createStatement();
@@ -622,7 +639,7 @@ public class BayesBaseCT_SortMerge {
 				System.out.println("Query String : " + queryString );	
 				
 				//make the rnid shorter 
-				String rnid_or=removed;
+				String rnid_or=removedShort;
 			
 				String cur_star_Table = "`"+removed.replace("`", "")+len+"_"+fc+"_star`";
 				String createStarString = "create table "+cur_star_Table +" as "+queryString;
@@ -699,7 +716,7 @@ public class BayesBaseCT_SortMerge {
 				if (rs1.next())
 					Next_CT_Table="`"+BaseName.replace("`", "")+"_CT`";
 				else 				 
-					Next_CT_Table="`"+rchain.replace("`", "")+"_CT`";
+                    Next_CT_Table = "`" + shortRchain.replace("`", "") + "_CT`";
 					
 				// Oct 16 2013
 				// preparing the CT table for next iteration
@@ -895,12 +912,20 @@ public class BayesBaseCT_SortMerge {
     public static void BuildCT_Rnodes_counts(int len) throws SQLException, IOException {
 
         Statement st = con_BN.createStatement();
-        ResultSet rs = st.executeQuery("select name as RChain from lattice_set where lattice_set.length = " + len + ";");
+        ResultSet rs = st.executeQuery(
+            "SELECT short_rnid AS short_RChain, orig_rnid AS RChain " +
+            "FROM lattice_set " +
+            "JOIN lattice_mapping " +
+            "ON lattice_set.name = lattice_mapping.orig_rnid " +
+            "WHERE lattice_set.length = " + len + ";"
+        );
         while(rs.next()){
 
-            //  get rnid for further use
+            // Get the short and full form rnids for further use.
             String rchain = rs.getString("RChain");
             System.out.println("\n RChain : " + rchain);
+            String shortRchain = rs.getString("short_RChain");
+            System.out.println(" Short RChain : " + shortRchain);
 
             //  create new statement
             Statement st2 = con_BN.createStatement();
@@ -936,24 +961,29 @@ public class BayesBaseCT_SortMerge {
                 //System.out.println("Query String : " + queryString );
             }
 
-            String createString = "create table `"+rchain.replace("`", "") +"_counts`"+" as "+queryString;
+            String createString = "CREATE TABLE `" + shortRchain.replace("`", "") + "_counts`" + " AS " + queryString;
             System.out.println("create String : " + createString );
             st3.execute(createString);
 
             //adding  covering index May 21
             //create index string
-            ResultSet rs5 = st2.executeQuery("select column_name as Entries from information_schema.columns where table_schema = '"+databaseName_CT+"' and table_name = '"+rchain.replace("`", "") +"_counts';");
+            ResultSet rs5 = st2.executeQuery(
+                "SELECT column_name AS Entries " +
+                "FROM information_schema.columns " +
+                "WHERE table_schema = '" + databaseName_CT + "' " +
+                "AND table_name = '" + shortRchain.replace("`", "") + "_counts';"
+            );
             String IndexString = makeIndexQuery(rs5, "Entries", " , ");
             //System.out.println("Index String : " + IndexString);
             //System.out.println("alter table `"+rchain.replace("`", "") +"_counts`"+" add index `"+rchain.replace("`", "") +"_Index`   ( "+IndexString+" );");
-            st3.execute("alter table `"+rchain.replace("`", "") +"_counts`"+" add index `"+rchain.replace("`", "") +"_Index`   ( "+IndexString+" );");
-
+            st3.execute(
+                "ALTER TABLE `" + shortRchain.replace("`", "") + "_counts` " +
+                "ADD INDEX `" + shortRchain.replace("`", "") +"_Index` (" + IndexString + ");"
+            );
 
             //  close statements
             st2.close();
             st3.close();
-
-
         }
 
         rs.close();
@@ -1053,12 +1083,20 @@ public class BayesBaseCT_SortMerge {
     public static void BuildCT_Rnodes_flat(int len) throws SQLException, IOException {
         long l = System.currentTimeMillis(); //@zqian : measure structure learning time
         Statement st = con_BN.createStatement();
-        ResultSet rs = st.executeQuery("select name as RChain from lattice_set where lattice_set.length = " + len + ";");
+        ResultSet rs = st.executeQuery(
+            "SELECT short_rnid AS short_RChain, orig_rnid AS RChain " +
+            "FROM lattice_set " +
+            "JOIN lattice_mapping " +
+            "ON lattice_set.name = lattice_mapping.orig_rnid " +
+            "WHERE lattice_set.length = " + len + ";"
+        );
         while(rs.next()){
 
-            //  get pvid for further use
+            // Get the short and full form rnids for further use.
             String rchain = rs.getString("RChain");
-            System.out.println("\n rchain String : " + rchain );
+            System.out.println("\n RChain : " + rchain);
+            String shortRchain = rs.getString("short_RChain");
+            System.out.println(" Short RChain : " + shortRchain);
 
             //  create new statement
             Statement st2 = con_BN.createStatement();
@@ -1088,17 +1126,25 @@ public class BayesBaseCT_SortMerge {
                 System.out.println("Query String : " + queryString );
             }
 
-            String createString = "create table `"+rchain.replace("`", "") +"_flat`"+" as "+queryString;
+            String createString = "CREATE TABLE `" + shortRchain.replace("`", "") + "_flat`" + " AS " + queryString;
             System.out.println("\n create String : " + createString );
             st3.execute(createString);
 
             //adding  covering index May 21
             //create index string
-            ResultSet rs5 = st2.executeQuery("select column_name as Entries from information_schema.columns where table_schema = '"+databaseName_CT+"' and table_name = '"+rchain.replace("`", "") +"_flat';");
+            ResultSet rs5 = st2.executeQuery(
+                "SELECT column_name AS Entries " +
+                "FROM information_schema.columns " +
+                "WHERE table_schema = '" + databaseName_CT + "' " +
+                "AND table_name = '" + shortRchain.replace("`", "") + "_flat';"
+            );
             String IndexString = makeIndexQuery(rs5, "Entries", " , ");
             //System.out.println("Index String : " + IndexString);
             //System.out.println("alter table `"+rchain.replace("`", "") +"_flat`"+" add index `"+rchain.replace("`", "") +"_flat`   ( "+IndexString+" );");
-            st3.execute("alter table `"+rchain.replace("`", "") +"_flat`"+" add index `"+rchain.replace("`", "") +"_flat`   ( "+IndexString+" );");
+            st3.execute(
+                "ALTER TABLE `" + shortRchain.replace("`", "") + "_flat` " +
+                "ADD INDEX `" + shortRchain.replace("`", "") + "_flat` (" + IndexString + ");"
+            );
 
 
             //  close statements
@@ -1120,12 +1166,20 @@ public class BayesBaseCT_SortMerge {
     public static void BuildCT_Rnodes_star(int len) throws SQLException, IOException {
         long l = System.currentTimeMillis(); //@zqian : measure structure learning time
         Statement st = con_BN.createStatement();
-        ResultSet rs = st.executeQuery("select name as RChain from lattice_set where lattice_set.length = " + len + ";");
+        ResultSet rs = st.executeQuery(
+            "SELECT short_rnid AS short_RChain, orig_rnid AS RChain " +
+            "FROM lattice_set " +
+            "JOIN lattice_mapping " +
+            "ON lattice_set.name = lattice_mapping.orig_rnid " +
+            "WHERE lattice_set.length = " + len + ";"
+        );
         while(rs.next()){
 
-            //  get pvid for further use
+            // Get the short and full form rnids for further use.
             String rchain = rs.getString("RChain");
-            System.out.println("\n rchain String : " + rchain );
+            System.out.println("\n RChain : " + rchain);
+            String shortRchain = rs.getString("short_RChain");
+            System.out.println(" Short RChain : " + shortRchain);
 
             //  create new statement
             Statement st2 = con_BN.createStatement();
@@ -1160,17 +1214,25 @@ public class BayesBaseCT_SortMerge {
             }
             //System.out.println("Query String : " + queryString );
 
-            String createString = "create table `"+rchain.replace("`", "") +"_star`"+" as "+queryString;
+            String createString = "CREATE TABLE `" + shortRchain.replace("`", "") + "_star`" + " as " + queryString;
             System.out.println("\n create String : " + createString );
             st3.execute(createString);
 
             //adding  covering index May 21
             //create index string
-            ResultSet rs5 = st2.executeQuery("select column_name as Entries from information_schema.columns where table_schema = '"+databaseName_CT+"' and table_name = '"+rchain.replace("`", "") +"_star';");
+            ResultSet rs5 = st2.executeQuery(
+                "SELECT column_name AS Entries " +
+                "FROM information_schema.columns " +
+                "WHERE table_schema = '" + databaseName_CT + "' " +
+                "AND table_name = '" + shortRchain.replace("`", "") + "_star';"
+            );
             String IndexString = makeIndexQuery(rs5, "Entries", " , ");
             //System.out.println("Index String : " + IndexString);
             //System.out.println("alter table `"+rchain.replace("`", "") +"_star`"+" add index `"+rchain.replace("`", "") +"_star`   ( "+IndexString+" );");
-            st3.execute("alter table `"+rchain.replace("`", "") +"_star`"+" add index `"+rchain.replace("`", "") +"_star`   ( "+IndexString+" );");
+            st3.execute(
+                "ALTER TABLE `" + shortRchain.replace("`", "") + "_star` " +
+                "ADD INDEX `" + shortRchain.replace("`", "") + "_star` (" + IndexString + ");"
+            );
 
 
             //  close statements
@@ -1193,12 +1255,20 @@ public class BayesBaseCT_SortMerge {
     public static void BuildCT_Rnodes_CT(int len) throws SQLException, IOException {
         long l = System.currentTimeMillis(); //@zqian : measure structure learning time
         Statement st = con_BN.createStatement();
-        ResultSet rs = st.executeQuery("select name as RChain from lattice_set where lattice_set.length = " + len + ";");
-        while(rs.next()){
+        ResultSet rs = st.executeQuery(
+            "SELECT short_rnid AS short_RChain, orig_rnid AS RChain " +
+            "FROM lattice_set " +
+            "JOIN lattice_mapping " +
+            "ON lattice_set.name = lattice_mapping.orig_rnid " +
+            "WHERE lattice_set.length = " + len + ";"
+        );
 
-            //  get pvid for further use
+        while(rs.next()) {
+            // Get the short and full form rnids for further use.
             String rchain = rs.getString("RChain");
-            System.out.println("\n rchain String : " + rchain );
+            System.out.println("\n RChain : " + rchain);
+            String shortRchain = rs.getString("short_RChain");
+            System.out.println(" Short RChain : " + shortRchain);
 
             //  create new statement
             Statement st2 = con_BN.createStatement();
@@ -1206,47 +1276,71 @@ public class BayesBaseCT_SortMerge {
             /**********starting to create _flase table***using sort_merge*******************************/
     		//Sort_merge5.sort_merge("`"+rchain.replace("`", "")+"_star`","`"+rchain.replace("`", "") +"_flat`","`"+rchain.replace("`", "") +"_false`",con3);
             //Sort_merge4.sort_merge("`"+rchain.replace("`", "")+"_star`","`"+rchain.replace("`", "") +"_flat`","`"+rchain.replace("`", "") +"_false`",con3);
-            Sort_merge3.sort_merge("`"+rchain.replace("`", "")+"_star`","`"+rchain.replace("`", "") +"_flat`","`"+rchain.replace("`", "") +"_false`",con_CT);
+            Sort_merge3.sort_merge(
+                "`" + shortRchain.replace("`", "") + "_star`",
+                "`" + shortRchain.replace("`", "") + "_flat`",
+                "`" + shortRchain.replace("`", "") + "_false`",
+                con_CT
+            );
             // computing false table as mult difference between star and false. Separate procedure for optimizing this big join.
             
           	//adding  covering index May 21
             //create index string
-            ResultSet rs15 = st2.executeQuery("select column_name as Entries from information_schema.columns where table_schema = '"+databaseName_CT+"' and table_name = '"+rchain.replace("`", "") +"_false';");
+            ResultSet rs15 = st2.executeQuery(
+                "SELECT column_name AS Entries " +
+                "FROM information_schema.columns " +
+                "WHERE table_schema = '" + databaseName_CT + "' " +
+                "AND table_name = '" + shortRchain.replace("`", "") + "_false';"
+            );
             String IndexString = makeIndexQuery(rs15, "Entries", " , ");
             //System.out.println("Index String : " + IndexString);
         	//	System.out.println("alter table `"+rchain.replace("`", "") +"_false`"+" add index `"+rchain.replace("`", "") +"_false`   ( "+IndexString+" );");
-            st3.execute("alter table `"+rchain.replace("`", "") +"_false`"+" add index `"+rchain.replace("`", "") +"_false`   ( "+IndexString+" );");
-
-
+            st3.execute(
+                "ALTER TABLE `" + shortRchain.replace("`", "") + "_false` " +
+                "ADD INDEX `" + shortRchain.replace("`", "") +"_false` (" + IndexString + ");"
+            );
 
             //building the _CT table        //expanding the columns // May 16
            	// must specify the columns, or there's will a mistake in the table that mismatch the columns
-            ResultSet rs5 = st3.executeQuery("select column_name as Entries from information_schema.columns where table_schema = '"+databaseName_CT+"' and table_name = '"+rchain.replace("`", "") +"_counts';");
+            ResultSet rs5 = st3.executeQuery(
+                "SELECT column_name AS Entries " +
+                "FROM information_schema.columns " +
+                "WHERE table_schema = '" + databaseName_CT + "' " +
+                "AND table_name = '" + shortRchain.replace("`", "") + "_counts';"
+            );
             // reading the column names from information_schema.columns, and the output will remove the "`" automatically,
             // however some columns contain "()" and MySQL does not support "()" well, so we have to add the "`" back.
             String UnionColumnString = makeUnionSepQuery(rs5, "Entries", " , ");
             //System.out.println("Union Column String : " + UnionColumnString);
 
             //join false table with join table to introduce rnid (=F) and 2nids (= n/a). Then union result with counts table.
-            String createCTString = "create table `"+rchain.replace("`", "") +"_CT`"+" as select "+UnionColumnString+ " from `"+rchain.replace("`", "") +"_counts` union " +
-            "select "+UnionColumnString+" from `"+rchain.replace("`", "") +"_false`, `"+rchain.replace("`", "") +"_join`;" ;
+            String createCTString = "CREATE TABLE `" + shortRchain.replace("`", "") + "_CT` AS SELECT " + UnionColumnString +
+                " FROM `" + shortRchain.replace("`", "") + "_counts`" +
+                " UNION" +
+                " SELECT " + UnionColumnString +
+                " FROM `" + shortRchain.replace("`", "") + "_false`, `" + shortRchain.replace("`", "") + "_join`;";
             System.out.println("\n create CT table String : " + createCTString );
             st3.execute(createCTString);
 
           	//adding  covering index May 21
             //create index string
-            ResultSet rs25 = st2.executeQuery("select column_name as Entries from information_schema.columns where table_schema = '"+databaseName_CT+"' and table_name = '"+rchain.replace("`", "") +"_CT';");
+            ResultSet rs25 = st2.executeQuery(
+                "SELECT column_name AS Entries " +
+                "FROM information_schema.columns " +
+                "WHERE table_schema = '" + databaseName_CT + "' " +
+                "AND table_name = '" + shortRchain.replace("`", "") + "_CT';"
+            );
             String IndexString2 = makeIndexQuery(rs25, "Entries", " , ");
             //System.out.println("Index String : " + IndexString2);
             //System.out.println("alter table `"+rchain.replace("`", "") +"_CT`"+" add index `"+rchain.replace("`", "") +"_CT`   ( "+IndexString2+" );");
-            st3.execute("alter table `"+rchain.replace("`", "") +"_CT`"+" add index `"+rchain.replace("`", "") +"_CT`   ( "+IndexString2+" );");
-
+            st3.execute(
+                "ALTER TABLE `" + shortRchain.replace("`", "") + "_CT` " +
+                "ADD INDEX `" + shortRchain.replace("`", "") + "_CT` (" + IndexString2 + ");"
+            );
 
             //  close statements
             st2.close();
             st3.close();
-
-
         }
 
         rs.close();
@@ -1278,7 +1372,12 @@ public class BayesBaseCT_SortMerge {
             Statement st3 = con_CT.createStatement();
 
             //  create ColumnString
-            ResultSet rs2 = st2.executeQuery("select distinct Entries from MetaQueries where Lattice_Point = '" + short_rnid + "' and TableType = 'Join';");
+            ResultSet rs2 = st2.executeQuery(
+                "SELECT DISTINCT Entries " +
+                "FROM MetaQueries " +
+                "WHERE Lattice_Point = '" + orig_rnid + "' " +
+                "AND TableType = 'Join';"
+            );
 
             String ColumnString = makeCommaSepQuery(rs2, "Entries", " , ");
             ColumnString = orig_rnid + " varchar(5) ," + ColumnString;

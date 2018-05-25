@@ -5,8 +5,16 @@ SET storage_engine=INNODB;
 /* set up the join tables that represent the case where a relationship is false and its attributes are undefined */
 
 INSERT into MetaQueries
-select distinct short_rnid as Lattice_Point, 'Join' as TableType, 'COLUMN' as ClauseType, '2nid' as EntryType, concat(2nid,
-' varchar(5)  default ',' "N/A" ') as Entries from RNodes_2Nodes N, LatticeRNodes L where N.rnid = L.orig_rnid;
+SELECT DISTINCT
+    orig_rnid as Lattice_Point,
+    'Join' as TableType,
+    'COLUMN' as ClauseType,
+    '2nid' as EntryType,
+    CONCAT(2nid, ' varchar(5)  default ', ' "N/A" ') AS Entries
+FROM
+    RNodes_2Nodes N, LatticeRNodes L
+WHERE
+    N.rnid = L.orig_rnid;
 
 /**************
  * Generating flat, star, and join tables for Rnodes
@@ -24,7 +32,10 @@ select distinct short_rnid as Lattice_Point, 'Join' as TableType, 'COLUMN' as Cl
  */
 INSERT into MetaQueries
 select DISTINCT 
-    short_rnid as Lattice_Point, 'Flat' as TableType, 'FROM' as ClauseType , 'table' as EntryType, 
+    orig_rnid AS Lattice_Point,
+    'Flat' AS TableType,
+    'FROM' AS ClauseType,
+    'table' AS EntryType,
     concat('`',replace(short_rnid, '`', ''),'_counts`') AS Entries
 from LatticeRNodes;
 
@@ -36,22 +47,38 @@ from LatticeRNodes;
 
 INSERT into MetaQueries
 SELECT distinct Lattice_Point, 'Flat' as TableType, ClauseType, EntryType, Entries
-FROM LatticeRNodes L, MetaQueries M where L.short_rnid = M.Lattice_Point and TableType = 'Counts' and ClauseType = 'GROUPBY'
-and EntryType <> 'rnid' and EntryType <> '2nid';
+FROM
+    LatticeRNodes L, MetaQueries M
+WHERE
+    L.orig_rnid = M.Lattice_Point
+    AND TableType = 'Counts'
+    AND ClauseType = 'GROUPBY'
+    AND EntryType <> 'rnid'
+    AND EntryType <> '2nid';
 
 /* use the same columns as in group by in select clause */
 
 INSERT into MetaQueries
 SELECT distinct Lattice_Point, 'Flat' as TableType, 'SELECT' AS ClauseType, EntryType, Entries
-FROM LatticeRNodes L, MetaQueries M where L.short_rnid = M.Lattice_Point and TableType = 'Counts' and ClauseType = 'GROUPBY'
-and EntryType <> 'rnid' and EntryType <> '2nid';
+FROM
+    LatticeRNodes L, MetaQueries M
+WHERE
+    L.orig_rnid = M.Lattice_Point
+    AND TableType = 'Counts'
+    AND ClauseType = 'GROUPBY'
+    AND EntryType <> 'rnid'
+    AND EntryType <> '2nid';
 
 /* sum over all the mults in the counts table 
  * 
  */
 INSERT into MetaQueries
-SELECT distinct short_rnid as Lattice_Point, 'Flat' as TableType, 'SELECT' AS ClauseType, 'aggregate' as EntryType,
-    concat('sum(`',replace(short_rnid, '`', ''),'_counts`.`MULT`)',' as "MULT"') AS Entries
+SELECT DISTINCT
+    orig_rnid AS Lattice_Point,
+    'Flat' AS TableType,
+    'SELECT' AS ClauseType,
+    'aggregate' AS EntryType,
+    CONCAT('SUM(`',REPLACE(short_rnid, '`', ''),'_counts`.`MULT`)',' as "MULT"') AS Entries
 from
     LatticeRNodes;
 
@@ -61,10 +88,18 @@ from
  */
 
 INSERT into MetaQueries
-SELECT distinct short_rnid as Lattice_Point, 'Star' as TableType, 'SELECT' as ClauseType, '1nid' as EntryType, Entries FROM
+SELECT DISTINCT
+    orig_rnid AS Lattice_Point,
+    'Star' AS TableType,
+    'SELECT' AS ClauseType,
+    '1nid' AS EntryType,
+    Entries
+FROM
     LatticeRNodes L, RNodes_pvars R, MetaQueries M
 WHERE
-    L.orig_rnid = R.rnid and M.Lattice_Point = R.pvid and ClauseType = 'GROUPBY';
+    L.orig_rnid = R.rnid
+    AND M.Lattice_Point = R.pvid
+    AND ClauseType = 'GROUPBY';
     
 /* Key condition: these fields must match the ones in the flat table. I.e. rnodes_counts - rnid, 1nid, multi = union of group by from pvariables
  * 
@@ -80,7 +115,11 @@ select (t1.mult * t2.mult * t3.mult) as "MULT". Currently done in code
  * insert all count tables from associated populations in from list for join
  */
 INSERT into MetaQueries
-SELECT DISTINCT short_rnid as Lattice_Point, 'Star' as TableType, 'FROM' as ClauseType, 'table' as EntryType, 
+SELECT DISTINCT
+    orig_rnid AS Lattice_Point,
+    'Star' AS TableType,
+    'FROM' AS ClauseType,
+    'table' AS EntryType,
 concat('`',replace(pvid, '`', ''),'_counts`')
     AS Entries FROM
     LatticeRNodes L, RNodes_pvars R
@@ -143,7 +182,7 @@ select  distinct
 from 
     lattice_membership M, LatticeRNodes L, RNodes_pvars R
 where 
-    R.rnid = L.orig_rnid and L.short_rnid = M.member;
+    R.rnid = L.orig_rnid AND L.orig_rnid = M.member;
     
 insert into MetaQueries
 SELECT DISTINCT 
@@ -153,11 +192,15 @@ SELECT DISTINCT
     lattice_rel.removed as EntryType, 
     /** rnid = lattice_rel.removed should now point to the R_i of our paper **/
     /* a bit awkward to call it entry type */
-    concat('`',replace(lattice_rel.parent,'`',''),'_CT`')  AS Entries 
+    concat('`', replace(lattice_mapping.short_rnid, '`', ''), '_CT`') AS Entries
     /* current CT should be like conditioning on all other relationships being true */
     /* the parent represents the shortened Rchain */
 FROM
     lattice_rel
+JOIN
+    lattice_mapping
+ON
+    lattice_rel.parent = lattice_mapping.orig_rnid
 where 
     lattice_rel.parent <>'EmptySet';
     /* i.e. child = rchain has length > 1; */
@@ -173,7 +216,10 @@ concat('`',replace(R.pvid, '`', ''),'_counts`')    AS Entries
 /* should check that this includes expansion for pvid = course 0 */
 FROM
     lattice_rel LR, LatticeRNodes L, RNodes_pvars R
-where LR.parent <>'EmptySet' and LR.removed = L.short_rnid and L.orig_rnid = R.rnid and
+WHERE
+    LR.parent <> 'EmptySet'
+    AND LR.removed = L.orig_rnid
+    AND L.orig_rnid = R.rnid AND
 R.pvid not in (select pvid from RChain_pvars where RChain_pvars.rchain = LR.parent);
 /* this seems to implement the "differing first-order variable rule" from the paper */
 /* find pvids that are associated with the removed rnode but not with the shortened rchain = parent */
@@ -198,7 +244,7 @@ where
     and  lattice_membership.member > lattice_rel.removed
     /* going through rnids in order, find the rows in current CT-table where the remaining rnids are true */
     and lattice_rel.parent <>'EmptySet'
-    and L.short_rnid = lattice_membership.member;
+    AND L.orig_rnid = lattice_membership.member;
 
 /****************
  * now the select clause. This finds the group by columns for all rnids in the shortened parent rchain
@@ -236,7 +282,10 @@ SELECT DISTINCT
 FROM
     lattice_rel LR, LatticeRNodes L, RNodes_pvars R,
     MetaQueries M
-where LR.parent <>'EmptySet' and LR.removed = L.short_rnid and L.orig_rnid = R.rnid and
+WHERE
+    LR.parent <> 'EmptySet'
+    AND LR.removed = L.orig_rnid
+    AND L.orig_rnid = R.rnid AND
 R.pvid not in (select pvid from RChain_pvars where RChain_pvars.rchain = LR.parent)
 AND M.Lattice_Point = R.pvid
 AND M.ClauseType = 'GROUPBY'

@@ -97,7 +97,11 @@ Now we make data join tables for each relationship functor node.
 
 INSERT into MetaQueries
 SELECT DISTINCT
-    short_rnid as Lattice_Point,'Counts' as TableType, 'FROM' as ClauseType, 'rtable' as EntryType, CONCAT('@database@.',R.TABLE_NAME, ' AS ', rnid) AS Entries
+    orig_rnid AS Lattice_Point,
+    'Counts' AS TableType,
+    'FROM' AS ClauseType,
+    'rtable' AS EntryType,
+    CONCAT('@database@.', R.TABLE_NAME, ' AS ', rnid) AS Entries
 FROM
     RNodes R, LatticeRNodes L 
 WHERE R.rnid = L.orig_rnid;
@@ -108,7 +112,10 @@ We need to replace the apostrophes in rnid to make the rnid a valid name for the
 
 INSERT into MetaQueries
 SELECT DISTINCT
-    short_rnid as Lattice_Point,'Counts' as TableType, 'FROM' as ClauseType, 'rtable' as EntryType,
+    orig_rnid AS Lattice_Point,
+    'Counts' AS TableType,
+    'FROM' AS ClauseType,
+    'rtable' AS EntryType,
     concat('(select "T" as ',
             rnid,
             ') as ',
@@ -121,7 +128,11 @@ WHERE R.rnid = L.orig_rnid;
 the ids in the population entity tables. **/
 
 INSERT into MetaQueries
-SELECT DISTINCT short_rnid as Lattice_Point,'Counts' as TableType, 'WHERE' as ClauseType, 'rtable' as EntryType,
+SELECT DISTINCT
+    orig_rnid AS Lattice_Point,
+    'Counts' AS TableType,
+    'WHERE' AS ClauseType,
+    'rtable' AS EntryType,
     CONCAT(rnid,
             '.',
             COLUMN_NAME,
@@ -142,13 +153,21 @@ WHERE R.rnid = L.orig_rnid;
 
 INSERT into MetaQueries
 select 
-    short_rnid as Lattice_Point, 'Counts' as TableType, 'SELECT' as ClauseType, 'rnid' as EntryType, orig_rnid AS Entries
+    orig_rnid AS Lattice_Point,
+    'Counts' AS TableType,
+    'SELECT' AS ClauseType,
+    'rnid' AS EntryType,
+    orig_rnid AS Entries
 from
     LatticeRNodes;
 
 INSERT into MetaQueries
 SELECT DISTINCT
-short_rnid as Lattice_Point, 'Counts' as TableType, 'SELECT' as ClauseType, '2nid' as EntryType, CONCAT(L.orig_rnid, '.', COLUMN_NAME, ' AS ', N.2nid) AS Entries
+    orig_rnid AS Lattice_Point,
+    'Counts' AS TableType,
+    'SELECT' AS ClauseType,
+    '2nid' AS EntryType,
+    CONCAT(L.orig_rnid, '.', COLUMN_NAME, ' AS ', N.2nid) AS Entries
 FROM
     LatticeRNodes L, RNodes_2Nodes RN, 2Nodes N
 where RN.rnid = L.orig_rnid and N.2nid = RN.2nid;
@@ -160,13 +179,21 @@ where RN.rnid = L.orig_rnid and N.2nid = RN.2nid;
 
 INSERT into MetaQueries
 select 
-    short_rnid as Lattice_Point, 'Counts' as TableType, 'GROUPBY' as ClauseType, 'rnid' as EntryType, orig_rnid AS Entries
+    orig_rnid AS Lattice_Point,
+    'Counts' AS TableType,
+    'GROUPBY' AS ClauseType,
+    'rnid' AS EntryType,
+    orig_rnid AS Entries
 from
     LatticeRNodes;
     
 INSERT into MetaQueries
 SELECT DISTINCT
-short_rnid as Lattice_Point, 'Counts' as TableType, 'GROUPBY' as ClauseType, '2nid' as EntryType, N.2nid AS Entries
+    orig_rnid AS Lattice_Point,
+    'Counts' AS TableType,
+    'GROUPBY' AS ClauseType,
+    '2nid' AS EntryType,
+    N.2nid AS Entries
 FROM
     LatticeRNodes L, RNodes_2Nodes RN, 2Nodes N
 where RN.rnid = L.orig_rnid and N.2nid = RN.2nid order by RN.rnid,COLUMN_NAME;
@@ -178,7 +205,13 @@ This includes the count(*) aggregation
 *************************************/
 
 INSERT into MetaQueries
-SELECT distinct short_rnid as Lattice_Point, TableType, ClauseType, EntryType, Entries FROM
+SELECT DISTINCT
+    orig_rnid AS Lattice_Point,
+    TableType,
+    ClauseType,
+    EntryType,
+    Entries
+FROM
     LatticeRNodes L, RNodes_pvars R, MetaQueries M
 WHERE
     L.orig_rnid = R.rnid and M.Lattice_Point = R.pvid;

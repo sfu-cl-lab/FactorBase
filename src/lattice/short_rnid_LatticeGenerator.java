@@ -118,14 +118,15 @@ public class short_rnid_LatticeGenerator {
         firstSets = new ArrayList<String>();
         wholeSets = new ArrayList<String>();
         Statement st = con2.createStatement();
-        ResultSet rs = st.executeQuery("select short_rnid from LatticeRNodes;");
+        ResultSet rs = st.executeQuery("select orig_rnid from LatticeRNodes;");
         
         // while(rs.next())
         //System.out.println(rs.getString(1));
      
         while(rs.next()){
-        	firstSets.add(rs.getString("short_rnid").substring(1,rs.getString("short_rnid").length()-1));
-            System.out.println("The short_rnid is : " + rs.getString("short_rnid"));
+            // Remove the flanking backticks from the orig_rnid before adding them to the set.
+            firstSets.add(rs.getString("orig_rnid").substring(1, rs.getString("orig_rnid").length() - 1));
+            System.out.println("The orig_rnid is : " + rs.getString("orig_rnid"));
         }
 /*        System.out.println("***********");
         for(String g:firstSets)
@@ -138,9 +139,9 @@ public class short_rnid_LatticeGenerator {
         maxNumberOfMembers = firstSets.size();
         Statement st = con2.createStatement();
     
-        st.execute("create table if not exists lattice_membership (name VARCHAR(20), member VARCHAR(20), rnid VARCHAR(199), PRIMARY KEY (name, member));");
-        st.execute("create table if not exists lattice_rel (parent VARCHAR(20), child VARCHAR(20), removed VARCHAR(20), rnid VARCHAR(199), PRIMARY KEY (parent, child));");
-        st.execute("create table if not exists lattice_set (name VARCHAR(20), length INT(11), PRIMARY KEY (name, length));");
+        st.execute("create table if not exists lattice_membership (name VARCHAR(398), member VARCHAR(398), rnid VARCHAR(199), PRIMARY KEY (name, member));");
+        st.execute("create table if not exists lattice_rel (parent VARCHAR(398), child VARCHAR(398), removed VARCHAR(199), rnid VARCHAR(199), PRIMARY KEY (parent, child));");
+        st.execute("create table if not exists lattice_set (name VARCHAR(199), length INT(11), PRIMARY KEY (name, length));");
 
         st.execute("truncate lattice_rel;");
         st.execute("truncate lattice_membership;");
@@ -259,60 +260,47 @@ public static void mapping_rnid() throws SQLException{
     	
     	ArrayList <String>list_rnid =new ArrayList<String>(); //for storing lattice_set name
     	
-    	
-    	while(rst.next()){
-    		
-    		String temp="";
-    		
-    			for(int i=0;i<rst.getString(1).length()-1;i++)
-    			{if(rst.getString(1).charAt(i)!='`') 
-    				temp=temp+rst.getString(1).charAt(i);
-    			}
-    		
-    		temp="`"+temp+"`";
-    		list_rnid.add(temp);
-    		//System.out.println(temp);
-    	
-    		  	}
-    	
-    	
-    	
-    	for(int i=0;i<list_rnid.size();i++){
-    		
-    		String n[]=list_rnid.get(i).substring(1, list_rnid.get(i).length()-1).split(",");
-    		String temp="";
-    		
-    		for(int j=0;j<n.length;j++){
-    			n[j]="`"+n[j]+"`";
-    			ResultSet rst2=st.executeQuery("select orig_rnid from LatticeRNodes where short_rnid='"+n[j]+"';" );//getting orignal Rnodes from Rnodes table
-    			  rst2.absolute(1);			
-    		     
-    			temp=temp+rst2.getString(1)+",";
-    			
-    		}
-    		
-    		temp=temp.substring(1, temp.length()-1);
-    		
-    		String orig_rnid="";
-    		for(int k=0;k<temp.length();k++){
-    			if(temp.charAt(k)!='`')
-    				orig_rnid=orig_rnid+temp.charAt(k);
-    		}
-    		orig_rnid="`"+orig_rnid+"`";
-    		//System.out.println(orig_rnid);
-    		
-    		
-    		
-    		st.execute("insert into lattice_mapping (orig_rnid,short_rnid) values('"+orig_rnid+"','"+list_rnid.get(i)+"');");
-    		//System.out.println(temp+"  "+list.get(i));
-    	}
-    	
-    	st.close();
+        while(rst.next()){
+            // Make sure that all the special characters are escaped properly by only having backticks that flank the
+            // string.
+            String cleanedName = rst.getString(1).replace("`", "");
+            cleanedName = "`" + cleanedName + "`";
+            list_rnid.add(cleanedName);
+        }
+
+        for(String rnid : list_rnid) {
+            // Splitting any Rchains into its components.
+            String[] rnodes = rnid.substring(1, rnid.length() - 1).replace("),", ") ").split(" ");
+            String short_rnid = "";
+
+            // for loop to find the short RNode ID of the components of any Rchains.
+            for(String rnode : rnodes){
+                rnode = "`" + rnode + "`";
+
+                // Getting short RNodes ID from LatticeRNodes table.
+                ResultSet rst2 = st.executeQuery("select short_rnid from LatticeRNodes where orig_rnid = '"+ rnode +"';");
+                rst2.absolute(1); // Moving the cursor to the first item in the results.
+
+                short_rnid = short_rnid + rst2.getString(1) + ",";
+            }
+
+            // Remove trailing comma (,).
+            short_rnid = short_rnid.substring(0, short_rnid.length() - 1);
+
+            // Make sure that all the special characters are escaped properly by only having backticks flanking the
+            // string.
+            short_rnid = short_rnid.replace("`", "");
+            short_rnid = "`" + short_rnid + "`";
+
+            st.execute(
+                "insert into lattice_mapping (orig_rnid,short_rnid) " + 
+                "values ('" + rnid + "','" + short_rnid +"');"
+            );
+        }
+
+        st.close();
     }
-    
-    
-    
-    
+
     public static boolean checkConstraints(String firstSet, String[] secondSetParts) throws SQLException {
         
 //    	System.out.println(firstSet);
@@ -323,8 +311,8 @@ public static void mapping_rnid() throws SQLException{
 
         // get primary key for first set
         
-        //use rnid, the shorter one
-        ResultSet rs = st.executeQuery("select pvid1, pvid2 from LatticeRNodes where short_rnid = '`" + firstSet + "`';");
+        // use rnid
+        ResultSet rs = st.executeQuery("select pvid1, pvid2 from LatticeRNodes where orig_rnid = '`" + firstSet + "`';");
         while(rs.next()){
             firstSetKeys.add(rs.getString("pvid1"));
             firstSetKeys.add(rs.getString("pvid2"));
@@ -334,7 +322,7 @@ public static void mapping_rnid() throws SQLException{
         //System.out.println(secondSetParts);
         for (String secondSet : secondSetParts)
         {
-            rs = st.executeQuery("select pvid1, pvid2 from LatticeRNodes where short_rnid = '`" + secondSet + "`';");
+            rs = st.executeQuery("select pvid1, pvid2 from LatticeRNodes where orig_rnid = '`" + secondSet + "`';");
             while(rs.next()){
                 secondSetKeys.add(rs.getString("pvid1"));
                 secondSetKeys.add(rs.getString("pvid2"));
@@ -376,7 +364,7 @@ public static void mapping_rnid() throws SQLException{
     
     public static String[] nodeSplit(String node) {
     //some portion of original code deleted	
-        String[] nodes = node.split( delimiter );
+        String[] nodes = node.replace("),", ") ").split(" ");
         
 //        System.out.println("*********************");
 //        System.out.println(node);
