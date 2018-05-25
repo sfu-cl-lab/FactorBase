@@ -558,25 +558,40 @@ public class BayesBaseCT_SortMerge {
 		long l = System.currentTimeMillis(); 
 
 		Statement st = con_BN.createStatement();
-		ResultSet rs = st.executeQuery("select name as RChain from lattice_set where lattice_set.length = " + len + ";");
+        ResultSet rs = st.executeQuery(
+            "SELECT short_rnid AS short_RChain, orig_rnid AS RChain " +
+            "FROM lattice_set " +
+            "JOIN lattice_mapping " +
+            "ON lattice_set.name = lattice_mapping.orig_rnid " +
+            "WHERE lattice_set.length = " + len + ";"
+        );
         int fc=0;
 		while(rs.next())
 		{
 			long l1 = System.currentTimeMillis(); 
 
 			//System.out.print("fc ::"+ fc);
-			//  get pvid for further use
-			String rchain = rs.getString("RChain");
-			System.out.println("\n rchain String : " + rchain );
+            // Get the short and full form rnids for further use.
+            String rchain = rs.getString("RChain");
+            System.out.println("\n RChain : " + rchain);
+            String shortRchain = rs.getString("short_RChain");
+            System.out.println(" Short RChain : " + shortRchain);
 			// Oct 16 2013
 			// initialize the cur_CT_Table, at very beginning we will use _counts table to create the _flat table
-			String 	cur_CT_Table="`"+rchain.replace("`", "")+"_counts`";  
+            String cur_CT_Table = "`" + shortRchain.replace("`", "") + "_counts`";
 			System.out.println(" cur_CT_Table : " + cur_CT_Table);
 			// counts represents the ct tables where all relationships in Rchain are true
 
 			//  create new statement
 			Statement st1 = con_BN.createStatement();
-			ResultSet rs1 = st1.executeQuery("SELECT distinct parent, removed FROM lattice_rel  where child = '"+rchain+"' order by removed ASC;"); // members of rchain
+            ResultSet rs1 = st1.executeQuery(
+                "SELECT DISTINCT parent, removed, short_rnid " +
+                "FROM lattice_rel " +
+                "JOIN lattice_mapping " +
+                "ON lattice_rel.removed = lattice_mapping.orig_rnid " +
+                "WHERE child = '" + rchain + "' " +
+                "ORDER BY removed ASC;"
+            ); // members of rchain
 			
 			while(rs1.next())
 			{		
@@ -585,7 +600,9 @@ public class BayesBaseCT_SortMerge {
 					System.out.println("\n parent : " + parent);
 				String removed = rs1.getString("removed");
 					System.out.println("\n removed : " + removed);	
-				String BaseName = "`"+rchain.replace("`", "")+"_"+removed.replace("`", "")+"`";
+                String removedShort = rs1.getString("short_rnid");
+                System.out.println("\n removed short : " + removedShort);
+                String BaseName = "`" + shortRchain.replace("`", "") + "_" + removedShort.replace("`", "") + "`";
 				System.out.println(" BaseName : " + BaseName );
 				
 				Statement st2 = con_BN.createStatement();
@@ -622,7 +639,7 @@ public class BayesBaseCT_SortMerge {
 				System.out.println("Query String : " + queryString );	
 				
 				//make the rnid shorter 
-				String rnid_or=removed;
+				String rnid_or=removedShort;
 			
 				String cur_star_Table = "`"+removed.replace("`", "")+len+"_"+fc+"_star`";
 				String createStarString = "create table "+cur_star_Table +" as "+queryString;
@@ -699,7 +716,7 @@ public class BayesBaseCT_SortMerge {
 				if (rs1.next())
 					Next_CT_Table="`"+BaseName.replace("`", "")+"_CT`";
 				else 				 
-					Next_CT_Table="`"+rchain.replace("`", "")+"_CT`";
+                    Next_CT_Table = "`" + shortRchain.replace("`", "") + "_CT`";
 					
 				// Oct 16 2013
 				// preparing the CT table for next iteration

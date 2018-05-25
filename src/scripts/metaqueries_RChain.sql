@@ -192,11 +192,15 @@ SELECT DISTINCT
     lattice_rel.removed as EntryType, 
     /** rnid = lattice_rel.removed should now point to the R_i of our paper **/
     /* a bit awkward to call it entry type */
-    concat('`',replace(lattice_rel.parent,'`',''),'_CT`')  AS Entries 
+    concat('`', replace(lattice_mapping.short_rnid, '`', ''), '_CT`') AS Entries
     /* current CT should be like conditioning on all other relationships being true */
     /* the parent represents the shortened Rchain */
 FROM
     lattice_rel
+JOIN
+    lattice_mapping
+ON
+    lattice_rel.parent = lattice_mapping.orig_rnid
 where 
     lattice_rel.parent <>'EmptySet';
     /* i.e. child = rchain has length > 1; */
