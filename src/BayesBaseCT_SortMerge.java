@@ -1355,7 +1355,12 @@ public class BayesBaseCT_SortMerge {
             Statement st3 = con_CT.createStatement();
 
             //  create ColumnString
-            ResultSet rs2 = st2.executeQuery("select distinct Entries from MetaQueries where Lattice_Point = '" + short_rnid + "' and TableType = 'Join';");
+            ResultSet rs2 = st2.executeQuery(
+                "SELECT DISTINCT Entries " +
+                "FROM MetaQueries " +
+                "WHERE Lattice_Point = '" + orig_rnid + "' " +
+                "AND TableType = 'Join';"
+            );
 
             String ColumnString = makeCommaSepQuery(rs2, "Entries", " , ");
             ColumnString = orig_rnid + " varchar(5) ," + ColumnString;
