@@ -546,8 +546,19 @@ public class BayesBaseH {
 				String NoTuples="";
 				for(String id : rnode_ids) {
 					System.out.println("\nStarting Learning the BN Structure of rnode_ids: " + id+"\n");
+                    Statement mapping_st = con2.createStatement();
 					Statement st = con3.createStatement();
-					ResultSet rs = st.executeQuery("SELECT count(*) FROM `"+id.replace("`","")+"_CT`;"); // Oct 2nd, Why not check the csv file directly?  faster for larter CT? Oct 23
+                    ResultSet rnidMappingResult = mapping_st.executeQuery(
+                        "SELECT short_rnid " +
+                        "FROM lattice_mapping " +
+                        "WHERE lattice_mapping.orig_rnid = '" + id + "';"
+                    );
+                    rnidMappingResult.absolute(1);
+                    String short_rnid = rnidMappingResult.getString("short_rnid");
+                    ResultSet rs = st.executeQuery(
+                        "SELECT COUNT(*) " +
+                        "FROM `" + short_rnid.replace("`","") + "_CT`;"
+                    ); // Oct 2nd, Why not check the csv file directly?  faster for larger CT? Oct 23, Comment from: Unknown since lacking Git history.
 						while(rs.next()){
 							NoTuples = rs.getString(1);
 							System.out.println("NoTuples : " + NoTuples);
