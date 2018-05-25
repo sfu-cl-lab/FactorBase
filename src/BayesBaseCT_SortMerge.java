@@ -1206,12 +1206,20 @@ public class BayesBaseCT_SortMerge {
     public static void BuildCT_Rnodes_CT(int len) throws SQLException, IOException {
         long l = System.currentTimeMillis(); //@zqian : measure structure learning time
         Statement st = con_BN.createStatement();
-        ResultSet rs = st.executeQuery("select name as RChain from lattice_set where lattice_set.length = " + len + ";");
-        while(rs.next()){
+        ResultSet rs = st.executeQuery(
+            "SELECT short_rnid AS short_RChain, orig_rnid AS RChain " +
+            "FROM lattice_set " +
+            "JOIN lattice_mapping " +
+            "ON lattice_set.name = lattice_mapping.orig_rnid " +
+            "WHERE lattice_set.length = " + len + ";"
+        );
 
-            //  get pvid for further use
+        while(rs.next()) {
+            // Get the short and full form rnids for further use.
             String rchain = rs.getString("RChain");
-            System.out.println("\n rchain String : " + rchain );
+            System.out.println("\n RChain : " + rchain);
+            String shortRchain = rs.getString("short_RChain");
+            System.out.println(" Short RChain : " + shortRchain);
 
             //  create new statement
             Statement st2 = con_BN.createStatement();
@@ -1219,47 +1227,71 @@ public class BayesBaseCT_SortMerge {
             /**********starting to create _flase table***using sort_merge*******************************/
     		//Sort_merge5.sort_merge("`"+rchain.replace("`", "")+"_star`","`"+rchain.replace("`", "") +"_flat`","`"+rchain.replace("`", "") +"_false`",con3);
             //Sort_merge4.sort_merge("`"+rchain.replace("`", "")+"_star`","`"+rchain.replace("`", "") +"_flat`","`"+rchain.replace("`", "") +"_false`",con3);
-            Sort_merge3.sort_merge("`"+rchain.replace("`", "")+"_star`","`"+rchain.replace("`", "") +"_flat`","`"+rchain.replace("`", "") +"_false`",con_CT);
+            Sort_merge3.sort_merge(
+                "`" + shortRchain.replace("`", "") + "_star`",
+                "`" + shortRchain.replace("`", "") + "_flat`",
+                "`" + shortRchain.replace("`", "") + "_false`",
+                con_CT
+            );
             // computing false table as mult difference between star and false. Separate procedure for optimizing this big join.
             
           	//adding  covering index May 21
             //create index string
-            ResultSet rs15 = st2.executeQuery("select column_name as Entries from information_schema.columns where table_schema = '"+databaseName_CT+"' and table_name = '"+rchain.replace("`", "") +"_false';");
+            ResultSet rs15 = st2.executeQuery(
+                "SELECT column_name AS Entries " +
+                "FROM information_schema.columns " +
+                "WHERE table_schema = '" + databaseName_CT + "' " +
+                "AND table_name = '" + shortRchain.replace("`", "") + "_false';"
+            );
             String IndexString = makeIndexQuery(rs15, "Entries", " , ");
             //System.out.println("Index String : " + IndexString);
         	//	System.out.println("alter table `"+rchain.replace("`", "") +"_false`"+" add index `"+rchain.replace("`", "") +"_false`   ( "+IndexString+" );");
-            st3.execute("alter table `"+rchain.replace("`", "") +"_false`"+" add index `"+rchain.replace("`", "") +"_false`   ( "+IndexString+" );");
-
-
+            st3.execute(
+                "ALTER TABLE `" + shortRchain.replace("`", "") + "_false` " +
+                "ADD INDEX `" + shortRchain.replace("`", "") +"_false` (" + IndexString + ");"
+            );
 
             //building the _CT table        //expanding the columns // May 16
            	// must specify the columns, or there's will a mistake in the table that mismatch the columns
-            ResultSet rs5 = st3.executeQuery("select column_name as Entries from information_schema.columns where table_schema = '"+databaseName_CT+"' and table_name = '"+rchain.replace("`", "") +"_counts';");
+            ResultSet rs5 = st3.executeQuery(
+                "SELECT column_name AS Entries " +
+                "FROM information_schema.columns " +
+                "WHERE table_schema = '" + databaseName_CT + "' " +
+                "AND table_name = '" + shortRchain.replace("`", "") + "_counts';"
+            );
             // reading the column names from information_schema.columns, and the output will remove the "`" automatically,
             // however some columns contain "()" and MySQL does not support "()" well, so we have to add the "`" back.
             String UnionColumnString = makeUnionSepQuery(rs5, "Entries", " , ");
             //System.out.println("Union Column String : " + UnionColumnString);
 
             //join false table with join table to introduce rnid (=F) and 2nids (= n/a). Then union result with counts table.
-            String createCTString = "create table `"+rchain.replace("`", "") +"_CT`"+" as select "+UnionColumnString+ " from `"+rchain.replace("`", "") +"_counts` union " +
-            "select "+UnionColumnString+" from `"+rchain.replace("`", "") +"_false`, `"+rchain.replace("`", "") +"_join`;" ;
+            String createCTString = "CREATE TABLE `" + shortRchain.replace("`", "") + "_CT` AS SELECT " + UnionColumnString +
+                " FROM `" + shortRchain.replace("`", "") + "_counts`" +
+                " UNION" +
+                " SELECT " + UnionColumnString +
+                " FROM `" + shortRchain.replace("`", "") + "_false`, `" + shortRchain.replace("`", "") + "_join`;";
             System.out.println("\n create CT table String : " + createCTString );
             st3.execute(createCTString);
 
           	//adding  covering index May 21
             //create index string
-            ResultSet rs25 = st2.executeQuery("select column_name as Entries from information_schema.columns where table_schema = '"+databaseName_CT+"' and table_name = '"+rchain.replace("`", "") +"_CT';");
+            ResultSet rs25 = st2.executeQuery(
+                "SELECT column_name AS Entries " +
+                "FROM information_schema.columns " +
+                "WHERE table_schema = '" + databaseName_CT + "' " +
+                "AND table_name = '" + shortRchain.replace("`", "") + "_CT';"
+            );
             String IndexString2 = makeIndexQuery(rs25, "Entries", " , ");
             //System.out.println("Index String : " + IndexString2);
             //System.out.println("alter table `"+rchain.replace("`", "") +"_CT`"+" add index `"+rchain.replace("`", "") +"_CT`   ( "+IndexString2+" );");
-            st3.execute("alter table `"+rchain.replace("`", "") +"_CT`"+" add index `"+rchain.replace("`", "") +"_CT`   ( "+IndexString2+" );");
-
+            st3.execute(
+                "ALTER TABLE `" + shortRchain.replace("`", "") + "_CT` " +
+                "ADD INDEX `" + shortRchain.replace("`", "") + "_CT` (" + IndexString2 + ");"
+            );
 
             //  close statements
             st2.close();
             st3.close();
-
-
         }
 
         rs.close();
