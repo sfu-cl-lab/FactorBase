@@ -58,7 +58,16 @@ public class KeepTablesOnly{
 	//Subject to change as per nee dfor tables in CT database
 	public static ArrayList<String> findLongestRChain() throws SQLException{
 		Statement st = con_BN.createStatement();
-		ResultSet rst = st.executeQuery("SELECT name FROM lattice_set;");
+		ResultSet rst = st.executeQuery(
+			"SELECT short_rnid AS name " +
+			"FROM lattice_set " +
+			"JOIN lattice_mapping " +
+			"ON lattice_set.name = lattice_mapping.orig_rnid " +
+			"WHERE lattice_set.length =	(" +
+				"SELECT MAX(length) " +
+				"FROM lattice_set" +
+			");"
+		);
 		ArrayList<String> sets = new ArrayList<String>();
 		while(rst.next()){
 			System.out.println(rst.getString("name"));
