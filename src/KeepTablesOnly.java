@@ -1,13 +1,10 @@
 import com.mysql.jdbc.Connection;
-import com.mysql.jdbc.exceptions.jdbc4.MySQLSyntaxErrorException;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.Statement;
 import java.sql.SQLException;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.lang.*;
-//import java.sql.Connection;
 
 public class KeepTablesOnly{
 	static String databaseName;

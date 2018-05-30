@@ -1,11 +1,8 @@
 //package relationalClassification;
 
 import com.mysql.jdbc.Connection;
-import com.mysql.jdbc.exceptions.jdbc4.MySQLSyntaxErrorException;
-
 import java.sql.DriverManager;
 import java.sql.SQLException;
-import java.sql.ResultSet;
 
 public class RelationalClassification {
 
