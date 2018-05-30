@@ -43,7 +43,6 @@ import bif.BIFExport;
 import bif.BIFImport;
 import bif.BIF_IO;
 
-import MLNExporter.*;
 import com.mysql.jdbc.Connection;
 
 import nu.xom.ParsingException;
