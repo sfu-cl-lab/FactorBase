@@ -6,9 +6,6 @@ Analyze schema information to prepare for statistical analysis.
 DROP SCHEMA IF EXISTS @database@_setup; 
 create schema @database@_setup;
 
-/*-- create schema if not exists unielwin_BN;*/
-/*-- create schema if not exists unielwin_CT;*/
-
 USE @database@_setup;
 SET storage_engine=INNODB;
 /* allows adding foreign key constraints */
