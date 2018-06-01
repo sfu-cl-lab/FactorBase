@@ -641,7 +641,7 @@ public class BayesBaseCT_SortMerge {
 				//make the rnid shorter 
 				String rnid_or=removedShort;
 			
-				String cur_star_Table = "`"+removed.replace("`", "")+len+"_"+fc+"_star`";
+                String cur_star_Table = "`" + removedShort.replace("`", "") + len + "_" + fc + "_star`";
 				String createStarString = "create table "+cur_star_Table +" as "+queryString;
 					
 			
@@ -665,7 +665,7 @@ public class BayesBaseCT_SortMerge {
 				// for the very first iteration, it's _counts table
 				System.out.println("cur_CT_Table is : " + cur_CT_Table);
 
-				String cur_flat_Table = "`"+removed.replace("`", "")+len+"_"+fc+"_flat`";
+                String cur_flat_Table = "`" + removedShort.replace("`", "") + len + "_" + fc + "_flat`";
 				String queryStringflat = "select sum("+cur_CT_Table+".`MULT`) as 'MULT', "+selectString + " from " +cur_CT_Table+" group by  "+ selectString +";" ;
 				String createStringflat = "create table "+cur_flat_Table+" as "+queryStringflat;
 				System.out.println("\n create flat String : " + createStringflat );			
@@ -682,7 +682,7 @@ public class BayesBaseCT_SortMerge {
 				System.out.print("Building Time(ms) for "+cur_flat_Table+ " : "+(l4-l3)+" ms.\n");
 				/**********starting to create _flase table***using sort_merge*******************************/
 				// starting to create _flase table : part1
-				String cur_false_Table= "`"+removed.replace("`", "")+len+"_"+fc+"_false`";
+                String cur_false_Table = "`" + removedShort.replace("`", "") + len + "_" + fc + "_false`";
 				
 				//create false table					
 				//Sort_merge5.sort_merge(cur_star_Table,cur_flat_Table,cur_false_Table,con3);
