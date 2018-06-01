@@ -1,6 +1,6 @@
 /****************************************************
 Analyze schema information to prepare for statistical analysis.
-unielwin stands for a generic database. This is replaced with the name of the actual target database schema by the program that calls this sql script.
+@database@ stands for a generic database. This is replaced with the name of the actual target database schema by the program that calls this sql script.
 */
 
 DROP SCHEMA IF EXISTS @database@_setup; 
@@ -21,7 +21,7 @@ CREATE TABLE Schema_Key_Info AS SELECT TABLE_NAME,
     CONSTRAINT_NAME FROM
     INFORMATION_SCHEMA.KEY_COLUMN_USAGE
 WHERE
-    (KEY_COLUMN_USAGE.TABLE_SCHEMA = 'unielwin')
+    (KEY_COLUMN_USAGE.TABLE_SCHEMA = '@database@')
 ORDER BY TABLE_NAME;
 
 
@@ -33,8 +33,8 @@ CREATE TABLE Schema_Position_Info AS SELECT COLUMNS.TABLE_NAME,
     INFORMATION_SCHEMA.COLUMNS,
     INFORMATION_SCHEMA.TABLES
 WHERE
-    (COLUMNS.TABLE_SCHEMA = 'unielwin'
-        AND TABLES.TABLE_SCHEMA = 'unielwin'
+    (COLUMNS.TABLE_SCHEMA = '@database@'
+        AND TABLES.TABLE_SCHEMA = '@database@'
         AND TABLES.TABLE_NAME = COLUMNS.TABLE_NAME
         AND TABLES.TABLE_TYPE = 'BASE TABLE')
 ORDER BY TABLE_NAME;
