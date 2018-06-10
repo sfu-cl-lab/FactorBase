@@ -212,7 +212,10 @@ public class KLD_generator {
 		indexlist1.remove(indexlist1.size()-1);
 		indexlist1.remove(indexlist1.size()-1);
 		indexlist1.remove(indexlist1.size()-1);
-		
+        if (((String)indexlist1.get(indexlist1.size() - 1)).equals("ParentSum")) {
+            indexlist1.remove(indexlist1.size() - 1);
+        }
+
 		ArrayList<String> indexlist2 = new ArrayList<String>(indexlist1);
 		//delete MULT, FID
 		indexlist2.remove(0);
@@ -306,6 +309,9 @@ public class KLD_generator {
 		list.remove(list.size()-1);
 		list.remove(list.size()-1);
 		list.remove(list.size()-1);
+        if (((String)list.get(list.size() - 1)).equals("ParentSum")) {
+            list.remove(list.size() - 1);
+        }
 
 		//don't know why there is an mult=0 column in pair table, doesm't matter
 		st.execute("DROP TABLE IF EXISTS " + name + ";");
