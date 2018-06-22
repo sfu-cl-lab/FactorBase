@@ -1,3 +1,5 @@
+package ca.sfu.cs.factorbase.tables;
+
 /* updated on Feb 6, 2014, fix the bug sum not equals to 1
  *Feb 6 Yan 
  * Change ChildValue to FID
@@ -33,6 +35,8 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
+
+import ca.sfu.cs.factorbase.app.Config;
 
 
 public class KLD_generator {

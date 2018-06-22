@@ -1,3 +1,5 @@
+package ca.sfu.cs.factorbase.tables;
+
 /*Aug 18, 2014, zqian
  * handle the extreme case when there's only `mult` columne
  * fixed the bug, found on July 6th. 

@@ -1,3 +1,5 @@
+package ca.sfu.cs.factorbase.tables;
+
 /** update the prior: zqian, June 23 2014
  * for FID who has parents the prior should be [sum(mult) group by FID ]/total_mult,
  * For FID do not have parents, prior == cp.
@@ -68,6 +70,8 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
+
+import ca.sfu.cs.factorbase.app.Config;
 
 /**
  * Finds conditional probabilities for the Bayes net parameters. Also computes log-likelihood and other scores for each node.

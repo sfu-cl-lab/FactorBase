@@ -1,3 +1,5 @@
+package ca.sfu.cs.factorbase.tables;
+
 /* zqian June 18, 2014
  * add the flag variable to tell if we use local ct or not.
  * Flag_UseLocal_CT = true, For TestScoreComputation to score the BN structure;
@@ -39,9 +41,13 @@
  * since all the files could be prepared in advance by run the program CSVPrecomputor.java
  * */
 
-import bif.BIFExport;
-import bif.BIFImport;
-import bif.BIF_IO;
+import ca.sfu.cs.factorbase.app.Config;
+import ca.sfu.cs.factorbase.exporter.bifexporter.BIF_Generator;
+import ca.sfu.cs.factorbase.exporter.bifexporter.bif.BIFExport;
+import ca.sfu.cs.factorbase.exporter.bifexporter.bif.BIFImport;
+import ca.sfu.cs.factorbase.exporter.bifexporter.bif.BIF_IO;
+import ca.sfu.cs.factorbase.jbn.BayesNet_Learning_main;
+import ca.sfu.cs.factorbase.util.BZScriptRunner;
 
 import com.mysql.jdbc.Connection;
 
@@ -361,7 +367,7 @@ public class BayesBaseH {
 			}
 
 			if(Integer.parseInt(NoTuples)>1){
-				ca.sfu.jbn.BayesNet_Learning_main.tetradLearner(
+				BayesNet_Learning_main.tetradLearner(
 						databaseName+"/" + File.separator + "csv" + File.separator + id.replace("`","") + ".csv",
 						databaseName+"/" + File.separator + "xml" + File.separator + id.replace("`","") + ".xml"
 					);
@@ -563,7 +569,7 @@ public class BayesBaseH {
 							System.out.println("NoTuples : " + NoTuples);
 						}
 					if(Integer.parseInt(NoTuples)>1){
-					ca.sfu.jbn.BayesNet_Learning_main.tetradLearner(
+					BayesNet_Learning_main.tetradLearner(
 									databaseName+"/" + File.separator + "csv" + File.separator + id.replace("`","") + ".csv",
 									databaseName+"/" + File.separator + "kno" + File.separator + id.replace("`","") + "_req.xml",
 									databaseName+"/" + File.separator + "kno" + File.separator + id.replace("`","") + "_for.xml",
@@ -804,7 +810,7 @@ public class BayesBaseH {
 						}
 					if(Integer.parseInt(NoTuples)>1 && len!=2){ // skip the level 2, Zqian @ Jan 28 2014, for hep,fin,imdb
 						//if(Integer.parseInt(NoTuples)>1 && len!=1){ // skip the level 2, Zqian @ Jan 28 2014, for muta
-					ca.sfu.jbn.BayesNet_Learning_main.tetradLearner(
+					BayesNet_Learning_main.tetradLearner(
 									databaseName+"/" + File.separator + "csv" + File.separator + id.replace("`","") + ".csv",
 									databaseName+"/" + File.separator + "kno" + File.separator + id.replace("`","") + "_req.xml",
 									databaseName+"/" + File.separator + "kno" + File.separator + id.replace("`","") + "_for.xml",

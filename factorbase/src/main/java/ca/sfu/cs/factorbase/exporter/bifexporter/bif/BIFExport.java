@@ -1,4 +1,4 @@
-package bif;
+package ca.sfu.cs.factorbase.exporter.bifexporter.bif;
 
 
 import java.io.BufferedWriter;

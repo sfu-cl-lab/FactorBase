@@ -1,5 +1,5 @@
 
-package lattice;
+package ca.sfu.cs.factorbase.lattice;
  
 import com.mysql.jdbc.Connection;
  

@@ -1,3 +1,5 @@
+package ca.sfu.cs.factorbase.util;
+
 import com.ibatis.common.jdbc.ScriptRunner;
 
 import java.io.*;

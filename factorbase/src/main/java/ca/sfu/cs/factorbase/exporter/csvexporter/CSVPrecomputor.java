@@ -1,3 +1,5 @@
+package ca.sfu.cs.factorbase.exporter.csvexporter;
+
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -12,6 +14,8 @@ import java.util.ArrayList;
 import javax.swing.JOptionPane;
 
 import org.apache.commons.lang.StringUtils;
+
+import ca.sfu.cs.factorbase.app.Config;
 
 import com.mysql.jdbc.Connection;
 /* zqian@Nov 21, fixed on bug for loading data into csv files (have to close the file)

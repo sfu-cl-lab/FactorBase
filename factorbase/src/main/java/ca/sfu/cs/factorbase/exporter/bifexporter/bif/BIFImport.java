@@ -1,4 +1,4 @@
-package bif;
+package ca.sfu.cs.factorbase.exporter.bifexporter.bif;
 
 import java.io.IOException;
 import java.sql.Connection;
@@ -6,7 +6,6 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 
-import bif.BIF_IO;
 import nu.xom.ParsingException;
 
 public class BIFImport {

@@ -1,3 +1,11 @@
+package ca.sfu.cs.factorbase.app;
+
+import ca.sfu.cs.factorbase.exporter.csvexporter.CSVPrecomputor;
+import ca.sfu.cs.factorbase.tables.BayesBaseCT_SortMerge;
+import ca.sfu.cs.factorbase.tables.BayesBaseH;
+import ca.sfu.cs.factorbase.tables.KeepTablesOnly;
+import ca.sfu.cs.factorbase.tables.MakeSetup;
+
 /* July 3rd, 2014, zqian
  * input: 
  * @database@ (original data based on ER diagram)

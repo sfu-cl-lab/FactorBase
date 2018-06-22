@@ -1,3 +1,5 @@
+package ca.sfu.cs.factorbase.tables;
+
 /*analyze schema data to create setup database. This can be edited by the user before learning.
   If setup = 0, we skip this step and use the existing setup database
   Yan Sept 10th*/
@@ -11,6 +13,10 @@
 
 import java.sql.DriverManager;
 import java.sql.SQLException;
+
+import ca.sfu.cs.factorbase.app.Config;
+import ca.sfu.cs.factorbase.util.BZScriptRunner;
+
 import com.mysql.jdbc.Connection;
 
 

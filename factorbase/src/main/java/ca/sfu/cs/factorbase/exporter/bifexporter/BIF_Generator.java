@@ -1,3 +1,5 @@
+package ca.sfu.cs.factorbase.exporter.bifexporter;
+
 /* Feb 7th 2014, zqian;
         //Make sure each node appear as a child
         // <child,''>, <child,parent>      
@@ -30,6 +32,8 @@ import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+
+import ca.sfu.cs.factorbase.app.Config;
 
 import com.mysql.jdbc.Connection;
 import com.mysql.jdbc.Statement;

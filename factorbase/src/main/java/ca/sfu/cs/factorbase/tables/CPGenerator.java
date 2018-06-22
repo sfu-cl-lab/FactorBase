@@ -1,3 +1,7 @@
+package ca.sfu.cs.factorbase.tables;
+
+import ca.sfu.cs.factorbase.app.Config;
+
 import com.mysql.jdbc.Connection;
 
 import java.io.IOException;

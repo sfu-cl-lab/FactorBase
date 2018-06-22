@@ -1,4 +1,4 @@
-package ca.sfu.jbn;
+package ca.sfu.cs.factorbase.jbn;
 
 //import edu.cmu.tetrad.data.DataParser;    //noe exists in new tetrad; replace with DataReader. Aug 21 Yan
 import edu.cmu.tetrad.data.DataReader;
