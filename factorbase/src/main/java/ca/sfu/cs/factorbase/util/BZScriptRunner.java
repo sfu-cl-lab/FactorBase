@@ -37,17 +37,22 @@ public class BZScriptRunner {
     }
 
     private String prepareFile(String fileName) throws IOException, SQLException {
+        InputStream inputStream = this.getClass().getClassLoader().getResourceAsStream(fileName);
+        if (inputStream == null) {
+            throw new FileNotFoundException("Unable to read the file: " + fileName);
+        }
+        InputStreamReader streamReader = new InputStreamReader(inputStream);
+        BufferedReader input = new BufferedReader(streamReader);
 
-    	
         File file = new File(fileName);
         String newFileName = file.getParent() + File.separator + "_" + file.getName();
         File newFile = new File(newFileName);
+        newFile.mkdirs();
         try{
             if (!newFile.delete())
                 throw new FileNotFoundException("Failed to delete file: " + newFile);
         }catch (Exception e){}
 
-        RandomAccessFile input = new RandomAccessFile(fileName, "r");
         RandomAccessFile output = new RandomAccessFile(newFileName, "rw");
 
         
