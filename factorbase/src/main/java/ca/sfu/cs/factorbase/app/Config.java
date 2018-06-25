@@ -8,7 +8,7 @@ import java.util.Properties;
 
 public class Config {
     public static final String SCRIPTS_DIRECTORY = "scripts/";
-    public static final String CONFIG_DIRECTORY = "";
+    public static final String DEFAULT_CONFIGFILE = "config.cfg";
 
     Properties configFile;
     FileReader fr;
@@ -16,8 +16,14 @@ public class Config {
 
     public Config() {
         configFile = new java.util.Properties();
+
+        String config = System.getProperty("config");
+        if (config == null) {
+            config = DEFAULT_CONFIGFILE;
+        }
+
         try {
-            fr = new FileReader(CONFIG_DIRECTORY + "config.cfg");
+            fr = new FileReader(config);
             reader = new BufferedReader(fr);
             configFile.load(reader);
         } catch(Exception eta) {
