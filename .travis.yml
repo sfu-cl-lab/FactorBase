@@ -14,33 +14,15 @@ before_script:
   - mysql -uroot -p123456 < testsql/Mutagenesis_std_bond.sql
   - mysql -uroot -p123456 < testsql/Mutagenesis_std_Mole.sql
   - mysql -uroot -p123456 < testsql/Mutagenesis_std_moleatm.sql
-script: 
-  - cd jar
-  - java -jar FactorBase.jar > jar.txt
-  - tail jar.txt
+script:
+  - mvn install
+  - java -Dconfig=src/config.cfg -jar factorbase/target/factorbase*SNAPSHOT.jar
   - ls -lh
   - tail dag_.txt
-  - java -jar MLNExporter.jar > mln_jar.txt
+  - java -jar jar/MLNExporter.jar > mln_jar.txt
   - tail mln_jar.txt
-  - cd ../src
-  - javac -cp ".:./lib/*" Config.java BZScriptRunner.java MakeSetup.java
-  - javac -cp ".:./lib/*" RunBB.java
-  - javac -cp ".:./lib/*" KeepTablesOnly.java
-  - javac -cp ".:./lib/*" MakeTargetSetup.java
-  - java -cp ".:./lib/*" MakeSetup > a.txt
-  - java -cp ".:./lib/*" RunBB > b.txt
-  - java -cp ".:./lib/*" MakeTargetSetup > c.txt
-  - tail a.txt
-  - tail b.txt
-  - tail c.txt
-  - tail dag_.txt
 
 after_script:
   - mysql -e "show databases;" -uroot -p123456
   - mysql -e "use unielwin_BN; show tables;" -uroot -p123456
   - mysql -e "use unielwin_CT; show tables;" -uroot -p123456
-  - mysql -e "use Mutagenesis_std_target_final_CT; show tables;" -uroot -p123456
-  - mysql -e "use Mutagenesis_std_target_final; show tables;" -uroot -p123456
-  - mysql -e "use Mutagenesis_std_target_CT; show tables;" -uroot -p123456
-  - mysql -e "use Mutagenesis_std_target_BN; show tables;" -uroot -p123456
-  - mysql -e "use Mutagenesis_std_target; show tables;" -uroot -p123456
