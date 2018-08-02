@@ -98,13 +98,14 @@ The learned BN structure can be exported from the database to support a number o
 	* Bayesian Interchange Format (BIF) Generator produces an .xml file that can be loaded into a standard **Bayesian Network** tool (like [AIspace tool](http://aispace.org/bayes/).) 
 	*This is the *best* way to visualize the learned graph structure.* 
 	* Queries in the learned Bayesian networks can be used as a Statistical-Relational Model to estimate frequencies in the database as explained [here](https://www.researchgate.net/publication/2919745_Selectivity_Estimation_using_Probabilistic_Models) and in our paper on [Modelling Relational Statistics With Bayes Nets](http://www.cs.sfu.ca/%7Eoschulte/files/pubs/ilp2012.pdf). 
-	* The belows show the Bayesian network xml file learning from a few dataset. The sql file is a MySQL dump for the relation schema, while the output is a Bayes net in BIF/XML format.
+	* The table shows the bayesian network xml files learned from some datasets. The sql file is the MySQL dump for the relation schema, while the output is the bayesian network in BIF/XML format.
 
 	| datasets      	      | sql                         | BIF/XML                   |
 	| :-------------: 	      |:-------------:              |  :-----:                   |
 	| unielwin | [unielwin.sql](./testsql/unielwin) | [Bif_unielwin.xml](./BN_xml/Bif_unielwin.xml) | 
 	| Mutagenesis_std | [Mutagenesis_std.sql](./testsql/Mutagenesis_std) | [Bif_Mutagenesis_std.xml](./BN_xml/Bif_Mutagenesis_std.xml) |
 	| MovieLens_std | [MovieLens_std.sql](./testsql/MovieLens_std) | [Bif_MovieLens_std.xml](./BN_xml/Bif_MovieLens_std.xml) |
+
 
 + **[MLN_Generator](https://github.com/sfu-cl-lab/MLN_Generator)**
 	* Markov Logic Network (MLN) is a first-order knowledge base with a weight attached to each formula (or clause)
