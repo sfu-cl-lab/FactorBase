@@ -103,8 +103,8 @@ The learned BN structure can be exported from the database to support a number o
 	| datasets      	      | sql                         | BIF/XML                   |
 	| :-------------: 	      |:-------------:              |  :-----:                   |
 	| unielwin | [unielwin.sql](./testsql/unielwin) | [Bif_unielwin.xml](./BN_xml/Bif_unielwin.xml) | 
-	| Mutagenesis_std | [Mutagenesis_std.sql](./testsql/Mutagenesis_std) | [Bif_Mutagenesis_std.xml](./BN_xml/Mutagenesis_std.xml) |
-	| MovieLens_std | [MovieLens_std.sql](./estsql/MovieLens_std) | [Bif_MovieLens_std.xml](./BN_xml/Bif_MovieLens_std.xml) |
+	| Mutagenesis_std | [Mutagenesis_std.sql](./testsql/Mutagenesis_std) | [Bif_Mutagenesis_std.xml](./BN_xml/Bif_Mutagenesis_std.xml) |
+	| MovieLens_std | [MovieLens_std.sql](./testsql/MovieLens_std) | [Bif_MovieLens_std.xml](./BN_xml/Bif_MovieLens_std.xml) |
 
 + **[MLN_Generator](https://github.com/sfu-cl-lab/MLN_Generator)**
 	* Markov Logic Network (MLN) is a first-order knowledge base with a weight attached to each formula (or clause)
