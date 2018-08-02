@@ -1,7 +1,0 @@
-action(item20)	drama(item20)
-horror(item20)	drama(item20)
-action(item20)	rating(User0,item20)
-Age(User0)	rating(User0,item20)
-drama(item20)	rating(User0,item20)
-Gender(User0)	rating(User0,item20)
-rating(User0,item20)	u2base(User0,item20)
