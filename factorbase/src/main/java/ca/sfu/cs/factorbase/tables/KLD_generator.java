@@ -328,7 +328,7 @@ public class KLD_generator {
 		st.execute(createclause);
 		
 		//add index to all columns in pair table
-		String index_p = "alter table " + name + " add index " + name + "( MULT ASC";
+		String index_p = "alter table " + name + " add unique index " + name + "( MULT ASC";
 		for (int i=0; i<list.size(); ++i) {
 			index_p = index_p + ", `" + list.get(i) + "` ASC";
 		}
