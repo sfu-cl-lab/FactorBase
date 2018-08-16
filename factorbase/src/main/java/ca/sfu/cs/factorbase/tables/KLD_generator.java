@@ -39,6 +39,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import ca.sfu.cs.factorbase.app.Config;
+import ca.sfu.cs.factorbase.util.QueryGenerator;
 
 
 public class KLD_generator {
@@ -303,8 +304,11 @@ public class KLD_generator {
 		// zqian@ Oct 21, 2013, Bottleneck??
 
 		//query2: insert not exists pairs into smoothed CP table
-		String query2="insert "+name +"( MULT "+columns+" ) (select MULT "+columns +"from "+table_name.subSequence(0, table_name.length()-1)+"_pairs`"
-		         +" where ("+columns.substring(2)+" ) not in ( select "+columns.substring(2)+ "from "+table_name+" )) ;";
+        String query2 =
+            "INSERT " + name +
+            "(MULT " + columns + ") (" +
+                QueryGenerator.createDifferenceQuery("MULT" + columns, columns.substring(2), table_name.subSequence(0, table_name.length() - 1) + "_pairs`", table_name) +
+            ");";
 		System.out.println("bottleneck? query2:"+query2);
 		st.execute(query2);
 
