@@ -14,8 +14,9 @@ before_script:
   - mysql -uroot -p123456 < testsql/Mutagenesis_std_bond.sql
   - mysql -uroot -p123456 < testsql/Mutagenesis_std_Mole.sql
   - mysql -uroot -p123456 < testsql/Mutagenesis_std_moleatm.sql
+  - mysql -uroot -p123456 < testsql/tests-database.sql
 script:
-  - mvn install
+  - mvn install -DtestDBUserName=root -DtestDBPassword=123456
   - java -Dconfig=src/config.cfg -jar factorbase/target/factorbase*SNAPSHOT.jar
   - ls -lh
   - tail dag_.txt
