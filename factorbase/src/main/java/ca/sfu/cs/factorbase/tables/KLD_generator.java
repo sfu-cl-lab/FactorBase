@@ -301,16 +301,16 @@ public class KLD_generator {
 //        System.out.println("query1:" + query1);
         st.execute(query1);
 
-		// zqian@ Oct 21, 2013, Bottleneck??
+        // zqian@ Oct 21, 2013, Bottleneck??
 
-		//query2: insert not exists pairs into smoothed CP table
+        //query2: insert not exists pairs into smoothed CP table
         String query2 =
             "INSERT " + name +
             "(MULT " + columns + ") (" +
                 QueryGenerator.createDifferenceQuery("MULT" + columns, columns.substring(2), table_name.subSequence(0, table_name.length() - 1) + "_pairs`", table_name) +
             ");";
-		System.out.println("bottleneck? query2:"+query2);
-		st.execute(query2);
+        System.out.println("bottleneck? query2:" + query2);
+        st.execute(query2);
 
 //        st.execute("DROP TABLE IF EXISTS " + table_name.subSequence(0, table_name.length() - 1) + "_pairs`;");
 
