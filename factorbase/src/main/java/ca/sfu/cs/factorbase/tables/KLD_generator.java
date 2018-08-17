@@ -283,10 +283,7 @@ public class KLD_generator {
 
 
         // Get all the columns, generate them as a clause.
-        String columns="";
-        for(int i = 0; i < list.size(); i++) {
-            columns = columns + " , `" + list.get(i) + "` ";
-        }
+        String columns = "`" + String.join("`,`", list) + "`";
 
         // query1: insert the exist rows into smoothed CP table
         String query1 = "INSERT " + name + " ( MULT ";
@@ -306,8 +303,13 @@ public class KLD_generator {
         //query2: insert not exists pairs into smoothed CP table
         String query2 =
             "INSERT " + name +
-            "(MULT " + columns + ") (" +
-                QueryGenerator.createDifferenceQuery("MULT" + columns, columns.substring(2), table_name.subSequence(0, table_name.length() - 1) + "_pairs`", table_name) +
+            "(MULT," + columns + ") (" +
+                QueryGenerator.createDifferenceQuery(
+                    "MULT," + columns,
+                    list,
+                    table_name.subSequence(0, table_name.length() - 1) + "_pairs`",
+                    table_name
+                ) +
             ");";
         System.out.println("bottleneck? query2:" + query2);
         st.execute(query2);

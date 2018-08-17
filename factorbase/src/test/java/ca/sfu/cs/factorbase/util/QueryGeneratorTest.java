@@ -6,6 +6,7 @@ import static org.hamcrest.Matchers.equalTo;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.Arrays;
 
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
@@ -38,7 +39,7 @@ public class QueryGeneratorTest {
     public void createDifferenceQuery_ReturnsCorrectResults() throws SQLException {
         String query = QueryGenerator.createDifferenceQuery(
                 "s_id,attr1,attr2,attr3",
-                "s_id,attr1,attr2",
+                Arrays.asList("s_id", "attr1", "attr2"),
                 "t1",
                 "t2"
         );
