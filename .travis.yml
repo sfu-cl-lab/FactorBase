@@ -14,39 +14,16 @@ before_script:
   - mysql -uroot -p123456 < testsql/Mutagenesis_std_bond.sql
   - mysql -uroot -p123456 < testsql/Mutagenesis_std_Mole.sql
   - mysql -uroot -p123456 < testsql/Mutagenesis_std_moleatm.sql
-script: 
-  - cd jar
-  - java -jar FactorBase.jar > jar.txt
-  - tail jar.txt
+  - mysql -uroot -p123456 < testsql/tests-database.sql
+script:
+  - mvn install -DtestDBUserName=root -DtestDBPassword=123456
+  - java -Dconfig=src/config.cfg -jar factorbase/target/factorbase*SNAPSHOT.jar
   - ls -lh
   - tail dag_.txt
-  - java -jar MLNExporter.jar > mln_jar.txt
+  - java -jar jar/MLNExporter.jar > mln_jar.txt
   - tail mln_jar.txt
-  - cd ../src
-  - javac -cp ".:./lib/*" Config.java BZScriptRunner.java MakeSetup.java
-  - javac -cp ".:./lib/*" RunBB.java
-  - javac -cp ".:./lib/*" KeepTablesOnly.java
-  - javac -cp ".:./lib/*" MakeTargetSetup.java
-  - javac -cp ".:./lib/*" FunctorWrapper.java
-  - java -cp ".:./lib/*" MakeSetup > a.txt
-  - java -cp ".:./lib/*" RunBB > b.txt
-  - java -cp ".:./lib/*" MakeTargetSetup > c.txt
-  - nohup java -cp ".:./lib/*" FunctorWrapper > d.txt &
-  - sleep 8m
-  - ls -lh d.txt
-  - echo 'FunctorWrapper cannot finish in 2 hours, to save time, kill it.'
-  - tail a.txt
-  - tail b.txt
-  - tail c.txt
-  - tail d.txt
-  - tail dag_.txt
 
 after_script:
   - mysql -e "show databases;" -uroot -p123456
   - mysql -e "use unielwin_BN; show tables;" -uroot -p123456
   - mysql -e "use unielwin_CT; show tables;" -uroot -p123456
-  - mysql -e "use Mutagenesis_std_target_final_CT; show tables;" -uroot -p123456
-  - mysql -e "use Mutagenesis_std_target_final; show tables;" -uroot -p123456
-  - mysql -e "use Mutagenesis_std_target_CT; show tables;" -uroot -p123456
-  - mysql -e "use Mutagenesis_std_target_BN; show tables;" -uroot -p123456
-  - mysql -e "use Mutagenesis_std_target; show tables;" -uroot -p123456

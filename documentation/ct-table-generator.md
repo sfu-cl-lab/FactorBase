@@ -7,7 +7,7 @@ Implements an efficient SQL-based method for computing instantiation counts for 
 + A relational database `datadb`
 + A set of first-order terms _t<sub>1</sub>,..,t<sub>n</sub>_. Default: complete, contains all terms associated with the relational schema.
 + Optional Expansion: A set of first-order variables _A<sub>1</sub>,...,A<sub>e</sub>,_. Default: empty.
-+ Optional Grounding: A set of groundings first-order variable _A<sub>1</sub>=a<sub>1</sub>,...,_A<sub>g</sub>=a<sub>g</sub>. Default: empty.
++ Optional Grounding: A set of groundings first-order variable <i>A<sub>1</sub>=a<sub>1</sub>,...,_A<sub>g</sub>=a<sub>g</sub></i>. Default: empty.
 
 ### Output
 
