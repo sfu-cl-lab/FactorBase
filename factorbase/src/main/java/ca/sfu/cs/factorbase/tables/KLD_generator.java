@@ -495,11 +495,12 @@ public class KLD_generator {
         st.execute(query1);
 
         // Add index to temp1 (parsum and all parents).
-        String index_t = "ALTER TABLE temp1 ADD INDEX temp1(`parsum` ASC";
-        for (int i = 1; i < list.size(); ++i) {
+        String index_t = "ALTER TABLE temp1 ADD INDEX temp1( `" + list.get(1) + "` ASC";
+        for (int i = 2; i < list.size(); ++i) {
             index_t = index_t + ", `" + list.get(i) + "` ASC";
         }
         index_t = index_t + ");";
+        System.out.println("queryIndex: "+ index_t);
         st.execute(index_t);
 
         // zqian@ Oct 21, 2013, Bottleneck??
