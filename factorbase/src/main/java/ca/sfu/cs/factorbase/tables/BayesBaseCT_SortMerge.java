@@ -19,7 +19,7 @@ package ca.sfu.cs.factorbase.tables;
  *  
  * */
 
-import ca.sfu.cs.factorbase.app.Config;
+import ca.sfu.cs.common.Configuration.Config;
 import ca.sfu.cs.factorbase.lattice.short_rnid_LatticeGenerator;
 import ca.sfu.cs.factorbase.util.BZScriptRunner;
 

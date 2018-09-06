@@ -33,7 +33,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 
-import ca.sfu.cs.factorbase.app.Config;
+import ca.sfu.cs.common.Configuration.Config;
 
 import com.mysql.jdbc.Connection;
 import com.mysql.jdbc.Statement;

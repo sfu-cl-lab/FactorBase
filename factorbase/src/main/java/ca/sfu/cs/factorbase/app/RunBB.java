@@ -1,5 +1,6 @@
 package ca.sfu.cs.factorbase.app;
 
+import ca.sfu.cs.common.Configuration.Config;
 import ca.sfu.cs.factorbase.exporter.csvexporter.CSVPrecomputor;
 import ca.sfu.cs.factorbase.tables.BayesBaseCT_SortMerge;
 import ca.sfu.cs.factorbase.tables.BayesBaseH;

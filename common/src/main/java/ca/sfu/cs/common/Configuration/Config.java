@@ -1,4 +1,4 @@
-package ca.sfu.cs.factorbase.app;
+package ca.sfu.cs.common.Configuration;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
