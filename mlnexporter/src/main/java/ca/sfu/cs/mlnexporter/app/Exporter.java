@@ -1,21 +1,18 @@
 package ca.sfu.cs.mlnexporter.app;
 
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
-import java.io.FileReader;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.io.Reader;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.text.DecimalFormat;
-import java.util.Properties;
 
+import ca.sfu.cs.common.Configuration.Config;
 import ca.sfu.cs.mlnexporter.graph.BNNode;
 import ca.sfu.cs.mlnexporter.util.MergeSort;
 
@@ -53,17 +50,7 @@ public class Exporter {
     }
 
     public static void setVarsFromConfig() {
-        Properties configFile;
-        FileReader fr;
-        Reader reader;
-        configFile = new java.util.Properties();
-        try {
-            fr = new FileReader("config.cfg");
-            reader = new BufferedReader(fr);
-            configFile.load(reader);
-        } catch(Exception eta) {
-            eta.printStackTrace();
-        }
+        Config configFile = new Config();
         databaseName = configFile.getProperty("dbname");
         databaseName2 = databaseName + "_BN";
         dbUsername = configFile.getProperty("dbusername");
