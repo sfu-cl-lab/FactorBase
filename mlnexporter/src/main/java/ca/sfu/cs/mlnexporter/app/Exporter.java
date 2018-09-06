@@ -1,5 +1,4 @@
-package MLNExporter;
-
+package ca.sfu.cs.mlnexporter.app;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -11,12 +10,16 @@ import java.io.PrintWriter;
 import java.io.Reader;
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.ResultSet;
 //import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.sql.ResultSet;
 import java.text.DecimalFormat;
 import java.util.Properties;
+
+import ca.sfu.cs.mlnexporter.graph.BNNode;
+import ca.sfu.cs.mlnexporter.util.MergeSort;
+
 /*
  * Description: This class is Exporter.
  *	   		   It allows the users to export the information for MLN file

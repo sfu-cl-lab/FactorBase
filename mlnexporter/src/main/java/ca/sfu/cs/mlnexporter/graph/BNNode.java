@@ -1,4 +1,4 @@
-package MLNExporter;
+package ca.sfu.cs.mlnexporter.graph;
 /*
  * Description: This class is BNNode.
  *	   		   It allows the users to store the node information of Bayesian network
