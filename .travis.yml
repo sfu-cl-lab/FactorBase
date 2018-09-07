@@ -10,10 +10,6 @@ before_script:
   - mysql -uroot -p123456 < testsql/unielwin_RA.sql
   - mysql -uroot -p123456 < testsql/unielwin_registration.sql
   - mysql -uroot -p123456 < testsql/unielwin_student.sql
-  - mysql -uroot -p123456 < testsql/Mutagenesis_std_Atom.sql
-  - mysql -uroot -p123456 < testsql/Mutagenesis_std_bond.sql
-  - mysql -uroot -p123456 < testsql/Mutagenesis_std_Mole.sql
-  - mysql -uroot -p123456 < testsql/Mutagenesis_std_moleatm.sql
   - mysql -uroot -p123456 < testsql/tests-database.sql
 script:
   - mvn install -DtestDBUserName=root -DtestDBPassword=123456
