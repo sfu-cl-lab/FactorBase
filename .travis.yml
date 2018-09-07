@@ -16,7 +16,7 @@ script:
   - java -Dconfig=travis-resources/config.cfg -jar factorbase/target/factorbase*SNAPSHOT.jar
   - ls -lh
   - tail dag_.txt
-  - java -jar jar/MLNExporter.jar > mln_jar.txt
+  - java -Dconfig=travis-resources/config.cfg -jar mlnexporter/target/mlnexporter*SNAPSHOT.jar > mln_jar.txt
   - tail mln_jar.txt
 
 after_script:
