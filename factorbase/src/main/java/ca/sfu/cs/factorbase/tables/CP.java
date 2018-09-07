@@ -71,7 +71,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 
-import ca.sfu.cs.factorbase.app.Config;
+import ca.sfu.cs.common.Configuration.Config;
 
 /**
  * Finds conditional probabilities for the Bayes net parameters. Also computes log-likelihood and other scores for each node.

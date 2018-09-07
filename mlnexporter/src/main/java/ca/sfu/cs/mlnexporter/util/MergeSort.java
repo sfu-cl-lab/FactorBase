@@ -1,4 +1,4 @@
-package MLNExporter;
+package ca.sfu.cs.mlnexporter.util;
 /*
  * Description: This class is MergeSort.
  *	   		   It allows the users sort the array of string in alphabetical order

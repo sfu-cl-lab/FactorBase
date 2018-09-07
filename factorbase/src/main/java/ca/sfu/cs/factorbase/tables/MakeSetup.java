@@ -14,7 +14,7 @@ package ca.sfu.cs.factorbase.tables;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 
-import ca.sfu.cs.factorbase.app.Config;
+import ca.sfu.cs.common.Configuration.Config;
 import ca.sfu.cs.factorbase.util.BZScriptRunner;
 
 import com.mysql.jdbc.Connection;

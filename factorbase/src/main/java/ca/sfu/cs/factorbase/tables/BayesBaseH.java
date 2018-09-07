@@ -41,7 +41,7 @@ package ca.sfu.cs.factorbase.tables;
  * since all the files could be prepared in advance by run the program CSVPrecomputor.java
  * */
 
-import ca.sfu.cs.factorbase.app.Config;
+import ca.sfu.cs.common.Configuration.Config;
 import ca.sfu.cs.factorbase.exporter.bifexporter.BIF_Generator;
 import ca.sfu.cs.factorbase.exporter.bifexporter.bif.BIFExport;
 import ca.sfu.cs.factorbase.exporter.bifexporter.bif.BIFImport;
