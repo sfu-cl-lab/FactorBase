@@ -500,7 +500,6 @@ public class KLD_generator {
             index_t = index_t + ", `" + list.get(i) + "` ASC";
         }
         index_t = index_t + ");";
-        System.out.println("queryIndex: "+ index_t);
         st.execute(index_t);
 
         // zqian@ Oct 21, 2013, Bottleneck??
