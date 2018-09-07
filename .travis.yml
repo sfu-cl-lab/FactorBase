@@ -5,15 +5,15 @@ jdk:
   - oraclejdk8
 before_script:
   - mysql -e "use mysql; update user set password=PASSWORD('123456') where User='root'; flush privileges;" -uroot
-  - mysql -uroot -p123456 < testsql/unielwin_course.sql
-  - mysql -uroot -p123456 < testsql/unielwin_prof.sql
-  - mysql -uroot -p123456 < testsql/unielwin_RA.sql
-  - mysql -uroot -p123456 < testsql/unielwin_registration.sql
-  - mysql -uroot -p123456 < testsql/unielwin_student.sql
-  - mysql -uroot -p123456 < testsql/tests-database.sql
+  - mysql -uroot -p123456 < travis-resources/unielwin_course.sql
+  - mysql -uroot -p123456 < travis-resources/unielwin_prof.sql
+  - mysql -uroot -p123456 < travis-resources/unielwin_RA.sql
+  - mysql -uroot -p123456 < travis-resources/unielwin_registration.sql
+  - mysql -uroot -p123456 < travis-resources/unielwin_student.sql
+  - mysql -uroot -p123456 < travis-resources/tests-database.sql
 script:
   - mvn install -DtestDBUserName=root -DtestDBPassword=123456
-  - java -Dconfig=src/config.cfg -jar factorbase/target/factorbase*SNAPSHOT.jar
+  - java -Dconfig=travis-resources/config.cfg -jar factorbase/target/factorbase*SNAPSHOT.jar
   - ls -lh
   - tail dag_.txt
   - java -jar jar/MLNExporter.jar > mln_jar.txt
