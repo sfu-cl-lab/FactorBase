@@ -240,11 +240,11 @@ public class Exporter {
             while(temp.next()) {
                 ID = "";
                 MLNStr = "B_";
-                t = temp.getString("orig_rnid").substring(1); // Get orig_rnid without ''.
+                t = temp.getString("rnid").substring(1); // Get rnid without ''.
                 t = t.substring(0, t.length() - 1);
                 int last = 0;
 
-                for(int i = 0; i < t.length(); i++) { // Build MLN string from orig_rnid.
+                for(int i = 0; i < t.length(); i++) { // Build MLN string from rnid.
                     if(t.charAt(i) == ',' || t.charAt(i) == ')') {
                         MLNStr += t.substring(last, i - 1);
                         MLNStr += "_id_inst";
@@ -362,6 +362,7 @@ public class Exporter {
         } catch (SQLException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
+            System.exit(1);
         }
     }
 
@@ -379,6 +380,7 @@ public class Exporter {
         } catch (FileNotFoundException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
+            System.exit(1);
         }
     }
 
