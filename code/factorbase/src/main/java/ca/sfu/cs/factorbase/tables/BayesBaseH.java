@@ -106,7 +106,7 @@ public class BayesBaseH {
         maxNumberOfMembers = rst.getInt(1);
 
         // Get the longest rchain.
-        String rchain=null;
+        String rchain = null;
         ResultSet rst1 = st.executeQuery("SELECT name FROM lattice_set WHERE length = " + maxNumberOfMembers + ";");
         rst1.absolute(1);
         rchain = rst1.getString(1);
@@ -289,10 +289,10 @@ public class BayesBaseH {
         rnode_ids_1 = new ArrayList<String>();
 
         if (FirstRunning==1) {
-            new File(databaseName+"/" + File.separator).mkdirs();
-            new File(databaseName+"/" + File.separator + "kno" + File.separator).mkdirs();
-            new File(databaseName+"/" + File.separator + "res" + File.separator).mkdirs();
-            new File(databaseName+"/" + File.separator + "xml" + File.separator).mkdirs();
+            new File(databaseName + "/" + File.separator).mkdirs();
+            new File(databaseName + "/" + File.separator + "kno" + File.separator).mkdirs();
+            new File(databaseName + "/" + File.separator + "res" + File.separator).mkdirs();
+            new File(databaseName + "/" + File.separator + "xml" + File.separator).mkdirs();
         }
 
     }
@@ -386,8 +386,8 @@ public class BayesBaseH {
 
             if (Integer.parseInt(NoTuples) > 1) {
                 BayesNet_Learning_main.tetradLearner(
-                    databaseName+"/" + File.separator + "csv" + File.separator + id.replace("`","") + ".csv",
-                    databaseName+"/" + File.separator + "xml" + File.separator + id.replace("`","") + ".xml"
+                    databaseName + "/" + File.separator + "csv" + File.separator + id.replace("`","") + ".csv",
+                    databaseName + "/" + File.separator + "xml" + File.separator + id.replace("`","") + ".xml"
                 );
 
                 bif1(id);
@@ -396,11 +396,11 @@ public class BayesBaseH {
                 // Insert the BN nodes into Entity_BayesNet.
                 System.out.println("SELECT 1nid FROM 1Nodes, EntityTables WHERE 1Nodes.pvid = CONCAT(EntityTables.Table_name,'0') AND 1Nodes.pvid = '" + id + "';");
                 ResultSet rs2 = st2.executeQuery("SELECT 1nid FROM 1Nodes, EntityTables WHERE 1Nodes.pvid = CONCAT(EntityTables.Table_name,'0') AND 1Nodes.pvid = '" + id + "';");
-                String child ="";
+                String child = "";
 
                 while(rs2.next()) {
                     Statement st3 = con2.createStatement();
-                    child= rs2.getString("1nid");
+                    child = rs2.getString("1nid");
                     System.out.println("INSERT IGNORE INTO Entity_BayesNets VALUES ('" + id + "', '" + child + "', '');");
                     st3.execute("INSERT IGNORE INTO Entity_BayesNets VALUES ('" + id + "', '" + child + "', '');");
                     st3.close();
@@ -410,7 +410,7 @@ public class BayesBaseH {
                 st2.close();
             }
 
-            System.out.println("\nEnd for " + id +"\n");
+            System.out.println("\nEnd for " + id + "\n");
         }
 
         pvar_ids.clear();
@@ -458,10 +458,10 @@ public class BayesBaseH {
 
                 if(Integer.parseInt(NoTuples) > 1) {
                     BayesNet_Learning_main.tetradLearner(
-                        databaseName+"/" + File.separator + "csv" + File.separator + id.replace("`","") + ".csv",
-                        databaseName+"/" + File.separator + "kno" + File.separator + id.replace("`","") + "_req.xml",
-                        databaseName+"/" + File.separator + "kno" + File.separator + id.replace("`","") + "_for.xml",
-                        databaseName+"/" + File.separator + "xml" + File.separator + id.replace("`","") + ".xml"
+                        databaseName + "/" + File.separator + "csv" + File.separator + id.replace("`","") + ".csv",
+                        databaseName + "/" + File.separator + "kno" + File.separator + id.replace("`","") + "_req.xml",
+                        databaseName + "/" + File.separator + "kno" + File.separator + id.replace("`","") + "_for.xml",
+                        databaseName + "/" + File.separator + "xml" + File.separator + id.replace("`","") + ".xml"
                     );
 
                     System.out.println("The BN Structure Learning for rnode_id::" + id + "is done."); //@zqian Test
@@ -679,8 +679,8 @@ public class BayesBaseH {
 
         st_temp.close();
         // End for adding rnode as child, May 26th, 2014 zqian.
-         st.close();
-     }
+        st.close();
+    }
 
 
     /**
@@ -718,10 +718,10 @@ public class BayesBaseH {
 
                 if(Integer.parseInt(NoTuples) > 1 && len != 2) { // Skip the level 2, Zqian @ Jan 28 2014, for hep, fin, imdb.
                     BayesNet_Learning_main.tetradLearner(
-                        databaseName+"/" + File.separator + "csv" + File.separator + id.replace("`","") + ".csv",
-                        databaseName+"/" + File.separator + "kno" + File.separator + id.replace("`","") + "_req.xml",
-                        databaseName+"/" + File.separator + "kno" + File.separator + id.replace("`","") + "_for.xml",
-                        databaseName+"/" + File.separator + "xml" + File.separator + id.replace("`","") + ".xml"
+                        databaseName + "/" + File.separator + "csv" + File.separator + id.replace("`","") + ".csv",
+                        databaseName + "/" + File.separator + "kno" + File.separator + id.replace("`","") + "_req.xml",
+                        databaseName + "/" + File.separator + "kno" + File.separator + id.replace("`","") + "_for.xml",
+                        databaseName + "/" + File.separator + "xml" + File.separator + id.replace("`","") + ".xml"
                     );
 
                     System.out.println("The BN Structure Learning for rnode_id::" + id + "is done."); // @zqian Test
@@ -757,7 +757,7 @@ public class BayesBaseH {
                         );
                     }
                     st_temp.close();
-                } else if (len==2) { // for hep,fin,imdb
+                } else if (len == 2) { // for hep, fin, imdb
                     Statement st_temp = con2.createStatement();
                     st_temp.execute("DELETE FROM Path_BayesNets WHERE Rchain = '" + id + "' AND (child, parent) IN (SELECT child, parent FROM Path_Forbidden_Edges WHERE Rchain = '" + id + "');"); // Oct 2nd
 
@@ -886,7 +886,7 @@ public class BayesBaseH {
         // Import @zqian.
         System.out.println("Starting to Import the learned path into MySQL::**Entity_BayesNets**"); // @zqian Test
         Statement st = con2.createStatement();
-        int i=0;
+        int i = 0;
         BIFImport.Import(databaseName + "/" + File.separator + "xml" + File.separator + id.replace("`","") + ".xml", id, "Entity_BayesNets", con2);
         System.out.println("*** imported Entity_BayesNets " + pvar_ids.get(i++) + " into database");
         System.out.println(" \n !!!!!!!!!Import is done for **Entity_BayesNets** \n"); // @zqian Test
@@ -899,7 +899,7 @@ public class BayesBaseH {
         System.out.println(" Starting to Import the learned path into MySQL::**Path_BayesNets**"); // @zqian
 
         Statement st = con2.createStatement();
-        int j=0;
+        int j = 0;
 
         BIFImport.Import(databaseName + "/" + File.separator + "xml" + File.separator + id.replace("`","") + ".xml", id, "Path_BayesNets", con2);
 
