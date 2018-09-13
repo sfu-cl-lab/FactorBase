@@ -144,8 +144,6 @@ public class BayesBaseH {
             // Export the final result to xml.  We assume that there is a single largest relationship chain and write the Bayes net for that relationship chain to xml.
             // Only export the structure, prepare for the pruning phase, Oct 23, 2013.
             exportResults();
-//            System.out.println("\n**** Pruning starts "); // Oct 23
-//            Pruning();
 
             //      @zqian  for TestScoreComputation, use local ct to compute local CP.
             if (Flag_UseLocal_CT) {
@@ -159,8 +157,6 @@ public class BayesBaseH {
                 //  For FunctorWrapper
             }
 
-            // Export to .mln file, banff workshop demo, 2015.
-//            Exporter.strBuilder(con1, con2, databaseName);
             // Score Bayes net: compute KL divergence, and log-likelihood (average probability of node value given its Markov blanket, compared to database frequencies)
             // May 7th, zqian, For RDN do not need to do the smoothing
             // COMPUTE KLD
@@ -233,7 +229,6 @@ public class BayesBaseH {
         // Generating .CSV files by reading _CT tables directly (including TRUE relationship and FALSE relationship).
         handleRNodes_zqian(); // import
         // Population lattice.
-//        p_handleRNodes_zqian();
         PropagateContextEdges();
 
         /**
@@ -294,12 +289,7 @@ public class BayesBaseH {
         rnode_ids_1 = new ArrayList<String>();
 
         if (FirstRunning==1) {
-//            try { //@ali
-//                delete(new File(databaseName+"/"));
-//            } catch (Exception e) {}
-
             new File(databaseName+"/" + File.separator).mkdirs();
-//            new File(databaseName+"/" + File.separator + "csv" + File.separator).mkdirs();
             new File(databaseName+"/" + File.separator + "kno" + File.separator).mkdirs();
             new File(databaseName+"/" + File.separator + "res" + File.separator).mkdirs();
             new File(databaseName+"/" + File.separator + "xml" + File.separator).mkdirs();
@@ -339,7 +329,6 @@ public class BayesBaseH {
 
         //zqian June 18, 2014
         String UseLocal_CT = conf.getProperty( "UseLocal_CT" );
-//        System.out.println(UseLocal_CT);
         if (UseLocal_CT.equalsIgnoreCase("1")) {
             Flag_UseLocal_CT = true;
         } else {
@@ -375,9 +364,6 @@ public class BayesBaseH {
         }
 
         con3 = (Connection) DriverManager.getConnection(CONN_STR3, dbUsername, dbPassword);
-
-        // Handle warnings.
-//        handleWarnings();
     }
 
     /** Jun 14
@@ -430,132 +416,6 @@ public class BayesBaseH {
         pvar_ids.clear();
     }
 
-//      public static void handleRNodes_zqian() throws Exception {
-//
-//      for(int len = 1; len <= maxNumberOfMembers; len++){
-//
-//                      readRNodesFromLattice(len);      //create csv files for all rnodes
-//
-////                    //required edges
-////                    for(String id : rnode_ids)                      //rchain
-////            {   System.out.println("\n !!!!Staring  to Export The Required Edges to "+id.replace("`","") +  "_req.xml \n");
-////                            BIFExport.Export(databaseName+"/" + File.separator + "kno" + File.separator + id.replace("`","") + "_req.xml", "Rchain", "Path_Required_Edges", id, con2);
-////                       // System.out.println("export to _req.xml::rnode_id::"+id); //@zqian Test
-////                     }
-////
-////                    //forbidden edges
-////                    for(String id : rnode_ids)
-////                    {   System.out.println("\n !!!!Staring  to Export The Forbidden Edges to "+id.replace("`","")+ "_for.xml \n");
-////                            BIFExport.Export(databaseName+"/" + File.separator + "kno" + File.separator + id.replace("`","") + "_for.xml", "Rchain", "Path_Forbidden_Edges", id, con2);
-////                        //System.out.println("export to _for.xml::rnode_id::"+id); //@zqian Test
-////                    }
-//                      for(String id : rnode_ids)  {
-//                              Statement st_t = con2.createStatement();
-//                              //st_t.execute("delete from Path_Required_Edges where Rchain = '"+id+"' and (child,parent) in (select child,parent from Path_Forbidden_Edges where Rchain ='"+id+"' );"); // Oct 2nd
-//                              BIFExport.Export(databaseName+"/" + File.separator + "kno" + File.separator + id.replace("`","") + "_req.xml", "Rchain", "Path_Required_Edges", id, con2);
-//                              BIFExport.Export(databaseName+"/" + File.separator + "kno" + File.separator + id.replace("`","") + "_for.xml", "Rchain", "Path_Forbidden_Edges", id, con2);
-//                      }
-//                      for(String id : rnode_ids)
-//                      {// 1. feeding into True.CSV and learning the edges involving 1nodes/2nodes to 1nodes/2nodes
-//                                              ca.sfu.jbn.BayesNet_Learning_main.tetradLearner(
-//                                                                              databaseName+"/" + File.separator + "csv" + File.separator + id.replace("`","") + "True.csv",
-//                                                                              databaseName+"/" + File.separator + "kno" + File.separator + id.replace("`","") + "_req.xml",
-//                                                                              databaseName+"/" + File.separator + "kno" + File.separator + id.replace("`","") + "_for.xml",
-//                                                                              databaseName+"/" + File.separator + "xml" + File.separator + id.replace("`","") + "True.xml"
-//                                                                      );
-//                                              BIFImport.Import(databaseName+"/" + File.separator + "xml" + File.separator + id.replace("`","") + "True.xml", id, "Path_Required_Edges", con2);
-//
-//                                              System.out.println("TRUE BN Structure Learning for rnode_id::"+id+"is done."); //@zqian Test
-//                      }
-//
-//                      String NoTuples="";
-//                      for(String id : rnode_ids) {
-//                              System.out.println("\nStarting Learning the BN Structure of rnode_ids: " + id+"\n");
-//                              Statement st3 = con3.createStatement();
-//                              ResultSet rs = st3.executeQuery("SELECT count(*) FROM `"+id.replace("`","")+"_CT`;"); // Oct 2nd, Why not check the csv file directly?  faster for larter CT? Oct 23
-//                              while(rs.next()){
-//                                      NoTuples = rs.getString(1);
-//                                      System.out.println("NoTuples : " + NoTuples);
-//                              }
-//                              if(Integer.parseInt(NoTuples)>1){
-//                              ca.sfu.jbn.BayesNet_Learning_main.tetradLearner(
-//                                                              databaseName+"/" + File.separator + "csv" + File.separator + id.replace("`","") + ".csv",
-//                                                              databaseName+"/" + File.separator + "kno" + File.separator + id.replace("`","") + "_req.xml",
-//                                                              databaseName+"/" + File.separator + "kno" + File.separator + id.replace("`","") + "_for.xml",
-//                                                              databaseName+"/" + File.separator + "xml" + File.separator + id.replace("`","") + ".xml"
-//                                                      );
-//                              System.out.println("The BN Structure Learning for rnode_id::"+id+"is done."); //@zqian Test
-//                              bif2(id) ; // import to db   @zqian
-//                              }
-//                      }
-//
-//                       // import to db   @zqian
-//
-//
-//                      Statement st = con2.createStatement();
-//                      // find new edges learned for this rchain
-//                      //st.execute("insert ignore into LearnedEdges select distinct   Path_BayesNets.Rchain,  Path_BayesNets.child,  Path_BayesNets.parent from    Path_BayesNets,    lattice_set,    lattice_rel where    Path_BayesNets.parent <> ''  and lattice_set.name = lattice_rel.parent         and lattice_set.length = "+len+"         and  (Path_BayesNets.Rchain , Path_BayesNets.child, Path_BayesNets.parent) not in (select  *  from  Path_Required_Edges); ");
-//                      // insert the context edges into path_bayesnet, the parent should be Rnode
-//                      //st.execute("insert ignore into Path_BayesNets select distinct  LearnedEdges.Rchain as Rchain, LearnedEdges.child as child,  lattice_membership.member as parent from    LearnedEdges,     lattice_membership,     lattice_rel,    lattice_set where     LearnedEdges.Rchain = lattice_membership.name  and lattice_set.length ="+ len+" and Rchain = lattice_set.name  ");
-//                      // propagate all edges to next level
-//                      st.execute("insert ignore into InheritedEdges select distinct lattice_rel.child AS Rchain, Path_BayesNets.child AS child,  Path_BayesNets.parent AS parent   FROM   Path_BayesNets,  lattice_rel,lattice_set    WHERE    lattice_rel.parent = Path_BayesNets.Rchain    AND Path_BayesNets.parent <> ''     and lattice_set.name=lattice_rel.parent      and lattice_set.length = "+(len)+"    ORDER BY Rchain;");
-//                      // make inherited edges as required edges, while avoiding conflict edges
-//                      //original query.
-//                      //st.execute("insert ignore into Path_Required_Edges select distinct Rchain, child, parent  from  InheritedEdges,lattice_set   where Rchain = lattice_set.name and lattice_set.length ="+ (len+1)+" and  (Rchain , parent, child) NOT IN (select   *  from   InheritedEdges) ; ");
-//                      //OCT 23, remove edges pointing to RNodes
-//                      //st.execute("insert ignore into Path_Required_Edges select distinct Rchain, child, parent  from  InheritedEdges,lattice_set   where Rchain = lattice_set.name and lattice_set.length ="+ (len+1)+" and  (Rchain , parent, child) NOT IN (select   *  from   InheritedEdges)  and child not in ( select rnid from RNodes);");
-//                      //OCT 28, remove edges from RNodes to RNodes
-//                      //st.execute("insert ignore into Path_Required_Edges select distinct Rchain, child, parent  from  InheritedEdges,lattice_set   where Rchain = lattice_set.name and lattice_set.length ="+ (len+1)+" and  (Rchain , parent, child) NOT IN (select   *  from   InheritedEdges)  and  (child not in (select rnid  from RNodes)   or parent not in(select    rnid   from  RNodes) ) ");
-//                      //(child not in (select rnid  from RNodes)   or parent not in(select    rnid   from  RNodes) )
-////####      Design One Required Edges:  ONLY propagate edges from/to 1Nodes/2Nodes  + SchemaEdges( such edges already inserted into required edges in the scripts,i.e. RNodes to 2Nodes)
-//                      //st.execute("insert ignore into Path_Required_Edges select distinct Rchain, child, parent  from  InheritedEdges,lattice_set   where Rchain = lattice_set.name and lattice_set.length ="+ (len+1)+" and  (Rchain , parent, child) NOT IN (select   *  from   InheritedEdges)   and child not in (select rnid from RNodes) and parent not in (select rnid from RNodes) union select distinct Rchain,child,parent from schemaedges,lattice_set where lattice_set.length = "+ (len+1)+" and Rchain = lattice_set.name " );
-//
-////####      Design Two Required Edges:         propagate edges from/to 1Nodes/2Nodes  + SchemaEdges + RNodes to 1Nodes/2Nodes
-//                      //st.execute("insert ignore into Path_Required_Edges select distinct Rchain, child, parent  from  InheritedEdges,lattice_set   where Rchain = lattice_set.name and lattice_set.length ="+ (len+1)+" and  (Rchain , parent, child) NOT IN (select   *  from   InheritedEdges)   and child not in (select rnid from RNodes) " );
-//
-////####      Design Three Required Edges:       propagate edges from/to 1Nodes/2Nodes  + SchemaEdges + RNodes to 1Nodes/2Nodes (same as Design Two)
-//                      st.execute("insert ignore into Path_Required_Edges select distinct Rchain, child, parent  from  InheritedEdges,lattice_set   where Rchain = lattice_set.name and lattice_set.length ="+ (len+1)+" and  (Rchain , parent, child) NOT IN (select   *  from   InheritedEdges)   and child not in (select rnid from RNodes) " );
-////####      Design Four: Do NOT differenciated Nodes Type, consider them(1Nodes,2Nodes,RNodes) as the same
-//                      //st.execute("insert ignore into Path_Required_Edges select distinct Rchain, child, parent  from  InheritedEdges,lattice_set   where Rchain = lattice_set.name and lattice_set.length ="+ (len+1)+" and  (Rchain , parent, child) NOT IN (select   *  from   InheritedEdges) ; ");
-//
-//                      // for path_complemtment edges, rchain should be at current level (len)
-//                      st.execute("insert ignore into Path_Complement_Edges select distinct  BN_nodes1.Rchain AS Rchain,  BN_nodes1.node AS child, BN_nodes2.node AS parent    FROM   Path_BN_nodes AS BN_nodes1,   Path_BN_nodes AS BN_nodes2,   lattice_set    WHERE lattice_set.name=BN_nodes1.Rchain and lattice_set.length ="+ len+" and  ((BN_nodes1.Rchain = BN_nodes2.Rchain)   AND (NOT (EXISTS( SELECT *   FROM  Path_BayesNets  WHERE ((Path_BayesNets.Rchain = BN_nodes1.Rchain)   AND (Path_BayesNets.child = BN_nodes1.node)    AND (Path_BayesNets.parent = BN_nodes2.node)))))) ;");
-////                    st.execute("insert ignore into Path_Complement_Edges select distinct  BN_nodes1.Rchain AS Rchain,  BN_nodes1.node AS child, BN_nodes2.node AS parent    FROM   Path_BN_nodes AS BN_nodes1,   Path_BN_nodes AS BN_nodes2,   lattice_set    WHERE lattice_set.name=BN_nodes1.Rchain and lattice_set.length ="+ len+" and  ((BN_nodes1.Rchain = BN_nodes2.Rchain)   AND (NOT (EXISTS( SELECT *   FROM  Path_BayesNets  WHERE ((Path_BayesNets.Rchain = BN_nodes1.Rchain)   AND (Path_BayesNets.child = BN_nodes1.node)    AND (Path_BayesNets.parent = BN_nodes2.node)))))) and BN_nodes2.node not in (select rnid from RNodes);");
-//
-//                      // for path forbidden edges, rchain should be at higher level (len+1) , so its parent should be at current level (len)
-//                      // make absent edges as forbidden edges, and give higher priority of required edges in case of conflict edges
-//                      //original query.
-//                      //st.execute("insert ignore into Path_Forbidden_Edges select distinct  lattice_rel.child AS Rchain, Path_Complement_Edges.child AS child, Path_Complement_Edges.parent AS parent    FROM  Path_Complement_Edges,        lattice_rel,    lattice_set    WHERE  lattice_set.name = lattice_rel.parent and lattice_set.length = "+ len+" and  lattice_rel.parent = Path_Complement_Edges.Rchain  AND Path_Complement_Edges.parent <> ''   and  (lattice_rel.child , Path_Complement_Edges.child,  Path_Complement_Edges.parent) not in (select  Rchain,child,parent from  Path_Required_Edges) ;");
-//                      //OCT 23, remove edges pointing to RNodes
-//                      //st.execute("insert ignore into Path_Forbidden_Edges select distinct  lattice_rel.child AS Rchain, Path_Complement_Edges.child AS child, Path_Complement_Edges.parent AS parent    FROM  Path_Complement_Edges,        lattice_rel,    lattice_set    WHERE  lattice_set.name = lattice_rel.parent and lattice_set.length = "+ len+" and  lattice_rel.parent = Path_Complement_Edges.Rchain  AND Path_Complement_Edges.parent <> ''   and  (lattice_rel.child , Path_Complement_Edges.child,  Path_Complement_Edges.parent) not in (select  Rchain,child,parent from  Path_Required_Edges) and Path_Complement_Edges.child not in ( select rnid from RNodes);");
-//                      //OCT 28, remove edges envolve RNodes
-//                      //st.execute("insert ignore into Path_Forbidden_Edges select distinct  lattice_rel.child AS Rchain, Path_Complement_Edges.child AS child, Path_Complement_Edges.parent AS parent    FROM  Path_Complement_Edges,        lattice_rel,    lattice_set    WHERE  lattice_set.name = lattice_rel.parent and lattice_set.length = "+ len+" and  lattice_rel.parent = Path_Complement_Edges.Rchain  AND Path_Complement_Edges.parent <> ''   and  (lattice_rel.child , Path_Complement_Edges.child,  Path_Complement_Edges.parent) not in (select  Rchain,child,parent from  Path_Required_Edges) and (Path_Complement_Edges.child not in ( select rnid from RNodes) and Path_Complement_Edges.parent not in ( select rnid from RNodes) );");
-//                      //OCT 30, should propagate edges pointing to RNodes from lower lever to higher level, so remove edges from RNodes.
-//                      //st.execute("insert ignore into Path_Forbidden_Edges select distinct  lattice_rel.child AS Rchain, Path_Complement_Edges.child AS child, Path_Complement_Edges.parent AS parent    FROM  Path_Complement_Edges,        lattice_rel,    lattice_set    WHERE  lattice_set.name = lattice_rel.parent and lattice_set.length = "+ len+" and  lattice_rel.parent = Path_Complement_Edges.Rchain  AND Path_Complement_Edges.parent <> ''   and  (lattice_rel.child , Path_Complement_Edges.child,  Path_Complement_Edges.parent) not in (select  Rchain,child,parent from  Path_Required_Edges) and  Path_Complement_Edges.parent not in ( select rnid from RNodes) ;");
-////####      Design One Forbidden Edges:  ONLY propagate edges from/to 1Nodes/2Nodes
-//                      //st.execute("insert ignore into Path_Forbidden_Edges select distinct  lattice_rel.child AS Rchain, Path_Complement_Edges.child AS child, Path_Complement_Edges.parent AS parent    FROM  Path_Complement_Edges,        lattice_rel,    lattice_set    WHERE  lattice_set.name = lattice_rel.parent and lattice_set.length = "+ len+" and  lattice_rel.parent = Path_Complement_Edges.Rchain  AND Path_Complement_Edges.parent <> ''   and  (lattice_rel.child , Path_Complement_Edges.child,  Path_Complement_Edges.parent) not in (select  Rchain,child,parent from  Path_Required_Edges)  and Path_Complement_Edges.child not in (select rnid from RNodes) and Path_Complement_Edges.parent not in (select rnid from RNodes);");
-////####      Design Two Forbidden Edges:  ONLY propagate edges from/to 1Nodes/2Nodes, (same as Design one)
-//                      //st.execute("insert ignore into Path_Forbidden_Edges select distinct  lattice_rel.child AS Rchain, Path_Complement_Edges.child AS child, Path_Complement_Edges.parent AS parent    FROM  Path_Complement_Edges,        lattice_rel,    lattice_set    WHERE  lattice_set.name = lattice_rel.parent and lattice_set.length = "+ len+" and  lattice_rel.parent = Path_Complement_Edges.Rchain  AND Path_Complement_Edges.parent <> ''   and  (lattice_rel.child , Path_Complement_Edges.child,  Path_Complement_Edges.parent) not in (select  Rchain,child,parent from  Path_Required_Edges)  and Path_Complement_Edges.child not in (select rnid from RNodes) and Path_Complement_Edges.parent not in (select rnid from RNodes);");
-////####      Design Three Forbidden Edges:     propagate edges from/to 1Nodes/2Nodes  + 1Nodes/2Nodes to RNodes
-//                      st.execute("insert ignore into Path_Forbidden_Edges select distinct  lattice_rel.child AS Rchain, Path_Complement_Edges.child AS child, Path_Complement_Edges.parent AS parent    FROM  Path_Complement_Edges,        lattice_rel,    lattice_set    WHERE  lattice_set.name = lattice_rel.parent and lattice_set.length = "+ len+" and  lattice_rel.parent = Path_Complement_Edges.Rchain  AND Path_Complement_Edges.parent <> ''   and  (lattice_rel.child , Path_Complement_Edges.child,  Path_Complement_Edges.parent) not in (select  Rchain,child,parent from  Path_Required_Edges)  and Path_Complement_Edges.parent not in (select rnid from RNodes);");
-//
-////####      Design Four: Do NOT differenciated Nodes Type, consider them(1Nodes,2Nodes,RNodes) as the same
-//                      //st.execute("insert ignore into Path_Forbidden_Edges select distinct  lattice_rel.child AS Rchain, Path_Complement_Edges.child AS child, Path_Complement_Edges.parent AS parent    FROM  Path_Complement_Edges,        lattice_rel,    lattice_set    WHERE  lattice_set.name = lattice_rel.parent and lattice_set.length = "+ len+" and  lattice_rel.parent = Path_Complement_Edges.Rchain  AND Path_Complement_Edges.parent <> ''   and  (lattice_rel.child , Path_Complement_Edges.child,  Path_Complement_Edges.parent) not in (select  Rchain,child,parent from  Path_Required_Edges) ;");
-//
-//
-//
-//
-//
-//                      st.close();
-//
-//
-//                      rnode_ids.clear(); //prepare for next loop
-//
-//                      System.out.println(" Import is done for length = "+len+"."); //@zqian Test
-//
-//              }
-//    }
-//
 
     public static void handleRNodes_zqian() throws Exception {
         for(int len = 1; len <= maxNumberOfMembers; len++) {
@@ -565,7 +425,6 @@ public class BayesBaseH {
             for(String id : rnode_ids) { // rchain
                 System.out.println("\n !!!!Starting to Export the Required Edges to " + id.replace("`","") +  "_req.xml \n");
                 BIFExport.Export(databaseName + "/" + File.separator + "kno" + File.separator + id.replace("`","") + "_req.xml", "Rchain", "Path_Required_Edges", id, con2);
-//                System.out.println("export to _req.xml::rnode_id::" + id); // @zqian Test
             }
 
             // Nov25
@@ -573,7 +432,6 @@ public class BayesBaseH {
             for(String id : rnode_ids) {
                 System.out.println("\n !!!!Starting to Export the Forbidden Edges to " + id.replace("`","") + "_for.xml \n");
                 BIFExport.Export(databaseName + "/" + File.separator + "kno" + File.separator + id.replace("`","") + "_for.xml", "Rchain", "Path_Forbidden_Edges", id, con2);
-//                System.out.println("export to _for.xml::rnode_id::" + id); //@zqian Test
             }
 
             String NoTuples = "";
@@ -614,10 +472,6 @@ public class BayesBaseH {
             // import to db @zqian
             Statement st = con2.createStatement();
 
-            // Find new edges learned for this rchain.
-//            st.execute("insert ignore into LearnedEdges select distinct   Path_BayesNets.Rchain,  Path_BayesNets.child,  Path_BayesNets.parent from    Path_BayesNets,    lattice_set,    lattice_rel where    Path_BayesNets.parent <> ''  and lattice_set.name = lattice_rel.parent         and lattice_set.length = "+len+"         and  (Path_BayesNets.Rchain , Path_BayesNets.child, Path_BayesNets.parent) not in (select  *  from  Path_Required_Edges); ");
-            // insert the context edges into path_bayesnet, the parent should be Rnode
-//            st.execute("insert ignore into Path_BayesNets select distinct  LearnedEdges.Rchain as Rchain, LearnedEdges.child as child,  lattice_membership.member as parent from    LearnedEdges,     lattice_membership,     lattice_rel,    lattice_set where     LearnedEdges.Rchain = lattice_membership.name  and lattice_set.length ="+ len+" and Rchain = lattice_set.name  ");
             // propagate all edges to next level
             st.execute(
                 "INSERT IGNORE INTO InheritedEdges " +
@@ -643,13 +497,6 @@ public class BayesBaseH {
                         "SELECT * FROM Path_Required_Edges" +
                     ");"
                 );
-
-                // April 1: We insert the context edges at the end.  Adding them during learning causes problem with link analysis off.
-                // Insert the context edges into path_bayesnet, the parent should be Rnode.
-//                st.execute("INSERT IGNORE INTO Path_BayesNets SELECT DISTINCT  LearnedEdges.Rchain AS Rchain, LearnedEdges.child AS child, lattice_membership.member AS parent FROM LearnedEdges, lattice_membership, lattice_rel, lattice_set WHERE LearnedEdges.Rchain = lattice_membership.name AND lattice_set.length =" + len + " AND Rchain = lattice_set.name");
-//                st.execute("CREATE TABLE ContextEdges AS SELECT DISTINCT LearnedEdges.Rchain AS Rchain, LearnedEdges.child AS child, lattice_rel.parent AS parent FROM LearnedEdges, lattice_set, lattice_rel WHERE LearnedEdges.Rchain = lattice_set.name AND lattice_set.name = lattice_rel.parent AND lattice_set.length = '" + len + "';");
-//                st.execute("INSERT IGNORE INTO Path_BayesNets SELECT * FROM ContextEdges;");
-//                st.execute("DROP TABLE ContextEdges;");
 
                 // Propagate all edges to next level.
                 st.execute(
@@ -689,32 +536,9 @@ public class BayesBaseH {
                     "SELECT * " +
                     "FROM InheritedEdges;"
                 );
-
-/*
-                st.execute(
-                    "INSERT IGNORE INTO RNodeEdges AS " +
-                    "SELECT DISTINCT LearnedEdges.Rchain AS Rchain, LearnedEdges.child AS child, lattice_membership.member AS parent " +
-                    "FROM LearnedEdges, lattice_membership " +
-                    "WHERE LearnedEdges.Rchain = lattice_membership.name;"
-                );
-*/
-
-//                st.execute("INSERT IGNORE INTO Path_BayesNets SELECT * FROM ContextEdges;");
             }
 
             // Make inherited edges as required edges, while avoiding conflict edges
-            // original query.
-//            st.execute("INSERT IGNORE INTO Path_Required_Edges SELECT DISTINCT Rchain, child, parent  FROM InheritedEdges,lattice_set WHERE Rchain = lattice_set.name AND lattice_set.length = " + (len + 1) + " AND (Rchain, parent, child) NOT IN (SELECT * FROM InheritedEdges);");
-            // Oct 23, remove edges pointing to RNodes.
-//            st.execute("INSERT IGNORE INTO Path_Required_Edges SELECT DISTINCT Rchain, child, parent FROM InheritedEdges, lattice_set WHERE Rchain = lattice_set.name AND lattice_set.length = " + (len + 1) + " AND (Rchain, parent, child) NOT IN (SELECT * FROM InheritedEdges) AND child NOT IN (SELECT rnid FROM RNodes);");
-            // Oct 28, remove edges from RNodes to RNodes.
-//            st.execute("INSERT IGNORE INTO Path_Required_Edges SELECT DISTINCT Rchain, child, parent FROM InheritedEdges, lattice_set WHERE Rchain = lattice_set.name AND lattice_set.length = " + (len + 1) + " AND (Rchain, parent, child) NOT IN (SELECT * FROM InheritedEdges) AND (child NOT IN (SELECT rnid FROM RNodes) OR parent NOT IN(SELECT rnid FROM RNodes))");
-            //(child NOT IN (SELECT rnid FROM RNodes) OR parent NOT IN(SELECT rnid FROM RNodes))
-
-            //#### Design One Required Edges: ONLY propagate edges from/to 1Nodes/2Nodes + SchemaEdges(such edges already inserted into required edges in the scripts, i.e. RNodes to 2Nodes).
-//            st.execute("INSERT IGNORE INTO Path_Required_Edges SELECT DISTINCT Rchain, child, parent FROM InheritedEdges, lattice_set WHERE Rchain = lattice_set.name AND lattice_set.length = " + (len + 1) + " AND (Rchain, parent, child) NOT IN (SELECT * FROM InheritedEdges) AND child NOT IN (SELECT rnid FROM RNodes) AND parent NOT IN (SELECT rnid FROM RNodes) UNION SELECT distinct Rchain, child, parent FROM schemaedges, lattice_set WHERE lattice_set.length = " + (len + 1) + " AND Rchain = lattice_set.name");
-            //#### Design Two Required Edges: propagate edges from/to 1Nodes/2Nodes + SchemaEdges + RNodes to 1Nodes/2Nodes.
-//            st.execute("INSERT IGNORE INTO Path_Required_Edges SELECT DISTINCT Rchain, child, parent FROM InheritedEdges, lattice_set WHERE Rchain = lattice_set.name AND lattice_set.length = " + (len + 1) + " AND (Rchain, parent, child) NOT IN (SELECT * FROM InheritedEdges) AND child NOT IN (SELECT rnid FROM RNodes)");
             //#### Design Three Required Edges: propagate edges from/to 1Nodes/2Nodes + SchemaEdges + RNodes to 1Nodes/2Nodes (same as Design Two).
             st.execute(
                 "INSERT IGNORE INTO Path_Required_Edges " +
@@ -730,9 +554,6 @@ public class BayesBaseH {
                     "FROM RNodes" +
                 ")"
             );
-
-            //#### Design Four: Do NOT differenciate Nodes Type, consider them (1Nodes, 2Nodes, RNodes) as the same.
-//            st.execute("INSERT IGNORE INTO Path_Required_Edges SELECT DISTINCT Rchain, child, parent FROM InheritedEdges, lattice_set WHERE Rchain = lattice_set.name AND lattice_set.length = " + (len + 1) + " AND (Rchain, parent, child) NOT IN (SELECT * FROM InheritedEdges);");
 
             // For path_complemtment edges, rchain should be at current level (len).
             // Nov25
@@ -755,22 +576,9 @@ public class BayesBaseH {
                 ");"
             );
 
-//            st.execute("INSERT IGNORE INTO Path_Complement_Edges SELECT DISTINCT BN_nodes1.Rchain AS Rchain, BN_nodes1.node AS child, BN_nodes2.node AS parent FROM Path_BN_nodes AS BN_nodes1, Path_BN_nodes AS BN_nodes2, lattice_set WHERE lattice_set.name = BN_nodes1.Rchain AND lattice_set.length = " + len + " AND ((BN_nodes1.Rchain = BN_nodes2.Rchain) AND (NOT (EXISTS(SELECT * FROM Path_BayesNets WHERE ((Path_BayesNets.Rchain = BN_nodes1.Rchain) AND (Path_BayesNets.child = BN_nodes1.node) AND (Path_BayesNets.parent = BN_nodes2.node)))))) AND BN_nodes2.node NOT IN (SELECT rnid FROM RNodes);");
 
             // For path forbidden edges, rchain should be at higher level (len+1), so its parent should be at current level (len).
             // Make absent edges as forbidden edges, and give higher priority of required edges in case of conflict edges.
-            // Original query.
-//            st.execute("INSERT IGNORE INTO Path_Forbidden_Edges SELECT DISTINCT lattice_rel.child AS Rchain, Path_Complement_Edges.child AS child, Path_Complement_Edges.parent AS parent FROM Path_Complement_Edges, lattice_rel, lattice_set WHERE lattice_set.name = lattice_rel.parent AND lattice_set.length = " + len + " AND lattice_rel.parent = Path_Complement_Edges.Rchain AND Path_Complement_Edges.parent <> '' AND (lattice_rel.child, Path_Complement_Edges.child, Path_Complement_Edges.parent) NOT IN (SELECT Rchain, child, parent FROM Path_Required_Edges);");
-            // Oct 23, remove edges pointing to RNodes.
-//            st.execute("INSERT IGNORE INTO Path_Forbidden_Edges SELECT DISTINCT lattice_rel.child AS Rchain, Path_Complement_Edges.child AS child, Path_Complement_Edges.parent AS parent FROM Path_Complement_Edges, lattice_rel, lattice_set WHERE lattice_set.name = lattice_rel.parent AND lattice_set.length = " + len + " AND lattice_rel.parent = Path_Complement_Edges.Rchain AND Path_Complement_Edges.parent <> '' AND (lattice_rel.child, Path_Complement_Edges.child, Path_Complement_Edges.parent) NOT IN (SELECT Rchain, child, parent FROM Path_Required_Edges) AND Path_Complement_Edges.child NOT IN (SELECT rnid FROM RNodes);");
-            // Oct 28, remove edges envolve RNodes.
-//            st.execute("INSERT IGNORE INTO Path_Forbidden_Edges SELECT DISTINCT lattice_rel.child AS Rchain, Path_Complement_Edges.child AS child, Path_Complement_Edges.parent AS parent FROM Path_Complement_Edges, lattice_rel, lattice_set WHERE lattice_set.name = lattice_rel.parent AND lattice_set.length = " + len + " AND lattice_rel.parent = Path_Complement_Edges.Rchain AND Path_Complement_Edges.parent <> '' AND (lattice_rel.child, Path_Complement_Edges.child, Path_Complement_Edges.parent) NOT IN (SELECT Rchain, child, parent FROM Path_Required_Edges) AND (Path_Complement_Edges.child NOT IN (SELECT rnid FROM RNodes) AND Path_Complement_Edges.parent NOT IN (SELECT rnid FROM RNodes));");
-            // Oct 30, should propagate edges pointing to RNodes from lower lever to higher level, so remove edges from RNodes.
-//            st.execute("INSERT IGNORE INTO Path_Forbidden_Edges SELECT DISTINCT lattice_rel.child AS Rchain, Path_Complement_Edges.child AS child, Path_Complement_Edges.parent AS parent FROM Path_Complement_Edges, lattice_rel, lattice_set WHERE lattice_set.name = lattice_rel.parent AND lattice_set.length = " + len + " AND lattice_rel.parent = Path_Complement_Edges.Rchain AND Path_Complement_Edges.parent <> '' AND (lattice_rel.child, Path_Complement_Edges.child, Path_Complement_Edges.parent) NOT IN (SELECT Rchain, child, parent FROM Path_Required_Edges) AND Path_Complement_Edges.parent NOT IN (SELECT rnid FROM RNodes) ;");
-            //#### Design One Forbidden Edges: ONLY propagate edges from/to 1Nodes/2Nodes
-//            st.execute("INSERT IGNORE INTO Path_Forbidden_Edges SELECT DISTINCT lattice_rel.child AS Rchain, Path_Complement_Edges.child AS child, Path_Complement_Edges.parent AS parent FROM Path_Complement_Edges, lattice_rel, lattice_set WHERE lattice_set.name = lattice_rel.parent AND lattice_set.length = " + len + " AND lattice_rel.parent = Path_Complement_Edges.Rchain AND Path_Complement_Edges.parent <> '' AND (lattice_rel.child, Path_Complement_Edges.child, Path_Complement_Edges.parent) NOT IN (SELECT Rchain, child, parent FROM Path_Required_Edges) AND Path_Complement_Edges.child NOT IN (SELECT rnid FROM RNodes) AND Path_Complement_Edges.parent NOT IN (SELECT rnid FROM RNodes);");
-            //#### Design Two Forbidden Edges: ONLY propagate edges from/to 1Nodes/2Nodes, (same as Design one).
-//            st.execute("INSERT IGNORE INTO Path_Forbidden_Edges SELECT DISTINCT lattice_rel.child AS Rchain, Path_Complement_Edges.child AS child, Path_Complement_Edges.parent AS parent FROM Path_Complement_Edges, lattice_rel, lattice_set WHERE lattice_set.name = lattice_rel.parent AND lattice_set.length = " + len + " AND lattice_rel.parent = Path_Complement_Edges.Rchain AND Path_Complement_Edges.parent <> '' AND (lattice_rel.child, Path_Complement_Edges.child, Path_Complement_Edges.parent) NOT IN (SELECT Rchain, child, parent FROM Path_Required_Edges) AND Path_Complement_Edges.child NOT IN (SELECT rnid FROM RNodes) AND Path_Complement_Edges.parent NOT IN (SELECT rnid FROM RNodes);");
             //#### Design Three Forbidden Edges: propagate edges from/to 1Nodes/2Nodes + 1Nodes/2Nodes to RNodes.
             // Nov 25
             st.execute(
@@ -788,9 +596,6 @@ public class BayesBaseH {
                     "SELECT rnid FROM RNodes" +
                 ");"
             );
-
-            //#### Design Four: Do NOT differenciated Nodes Type, consider them(1Nodes,2Nodes,RNodes) as the same
-//            st.execute("INSERT IGNORE INTO Path_Forbidden_Edges SELECT DISTINCT lattice_rel.child AS Rchain, Path_Complement_Edges.child AS child, Path_Complement_Edges.parent AS parent FROM Path_Complement_Edges, lattice_rel, lattice_set WHERE lattice_set.name = lattice_rel.parent AND lattice_set.length = " + len + " AND lattice_rel.parent = Path_Complement_Edges.Rchain AND Path_Complement_Edges.parent <> '' AND (lattice_rel.child, Path_Complement_Edges.child, Path_Complement_Edges.parent) NOT IN (SELECT Rchain, child, parent FROM Path_Required_Edges);");
 
             st.close();
 
@@ -848,7 +653,6 @@ public class BayesBaseH {
         ResultSet rs_largest = st_largest.executeQuery("SELECT name AS Rchain FROM lattice_set WHERE length = (SELECT MAX(length) FROM lattice_set);");
         rs_largest.absolute(1);
         largest_rchain = rs_largest.getString(1);
-//        System.out.println("\n largest_rchain : " + largest_rchain);
         st_largest.close();
 
         Statement st1 = con2.createStatement();
@@ -865,15 +669,12 @@ public class BayesBaseH {
         while(rs.next()) {
             // Get rvid for further use.
             String rchain = rs.getString("RChain");
-//            System.out.println("\n RChain: " + rchain);
             rnode_ids_1.add(rchain);
         }
         st1.close();
         Statement st_temp = con2.createStatement();
         for(String id : rnode_ids_1) { // Feb 7th 2014, zqian; updated May 26, 2014 zqian.
-//            System.out.println("id: "+id);
             st_temp.execute("INSERT IGNORE INTO Path_BayesNets (SELECT '" + largest_rchain + "' AS Rchain, '" + id + "' AS child, '' AS parent);");
-//            System.out.println ("INSERT IGNORE INTO Path_BayesNets (SELECT '" + largest_rchain + "' AS Rchain, '" + id + "' AS child, '' AS parent);");
         }
 
         st_temp.close();
@@ -896,7 +697,6 @@ public class BayesBaseH {
             for(String id : rnode_ids) { // rchain
                 System.out.println("\n !!!!Starting to Export The Required Edges to " + id.replace("`","") + "_req.xml \n");
                 BIFExport.Export(databaseName + "/" + File.separator + "kno" + File.separator + id.replace("`","") + "_req.xml", "Rchain", "Path_Required_Edges", id, con2);
-//                System.out.println("export to _req.xml::rnode_id::" + id); // @zqian Test
             }
 
             // Nov 25
@@ -904,7 +704,6 @@ public class BayesBaseH {
             for(String id : rnode_ids) {
                 System.out.println("\n !!!!Starting to Export The Forbidden Edges to " + id.replace("`","") + "_for.xml \n");
                 BIFExport.Export(databaseName + "/" + File.separator + "kno" + File.separator + id.replace("`","") + "_for.xml", "Rchain", "Path_Forbidden_Edges", id, con2);
-//                System.out.println("export to _for.xml::rnode_id::" + id); // @zqian Test
             }
 
             String NoTuples = "";
@@ -918,7 +717,6 @@ public class BayesBaseH {
                 }
 
                 if(Integer.parseInt(NoTuples) > 1 && len != 2) { // Skip the level 2, Zqian @ Jan 28 2014, for hep, fin, imdb.
-//                if(Integer.parseInt(NoTuples) > 1 && len != 1) { // Skip the level 2, Zqian @ Jan 28 2014, for muta
                     BayesNet_Learning_main.tetradLearner(
                         databaseName+"/" + File.separator + "csv" + File.separator + id.replace("`","") + ".csv",
                         databaseName+"/" + File.separator + "kno" + File.separator + id.replace("`","") + "_req.xml",
@@ -960,17 +758,12 @@ public class BayesBaseH {
                     }
                     st_temp.close();
                 } else if (len==2) { // for hep,fin,imdb
-//                else if (len==1) { // muta
                     Statement st_temp = con2.createStatement();
                     st_temp.execute("DELETE FROM Path_BayesNets WHERE Rchain = '" + id + "' AND (child, parent) IN (SELECT child, parent FROM Path_Forbidden_Edges WHERE Rchain = '" + id + "');"); // Oct 2nd
-//                    bif2(id); // Just import the knowledge to path_bayesNets Jan 28.
-//                    BIFImport.Import(databaseName + "/" + File.separator + "kno" + File.separator + id.replace("`","") + "_req.xml", id, "Path_BayesNets", con2);
 
                     ArrayList<String[]> pairs = BIF_IO.getLinksFromFile(databaseName + "/" + File.separator + "kno" + File.separator + id.replace("`","") + "_req.xml");
 
-//                    System.out.print(id);
                     for (String[] pair : pairs) {
-//                        Statement st = con.createStatement();
 
                         System.out.println("INSERT IGNORE INTO " + "Path_BayesNets" + " VALUES (\'" + id + "\', \'`" + pair[1] + "`\', \'`" + pair[0] + "`\');");
                         st_temp.execute("INSERT ignore INTO " + "Path_BayesNets" + " VALUES (\'" + id + "\', \'`" + pair[1] + "`\', \'`" + pair[0] + "`\');");
@@ -1082,10 +875,8 @@ public class BayesBaseH {
             String rchain = rs.getString("RChain");
             System.out.println("\n RChain: " + rchain);
             rnode_ids.add(rchain);
-//            rnode_ids_1.add(rchain);
         }
 
-//        rs.close();
         st.close();
     }
 
@@ -1095,13 +886,9 @@ public class BayesBaseH {
         // Import @zqian.
         System.out.println("Starting to Import the learned path into MySQL::**Entity_BayesNets**"); // @zqian Test
         Statement st = con2.createStatement();
-//        st.execute("truncate Entity_BayesNets;");
         int i=0;
-//        for(String id : pvar_ids) {
-//            System.out.println(databaseName+"/" + File.separator + "xml" + File.separator + id.replace("`","") + ".xml "+ id + " Entity_BayesNets "+con2);
         BIFImport.Import(databaseName + "/" + File.separator + "xml" + File.separator + id.replace("`","") + ".xml", id, "Entity_BayesNets", con2);
         System.out.println("*** imported Entity_BayesNets " + pvar_ids.get(i++) + " into database");
-//        }
         System.out.println(" \n !!!!!!!!!Import is done for **Entity_BayesNets** \n"); // @zqian Test
         st.close();
     }
@@ -1112,7 +899,6 @@ public class BayesBaseH {
         System.out.println(" Starting to Import the learned path into MySQL::**Path_BayesNets**"); // @zqian
 
         Statement st = con2.createStatement();
-//        st.execute("truncate Path_BayesNets;");
         int j=0;
 
         BIFImport.Import(databaseName + "/" + File.separator + "xml" + File.separator + id.replace("`","") + ".xml", id, "Path_BayesNets", con2);
@@ -1130,16 +916,12 @@ public class BayesBaseH {
 
     public static String makeCommaSepQuery(ResultSet rs, String colName, String del) throws SQLException {
         ArrayList<String> parts = new ArrayList<String>();
-//        String stringQuery = "";
 
         while(rs.next()) {
-//            stringQuery += rs.getString(colName) + del;
             parts.add(rs.getString(colName));
         }
-//        stringQuery = stringQuery.substring(0, stringQuery.length() - del.length());
 
         return StringUtils.join(parts,del);
-//        return stringQuery;
     }
 
 
