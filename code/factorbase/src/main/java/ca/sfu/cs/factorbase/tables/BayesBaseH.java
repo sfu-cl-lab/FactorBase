@@ -244,41 +244,6 @@ public class BayesBaseH {
     }
 
 
-    public static void handleWarnings() throws SQLException {
-        String warning = "";
-        warning += buildWarningString(con2, "TernaryRelations", "of having a three column key");
-        warning += buildWarningString(con2, "NoPKeys", "of not having a primary key");
-
-        if (warning.length() > 0) {
-            JOptionPane.showMessageDialog(null, warning);
-        }
-    }
-
-
-    public static String buildWarningString(java.sql.Connection con, String checkTableName, String reason) throws SQLException {
-        String warningStr = "";
-        Statement stmt = con.createStatement();
-        ArrayList<String> ternaryrelationsTables = new ArrayList<String>();
-        ResultSet rs = stmt.executeQuery("SELECT TABLE_NAME FROM " + checkTableName + ";");
-        while (rs.next()) {
-            ternaryrelationsTables.add(rs.getString("TABLE_NAME"));
-        }
-
-        int tableNum = 0;
-        for(String tableName : ternaryrelationsTables) {
-            tableNum++;
-            warningStr += tableName + System.getProperty("line.separator");
-        }
-
-        if (tableNum > 0) {
-            String tableORtables = (tableNum == 1) ? "table is" : tableNum + " tables are";
-            warningStr = "WARNING: The following " + tableORtables + " ignored because " + reason + ":" + System.getProperty("line.separator") + System.getProperty("line.separator") + warningStr + System.getProperty("line.separator");
-        }
-
-        return warningStr;
-    }
-
-
     public static void initProgram(int FirstRunning) throws IOException, SQLException {
         // Read config file.
         setVarsFromConfig();
@@ -296,17 +261,6 @@ public class BayesBaseH {
         }
 
     }
-
-
-    public static void delete(File f) throws IOException {
-        if (f.isDirectory()) {
-            for (File c : f.listFiles()) {
-                delete(c);
-            }
-        }
-        if (!f.delete())
-            throw new FileNotFoundException("Failed to delete file: " + f);
-        }
 
 
     public static void setVarsFromConfig() {
@@ -683,170 +637,6 @@ public class BayesBaseH {
     }
 
 
-    /**
-     * Jan 28, hard-coding the population lattice learning
-     * do the learning for level 1 (a;b;c)
-     * and then skip the level 2 (a,b; a,c; b,c)
-     * jump to level 3 directly (a,b,c)
-     **/
-    public static void p_handleRNodes_zqian() throws Exception {
-        for (int len = 1; len <= maxNumberOfMembers; len++) {
-            readRNodesFromLattice(len); // Create csv files for all rnodes.
-
-            // Required edges.
-            for(String id : rnode_ids) { // rchain
-                System.out.println("\n !!!!Starting to Export The Required Edges to " + id.replace("`","") + "_req.xml \n");
-                BIFExport.Export(databaseName + "/" + File.separator + "kno" + File.separator + id.replace("`","") + "_req.xml", "Rchain", "Path_Required_Edges", id, con2);
-            }
-
-            // Nov 25
-            // Forbidden edges.
-            for(String id : rnode_ids) {
-                System.out.println("\n !!!!Starting to Export The Forbidden Edges to " + id.replace("`","") + "_for.xml \n");
-                BIFExport.Export(databaseName + "/" + File.separator + "kno" + File.separator + id.replace("`","") + "_for.xml", "Rchain", "Path_Forbidden_Edges", id, con2);
-            }
-
-            String NoTuples = "";
-            for(String id : rnode_ids) {
-                System.out.println("\nStarting Learning the BN Structure of rnode_ids: " + id + "\n");
-                Statement st = con3.createStatement();
-                ResultSet rs = st.executeQuery("SELECT COUNT(*) FROM `" + id.replace("`","") + "_CT`;"); // Oct 2nd, Why not check the csv file directly? faster for larger CT? Oct 23.
-                while(rs.next()) {
-                    NoTuples = rs.getString(1);
-                    System.out.println("NoTuples : " + NoTuples);
-                }
-
-                if(Integer.parseInt(NoTuples) > 1 && len != 2) { // Skip the level 2, Zqian @ Jan 28 2014, for hep, fin, imdb.
-                    BayesNet_Learning_main.tetradLearner(
-                        databaseName + "/" + File.separator + "csv" + File.separator + id.replace("`","") + ".csv",
-                        databaseName + "/" + File.separator + "kno" + File.separator + id.replace("`","") + "_req.xml",
-                        databaseName + "/" + File.separator + "kno" + File.separator + id.replace("`","") + "_for.xml",
-                        databaseName + "/" + File.separator + "xml" + File.separator + id.replace("`","") + ".xml"
-                    );
-
-                    System.out.println("The BN Structure Learning for rnode_id::" + id + "is done."); // @zqian Test
-                    bif2(id); // import to db @zqian
-                    // Feb 7th 2014, zqian;
-                    // Make sure each node appear as a child in Path_BayesNet.
-                    System.out.print("id: " + id);
-                    Statement st_temp = con2.createStatement();
-                    ResultSet rs_temp = st_temp.executeQuery(
-                        "SELECT DISTINCT parent " +
-                        "FROM Path_BayesNets " +
-                        "WHERE Rchain = '" + id + "' " +
-                        "AND parent NOT IN (" +
-                            "SELECT DISTINCT child " +
-                            "FROM Path_BayesNets " +
-                            "WHERE Rchain ='" + id + "'" +
-                        ");"
-                    );
-
-                    if (!rs_temp.next()) {
-                        st_temp.execute(
-                            "INSERT INTO Path_BayesNets (" +
-                            "SELECT '" + id + "' AS Rchain, (" +
-                                "SELECT DISTINCT parent " +
-                                "FROM Path_BayesNets " +
-                                "WHERE Rchain = '" + id + "' " +
-                                "AND parent NOT IN (" +
-                                    "SELECT DISTINCT child " +
-                                    "FROM Path_BayesNets " +
-                                    "WHERE Rchain = '" + id + "'" +
-                                ")" +
-                            ") AS child, '')"
-                        );
-                    }
-                    st_temp.close();
-                } else if (len == 2) { // for hep, fin, imdb
-                    Statement st_temp = con2.createStatement();
-                    st_temp.execute("DELETE FROM Path_BayesNets WHERE Rchain = '" + id + "' AND (child, parent) IN (SELECT child, parent FROM Path_Forbidden_Edges WHERE Rchain = '" + id + "');"); // Oct 2nd
-
-                    ArrayList<String[]> pairs = BIF_IO.getLinksFromFile(databaseName + "/" + File.separator + "kno" + File.separator + id.replace("`","") + "_req.xml");
-
-                    for (String[] pair : pairs) {
-
-                        System.out.println("INSERT IGNORE INTO " + "Path_BayesNets" + " VALUES (\'" + id + "\', \'`" + pair[1] + "`\', \'`" + pair[0] + "`\');");
-                        st_temp.execute("INSERT ignore INTO " + "Path_BayesNets" + " VALUES (\'" + id + "\', \'`" + pair[1] + "`\', \'`" + pair[0] + "`\');");
-                    }
-                }
-            }
-
-            // Import to db @zqian.
-            Statement st = con2.createStatement();
-            // Find new edges learned for this rchain.
-            // Propagate all edges to next level.
-            st.execute(
-                "INSERT IGNORE INTO InheritedEdges " +
-                "SELECT DISTINCT lattice_rel.child AS Rchain, Path_BayesNets.child AS child, Path_BayesNets.parent AS parent " +
-                "FROM Path_BayesNets, lattice_rel, lattice_set " +
-                "WHERE lattice_rel.parent = Path_BayesNets.Rchain " +
-                "AND Path_BayesNets.parent <> '' " +
-                "AND lattice_set.name = lattice_rel.parent " +
-                "AND lattice_set.length = " + (len) + " " +
-                "ORDER BY Rchain;"
-            );
-
-            // Make inherited edges as required edges, while avoiding conflict edges.
-            //#### Design Three Required Edges: propagate edges from/to 1Nodes/2Nodes + SchemaEdges + RNodes to 1Nodes/2Nodes (same as Design Two)
-            st.execute(
-                "INSERT IGNORE INTO Path_Required_Edges " +
-                "SELECT DISTINCT Rchain, child, parent " +
-                "FROM InheritedEdges, lattice_set " +
-                "WHERE Rchain = lattice_set.name " +
-                "AND lattice_set.length = " + (len + 1) + " " +
-                "AND (Rchain, parent, child) NOT IN (" +
-                    "SELECT * " +
-                    "FROM InheritedEdges" +
-                ") AND child NOT IN (" +
-                    "SELECT rnid " +
-                    "FROM RNodes" +
-                ")"
-            );
-
-            // For path_complemtment edges, rchain should be at current level (len).
-            // Nov 25
-            st.execute(
-                "INSERT IGNORE INTO Path_Complement_Edges " +
-                "SELECT DISTINCT BN_nodes1.Rchain AS Rchain, BN_nodes1.node AS child, BN_nodes2.node AS parent " +
-                "FROM Path_BN_nodes AS BN_nodes1, Path_BN_nodes AS BN_nodes2, lattice_set " +
-                "WHERE lattice_set.name = BN_nodes1.Rchain AND lattice_set.length = " + len +
-                "AND (" +
-                    "(BN_nodes1.Rchain = BN_nodes2.Rchain) " +
-                    "AND (NOT (EXISTS(" +
-                        "SELECT * " +
-                        "FROM Path_BayesNets " +
-                        "WHERE (" +
-                            "(Path_BayesNets.Rchain = BN_nodes1.Rchain) " +
-                            "AND (Path_BayesNets.child = BN_nodes1.node) " +
-                            "AND (Path_BayesNets.parent = BN_nodes2.node)" +
-                        ")" +
-                    ")))" +
-                ");"
-            );
-
-            //#### Design Three Forbidden Edges: propagate edges from/to 1Nodes/2Nodes + 1Nodes/2Nodes to RNodes
-            // Nov 25
-            st.execute(
-                "INSERT IGNORE INTO Path_Forbidden_Edges " +
-                "SELECT DISTINCT lattice_rel.child AS Rchain, Path_Complement_Edges.child AS child, Path_Complement_Edges.parent AS parent " +
-                "FROM Path_Complement_Edges, lattice_rel, lattice_set " +
-                "WHERE lattice_set.name = lattice_rel.parent AND lattice_set.length = " + len + " " +
-                "AND lattice_rel.parent = Path_Complement_Edges.Rchain AND Path_Complement_Edges.parent <> '' " +
-                "AND (lattice_rel.child, Path_Complement_Edges.child, Path_Complement_Edges.parent) NOT IN (" +
-                    "SELECT Rchain, child, parent " +
-                    "FROM Path_Required_Edges" +
-                ") AND Path_Complement_Edges.parent NOT IN (" +
-                    "SELECT rnid FROM RNodes" +
-                ");"
-            );
-
-            st.close();
-            rnode_ids.clear(); // Prepare for next loop.
-            System.out.println("Import is done for length = " + len + "."); // @zqian Test
-        }
-    }
-
-
     public static void readPvarFromBN() throws SQLException, IOException {
         Statement st = con2.createStatement();
 
@@ -911,31 +701,6 @@ public class BayesBaseH {
 
         System.out.println(" Import is done for **Path_BayesNets**"); // @zqian Test
         st.close();
-    }
-
-
-    public static String makeCommaSepQuery(ResultSet rs, String colName, String del) throws SQLException {
-        ArrayList<String> parts = new ArrayList<String>();
-
-        while(rs.next()) {
-            parts.add(rs.getString(colName));
-        }
-
-        return StringUtils.join(parts,del);
-    }
-
-
-    public static ArrayList<String> getColumns(ResultSet rs) throws SQLException {
-        ArrayList<String> cols = new ArrayList<String>();
-        ResultSetMetaData metaData = rs.getMetaData();
-        rs.next();
-
-        int columnCount = metaData.getColumnCount();
-        for (int i = 1; i <= columnCount; i++) {
-            cols.add(metaData.getColumnLabel(i));
-        }
-
-        return cols;
     }
 
 
