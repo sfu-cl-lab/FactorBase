@@ -439,7 +439,7 @@ public class BayesBaseH {
             );
 
             if (!linkAnalysis) {
-                // Find new edges learned for this rchain.
+                // Find new edges learned for this rchain, that were not already required before learning.
                 st.execute(
                     "INSERT IGNORE INTO LearnedEdges " +
                     "SELECT DISTINCT Path_BayesNets.Rchain, Path_BayesNets.child, Path_BayesNets.parent " +
