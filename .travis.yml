@@ -17,6 +17,9 @@ script:
   - java -Dconfig=../travis-resources/config.cfg -jar factorbase/target/factorbase*SNAPSHOT.jar
   - ls -lh
   - tail dag_.txt
+  - diff Bif_unielwin.xml ../travis-resources/expected-output/Bif_unielwin.xml
+  - bash ../travis-resources/dbdump.sh -n unielwin -p 123456
+  - diff mysql-extraction.txt ../travis-resources/expected-output/mysql-extraction.txt
   - java -Dconfig=../travis-resources/config.cfg -jar mlnexporter/target/mlnexporter*SNAPSHOT.jar > mln_jar.txt
   - tail mln_jar.txt
 
