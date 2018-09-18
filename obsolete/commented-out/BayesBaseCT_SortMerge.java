@@ -34,20 +34,21 @@ import java.io.IOException;
 import java.sql.*;
 import java.util.ArrayList;
 
+
 public class BayesBaseCT_SortMerge {
 
-    private static Connection con_std;
+	private static Connection con_std;
     private static Connection con_BN;
     private static Connection con_CT;
     private static Connection con_setup;
-    private static String databaseName_std;
+	private static String databaseName_std;
     private static String databaseName_BN;
     private static String databaseName_CT;
     private static String databaseName_setup;
-    private static String dbbase;
-    private static String dbUsername;
-    private static String dbPassword;
-    private static String dbaddress;
+	private static String dbbase;
+	private static String dbUsername;
+	private static String dbPassword;
+	private static String dbaddress;
     private static String linkCorrelation;
     private static String continuous;
     /*
@@ -56,20 +57,20 @@ public class BayesBaseCT_SortMerge {
      */
     private static String cont;
 
-    private static int maxNumberOfMembers = 0;
+	private static int maxNumberOfMembers = 0;
 
     public static void main(String[] args) throws Exception {
-              
-        buildCT();
+		      
+		buildCT();
 
-    }
+	}
 
     /**
      * @Overload
      * buildCT
      * @throws Exception
      */
-    public static void buildCT() throws Exception {
+	public static void buildCT() throws Exception {
 
         setVarsFromConfig();
         //connect to db using jdbc
@@ -108,7 +109,7 @@ public class BayesBaseCT_SortMerge {
         } else {
             bzsr.runScript(Config.SCRIPTS_DIRECTORY + "metaqueries.sql");
             // modified on Feb. 3rd, 2015, zqian, to include rnode as columns
-        //          bzsr.runScript("scripts/metadata_2_nolink.sql");
+        //			bzsr.runScript("scripts/metadata_2_nolink.sql");
         }
       //  bzsr.runScript("scripts/model_manager.sql");
         //why are we running the model manager first? // commenting this out for now August 22
@@ -117,167 +118,453 @@ public class BayesBaseCT_SortMerge {
         // building CT tables for Rchain
         CTGenerator();
         disconnectDB();
-    }
- 
-    /*** this part we do need O.s. May 16, 2018 ***/
+	}
+
+	/**
+	 *
+	 * @param con_std
+	 * @param con_BN
+	 * @param con_CT
+	 * @param con_setup
+	 * @param databaseName_std
+	 * @param linkCorrelation
+	 * @param cont
+	 * @throws Exception
+	 */
+	public static void buildCT( Connection con_std, Connection con_setup, Connection con_BN, Connection con_CT,
+								String databaseName_std, String linkCorrelation,
+								String cont) throws Exception {
+
+        setVars(con_std, con_setup, con_BN, con_CT, databaseName_std,
+                linkCorrelation, cont);
+		
+
+        BZScriptRunner bzsr = new BZScriptRunner(databaseName_std,con_setup);
+        bzsr.runScript(Config.SCRIPTS_DIRECTORY + "transfer.sql");
+
+        
+        maxNumberOfMembers = short_rnid_LatticeGenerator.generate(con_BN);
+        
+        if (cont.equals("1")) {
+            bzsr.runScript(Config.SCRIPTS_DIRECTORY + "metadata_2_cont.sql");
+        } else if (linkCorrelation.equals("1")) { //LinkCorrelations
+            bzsr.runScript(Config.SCRIPTS_DIRECTORY + "metadata_2.sql");
+        } else {
+            bzsr.runScript(Config.SCRIPTS_DIRECTORY + "metadata_2.sql");
+            // modified on Feb. 3rd, 2015, zqian, to include rnode as columns
+            //			bzsr.runScript("scripts/metadata_2_nolink.sql");
+        }
+        // building CT tables for Rchain
+        CTGenerator();
+	}
     /**
-     *  Building the _CT tables for length >=2
-     *  For each length
-     *  1. find rchain, find list of members of rc-hain. Suppose first member is rnid1.
-     *  2. initialize current_ct = rchain_counts after summing out the relational attributes of rnid1.
-     *  3. Current list = all members of rchain minus rndi1. find ct(table) for current list = . Select rows where all members of current list are true. Add 1nodes of rnid1.
-     *  4. Compute false table using the results of 2 and 3 (basically 2 - 3).
-     *  5. Union false table with current_ct to get new ct where all members of current list are true.
-     *  6. Repeat with current list as initial list until list is empty.
-     *  Example:
-     *  1. Rchain = R3,R2,R1. first rnid1 = R3.
-     *  2. Find `R3,R2,R1_counts`. Sum out fields from R3 to get `R2,R1-R3_flat1`.
-     *  3. Current list = R2,R1. Find `R2,R1_ct` where R1 = T, R2 = T. Add 1nodes of R3 (multiplying) to get `R2,R1-R3_star`.
-     *  4. Compute `R2,R1-R3_false` = `R2,R1-R3_star - `R2,R1-R3_flat1` union (as before)
-     *  5. Compute `R2,R1-R3_ct` = `R2,R1-R3_false` cross product `R3_join` union `R3,R2,R1_counts`.
-     *  6. Current list = R1. Current rnid = R2. Current ct_table = `R2,R1-R3_ct`.
+    ** O.S. May 16: Starting here, we shouldn't implement the functionality below here. This is now part of the functionality in the new CT generator.
+     * Populates the <databaseName>_BN schema with tables. (Refer transfer2.sql)
+     * Generates lattice  tree. (Refer Class: short_rnid_LatticeGenerator , Method: generateTarget())
+     * Executes metadata_3.sql
      *
-     *  BuildCT_Rnodes_flat(len);
-     *
-     *  BuildCT_Rnodes_star(len);
-     *
-     *  BuildCT_Rnodes_CT(len);
-     *
+     * @return int : maximum Number Of Members
      * @throws Exception
      */
-    public static void CTGenerator() throws Exception{
+	public static int buildCTTarget() throws Exception {
+	      
+		setVarsFromConfigForTarget();
+		//connect to db using jdbc
+		con_std = connectDB(databaseName_std);
+        con_setup = connectDB(databaseName_setup);
+		//build _BN part1 from metadata_1.sql
+
+		BZScriptRunner bzsr = new BZScriptRunner(databaseName_std,dbbase,con_setup);
+		bzsr.runScript(Config.SCRIPTS_DIRECTORY + "transfer2.sql");
+		con_BN = connectDB(databaseName_BN);
+    	con_CT = connectDB(databaseName_CT);
+
+		//generate lattice tree
+		maxNumberOfMembers = short_rnid_LatticeGenerator.generateTarget(con_BN);// rnid mapping. maxNumberofMembers = maximum size of lattice element. Should be called LatticeHeight
+		System.out.println(" ##### lattice is ready for use* ");
+		
+		//build _BN part2: from metadata_2.sql      
+		if (cont.equals("1")) {
+			bzsr.runScript(Config.SCRIPTS_DIRECTORY + "metadata_3_cont.sql");
+		} else if (linkCorrelation.equals("1")) { //LinkCorrelations
+			bzsr.runScript(Config.SCRIPTS_DIRECTORY + "metadata_3.sql");
+		} else {
+			bzsr.runScript(Config.SCRIPTS_DIRECTORY + "metadata_3_nolink.sql");
+			// modified on Feb. 3rd, 2015, zqian, to include rnode as columns
+		}
+		
+        // building CT tables for Rchain
+        CTGenerator();
         
-        long l = System.currentTimeMillis(); //@zqian : CT table generating time
-           // handling Pvars, generating pvars_counts       
+		disconnectDB();
+		
+		return maxNumberOfMembers;
+	}
+
+
+    /**
+     * @Overload
+     * buildSubCTTarget
+     * Compute the subset given factor id (fid) and it's parents
+     * @update Aug. 19, 2014, zqian
+     * @param functorId
+     * @param database_BN
+     * @param database_target
+     * @param database_target_bn
+     * @param database_db
+     * @return
+     * @throws Exception
+     */
+
+	public static int buildSubCTTarget(String functorId,String database_BN,String database_target,String database_target_bn,String database_db) throws Exception { 
+	      
+		setVarsFromConfigForTarget();
+		//connect to db using jdbc
+		con_std = connectDB(databaseName_std);
+        con_setup = connectDB(databaseName_setup);
+		//build _BN part1 from metadata_1.sql
+
+		BZScriptRunner bzsr = new BZScriptRunner(databaseName_std,dbbase,con_setup);
+		bzsr.runScript(Config.SCRIPTS_DIRECTORY + "transfer2.sql");
+		con_BN = connectDB(databaseName_BN);
+        con_CT = connectDB(databaseName_CT);
+
+		//generate lattice tree
+		maxNumberOfMembers = short_rnid_LatticeGenerator.generateTarget(con_BN);// rnid mapping. maxNumberofMembers = maximum size of lattice element. Should be called LatticeHeight
+		System.out.println(" ##### lattice is ready for use* ");
+		
+		//build _BN part2: from metadata_2.sql      
+		if (cont.equals("1")) {
+			bzsr.runScript(Config.SCRIPTS_DIRECTORY + "metadata_3_cont.sql");
+		} else if (linkCorrelation.equals("1")) { //LinkCorrelations
+			bzsr.runScript(Config.SCRIPTS_DIRECTORY + "metadata_3.sql");
+		} else {
+			bzsr.runScript(Config.SCRIPTS_DIRECTORY + "metadata_3_nolink.sql");
+			//buildSubCTTarget modified on Feb. 3rd, 2015, zqian, to include rnode as columns
+		}
+
+        // building CT tables for Rchain
+        // CTGenerator();
+        //compute the subset given fid and it's markov blanket
+        //SubsetCTComputation.computeTargetSubset_CTs(functorId,database_BN,database_target,database_target_bn,database_db); //unielwin_training1_target_db
+
+        disconnectDB();
+		
+		return maxNumberOfMembers;
+	}
+
+
+    /**
+     *  @Overload
+     *  buildSubCTTarget
+     *  Compute the subset given fid and it's child with child's parents
+     *  @param functorId
+     *  @param database_BN
+     *  @param database_target
+     *  @param database_target_bn
+     *  @param database_db
+     *  @param child
+     *  @param child1
+     *  @return int
+     */
+	public static int buildSubCTTarget(String functorId,String database_BN,String database_target,String database_target_bn,String database_db,String child,String child1) throws Exception { 
+	      
+		setVarsFromConfigForTarget();
+		//connect to db using jdbc
+		con_std = connectDB(databaseName_std);
+        con_setup = connectDB(databaseName_setup);
+
+		//build _BN part1 from metadata_1.sql
+
+		BZScriptRunner bzsr = new BZScriptRunner(databaseName_std,dbbase,con_setup);
+		bzsr.runScript(Config.SCRIPTS_DIRECTORY + "transfer2.sql");
+		con_BN = connectDB(databaseName_BN);
+    con_CT = connectDB(databaseName_CT);
+
+		//generate lattice tree
+		maxNumberOfMembers = short_rnid_LatticeGenerator.generateTarget(con_BN);// rnid mapping. maxNumberofMembers = maximum size of lattice element. Should be called LatticeHeight
+		System.out.println(" ##### lattice is ready for use* ");
+		
+		//build _BN part2: from metadata_2.sql      
+		if (cont.equals("1")) {
+			bzsr.runScript(Config.SCRIPTS_DIRECTORY + "metadata_3_cont.sql");
+		}
+		else if (linkCorrelation.equals("1")) {
+			bzsr.runScript(Config.SCRIPTS_DIRECTORY + "metadata_3.sql");
+		}
+		else {
+			bzsr.runScript(Config.SCRIPTS_DIRECTORY + "metadata_3_nolink.sql");
+
+			// modified on Feb. 3rd, 2015, zqian, to include rnode as columns
+		}
+
+        // building CT tables for Rchain
+        // CTGenerator();
+        //compute the subset given fid and it's markov blanket
+        //SubsetCTComputation.computeTargetSubset_CTs(functorId,database_BN,database_target,database_target_bn,database_db,child,child1); //unielwin_training1_target_db
+        
+		disconnectDB();
+		
+		return maxNumberOfMembers;
+	}
+	
+	/*** this part we do need O.s. May 16, 2018 ***/
+	/**
+	 *  Building the _CT tables for length >=2
+	 * 	For each length
+     * 	1. find rchain, find list of members of rc-hain. Suppose first member is rnid1.
+     * 	2. initialize current_ct = rchain_counts after summing out the relational attributes of rnid1.
+     * 	3. Current list = all members of rchain minus rndi1. find ct(table) for current list = . Select rows where all members of current list are true. Add 1nodes of rnid1.
+     * 	4. Compute false table using the results of 2 and 3 (basically 2 - 3).
+     * 	5. Union false table with current_ct to get new ct where all members of current list are true.
+     * 	6. Repeat with current list as initial list until list is empty.
+     * 	Example:
+     * 	1. Rchain = R3,R2,R1. first rnid1 = R3.
+     * 	2. Find `R3,R2,R1_counts`. Sum out fields from R3 to get `R2,R1-R3_flat1`.
+     * 	3. Current list = R2,R1. Find `R2,R1_ct` where R1 = T, R2 = T. Add 1nodes of R3 (multiplying) to get `R2,R1-R3_star`.
+     * 	4. Compute `R2,R1-R3_false` = `R2,R1-R3_star - `R2,R1-R3_flat1` union (as before)
+     * 	5. Compute `R2,R1-R3_ct` = `R2,R1-R3_false` cross product `R3_join` union `R3,R2,R1_counts`.
+     * 	6. Current list = R1. Current rnid = R2. Current ct_table = `R2,R1-R3_ct`.
+     *
+     * 	BuildCT_Rnodes_flat(len);
+     *
+     * 	BuildCT_Rnodes_star(len);
+     *
+     * 	BuildCT_Rnodes_CT(len);
+     *
+	 * @throws Exception
+	 */
+	public static void CTGenerator() throws Exception{
+		
+		long l = System.currentTimeMillis(); //@zqian : CT table generating time
+		   // handling Pvars, generating pvars_counts		
         BuildCT_Pvars();
         
         // preparing the _join part for _CT tables
-        BuildCT_Rnodes_join();
-        
-        //building the RNodes_counts tables. should be called Rchains since it goes up the lattice.
-        if(linkCorrelation.equals("1")) {
-            long l_1 = System.currentTimeMillis(); //@zqian : measure structure learning time
-            for(int len = 1; len <= maxNumberOfMembers; len++){
-                BuildCT_Rnodes_counts(len);
-            }
-            long l2 = System.currentTimeMillis(); //@zqian : measure structure learning time
-            System.out.print("Building Time(ms) for Rnodes_counts: "+(l2-l_1)+" ms.\n");
-        }
-        else {
-            System.out.println("link off !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
-            for(int len = 1; len <= maxNumberOfMembers; len++)
-                BuildCT_Rnodes_counts2(len);
-            //count2 simply copies the counts to the CT tables
-            //copying the code seems very inelegant OS August 22
+		BuildCT_Rnodes_join();
+		
+		//building the RNodes_counts tables. should be called Rchains since it goes up the lattice.
+		if(linkCorrelation.equals("1")) {
+			long l_1 = System.currentTimeMillis(); //@zqian : measure structure learning time
+			for(int len = 1; len <= maxNumberOfMembers; len++){
+				BuildCT_Rnodes_counts(len);
+			}
+			long l2 = System.currentTimeMillis(); //@zqian : measure structure learning time
+			System.out.print("Building Time(ms) for Rnodes_counts: "+(l2-l_1)+" ms.\n");
+		}
+		else {
+			System.out.println("link off !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+			for(int len = 1; len <= maxNumberOfMembers; len++)
+				BuildCT_Rnodes_counts2(len);
+			//count2 simply copies the counts to the CT tables
+			//copying the code seems very inelegant OS August 22
 
-        }
+		}
                                                                       
-        if (linkCorrelation.equals("1")) {
-            // handling Rnodes with Lattice Moebius Transform
+		if (linkCorrelation.equals("1")) {
+			// handling Rnodes with Lattice Moebius Transform
             //initialize first level of rchain lattice
-            for(int len = 1; len <= 1; len++) {
-                System.out.print("Building Time(ms) for Rchain =1 \n");
-                //building the _flat tables
-                BuildCT_Rnodes_flat(len);
-        
-                //building the _star tables
-                BuildCT_Rnodes_star(len);
+			for(int len = 1; len <= 1; len++) {
+				System.out.print("Building Time(ms) for Rchain =1 \n");
+				//building the _flat tables
+				BuildCT_Rnodes_flat(len);
+		
+				//building the _star tables
+				BuildCT_Rnodes_star(len);
 
-                //building the _false tables first and then the _CT tables
-                BuildCT_Rnodes_CT(len);
-            }
-            
-            //building the _CT tables. Going up the Rchain lattice
-            for(int len = 2; len <= maxNumberOfMembers; len++)
-            { 
-                System.out.println("now we're here for Rchain!");
-                System.out.print("Building Time(ms) for Rchain >=2 \n");
-                BuildCT_RChain_flat(len);
-                System.out.println(" Rchain! are done");
-            }
+				//building the _false tables first and then the _CT tables
+				BuildCT_Rnodes_CT(len);
+			}
+			
+			//building the _CT tables. Going up the Rchain lattice
+			for(int len = 2; len <= maxNumberOfMembers; len++)
+			{ 
+				System.out.println("now we're here for Rchain!");
+				System.out.print("Building Time(ms) for Rchain >=2 \n");
+				BuildCT_RChain_flat(len);
+				System.out.println(" Rchain! are done");
+			}
+		}
+		
+
+		//delete the tuples with MULT=0 in the biggest CT table
+		String BiggestRchain="";
+		Statement st_BN= con_BN.createStatement();
+		ResultSet rs = st_BN.executeQuery("select name as RChain from lattice_set where lattice_set.length = (SELECT max(length)  FROM lattice_set);" );
+
+		boolean RChainCreated = false;
+		while(rs.next())
+		{
+			RChainCreated = true;
+			BiggestRchain = rs.getString("RChain");
+			System.out.println("\n BiggestRchain : " + BiggestRchain);
+		}
+		
+		st_BN.close();
+		
+		if ( RChainCreated )
+		{
+			Statement st_CT = con_CT.createStatement();
+			try
+			{
+				st_CT.execute("delete from `"+BiggestRchain.replace("`", "") +"_CT` where MULT='0';" );
+				System.out.println("delete from `"+BiggestRchain.replace("`", "") +"_CT` where MULT='0';" );
+
+			}
+			catch ( MySQLSyntaxErrorException e )
+			{
+				//Do nothing
+			}
+			st_CT.close();
+		}
+		
+		long l2 = System.currentTimeMillis();  //@zqian
+		System.out.print("Building Time(ms) for ALL CT tables:  "+(l2-l)+" ms.\n");
+	}
+
+    /**
+     * handleWarnings
+     * @throws SQLException
+     */
+    static void handleWarnings() throws SQLException {
+        String warning = "";
+        warning += buildWarningString(con_BN, "TernaryRelations", "of having a three column key");
+        warning += buildWarningString(con_BN, "NoPKeys", "of not having a primary key");
+        if(warning.length() > 0){
+            JOptionPane.showMessageDialog(null, warning);
         }
-        
-
-        //delete the tuples with MULT=0 in the biggest CT table
-        String BiggestRchain="";
-        Statement st_BN= con_BN.createStatement();
-        ResultSet rs = st_BN.executeQuery("select name as RChain from lattice_set where lattice_set.length = (SELECT max(length)  FROM lattice_set);" );
-
-        boolean RChainCreated = false;
-        while(rs.next())
-        {
-            RChainCreated = true;
-            BiggestRchain = rs.getString("RChain");
-            System.out.println("\n BiggestRchain : " + BiggestRchain);
-        }
-        
-        st_BN.close();
-        
-        if ( RChainCreated )
-        {
-            Statement st_CT = con_CT.createStatement();
-            try
-            {
-                st_CT.execute("delete from `"+BiggestRchain.replace("`", "") +"_CT` where MULT='0';" );
-                System.out.println("delete from `"+BiggestRchain.replace("`", "") +"_CT` where MULT='0';" );
-
-            }
-            catch ( MySQLSyntaxErrorException e )
-            {
-                //Do nothing
-            }
-            st_CT.close();
-        }
-        
-        long l2 = System.currentTimeMillis();  //@zqian
-        System.out.print("Building Time(ms) for ALL CT tables:  "+(l2-l)+" ms.\n");
     }
+
+    /**
+     * buildWarningString
+     * @param con
+     * @param checkTableName
+     * @param reason
+     * @return
+     * @throws SQLException
+     */
+    public static String buildWarningString(java.sql.Connection con, String checkTableName, String reason) throws SQLException {
+        String warningStr = "";
+
+        Statement stmt = con.createStatement();
+        ArrayList<String> ternaryrelationsTables = new ArrayList<String>();
+        ResultSet rs = stmt.executeQuery("select TABLE_NAME from " + checkTableName + ";");
+        while (rs.next()) {
+            ternaryrelationsTables.add(rs.getString("TABLE_NAME"));
+        }
+
+        int tableNum = 0;
+        for(String tableName : ternaryrelationsTables){
+            tableNum++;
+            warningStr += tableName + System.getProperty("line.separator");
+        }
+
+        if(tableNum > 0){
+            String tableORtables = (tableNum == 1) ? "table is" : tableNum + " tables are";
+            warningStr = "Warning: The following " + tableORtables + " ignored because " + reason + ":" + System.getProperty("line.separator") + System.getProperty("line.separator") + warningStr + System.getProperty("line.separator");
+        }
+
+        return warningStr;
+    }
+
+    /**
+     * setVarsFromConfigForTarget
+     */
+	public static void setVarsFromConfigForTarget()
+	{
+		Config conf = new Config();
+		databaseName_std = conf.getProperty("dbname");
+		dbbase = databaseName_std;
+		databaseName_std += "_target";
+		databaseName_BN = databaseName_std + "_BN";
+		databaseName_CT = databaseName_std + "_CT";
+		databaseName_setup = databaseName_std + "_setup";
+		dbUsername = conf.getProperty("dbusername");
+		dbPassword = conf.getProperty("dbpassword");
+		dbaddress = conf.getProperty("dbaddress");
+		linkCorrelation = conf.getProperty("LinkCorrelations");
+		cont = conf.getProperty("Continuous");
+		
+		if ( conf.closeFile() != 0 )
+		{
+			System.out.println( "Failed to close file!" );
+		}
+	}
 
     /**
      * setVarsFromConfig
      * ToDo : Remove Duplicate definitions across java files
      */
-    public static void setVarsFromConfig(){
-        Config conf = new Config();
-        databaseName_std = conf.getProperty("dbname");
-        //dbbase = conf.getProperty("dbbase");
-        databaseName_BN = databaseName_std + "_BN";
-        databaseName_CT = databaseName_std + "_CT";
-        databaseName_setup = databaseName_std + "_setup";
-        dbUsername = conf.getProperty("dbusername");
-        dbPassword = conf.getProperty("dbpassword");
-        dbaddress = conf.getProperty("dbaddress");
-        linkCorrelation = conf.getProperty("LinkCorrelations");
-        cont = conf.getProperty("Continuous");
-    }
-  
+	public static void setVarsFromConfig(){
+		Config conf = new Config();
+		databaseName_std = conf.getProperty("dbname");
+		//dbbase = conf.getProperty("dbbase");
+		databaseName_BN = databaseName_std + "_BN";
+		databaseName_CT = databaseName_std + "_CT";
+		databaseName_setup = databaseName_std + "_setup";
+		dbUsername = conf.getProperty("dbusername");
+		dbPassword = conf.getProperty("dbpassword");
+		dbaddress = conf.getProperty("dbaddress");
+		linkCorrelation = conf.getProperty("LinkCorrelations");
+		cont = conf.getProperty("Continuous");
+	}
+
+    /**
+     * Set vars for paramterised call to method buildCT
+     * @param connection_std
+     * @param connection_BN
+     * @param connection_CT
+     * @param connection_setup
+     * @param databaseName_std
+     * @param linkCorrelation
+     * @param continuous
+     */
+    public static void setVars( Connection connection_std, Connection connection_setup, 
+    							Connection connection_BN, Connection connection_CT, 
+    							String databaseName_std, 
+                                String linkCorrelation,
+                                String continuous){
+
+		BayesBaseCT_SortMerge.databaseName_std = databaseName_std;
+		BayesBaseCT_SortMerge.databaseName_BN = databaseName_std + "_BN";
+		BayesBaseCT_SortMerge.databaseName_CT = databaseName_std + "_CT";
+		BayesBaseCT_SortMerge.databaseName_setup = databaseName_std + "_setup";
+		BayesBaseCT_SortMerge.linkCorrelation = linkCorrelation;
+		BayesBaseCT_SortMerge.cont = continuous;
+		
+		BayesBaseCT_SortMerge.con_std = connection_std;
+		BayesBaseCT_SortMerge.con_BN = connection_BN;
+		BayesBaseCT_SortMerge.con_CT = connection_CT;
+		BayesBaseCT_SortMerge.con_setup = connection_setup;
+	}
+    
     /**
      * Connect to database via MySQL JDBC driver
      */
-    public static Connection connectDB(String databaseName) throws SQLException{
-        String CONN_STR = "jdbc:" + dbaddress + "/" + databaseName;
-        try {
-            java.lang.Class.forName("com.mysql.jdbc.Driver");
-        } catch (Exception ex) {
-            System.err.println("Unable to load MySQL JDBC driver");
-        }
-        return (Connection) DriverManager.getConnection(CONN_STR, dbUsername, dbPassword);
-    }
-        
-        
+	public static Connection connectDB(String databaseName) throws SQLException{
+		String CONN_STR = "jdbc:" + dbaddress + "/" + databaseName;
+		try {
+			java.lang.Class.forName("com.mysql.jdbc.Driver");
+		} catch (Exception ex) {
+			System.err.println("Unable to load MySQL JDBC driver");
+		}
+		return (Connection) DriverManager.getConnection(CONN_STR, dbUsername, dbPassword);
+	}
+		
+		
     /**
      * Building the _CT tables. Going up the Rchain lattice ( When rchain.length >=2)
      * @param int : length of the RChain
      * @throws  SQLException
      * @throws  IOException
      */
-    public static void BuildCT_RChain_flat(int len) throws SQLException, IOException {
-        System.out.println("\n ****************** \n" +
-                "Building the _CT tables for Length = "+len +"\n" );
+	public static void BuildCT_RChain_flat(int len) throws SQLException, IOException {
+		System.out.println("\n ****************** \n" +
+				"Building the _CT tables for Length = "+len +"\n" );
 
-        long l = System.currentTimeMillis(); 
+		long l = System.currentTimeMillis(); 
 
-        Statement st = con_BN.createStatement();
+		Statement st = con_BN.createStatement();
         ResultSet rs = st.executeQuery(
             "SELECT short_rnid AS short_RChain, orig_rnid AS RChain " +
             "FROM lattice_set " +
@@ -286,24 +573,24 @@ public class BayesBaseCT_SortMerge {
             "WHERE lattice_set.length = " + len + ";"
         );
         int fc=0;
-        while(rs.next())
-        {
-            long l1 = System.currentTimeMillis(); 
+		while(rs.next())
+		{
+			long l1 = System.currentTimeMillis(); 
 
-            //System.out.print("fc ::"+ fc);
+			//System.out.print("fc ::"+ fc);
             // Get the short and full form rnids for further use.
             String rchain = rs.getString("RChain");
             System.out.println("\n RChain : " + rchain);
             String shortRchain = rs.getString("short_RChain");
             System.out.println(" Short RChain : " + shortRchain);
-            // Oct 16 2013
-            // initialize the cur_CT_Table, at very beginning we will use _counts table to create the _flat table
+			// Oct 16 2013
+			// initialize the cur_CT_Table, at very beginning we will use _counts table to create the _flat table
             String cur_CT_Table = "`" + shortRchain.replace("`", "") + "_counts`";
-            System.out.println(" cur_CT_Table : " + cur_CT_Table);
-            // counts represents the ct tables where all relationships in Rchain are true
+			System.out.println(" cur_CT_Table : " + cur_CT_Table);
+			// counts represents the ct tables where all relationships in Rchain are true
 
-            //  create new statement
-            Statement st1 = con_BN.createStatement();
+			//  create new statement
+			Statement st1 = con_BN.createStatement();
             ResultSet rs1 = st1.executeQuery(
                 "SELECT DISTINCT parent, removed, short_rnid " +
                 "FROM lattice_rel " +
@@ -312,318 +599,318 @@ public class BayesBaseCT_SortMerge {
                 "WHERE child = '" + rchain + "' " +
                 "ORDER BY removed ASC;"
             ); // members of rchain
-            
-            while(rs1.next())
-            {       
-                long l2 = System.currentTimeMillis(); 
-                String parent = rs1.getString("parent");
-                    System.out.println("\n parent : " + parent);
-                String removed = rs1.getString("removed");
-                    System.out.println("\n removed : " + removed);  
+			
+			while(rs1.next())
+			{		
+				long l2 = System.currentTimeMillis(); 
+				String parent = rs1.getString("parent");
+					System.out.println("\n parent : " + parent);
+				String removed = rs1.getString("removed");
+					System.out.println("\n removed : " + removed);	
                 String removedShort = rs1.getString("short_rnid");
                 System.out.println("\n removed short : " + removedShort);
                 String BaseName = "`" + shortRchain.replace("`", "") + "_" + removedShort.replace("`", "") + "`";
-                System.out.println(" BaseName : " + BaseName );
-                
-                Statement st2 = con_BN.createStatement();
-                Statement st3 = con_CT.createStatement();
-                    
-                //  create select query string  
-                
-                            
-                ResultSet rs2 = st2.executeQuery("SELECT DISTINCT Entries FROM MetaQueries WHERE Lattice_Point = '" + rchain + "' and '"+removed+"' = EntryType and ClauseType = 'SELECT' and TableType = 'Star';");
-                String selectString = makeCommaSepQuery(rs2, "Entries", " , ");         
-                    System.out.println("Select String : " + selectString);
-                rs2.close();
-                //  create mult query string
-                ResultSet rs3 = st2.executeQuery("SELECT DISTINCT Entries FROM MetaQueries WHERE Lattice_Point = '" + rchain + "' and '"+removed+"' = EntryType and ClauseType = 'FROM' and TableType = 'Star';");
-                String MultString = makeStarSepQuery(rs3, "Entries", " * ");
-                    System.out.println("Mult String : " + MultString+ " as `MULT`");
-                rs3.close();
-                //  create from query string
-                ResultSet rs4 = st2.executeQuery("SELECT DISTINCT Entries FROM MetaQueries WHERE Lattice_Point = '" + rchain + "' and '"+removed+"' = EntryType and ClauseType = 'FROM' and TableType = 'Star';");
-                String fromString = makeCommaSepQuery(rs4, "Entries", " , ");
-                    System.out.println("From String : " + fromString);          
-                rs4.close();
-                //  create where query string
-                ResultSet rs5 = st2.executeQuery("SELECT DISTINCT Entries FROM MetaQueries WHERE Lattice_Point = '" + rchain + "' and '"+removed+"' = EntryType and ClauseType = 'WHERE' and TableType = 'Star';");
-                String whereString = makeCommaSepQuery(rs5, "Entries", " and ");
-                    System.out.println("Where String : " + whereString);
-                rs5.close();
-                //  create the final query
-                String queryString ="";
-                if (!whereString.isEmpty())     
-                    queryString = "Select " +  MultString+ " as `MULT` ,"+selectString + " from " + fromString  + " where " + whereString;
-                else 
-                    queryString = "Select " +  MultString+ " as `MULT` ,"+selectString + " from " + fromString;
-                System.out.println("Query String : " + queryString );   
-                
-                //make the rnid shorter 
-                String rnid_or=removedShort;
-            
+				System.out.println(" BaseName : " + BaseName );
+				
+				Statement st2 = con_BN.createStatement();
+				Statement st3 = con_CT.createStatement();
+					
+				//  create select query string	
+				
+							
+				ResultSet rs2 = st2.executeQuery("SELECT DISTINCT Entries FROM MetaQueries WHERE Lattice_Point = '" + rchain + "' and '"+removed+"' = EntryType and ClauseType = 'SELECT' and TableType = 'Star';");
+				String selectString = makeCommaSepQuery(rs2, "Entries", " , ");			
+					System.out.println("Select String : " + selectString);
+				rs2.close();
+				//  create mult query string
+				ResultSet rs3 = st2.executeQuery("SELECT DISTINCT Entries FROM MetaQueries WHERE Lattice_Point = '" + rchain + "' and '"+removed+"' = EntryType and ClauseType = 'FROM' and TableType = 'Star';");
+				String MultString = makeStarSepQuery(rs3, "Entries", " * ");
+					System.out.println("Mult String : " + MultString+ " as `MULT`");
+				rs3.close();
+				//  create from query string
+				ResultSet rs4 = st2.executeQuery("SELECT DISTINCT Entries FROM MetaQueries WHERE Lattice_Point = '" + rchain + "' and '"+removed+"' = EntryType and ClauseType = 'FROM' and TableType = 'Star';");
+				String fromString = makeCommaSepQuery(rs4, "Entries", " , ");
+					System.out.println("From String : " + fromString);			
+				rs4.close();
+				//  create where query string
+				ResultSet rs5 = st2.executeQuery("SELECT DISTINCT Entries FROM MetaQueries WHERE Lattice_Point = '" + rchain + "' and '"+removed+"' = EntryType and ClauseType = 'WHERE' and TableType = 'Star';");
+				String whereString = makeCommaSepQuery(rs5, "Entries", " and ");
+					System.out.println("Where String : " + whereString);
+				rs5.close();
+				//  create the final query
+				String queryString ="";
+				if (!whereString.isEmpty())		
+					queryString = "Select " +  MultString+ " as `MULT` ,"+selectString + " from " + fromString  + " where " + whereString;
+				else 
+					queryString = "Select " +  MultString+ " as `MULT` ,"+selectString + " from " + fromString;
+				System.out.println("Query String : " + queryString );	
+				
+				//make the rnid shorter 
+				String rnid_or=removedShort;
+			
                 String cur_star_Table = "`" + removedShort.replace("`", "") + len + "_" + fc + "_star`";
-                String createStarString = "create table "+cur_star_Table +" as "+queryString;
-                    
-            
-                System.out.println("\n create star String : " + createStarString );
-                st3.execute(createStarString);      //create star table     
-            
-                 //adding  covering index May 21
-                //create index string
-                ResultSet rs15 = st2.executeQuery("select column_name as Entries from information_schema.columns where table_schema = '"+databaseName_CT+"' and table_name = '"+cur_star_Table.replace("`","")+"';");
-                String IndexString = makeIndexQuery(rs15, "Entries", " , ");
-                //System.out.println("Index String : " + IndexString);
-                //System.out.println("alter table "+cur_star_Table+" add index "+cur_star_Table+"   ( "+IndexString+" );");
-                st3.execute("alter table "+cur_star_Table+" add index "+cur_star_Table+"   ( "+IndexString+" );");       
-                long l3 = System.currentTimeMillis(); 
-                System.out.print("Building Time(ms) for "+cur_star_Table+ " : "+(l3-l2)+" ms.\n");
-                //staring to create the _flat table
-                // Oct 16 2013
-                // here is the wrong version that always uses _counts table to generate the _flat table. 
-                //String    cur_CT_Table="`"+rchain.replace("`", "")+"_counts`";
-                // cur_CT_Table should be the one generated in the previous iteration
-                // for the very first iteration, it's _counts table
-                System.out.println("cur_CT_Table is : " + cur_CT_Table);
+				String createStarString = "create table "+cur_star_Table +" as "+queryString;
+					
+			
+				System.out.println("\n create star String : " + createStarString );
+				st3.execute(createStarString);		//create star table		
+			
+				 //adding  covering index May 21
+				//create index string
+				ResultSet rs15 = st2.executeQuery("select column_name as Entries from information_schema.columns where table_schema = '"+databaseName_CT+"' and table_name = '"+cur_star_Table.replace("`","")+"';");
+				String IndexString = makeIndexQuery(rs15, "Entries", " , ");
+				//System.out.println("Index String : " + IndexString);
+				//System.out.println("alter table "+cur_star_Table+" add index "+cur_star_Table+"   ( "+IndexString+" );");
+				st3.execute("alter table "+cur_star_Table+" add index "+cur_star_Table+"   ( "+IndexString+" );");       
+				long l3 = System.currentTimeMillis(); 
+				System.out.print("Building Time(ms) for "+cur_star_Table+ " : "+(l3-l2)+" ms.\n");
+				//staring to create the _flat table
+				// Oct 16 2013
+				// here is the wrong version that always uses _counts table to generate the _flat table. 
+				//String 	cur_CT_Table="`"+rchain.replace("`", "")+"_counts`";
+				// cur_CT_Table should be the one generated in the previous iteration
+				// for the very first iteration, it's _counts table
+				System.out.println("cur_CT_Table is : " + cur_CT_Table);
 
                 String cur_flat_Table = "`" + removedShort.replace("`", "") + len + "_" + fc + "_flat`";
-                String queryStringflat = "select sum("+cur_CT_Table+".`MULT`) as 'MULT', "+selectString + " from " +cur_CT_Table+" group by  "+ selectString +";" ;
-                String createStringflat = "create table "+cur_flat_Table+" as "+queryStringflat;
-                System.out.println("\n create flat String : " + createStringflat );         
-                st3.execute(createStringflat);      //create flat table
-            
-                 //adding  covering index May 21
-                //create index string
-                ResultSet rs25 = st2.executeQuery("select column_name as Entries from information_schema.columns where table_schema = '"+databaseName_CT+"' and table_name = '"+cur_flat_Table.replace("`","")+"';");
-                String IndexString2 = makeIndexQuery(rs25, "Entries", " , ");
-                //System.out.println("Index String : " + IndexString2);
-                //System.out.println("alter table "+cur_flat_Table+" add index "+cur_flat_Table+"   ( "+IndexString2+" );");
-                st3.execute("alter table "+cur_flat_Table+" add index "+cur_flat_Table+"   ( "+IndexString2+" );");
-                long l4 = System.currentTimeMillis(); 
-                System.out.print("Building Time(ms) for "+cur_flat_Table+ " : "+(l4-l3)+" ms.\n");
-                /**********starting to create _flase table***using sort_merge*******************************/
-                // starting to create _flase table : part1
+				String queryStringflat = "select sum("+cur_CT_Table+".`MULT`) as 'MULT', "+selectString + " from " +cur_CT_Table+" group by  "+ selectString +";" ;
+				String createStringflat = "create table "+cur_flat_Table+" as "+queryStringflat;
+				System.out.println("\n create flat String : " + createStringflat );			
+				st3.execute(createStringflat);		//create flat table
+			
+				 //adding  covering index May 21
+				//create index string
+				ResultSet rs25 = st2.executeQuery("select column_name as Entries from information_schema.columns where table_schema = '"+databaseName_CT+"' and table_name = '"+cur_flat_Table.replace("`","")+"';");
+				String IndexString2 = makeIndexQuery(rs25, "Entries", " , ");
+				//System.out.println("Index String : " + IndexString2);
+				//System.out.println("alter table "+cur_flat_Table+" add index "+cur_flat_Table+"   ( "+IndexString2+" );");
+				st3.execute("alter table "+cur_flat_Table+" add index "+cur_flat_Table+"   ( "+IndexString2+" );");
+				long l4 = System.currentTimeMillis(); 
+				System.out.print("Building Time(ms) for "+cur_flat_Table+ " : "+(l4-l3)+" ms.\n");
+				/**********starting to create _flase table***using sort_merge*******************************/
+				// starting to create _flase table : part1
                 String cur_false_Table = "`" + removedShort.replace("`", "") + len + "_" + fc + "_false`";
-                
-                //create false table                    
-                //Sort_merge5.sort_merge(cur_star_Table,cur_flat_Table,cur_false_Table,con3);
-                //Sort_merge4.sort_merge(cur_star_Table,cur_flat_Table,cur_false_Table,con3);
-                Sort_merge3.sort_merge(cur_star_Table,cur_flat_Table,cur_false_Table,con_CT);
+				
+				//create false table					
+				//Sort_merge5.sort_merge(cur_star_Table,cur_flat_Table,cur_false_Table,con3);
+				//Sort_merge4.sort_merge(cur_star_Table,cur_flat_Table,cur_false_Table,con3);
+				Sort_merge3.sort_merge(cur_star_Table,cur_flat_Table,cur_false_Table,con_CT);
                  // a separate procedure for computing the false table as the mult difference between star and flat
                  // trying to optimize this big join
-                
-                 //adding  covering index May 21
-                //create index string
-                ResultSet rs35 = st2.executeQuery("select column_name as Entries from information_schema.columns where table_schema = '"+databaseName_CT+"' and table_name = '"+cur_false_Table.replace("`","")+"';");
-                String IndexString3 = makeIndexQuery(rs35, "Entries", " , ");
-                //System.out.println("Index String : " + IndexString3);
-                //System.out.println("alter table "+cur_false_Table+" add index "+cur_false_Table+"   ( "+IndexString3+" );");
-                st3.execute("alter table "+cur_false_Table+" add index "+cur_false_Table+"   ( "+IndexString3+" );");       
-                long l5 = System.currentTimeMillis(); 
-                System.out.print("Building Time(ms) for "+cur_false_Table+ " : "+(l5-l4)+" ms.\n");
-         
-                // staring to create the CT table
-                ResultSet rs_45 = st2.executeQuery("select column_name as Entries from information_schema.columns where table_schema = '"+databaseName_CT+"' and table_name = '"+cur_CT_Table.replace("`","")+"';");
-                String CTJoinString = makeUnionSepQuery(rs_45, "Entries", " , ");
-                //System.out.println("select column_name as Entries from information_schema.columns where table_schema = '"+databaseName3+"' and table_name = '"+cur_CT_Table.replace("`","")+"';");
-                System.out.println("CT Join String : " + CTJoinString);
-                
-                //join false table with join table to add in rnid (= F) and 2nid (= n/a). then can union with CT table
-                String QueryStringCT = "select "+CTJoinString+" from "+cur_CT_Table + " union " + "select "+CTJoinString+" from " + cur_false_Table +", `" + rnid_or.replace("`", "") +"_join`";
-                //System.out.println("\n Query String for CT Table: "+ QueryStringCT);
-                
-                //String Next_CT_Table="OS_Dummy";
-                String Next_CT_Table="";
-                if (rs1.next())
-                    Next_CT_Table="`"+BaseName.replace("`", "")+"_CT`";
-                else                 
+				
+				 //adding  covering index May 21
+				//create index string
+				ResultSet rs35 = st2.executeQuery("select column_name as Entries from information_schema.columns where table_schema = '"+databaseName_CT+"' and table_name = '"+cur_false_Table.replace("`","")+"';");
+				String IndexString3 = makeIndexQuery(rs35, "Entries", " , ");
+				//System.out.println("Index String : " + IndexString3);
+				//System.out.println("alter table "+cur_false_Table+" add index "+cur_false_Table+"   ( "+IndexString3+" );");
+				st3.execute("alter table "+cur_false_Table+" add index "+cur_false_Table+"   ( "+IndexString3+" );");       
+				long l5 = System.currentTimeMillis(); 
+				System.out.print("Building Time(ms) for "+cur_false_Table+ " : "+(l5-l4)+" ms.\n");
+		 
+				// staring to create the CT table
+				ResultSet rs_45 = st2.executeQuery("select column_name as Entries from information_schema.columns where table_schema = '"+databaseName_CT+"' and table_name = '"+cur_CT_Table.replace("`","")+"';");
+				String CTJoinString = makeUnionSepQuery(rs_45, "Entries", " , ");
+				//System.out.println("select column_name as Entries from information_schema.columns where table_schema = '"+databaseName3+"' and table_name = '"+cur_CT_Table.replace("`","")+"';");
+				System.out.println("CT Join String : " + CTJoinString);
+				
+				//join false table with join table to add in rnid (= F) and 2nid (= n/a). then can union with CT table
+				String QueryStringCT = "select "+CTJoinString+" from "+cur_CT_Table + " union " + "select "+CTJoinString+" from " + cur_false_Table +", `" + rnid_or.replace("`", "") +"_join`";
+				//System.out.println("\n Query String for CT Table: "+ QueryStringCT);
+				
+				//String Next_CT_Table="OS_Dummy";
+				String Next_CT_Table="";
+				if (rs1.next())
+					Next_CT_Table="`"+BaseName.replace("`", "")+"_CT`";
+				else 				 
                     Next_CT_Table = "`" + shortRchain.replace("`", "") + "_CT`";
-                    
-                // Oct 16 2013
-                // preparing the CT table for next iteration
-                cur_CT_Table = Next_CT_Table;   
-                
-                //System.out.println("\n name for Next_CT_Table : "+Next_CT_Table);
-             
-                System.out.println("\n create CT table string: create table "+Next_CT_Table+" as " + QueryStringCT +"\n*****\n");
-                st3.execute("create  table "+Next_CT_Table+" as " + QueryStringCT);  //create CT table  
-                rs1.previous();
+					
+				// Oct 16 2013
+				// preparing the CT table for next iteration
+				cur_CT_Table = Next_CT_Table;	
+				
+				//System.out.println("\n name for Next_CT_Table : "+Next_CT_Table);
+			 
+				System.out.println("\n create CT table string: create table "+Next_CT_Table+" as " + QueryStringCT +"\n*****\n");
+				st3.execute("create  table "+Next_CT_Table+" as " + QueryStringCT);	 //create CT table	
+				rs1.previous();
 
-                //adding  covering index May 21
-                //create index string
-                ResultSet rs45 = st2.executeQuery("select column_name as Entries from information_schema.columns where table_schema = '"+databaseName_CT+"' and table_name = '"+Next_CT_Table.replace("`","")+"';");
-                String IndexString4 = makeIndexQuery(rs45, "Entries", " , ");
-                //System.out.println("Index String : " + IndexString4);
-                //System.out.println("alter table "+Next_CT_Table+" add index "+Next_CT_Table+"   ( "+IndexString4+" );");
-                st3.execute("alter table "+Next_CT_Table+" add index "+Next_CT_Table+"   ( "+IndexString4+" );");       
+				//adding  covering index May 21
+				//create index string
+				ResultSet rs45 = st2.executeQuery("select column_name as Entries from information_schema.columns where table_schema = '"+databaseName_CT+"' and table_name = '"+Next_CT_Table.replace("`","")+"';");
+				String IndexString4 = makeIndexQuery(rs45, "Entries", " , ");
+				//System.out.println("Index String : " + IndexString4);
+				//System.out.println("alter table "+Next_CT_Table+" add index "+Next_CT_Table+"   ( "+IndexString4+" );");
+				st3.execute("alter table "+Next_CT_Table+" add index "+Next_CT_Table+"   ( "+IndexString4+" );");       
 
-                fc++;   
-                
-                //  close statements
-                st2.close();            
-                st3.close();
-                long l6 = System.currentTimeMillis(); 
-                System.out.print("Building Time(ms) for "+cur_CT_Table+ " : "+(l6-l5)+" ms.\n");
-            }
-            st1.close();
-            rs1.close();
-        }
-        //System.out.println("count "+count+"\n");
-        rs.close();
-        st.close();
-        long l2 = System.currentTimeMillis(); //@zqian : measure structure learning time
-        //System.out.print("Building Time(ms): "+(l2-l)+" ms.\n");
-        System.out.println("\n Build CT_RChain_TABLES for length = "+len+" are DONE \n" );
-    }
+				fc++;	
+				
+				//  close statements
+				st2.close();			
+				st3.close();
+				long l6 = System.currentTimeMillis(); 
+				System.out.print("Building Time(ms) for "+cur_CT_Table+ " : "+(l6-l5)+" ms.\n");
+			}
+			st1.close();
+			rs1.close();
+		}
+		//System.out.println("count "+count+"\n");
+		rs.close();
+		st.close();
+		long l2 = System.currentTimeMillis(); //@zqian : measure structure learning time
+		//System.out.print("Building Time(ms): "+(l2-l)+" ms.\n");
+		System.out.println("\n Build CT_RChain_TABLES for length = "+len+" are DONE \n" );
+	}
 
-    /* building pvars_counts*/
-    public static void BuildCT_Pvars() throws SQLException, IOException {
-        long l = System.currentTimeMillis(); //@zqian : measure structure learning time
-        Statement st = con_BN.createStatement();
-        st.execute("Drop schema if exists " + databaseName_CT + ";");
-        st.execute("Create schema if not exists " + databaseName_CT + ";");
-        ResultSet rs = st.executeQuery("select * from PVariables;");
+	/* building pvars_counts*/
+	public static void BuildCT_Pvars() throws SQLException, IOException {
+		long l = System.currentTimeMillis(); //@zqian : measure structure learning time
+		Statement st = con_BN.createStatement();
+		st.execute("Drop schema if exists " + databaseName_CT + ";");
+		st.execute("Create schema if not exists " + databaseName_CT + ";");
+		ResultSet rs = st.executeQuery("select * from PVariables;");
 
-        while(rs.next()){
-            //  get pvid for further use
-            String pvid = rs.getString("pvid");
-            System.out.println("pvid : " + pvid);
-            //  create new statement
-            Statement st2 = con_BN.createStatement();
-            Statement st3 = con_CT.createStatement();
-            //  create select query string
-            ResultSet rs2 = st2.executeQuery("select distinct Entries from MetaQueries where Lattice_Point = '" + pvid + "' and ClauseType = 'SELECT' and TableType = 'Counts' and EntryType = 'aggregate' union select distinct Entries from MetaQueries where Lattice_Point = '" + pvid + "' and ClauseType = 'SELECT' and TableType = 'Counts' and EntryType <> 'aggregate';");
-            String selectString = makeCommaSepQuery(rs2, "Entries", " , ");
-            System.out.println("Select String : " + selectString);
-            //  create from query string
-            ResultSet rs3 = st2.executeQuery("select distinct Entries from MetaQueries where Lattice_Point = '" + pvid + "' and ClauseType = 'FROM' and TableType = 'Counts' ;");
-            String fromString = makeCommaSepQuery(rs3, "Entries", " , ");
-            //System.out.println("From String : " + fromString);and TableType = 'Counts'and TableType = 'Counts'
+		while(rs.next()){
+			//  get pvid for further use
+			String pvid = rs.getString("pvid");
+			System.out.println("pvid : " + pvid);
+			//  create new statement
+			Statement st2 = con_BN.createStatement();
+			Statement st3 = con_CT.createStatement();
+			//  create select query string
+			ResultSet rs2 = st2.executeQuery("select distinct Entries from MetaQueries where Lattice_Point = '" + pvid + "' and ClauseType = 'SELECT' and TableType = 'Counts' and EntryType = 'aggregate' union select distinct Entries from MetaQueries where Lattice_Point = '" + pvid + "' and ClauseType = 'SELECT' and TableType = 'Counts' and EntryType <> 'aggregate';");
+			String selectString = makeCommaSepQuery(rs2, "Entries", " , ");
+			System.out.println("Select String : " + selectString);
+			//  create from query string
+			ResultSet rs3 = st2.executeQuery("select distinct Entries from MetaQueries where Lattice_Point = '" + pvid + "' and ClauseType = 'FROM' and TableType = 'Counts' ;");
+			String fromString = makeCommaSepQuery(rs3, "Entries", " , ");
+			//System.out.println("From String : " + fromString);and TableType = 'Counts'and TableType = 'Counts'
 
-            ResultSet rs_6 = st2.executeQuery("select distinct Entries from MetaQueries where Lattice_Point = '" + pvid + "' and ClauseType = 'GROUPBY' and TableType = 'Counts' ;");
-            String GroupByString = makeCommaSepQuery(rs_6, "Entries", " , ");
-            //System.out.println("GroupBy String : " + GroupByString);
+			ResultSet rs_6 = st2.executeQuery("select distinct Entries from MetaQueries where Lattice_Point = '" + pvid + "' and ClauseType = 'GROUPBY' and TableType = 'Counts' ;");
+			String GroupByString = makeCommaSepQuery(rs_6, "Entries", " , ");
+			//System.out.println("GroupBy String : " + GroupByString);
 
-            /*
-             *  Check for groundings on pvid
-             *  If exist, add as where clause
-             */
-            System.out.println( "con_BN:SELECT id FROM Groundings WHERE pvid = '"+pvid+"';" );
-            
-            ResultSet rsGrounding = null;
-            String whereString = "";
-            
-            try
-            {
-                rsGrounding = st2.executeQuery("select distinct Entries from MetaQueries where Lattice_Point = '" + pvid + "' and ClauseType = 'WHERE' and TableType = 'Counts' ;");
-            }
-            catch( MySQLSyntaxErrorException e )
-            {
-                System.out.println( "No WHERE clause for groundings" );
-            }
-            
-            if ( null != rsGrounding )
-            {
+			/*
+			 *  Check for groundings on pvid
+			 *  If exist, add as where clause
+			 */
+			System.out.println( "con_BN:SELECT id FROM Groundings WHERE pvid = '"+pvid+"';" );
+			
+			ResultSet rsGrounding = null;
+			String whereString = "";
+			
+			try
+			{
+				rsGrounding = st2.executeQuery("select distinct Entries from MetaQueries where Lattice_Point = '" + pvid + "' and ClauseType = 'WHERE' and TableType = 'Counts' ;");
+			}
+			catch( MySQLSyntaxErrorException e )
+			{
+				System.out.println( "No WHERE clause for groundings" );
+			}
+			
+			if ( null != rsGrounding )
+			{
 
-                whereString = makeCommaSepQuery(rsGrounding, "Entries", " AND ");
+				whereString = makeCommaSepQuery(rsGrounding, "Entries", " AND ");
 
-            }
-            
-            System.out.println( "whereString:" + whereString );
-            
-            // OLD CODE
-            
-//          ResultSet rsGrounding = null;
-//          try
-//          {
-//              rsGrounding = st2.executeQuery("SELECT id FROM Groundings WHERE pvid = '"+pvid+"';");
-//          }
-//          catch( MySQLSyntaxErrorException e )
-//          {
-//              System.out.println( "No Groundings table." );
-//          }
+			}
+			
+			System.out.println( "whereString:" + whereString );
+			
+			// OLD CODE
+			
+// 			ResultSet rsGrounding = null;
+// 			try
+// 			{
+// 				rsGrounding = st2.executeQuery("SELECT id FROM Groundings WHERE pvid = '"+pvid+"';");
+// 			}
+// 			catch( MySQLSyntaxErrorException e )
+// 			{
+// 				System.out.println( "No Groundings table." );
+// 			}
 
-//          String whereString = "";
+// 			String whereString = "";
 
-//          if ( null != rsGrounding )
-//          {
-//              if ( rsGrounding.absolute(1) )
-//              {
-//                  System.out.println( "Grounding for pvid=" + pvid + ":" +
-//                                      rsGrounding.getString(1) );
+// 			if ( null != rsGrounding )
+// 			{
+// 				if ( rsGrounding.absolute(1) )
+// 				{
+// 					System.out.println( "Grounding for pvid=" + pvid + ":" +
+// 										rsGrounding.getString(1) );
 
-//                  /*
-//                   * Get pvar id name
-//                   */
-//                  Statement st0 = con_BN.createStatement();
+// 					/*
+// 					 * Get pvar id name
+// 					 */
+// 					Statement st0 = con_BN.createStatement();
 
-//                  ResultSet rs0 = st0.executeQuery( "SELECT TABLE_NAME FROM PVariables " +
-//                                                    "WHERE pvid = '" + pvid + "';" );
+// 					ResultSet rs0 = st0.executeQuery( "SELECT TABLE_NAME FROM PVariables " +
+// 													  "WHERE pvid = '" + pvid + "';" );
 
-//                  if ( !rs0.first() )
-//                  {
-//                      System.out.println( "Failed to get pvid." );
-//                      return;
-//                  }
+// 					if ( !rs0.first() )
+// 					{
+// 						System.out.println( "Failed to get pvid." );
+// 						return;
+// 					}
 
-//                  String pvidTableName = rs0.getString( 1 );
+// 					String pvidTableName = rs0.getString( 1 );
 
-//                  rs0.close();
+// 					rs0.close();
 
-//                  rs0 = st0.executeQuery( "SELECT COLUMN_NAME FROM EntityTables " +
-//                                          "WHERE TABLE_NAME = '" + pvidTableName + "';" );
+// 					rs0 = st0.executeQuery( "SELECT COLUMN_NAME FROM EntityTables " +
+// 							  				"WHERE TABLE_NAME = '" + pvidTableName + "';" );
 
-//                  if ( !rs0.first() )
-//                  {
-//                      System.out.println( "Failed to get pvid." );
-//                      return;
-//                  }
+// 					if ( !rs0.first() )
+// 					{
+// 						System.out.println( "Failed to get pvid." );
+// 						return;
+// 					}
 
-//                  String pvidActualId = rs0.getString( 1 );
+// 					String pvidActualId = rs0.getString( 1 );
 
-//                  rs0.close();
+// 					rs0.close();
 
-//                  st0.close();
+// 					st0.close();
 
-//                  whereString += " where " + pvid + "." +
-//                                 pvidActualId + " = " +
-//                                 rsGrounding.getString(1);
-//                  System.out.println( "whereString:" + whereString );
-//              }
+// 					whereString += " where " + pvid + "." +
+// 								   pvidActualId + " = " +
+// 								   rsGrounding.getString(1);
+// 					System.out.println( "whereString:" + whereString );
+// 				}
 
-//              rsGrounding.close();
-//          }
+// 				rsGrounding.close();
+// 			}
 // // stop old code here
 
-            //  create the final query
-            String queryString = "Select " + selectString + " from " +
-                                 fromString + whereString;
-                                 
+			//  create the final query
+			String queryString = "Select " + selectString + " from " +
+								 fromString + whereString;
+								 
 //this seems unnecessarily complicated even to deal with continuos variables. OS August 22, 2017
 
-            if (!cont.equals("1"))
-                if (!GroupByString.isEmpty()) queryString = queryString + " group by"  + GroupByString;
+			if (!cont.equals("1"))
+				if (!GroupByString.isEmpty()) queryString = queryString + " group by"  + GroupByString;
 
-            //System.out.println("Query String : " + queryString );
-            System.out.println("Create String : " + "create table "+pvid+"_counts"+" as "+queryString );
-            st3.execute("create table "+pvid+"_counts"+" as "+queryString);
-            //adding  covering index May 21
-            //create index string
-            ResultSet rs4 = st2.executeQuery("select column_name as Entries from information_schema.columns where table_schema = '"+databaseName_CT+"' and table_name = '"+pvid+"_counts';");
-            String IndexString = makeIndexQuery(rs4, "Entries", " , ");
-            //System.out.println("Index String : " + IndexString);
-            st3.execute("alter table "+pvid+"_counts"+" add  index "+pvid+"_Index   ( "+IndexString+" );");
+			//System.out.println("Query String : " + queryString );
+			System.out.println("Create String : " + "create table "+pvid+"_counts"+" as "+queryString );
+			st3.execute("create table "+pvid+"_counts"+" as "+queryString);
+			//adding  covering index May 21
+			//create index string
+			ResultSet rs4 = st2.executeQuery("select column_name as Entries from information_schema.columns where table_schema = '"+databaseName_CT+"' and table_name = '"+pvid+"_counts';");
+			String IndexString = makeIndexQuery(rs4, "Entries", " , ");
+			//System.out.println("Index String : " + IndexString);
+			st3.execute("alter table "+pvid+"_counts"+" add  index "+pvid+"_Index   ( "+IndexString+" );");
 
-            //  close statements
-            st2.close();
-            st3.close();
-        }
+			//  close statements
+			st2.close();
+			st3.close();
+		}
 
-        rs.close();
-        st.close();
-        long l2 = System.currentTimeMillis(); //@zqian : measure structure learning time
-        System.out.print("Building Time(ms) for Pvariables counts: "+(l2-l)+" ms.\n");
-        System.out.println("\n Pvariables are DONE \n" );
-    }
+		rs.close();
+		st.close();
+		long l2 = System.currentTimeMillis(); //@zqian : measure structure learning time
+		System.out.print("Building Time(ms) for Pvariables counts: "+(l2-l)+" ms.\n");
+		System.out.println("\n Pvariables are DONE \n" );
+	}
 
     /**
      * building the RNodes_counts tables
@@ -994,7 +1281,7 @@ public class BayesBaseCT_SortMerge {
             Statement st2 = con_BN.createStatement();
             Statement st3 = con_CT.createStatement();
             /**********starting to create _flase table***using sort_merge*******************************/
-            //Sort_merge5.sort_merge("`"+rchain.replace("`", "")+"_star`","`"+rchain.replace("`", "") +"_flat`","`"+rchain.replace("`", "") +"_false`",con3);
+    		//Sort_merge5.sort_merge("`"+rchain.replace("`", "")+"_star`","`"+rchain.replace("`", "") +"_flat`","`"+rchain.replace("`", "") +"_false`",con3);
             //Sort_merge4.sort_merge("`"+rchain.replace("`", "")+"_star`","`"+rchain.replace("`", "") +"_flat`","`"+rchain.replace("`", "") +"_false`",con3);
             Sort_merge3.sort_merge(
                 "`" + shortRchain.replace("`", "") + "_star`",
@@ -1004,7 +1291,7 @@ public class BayesBaseCT_SortMerge {
             );
             // computing false table as mult difference between star and false. Separate procedure for optimizing this big join.
             
-            //adding  covering index May 21
+          	//adding  covering index May 21
             //create index string
             ResultSet rs15 = st2.executeQuery(
                 "SELECT column_name AS Entries " +
@@ -1014,14 +1301,14 @@ public class BayesBaseCT_SortMerge {
             );
             String IndexString = makeIndexQuery(rs15, "Entries", " , ");
             //System.out.println("Index String : " + IndexString);
-            //  System.out.println("alter table `"+rchain.replace("`", "") +"_false`"+" add index `"+rchain.replace("`", "") +"_false`   ( "+IndexString+" );");
+        	//	System.out.println("alter table `"+rchain.replace("`", "") +"_false`"+" add index `"+rchain.replace("`", "") +"_false`   ( "+IndexString+" );");
             st3.execute(
                 "ALTER TABLE `" + shortRchain.replace("`", "") + "_false` " +
                 "ADD INDEX `" + shortRchain.replace("`", "") +"_false` (" + IndexString + ");"
             );
 
             //building the _CT table        //expanding the columns // May 16
-            // must specify the columns, or there's will a mistake in the table that mismatch the columns
+           	// must specify the columns, or there's will a mistake in the table that mismatch the columns
             ResultSet rs5 = st3.executeQuery(
                 "SELECT column_name AS Entries " +
                 "FROM information_schema.columns " +
@@ -1042,7 +1329,7 @@ public class BayesBaseCT_SortMerge {
             System.out.println("\n create CT table String : " + createCTString );
             st3.execute(createCTString);
 
-            //adding  covering index May 21
+          	//adding  covering index May 21
             //create index string
             ResultSet rs25 = st2.executeQuery(
                 "SELECT column_name AS Entries " +
@@ -1123,6 +1410,33 @@ public class BayesBaseCT_SortMerge {
     }
 
     /**
+     * for _false: union part
+     * @param rs
+     * @param colName
+     * @param del
+     * @param Rchain
+     * @return
+     * @throws SQLException
+     */
+    public static String makeTSepQuery(ResultSet rs, String colName, String del, String Rchain) throws SQLException {
+
+        ArrayList<String> parts = new ArrayList<String>();
+
+        while(rs.next()){
+            //stringQuery += rs.getString(colName) + del;
+            String temp=rs.getString(colName);
+            String temp1=temp.replace("`", "");
+            temp = "`"+Rchain.replace("`", "") +"_star`"+".`"+temp1+"`";
+            parts.add(temp);
+
+        }
+        //stringQuery = stringQuery.substring(0, stringQuery.length() - del.length());
+
+        return StringUtils.join(parts,del);
+        //return stringQuery;
+    }
+
+    /**
      * for _star  adding "`"
      * @param rs
      * @param colName
@@ -1157,7 +1471,7 @@ public class BayesBaseCT_SortMerge {
      * @throws SQLException
      */
     public static String makeUnionSepQuery(ResultSet rs, String colName, String del) throws SQLException {
-    
+	
         ArrayList<String> parts = new ArrayList<String>();
 
         while(rs.next()){
@@ -1175,13 +1489,13 @@ public class BayesBaseCT_SortMerge {
      * @throws SQLException
      */
     public static String makeCommaSepQuery(ResultSet rs, String colName, String del) throws SQLException {
-        
-        ArrayList<String> parts = new ArrayList<String>();
-        while(rs.next()){
-            parts.add(rs.getString(colName));
-        }
-        return StringUtils.join(parts,del);
-    }
+		
+		ArrayList<String> parts = new ArrayList<String>();
+		while(rs.next()){
+			parts.add(rs.getString(colName));
+		}
+		return StringUtils.join(parts,del);
+	}
 
     /**
      * for len>1, false table, part 1, where string
@@ -1208,6 +1522,28 @@ public class BayesBaseCT_SortMerge {
 
         return StringUtils.join(parts,del);
         //return stringQuery;
+    }
+
+    /**
+     * for len>1, false table, part 1, part 2, select string
+     * @param rs
+     * @param colName
+     * @param del
+     * @param cur_flat_Table
+     * @return
+     * @throws SQLException
+     */
+    public static String makeFalseSepQuery(ResultSet rs, String colName, String del, String cur_flat_Table) throws SQLException {
+        ArrayList<String> parts = new ArrayList<String>();
+
+        while(rs.next()){
+            String temp=rs.getString(colName);
+            String temp1=temp.replace("`", "");
+            temp = "`"+cur_flat_Table.replace("`", "") +"`.`"+temp1+"`";
+            parts.add(temp);
+        }
+
+        return StringUtils.join(parts,del);
     }
 
     /**
@@ -1240,26 +1576,27 @@ public class BayesBaseCT_SortMerge {
      * @return
      * @throws SQLException
      */
-    public static ArrayList<String> getColumns(ResultSet rs) throws SQLException {
-        ArrayList<String> cols = new ArrayList<String>();
-        ResultSetMetaData metaData = rs.getMetaData();
-        rs.next();
+	public static ArrayList<String> getColumns(ResultSet rs) throws SQLException {
+		ArrayList<String> cols = new ArrayList<String>();
+		ResultSetMetaData metaData = rs.getMetaData();
+		rs.next();
 
-        int columnCount = metaData.getColumnCount();
-        for (int i = 1; i <= columnCount; i++) {
-            cols.add(metaData.getColumnLabel(i));
-        }
-        return cols;
-    }
+		int columnCount = metaData.getColumnCount();
+		for (int i = 1; i <= columnCount; i++) {
+			cols.add(metaData.getColumnLabel(i));
+		}
+		return cols;
+	}
 
     /**
      * Disconnect all the databases
      * @throws SQLException
      */
-    public static void disconnectDB() throws SQLException {
-        con_std.close();
-        con_BN.close();
-        con_CT.close();
-        con_setup.close();
-    }
+	public static void disconnectDB() throws SQLException {
+		con_std.close();
+		con_BN.close();
+		con_CT.close();
+		con_setup.close();
+	}
 }
+
