@@ -111,7 +111,14 @@ public class BayesBaseH {
         rst1.absolute(1);
         rchain = rst1.getString(1);
         System.out.println(" ##### lattice is ready for use* "); // @zqian
-
+        
+        if(linkAnalysis) {
+        	st.execute(
+        			"INSERT IGNORE "
+        			+ "INTO Path_Required_Edges "
+        			+ "SELECT  DISTINCT  * "
+        			+ "FROM SchemaEdges;" );
+        }
         // Structure learning.
         StructureLearning(con2);
 
