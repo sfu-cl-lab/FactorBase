@@ -718,12 +718,20 @@ public class BayesBaseCT_SortMerge {
     public static void BuildCT_Rnodes_counts2(int len) throws SQLException, IOException {
        
          Statement st = con_BN.createStatement();
-        ResultSet rs = st.executeQuery("select name as RChain from lattice_set where lattice_set.length = " + len + ";");
+        ResultSet rs = st.executeQuery(            
+        		"SELECT short_rnid AS short_RChain, orig_rnid AS RChain " +
+                "FROM lattice_set " +
+                "JOIN lattice_mapping " +
+                "ON lattice_set.name = lattice_mapping.orig_rnid " +
+                "WHERE lattice_set.length = " + len + ";"
+            );        
         while(rs.next()){
 
             //  get rnid for further use
             String rchain = rs.getString("RChain");
             System.out.println("\n RChain : " + rchain);
+            String shortRchain = rs.getString("short_RChain");
+            System.out.println(" Short RChain : " + shortRchain);
 
             //  create new statement
             Statement st2 = con_BN.createStatement();
@@ -759,30 +767,30 @@ public class BayesBaseCT_SortMerge {
                 //System.out.println("Query String : " + queryString );
             }
 
-            String createString = "create table `"+rchain.replace("`", "") +"_counts`"+" as "+queryString;
+            String createString = "create table `"+shortRchain.replace("`", "") +"_counts`"+" as "+queryString;
             System.out.println("create String : " + createString );
             st3.execute(createString);
 
             //adding  covering index May 21
             //create index string
-            ResultSet rs5 = st2.executeQuery("select column_name as Entries from information_schema.columns where table_schema = '"+databaseName_CT+"' and table_name = '"+rchain.replace("`", "") +"_counts';");
+            ResultSet rs5 = st2.executeQuery("select column_name as Entries from information_schema.columns where table_schema = '"+databaseName_CT+"' and table_name = '"+shortRchain.replace("`", "") +"_counts';");
             String IndexString = makeIndexQuery(rs5, "Entries", " , ");
             //System.out.println("Index String : " + IndexString);
             //System.out.println("alter table `"+rchain.replace("`", "") +"_counts`"+" add index `"+rchain.replace("`", "") +"_Index`   ( "+IndexString+" );");
-            st3.execute("alter table `"+rchain.replace("`", "") +"_counts`"+" add index `"+rchain.replace("`", "") +"_Index`   ( "+IndexString+" );");
+            st3.execute("alter table `"+shortRchain.replace("`", "") +"_counts`"+" add index `"+shortRchain.replace("`", "") +"_Index`   ( "+IndexString+" );");
 
-            String createString_CT = "create table `"+rchain.replace("`", "") +"_CT`"+" as "+queryString;
+            String createString_CT = "create table `"+shortRchain.replace("`", "") +"_CT`"+" as "+queryString;
             System.out.println("create String : " + createString_CT );
             st3.execute(createString_CT);
 
             //adding  covering index May 21
             //create index string
             
-            ResultSet rs5_CT = st2.executeQuery("select column_name as Entries from information_schema.columns where table_schema = '"+databaseName_CT+"' and table_name = '"+rchain.replace("`", "") +"_CT';");
+            ResultSet rs5_CT = st2.executeQuery("select column_name as Entries from information_schema.columns where table_schema = '"+databaseName_CT+"' and table_name = '"+shortRchain.replace("`", "") +"_CT';");
             String IndexString_CT = makeIndexQuery(rs5_CT, "Entries", " , ");
             //System.out.println("Index String : " + IndexString);
             //System.out.println("alter table `"+rchain.replace("`", "") +"_counts`"+" add index `"+rchain.replace("`", "") +"_Index`   ( "+IndexString+" );");
-            st3.execute("alter table `"+rchain.replace("`", "") +"_CT`"+" add index `"+rchain.replace("`", "") +"_Index`   ( "+IndexString_CT+" );");
+            st3.execute("alter table `"+shortRchain.replace("`", "") +"_CT`"+" add index `"+shortRchain.replace("`", "") +"_Index`   ( "+IndexString_CT+" );");
 
 
             //  close statements
