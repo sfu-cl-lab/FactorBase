@@ -134,19 +134,13 @@ where
         AND lattice_membership.name in (select 
             lattice_set.name
         from
-            lattice_set
-        where
-            length = (select 
-                    max(length)
-                from
-                    lattice_set));
+            lattice_set);
+            
 ALTER TABLE SchemaEdges ADD INDEX `HashIn`  (`Rchain`,`child`,`parent`);
 
 CREATE TABLE  Path_Required_Edges like Path_BayesNets;/*May 10th*/
 insert ignore into Path_Required_Edges select distinct *    from        Knowledge_Required_Edges;
 /*union distinct  */
-insert ignore into Path_Required_Edges select  distinct *    from        SchemaEdges;
-
    
 CREATE TABLE Path_Forbidden_Edges like Path_BayesNets;/*May 10th*/
 insert ignore into Path_Forbidden_Edges select     distinct *    from        Knowledge_Forbidden_Edges ;
