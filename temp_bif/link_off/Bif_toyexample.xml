@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<BIF VERSION="0.3"  xmlns="http://www.cs.ubc.ca/labs/lci/fopi/ve/XMLBIFv0_3"
+xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+xsi:schemaLocation="http://www.cs.ubc.ca/labs/lci/fopi/ve/XMLBIFv0_3 http://www.cs.ubc.ca/labs/lci/fopi/ve/XMLBIFv0_3/XMLBIFv0_3.xsd">
+<NETWORK>
+<NAME>toyexample</NAME>
+<VARIABLE TYPE="nature">
+	<NAME>capability(Student0,Professor0)</NAME>
+	<OUTCOME>1</OUTCOME>
+	<OUTCOME>2</OUTCOME>
+	<OUTCOME>3</OUTCOME>
+	<PROPERTY> position=(6000.0,4000.0)</PROPERTY>
+</VARIABLE>
+<VARIABLE TYPE="nature">
+	<NAME>intelligence(Student0)</NAME>
+	<OUTCOME>1</OUTCOME>
+	<OUTCOME>2</OUTCOME>
+	<OUTCOME>3</OUTCOME>
+	<PROPERTY> position=(6200.0,4000.0)</PROPERTY>
+</VARIABLE>
+<VARIABLE TYPE="nature">
+	<NAME>popularity(Professor0)</NAME>
+	<OUTCOME>2</OUTCOME>
+	<OUTCOME>3</OUTCOME>
+	<PROPERTY> position=(6400.0,4000.0)</PROPERTY>
+</VARIABLE>
+<VARIABLE TYPE="nature">
+	<NAME>RA(Student0,Professor0)</NAME>
+	<OUTCOME>T</OUTCOME>
+	<PROPERTY> position=(6000.0,4200.0)</PROPERTY>
+</VARIABLE>
+<VARIABLE TYPE="nature">
+	<NAME>ranking(Student0)</NAME>
+	<OUTCOME>1</OUTCOME>
+	<OUTCOME>2</OUTCOME>
+	<PROPERTY> position=(6200.0,4200.0)</PROPERTY>
+</VARIABLE>
+<VARIABLE TYPE="nature">
+	<NAME>salary(Student0,Professor0)</NAME>
+	<OUTCOME>High</OUTCOME>
+	<OUTCOME>Low</OUTCOME>
+	<OUTCOME>Med</OUTCOME>
+	<PROPERTY> position=(6400.0,4200.0)</PROPERTY>
+</VARIABLE>
+<VARIABLE TYPE="nature">
+	<NAME>teachingability(Professor0)</NAME>
+	<OUTCOME>1</OUTCOME>
+	<OUTCOME>2</OUTCOME>
+	<PROPERTY> position=(6000.0,4400.0)</PROPERTY>
+</VARIABLE>
+<DEFINITION>
+	<FOR>capability(Student0,Professor0)</FOR>
+	<GIVEN>popularity(Professor0)</GIVEN>
+	<GIVEN>RA(Student0,Professor0)</GIVEN>
+	<TABLE> 0.200000 0.600000 0.200000 0.400000 0.200000 0.400000</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>intelligence(Student0)</FOR>
+	<GIVEN>capability(Student0,Professor0)</GIVEN>
+	<GIVEN>RA(Student0,Professor0)</GIVEN>
+	<GIVEN>ranking(Student0)</GIVEN>
+	<TABLE> 0.250000 0.500000 0.250000 0.333334 0.333333 0.333333 0.250000 0.500000 0.250000 0.500000 0.250000 0.250000 0.250000 0.250000 0.500000 0.333334 0.333333 0.333333</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>popularity(Professor0)</FOR>
+	<TABLE> 0.500000 0.500000</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>RA(Student0,Professor0)</FOR>
+	<TABLE> 1.000000</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>ranking(Student0)</FOR>
+	<GIVEN>RA(Student0,Professor0)</GIVEN>
+	<GIVEN>salary(Student0,Professor0)</GIVEN>
+	<TABLE> 0.750000 0.250000 0.666667 0.333333 0.333333 0.666667</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>salary(Student0,Professor0)</FOR>
+	<GIVEN>capability(Student0,Professor0)</GIVEN>
+	<GIVEN>RA(Student0,Professor0)</GIVEN>
+	<GIVEN>teachingability(Professor0)</GIVEN>
+	<TABLE> 0.250000 0.500000 0.250000 0.333334 0.333333 0.333333 0.250000 0.250000 0.500000 0.500000 0.250000 0.250000 0.500000 0.250000 0.250000 0.333334 0.333333 0.333333</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>teachingability(Professor0)</FOR>
+	<TABLE> 0.666667 0.333333</TABLE>
+</DEFINITION>
+</NETWORK>
+</BIF>
