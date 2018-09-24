@@ -112,6 +112,7 @@ public class BayesBaseH {
         rchain = rst1.getString(1);
         System.out.println(" ##### lattice is ready for use* "); // @zqian
         
+        // when LinkAnaylis is on, insert edges from SchemaEdges into Path_Required_Edges before structure learning
         if(linkAnalysis) {
         	st.execute(
         			"INSERT IGNORE "
@@ -121,6 +122,16 @@ public class BayesBaseH {
         }
         // Structure learning.
         StructureLearning(con2);
+        
+        // when LinkAnalysis is off, insert edges from SchemaEdges into Path_BayesNets after structure learning and before parameter learning 
+        if(!linkAnalysis) {
+        	st.execute(
+        			"INSERT IGNORE "
+        			+ "INTO Path_BayesNets "
+        			+ "SELECT  DISTINCT  * "
+        			+ "FROM SchemaEdges;" );
+        }
+        
 
         /**
          * OS: Nov 17, 2016. It can happen that Tetrad learns a forbidden edge. Argh. To catch this, we delete forbidden edges from any insertion. But then
@@ -455,7 +466,7 @@ public class BayesBaseH {
                     "AND lattice_set.name = lattice_rel.parent " +
                     "AND lattice_set.length = " + len + " " +
                     "AND (Path_BayesNets.Rchain, Path_BayesNets.child, Path_BayesNets.parent) NOT IN (" +
-                        "SELECT * FROM Path_Required_Edges" +
+                        "SELECT * FROM SchemaEdges" +
                     ");"
                 );
 
@@ -481,7 +492,7 @@ public class BayesBaseH {
                     "AND lattice_set.length = " + len + " " +
                     "AND (Path_BayesNets.Rchain, Path_BayesNets.child, Path_BayesNets.parent) NOT IN (" +
                         "SELECT * " +
-                        "FROM Path_Required_Edges" +
+                        "FROM SchemaEdges" +
                     ");"
                 );
 
