@@ -14,11 +14,6 @@ import nu.xom.Builder;
 import nu.xom.Document;
 import nu.xom.Element;
 import nu.xom.Elements;
-import weka.classifiers.bayes.net.EditableBayesNet;
-import weka.classifiers.bayes.net.estimate.MultiNomialBMAEstimator;
-import weka.classifiers.bayes.net.search.global.K2;
-import weka.core.Instances;
-import weka.core.converters.ConverterUtils.DataSource;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -30,25 +25,6 @@ import java.util.Set;
 
 
 public class BayesNet_Learning_main {
-
-
-    public static void wekaLearner(String arffFile) throws Exception {
-        Instances ins = DataSource.read(arffFile);
-        ins.setClassIndex(0);
-
-        K2 learner = new K2();
-
-        MultiNomialBMAEstimator estimator = new MultiNomialBMAEstimator();
-        estimator.setUseK2Prior(true);
-
-        EditableBayesNet bn = new EditableBayesNet(ins);
-        bn.initStructure();
-
-        learner.buildStructure(bn, ins);
-        estimator.estimateCPTs(bn);
-
-        System.out.println(bn);
-    }
 
 
     public static void tetradLearner(String srcfile, String destfile) throws Exception {
