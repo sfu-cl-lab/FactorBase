@@ -1,19 +1,14 @@
 package ca.sfu.cs.factorbase.jbn;
 
-//import edu.cmu.tetrad.data.DataParser;    //noe exists in new tetrad; replace with DataReader. Aug 21 Yan
 import edu.cmu.tetrad.data.DataReader;
 import edu.cmu.tetrad.data.DataSet;
 import edu.cmu.tetrad.data.DelimiterType;
 import edu.cmu.tetrad.data.Knowledge;
-//import edu.cmu.tetrad.data.RectangularDataSet;  //not exists in new tetrad; replace with DataSet. Aug 21 Yan
 import edu.cmu.tetrad.graph.Dag;
 import edu.cmu.tetrad.graph.Graph;
 import edu.cmu.tetrad.graph.Node;
 import edu.cmu.tetrad.graph.Pattern;
 import edu.cmu.tetrad.search.*;
-//import edu.cmu.tetrad.search.GesSearch;
-//import edu.cmu.tetrad.search.GesSearch3;
-//import edu.cmu.tetrad.search.PatternToDagSearch;  //not exists in new tetrad; replace with PatternToDag. Aug 21 Yan
 import edu.cmu.tetrad.search.PatternToDag;
 import nu.xom.Builder;
 import nu.xom.Document;
@@ -67,16 +62,10 @@ public class BayesNet_Learning_main {
 
 
     public static void tetradLearner(String srcfile, String required, String forbidden, String destfile) throws Exception {
-/* initialization */
-//        TetradLogger.getInstance().addOutputStream(System.out);
-//        RectangularDataSet dataset = null;
-//        RectangularDataSet is replaced by DataSet in new tetrad.  Aug 21 Yan
         DataSet dataset = null;
 
         File src = new File(srcfile);
 
-//        DataParser parser = new DataParser();
-//        DataParser is replaced by DataReader in new tetrad.  Aug 21 Yan
         DataReader parser = new DataReader();
         parser.setDelimiter(DelimiterType.TAB);
         dataset = parser.parseTabular(src);
@@ -87,7 +76,6 @@ public class BayesNet_Learning_main {
         /* load required knowledge */
         if (required != null) {
             Builder xmlParser = new Builder();
-//            Document doc = xmlParser.build(required);
             Document doc = xmlParser.build(new File(required));
             Element root = doc.getRootElement();
             root = root.getFirstChildElement("NETWORK");
@@ -101,7 +89,6 @@ public class BayesNet_Learning_main {
                     Element parent = parents.get(j);
                     String childStr = child.getValue();
                     String parentStr = parent.getValue();
-//                    System.out.println("Test, Required: " + parentStr + " " + childStr);
                     knowledge.setEdgeRequired(parentStr, childStr, true);
                 }
             }
@@ -110,7 +97,6 @@ public class BayesNet_Learning_main {
         /* load forbidden knowledge */
         if (forbidden != null) {
             Builder xmlParser = new Builder();
-//            Document doc = xmlParser.build(forbidden);
             Document doc = xmlParser.build(new File(forbidden));
             Element root = doc.getRootElement();
             root = root.getFirstChildElement("NETWORK");
@@ -124,7 +110,6 @@ public class BayesNet_Learning_main {
                     Element parent = parents.get(j);
                     String childStr = child.getValue();
                     String parentStr = parent.getValue();
-//                    System.out.println("Test, Forbidden: " + parentStr + " " + childStr);
                     knowledge.setEdgeForbidden(parentStr, childStr, true);
                 }
             }
@@ -136,36 +121,14 @@ public class BayesNet_Learning_main {
         gesSearch.setKnowledge(knowledge);
         gesSearch.setStructurePrior(1.0000);
         gesSearch.setSamplePrior(10.0000);
-//        System.out.println("here you are ~~");
         /* learn a dag from data */
         Graph graph = gesSearch.search();
-//        System.out.println("gesSearch.search() is done, oct 30");
         Pattern pattern = new Pattern(graph);
 
-//        PatternToDagSearch is replaced by PatternToDag in new tetrad. Aug 21 Yan
-//        PatternToDagSearch p2d = new PatternToDagSearch(pattern);
         PatternToDag p2d = new PatternToDag(pattern);
-//        System.out.println("Entering patternToDagMeek(), oct 30");
         Dag dag = p2d.patternToDagMeek();
-//        Dag dag = p2d.patternToDagDorTarsi();   //#######################################?????
 
-//        System.out.println("patternToDagMeek() is done, oct 30");
-//        System.out.println("Final DAG Starts");
-//        System.out.println(dag);
         System.out.println("DAG is DONE~~~");
-
-        ///////////////////////////////////////////
-//        April 16th @zqian here the score can not be used for comparison since it's based on the much smaller join
-/*              BayesProperties scorer = new BayesProperties(dataset,dag);
-                System.out.println("%%%% Tuples of Data = " + dataset.getNumRows());
-                System.out.println("%%%% BIC score = "+scorer.getBic());
-                System.out.println("%%%% AIC score = "+scorer.getAic());
-                System.out.println("%%%% loglikelihood = " + scorer.getloglikelihood());
-                System.out.println("%%%% P-value = " + scorer.getPValue());
-                System.out.println("%%%% Chisq = " + scorer.getPValueChisq());
-                System.out.println("%%%% Dof = " + scorer.getPValueDf());
-*/
-        ////////////////////// computing these score is very time consuming
 
         // Output dag into Bayes Interchange format.
         FileWriter fstream = new FileWriter(destfile);
@@ -210,53 +173,26 @@ public class BayesNet_Learning_main {
         out.write("</NETWORK>\n");
         out.write("</BIF>\n");
         out.close();
-
-/*      //@zqian : redirectinig the dag to file: dag.txt.
-        // only need the final dag
-        File file = new File("dag.txt");
-        PrintStream console = System.out;
-        FileOutputStream fos = new FileOutputStream(file);
-        PrintStream ps = new PrintStream(fos);
-        System.setOut(ps);
-        System.out.println(dag);
-        System.setOut(console);
-*/
     }
 
 
     public static void tetradLearner(String srcfile, String required, String forbidden, String destfile, Map<Node, Map<Set<Node>, Double>> globalScoreHash) throws Exception {
-/* initialization */
-//        TetradLogger.getInstance().addOutputStream(System.out);
-//        RectangularDataSet dataset = null;
-//        RectangularDataSet is replaced by DataSet in new tetrad.  Aug 21 Yan
         DataSet dataset = null;
 
         File src = new File(srcfile);
 
-//        DataParser parser = new DataParser();
-//        DataParser is replaced by DataReader in new tetrad.  Aug 21 Yan
         DataReader parser = new DataReader();
         parser.setDelimiter(DelimiterType.TAB);
         dataset = parser.parseTabular(src);
 
-//        before_dataset = parser.parseTabular(src);
-//        TetradLogger.getInstance().removeOutputStream(System.out);
-//        System.out.print(before_dataset);
-//        System.out.print("\n");
-//        System.out.print("isMulipliersCollapsed: " +before_dataset.isMulipliersCollapsed()+" \n");
         System.out.print("isMulipliersCollapsed: " + dataset.isMulipliersCollapsed() + " \n");
-//        CaseExpander CE= new CaseExpander(); //@zqian //expanding the dataset
-//        dataset = CE.filter(before_dataset);
-//        System.out.print(dataset);
 
-//        GesSearch gesSearch = new GesSearch(dataset);
         Ges3 gesSearch = new Ges3(dataset);
         Knowledge knowledge = new Knowledge();
 
         /* load required knowledge */
         if (required != null) {
             Builder xmlParser = new Builder();
-//            Document doc = xmlParser.build(required);
             Document doc = xmlParser.build(new File(required));
             Element root = doc.getRootElement();
             root = root.getFirstChildElement("NETWORK");
@@ -270,7 +206,6 @@ public class BayesNet_Learning_main {
                     Element parent = parents.get(j);
                     String childStr = child.getValue();
                     String parentStr = parent.getValue();
-//                    System.out.println("Test, Required: " + parentStr + " " + childStr);
                     knowledge.setEdgeRequired(parentStr, childStr, true);
                 }
             }
@@ -279,7 +214,6 @@ public class BayesNet_Learning_main {
         /* load forbidden knowledge */
         if (forbidden != null) {
             Builder xmlParser = new Builder();
-//            Document doc = xmlParser.build(forbidden);
             Document doc = xmlParser.build(new File(forbidden));
             Element root = doc.getRootElement();
             root = root.getFirstChildElement("NETWORK");
@@ -292,7 +226,6 @@ public class BayesNet_Learning_main {
                 for (int j = 0; j < parents.size(); j++) {
                     Element parent = parents.get(j);
                     String childStr = child.getValue(), parentStr = parent.getValue();
-//                    System.out.println("Test, Forbidden: " + parentStr + " " + childStr);
                     knowledge.setEdgeForbidden(parentStr, childStr, true);
                 }
             }
@@ -313,26 +246,11 @@ public class BayesNet_Learning_main {
         Graph graph = gesSearch.search(globalScoreHash);
         Pattern pattern = new Pattern(graph);
 
-//        PatternToDagSearch is replaced by PatternToDag in new tetrad. Aug 21 Yan
-//        PatternToDagSearch p2d = new PatternToDagSearch(pattern);
         PatternToDag p2d = new PatternToDag(pattern);
         Dag dag = p2d.patternToDagMeek();
         System.out.println("Final DAG Starts");
         System.out.println(dag);
         System.out.println("DAG is DONE~~~");
-
-        ///////////////////////////////////////////
-//        April 16th @zqian here the score can not be used for comparison since it's based on the much smaller join
-/*          BayesProperties scorer = new BayesProperties(dataset,dag);
-            System.out.println("%%%% Tuples of Data = " + dataset.getNumRows());
-            System.out.println("%%%% BIC score = "+scorer.getBic());
-            System.out.println("%%%% AIC score = "+scorer.getAic());
-            System.out.println("%%%% loglikelihood = " + scorer.getloglikelihood());
-            System.out.println("%%%% P-value = " + scorer.getPValue());
-            System.out.println("%%%% Chisq = " + scorer.getPValueChisq());
-            System.out.println("%%%% Dof = " + scorer.getPValueDf());
-*/
-        ////////////////////// computing these score is very time consuming
 
         /* output dag into Bayes Interchange format */
         FileWriter fstream = new FileWriter(destfile);
@@ -376,42 +294,26 @@ public class BayesNet_Learning_main {
         out.write("</NETWORK>\n");
         out.write("</BIF>\n");
         out.close();
-
-/*//@zqian : redirectinig the dag to file: dag.txt.
-        // only need the final dag
-        File file = new File("dag.txt");
-        PrintStream console = System.out;
-        FileOutputStream fos = new FileOutputStream(file);
-        PrintStream ps = new PrintStream(fos);
-        System.setOut(ps);
-        System.out.println(dag);
-        System.setOut(console);
-*/
     }
 
 
     // TODO: Figure out if tetradLearner_BES can be deleted since it doesn't appear to be used anywhere.
     /*pruning phase, zqian @ Oct 23 2013*/
     public static void tetradLearner_BES(String srcfile, String required, String destfile) throws Exception {
-/* initialization */
-//        RectangularDataSet is replaced by DataSet in new tetrad.  Aug 21 Yan
         DataSet dataset = null;
         File src = new File(srcfile);
 
-//        DataParser is replaced by DataReader in new tetrad.  Aug 21 Yan
         DataReader parser = new DataReader();
         parser.setDelimiter(DelimiterType.TAB);
         dataset = parser.parseTabular(src);
         System.out.print("isMulipliersCollapsed: " + dataset.isMulipliersCollapsed() + " \n");
 
-//        GesSearch gesSearch = new GesSearch(dataset);
         Ges3 gesSearch = new Ges3(dataset);
         Knowledge knowledge = new Knowledge();
 
         /* load required knowledge */
         if (required != null) {
             Builder xmlParser = new Builder();
-//            Document doc = xmlParser.build(required);
             Document doc = xmlParser.build(new File(required));
             Element root = doc.getRootElement();
             root = root.getFirstChildElement("NETWORK");
@@ -424,7 +326,6 @@ public class BayesNet_Learning_main {
                 for (int j = 0; j < parents.size(); j++) {
                     Element parent = parents.get(j);
                     String childStr = child.getValue(), parentStr = parent.getValue();
-//                    System.out.println("Test, Required: " + parentStr + " " + childStr);
                     knowledge.setEdgeRequired(parentStr, childStr, true);
                 }
             }
@@ -437,10 +338,8 @@ public class BayesNet_Learning_main {
 
         /* pruning part */
         Graph graph = gesSearch.Pruning_BES();
-/*         pruning part */
         Pattern pattern = new Pattern(graph);
 
-//        PatternToDagSearch is replaced by PatternToDag in new tetrad. Aug 21 Yan
         PatternToDag p2d = new PatternToDag(pattern);
         Dag dag = p2d.patternToDagMeek();
         System.out.println("Final DAG Starts");
@@ -488,17 +387,6 @@ public class BayesNet_Learning_main {
         out.write("</NETWORK>\n");
         out.write("</BIF>\n");
         out.close();
-
-/*//@zqian : redirectinig the dag to file: dag.txt.
-        // only need the final dag
-        File file = new File("dag.txt");
-        PrintStream console = System.out;
-        FileOutputStream fos = new FileOutputStream(file);
-        PrintStream ps = new PrintStream(fos);
-        System.setOut(ps);
-        System.out.println(dag);
-        System.setOut(console);
-*/
     }
 
 
@@ -559,31 +447,3 @@ class BIFHeader {
         System.out.print(header);
     }
 }
-
-/*
-data.arff
-@relation test
-
-@attribute x {0,1}
-@attribute y {0,1,2}
-@attribute z {0,1}
-
-@data
-0,1,0
-1,0,1
-1,1,1
-1,2,1
-0,0,0
-
-data.dat
-int	ranking	gpa
-1	1	2
-1	1	1
-3	2	3
-1	2	2
-2	1	1
-2	2	1
-1	1	2
-2	1	3
-1	1	1
- */
