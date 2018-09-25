@@ -38,7 +38,6 @@ public class BayesNet_Learning_main {
         DataReader parser = new DataReader();
         parser.setDelimiter(DelimiterType.TAB);
         dataset = parser.parseTabular(src);
-        System.out.print("isMulipliersCollapsed: " + dataset.isMulipliersCollapsed() + " \n");
         Ges3 gesSearch = new Ges3(dataset);
         Knowledge knowledge = new Knowledge();
 
