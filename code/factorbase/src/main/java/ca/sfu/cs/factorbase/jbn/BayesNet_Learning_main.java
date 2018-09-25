@@ -32,11 +32,6 @@ public class BayesNet_Learning_main {
     }
 
 
-    public static void tetradLearner(String srcfile, String destfile, Map<Node, Map<Set<Node>, Double>> globalScoreHash) throws Exception {
-        tetradLearner(srcfile, null, null, destfile, globalScoreHash);
-    }
-
-
     public static void tetradLearner(String srcfile, String required, String forbidden, String destfile) throws Exception {
         DataSet dataset = null;
 
@@ -249,99 +244,6 @@ public class BayesNet_Learning_main {
                 out.write("\t<OUTCOME>" + o + "</OUTCOME>\n");
             }
 
-            out.write("</VARIABLE>\n");
-        }
-
-        List<Node> nodes = dag.getNodes();
-        int nodesNum = nodes.size();
-        for (int i = 0; i < nodesNum; i++) {
-            Node current = nodes.get(i);
-            List<Node> parents = dag.getParents(current);
-            int parentsNum = parents.size();
-            out.write("<DEFINITION>\n");
-            out.write("\t<FOR>" + "`" + current + "`" + "</FOR>\n"); // @zqian
-            for (int j = 0; j < parentsNum; j++) {
-                out.write("\t<GIVEN>" + "`" + parents.get(j) + "`" + "</GIVEN>\n"); // @zqian
-            }
-
-            out.write("</DEFINITION>\n");
-        }
-
-        out.write("</NETWORK>\n");
-        out.write("</BIF>\n");
-        out.close();
-    }
-
-
-    // TODO: Figure out if tetradLearner_BES can be deleted since it doesn't appear to be used anywhere.
-    /*pruning phase, zqian @ Oct 23 2013*/
-    public static void tetradLearner_BES(String srcfile, String required, String destfile) throws Exception {
-        DataSet dataset = null;
-        File src = new File(srcfile);
-
-        DataReader parser = new DataReader();
-        parser.setDelimiter(DelimiterType.TAB);
-        dataset = parser.parseTabular(src);
-        System.out.print("isMulipliersCollapsed: " + dataset.isMulipliersCollapsed() + " \n");
-
-        Ges3 gesSearch = new Ges3(dataset);
-        Knowledge knowledge = new Knowledge();
-
-        /* load required knowledge */
-        if (required != null) {
-            Builder xmlParser = new Builder();
-            Document doc = xmlParser.build(new File(required));
-            Element root = doc.getRootElement();
-            root = root.getFirstChildElement("NETWORK");
-            Elements requiredEdges = root.getChildElements("DEFINITION");
-
-            for (int i = 0; i < requiredEdges.size(); i++) {
-                Element node = requiredEdges.get(i);
-                Element child = node.getFirstChildElement("FOR");
-                Elements parents = node.getChildElements("GIVEN");
-                for (int j = 0; j < parents.size(); j++) {
-                    Element parent = parents.get(j);
-                    String childStr = child.getValue(), parentStr = parent.getValue();
-                    knowledge.setEdgeRequired(parentStr, childStr, true);
-                }
-            }
-        }
-
-        System.out.println(knowledge);
-        System.out.println("*************knowledge is DONE~~ \n");
-        /* set GES search parameters */
-        gesSearch.setKnowledge(knowledge);
-
-        /* pruning part */
-        Graph graph = gesSearch.Pruning_BES();
-        Pattern pattern = new Pattern(graph);
-
-        PatternToDag p2d = new PatternToDag(pattern);
-        Dag dag = p2d.patternToDagMeek();
-        System.out.println("Final DAG Starts");
-        System.out.println(dag);
-        System.out.println("DAG is DONE~~~");
-
-        /* output dag into Bayes Interchange format */
-        FileWriter fstream = new FileWriter(destfile);
-        BufferedWriter out = new BufferedWriter(fstream);
-        out.write(BIFHeader.header);
-        out.write("<BIF VERSION=\"0.3\">\n");
-        out.write("<NETWORK>\n");
-        out.write("<NAME>BayesNet</NAME>\n");
-
-        int col = dataset.getNumColumns();
-        int row = dataset.getNumRows();
-        for (int i = 0; i < col; i++) {
-            out.write("<VARIABLE TYPE=\"nature\">\n");
-            out.write("\t<NAME>" + "`" + dataset.getVariable(i).getName() + "`" + "</NAME>\n"); // @zqian adding apostrophes to the name of bayes nodes
-            HashSet<Object> domain = new HashSet<Object>();
-            for (int j = 0; j < row; j++) {
-                domain.add(dataset.getObject(j, i));
-            }
-            for (Object o : domain) {
-                out.write("\t<OUTCOME>" + o + "</OUTCOME>\n");
-            }
             out.write("</VARIABLE>\n");
         }
 
