@@ -1,11 +1,14 @@
 package ca.sfu.cs.factorbase.app;
 
+import java.util.logging.Logger;
+
 import ca.sfu.cs.common.Configuration.Config;
 import ca.sfu.cs.factorbase.exporter.csvexporter.CSVPrecomputor;
 import ca.sfu.cs.factorbase.tables.BayesBaseCT_SortMerge;
 import ca.sfu.cs.factorbase.tables.BayesBaseH;
 import ca.sfu.cs.factorbase.tables.KeepTablesOnly;
 import ca.sfu.cs.factorbase.tables.MakeSetup;
+import ca.sfu.cs.factorbase.util.LoggerConfig;
 
 /* July 3rd, 2014, zqian
  * input: 
@@ -18,21 +21,23 @@ import ca.sfu.cs.factorbase.tables.MakeSetup;
  * */
 public class RunBB {
 	static String isAutomaticSetup;
+	private static Logger logger = Logger.getLogger(RunBB.class.getName());
 	
 	public static void main(String[] args) throws Exception {
+		LoggerConfig.setGlobalLevel();
 		long t1 = System.currentTimeMillis(); 
-		System.out.println("Start Program...");
+		logger.info("Start Program...");
 		setVarsFromConfig();
 		if (isAutomaticSetup.equals("1")) {
 			MakeSetup.runMS();
-			System.out.println("Setup database is ready.");
+			logger.info("Setup database is ready.");
 		} else {
-			System.out.println("Setup database exists.");
+			logger.info("Setup database exists.");
 		}
 		runBBLearner();
 		
 		long t2 = System.currentTimeMillis(); 
-		System.out.println("Total Running time is " + (t2-t1) + "ms.");
+		logger.info("Total Running time is " + (t2-t1) + "ms.");
 	}
 	
 	
@@ -47,15 +52,15 @@ public class RunBB {
 		//assumes that dbname is in config file and that dbname_setup exists.
 
 		BayesBaseCT_SortMerge.buildCT();
-		System.out.println("The CT database is ready for use.");
-		System.out.println("*********************************************************");
+		logger.info("The CT database is ready for use.");
+		logger.info("*********************************************************");
 		CSVPrecomputor.runCSV();
-		System.out.println("CSV files are generated.");
-		System.out.println("*********************************************************");
+		logger.info("CSV files are generated.");
+		logger.info("*********************************************************");
 		BayesBaseH.runBBH();
-		System.out.println("\nFinish running BayesBaseH.");
-		System.out.println("*********************************************************");
-		System.out.println("Cleaning CT database");
+		logger.info("\nFinish running BayesBaseH.");
+		logger.info("*********************************************************");
+		logger.info("Cleaning CT database");
 		//Now eliminate temporary tables. Keep only the tables for the longest Rchain. Turn this off for debugging.//
 		KeepTablesOnly.Drop_tmpTables();
 
