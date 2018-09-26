@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
+import java.util.logging.Logger;
 
 import com.mysql.jdbc.Connection;
 
@@ -28,6 +29,8 @@ public class short_rnid_LatticeGenerator {
 	static String dbUsername;
 	static String dbPassword;
 	static String dbaddress;
+	
+	private static Logger logger = Logger.getLogger(short_rnid_LatticeGenerator.class.getName());
 
     public static int generate(Connection con) throws SQLException {
         //connect to db using jdbc
@@ -35,12 +38,12 @@ public class short_rnid_LatticeGenerator {
         Statement tempst=con2.createStatement();
         //int len=tempst.execute("SELECT count(*) FROM unielwin_lattice.RNodes;");
         
-        System.out.println("ENTER INTO SHORT LATTICE generate");
+        logger.info("ENTER INTO SHORT LATTICE generate");
         //generate shorter rnid, from a to z
         int fc=97; 
         char short_rnid;
         ResultSet temprs=tempst.executeQuery("select orig_rnid from LatticeRNodes;");
-        System.out.println("about to execute the following query: select orig_rnid from LatticeRNodes");
+        logger.fine("about to execute the following query: select orig_rnid from LatticeRNodes");
         ArrayList<String> tempList=new ArrayList<String>();
         while(temprs.next()) {
             tempList.add(temprs.getString("orig_rnid"));
@@ -121,16 +124,16 @@ public class short_rnid_LatticeGenerator {
         ResultSet rs = st.executeQuery("select orig_rnid from LatticeRNodes;");
         
         // while(rs.next())
-        //System.out.println(rs.getString(1));
+        //logger.fine(rs.getString(1));
      
         while(rs.next()){
             // Remove the flanking backticks from the orig_rnid before adding them to the set.
             firstSets.add(rs.getString("orig_rnid").substring(1, rs.getString("orig_rnid").length() - 1));
-            System.out.println("The orig_rnid is : " + rs.getString("orig_rnid"));
+            logger.fine("The orig_rnid is : " + rs.getString("orig_rnid"));
         }
-/*        System.out.println("***********");
+/*        logger.fine("***********");
         for(String g:firstSets)
-        	System.out.println(g);*/
+        	logger.fine(g);*/
         st.close();
     }
 
@@ -164,14 +167,14 @@ public class short_rnid_LatticeGenerator {
             while(rs.next()){
                 String h= rs.getString("name").substring(1,rs.getString("name").length()-1 ) ;   //deleting apostrophe from beginning and end
                 sets.add(h);
-                //System.out.println(rs.getString("name").length());
+                //logger.fine(rs.getString("name").length());
             }
             
-//            System.out.println(sets.size());
+//            logger.fine(sets.size());
 //            for (String s : sets)
-//            System.out.println(s);
-//            System.out.println(setLength);
-//            System.out.println(sets);
+//            logger.fine(s);
+//            logger.fine(setLength);
+//            logger.fine(sets);
             
             createNewSets(sets);
         }
@@ -181,26 +184,26 @@ public class short_rnid_LatticeGenerator {
     public static void createNewSets(ArrayList<String> sets) throws SQLException {
         for(String firstSet : firstSets){
             for(String secondSet : sets){
-            	//System.out.println(secondSet);
+            	//logger.fine(secondSet);
                 HashSet<String> newSet = new HashSet<String>();
                 String[] secondSetParts = nodeSplit(secondSet);
                 //String[] secondSetParts = secondSet;
                 
                 
-                //System.out.println("size of secondset:"+ secondSet.length());
+                //logger.fine("size of secondset:"+ secondSet.length());
                 
-//                System.out.println("********************");
-//                System.out.println();
-//                System.out.println(secondSetParts);
+//                logger.fine("********************");
+//                logger.fine();
+//                logger.fine(secondSetParts);
  //               for (String s : secondSetParts)
  //               System.out.print(s + " ");
-//                System.out.println();
-//                System.out.println(checkConstraints(firstSet, secondSetParts));
-//                System.out.println("********************");
+//                logger.fine();
+//                logger.fine(checkConstraints(firstSet, secondSetParts));
+//                logger.fine("********************");
                 
-                //System.out.println(checkConstraints(firstSet, secondSetParts));
+                //logger.fine(checkConstraints(firstSet, secondSetParts));
                 if (!checkConstraints(firstSet, secondSetParts)) continue;
-                //System.out.println("*****()*****");
+                //logger.fine("*****()*****");
 
                 //add set with length 1
                 newSet.add(firstSet);
@@ -210,7 +213,7 @@ public class short_rnid_LatticeGenerator {
 
                 int newSetLength = newSet.size();
                 String newSetName = nodeJoin(newSet);  
-                //System.out.println(newSetName.compareTo(secondSet));
+                //logger.fine(newSetName.compareTo(secondSet));
 
                 //add it to db and createdSet
                 if(newSetName.compareTo(secondSet) != 0) {
@@ -302,7 +305,7 @@ public static void mapping_rnid() throws SQLException{
 
     public static boolean checkConstraints(String firstSet, String[] secondSetParts) throws SQLException {
         
-//    	System.out.println(firstSet);
+//    	logger.fine(firstSet);
     	
     	HashSet<String> firstSetKeys = new HashSet<String>();
         HashSet<String> secondSetKeys = new HashSet<String>();
@@ -318,7 +321,7 @@ public static void mapping_rnid() throws SQLException{
         }
 
         // get primary key for second set
-        //System.out.println(secondSetParts);
+        //logger.fine(secondSetParts);
         for (String secondSet : secondSetParts)
         {
             rs = st.executeQuery("select pvid1, pvid2 from LatticeRNodes where orig_rnid = '`" + secondSet + "`';");
@@ -334,10 +337,10 @@ public static void mapping_rnid() throws SQLException{
         unionSetKeys.addAll(secondSetKeys);
         if (unionSetKeys.size() > maxNumberOfPVars) return false;
 
-//        System.out.println("*************************");
-//        System.out.println(firstSetKeys);
-//        System.out.println(secondSetKeys);
-//        System.out.println("*************************");
+//        logger.fine("*************************");
+//        logger.fine(firstSetKeys);
+//        logger.fine(secondSetKeys);
+//        logger.fine("*************************");
         
         // check if there is a shared primary key
         firstSetKeys.retainAll(secondSetKeys);
@@ -355,7 +358,7 @@ public static void mapping_rnid() throws SQLException{
         for (String listItem : newList)
             joinStr = joinStr + delimiter + listItem;
         if (joinStr.length() > 0) joinStr = joinStr.substring(1);
-        //System.out.println(joinStr);
+        //logger.fine(joinStr);
         return joinStr;
     }
 
@@ -365,12 +368,12 @@ public static void mapping_rnid() throws SQLException{
     //some portion of original code deleted	
         String[] nodes = node.replace("),", ") ").split(" ");
         
-//        System.out.println("*********************");
-//        System.out.println(node);
-//        System.out.println("nodes:");
+//        logger.fine("*********************");
+//        logger.fine(node);
+//        logger.fine("nodes:");
 //        for (String s : nodes)
-//        	System.out.println(s);
-//        System.out.println("*********************");
+//        	logger.fine(s);
+//        logger.fine("*********************");
         
         return nodes;
     }
@@ -391,7 +394,7 @@ public static void mapping_rnid() throws SQLException{
 
 		//generate lattice tree
 		maxNumberOfMembers = short_rnid_LatticeGenerator.generate(con2);
-		System.out.println(" ##### lattice is ready for use* ");
+		logger.info(" ##### lattice is ready for use* ");
 		
 		disconnectDB();
     }
@@ -401,7 +404,7 @@ public static void mapping_rnid() throws SQLException{
 		try {
 			java.lang.Class.forName("com.mysql.jdbc.Driver");
 		} catch (Exception ex) {
-			System.err.println("Unable to load MySQL JDBC driver");
+			logger.severe("Unable to load MySQL JDBC driver");
 		}
 		con2 = (Connection) DriverManager.getConnection(CONN_STR2, dbUsername, dbPassword);
 	}
