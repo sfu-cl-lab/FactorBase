@@ -5,9 +5,9 @@ import edu.cmu.tetrad.data.DataSet;
 import edu.cmu.tetrad.data.DelimiterType;
 import edu.cmu.tetrad.data.Knowledge;
 import edu.cmu.tetrad.graph.Dag;
+import edu.cmu.tetrad.graph.EdgeListGraphSingleConnections;
 import edu.cmu.tetrad.graph.Graph;
 import edu.cmu.tetrad.graph.Node;
-import edu.cmu.tetrad.graph.Pattern;
 import edu.cmu.tetrad.search.*;
 import edu.cmu.tetrad.search.PatternToDag;
 import nu.xom.Builder;
@@ -91,7 +91,7 @@ public class BayesNet_Learning_main {
         gesSearch.setSamplePrior(10.0000);
         /* learn a dag from data */
         Graph graph = gesSearch.search();
-        Pattern pattern = new Pattern(graph);
+        Graph pattern = new EdgeListGraphSingleConnections(graph);
 
         PatternToDag p2d = new PatternToDag(pattern);
         Dag dag = p2d.patternToDagMeek();
