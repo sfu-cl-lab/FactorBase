@@ -94,7 +94,7 @@ public class BayesNet_Learning_main {
         Graph pattern = new EdgeListGraphSingleConnections(graph);
 
         PatternToDag p2d = new PatternToDag(pattern);
-        Dag dag = p2d.patternToDagMeek();
+        Graph dag = p2d.patternToDagMeek();
 
         System.out.println("DAG is DONE~~~");
 
