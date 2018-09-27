@@ -24,6 +24,7 @@ public class RunBB {
 	private static Logger logger = Logger.getLogger(RunBB.class.getName());
 	
 	public static void main(String[] args) throws Exception {
+		LoggerConfig.getLevelFromConfig();
 		LoggerConfig.setGlobalLevel();
 		long t1 = System.currentTimeMillis(); 
 		logger.info("Start Program...");
