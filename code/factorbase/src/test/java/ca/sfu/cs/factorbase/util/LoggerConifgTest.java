@@ -1,56 +1,72 @@
 package ca.sfu.cs.factorbase.util;
 
-import org.junit.Assert;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.equalTo;
+
+import org.junit.AfterClass;
+import org.junit.BeforeClass;
 import org.junit.Test;
-import org.junit.Before;
-import org.junit.After;
 
 import java.util.logging.Logger;
 import java.util.logging.LogManager;
 import java.util.logging.Handler;
 import java.util.logging.Level;
-import java.util.ArrayList;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Iterator;
+import java.util.Properties;
+
+import java.io.IOException;
+
+import testframework.TestConfigFile ;;
 
 public class LoggerConifgTest {
-	private static Level defaultRootLevel;
-	private static Level defaultHandlerLevel;
+	private static Logger rootLogger;
+	private static TestConfigFile conf;
 
-	@ Before
-	public void getDefaultLoggerLevel() {
-		Logger rootLogger = LogManager.getLogManager().getLogger("");
-		defaultRootLevel = rootLogger.getLevel();
-		for(Handler h: rootLogger.getHandlers()) {
-			defaultHandlerLevel = h.getLevel();
-		}
+	@BeforeClass
+	public static void setUpBeforeClass() throws IOException{
+		Properties properties = new Properties();
+		properties.setProperty("LoggingLevel", "");
+		conf = new TestConfigFile(properties);
 	}
-	@ After
-	public void restoreDefaultLoggerLevel() {
-		Logger rootLogger = LogManager.getLogManager().getLogger("");
-		rootLogger.setLevel(defaultRootLevel);
-		for(Handler h: rootLogger.getHandlers()) {
-			h.setLevel(defaultHandlerLevel);
-		}
+	
+	@AfterClass
+	public static void tearDownAfterClass() {
+		conf.file.delete();
+		conf = null;
 	}
-	@ Test
-	public void setGlobalLevel_setSuccessful(){
-		Logger rootLogger = LogManager.getLogManager().getLogger("");
+	
+	@Test
+	public void setGlobalLevel_setSuccessful() throws Exception{
+		System.setProperty("config", conf.file.getName());
 		
+		rootLogger = LogManager.getLogManager().getLogger("");
+		
+		// Build the Level table to map the LoggingLevel specified in the config file to the Level of JUL
+		Map<String, Level> levelMap = new HashMap<String, Level>();
+		levelMap.put("debug", Level.ALL);
+		levelMap.put("info", Level.INFO);
+		levelMap.put("off", Level.OFF);
+		Iterator<String> LoggingLevelItr = levelMap.keySet().iterator();
+		
+		// Set the LoggingLevel to different Level to see if the result of rootLogger and handler is the same as we desired
+		String LoggingLevel;
 		Level currentLevel;
-		ArrayList<Level> expectedLevels = new ArrayList<Level>();
-		expectedLevels.add(Level.ALL);
-		expectedLevels.add(Level.INFO);
-		expectedLevels.add(Level.OFF);
-		
-		for(Level expectedLevel: expectedLevels) {
-			LoggerConfig.setLevel(expectedLevel);
-			LoggerConfig.setGlobalLevel();
+		Level expectedLevel;
+		while(LoggingLevelItr.hasNext()) {
+			LoggingLevel = LoggingLevelItr.next();
+			expectedLevel = levelMap.get(LoggingLevel);
 			
+			conf.setPropertyValue("LoggingLevel", LoggingLevel);
+			LoggerConfig.setGlobalLevel();
 			currentLevel = rootLogger.getLevel();
-			Assert.assertEquals(currentLevel, expectedLevel);
+			assertThat(currentLevel, equalTo(expectedLevel));
 			
 			for(Handler h: rootLogger.getHandlers()) {
 				currentLevel = h.getLevel();
-				Assert.assertEquals(currentLevel, expectedLevel);
+				assertThat(currentLevel, equalTo(expectedLevel));
 			}
 		}
 	}

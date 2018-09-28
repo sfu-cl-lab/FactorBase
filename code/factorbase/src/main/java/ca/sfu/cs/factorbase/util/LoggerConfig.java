@@ -9,16 +9,16 @@ import java.util.logging.Level;
 
 import ca.sfu.cs.common.Configuration.Config;
 
-public class LoggerConfig {
-	private static Level loggerLevel;
-	
+public class LoggerConfig {	
 	/**
 	 * Set the global logger level
 	 * debug: show all log messages(including debug, info, warning and error messages)
 	 * info: only show info, warning and error messages(no debug message)
 	 * off: show no log message
+	 * @throws Exception if the specified value is not valid
 	 */
-	public static void setGlobalLevel(){		
+	public static void setGlobalLevel() throws Exception{
+		Level loggerLevel = getLevelFromConfig();
 		Logger rootLogger = LogManager.getLogManager().getLogger("");
 		
 		rootLogger.setLevel(loggerLevel);
@@ -32,7 +32,7 @@ public class LoggerConfig {
 	 * @return the specified Level
 	 * @throws Exception if the specified value is not valid
 	 */
-	public static void getLevelFromConfig() throws Exception{
+	private static Level getLevelFromConfig() throws Exception{
 		String loggingLevel;
 		Config conf = new Config();
 		loggingLevel = conf.getProperty("LoggingLevel");
@@ -45,15 +45,6 @@ public class LoggerConfig {
 		if(levelTable.get(loggingLevel) == null) {
 			 throw new IllegalArgumentException("Invlid LoggingLevel setting. Please set the loggingLevel in config.cfg to debug/info/off!");
 		}
-		else
-			loggerLevel = levelTable.get(loggingLevel);
-	}
-	
-	/**
-	 * set the global level, for test usage
-	 * @param level: the logger level expected to be set
-	 */
-	public static void setLevel(Level level) {
-		loggerLevel = level;
+		return levelTable.get(loggingLevel);
 	}
 }
