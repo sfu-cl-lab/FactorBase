@@ -12,7 +12,6 @@ import java.util.logging.LogManager;
 import java.util.logging.Handler;
 import java.util.logging.Level;
 
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Iterator;
 import java.util.Properties;
@@ -42,13 +41,8 @@ public class LoggerConifgTest {
 	public void setGlobalLevel_setSuccessful() throws Exception{
 		System.setProperty("config", conf.file.getName());
 		
-		rootLogger = LogManager.getLogManager().getLogger("");
-		
-		// Build the Level table to map the LoggingLevel specified in the config file to the Level of JUL
-		Map<String, Level> levelMap = new HashMap<String, Level>();
-		levelMap.put("debug", Level.ALL);
-		levelMap.put("info", Level.INFO);
-		levelMap.put("off", Level.OFF);
+		rootLogger = LogManager.getLogManager().getLogger("");		
+		Map<String, Level> levelMap = LoggerConfig.levelMap;
 		Iterator<String> LoggingLevelItr = levelMap.keySet().iterator();
 		
 		// Set the LoggingLevel to different Level to see if the result of rootLogger and handler is the same as we desired

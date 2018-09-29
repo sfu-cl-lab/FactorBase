@@ -17,7 +17,10 @@ public class LoggerConfig {
 	 * off: show no log message
 	 * @throws Exception if the specified value is not valid
 	 */
+	public static Map<String, Level> levelMap;
+	
 	public static void setGlobalLevel() throws Exception{
+		buildLevelMap();
 		Level loggerLevel = getLevelFromConfig();
 		Logger rootLogger = LogManager.getLogManager().getLogger("");
 		
@@ -36,15 +39,20 @@ public class LoggerConfig {
 		String loggingLevel;
 		Config conf = new Config();
 		loggingLevel = conf.getProperty("LoggingLevel");
-		
-		Map<String, Level> levelTable = new HashMap<String, Level>();
-		levelTable.put("debug", Level.ALL);
-		levelTable.put("info", Level.INFO);
-		levelTable.put("off", Level.OFF);
-		
-		if(levelTable.get(loggingLevel) == null) {
+				
+		if(levelMap.get(loggingLevel) == null) {
 			 throw new IllegalArgumentException("Invlid LoggingLevel setting. Please set the loggingLevel in config.cfg to debug/info/off!");
 		}
-		return levelTable.get(loggingLevel);
+		return levelMap.get(loggingLevel);
+	}
+	
+	/**
+	 *Build the Level table to map the LoggingLevel specified in the config file to the Level of JUL
+	 */
+	private static void buildLevelMap() {
+		levelMap = new HashMap<String, Level>();
+		levelMap.put("debug", Level.ALL);
+		levelMap.put("info", Level.INFO);
+		levelMap.put("off", Level.OFF);	
 	}
 }
