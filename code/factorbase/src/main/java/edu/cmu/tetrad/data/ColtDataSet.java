@@ -21,17 +21,25 @@
 
 package edu.cmu.tetrad.data;
 
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.text.NumberFormat;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
 import cern.colt.matrix.DoubleMatrix2D;
 import cern.colt.matrix.doublealgo.Statistic;
 import cern.colt.matrix.impl.DenseDoubleMatrix2D;
 import edu.cmu.tetrad.graph.Node;
 import edu.cmu.tetrad.util.NumberFormatUtil;
 import edu.cmu.tetrad.util.TetradSerializable;
-
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.text.NumberFormat;
-import java.util.*;
 
 /**
  * Wraps a COLT 2D matrix in such a way that mixed data sets can be stored. The
@@ -1843,6 +1851,12 @@ public final class ColtDataSet
 
     public void setLineNumbersWritten(boolean lineNumbersWritten) {
         this.lineNumbersWritten = lineNumbersWritten;
+    }
+
+    @Override
+    public DataModel copy() {
+        // TODO Auto-generated method stub
+        return null;
     }
 }
 
