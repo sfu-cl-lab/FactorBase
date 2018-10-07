@@ -21,44 +21,22 @@
 
 package edu.cmu.tetrad.search;
 
+import cern.colt.matrix.DoubleMatrix1D;
+import cern.colt.matrix.DoubleMatrix2D;
+import cern.colt.matrix.linalg.Algebra;
+import edu.cmu.tetrad.data.*;
+import edu.cmu.tetrad.graph.*;
+import edu.cmu.tetrad.regression.RegressionDataset;
+import edu.cmu.tetrad.util.*;
+
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
+import java.io.IOException;
 import java.text.NumberFormat;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.SortedSet;
-import java.util.TreeSet;
-import java.util.WeakHashMap;
-
-import cern.colt.matrix.DoubleMatrix1D;
-import cern.colt.matrix.DoubleMatrix2D;
-import cern.colt.matrix.linalg.Algebra;
-import edu.cmu.tetrad.data.DataSet;
-import edu.cmu.tetrad.data.DataUtils;
-import edu.cmu.tetrad.data.DiscreteVariable;
-import edu.cmu.tetrad.data.ICovarianceMatrix;
-import edu.cmu.tetrad.data.Knowledge;
-import edu.cmu.tetrad.data.KnowledgeEdge;
-import edu.cmu.tetrad.graph.Edge;
-import edu.cmu.tetrad.graph.EdgeListGraph;
-import edu.cmu.tetrad.graph.Edges;
-import edu.cmu.tetrad.graph.Graph;
-import edu.cmu.tetrad.graph.Node;
-import edu.cmu.tetrad.regression.RegressionDataset;
-import edu.cmu.tetrad.util.MatrixUtils;
-import edu.cmu.tetrad.util.NumberFormatUtil;
-import edu.cmu.tetrad.util.ProbUtils;
-import edu.cmu.tetrad.util.TetradLogger;
+import java.util.*;
 
 /**
  * GesSearch is an implementation of the GES algorithm, as specified in Chickering (2002) "Optimal structure
@@ -1075,7 +1053,7 @@ public final class Ges3 implements GraphSearch, GraphScorer {
         lookupArrowsBackwards = new HashSet[nodes.size()][nodes.size()];
         
 
-        Set<Edge> graphEdges = graph.getEdges();
+        List<Edge> graphEdges = graph.getEdges();
         for (Edge edge : graphEdges) {
             Node _x = edge.getNode1();
             Node _y = edge.getNode2();
@@ -1107,7 +1085,7 @@ public final class Ges3 implements GraphSearch, GraphScorer {
         sortedArrowsBackwards = new TreeSet<Arrow>();
         lookupArrowsBackwards = new HashSet[nodes.size()][nodes.size()];
 
-        Set<Edge> graphEdges = graph.getEdges();
+        List<Edge> graphEdges = graph.getEdges();
 
         for (Edge edge : graphEdges) {
             Node _x = edge.getNode1();
@@ -1136,7 +1114,7 @@ public final class Ges3 implements GraphSearch, GraphScorer {
         lookupArrowsBackwards = new HashSet[nodes.size()][nodes.size()];
         
 
-        Set<Edge> graphEdges = graph.getEdges();
+        List<Edge> graphEdges = graph.getEdges();
         for (Edge edge : graphEdges) {
             Node _x = edge.getNode1();
             Node _y = edge.getNode2();

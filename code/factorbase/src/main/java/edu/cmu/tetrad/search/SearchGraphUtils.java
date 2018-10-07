@@ -21,16 +21,31 @@
 
 package edu.cmu.tetrad.search;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Set;
+
+import org.apache.commons.collections.map.MultiKeyMap;
+
 import edu.cmu.tetrad.data.IKnowledge;
 import edu.cmu.tetrad.data.Knowledge;
 import edu.cmu.tetrad.data.KnowledgeEdge;
-import edu.cmu.tetrad.graph.*;
+import edu.cmu.tetrad.graph.Dag;
+import edu.cmu.tetrad.graph.Edge;
+import edu.cmu.tetrad.graph.EdgeListGraph;
+import edu.cmu.tetrad.graph.Edges;
+import edu.cmu.tetrad.graph.Endpoint;
+import edu.cmu.tetrad.graph.Graph;
+import edu.cmu.tetrad.graph.GraphUtils;
+import edu.cmu.tetrad.graph.Node;
 import edu.cmu.tetrad.util.ChoiceGenerator;
 import edu.cmu.tetrad.util.CombinationGenerator;
 import edu.cmu.tetrad.util.TetradLogger;
-import org.apache.commons.collections.map.MultiKeyMap;
-
-import java.util.*;
 
 /**
  * Graph utilities for search algorithms. Lots of orientation method, for instance.
@@ -1536,7 +1551,7 @@ public final class SearchGraphUtils {
 
     public static List<Graph> getAllGraphsByDirectingUndirectedEdges(Graph skeleton) {
         List<Graph> graphs = new ArrayList<Graph>();
-        List<Edge> edges = skeleton.getEdges();
+        List<Edge> edges = new ArrayList<Edge>(skeleton.getEdges());
 
         List<Integer> undirectedIndices = new ArrayList<Integer>();
 
