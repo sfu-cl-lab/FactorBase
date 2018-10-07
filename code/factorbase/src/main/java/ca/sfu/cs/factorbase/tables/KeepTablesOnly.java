@@ -1,15 +1,15 @@
 package ca.sfu.cs.factorbase.tables;
 
+import java.io.IOException;
+import java.sql.DriverManager;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.ArrayList;
+
 import ca.sfu.cs.common.Configuration.Config;
 
 import com.mysql.jdbc.Connection;
-
-import java.sql.DriverManager;
-import java.sql.ResultSet;
-import java.sql.Statement;
-import java.sql.SQLException;
-import java.io.IOException;
-import java.util.ArrayList;
 
 public class KeepTablesOnly{
 	static String databaseName;
@@ -21,8 +21,6 @@ public class KeepTablesOnly{
 	private static Connection con_BN;
 	private static String dbname_CT;
 	private static String dbname_BN;
-	private static String dbname_setup;
-	//private static String[] keep_CT_tablenames = new String[]{"a,b_CT","a,b_a_CT","b_CT","a_CT"};
 
 	
 	public static void setVarsFromConfig(){
@@ -33,7 +31,6 @@ public class KeepTablesOnly{
 		dbaddress = conf.getProperty("dbaddress");
 		dbname_CT = databaseName + "_CT";
 		dbname_BN = databaseName + "_BN";
-		dbname_setup = databaseName + "_setup";
 	}
 
 	public static Connection connectDB(String database) throws Exception{

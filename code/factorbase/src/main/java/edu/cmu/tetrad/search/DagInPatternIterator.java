@@ -21,11 +21,21 @@
 
 package edu.cmu.tetrad.search;
 
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.Map;
+import java.util.Set;
+
 import edu.cmu.tetrad.data.IKnowledge;
 import edu.cmu.tetrad.data.Knowledge;
-import edu.cmu.tetrad.graph.*;
-
-import java.util.*;
+import edu.cmu.tetrad.graph.Edge;
+import edu.cmu.tetrad.graph.EdgeListGraph;
+import edu.cmu.tetrad.graph.Edges;
+import edu.cmu.tetrad.graph.Graph;
+import edu.cmu.tetrad.graph.GraphUtils;
+import edu.cmu.tetrad.graph.Node;
+import edu.cmu.tetrad.graph.Triple;
 
 /**
  * Given a pattern, lists all of the DAGs in that pattern. In the form of an iterator--call hasNext() to see if there's
@@ -175,13 +185,6 @@ public class DagInPatternIterator {
 //        this.knowledge = knowledge;
 //    }
 
-    private void fail(Graph graph, String label) {
-        if (knowledge.isViolatedBy(graph)) {
-//                System.out.println(this.graph);
-            throw new IllegalArgumentException("IKnowledge violated: " + label);
-        }
-    }
-
     //==============================CLASSES==============================//
 
     private static class DecoratedGraph {
@@ -224,10 +227,6 @@ public class DagInPatternIterator {
         @Override
 		public String toString() {
             return graph.toString();
-        }
-
-        public void triedDirectLeft() {
-            triedLeft = true;
         }
 
         public boolean isOrientable() {
@@ -458,10 +457,6 @@ public class DagInPatternIterator {
 
         public boolean isAllowArbitraryOrientation() {
             return allowArbitraryOrientation;
-        }
-
-        public void setAllowArbitraryOrientation(boolean allowArbitraryOrientation) {
-            this.allowArbitraryOrientation = allowArbitraryOrientation;
         }
     }
 }

@@ -19,20 +19,22 @@ package ca.sfu.cs.factorbase.tables;
  *  
  * */
 
+import java.io.IOException;
+import java.sql.DriverManager;
+import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.ArrayList;
+
+import org.apache.commons.lang.StringUtils;
+
 import ca.sfu.cs.common.Configuration.Config;
 import ca.sfu.cs.factorbase.lattice.short_rnid_LatticeGenerator;
 import ca.sfu.cs.factorbase.util.BZScriptRunner;
 
 import com.mysql.jdbc.Connection;
 import com.mysql.jdbc.exceptions.jdbc4.MySQLSyntaxErrorException;
-
-import org.apache.commons.lang.StringUtils;
-
-import javax.swing.*;
-
-import java.io.IOException;
-import java.sql.*;
-import java.util.ArrayList;
 
 public class BayesBaseCT_SortMerge {
 
@@ -44,12 +46,10 @@ public class BayesBaseCT_SortMerge {
     private static String databaseName_BN;
     private static String databaseName_CT;
     private static String databaseName_setup;
-    private static String dbbase;
     private static String dbUsername;
     private static String dbPassword;
     private static String dbaddress;
     private static String linkCorrelation;
-    private static String continuous;
     /*
      * cont is Continuous
      * ToDo: Refactor
@@ -240,7 +240,6 @@ public class BayesBaseCT_SortMerge {
     public static void setVarsFromConfig(){
         Config conf = new Config();
         databaseName_std = conf.getProperty("dbname");
-        //dbbase = conf.getProperty("dbbase");
         databaseName_BN = databaseName_std + "_BN";
         databaseName_CT = databaseName_std + "_CT";
         databaseName_setup = databaseName_std + "_setup";

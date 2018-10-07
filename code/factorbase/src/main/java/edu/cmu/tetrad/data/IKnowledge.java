@@ -21,10 +21,10 @@
 
 package edu.cmu.tetrad.data;
 
-import edu.cmu.tetrad.graph.Graph;
-
-import java.util.List;
 import java.util.Iterator;
+import java.util.List;
+
+import edu.cmu.tetrad.graph.Graph;
 
 /**
  * Created by IntelliJ IDEA.
@@ -74,7 +74,6 @@ public interface IKnowledge {
 
     boolean noEdgeRequired(String x, String y);
 
-    @SuppressWarnings({"SimplifiableIfStatement"})
     boolean isForbiddenByTiers(String var1, String var2);
 
     boolean isEmpty();
@@ -110,7 +109,6 @@ public interface IKnowledge {
 	int hashCode();
 
     @Override
-	@SuppressWarnings({"SimplifiableIfStatement"})
     boolean equals(Object o);
 
     @Override

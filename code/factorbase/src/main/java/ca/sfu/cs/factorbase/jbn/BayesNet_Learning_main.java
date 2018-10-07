@@ -1,25 +1,24 @@
 package ca.sfu.cs.factorbase.jbn;
 
-import edu.cmu.tetrad.data.DataReader;
-import edu.cmu.tetrad.data.DataSet;
-import edu.cmu.tetrad.data.DelimiterType;
-import edu.cmu.tetrad.data.Knowledge;
-import edu.cmu.tetrad.graph.Dag;
-import edu.cmu.tetrad.graph.EdgeListGraphSingleConnections;
-import edu.cmu.tetrad.graph.Graph;
-import edu.cmu.tetrad.graph.Node;
-import edu.cmu.tetrad.search.*;
-import edu.cmu.tetrad.search.PatternToDag;
-import nu.xom.Builder;
-import nu.xom.Document;
-import nu.xom.Element;
-import nu.xom.Elements;
-
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.util.HashSet;
 import java.util.List;
+
+import nu.xom.Builder;
+import nu.xom.Document;
+import nu.xom.Element;
+import nu.xom.Elements;
+import edu.cmu.tetrad.data.DataReader;
+import edu.cmu.tetrad.data.DataSet;
+import edu.cmu.tetrad.data.DelimiterType;
+import edu.cmu.tetrad.data.Knowledge;
+import edu.cmu.tetrad.graph.EdgeListGraphSingleConnections;
+import edu.cmu.tetrad.graph.Graph;
+import edu.cmu.tetrad.graph.Node;
+import edu.cmu.tetrad.search.Ges3;
+import edu.cmu.tetrad.search.PatternToDag;
 
 
 public class BayesNet_Learning_main {
