@@ -25,14 +25,13 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import edu.cmu.tetrad.util.ProbUtils;
 import edu.cmu.tetrad.data.DataSet;
 import edu.cmu.tetrad.data.DiscreteVariable;
 import edu.cmu.tetrad.graph.Node;
+import edu.cmu.tetrad.util.ProbUtils;
 
 /**
  * Created by IntelliJ IDEA. User: jdramsey Date: Apr 19, 2009 Time: 7:28:45 PM To change this template use File |
@@ -361,65 +360,5 @@ public class BDeuScore implements LocalDiscreteScore {
 	public void setSamplePrior(double samplePrior) {
         this.samplePrior = samplePrior;
     }
-
-	@Override
-	public boolean determines(List<Node> arg0, Node arg1) {
-		// TODO Auto-generated method stub
-		return false;
-	}
-
-	@Override
-	public int getMaxDegree() {
-		// TODO Auto-generated method stub
-		return 0;
-	}
-
-	@Override
-	public int getSampleSize() {
-		// TODO Auto-generated method stub
-		return 0;
-	}
-
-	@Override
-	public Node getVariable(String arg0) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public List<Node> getVariables() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public boolean isEffectEdge(double arg0) {
-		// TODO Auto-generated method stub
-		return false;
-	}
-
-	@Override
-	public double localScore(int arg0) {
-		// TODO Auto-generated method stub
-		return 0;
-	}
-
-	@Override
-	public double localScore(int arg0, int arg1) {
-		// TODO Auto-generated method stub
-		return 0;
-	}
-
-	@Override
-	public double localScoreDiff(int arg0, int arg1) {
-		// TODO Auto-generated method stub
-		return 0;
-	}
-
-	@Override
-	public double localScoreDiff(int arg0, int arg1, int[] arg2) {
-		// TODO Auto-generated method stub
-		return 0;
-	}
 }
 
