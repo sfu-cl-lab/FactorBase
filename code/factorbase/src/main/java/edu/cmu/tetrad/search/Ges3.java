@@ -1061,7 +1061,7 @@ public final class Ges3 implements GraphSearch, GraphScorer {
         lookupArrowsBackwards = new HashSet[nodes.size()][nodes.size()];
         
 
-        Set<Edge> graphEdges = graph.getEdges();
+        List<Edge> graphEdges = graph.getEdges();
         for (Edge edge : graphEdges) {
             Node _x = edge.getNode1();
             Node _y = edge.getNode2();
@@ -1093,7 +1093,7 @@ public final class Ges3 implements GraphSearch, GraphScorer {
         sortedArrowsBackwards = new TreeSet<Arrow>();
         lookupArrowsBackwards = new HashSet[nodes.size()][nodes.size()];
 
-        Set<Edge> graphEdges = graph.getEdges();
+        List<Edge> graphEdges = graph.getEdges();
 
         for (Edge edge : graphEdges) {
             Node _x = edge.getNode1();
@@ -1122,7 +1122,7 @@ public final class Ges3 implements GraphSearch, GraphScorer {
         lookupArrowsBackwards = new HashSet[nodes.size()][nodes.size()];
         
 
-        Set<Edge> graphEdges = graph.getEdges();
+        List<Edge> graphEdges = graph.getEdges();
         for (Edge edge : graphEdges) {
             Node _x = edge.getNode1();
             Node _y = edge.getNode2();

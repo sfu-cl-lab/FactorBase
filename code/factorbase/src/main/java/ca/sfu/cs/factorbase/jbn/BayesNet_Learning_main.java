@@ -17,6 +17,7 @@ import edu.cmu.tetrad.data.Knowledge;
 import edu.cmu.tetrad.graph.EdgeListGraphSingleConnections;
 import edu.cmu.tetrad.graph.Graph;
 import edu.cmu.tetrad.graph.Node;
+import edu.cmu.tetrad.graph.Pattern;
 import edu.cmu.tetrad.search.Ges3;
 import edu.cmu.tetrad.search.PatternToDag;
 
@@ -90,7 +91,7 @@ public class BayesNet_Learning_main {
         gesSearch.setSamplePrior(10.0000);
         /* learn a dag from data */
         Graph graph = gesSearch.search();
-        Graph pattern = new EdgeListGraphSingleConnections(graph);
+        Pattern pattern = new Pattern(graph);
 
         PatternToDag p2d = new PatternToDag(pattern);
         Graph dag = p2d.patternToDagMeek();
