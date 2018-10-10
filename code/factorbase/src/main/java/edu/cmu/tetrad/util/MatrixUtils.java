@@ -21,6 +21,13 @@
 
 package edu.cmu.tetrad.util;
 
+import java.text.DecimalFormat;
+import java.text.NumberFormat;
+
+import no.uib.cipr.matrix.DenseMatrix;
+import no.uib.cipr.matrix.Matrices;
+import no.uib.cipr.matrix.Matrix;
+import no.uib.cipr.matrix.MatrixSingularException;
 import cern.colt.matrix.DoubleFactory2D;
 import cern.colt.matrix.DoubleMatrix1D;
 import cern.colt.matrix.DoubleMatrix2D;
@@ -31,13 +38,6 @@ import cern.colt.matrix.linalg.Algebra;
 import cern.colt.matrix.linalg.CholeskyDecomposition;
 import cern.colt.matrix.linalg.Property;
 import cern.jet.math.Functions;
-import no.uib.cipr.matrix.DenseMatrix;
-import no.uib.cipr.matrix.Matrices;
-import no.uib.cipr.matrix.Matrix;
-import no.uib.cipr.matrix.MatrixSingularException;
-
-import java.text.DecimalFormat;
-import java.text.NumberFormat;
 
 /**
  * Class Matrix includes several public static functions performing matrix
@@ -48,7 +48,6 @@ import java.text.NumberFormat;
  * @author Tianjiao Chu
  * @author Joseph Ramsey
  */
-@SuppressWarnings({"WeakerAccess", "UnusedDeclaration"})
 public final class MatrixUtils {
 
     //=========================PUBLIC METHODS===========================//
@@ -129,7 +128,6 @@ public final class MatrixUtils {
      * @param tolerance A double >= 0.
      * @return Ibid.
      */
-    @SuppressWarnings({"SameParameterValue", "BooleanMethodIsAlwaysInverted"})
     public static boolean isSymmetric(double[][] m, double tolerance) {
         return new Property(tolerance).isSymmetric(new DenseDoubleMatrix2D(m));
     }
@@ -681,7 +679,6 @@ public final class MatrixUtils {
      * Return true if the given matrix is symmetric positive definite--that is,
      * if it would make a valid covariance matrix.
      */
-    @SuppressWarnings({"BooleanMethodIsAlwaysInverted"})
     public static boolean isPositiveDefinite(DoubleMatrix2D matrix) {
         return new CholeskyDecomposition(matrix).isSymmetricPositiveDefinite();
     }

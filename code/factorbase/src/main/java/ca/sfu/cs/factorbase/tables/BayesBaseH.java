@@ -35,27 +35,23 @@ package ca.sfu.cs.factorbase.tables;
  * since all the files could be prepared in advance by run the program CSVPrecomputor.java
  */
 
+import java.io.File;
+import java.io.IOException;
+import java.sql.DriverManager;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.ArrayList;
+
+import nu.xom.ParsingException;
 import ca.sfu.cs.common.Configuration.Config;
 import ca.sfu.cs.factorbase.exporter.bifexporter.BIF_Generator;
 import ca.sfu.cs.factorbase.exporter.bifexporter.bif.BIFExport;
 import ca.sfu.cs.factorbase.exporter.bifexporter.bif.BIFImport;
-import ca.sfu.cs.factorbase.exporter.bifexporter.bif.BIF_IO;
 import ca.sfu.cs.factorbase.jbn.BayesNet_Learning_main;
 import ca.sfu.cs.factorbase.util.BZScriptRunner;
 
 import com.mysql.jdbc.Connection;
-
-import nu.xom.ParsingException;
-
-import org.apache.commons.lang.StringUtils;
-
-import javax.swing.*;
-
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.sql.*;
-import java.util.ArrayList;
 
 public class BayesBaseH {
 

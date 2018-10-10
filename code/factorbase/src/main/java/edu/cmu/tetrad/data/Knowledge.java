@@ -21,14 +21,27 @@
 
 package edu.cmu.tetrad.data;
 
+import java.io.CharArrayWriter;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.Writer;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.SortedSet;
+import java.util.TreeSet;
+
 import edu.cmu.tetrad.graph.Edge;
 import edu.cmu.tetrad.graph.Edges;
 import edu.cmu.tetrad.graph.Graph;
 import edu.cmu.tetrad.graph.Node;
 import edu.cmu.tetrad.util.TetradSerializable;
-
-import java.io.*;
-import java.util.*;
 
 /**
  * Stores information about required and forbidden edges and common causes for
@@ -553,7 +566,6 @@ public final class Knowledge implements TetradSerializable, IKnowledge {
      * tiers.
      */
     @Override
-	@SuppressWarnings({"SimplifiableIfStatement"})
     public final boolean isForbiddenByTiers(String var1, String var2) {
        /* if (var1.equals(var2)) {
             throw new IllegalArgumentException();
@@ -841,7 +853,6 @@ public final class Knowledge implements TetradSerializable, IKnowledge {
     }
 
     @Override
-	@SuppressWarnings({"SimplifiableIfStatement"})
     public final boolean equals(Object o) {
         if (o == this) {
             return true;
@@ -1084,33 +1095,6 @@ public final class Knowledge implements TetradSerializable, IKnowledge {
         }
 
         getForbiddenEdges().addAll(explicitlyForbiddenEdges);
-    }
-
-    private static String readLineSkippingComments(BufferedReader in,
-                                                   String commentIndicator, int[] lineNo) throws IOException {
-        if (commentIndicator == null) {
-            lineNo[0]++;
-            return in.readLine();
-        } else {
-            String line;
-
-            while ((line = in.readLine()) != null) {
-                lineNo[0]++;
-                if (!isCommentLine(line, commentIndicator)) {
-                    return line;
-                }
-            }
-
-            return null;
-        }
-    }
-
-    private static boolean isCommentLine(String line, String commentIndicator) {
-        return line.startsWith(commentIndicator) || "".equals(line);
-    }
-
-    private static String substitutePeriodsForSpaces(String s) {
-        return s.replaceAll(" ", ".");
     }
 
     /**

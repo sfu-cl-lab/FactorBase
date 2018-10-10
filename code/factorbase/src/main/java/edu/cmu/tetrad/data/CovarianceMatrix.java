@@ -21,16 +21,21 @@
 
 package edu.cmu.tetrad.data;
 
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.text.NumberFormat;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Set;
+
 import cern.colt.matrix.DoubleMatrix2D;
 import cern.colt.matrix.impl.DenseDoubleMatrix2D;
 import edu.cmu.tetrad.graph.Node;
 import edu.cmu.tetrad.util.MatrixUtils;
 import edu.cmu.tetrad.util.NumberFormatUtil;
-
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.util.*;
-import java.text.NumberFormat;
 
 /**
  * Stores a covariance matrix together with variable names and sample size,
@@ -552,6 +557,30 @@ public class CovarianceMatrix implements ICovarianceMatrix {
         if (selectedVariables == null) {
             selectedVariables = new HashSet<Node>();
         }
+    }
+
+    @Override
+    public DataModel copy() {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public boolean isContinuous() {
+        // TODO Auto-generated method stub
+        return false;
+    }
+
+    @Override
+    public boolean isDiscrete() {
+        // TODO Auto-generated method stub
+        return false;
+    }
+
+    @Override
+    public boolean isMixed() {
+        // TODO Auto-generated method stub
+        return false;
     }
 }
 

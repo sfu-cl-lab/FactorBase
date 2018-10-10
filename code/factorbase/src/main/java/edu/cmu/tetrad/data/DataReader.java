@@ -21,15 +21,27 @@
 
 package edu.cmu.tetrad.data;
 
+import java.io.CharArrayReader;
+import java.io.CharArrayWriter;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
+import java.io.Reader;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Set;
+import java.util.regex.Pattern;
+
 import cern.colt.matrix.DoubleMatrix2D;
 import cern.colt.matrix.impl.DenseDoubleMatrix2D;
 import edu.cmu.tetrad.graph.Node;
 import edu.cmu.tetrad.util.NamingProtocol;
 import edu.cmu.tetrad.util.TetradLogger;
-
-import java.io.*;
-import java.util.*;
-import java.util.regex.Pattern;
 
 /**
  * Parses a tabular data file or covariance matrix, with or without data file
@@ -101,11 +113,6 @@ public final class DataReader {
 
 
     /**
-     * Log empty token messages.
-     */
-    private boolean logEmptyTokens = false;
-
-    /**
      * True if variable names should be read lowercase.
      */
     private boolean readVariablesLowercase = false;
@@ -122,12 +129,6 @@ public final class DataReader {
     }
 
     //============================PUBLIC METHODS========================//
-
-
-    public void setLogEmptyTokens(boolean log){
-        this.logEmptyTokens = log;
-    }
-
 
     /**
      * Lines beginning with blanks or this marker will be skipped.

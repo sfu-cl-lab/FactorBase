@@ -21,17 +21,23 @@
 
 package edu.cmu.tetrad.data;
 
+import java.text.NumberFormat;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
 import cern.colt.matrix.DoubleMatrix2D;
 import cern.colt.matrix.doublealgo.Statistic;
 import cern.colt.matrix.impl.DenseDoubleMatrix2D;
 import edu.cmu.tetrad.graph.Node;
 import edu.cmu.tetrad.util.NumberFormatUtil;
 import edu.cmu.tetrad.util.TetradSerializable;
-
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.text.NumberFormat;
-import java.util.*;
 
 /**
  * Wraps a COLT 2D matrix in such a way that mixed data sets can be stored. The
@@ -610,7 +616,6 @@ public final class ColtDataSet
      * @throws IllegalArgumentException if the given change is not supported.
      */
     @Override
-	@SuppressWarnings({"ConstantConditions"})
     public final void changeVariable(Node from, Node to) {
         if (!(from instanceof DiscreteVariable &&
                 to instanceof DiscreteVariable)) {
@@ -624,7 +629,7 @@ public final class ColtDataSet
         int col = variables.indexOf(_from);
 
         List<String> oldCategories = _from.getCategories();
-        List newCategories = _to.getCategories();
+        List<String> newCategories = _to.getCategories();
 
         int[] indexArray = new int[oldCategories.size()];
 
@@ -1599,24 +1604,6 @@ public final class ColtDataSet
     }
 
     /**
-     * Adds semantic checks to the default deserialization method. This method
-     * must have the standard signature for a readObject method, and the body of
-     * the method must begin with "s.defaultReadObject();". Other than that, any
-     * semantic checks can be specified and do not need to stay the same from
-     * version to version. A readObject method of this form may be added to any
-     * class, even if Tetrad sessions were previously saved out using a version
-     * of the class that didn't include it. (That's what the
-     * "s.defaultReadObject();" is for. See J. Bloch, Effective Java, for help.
-     *
-     * @throws java.io.IOException
-     * @throws ClassNotFoundException
-     */
-    private static void readObject(ObjectInputStream s)
-            throws IOException, ClassNotFoundException {
-        s.defaultReadObject();
-    }
-
-    /**
      * Returns the set of selected nodes, creating a new set if necessary.
      */
     private Set<Node> getSelection() {
@@ -1820,29 +1807,18 @@ public final class ColtDataSet
     }
 
 
-    /**
-     * Returns the index of the last row of the data that does not consist
-     * entirely of missing values (that is, Double.NaN's), or -1, if there are
-     * no rows in the data that do not consist entirely of missing values.
-     */
-    private int lastInterestingRow() {
-        for (int lastRow = data.rows() - 1; lastRow >= 0; lastRow--) {
-            for (int j = 0; j < data.columns(); j++) {
-                if (!Double.isNaN(data.get(lastRow, j))) {
-                    return lastRow + 1;
-                }
-            }
-        }
-
-        return -1;
-    }
-
     public boolean isLineNumbersWritten() {
         return lineNumbersWritten;
     }
 
     public void setLineNumbersWritten(boolean lineNumbersWritten) {
         this.lineNumbersWritten = lineNumbersWritten;
+    }
+
+    @Override
+    public DataModel copy() {
+        // TODO Auto-generated method stub
+        return null;
     }
 }
 

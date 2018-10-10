@@ -1,8 +1,6 @@
 
 package ca.sfu.cs.factorbase.lattice;
  
-import com.mysql.jdbc.Connection;
- 
 import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -11,6 +9,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
+
+import com.mysql.jdbc.Connection;
 
 // assumes that a table LatticeRnodes has been generated. See transfer.sql //
 
@@ -161,7 +161,6 @@ public class short_rnid_LatticeGenerator {
         for(int setLength = 1; setLength < maxNumberOfMembers; setLength++){
             ArrayList<String> sets = new ArrayList<String>();
             ResultSet rs = st.executeQuery("select name from lattice_set where length = " + setLength + ";");
-            int tem=0;
             while(rs.next()){
                 String h= rs.getString("name").substring(1,rs.getString("name").length()-1 ) ;   //deleting apostrophe from beginning and end
                 sets.add(h);

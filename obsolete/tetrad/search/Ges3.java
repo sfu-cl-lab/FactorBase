@@ -21,42 +21,22 @@
 
 package edu.cmu.tetrad.search;
 
+import cern.colt.matrix.DoubleMatrix1D;
+import cern.colt.matrix.DoubleMatrix2D;
+import cern.colt.matrix.linalg.Algebra;
+import edu.cmu.tetrad.data.*;
+import edu.cmu.tetrad.graph.*;
+import edu.cmu.tetrad.regression.RegressionDataset;
+import edu.cmu.tetrad.util.*;
+
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
+import java.io.IOException;
 import java.text.NumberFormat;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.SortedSet;
-import java.util.TreeSet;
-import java.util.WeakHashMap;
-
-import cern.colt.matrix.DoubleMatrix1D;
-import cern.colt.matrix.DoubleMatrix2D;
-import cern.colt.matrix.linalg.Algebra;
-import edu.cmu.tetrad.data.DataSet;
-import edu.cmu.tetrad.data.DataUtils;
-import edu.cmu.tetrad.data.ICovarianceMatrix;
-import edu.cmu.tetrad.data.Knowledge;
-import edu.cmu.tetrad.data.KnowledgeEdge;
-import edu.cmu.tetrad.graph.Edge;
-import edu.cmu.tetrad.graph.EdgeListGraph;
-import edu.cmu.tetrad.graph.Edges;
-import edu.cmu.tetrad.graph.Graph;
-import edu.cmu.tetrad.graph.Node;
-import edu.cmu.tetrad.util.MatrixUtils;
-import edu.cmu.tetrad.util.NumberFormatUtil;
-import edu.cmu.tetrad.util.ProbUtils;
-import edu.cmu.tetrad.util.TetradLogger;
+import java.util.*;
 
 /**
  * GesSearch is an implementation of the GES algorithm, as specified in Chickering (2002) "Optimal structure
@@ -90,6 +70,16 @@ public final class Ges3 implements GraphSearch, GraphScorer {
      * Specification of forbidden and required edges.
      */
     private Knowledge knowledge = new Knowledge();
+
+    /**
+     * For discrete data scoring, the structure prior.
+     */
+    private double structurePrior;
+
+    /**
+     * For discrete data scoring, the sample prior.
+     */
+    private double samplePrior;
 
     /**
      * Map from variables to their column indices in the data set.
@@ -544,12 +534,14 @@ public final class Ges3 implements GraphSearch, GraphScorer {
         if (getDiscreteScore() != null) {
             getDiscreteScore().setStructurePrior(structurePrior);
         }
+        this.structurePrior = structurePrior;
     }
 
     public void setSamplePrior(double samplePrior) {
         if (getDiscreteScore() != null) {
             getDiscreteScore().setSamplePrior(samplePrior);
         }
+        this.samplePrior = samplePrior;
     }
 
     @Override
@@ -2105,7 +2097,14 @@ public final class Ges3 implements GraphSearch, GraphScorer {
         }
     }
 
-
+    private static int getRowIndex(int dim[], int[] values) {
+        int rowIndex = 0;
+        for (int i = 0; i < dim.length; i++) {
+            rowIndex *= dim[i];
+            rowIndex += values[i];
+        }
+        return rowIndex;
+    }
 
     //===========================SCORING METHODS===========================//
 
@@ -2384,6 +2383,12 @@ public final class Ges3 implements GraphSearch, GraphScorer {
         return getDiscreteScore().localScore(i, parents, y, parentNodes, globalScoreHash);
     }
 
+    private int numCategories(int i) {
+        return ((DiscreteVariable) dataSet().getVariable(i)).getNumCategories();
+    }
+
+    private RegressionDataset regression;
+
     /**
      * Calculates the sample likelihood and BIC score for i given its parents in a simple SEM model.
      */
@@ -2512,6 +2517,14 @@ public final class Ges3 implements GraphSearch, GraphScorer {
 
     private DataSet dataSet() {
         return dataSet;
+    }
+
+    private double getStructurePrior() {
+        return structurePrior;
+    }
+
+    private double getSamplePrior() {
+        return samplePrior;
     }
 
     private boolean isDiscrete() {
