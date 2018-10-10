@@ -31,6 +31,16 @@ public class LoggerConfig {
 	}
 	
 	/**
+	 *Build the Level table to map the LoggingLevel specified in the config file to the Level of JUL
+	 */
+	public static void buildLevelMap() {
+		levelMap = new HashMap<String, Level>();
+		levelMap.put("debug", Level.ALL);
+		levelMap.put("info", Level.INFO);
+		levelMap.put("off", Level.OFF);	
+	}
+	
+	/**
 	 * get the logger level from config.cfg
 	 * @return the specified Level
 	 * @throws Exception if the specified value is not valid
@@ -44,15 +54,5 @@ public class LoggerConfig {
 			 throw new IllegalArgumentException("Invlid LoggingLevel setting. Please set the loggingLevel in config.cfg to debug/info/off!");
 		}
 		return levelMap.get(loggingLevel);
-	}
-	
-	/**
-	 *Build the Level table to map the LoggingLevel specified in the config file to the Level of JUL
-	 */
-	private static void buildLevelMap() {
-		levelMap = new HashMap<String, Level>();
-		levelMap.put("debug", Level.ALL);
-		levelMap.put("info", Level.INFO);
-		levelMap.put("off", Level.OFF);	
 	}
 }

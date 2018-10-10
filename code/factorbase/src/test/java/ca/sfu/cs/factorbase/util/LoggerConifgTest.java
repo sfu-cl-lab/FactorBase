@@ -18,17 +18,20 @@ import java.util.Properties;
 
 import java.io.IOException;
 
-import testframework.TestConfigFile ;;
+import testframework.TestConfigFile;
 
 public class LoggerConifgTest {
 	private static Logger rootLogger;
 	private static TestConfigFile conf;
+	private static Map<String, Level> levelMap;
 
 	@BeforeClass
 	public static void setUpBeforeClass() throws IOException{
+		LoggerConfig.buildLevelMap();
 		Properties properties = new Properties();
 		properties.setProperty("LoggingLevel", "");
 		conf = new TestConfigFile(properties);
+		levelMap = LoggerConfig.levelMap;
 	}
 	
 	@AfterClass
@@ -40,9 +43,7 @@ public class LoggerConifgTest {
 	@Test
 	public void setGlobalLevel_setSuccessful() throws Exception{
 		System.setProperty("config", conf.file.getName());
-		
 		rootLogger = LogManager.getLogManager().getLogger("");		
-		Map<String, Level> levelMap = LoggerConfig.levelMap;
 		Iterator<String> LoggingLevelItr = levelMap.keySet().iterator();
 		
 		// Set the LoggingLevel to different Level to see if the result of rootLogger and handler is the same as we desired
