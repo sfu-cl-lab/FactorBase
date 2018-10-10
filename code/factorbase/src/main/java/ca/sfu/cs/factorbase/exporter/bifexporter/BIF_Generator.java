@@ -32,6 +32,7 @@ import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.logging.Logger;
 
 import ca.sfu.cs.common.Configuration.Config;
 
@@ -50,6 +51,8 @@ public class BIF_Generator {
 	static String dbUsername;
 	static String dbPassword;
 	static String dbaddress;
+	
+	private static Logger logger = Logger.getLogger(BIF_Generator.class.getName());
 	
 	public static void main(String[] args) throws SQLException, IOException {
 		
@@ -73,7 +76,7 @@ public class BIF_Generator {
 	
 	
 	public static void generate_bif(String network_name, String bif_file_name_withPath, Connection conn) throws SQLException, IOException{
-		System.out.println("\n BIF Generator starts");
+		logger.info("\n BIF Generator starts");
 		
 		Statement st=(Statement) conn.createStatement();
 		File file = new File(bif_file_name_withPath);
@@ -162,7 +165,7 @@ public class BIF_Generator {
       	  rst2=st.executeQuery("SELECT distinct lattice_set.name FROM lattice_membership,lattice_set where length=( SELECT max(length) FROM lattice_set);");
       	  rst2.next();
       	  String Rchain=rst2.getString(1);
-      	 // System.out.println("Rchain:"+Rchain);
+      	 // logger.fine("Rchain:"+Rchain);
       	  rst2=st.executeQuery("select distinct parent from Path_BayesNets where child= '`"+variables.get(i)+"`' and parent !=''and  Rchain='"+Rchain+"' ;");
       	  
       	
@@ -185,7 +188,7 @@ public class BIF_Generator {
       	  }
       	  order=order+", `" + variables.get(i) + "`";
       	  String query="select CP from "+table_name+" order by "+order+" ;";
-      	 // System.out.println(query+"\n"); //zqian
+      	 // logger.fine(query+"\n"); //zqian
       	  rst2=st.executeQuery(query);
       	  
       	  
@@ -200,12 +203,12 @@ public class BIF_Generator {
       	  // for(int j=1;j<=(outcomes.get(i)-1);j++){
       	  for(int j=1;j<=(outcomes.get(i));j++){
       	    rst2.next();
-      	  // System.out.println(j + ": "  + rst2.getString(1)+"\n"); //zqian
+      	  // logger.fine(j + ": "  + rst2.getString(1)+"\n"); //zqian
       	    probabilities=probabilities+" "+rst2.getString(1);
       	    //KLD generator has been modified s.t. probabilities sum to 1, and have at most 6 digits are .  Oliver
       	    //getString(1) is assigned the conditional probability (CP) as a string
       		//subtot=subtot+Integer.parseInt((rst2.getString(1).substring(2,rst2.getString(1).length())));
-      	//	System.out.println("subtot: " + subtot);
+      	//	logger.fine("subtot: " + subtot);
       		
       		//convert string representing a conditional probability to an integer. 
       		}
@@ -270,7 +273,7 @@ public class BIF_Generator {
         
         output.close();
         st.close();
-    	System.out.println("BIF Generator Ends for "+network_name);
+    	logger.info("BIF Generator Ends for "+network_name);
 		
 	}
 	
@@ -283,7 +286,7 @@ public class BIF_Generator {
 		//st1.execute("drop table if exists `Final_Path_BayesNets` ;");
 		//creating table Final_Path_BayesNets
 		String query1="CREATE TABLE `Final_Path_BayesNets` ( Select * from `Path_BayesNets` where Rchain='"+rchain+"' and parent<>'' ) ;";
-		System.out.println(query1);
+		logger.fine(query1);
 		st1.execute(query1);
 		//adding primary key to Final_Path_BayesNets
 		st1.execute("alter table `Final_Path_BayesNets` add primary key (  `Rchain`,`child`,`parent`)  ;");
@@ -310,7 +313,7 @@ public class BIF_Generator {
 	
 	public static void print(ArrayList<String> al){
 		for(int i=0;i<al.size();i++)
-			System.out.println(al.get(i));
+			logger.fine(al.get(i));
 	}
 	
 	public static String writeBifHeader() {
@@ -379,7 +382,7 @@ public class BIF_Generator {
 		try {
 			java.lang.Class.forName("com.mysql.jdbc.Driver");
 		} catch (Exception ex) {
-			System.err.println("Unable to load MySQL JDBC driver");
+			logger.severe("Unable to load MySQL JDBC driver");
 		}
 		con1 = (Connection) DriverManager.getConnection(CONN_STR1, dbUsername, dbPassword);
 
@@ -387,7 +390,7 @@ public class BIF_Generator {
 		try {
 			java.lang.Class.forName("com.mysql.jdbc.Driver");
 		} catch (Exception ex) {
-			System.err.println("Unable to load MySQL JDBC driver");
+			logger.severe("Unable to load MySQL JDBC driver");
 		}
 		con2 = (Connection) DriverManager.getConnection(CONN_STR2, dbUsername, dbPassword);
 		
@@ -395,7 +398,7 @@ public class BIF_Generator {
 		try {
 			java.lang.Class.forName("com.mysql.jdbc.Driver");
 		} catch (Exception ex) {
-			System.err.println("Unable to load MySQL JDBC driver");
+			logger.severe("Unable to load MySQL JDBC driver");
 		}
 		con3 = (Connection) DriverManager.getConnection(CONN_STR3, dbUsername, dbPassword);
         //handle warnings

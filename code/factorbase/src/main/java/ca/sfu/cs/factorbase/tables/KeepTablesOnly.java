@@ -6,6 +6,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.logging.Logger;
 
 import ca.sfu.cs.common.Configuration.Config;
 
@@ -22,6 +23,9 @@ public class KeepTablesOnly{
 	private static String dbname_CT;
 	private static String dbname_BN;
 
+	private static String dbname_setup;
+	//private static String[] keep_CT_tablenames = new String[]{"a,b_CT","a,b_a_CT","b_CT","a_CT"};
+	private static Logger logger = Logger.getLogger(KeepTablesOnly.class.getName());
 	
 	public static void setVarsFromConfig(){
 		Config conf = new Config();
@@ -40,13 +44,13 @@ public class KeepTablesOnly{
 		try {
 			java.lang.Class.forName("com.mysql.jdbc.Driver");
 		} catch (Exception ex) {
-			System.err.println("Unable to load MySQL JDBC driver");
+			logger.severe("Unable to load MySQL JDBC driver");
 		}
 
 		try{
 			return ((Connection) DriverManager.getConnection(CONN_STR, dbUsername, dbPassword));
 		} catch (Exception e){
-			System.err.println("Could not connect to the database " + database );
+			logger.severe("Could not connect to the database " + database );
 		}
 		
 		return null;
@@ -69,7 +73,7 @@ public class KeepTablesOnly{
 		);
 		ArrayList<String> sets = new ArrayList<String>();
 		while(rst.next()){
-			System.out.println(rst.getString("name"));
+			logger.fine(rst.getString("name"));
 			String tables = rst.getString("name");
 			sets.add(tables.substring(1, tables.length()-1) + "_CT");
 		}
@@ -94,26 +98,26 @@ public class KeepTablesOnly{
 		}
 		NewSQL += "';";
 
-		System.out.println(NewSQL);
+		logger.fine(NewSQL);
 		ArrayList<String> sets = new ArrayList<String>();
 		try{
 			ResultSet res = st.executeQuery(NewSQL);
 			while(res.next()){
  
                 sets.add(res.getString("result"));
- 				//System.out.println(sets+" +++ ");
+ 				//logger.fine(sets+" +++ ");
             }
 
 			for(String set : sets){
 				st.execute(set);
-				System.out.println(set+" OK!");
+				logger.fine(set+" OK!");
 			}
 		
 			
 			//st.close();
 		}
 		catch(SQLException e){
-			System.out.println("ERROR"+ e);
+			logger.severe("ERROR"+ e);
 		}		
 
 	}
@@ -121,19 +125,19 @@ public class KeepTablesOnly{
 	//@Overload
 	public static void Drop_tmpTables(){
 		setVarsFromConfig();
-		System.out.println("Set variables");
+		logger.fine("Set variables");
 
 		try{
 			con_CT = connectDB(dbname_CT);
 		} catch (Exception e) {
-			System.err.println("Could not connect to the database " + dbname_CT );
+			logger.severe("Could not connect to the database " + dbname_CT );
 			//throw new Exception();
 		}
 		//
 		try{
 			con_BN = connectDB(dbname_BN);
 		} catch (Exception e) {
-			System.err.println("Could not connect to the database " + dbname_BN );
+			logger.severe("Could not connect to the database " + dbname_BN );
 			//throw new Exception();
 		}
 		
@@ -155,12 +159,12 @@ public class KeepTablesOnly{
 	public static void main(String[] args) throws SQLException, IOException{
 		
 		setVarsFromConfig();
-		System.out.println("Set variables");
+		logger.fine("Set variables");
 
 		try{
 			con_CT = connectDB(dbname_CT);
 		} catch (Exception e) {
-			System.err.println("Could not connect to the database " + dbname_CT );
+			logger.severe("Could not connect to the database " + dbname_CT );
 		}
 		
 		//keep tables in CT database
@@ -174,7 +178,7 @@ public class KeepTablesOnly{
 
 		//select the delete tablenames,return a strinng
         /*st.execute("select concat('drop table ',table_name,';') as result FROM information_schema.tables where table_schema = " +dbname+ " and table_name != " +tablename+ ";" );  
-		System.out.println(result);
+		logger.fine(result);
 		Statement tmp = con.createStatement();*/
 
  

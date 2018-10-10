@@ -14,6 +14,7 @@ import java.sql.*;
  *August 9. This just adds Boolean values for the relationship values to the Attribute_Values tables. Todo: move this to Find_Values part.
  * 
  * */
+import java.util.logging.Logger;
 
 public class CPGenerator {
 
@@ -23,7 +24,8 @@ public class CPGenerator {
 	static String dbUsername;
 	static String dbPassword;
 	static String dbaddress;
-
+	
+	private static Logger logger = Logger.getLogger(CPGenerator.class.getName());
 	
 	public static void main(String[] args) throws Exception {
 		
@@ -32,12 +34,12 @@ public class CPGenerator {
 		
 		//connect to db using jdbc
 		connectDB();
-        System.out.println(" Parameter learning  for :"+ databaseName2);
+        logger.info(" Parameter learning  for :"+ databaseName2);
 
 		CPGenerator.Generator(databaseName,con2);
 		CP mycp = new CP(databaseName2,databaseName3);
 		mycp.cp();
-		System.out.println("\n Parameter learning is done.");
+		logger.info("\n Parameter learning is done.");
 		
 		
 		con2.close();
@@ -53,12 +55,12 @@ public class CPGenerator {
 		ResultSet rs1 = st1.executeQuery("select rnid from RNodes;;");    
 		while(rs1.next()){
 			String rnid = rs1.getString("rnid");
-			//System.out.println("rnid : " + rnid);
+			//logger.fine("rnid : " + rnid);
 			Statement st2 = con2.createStatement();
 			st2.execute("SET SQL_SAFE_UPDATES=0;");
 			//adding boolean values for rnodes
 			st2.execute("delete from  Attribute_Value  where column_name='"+rnid+"';");
-			//System.out.println("delete from  Attribute_Value  where column_name='"+rnid+"';");
+			//logger.fine("delete from  Attribute_Value  where column_name='"+rnid+"';");
 			//st2.execute("insert  into Attribute_Value values('"+rnid+"','True');");
 			//st2.execute("insert  into Attribute_Value values('"+rnid+"','False');");
 			st2.execute("insert  into Attribute_Value values('"+rnid+"','T');"); // April 28, 2014, zqian
@@ -72,22 +74,22 @@ public class CPGenerator {
 	/*	//build stored procedure in _BN        
         BZScriptRunner bzsr = new BZScriptRunner(databaseName2,con2);
         bzsr.CP_createSP("scripts/CPGenerator.sql");
-        //System.out.println("creating the stored procedure is done "+databaseName);
+        //logger.fine("creating the stored procedure is done "+databaseName);
         bzsr.callSP("CP_Generator");
-        //System.out.println("CP_Generator is done for "+databaseName);
+        //logger.fine("CP_Generator is done for "+databaseName);
         long l2 = System.currentTimeMillis();
 		System.out.print("Parameter Learning Time(ms): "+(l2-l)+" ms.\n");
 
         ResultSet rs2 = st1.executeQuery("SELECT    sum(LogLikelihood) as FinalLogLikelihood,    sum(Parameters) as FreeParameters,    sum(BIC) as FinalBIC,    sum(AIC) as FinalAIC FROM   Scores;");    
 		while(rs2.next()){
 			String FinalLogLikelihood = rs2.getString("FinalLogLikelihood");
-			System.out.println("FinalLogLikelihood : " + FinalLogLikelihood);
+			logger.fine("FinalLogLikelihood : " + FinalLogLikelihood);
 			String FreeParameters = rs2.getString("FreeParameters");
-			System.out.println("FreeParameters : " + FreeParameters);
+			logger.fine("FreeParameters : " + FreeParameters);
 			String  FinalBIC = rs2.getString("FinalBIC");
-			System.out.println("FinalBIC  : " + FinalBIC);
+			logger.fine("FinalBIC  : " + FinalBIC);
 			String  FinalAIC = rs2.getString("FinalAIC");
-			System.out.println("FinalAIC  : " + FinalAIC);
+			logger.fine("FinalAIC  : " + FinalAIC);
 			
 		}
 		*/
@@ -113,7 +115,7 @@ public class CPGenerator {
 		try {
 			java.lang.Class.forName("com.mysql.jdbc.Driver");
 		} catch (Exception ex) {
-			System.err.println("Unable to load MySQL JDBC driver");
+			logger.severe("Unable to load MySQL JDBC driver");
 		}
 		con2 = (Connection) DriverManager.getConnection(CONN_STR2, dbUsername, dbPassword);
 		

@@ -21,9 +21,11 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.logging.Logger;
 
 import com.mysql.jdbc.Connection;
 import com.mysql.jdbc.ResultSetMetaData;
+
 /*
 //sort merge version3
 //here the compare function is also good
@@ -34,6 +36,8 @@ public class Sort_merge3 {
 	static Connection con;
 	final static String database = "sort_merge";
 	
+	private static Logger logger = Logger.getLogger(Sort_merge3.class.getName());
+
 	public static void main(String[] args) throws SQLException, IOException {
 		
 		connectDB();
@@ -48,14 +52,16 @@ public class Sort_merge3 {
 		
 		long time2=System.currentTimeMillis();
 		
-		System.out.println("total time:"+(time2-time1));
-		System.out.println(compare_tables(table3,"a2_0_false",con));
-		
-
+		logger.info("total time:"+(time2-time1));
+		if(compare_tables(table3,"a2_0_false",con))
+			logger.fine("true");
+		else
+			logger.fine("false");
 	}
+	
 	 public static void sort_merge(String table1,String table2, String table3, Connection conn) throws SQLException, IOException{
-		 //System.out.println("sort merge version 3");
-			System.out.println("\nGenerating false table by Subtration using Sort_merge, cur_false_Table is : " + table3);
+		 //logger.fine("sort merge version 3");
+			logger.info("\nGenerating false table by Subtration using Sort_merge, cur_false_Table is : " + table3);
 
 			//!!!!!!!!!!!!!!!!!remember to change the path and file name
 			File ftemp=new File("sort_merge.csv");
@@ -83,7 +89,7 @@ public class Sort_merge3 {
 				 
 				 if((orderList.get(i)).contains("MULT"))
 					 {
-					 	//System.out.println("sort merge test: "+orderList.get(i));
+					 	//logger.fine("sort merge test: "+orderList.get(i));
 					 	orderList.remove(i);
 					 	break;
 					 }
@@ -113,7 +119,7 @@ public class Sort_merge3 {
 				//SELECT * INTO OUTFILE '/tmp/result.txt'; //here the files are stored on the Server Side.
 				// and then load these files into memory?
 				long time1=System.currentTimeMillis();
-				System.out.println("\n rst1 : " + "select distinct mult, "+order+" from "+table1+" order by "+order+" ;");
+				logger.info("\n rst1 : " + "select distinct mult, "+order+" from "+table1+" order by "+order+" ;");
 			    ResultSet rst1=st1.executeQuery("select distinct mult, "+order+" from "+table1+" order by "+order+" ;"); 
 			    ResultSet rst2=st2.executeQuery("select distinct mult, "+order+" from "+table2+" order by "+order+" ;");
 			    long time2=System.currentTimeMillis();
@@ -207,16 +213,16 @@ public class Sort_merge3 {
 			 
 			long time5=System.currentTimeMillis();
 			//System.out.print("\t export csv file to sql:"+(time5-time4));
-			System.out.println("\ntotal time: "+(time5-time1)+"\n");
+			logger.info("\ntotal time: "+(time5-time1)+"\n");
 			//delete the csv file, zqian
 			if(ftemp.exists()) ftemp.delete();
 			 }
 			 
 			 else { //Aug 18, 2014 zqian //handle the extreme case when there's only `mult` columne
-				System.out.println("\n \t handle the extreme case when there's only `mult` columne \n");
+				logger.fine("\n \t handle the extreme case when there's only `mult` columne \n");
 				st2.execute("drop table if exists "+ table3+"; ");
 				st2.execute("create table " +table3+" like "+ table1+" ;");
-				System.out.println("insert into "+table3+" select ("+table1+".mult - "+table2+".mult ) as mult from "+table1 + ", "+ table2 + " ;");
+				logger.fine("insert into "+table3+" select ("+table1+".mult - "+table2+".mult ) as mult from "+table1 + ", "+ table2 + " ;");
 				st2.execute("insert into "+table3+" select ("+table1+".mult - "+table2+".mult ) as mult from "+table1 + ", "+ table2 + " ;");
 			
 
@@ -244,14 +250,14 @@ public class Sort_merge3 {
 				list2.add(rst2.getString(1));
 				}
 			if(list1.size()!=list2.size()){
-				System.out.println("not equal number of columns in "+table1+" and "+table2);
+				logger.fine("not equal number of columns in "+table1+" and "+table2);
 				return false;
 			}
 			
 				for(int i=0;i<list1.size();i++){
 				if(!list1.get(i).equals(list2.get(i))){
-				System.out.println(list1.get(i)+" "+list2.get(i));	
-				System.out.println("coulumns are not same or their order is not same");
+				logger.fine(list1.get(i)+" "+list2.get(i));	
+				logger.fine("coulumns are not same or their order is not same");
 				return false;
 			}
 				}
@@ -268,7 +274,7 @@ public class Sort_merge3 {
 		     while(rst1.next())size1++;
 		     while(rst2.next())size2++;
 		     if(size1!=size2)
-		    	 System.out.println("not equal no. of rows in both the tables");
+		    	 logger.fine("not equal no. of rows in both the tables");
 		     
 		     rst1.beforeFirst();
 		     rst2.beforeFirst();
@@ -282,14 +288,14 @@ public class Sort_merge3 {
 			temp2=temp2+rst2.getString(i);
 		    }
 			if(!temp1.equals(temp2)){
-				System.out.println("tables not equal");
+				logger.fine("tables not equal");
 				return false;
 			  }
 		    }
 		
 		     
 		     
-	   System.out.println("tables are equal");
+	   logger.fine("tables are equal");
 	   return true;
 	 }
 	
@@ -299,7 +305,7 @@ public class Sort_merge3 {
         try {
             Class.forName("com.mysql.jdbc.Driver");
         } catch (Exception ex) {
-            System.err.println("Unable to load MySQL JDBC driver");
+            logger.severe("Unable to load MySQL JDBC driver");
         }
         con = (Connection) DriverManager.getConnection(CONN_STR, "root", "alibz");
     }

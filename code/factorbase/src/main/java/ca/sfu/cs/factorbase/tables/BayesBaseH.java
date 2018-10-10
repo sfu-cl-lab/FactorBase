@@ -53,6 +53,19 @@ import ca.sfu.cs.factorbase.util.BZScriptRunner;
 
 import com.mysql.jdbc.Connection;
 
+import nu.xom.ParsingException;
+
+import org.apache.commons.lang.StringUtils;
+
+import javax.swing.*;
+
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.sql.*;
+import java.util.ArrayList;
+import java.util.logging.Logger;
+
 public class BayesBaseH {
 
     static Connection con1, con2, con3;
@@ -78,7 +91,8 @@ public class BayesBaseH {
      * else, just reuse the old csv files. May 1st @zqian.
      */
     static int FirstRunning = 1;
-
+    
+    private static Logger logger = Logger.getLogger(BayesBaseH.class.getName());
 
     public static void main(String[] args) throws Exception {
         runBBH();
@@ -106,7 +120,7 @@ public class BayesBaseH {
         ResultSet rst1 = st.executeQuery("SELECT name FROM lattice_set WHERE length = " + maxNumberOfMembers + ";");
         rst1.absolute(1);
         rchain = rst1.getString(1);
-        System.out.println(" ##### lattice is ready for use* "); // @zqian
+        logger.info(" ##### lattice is ready for use* "); // @zqian
 
         // Structure learning.
         StructureLearning(con2);
@@ -116,7 +130,7 @@ public class BayesBaseH {
          * it can happen that a node has no edge at all, not even with an empty parent. In that case the Bif generator gets messed up. So we catch such
          * orphaned nodes in the next statement.
          */
-        System.out.println("Inserting the Missing Fid as Child into Path_Bayes_Nets \n");
+        logger.info("Inserting the Missing Fid as Child into Path_Bayes_Nets \n");
         st.execute(
             "INSERT IGNORE INTO Path_BayesNets " +
             "SELECT '" + rchain + "' AS Rchain, Fid AS child, '' AS parent " +
@@ -135,7 +149,7 @@ public class BayesBaseH {
         // Continuous
         if (!cont.equals("1")) {
             // Now compute conditional probability estimates and write them to @database@_BN.
-            System.out.println("\n Structure Learning is DONE.  ready for parameter learning."); //@zqian
+            logger.info("\n Structure Learning is DONE.  ready for parameter learning."); //@zqian
 
             // Export the final result to xml.  We assume that there is a single largest relationship chain and write the Bayes net for that relationship chain to xml.
             // Only export the structure, prepare for the pruning phase, Oct 23, 2013.
@@ -143,13 +157,13 @@ public class BayesBaseH {
 
             //      @zqian  for TestScoreComputation, use local ct to compute local CP.
             if (Flag_UseLocal_CT) {
-                System.out.println("\n For BN_ScoreComputation.  use local_CT to compute the local_CP.");
+                logger.info("\n For BN_ScoreComputation.  use local_CT to compute the local_CP.");
             } else {
                 // For FunctorWrapper, do NOT have to use the local_CT, or HAVE TO change the weight learning part. June 18 2014.
                 CPGenerator.Generator(databaseName, con2); // May 22, 2014 zqian, computing the score for link analysis off.
                 CP mycp = new CP(databaseName2, databaseName3);
                 mycp.cp();
-                System.out.println("\n Parameter learning is done.");
+                logger.info("\n Parameter learning is done.");
                 //  For FunctorWrapper
             }
 
@@ -159,10 +173,10 @@ public class BayesBaseH {
             long l = System.currentTimeMillis(); // @zqian: measure structure learning time
 
             if (opt3.equals("1")) {
-                System.out.println("\n KLD_generator.KLDGenerator.");
+                logger.info("\n KLD_generator.KLDGenerator.");
                 KLD_generator.KLDGenerator(databaseName, con2);
             } else {
-                System.out.println("\n KLD_generator.smoothed_CP.");
+                logger.info("\n KLD_generator.smoothed_CP.");
                 KLD_generator.smoothed_CP(rchain, con2);
             }
 
@@ -171,9 +185,9 @@ public class BayesBaseH {
             BIF_Generator.generate_bif(databaseName, "Bif_" + databaseName + ".xml", con2);
 
             long l2 = System.currentTimeMillis(); // @zqian: measure structure learning time.
-            System.out.print("smoothed_CP Time(ms): " + (l2 - l) + " ms.\n");
+            logger.info("smoothed_CP Time(ms): " + (l2 - l) + " ms.\n");
         } else {
-            System.out.println("\n Structure Learning is DONE. \n NO parameter learning for Continuous data."); // @zqian
+            logger.info("\n Structure Learning is DONE. \n NO parameter learning for Continuous data."); // @zqian
         }
 
         // Disconnect from db.
@@ -236,7 +250,7 @@ public class BayesBaseH {
          */
 
         long l2 = System.currentTimeMillis(); // @zqian: Measure structure learning time.
-        System.out.print("\n*****************\nStructure Learning Time(ms): " + (l2 - l) + " ms.\n");
+        logger.info("\n*****************\nStructure Learning Time(ms): " + (l2 - l) + " ms.\n");
     }
 
 
@@ -292,7 +306,7 @@ public class BayesBaseH {
         try {
             java.lang.Class.forName("com.mysql.jdbc.Driver");
         } catch (Exception ex) {
-            System.err.println("Unable to load MySQL JDBC driver");
+            logger.severe("Unable to load MySQL JDBC driver");
         }
 
         con1 = (Connection) DriverManager.getConnection(CONN_STR1, dbUsername, dbPassword);
@@ -301,7 +315,7 @@ public class BayesBaseH {
         try {
             java.lang.Class.forName("com.mysql.jdbc.Driver");
         } catch (Exception ex) {
-            System.err.println("Unable to load MySQL JDBC driver");
+            logger.severe("Unable to load MySQL JDBC driver");
         }
 
         con2 = (Connection) DriverManager.getConnection(CONN_STR2, dbUsername, dbPassword);
@@ -310,7 +324,7 @@ public class BayesBaseH {
         try {
             java.lang.Class.forName("com.mysql.jdbc.Driver");
         } catch (Exception ex) {
-            System.err.println("Unable to load MySQL JDBC driver");
+            logger.severe("Unable to load MySQL JDBC driver");
         }
 
         con3 = (Connection) DriverManager.getConnection(CONN_STR3, dbUsername, dbPassword);
@@ -326,12 +340,12 @@ public class BayesBaseH {
 
         String NoTuples = "";
         for(String id : pvar_ids) {
-            System.out.println("\nStarting Learning the BN Structure of pvar_ids: " + id + "\n");
+            logger.info("\nStarting Learning the BN Structure of pvar_ids: " + id + "\n");
             Statement st = con3.createStatement();
             ResultSet rs = st.executeQuery("SELECT count(*) FROM `" + id.replace("`","") + "_counts`;"); // Optimize this query, too slow, Nov 13, zqian.
             while(rs.next()) {
                 NoTuples = rs.getString(1);
-                System.out.println("NoTuples : " + NoTuples);
+                logger.fine("NoTuples : " + NoTuples);
             }
 
             if (Integer.parseInt(NoTuples) > 1) {
@@ -344,14 +358,14 @@ public class BayesBaseH {
             } else {
                 Statement st2 = con2.createStatement();
                 // Insert the BN nodes into Entity_BayesNet.
-                System.out.println("SELECT 1nid FROM 1Nodes, EntityTables WHERE 1Nodes.pvid = CONCAT(EntityTables.Table_name,'0') AND 1Nodes.pvid = '" + id + "';");
+                logger.fine("SELECT 1nid FROM 1Nodes, EntityTables WHERE 1Nodes.pvid = CONCAT(EntityTables.Table_name,'0') AND 1Nodes.pvid = '" + id + "';");
                 ResultSet rs2 = st2.executeQuery("SELECT 1nid FROM 1Nodes, EntityTables WHERE 1Nodes.pvid = CONCAT(EntityTables.Table_name,'0') AND 1Nodes.pvid = '" + id + "';");
                 String child = "";
 
                 while(rs2.next()) {
                     Statement st3 = con2.createStatement();
                     child = rs2.getString("1nid");
-                    System.out.println("INSERT IGNORE INTO Entity_BayesNets VALUES ('" + id + "', '" + child + "', '');");
+                    logger.fine("INSERT IGNORE INTO Entity_BayesNets VALUES ('" + id + "', '" + child + "', '');");
                     st3.execute("INSERT IGNORE INTO Entity_BayesNets VALUES ('" + id + "', '" + child + "', '');");
                     st3.close();
                 }
@@ -360,7 +374,7 @@ public class BayesBaseH {
                 st2.close();
             }
 
-            System.out.println("\nEnd for " + id + "\n");
+            logger.info("\nEnd for " + id + "\n");
         }
 
         pvar_ids.clear();
@@ -373,20 +387,20 @@ public class BayesBaseH {
 
             // Required edges.
             for(String id : rnode_ids) { // rchain
-                System.out.println("\n !!!!Starting to Export the Required Edges to " + id.replace("`","") +  "_req.xml \n");
+                logger.fine("\n !!!!Starting to Export the Required Edges to " + id.replace("`","") +  "_req.xml \n");
                 BIFExport.Export(databaseName + "/" + File.separator + "kno" + File.separator + id.replace("`","") + "_req.xml", "Rchain", "Path_Required_Edges", id, con2);
             }
 
             // Nov25
             // Forbidden edges.
             for(String id : rnode_ids) {
-                System.out.println("\n !!!!Starting to Export the Forbidden Edges to " + id.replace("`","") + "_for.xml \n");
+                logger.fine("\n !!!!Starting to Export the Forbidden Edges to " + id.replace("`","") + "_for.xml \n");
                 BIFExport.Export(databaseName + "/" + File.separator + "kno" + File.separator + id.replace("`","") + "_for.xml", "Rchain", "Path_Forbidden_Edges", id, con2);
             }
 
             String NoTuples = "";
             for(String id : rnode_ids) {
-                System.out.println("\nStarting Learning the BN Structure of rnode_ids: " + id + "\n");
+                logger.info("\nStarting Learning the BN Structure of rnode_ids: " + id + "\n");
                 Statement mapping_st = con2.createStatement();
                 Statement st = con3.createStatement();
                 ResultSet rnidMappingResult = mapping_st.executeQuery(
@@ -403,7 +417,7 @@ public class BayesBaseH {
 
                 while(rs.next()) {
                     NoTuples = rs.getString(1);
-                    System.out.println("NoTuples : " + NoTuples);
+                    logger.fine("NoTuples : " + NoTuples);
                 }
 
                 if(Integer.parseInt(NoTuples) > 1) {
@@ -414,7 +428,7 @@ public class BayesBaseH {
                         databaseName + "/" + File.separator + "xml" + File.separator + id.replace("`","") + ".xml"
                     );
 
-                    System.out.println("The BN Structure Learning for rnode_id::" + id + "is done."); //@zqian Test
+                    logger.info("The BN Structure Learning for rnode_id::" + id + "is done."); //@zqian Test
                     bif2(id); // import to db   @zqian
                 }
             }
@@ -551,7 +565,7 @@ public class BayesBaseH {
 
             rnode_ids.clear(); // Prepare for next loop.
 
-            System.out.println(" Import is done for length = " + len + "."); // @zqian Test
+            logger.info(" Import is done for length = " + len + "."); // @zqian Test
         }
     }
 
@@ -641,7 +655,7 @@ public class BayesBaseH {
         while(rs.next()) {
             // Get pvid for further use.
             String pvid = rs.getString("pvid");
-            System.out.println("pvid : " + pvid);
+            logger.fine("pvid : " + pvid);
 
             // Add to ids for further use.
             pvar_ids.add(pvid);
@@ -659,7 +673,7 @@ public class BayesBaseH {
         while(rs.next()) {
             // Get pvid for further use.
             String rchain = rs.getString("RChain");
-            System.out.println("\n RChain: " + rchain);
+            logger.fine("\n RChain: " + rchain);
             rnode_ids.add(rchain);
         }
 
@@ -670,19 +684,19 @@ public class BayesBaseH {
     // Import to Entity_BayesNets.
     public static void bif1(String id) throws SQLException, IOException, ParsingException {
         // Import @zqian.
-        System.out.println("Starting to Import the learned path into MySQL::**Entity_BayesNets**"); // @zqian Test
+        logger.info("Starting to Import the learned path into MySQL::**Entity_BayesNets**"); // @zqian Test
         Statement st = con2.createStatement();
         int i = 0;
         BIFImport.Import(databaseName + "/" + File.separator + "xml" + File.separator + id.replace("`","") + ".xml", id, "Entity_BayesNets", con2);
-        System.out.println("*** imported Entity_BayesNets " + pvar_ids.get(i++) + " into database");
-        System.out.println(" \n !!!!!!!!!Import is done for **Entity_BayesNets** \n"); // @zqian Test
+        logger.info("*** imported Entity_BayesNets " + pvar_ids.get(i++) + " into database");
+        logger.info(" \n !!!!!!!!!Import is done for **Entity_BayesNets** \n"); // @zqian Test
         st.close();
     }
 
 
     // Import to Path_BayesNets // zqian@Oct 2nd 2013.
     public static void bif2(String id) throws SQLException, IOException, ParsingException {
-        System.out.println(" Starting to Import the learned path into MySQL::**Path_BayesNets**"); // @zqian
+        logger.info(" Starting to Import the learned path into MySQL::**Path_BayesNets**"); // @zqian
 
         Statement st = con2.createStatement();
         int j = 0;
@@ -693,9 +707,9 @@ public class BayesBaseH {
         // Delete the edges which is already forbidden in a lower level before inserting into the database.
         // Nov 25
         st.execute("DELETE FROM Path_BayesNets WHERE Rchain = '" + id + "' AND (child, parent) IN (SELECT child, parent FROM Path_Forbidden_Edges WHERE Rchain = '" + id + "');"); // Oct 2nd
-        System.out.println("*** imported Path_BayesNets " + rnode_ids.get(j++) + "into database");
+        logger.info("*** imported Path_BayesNets " + rnode_ids.get(j++) + "into database");
 
-        System.out.println(" Import is done for **Path_BayesNets**"); // @zqian Test
+        logger.info(" Import is done for **Path_BayesNets**"); // @zqian Test
         st.close();
     }
 

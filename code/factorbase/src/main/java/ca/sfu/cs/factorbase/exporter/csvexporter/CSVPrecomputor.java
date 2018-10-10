@@ -10,6 +10,7 @@ import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.logging.Logger;
 
 import javax.swing.JOptionPane;
 
@@ -50,6 +51,8 @@ public class CSVPrecomputor {
 	static ArrayList<String> rnode_ids;
 	static ArrayList<String> pvar_ids;		
 	
+	private static Logger logger = Logger.getLogger(CSVPrecomputor.class.getName());
+	
 	public static void main(String[] args) throws Exception {
 		runCSV();
 	}
@@ -68,7 +71,7 @@ public class CSVPrecomputor {
         rst.close();
         st.close();
 
-		System.out.println(" ##### lattice is ready for use* "); //@zqian	
+		logger.info(" ##### lattice is ready for use* "); //@zqian	
 	    
         Computing_CSV();
        
@@ -84,7 +87,7 @@ public class CSVPrecomputor {
 	
        for(int len = 1; len <= maxNumberOfMembers; len++)
        {
-   		   System.out.println("\n processing Rchain.length = "+len); //@zqian	
+   		   logger.info("\n processing Rchain.length = "+len); //@zqian	
    		  // readRNodesFromLatticeFalse(len);
 		  // readRNodesFromLatticeTrue(len);
     	   readRNodesFromLattice(len);					
@@ -92,7 +95,7 @@ public class CSVPrecomputor {
 			
 		}
        long l2 = System.currentTimeMillis();
-       System.out.print("\n CSVPrecomputor TOTAL Time(ms): "+(l2-l)+" ms.\n");
+       logger.info("\n CSVPrecomputor TOTAL Time(ms): "+(l2-l)+" ms.\n");
 		
 		
 	}
@@ -174,19 +177,19 @@ public class CSVPrecomputor {
 
 				//  get pvid for further use
 				String pvid = rs.getString("pvid");
-				System.out.println("pvid : " + pvid);
+				logger.fine("pvid : " + pvid);
 
 				//  create new statement
 				Statement st3 = con3.createStatement();
 
 				String queryString= "SELECT * FROM `"+pvid.replace("`", "")+"_counts` where mult>0 ;";
 				ResultSet rs4 = st3.executeQuery(queryString);
-				System.out.print("query string : "+queryString);
+				logger.fine("query string : "+queryString);
 				
 				//  create header
 				ArrayList<String> columns = getColumns(rs4);
 				String csvHeader = StringUtils.join(columns, "\t");
-				System.out.println("\nCSV Header : " + csvHeader+ "\n");
+				logger.fine("\nCSV Header : " + csvHeader+ "\n");
 
 				//  create csv file
 				RandomAccessFile csv = new RandomAccessFile(databaseName+"/" + File.separator + "csv" + File.separator + pvid + ".csv", "rw");
@@ -229,9 +232,9 @@ public class CSVPrecomputor {
 
             // Get the short and full form rnids for further use.
             String rchain = rs.getString("RChain");
-            System.out.println("\n RChain : " + rchain);
+            logger.fine("\n RChain : " + rchain);
             String shortRchain = rs.getString("short_RChain");
-            System.out.println(" Short RChain : " + shortRchain);
+            logger.fine(" Short RChain : " + shortRchain);
 
 			//  create new statement
 			Statement st3 = con3.createStatement();
@@ -248,12 +251,12 @@ public class CSVPrecomputor {
 				st3.close();
 				break;
 			}
-			System.out.print("query string : "+queryString);
+			logger.fine("query string : "+queryString);
 			
 			//  create header
 			ArrayList<String> columns = getColumns(rs5);
 			String csvHeader = StringUtils.join(columns, "\t");
-			System.out.println("\n CSV Header : " + csvHeader+ "\n");
+			logger.fine("\n CSV Header : " + csvHeader+ "\n");
 
 			//  create csv file, reading data from _CT table into .csv file
 			RandomAccessFile csv = new RandomAccessFile(databaseName+"/" + File.separator + "csv" + File.separator + rchain.replace("`", "") + ".csv", "rw");
@@ -288,7 +291,7 @@ public class CSVPrecomputor {
 
 			//  get pvid for further use
 			String rchain = rs.getString("RChain");
-			System.out.println("\n RChain : " + rchain);
+			logger.fine("\n RChain : " + rchain);
 
 			//  create new statement
 			Statement st3 = con3.createStatement();
@@ -304,13 +307,13 @@ public class CSVPrecomputor {
 				whereString = "`"+rchain.replace("`", "")+"` = 'T'";
 
 			String queryString= "SELECT * FROM `"+rchain.replace("`", "")+"_CT` where  " + whereString + " and mult>0;";
-					System.out.print("query string : "+queryString);
+			logger.fine("query string : "+queryString);
 			ResultSet rs5 = st3.executeQuery(queryString);
 
 			//  create header
 			ArrayList<String> columns = getColumns(rs5);
 			String csvHeader = StringUtils.join(columns, "\t");
-			System.out.println("\n CSV Header : " + csvHeader+ "\n");
+			logger.fine("\n CSV Header : " + csvHeader+ "\n");
 
 			//  create csv file, reading data from _CT table into .csv file
 			RandomAccessFile csv = new RandomAccessFile(databaseName+"/" + File.separator + "csv" + File.separator + rchain.replace("`", "") + "True.csv", "rw");
@@ -345,7 +348,7 @@ public class CSVPrecomputor {
 
 			//  get pvid for further use
 			String rchain = rs.getString("RChain");
-			System.out.println("\n RChain : " + rchain);
+			logger.fine("\n RChain : " + rchain);
 
 			//  create new statement
 			Statement st3 = con3.createStatement();
@@ -371,14 +374,14 @@ public class CSVPrecomputor {
 		
 //			String queryString= "SELECT * FROM `"+rchain.replace("`", "")+"_CT` where  " + whereString + " ;";
 			
-			System.out.print("\n query string : "+queryString);
+			logger.fine("\n query string : "+queryString);
 			ResultSet rs5 = st3.executeQuery(queryString);
 			
 			
 			//  create header
 			ArrayList<String> columns = getColumns(rs5);
 			String csvHeader = StringUtils.join(columns, "\t");
-			System.out.println("\n CSV Header : " + csvHeader+ "\n");
+			logger.fine("\n CSV Header : " + csvHeader+ "\n");
 
 	
 			//  create csv file, reading data from _CT table into .csv file
@@ -420,10 +423,10 @@ public class CSVPrecomputor {
 			Temp = Rchain.split(delimiter);
 		for(int i =0; i<Temp.length; i++)
 		{
-			//System.out.println("Splitted temp::"+Temp[i]);
+			//logger.fine("Splitted temp::"+Temp[i]);
 			parts.add("`"+Temp[i]+"` = "+ del);
 		}	
-		//System.out.println(StringUtils.join(parts," and "));
+		//logger.fine(StringUtils.join(parts," and "));
 		
 		return StringUtils.join(parts," and ");
 		

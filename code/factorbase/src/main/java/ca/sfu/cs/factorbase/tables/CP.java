@@ -70,6 +70,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.logging.Logger;
 
 import ca.sfu.cs.common.Configuration.Config;
 
@@ -87,6 +88,8 @@ public class CP {
     static String dbaddress="";
     static String rchain;
     static String shortRchain;
+    
+    private static Logger logger = Logger.getLogger(CP.class.getName());
 
     public CP(String databaseName, String databaseName2) {
         CP.databaseName = databaseName;
@@ -100,7 +103,7 @@ public class CP {
         CP(rchain,con1);
 
         long l2 = System.currentTimeMillis(); // @zqian : measure parameter learning time
-        System.out.print("Parameter Learning Time(ms): " + (l2 - l) + " ms.\n");
+        logger.info("Parameter Learning Time(ms): " + (l2 - l) + " ms.\n");
     }
 
     /**
@@ -253,27 +256,27 @@ public class CP {
             "SELECT child FROM Path_BayesNets WHERE Rchain='" + rchain +
             "' AND parent = '' and child not in (SELECT distinct child FROM Path_BayesNets WHERE parent<>'' and Rchain= '" + rchain + "');"
         );
-        System.out.println(
+        logger.fine(
             "SELECT child FROM Path_BayesNets WHERE Rchain='" + rchain +
             "' AND parent = '' and child not in (SELECT distinct child FROM Path_BayesNets WHERE parent<>'' and Rchain= '" + rchain + "');"
         );
         ArrayList<String> noparent_tables = new ArrayList<String>();
 
         String bigTable = shortRchain.substring(0, shortRchain.length() - 1) + "_CT`";
-        System.out.println("bigTable Name: " + bigTable + "\n");
+        logger.fine("bigTable Name: " + bigTable + "\n");
         while(rst.next()) {
-            System.out.println("noparent node: " + rst.getString(1));
+            logger.fine("noparent node: " + rst.getString(1));
             noparent_tables.add(rst.getString(1));
         }
         // zqian Nov 13, computing sum(mult) from biggest CT table
         // and close the connections
         java.sql.Statement st2 = con1.createStatement();
         String sql2 = "select sum(MULT) from " + databaseName2 + "." + bigTable + ";"; // only need to do this query once, Nov 12 zqian
-        System.out.println(sql2 + "\n");
+        logger.fine(sql2 + "\n");
         ResultSet deno = st2.executeQuery(sql2);
         deno.absolute(1);
         long mydeno = Long.parseLong(deno.getString(1)); // convert string to integer
-        System.out.println("SUM(mult) in bigCTTable : "+mydeno + "\n");
+        logger.fine("SUM(mult) in bigCTTable : "+mydeno + "\n");
         for(int i = 0; i < noparent_tables.size(); i++) {
             nopar_update(rchain, bigTable, noparent_tables.get(i), con1, mydeno);
         }
@@ -290,7 +293,7 @@ public class CP {
         java.sql.Statement st2 = con1.createStatement();
         String table_name = nodeName.substring(0, nodeName.length() - 1) + "_CP`";
         st.execute("drop table if exists " + table_name + ";");
-        System.out.println(table_name + "\n");
+        logger.fine(table_name + "\n");
         // change the ChildValue to FID -- Jan 23 Yan
         st.execute("create table " + table_name + " ( " + nodeName + " varchar(200) NOT NULL, CP float(7,6), MULT bigint(20), local_mult bigint(20))");
         st.execute("insert into " + table_name + "(" + nodeName + ") select distinct " + nodeName + " from " +databaseName2 + "." + bigTable + ";");
@@ -298,23 +301,23 @@ public class CP {
         ResultSet rst=st.executeQuery("select " + nodeName + " from " + table_name + ";");
         ArrayList<String> column_value = new ArrayList<String>();
         while(rst.next()) {
-            System.out.println("column value: " + rst.getString(1) + "\n");
+            logger.fine("column value: " + rst.getString(1) + "\n");
             column_value.add(rst.getString(1));
         }
 
         for(int i = 0; i < column_value.size(); i++) {
             String sql = "select sum(MULT) from " + databaseName2 + "." + bigTable + " where " + nodeName + " = '" + column_value.get(i) + "';";
-            System.out.println(sql+"\n");
+            logger.fine(sql+"\n");
             ResultSet nume = st2.executeQuery(sql);
             // nume is the sum over all contingency table rows for a specific value.
             nume.absolute(1);
             long mynume = Long.parseLong(nume.getString(1));
             // converts string to integer.
-            System.out.println(mynume + "\n");
+            logger.fine(mynume + "\n");
 
             // change the ChildValue to FID -- Jan 23 Yan
             String sql3 = "update " + table_name + " set MULT = " + mynume + " where " + nodeName + " = '" + column_value.get(i) + "';";
-            System.out.println(sql3 + "\n");
+            logger.fine(sql3 + "\n");
             st2.execute(sql3);
             st2.execute("update " + table_name + " set CP = MULT / " + mydeno + " where "  + nodeName + " = '" + column_value.get(i) +"';");
 
@@ -322,18 +325,18 @@ public class CP {
             long local = 1;
             while(rs.next()) {
                 local = Long.parseLong (rs.getString("Tuples"));
-                System.out.println("local is " + local);
+                logger.fine("local is " + local);
                 mynume = mynume / local;
-//                System.out.println("set local_mult = mult, May 21, 2014 zqian ");
+//                logger.fine("set local_mult = mult, May 21, 2014 zqian ");
                 // set local_mult = mult, May 21, 2014 zqian
             }
             if (!rs.first()) {
-                System.out.println("local is 1, ******");
+                logger.fine("local is 1, ******");
                 mynume = mynume / local;
             }
             // updating the local_mult = mult / local , Dec 3rd
             String sql4 = "update " + table_name + " set local_mult = " + mynume + " where " + nodeName + " = '" + column_value.get(i) + "';";
-            System.out.println(sql4 + "\n");
+            logger.fine(sql4 + "\n");
             st2.execute(sql4);
         }
 
@@ -379,7 +382,7 @@ public class CP {
         // find name of contingency table that has the data we need for the chain
 
         while(rst.next()) {
-            System.out.println("hasparent node: " + rst.getString(1));
+            logger.fine("hasparent node: " + rst.getString(1));
             hasparent_tables.add(rst.getString(1));
         }
         for(int i = 0; i < hasparent_tables.size(); i++) {
@@ -396,7 +399,7 @@ public class CP {
         ResultSet parents = st.executeQuery("select distinct parent from Path_BayesNets where Rchain = '" + rchain + "' and child = '" + nodeName + "' and parent != '';");
         ArrayList<String> parent_name = new ArrayList<String>();
         while(parents.next()) {
-            System.out.println("parent value: " + parents.getString(1) + "\n");
+            logger.fine("parent value: " + parents.getString(1) + "\n");
             parent_name.add(parents.getString(1));
         }
 
@@ -404,16 +407,16 @@ public class CP {
         for(int i = 1; i < parent_name.size(); i++) {
             from_st = from_st + " , " + parent_name.get(i);
         }
-        System.out.println("from clause: " +from_st+"\n");
+        logger.fine("from clause: " +from_st+"\n");
 
         // general strategy: apply group by parent values to CT table, to find sum of parent counts. Then use that to divide the joint child-family count, which we get from the CT table.
         String table_name = nodeName.substring(0, nodeName.length() - 1) + "_CP`";
-        System.out.println(table_name + "\n");
+        logger.fine(table_name + "\n");
         st.execute("drop table if exists " + table_name + ";");
         st.execute("drop table if exists temp;");
 
         // Change the ChildValue to FID -- Jan 23 Yan
-        System.out.println(
+        logger.fine(
             "create table " + table_name + " as select sum(MULT) as MULT, " + nodeName + " , " + from_st +
             " , 0 as ParentSum from " + databaseName2 + "." + bigTable + " group by " + nodeName + ", " + from_st + ";"
         );
@@ -431,11 +434,11 @@ public class CP {
             index = index + ", " + parent_name.get(i) + " ASC ";
         }
         index = index + ");";
-//        System.out.println(index);
+//        logger.fine(index);
         // Dec 12
         st.execute(index);
 
-        System.out.println("create table temp as select MULT, " + from_st + ", sum(MULT) as ParentSum from " + table_name + " group by " + from_st + ";");
+        logger.fine("create table temp as select MULT, " + from_st + ", sum(MULT) as ParentSum from " + table_name + " group by " + from_st + ";");
         st.execute("create table temp as select MULT, " + from_st + ", sum(MULT) as ParentSum from " + table_name + " group by " + from_st + ";");
 
         // Add index to temp table
@@ -444,7 +447,7 @@ public class CP {
             index_temp = index_temp + ", " + parent_name.get(i) + " ASC ";
         }
         index_temp = index_temp + ");";
-//        System.out.println(index_temp);
+//        logger.fine(index_temp);
         // Dec 12
         st.execute(index_temp);
 
@@ -453,7 +456,7 @@ public class CP {
         for (int i = 1; i < parent_name.size(); ++i) {
             updateclause = updateclause + " and " + table_name + "." + parent_name.get(i) + " = temp." + parent_name.get(i);
         }
-        System.out.println(updateclause + ";");
+        logger.fine(updateclause + ";");
         st.execute(updateclause + ";");
 
         st.execute("alter table " + table_name + " add CP float(7,6);");
@@ -470,15 +473,15 @@ public class CP {
 
         while(rs.next()) {
             local = Long.parseLong (rs.getString("Tuples"));
-            System.out.println("local is " + local);
+            logger.fine("local is " + local);
             String sql = "update "+ table_name + " set local_mult = mult / " + local + ";";
 //            String sql = "update " + table_name + " set local_mult = mult;";
-            System.out.println(sql);
+            logger.fine(sql);
             // set local_mult = mult, May 21, 2014 zqian
             st1.execute(sql);
         }
         if (!rs.first()) {
-            System.out.println("local is 1, ******" );
+            logger.fine("local is 1, ******" );
             String sql = "update " + table_name + " set local_mult = mult / " + local + ";";
             st1.execute(sql);
         }
@@ -519,13 +522,13 @@ public class CP {
 
         st.execute("DROP TABLE IF EXISTS temp;");
         String createtemp = "CREATE TABLE IF NOT EXISTS temp SELECT sum(local_mult) as prior_parsum, `"+ nodeName.replace("`","") + "` FROM " + table_name + " GROUP BY `" +  nodeName.replace("`","")   +"` ;";
-        System.out.println("temp: " + createtemp);
+        logger.fine("temp: " + createtemp);
         st.execute(createtemp);
 
         String updateprior = "UPDATE " + table_name + ", temp" + " SET " + table_name + ".prior = temp.prior_parsum / " + total_sum
             + " WHERE " + table_name + ".`" + nodeName.replace("`","") + "`=temp.`" + nodeName.replace("`","") + "`;";
 
-        System.out.println("updateprior: " + updateprior);
+        logger.fine("updateprior: " + updateprior);
         st.execute(updateprior);
         st.execute("DROP TABLE IF EXISTS temp;");
 
@@ -587,7 +590,7 @@ public class CP {
         while(rs.next()) {
             String entity_table = rs.getString("table_name");
             String sql = "update PVariables set Tuples = (select count(*) from " + real_database + "." + entity_table + ") where PVariables.table_name = '" + entity_table + "';";
-            System.out.println("\n**********\n adding tuple to PVariables :"+ sql);
+            logger.fine("\n**********\n adding tuple to PVariables :"+ sql);
             st1.execute(sql);
         }
         // Updating Pvars_Not_In_Family
@@ -612,7 +615,7 @@ public class CP {
         try {
             java.lang.Class.forName("com.mysql.jdbc.Driver");
         } catch (Exception ex) {
-            System.err.println("Unable to load MySQL JDBC driver");
+            logger.severe("Unable to load MySQL JDBC driver");
         }
         con1 = DriverManager.getConnection(CONN_STR1, dbUsername, dbPassword);
         java.sql.Statement st = con1.createStatement();
@@ -627,8 +630,8 @@ public class CP {
         myrchain.absolute(1);
         rchain = myrchain.getString("RChain");
         shortRchain = myrchain.getString("short_RChain");
-        System.out.println("rchain: " + rchain + "\n");
-        System.out.println("short rchain: " + shortRchain + "\n");
+        logger.fine("rchain: " + rchain + "\n");
+        logger.fine("short rchain: " + shortRchain + "\n");
         st.close();
     }
 }

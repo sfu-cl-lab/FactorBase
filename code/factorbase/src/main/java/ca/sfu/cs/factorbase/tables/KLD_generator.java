@@ -37,10 +37,10 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.logging.Logger;
 
 import ca.sfu.cs.common.Configuration.Config;
 import ca.sfu.cs.factorbase.util.QueryGenerator;
-
 
 public class KLD_generator {
     static String databaseName, databaseName2, databaseName3;
@@ -55,8 +55,9 @@ public class KLD_generator {
     static ArrayList<String> column_names = new ArrayList<String>();
     // List of conditional probability columns for each node in the rchian, used in KLD table.
     static ArrayList<String> column_names_CP = new ArrayList<String>();
-
-
+    
+    private static Logger logger = Logger.getLogger(KLD_generator.class.getName());
+    
     public static void main(String[] args) throws Exception {
         setVarsFromConfig();
         connectDB();
@@ -84,7 +85,7 @@ public class KLD_generator {
 
 
     public static void KLDGenerator(String database, Connection con2) throws Exception {
-        System.out.println("KLD Generator starts");
+        logger.info("KLD Generator starts");
         String Rchain="";
         Statement st = con2.createStatement();
         ResultSet rs = st.executeQuery(
@@ -98,26 +99,26 @@ public class KLD_generator {
 
         while(rs.next()) {
             Rchain = rs.getString("RChain");
-//            System.out.println("\n Longest  RChain: " + Rchain);
+//            logger.fine("\n Longest  RChain: " + Rchain);
         }
         rs.close();
         st.close();
 
         smoothed_CP(Rchain, con2); // Updated the pairs generator Jun 19.
-        System.out.println("smoothed CP tables are already to use.");
-//        System.out.println("************************");
+        logger.info("smoothed CP tables are already to use.");
+//        logger.fine("************************");
 
         create_join_CP(database,Rchain, con2);  // Input the biggest rchain.
-        System.out.println("KLD table is already to use.");
-//        System.out.println("************************");
+        logger.info("KLD table is already to use.");
+//        logger.fine("************************");
 
         generate_CLL(Rchain, con2);
-        System.out.println("CLL tables are already to use.");
-//        System.out.println("************************");
+        logger.info("CLL tables are already to use.");
+//        logger.fine("************************");
 
         plot_CLL(database, Rchain, con2);
 
-        System.out.println("\nKLD Generator Ends");
+        logger.info("\nKLD Generator Ends");
     }
 
 
@@ -141,18 +142,18 @@ public class KLD_generator {
         );
 
         while(rst.next()) {
-//            System.out.println(rst.getString(1).substring(0, rst.getString(1).length() - 1) + "_final`");
+//            logger.fine(rst.getString(1).substring(0, rst.getString(1).length() - 1) + "_final`");
             final_tables1.add(rst.getString(1).substring(0, rst.getString(1).length() - 1) + "_CP`");
         }
 
         // Generate full pairs table and smooth CP table for each node in final_tables1.
         for(int i = 0; i < final_tables1.size(); i++) {
-//            System.out.println("child: " + final_tables1.get(i));
+//            logger.fine("child: " + final_tables1.get(i));
             new_table_smoothed(final_tables1.get(i), con2); // Updating the full pairs generator.
         }
 
         // Another situation for some nodes that do NOT have any parent, OCT 22, zqian.
-        System.out.println("for some nodes that do NOT have any parent.");
+        logger.fine("for some nodes that do NOT have any parent.");
         // Find all the nodes that do NOT have parents and store them in list final_table_smoothed.
 //        rst = st.executeQuery("SELECT Fid FROM FNodes WHERE Fid NOT IN (SELECT DISTINCT child FROM Path_BayesNets WHERE parent <> '')");
         rst = st.executeQuery(
@@ -169,7 +170,7 @@ public class KLD_generator {
 
         ArrayList<String> final_tables_smoothed = new ArrayList<String>();
         while(rst.next()) {
-//            System.out.println("parent: " + rst.getString(1));
+//            logger.fine("parent: " + rst.getString(1));
             final_tables_smoothed.add(rst.getString(1));
         }
 
@@ -178,13 +179,13 @@ public class KLD_generator {
             // Create smoothed CP table for each node.
             String table_name = final_tables_smoothed.get(i).substring(0, final_tables_smoothed.get(i).length() - 1) + "_CP_smoothed`";
             String orig_table = final_tables_smoothed.get(i).substring(0, final_tables_smoothed.get(i).length() - 1) + "_CP`"; // Fixed Oct 22, zqian, missing on '`'.
-            System.out.println("CREATE TABLE " + table_name + " AS SELECT * FROM " + orig_table + ";"); // zqian Oct 22, testing.
+            logger.fine("CREATE TABLE " + table_name + " AS SELECT * FROM " + orig_table + ";"); // zqian Oct 22, testing.
 
             String nodeName = final_tables_smoothed.get(i);
 
             st.execute("DROP TABLE IF EXISTS " + table_name + ";");
             st.execute("CREATE TABLE " + table_name + " AS SELECT * FROM " + orig_table + ";");
-            System.out.println("CREATE TABLE " + table_name + " AS SELECT * FROM " + orig_table + ";"); // zqian Oct 22, testing.
+            logger.fine("CREATE TABLE " + table_name + " AS SELECT * FROM " + orig_table + ";"); // zqian Oct 22, testing.
 
             // Update values of mult an CP. We add a virtual count of 1 to each pair (family state). This is where the smoothing happens.
             st.execute("UPDATE " + table_name + " SET mult = mult + 1");
@@ -194,16 +195,16 @@ public class KLD_generator {
             st.execute("UPDATE " + table_name + " SET cp = mult / " + sum_mult + ";");
 
             // Make CP sum up=1.
-//            System.out.println("CP already *******************");
-            System.out.println("SELECT " + nodeName + " FROM " + table_name + ";");
+//            logger.fine("CP already *******************");
+            logger.fine("SELECT " + nodeName + " FROM " + table_name + ";");
             ResultSet rst2 = st.executeQuery("SELECT " + nodeName + " FROM " + table_name + ";");
             rst2.absolute(1);
-//            System.out.println(rst2.getString(1));
+//            logger.fine(rst2.getString(1));
             String CV = rst2.getString(1);
             ResultSet rst3 = st.executeQuery("SELECT SUM(CP) FROM " + table_name + " WHERE " + nodeName + " <> '" + CV + "';");
             rst3.absolute(1);
             float SubTotal = rst3.getFloat(1);
-//            System.out.println("SubTotal : " + SubTotal);
+//            logger.fine("SubTotal : " + SubTotal);
             if (SubTotal >= 1.0) {
                 SubTotal = 1;
             }
@@ -211,7 +212,7 @@ public class KLD_generator {
             // Nov 12 zqian, this may cause minus cp value which is not acceptable of _bif file.
             // Round off issue: compare with a tiny enough number instead of using absolute value.
             String query_temp2= ("UPDATE " + table_name + "SET CP = (1 - " + SubTotal + ") WHERE " + nodeName + " = '" + CV + "';");
-//            System.out.println("may generate minus CP value"+query_temp2); // Nov 12 zqian
+//            logger.fine("may generate minus CP value"+query_temp2); // Nov 12 zqian
             st.execute(query_temp2);
         }
         st.close();
@@ -226,7 +227,7 @@ public class KLD_generator {
 
         // Create smooth CP table.
         st.execute("DROP TABLE IF EXISTS " + name + ";");
-//        System.out.println("create table " + name + " like " + table_name + ";");
+//        logger.fine("create table " + name + " like " + table_name + ";");
         st.execute("CREATE TABLE " + name + " LIKE " + table_name + ";");
 
         // Add index to 1. (MULT, ChildValue, parents....) and 2. (parent nodes...)
@@ -295,7 +296,7 @@ public class KLD_generator {
             query1 = query1 + ", `" + list.get(i) + "` ";
         }
         query1 = query1 + " FROM " + table_name + ";";
-//        System.out.println("query1:" + query1);
+//        logger.fine("query1:" + query1);
         st.execute(query1);
 
         // zqian@ Oct 21, 2013, Bottleneck??
@@ -311,7 +312,7 @@ public class KLD_generator {
                     table_name
                 ) +
             ");";
-        System.out.println("bottleneck? query2:" + query2);
+        logger.warning("bottleneck? query2:" + query2);
         st.execute(query2);
 
 //        st.execute("DROP TABLE IF EXISTS " + table_name.subSequence(0, table_name.length() - 1) + "_pairs`;");
@@ -362,7 +363,7 @@ public class KLD_generator {
         }
 
         createclause = createclause + ");";
-        System.out.println("createclause: " + createclause);
+        logger.fine("createclause: " + createclause);
         st.execute(createclause);
 
         // Add index to all columns in pair table.
@@ -373,7 +374,7 @@ public class KLD_generator {
         index_p = index_p + ");";
         st.execute(index_p);
 
-//        System.out.println("SELECT DISTINCT `" + list.get(0) + "` FROM " + table_name);
+//        logger.fine("SELECT DISTINCT `" + list.get(0) + "` FROM " + table_name);
         ResultSet rst1 = st.executeQuery("SELECT DISTINCT `" + list.get(0) + "` FROM " + table_name);
         ArrayList<String> join = new ArrayList<String>();
         ArrayList<String> join_pre = new ArrayList<String>();
@@ -402,7 +403,7 @@ public class KLD_generator {
 
             for (int i = 0; i < join.size(); ++i) {
                 join_pre.add(join.get(i));
-//                System.out.println(join.get(i));
+//                logger.fine(join.get(i));
             }
         }
 
@@ -439,7 +440,7 @@ public class KLD_generator {
 
 		java.sql.Statement st=con2.createStatement();
 		ResultSet rst=st.executeQuery("show columns from "+ table_name);
-		//System.out.println("show columns from "+ table_name);
+		//logger.fine("show columns from "+ table_name);
 
 		//get all value columns in original CP table
 		list=new ArrayList<String>();
@@ -464,7 +465,7 @@ public class KLD_generator {
 		st.execute("drop table if exists "+name+";");
 
 		String query="create table "+name+" select distinct "+selectclause+" from "+fromclause;
-	//	System.out.println(query);
+	//	logger.fine(query);
 		st.execute(query);
 
 
@@ -490,7 +491,7 @@ public class KLD_generator {
 
         st.execute("DROP TABLE IF EXISTS temp1;");
         String query1 = "CREATE TABLE temp1 AS SELECT SUM(mult) AS parsum " + parents + " FROM " + table_final_smoothed + " GROUP BY " + parents.substring(2);
-        System.out.println("query1: "+ query1);
+        logger.fine("query1: "+ query1);
 
         st.execute(query1);
 
@@ -512,7 +513,7 @@ public class KLD_generator {
         }
 
         query2 = query2 + " " + compare + ");";
-        System.out.println("query2: "+ query2);
+        logger.fine("query2: "+ query2);
 
         st.execute(query2);
         st.execute("UPDATE " + table_final_smoothed + "SET CP = MULT / ParentSum;");
@@ -525,16 +526,16 @@ public class KLD_generator {
 
         ResultSet rst_temp1 = st.executeQuery("SELECT DISTINCT " + parents.substring(2) + " FROM temp1;");
         String whereclause="";
-        System.out.println("parents.substring(2): " + parents.substring(2));
+        logger.fine("parents.substring(2): " + parents.substring(2));
 //        rst_temp1.absolute(0);
         while(rst_temp1.next()) {
             for (int i = 1; i < list.size(); ++i) {
                 whereclause = whereclause + "`" + list.get(i) + "` = '" + rst_temp1.getString(i) + "' AND ";
             }
-            System.out.println("whereclause: " + whereclause);
+            logger.fine("whereclause: " + whereclause);
 
             // Let CV1 be the childvalue with the largest CP  Feb 6 Yan.
-            System.out.println("SELECT DISTINCT " + nodeName + " FROM " + table_final_smoothed + " WHERE " + whereclause.substring(0, whereclause.length() - 4) + " ORDER BY CP DESC;");
+            logger.fine("SELECT DISTINCT " + nodeName + " FROM " + table_final_smoothed + " WHERE " + whereclause.substring(0, whereclause.length() - 4) + " ORDER BY CP DESC;");
             ResultSet rst_temp = st1.executeQuery(
                 "SELECT DISTINCT " + nodeName + " " +
                 "FROM " + table_final_smoothed + " " +
@@ -545,9 +546,9 @@ public class KLD_generator {
             String CV1 = null;
             if (rst_temp.absolute(1)) {
                 CV1 = rst_temp.getString(1);
-                System.out.println(nodeName + " CV1: " + CV1);
+                logger.fine(nodeName + " CV1: " + CV1);
 
-//                System.out.println(whereclause);
+//                logger.fine(whereclause);
                 ResultSet rst_temp2 = st1.executeQuery(
                     "SELECT SUM(CP) " +
                     "FROM " + table_final_smoothed + " " +
@@ -559,9 +560,9 @@ public class KLD_generator {
 //                    SubTot = 1;
 //                }
 
-//                  System.out.println("SubTot: " + SubTot);
+//                  logger.fine("SubTot: " + SubTot);
                 String query_temp1 = "UPDATE " + table_final_smoothed + " SET CP = 1 - " + SubTot + " WHERE " + whereclause + " " + nodeName + " = '" + CV1 + "';";
-//                System.out.println("may generate minus CP value" + query_temp1);  // Nov 12 zqian
+//                logger.fine("may generate minus CP value" + query_temp1);  // Nov 12 zqian
                 st1.execute(query_temp1);
             }
 
@@ -646,16 +647,16 @@ public class KLD_generator {
             rst_temp.absolute(0);
             String CV1 = rst_temp.getString(1);
 
-//            System.out.println(whereclause);
+//            logger.fine(whereclause);
             ResultSet rst_temp2 = st1.executeQuery("SELECT SUM(CP) FROM " + table_final_smoothed + "WHERE " + whereclause + " " + list.get(0) + " <> '" + CV1 + "';");
             rst_temp2.absolute(1);
             float SubTot = rst_temp2.getFloat(1);
 //            if (SubTot >= 1.0) {
 //                SubTot = 1;
 //            }
-//            System.out.println("SubTot : "+ SubTot);
+//            logger.fine("SubTot : "+ SubTot);
             String query_temp1 = "UPDATE " + table_final_smoothed + " SET CP = 1 - " + SubTot + " WHERE " + whereclause + " " + list.get(0) + " = '" + CV1 + "';";
-//            System.out.println("may generate minus CP value" + query_temp1); // Nov 12 zqian.
+//            logger.fine("may generate minus CP value" + query_temp1); // Nov 12 zqian.
             st1.execute(query_temp1);
 
             whereclause = "";
@@ -675,13 +676,13 @@ public class KLD_generator {
      */
     public static void create_join_CP(String databaseCT, String rchain, Connection con2) throws SQLException {
         String table_name = databaseCT + "_CT." + rchain.substring(0, rchain.length() - 1) + "_CT`";
-//        System.out.println(databaseCT+"_CT");
+//        logger.fine(databaseCT+"_CT");
         String newTable_name = rchain.substring(0, rchain.length() - 1) + "_CT_KLD`";
-//        System.out.println(table_name);
+//        logger.fine(table_name);
         // table_name is input contingency table, newTable_name will be  output KLD table.
         Statement st = con2.createStatement();
         ResultSet rst = st.executeQuery("SHOW COLUMNS FROM " + table_name + ";");
-//        System.out.println("SHOW COLUMNS FROM " + table_name + ";");
+//        logger.fine("SHOW COLUMNS FROM " + table_name + ";");
         while(rst.next()) {
             column_names.add("`" + rst.getString(1) + "`");
             // Add conditional probability column for each attribute column.
@@ -697,7 +698,7 @@ public class KLD_generator {
             query1 = query1 + column_names.get(i) + " VARCHAR(45)," + column_names_CP.get(i) + " FLOAT(7,6),";
         }
         query1 = query1 + " JP FLOAT,  JP_DB  FLOAT, KLD  FLOAT DEFAULT 0, PRIMARY KEY (id)) ENGINE=INNODB;";
-//        System.out.println(query1);
+//        logger.fine(query1);
         st.execute(query1);
 
         // Copy the values from the mult table. CP values are null at this point.
@@ -707,13 +708,13 @@ public class KLD_generator {
         }
         query2 = query2 + ") SELECT * FROM " + table_name + ";"; // Nov 28 @ zqian, do not use "*" in terms of query optimization.
         // Nov 28 @ zqian, adding covering index to CT table for query string.
-        System.out.println(query2);
+        logger.fine(query2);
         st.execute(query2);
 
-        System.out.println("\n insert into KLD table conditional probability for each node"); // zqian
+        logger.fine("\n insert into KLD table conditional probability for each node"); // zqian
         // Insert CP value to attributes.
         insert_CP_Values(rchain, newTable_name, con2);
-        System.out.println("\n compute Bayes net joint probabilities"); //zqian
+        logger.fine("\n compute Bayes net joint probabilities"); //zqian
         // Compute Bayes net joint probabilities.
         cal_KLD(newTable_name, con2);
 
@@ -744,7 +745,7 @@ public class KLD_generator {
         ArrayList<String> no_parents = new ArrayList<String>();
         while(rst1.next()) {
             // Remove final apostrophe.
-//            System.out.println("child: " + rst1.getString(1).substring(0, rst1.getString(1).length() - 1));
+//            logger.fine("child: " + rst1.getString(1).substring(0, rst1.getString(1).length() - 1));
             no_parents.add(rst1.getString(1).substring(0, rst1.getString(1).length() - 1));
         }
 
@@ -756,7 +757,7 @@ public class KLD_generator {
             query1 = "UPDATE " + newTable_name;
             temp = no_parents.get(i) + "_CP_smoothed`";
             query1 = query1 + " ," + temp + " SET " + no_parents.get(i) + "_CP` = " + temp + ".CP WHERE " + temp + "." + no_parents.get(i) + "` = " + newTable_name + "." + no_parents.get(i) + "`";
-            System.out.println(no_parents.get(i) + "`: " + query1);
+            logger.fine(no_parents.get(i) + "`: " + query1);
             st.execute(query1);
         }
 
@@ -768,7 +769,7 @@ public class KLD_generator {
         // Stores list of parents for current child/attribute/functor node.
         while(rst2.next()) {
             with_parents.add(rst2.getString(1).substring(0, rst2.getString(1).length() - 1));
-//            System.out.println("parent: " + rst2.getString(1).substring(0, rst2.getString(1).length() - 1));
+//            logger.fine("parent: " + rst2.getString(1).substring(0, rst2.getString(1).length() - 1));
         }
 
         temp = "";
@@ -808,7 +809,7 @@ public class KLD_generator {
             }
 
             index2 = index2 + ");";
-            System.out.println("index2: "+ index2);
+            logger.fine("index2: "+ index2);
             st.execute(index2);
 
             query2 = "UPDATE " + newTable_name;
@@ -819,7 +820,7 @@ public class KLD_generator {
                 query2 = query2 + "AND " + newTable_name + "." + parents.get(j) + " = " + temp + "." + parents.get(j) + " ";
             }
 
-            System.out.println(with_parents.get(i) + "`: " + query2);
+            logger.fine(with_parents.get(i) + "`: " + query2);
             st.execute(query2);
         }
 
@@ -836,18 +837,18 @@ public class KLD_generator {
         for(int l = 2; l < column_names_CP.size(); l++) {
             query_jp = query_jp + " * " + column_names_CP.get(l);
         }
-        System.out.println("KLD1: " + query_jp);
+        logger.fine("KLD1: " + query_jp);
         st.execute(query_jp);
 
         ResultSet rst = st.executeQuery("SELECT SUM(MULT) FROM " + newTable_name + ";");
         rst.absolute(1);
         Long mult_sum = rst.getLong(1);
         String query1 = "UPDATE " + newTable_name + " SET JP_DB = MULT / " + mult_sum + ";";
-        System.out.println("query 1: " + query1);
+        logger.fine("query 1: " + query1);
         st.execute(query1);
 
         String query2 = "UPDATE " + newTable_name + " SET KLD = (JP_DB * (log(JP_DB) - log(JP))) WHERE MULT <> 0;";
-        System.out.println("KLD2: " + query2);
+        logger.fine("KLD2: " + query2);
         st.execute(query2);
         st.close();
     }
@@ -902,11 +903,11 @@ public class KLD_generator {
             // Create statement for CLL table.
             String query1 = "CREATE TABLE " + table_name + " (" + Node_name + " VARCHAR (45)";
             for(int i = 0; i < node_blanket.size(); i++) {
-//                System.out.println(node_blanket.get(i));
+//                logger.fine(node_blanket.get(i));
                 query1 = query1 + " , " + node_blanket.get(i) + " VARCHAR (45) ";
             }
             query1 = query1 + ", JP_DB FLOAT, JP_DB_blanket FLOAT, CLL_DB FLOAT,JP FLOAT,JP_blanket FLOAT, CLL_JP FLOAT, AbsDif FLOAT) ENGINE=INNODB;";
-//            System.out.println(query1);
+//            logger.fine(query1);
             st.execute(query1);
 
             // Insert node values, JP and JP_DB into CLL table.
@@ -918,14 +919,14 @@ public class KLD_generator {
             // To optimize.
             // Nov 28 @ zqian, adding covering index for group by list.
             query2 = query2 + mrk;
-            System.out.println("CLL query2: " + query2);
+            logger.fine("CLL query2: " + query2);
             st.execute(query2);
 
             //create a temp table to sum up JP and JP_DB, group by markov blanket
             st.execute("DROP TABLE IF EXISTS temp;");
-            System.out.println("Node_name " + Node_name + "\n mrk " + mrk);
+            logger.fine("Node_name " + Node_name + "\n mrk " + mrk);
 
-            System.out.println("create temp: " + "CREATE TABLE temp SELECT SUM(JP_DB) AS JP_DB_sum, SUM(JP) AS JP_sum " + mrk + " FROM " + table_name + " GROUP BY " + mrk.substring(1) + "\n");
+            logger.fine("create temp: " + "CREATE TABLE temp SELECT SUM(JP_DB) AS JP_DB_sum, SUM(JP) AS JP_sum " + mrk + " FROM " + table_name + " GROUP BY " + mrk.substring(1) + "\n");
             // To optimize.
             // Nov 28 @ zqian, adding covering index for group by list.
             st.execute("CREATE TABLE temp SELECT SUM(JP_DB) AS JP_DB_sum, SUM(JP) AS JP_sum " + mrk + " FROM " + table_name + " GROUP BY " + mrk.substring(1));
@@ -936,7 +937,7 @@ public class KLD_generator {
             for(int i = 1; i < node_blanket.size(); i++) {
                 query3 = query3 + " AND temp." + node_blanket.get(i) + " = " + table_name + "." + node_blanket.get(i);
             }
-            System.out.println("CLL query2: " + query3);
+            logger.fine("CLL query2: " + query3);
             st.execute(query3);
         } else {
             String query1 = "CREATE TABLE " + table_name + " (" + Node_name + " VARCHAR (45)";
@@ -944,7 +945,7 @@ public class KLD_generator {
             st.execute(query1);
             String query2 = "INSERT INTO " + table_name + "(" + Node_name + " , JP_DB, JP) SELECT " + Node_name;
             query2 = query2 + " , SUM(JP_DB), SUM(JP) FROM " + Rchain_value.substring(0, Rchain_value.length() - 1) + "_CT_KLD` " + "GROUP BY " + Node_name;
-            System.out.println("CLL query2: " + query2);
+            logger.fine("CLL query2: " + query2);
             st.execute(query2);
 
             // Because the blanket is empty, set the joint probability of the blanket equal to the joint probability of the point.
@@ -972,7 +973,7 @@ public class KLD_generator {
          Statement st = con2.createStatement();
          // Select the parents of the node.
          String query1 = "SELECT DISTINCT parent FROM `Path_BayesNets` WHERE child = '" + node_name + "' AND Rchain = '" + Rchain_value + "' AND parent <> '';";
-//         System.out.println(query1);
+//         logger.fine(query1);
          ResultSet rst1 = st.executeQuery(query1);
          while(rst1.next()) {
              // Add parents to markov blanket.
@@ -981,7 +982,7 @@ public class KLD_generator {
 
          //select the children of the node
          String query2 = "SELECT DISTINCT child FROM `Path_BayesNets` WHERE parent = '" + node_name + "' AND Rchain = '" + Rchain_value + "';";
-//         System.out.println(query2);
+//         logger.fine(query2);
          ResultSet rst2 = st.executeQuery(query2);
 
          while(rst2.next()) {
@@ -995,7 +996,7 @@ public class KLD_generator {
              ResultSet rst_temp;
              String temp = children.get(i);
              String query_temp = "SELECT DISTINCT parent FROM `Path_BayesNets` WHERE child = '" + temp + "' AND Rchain = '" + Rchain_value + "' AND parent <> '' AND parent <> '" + node_name + "';";
-//             System.out.println(query_temp);
+//             logger.fine(query_temp);
              rst_temp = st.executeQuery(query_temp);
              while(rst_temp.next()) {
                  markov_blanket.add(rst_temp.getString(1));
@@ -1062,11 +1063,11 @@ public class KLD_generator {
         int cll_jp_size = cll_jp.size();
         double ave_all_db = cll_db_sum / cll_db_size;
         double ave_all_jp = cll_jp_sum / cll_jp_size;
-        System.out.println("The average for cll_db is " + ave_all_db + "\n");
-        System.out.println("The average for cll_jp is " + ave_all_jp + "\n");
+        logger.fine("The average for cll_db is " + ave_all_db + "\n");
+        logger.fine("The average for cll_jp is " + ave_all_jp + "\n");
         MeanError = MeanError / cll_db_size;
-        System.out.println("\n The Mean Difference of CLL is " + MeanError);
-        System.out.println("\n The Relative Mean Difference of CLL is " + Math.abs(MeanError / ave_all_db)); // zqian Dec 5th
+        logger.fine("\n The Mean Difference of CLL is " + MeanError);
+        logger.fine("\n The Relative Mean Difference of CLL is " + Math.abs(MeanError / ave_all_db)); // zqian Dec 5th
 
         // Calculate the variance.
         double var_sum = 0;
@@ -1076,7 +1077,7 @@ public class KLD_generator {
         }
 //        var = Math.sqrt(var_sum) / cll_db_size;
         var = Math.sqrt(var_sum / cll_db_size);
-        System.out.println("The Standard Deviation is " + var + "\n");
+        logger.fine("The Standard Deviation is " + var + "\n");
 
 //        //save as csv file
 //        BufferedWriter br = new BufferedWriter(new FileWriter("cll.csv"));
@@ -1103,7 +1104,7 @@ public class KLD_generator {
 //        line[0][1] = b;
 //        line[1][0] = 1;
 //        line[1][1] = a + b;
-////        System.out.println("Line " + a + "x + " + b);
+////        logger.fine("Line " + a + "x + " + b);
 //
 //          // Create your PlotPanel (you can use it as a JPanel).
 //        Plot2DPanel plot = new Plot2DPanel();
@@ -1140,8 +1141,8 @@ public class KLD_generator {
         ResultSet rs1 = st1.executeQuery("SELECT SUM(kld) AS KLD FROM " + database + "_BN" + ".`" + rs.getString("RChain").replace("`", "") + "_CT_KLD`;");
         rs1.next();
         KLD = rs1.getString("KLD");
-        System.out.println(" KLD is: " + KLD);
-        System.out.println("database: " + database);
+        logger.fine(" KLD is: " + KLD);
+        logger.fine("database: " + database);
         rs1.close();
         st1.close();
         rs.close();
@@ -1202,7 +1203,7 @@ public class KLD_generator {
         try {
             java.lang.Class.forName("com.mysql.jdbc.Driver");
         } catch (Exception ex) {
-            System.err.println("Unable to load MySQL JDBC driver");
+            logger.severe("Unable to load MySQL JDBC driver");
         }
         con2 = DriverManager.getConnection(CONN_STR2, dbUsername, dbPassword);
     }

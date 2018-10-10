@@ -4,6 +4,7 @@ import com.ibatis.common.jdbc.ScriptRunner;
 
 import java.io.*;
 import java.sql.*;
+import java.util.logging.Logger;
 import java.util.regex.Pattern;
 
 /**
@@ -15,6 +16,8 @@ public class BZScriptRunner {
     private String dbbase;
     private String largestRchain;
     private Connection con2;
+    
+	private static Logger logger = Logger.getLogger(BZScriptRunner.class.getName());
 
     public BZScriptRunner(String databaseName, Connection con2) {
         this.databaseName = databaseName;
@@ -134,7 +137,7 @@ public class BZScriptRunner {
         );
         while (rs.next()) {
             Rchain = rs.getString("RChain");
-            //System.out.println("\n Longest  RChain : " + Rchain);
+            //logger.fine("\n Longest  RChain : " + Rchain);
         }
         rs.close();
         st.close();
@@ -182,6 +185,7 @@ public class BZScriptRunner {
         // System.out.print(newScriptFileName);
         FileReader newScriptFileReader = new FileReader(newScriptFileName);
         BufferedReader newBuf = new BufferedReader(newScriptFileReader);
+        runner.setLogWriter(null);
         runner.runScript(newBuf);
         //System.out.print("\n after runner.runScript \n");
         newBuf.close();
@@ -189,11 +193,11 @@ public class BZScriptRunner {
     }
 
     public static int runScript(String scriptFileName, String setup, String work, String data, Connection con) {
-        System.out.println("Executing script: " + scriptFileName);
+        logger.fine("Executing script: " + scriptFileName);
         String newScriptFileName = prepareFile(scriptFileName, setup, work, data);
 
         if (newScriptFileName == null) {
-            System.out.println("Failed to execute script: " + scriptFileName);
+            logger.severe("Failed to execute script: " + scriptFileName);
             return -1;
         }
         ScriptRunner runner = new ScriptRunner(con, false, false);
@@ -201,7 +205,7 @@ public class BZScriptRunner {
         try {
             newScriptFileReader = new FileReader(newScriptFileName);
         } catch (FileNotFoundException e) {
-            System.out.println("Failed to open script: " + newScriptFileName);
+            logger.severe("Failed to open script: " + newScriptFileName);
             e.printStackTrace();
             return -1;
         }
@@ -210,11 +214,11 @@ public class BZScriptRunner {
         try {
             runner.runScript(newBuf);
         } catch (IOException e) {
-            System.out.println("IO error while running script: " + newScriptFileName);
+            logger.severe("IO error while running script: " + newScriptFileName);
             e.printStackTrace();
             return -2;
         } catch (SQLException e) {
-            System.out.println("SQL error while running script: " + newScriptFileName);
+            logger.severe("SQL error while running script: " + newScriptFileName);
             e.printStackTrace();
             return -3;
         }
@@ -223,12 +227,12 @@ public class BZScriptRunner {
             newBuf.close();
             newScriptFileReader.close();
         } catch (IOException e) {
-            System.out.println("Failed to close files.");
+            logger.severe("Failed to close files.");
             e.printStackTrace();
             return -1;
         }
 
-        System.out.println("Finished executing script.");
+        logger.fine("Finished executing script.");
 
         return 0;
     }
@@ -251,7 +255,7 @@ public class BZScriptRunner {
         try {
             input = new RandomAccessFile(fileName, "r");
         } catch (FileNotFoundException e) {
-            System.out.println("Failed to find file " + fileName);
+            logger.severe("Failed to find file " + fileName);
             e.printStackTrace();
             return null;
         }
@@ -261,7 +265,7 @@ public class BZScriptRunner {
         try {
             output = new RandomAccessFile(newFileName, "rw");
         } catch (FileNotFoundException e) {
-            System.out.println("Failed to find file " + newFileName);
+            logger.severe("Failed to find file " + newFileName);
             e.printStackTrace();
             return null;
         }
@@ -286,7 +290,7 @@ public class BZScriptRunner {
             output.close();
             input.close();
         } catch (IOException e) {
-            System.out.println("Failed to read file " + fileName);
+            logger.severe("Failed to read file " + fileName);
             e.printStackTrace();
             return null;
         }

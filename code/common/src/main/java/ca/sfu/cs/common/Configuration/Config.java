@@ -5,6 +5,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.Reader;
 import java.util.Properties;
+import java.util.logging.Logger;
 
 public class Config {
     public static final String SCRIPTS_DIRECTORY = "scripts/";
@@ -13,6 +14,8 @@ public class Config {
     Properties configFile;
     FileReader fr;
     Reader reader;
+    
+    private static Logger logger = Logger.getLogger(Config.class.getName());
 
     public Config() {
         configFile = new java.util.Properties();
@@ -40,7 +43,7 @@ public class Config {
             reader.close();
             fr.close();
         } catch (IOException e) {
-            System.out.println("Failed to close file.");
+            logger.severe("Failed to close file.");
             e.printStackTrace();
             return -1;
         }
