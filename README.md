@@ -41,7 +41,7 @@ One of the key computational problems in relational learning and inference is to
 	FactorBase and other tools in the project can all be built using the following command (make sure to have [Maven](https://maven.apache.org) installed):
 
 	```shell
-	cd FactorBase
+	cd FactorBase/code
 	mvn install
 	```
 
@@ -56,9 +56,16 @@ One of the key computational problems in relational learning and inference is to
 
 4. **Point to the required database in your MySQL server**
 
-	Modify `src/config.cfg` with your own configuration according to the sample format explained in the image. ![Sample Configuration](/images/configuration.png).
+	Modify `travis-resources/config.cfg` with your own configuration according to the sample format explained in the image.
+	
+	 ![Sample Configuration](/images/configuration.png).
 
 	See our [project website](https://sfu-cl-lab.github.io/FactorBase/options.html) for an explanation of the options.
+
+	For the last row, you can set the global logger to this threee levels:
+	- debug: show all log messages;
+	- info: only show info, warning and error messages(no debug message), which is the default;
+	- off: show no log message;
 
 5. **Learn a Bayesian Network Structure**
 
@@ -79,7 +86,7 @@ One of the key computational problems in relational learning and inference is to
 	By default the executable JAR file will look for the configuration file in the current directory (i.e. where you are running the command), if you would like to specify a different configuration file to use when running FactorBase you can use the parameter `-Dconfig=<config-file>`.  For example:
 
 	```shell
-	java -Dconfig=src/myconfig.cfg -jar factorbase/target/factorbase-<version>-SNAPSHOT.jar
+	java -Dconfig=../travis-resources/config.cfg -jar factorbase/target/factorbase-<version>-SNAPSHOT.jar
 	```
 
 6. **Inspect the Bayesian Network (BN)**
