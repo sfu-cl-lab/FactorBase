@@ -42,6 +42,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.logging.Logger;
 
 import nu.xom.ParsingException;
 import ca.sfu.cs.common.Configuration.Config;
@@ -52,19 +53,6 @@ import ca.sfu.cs.factorbase.jbn.BayesNet_Learning_main;
 import ca.sfu.cs.factorbase.util.BZScriptRunner;
 
 import com.mysql.jdbc.Connection;
-
-import nu.xom.ParsingException;
-
-import org.apache.commons.lang.StringUtils;
-
-import javax.swing.*;
-
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.sql.*;
-import java.util.ArrayList;
-import java.util.logging.Logger;
 
 public class BayesBaseH {
 

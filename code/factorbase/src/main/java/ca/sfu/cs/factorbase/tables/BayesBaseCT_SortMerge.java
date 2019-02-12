@@ -26,6 +26,7 @@ import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.logging.Logger;
 
 import org.apache.commons.lang.StringUtils;
 
@@ -35,14 +36,6 @@ import ca.sfu.cs.factorbase.util.BZScriptRunner;
 
 import com.mysql.jdbc.Connection;
 import com.mysql.jdbc.exceptions.jdbc4.MySQLSyntaxErrorException;
-import org.apache.commons.lang.StringUtils;
-
-import javax.swing.*;
-
-import java.io.IOException;
-import java.sql.*;
-import java.util.ArrayList;
-import java.util.logging.Logger;
 
 public class BayesBaseCT_SortMerge {
 
