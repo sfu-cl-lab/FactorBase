@@ -7,9 +7,6 @@ create schema @database@_BN;
 DROP SCHEMA IF EXISTS @database@_CT; 
 create schema @database@_CT;
 
-DROP SCHEMA IF EXISTS @database@_convert_CT; 
-create schema @database@_convert_CT;
-
 USE @database@_BN;
 SET storage_engine=INNODB;
 
@@ -161,5 +158,3 @@ create table lattice_set as select * from  @database@_setup.lattice_set;
 create table Path_Aux_Edges as select * from  @database@_setup.Path_Aux_Edges;
 create table SchemaEdges as select * from  @database@_setup.SchemaEdges;
 */
-
-

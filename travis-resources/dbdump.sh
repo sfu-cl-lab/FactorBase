@@ -34,7 +34,7 @@ fi
 
 any_failure=0
 
-for database in "${name}_BN" "${name}_CT" "${name}_convert_CT" "${name}_setup"
+for database in "${name}_BN" "${name}_CT" "${name}_setup"
 do
   extractionFailed=0
   echo "Now extracting tables in database: $database..."
