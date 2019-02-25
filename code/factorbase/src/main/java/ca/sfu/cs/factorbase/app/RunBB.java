@@ -3,11 +3,12 @@ package ca.sfu.cs.factorbase.app;
 import java.util.logging.Logger;
 
 import ca.sfu.cs.common.Configuration.Config;
+import ca.sfu.cs.factorbase.database.FactorBaseDataBase;
+import ca.sfu.cs.factorbase.database.MySQLFactorBaseDataBase;
 import ca.sfu.cs.factorbase.exporter.csvexporter.CSVPrecomputor;
 import ca.sfu.cs.factorbase.tables.BayesBaseCT_SortMerge;
 import ca.sfu.cs.factorbase.tables.BayesBaseH;
 import ca.sfu.cs.factorbase.tables.KeepTablesOnly;
-import ca.sfu.cs.factorbase.tables.MakeSetup;
 import ca.sfu.cs.factorbase.util.LoggerConfig;
 
 /**
@@ -29,9 +30,16 @@ public class RunBB {
         Config config = new Config();
         logger.info("Start Program...");
 
+        FactorBaseDataBase factorBaseDatabase = new MySQLFactorBaseDataBase(
+            config.getProperty("dbaddress"),
+            config.getProperty("dbname"),
+            config.getProperty("dbusername"),
+            config.getProperty("dbpassword")
+        );
+
         // Generate the setup database if specified to.
         if (config.getProperty("AutomaticSetup").equals("1")) {
-            MakeSetup.runMS();
+            factorBaseDatabase.setupDatabase();
             logger.info("Setup database is ready.");
         } else {
             logger.info("Setup database exists.");
