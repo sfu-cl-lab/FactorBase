@@ -1,6 +1,7 @@
 
 package ca.sfu.cs.factorbase.lattice;
  
+import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -19,10 +20,15 @@ public class short_rnid_LatticeGenerator {
     static Connection con2;
 
     static ArrayList<String> firstSets;
+    static List<String> wholeSets;
     static int maxNumberOfMembers;
     final static int maxNumberOfPVars = 10;
     final static String delimiter = ",";
     
+	static String databaseName, databaseName2;
+	static String dbUsername;
+	static String dbPassword;
+	static String dbaddress;
 	
 	private static Logger logger = Logger.getLogger(short_rnid_LatticeGenerator.class.getName());
 
@@ -30,6 +36,7 @@ public class short_rnid_LatticeGenerator {
         //connect to db using jdbc
         con2 = con;
         Statement tempst=con2.createStatement();
+        //int len=tempst.execute("SELECT count(*) FROM unielwin_lattice.RNodes;");
         
         logger.info("ENTER INTO SHORT LATTICE generate");
         //generate shorter rnid, from a to z
@@ -65,21 +72,68 @@ public class short_rnid_LatticeGenerator {
 
         return maxNumberOfMembers;
     }
+    
+    public static int generateTarget(Connection con) throws SQLException {
+        //connect to db using jdbc
+        con2 = con;
+        Statement tempst=con2.createStatement();
+        //int len=tempst.execute("SELECT count(*) FROM unielwin_lattice.RNodes;");
+        
+        
+      /* // Aug. 21, 2014, do not need to do this step, since it's copied form _setup database
+        // e.g. unielwin_Training1_BN-->> unielwin_Training1_target_setup  -->> unielwin_Training1_target_BN
+        //  in this way, do not need to worry about the consistency of Rnods.
+       //generate shorter rnid, from a to z
+        int fc=97; 
+        char short_rnid;
+        ResultSet temprs=tempst.executeQuery("select orig_rnid from RNodes;");
+        ArrayList<String> tempList=new ArrayList<String>();
+        while(temprs.next()) {
+            tempList.add(temprs.getString("orig_rnid"));
+        }
+        for(int i=0;i<tempList.size();i++) {
+        	short_rnid=(char)fc;           //explict type casting to convert integer to character
+        	fc++;
+        	tempst.execute("update RNodes set rnid='`" + short_rnid + "`' where orig_rnid='" + tempList.get(i) + "';");
+        }
+        tempst.close();*/
+	
+      //  maxNumberOfMembers = 2;
 
+
+        //LATTICE read first sest from RFunctors
+        readFirstSets();
+
+        //LATTICE init -> init createdSet + truncate tables + add first sets to db
+        init();
+
+        //LATTICE generate lattice tree
+        generateTree();
+        
+        // create a table of orig_rnid and rnid         
+        mapping_rnid();
+
+        return maxNumberOfMembers;
+    }
 
     //change orig_rnid to rnid, make it shorter
     public static void readFirstSets() throws SQLException {
         firstSets = new ArrayList<String>();
+        wholeSets = new ArrayList<String>();
         Statement st = con2.createStatement();
         ResultSet rs = st.executeQuery("select orig_rnid from LatticeRNodes;");
         
+        // while(rs.next())
+        //logger.fine(rs.getString(1));
      
         while(rs.next()){
             // Remove the flanking backticks from the orig_rnid before adding them to the set.
             firstSets.add(rs.getString("orig_rnid").substring(1, rs.getString("orig_rnid").length() - 1));
             logger.fine("The orig_rnid is : " + rs.getString("orig_rnid"));
         }
-
+/*        logger.fine("***********");
+        for(String g:firstSets)
+        	logger.fine(g);*/
         st.close();
     }
 
@@ -113,8 +167,14 @@ public class short_rnid_LatticeGenerator {
             while(rs.next()){
                 String h= rs.getString("name").substring(1,rs.getString("name").length()-1 ) ;   //deleting apostrophe from beginning and end
                 sets.add(h);
+                //logger.fine(rs.getString("name").length());
             }
             
+//            logger.fine(sets.size());
+//            for (String s : sets)
+//            logger.fine(s);
+//            logger.fine(setLength);
+//            logger.fine(sets);
             
             createNewSets(sets);
         }
@@ -124,12 +184,26 @@ public class short_rnid_LatticeGenerator {
     public static void createNewSets(ArrayList<String> sets) throws SQLException {
         for(String firstSet : firstSets){
             for(String secondSet : sets){
+            	//logger.fine(secondSet);
                 HashSet<String> newSet = new HashSet<String>();
                 String[] secondSetParts = nodeSplit(secondSet);
+                //String[] secondSetParts = secondSet;
                 
                 
+                //logger.fine("size of secondset:"+ secondSet.length());
                 
+//                logger.fine("********************");
+//                logger.fine();
+//                logger.fine(secondSetParts);
+ //               for (String s : secondSetParts)
+ //               System.out.print(s + " ");
+//                logger.fine();
+//                logger.fine(checkConstraints(firstSet, secondSetParts));
+//                logger.fine("********************");
+                
+                //logger.fine(checkConstraints(firstSet, secondSetParts));
                 if (!checkConstraints(firstSet, secondSetParts)) continue;
+                //logger.fine("*****()*****");
 
                 //add set with length 1
                 newSet.add(firstSet);
@@ -139,13 +213,17 @@ public class short_rnid_LatticeGenerator {
 
                 int newSetLength = newSet.size();
                 String newSetName = nodeJoin(newSet);  
+                //logger.fine(newSetName.compareTo(secondSet));
 
                 //add it to db and createdSet
                 if(newSetName.compareTo(secondSet) != 0) {
+                    wholeSets.add(newSetName);
                     // insert ignore is used to remove duplicates by primary keys
                     // is this really necessary? I'd like to enforce foreign key constraints. O.S.
                     Statement st = con2.createStatement();
                     // add new set
+                    //System.out.print(newSetName+"     ");
+                    
                     //adding apostrophe `
                     newSetName="`"+newSetName+"`";
                     secondSet = "`" + secondSet + "`";
@@ -227,6 +305,7 @@ public static void mapping_rnid() throws SQLException{
 
     public static boolean checkConstraints(String firstSet, String[] secondSetParts) throws SQLException {
         
+//    	logger.fine(firstSet);
     	
     	HashSet<String> firstSetKeys = new HashSet<String>();
         HashSet<String> secondSetKeys = new HashSet<String>();
@@ -242,6 +321,7 @@ public static void mapping_rnid() throws SQLException{
         }
 
         // get primary key for second set
+        //logger.fine(secondSetParts);
         for (String secondSet : secondSetParts)
         {
             rs = st.executeQuery("select pvid1, pvid2 from LatticeRNodes where orig_rnid = '`" + secondSet + "`';");
@@ -257,6 +337,11 @@ public static void mapping_rnid() throws SQLException{
         unionSetKeys.addAll(secondSetKeys);
         if (unionSetKeys.size() > maxNumberOfPVars) return false;
 
+//        logger.fine("*************************");
+//        logger.fine(firstSetKeys);
+//        logger.fine(secondSetKeys);
+//        logger.fine("*************************");
+        
         // check if there is a shared primary key
         firstSetKeys.retainAll(secondSetKeys);
         return !firstSetKeys.isEmpty();
@@ -273,7 +358,7 @@ public static void mapping_rnid() throws SQLException{
         for (String listItem : newList)
             joinStr = joinStr + delimiter + listItem;
         if (joinStr.length() > 0) joinStr = joinStr.substring(1);
-
+        //logger.fine(joinStr);
         return joinStr;
     }
 
@@ -283,6 +368,49 @@ public static void mapping_rnid() throws SQLException{
     //some portion of original code deleted	
         String[] nodes = node.replace("),", ") ").split(" ");
         
+//        logger.fine("*********************");
+//        logger.fine(node);
+//        logger.fine("nodes:");
+//        for (String s : nodes)
+//        	logger.fine(s);
+//        logger.fine("*********************");
+        
         return nodes;
     }
+    
+    
+    
+    // why is this hard-coded? //
+    //main, connect to database
+    public static void main(String[] args) throws Exception {
+		databaseName = "UW_std";
+		databaseName2 = databaseName + "_lattice";
+		dbUsername = "sfu";
+		dbPassword = "joinBayes";
+		dbaddress = "mysql://kripke.cs.sfu.ca";
+
+        //connect to db using jdbc
+		connectDB();
+
+		//generate lattice tree
+		maxNumberOfMembers = short_rnid_LatticeGenerator.generate(con2);
+		logger.info(" ##### lattice is ready for use* ");
+		
+		disconnectDB();
+    }
+
+	public static void connectDB() throws SQLException {
+		String CONN_STR2 = "jdbc:" + dbaddress + "/" + databaseName2;
+		try {
+			java.lang.Class.forName("com.mysql.jdbc.Driver");
+		} catch (Exception ex) {
+			logger.severe("Unable to load MySQL JDBC driver");
+		}
+		con2 = (Connection) DriverManager.getConnection(CONN_STR2, dbUsername, dbPassword);
+	}
+		
+	public static void disconnectDB() throws SQLException {
+		con2.close();
+	}
+
 }
