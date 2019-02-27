@@ -17,18 +17,14 @@ import com.mysql.jdbc.Connection;
  * Assumes that a table LatticeRnodes has been generated. See transfer.sql.
  */
 public class short_rnid_LatticeGenerator {
-    static Connection con2;
-    static ArrayList<String> firstSets;
-    static int maxNumberOfMembers;
-    final static int maxNumberOfPVars = 10;
-    final static String delimiter = ",";
+    private static final int MAX_NUM_OF_PVARS = 10;
+    private static final String delimiter = ",";
     private static Logger logger = Logger.getLogger(short_rnid_LatticeGenerator.class.getName());
 
 
-    public static int generate(Connection con) throws SQLException {
+    public static int generate(Connection dbConnection) throws SQLException {
         // Connect to db using jdbc.
-        con2 = con;
-        Statement tempst = con2.createStatement();
+        Statement tempst = dbConnection.createStatement();
 
         logger.info("Enter into short lattice generate.");
 
@@ -52,17 +48,17 @@ public class short_rnid_LatticeGenerator {
 
         tempst.close();
 
-        // Lattice read first sest from RFunctors.
-        readFirstSets();
+        // Lattice read first sets from RFunctors.
+        List<String> firstSets = retrieveFirstSets(dbConnection);
 
         // Lattice init -> init createdSet + truncate tables + add first sets to db.
-        init();
+        int maxNumberOfMembers = init(dbConnection, firstSets);
 
         // Lattice generate lattice tree.
-        generateTree();
+        generateTree(dbConnection, firstSets, maxNumberOfMembers);
 
         // Create a table of orig_rnid and rnid.
-        mapping_rnid();
+        mapping_rnid(dbConnection);
 
         return maxNumberOfMembers;
     }
@@ -71,9 +67,9 @@ public class short_rnid_LatticeGenerator {
     /**
      * Change orig_rnid to rnid, make it shorter.
      */
-    public static void readFirstSets() throws SQLException {
-        firstSets = new ArrayList<String>();
-        Statement st = con2.createStatement();
+    private static List<String> retrieveFirstSets(Connection dbConnection) throws SQLException {
+        ArrayList<String> firstSets = new ArrayList<String>();
+        Statement st = dbConnection.createStatement();
         ResultSet rs = st.executeQuery("SELECT orig_rnid FROM LatticeRNodes;");
 
         while(rs.next()) {
@@ -83,12 +79,14 @@ public class short_rnid_LatticeGenerator {
         }
 
         st.close();
+
+        return firstSets;
     }
 
 
-    public static void init() throws SQLException {
-        maxNumberOfMembers = firstSets.size();
-        Statement st = con2.createStatement();
+    private static int init(Connection dbConnection, List<String> firstSets) throws SQLException {
+        int maxNumberOfMembers = firstSets.size();
+        Statement st = dbConnection.createStatement();
 
         st.execute("CREATE TABLE IF NOT EXISTS lattice_membership (name VARCHAR(398), member VARCHAR(398), PRIMARY KEY(name, member));");
         st.execute("CREATE TABLE IF NOT EXISTS lattice_rel (parent VARCHAR(398), child VARCHAR(398), removed VARCHAR(199), rnid VARCHAR(199), PRIMARY KEY(parent, child));");
@@ -105,11 +103,13 @@ public class short_rnid_LatticeGenerator {
         }
 
         st.close();
+
+        return maxNumberOfMembers;
     }
 
 
-    public static void generateTree() throws SQLException {
-        Statement st = con2.createStatement();
+    private static void generateTree(Connection dbConnection, List<String> firstSets, int maxNumberOfMembers) throws SQLException {
+        Statement st = dbConnection.createStatement();
         for(int setLength = 1; setLength < maxNumberOfMembers; setLength++) {
             ArrayList<String> sets = new ArrayList<String>();
             ResultSet rs = st.executeQuery("SELECT name FROM lattice_set WHERE length = " + setLength + ";");
@@ -118,20 +118,20 @@ public class short_rnid_LatticeGenerator {
                 sets.add(h);
             }
 
-            createNewSets(sets);
+            createNewSets(dbConnection, firstSets, sets);
         }
 
         st.close();
     }
 
 
-    public static void createNewSets(ArrayList<String> sets) throws SQLException {
+    private static void createNewSets(Connection dbConnection, List<String> firstSets, ArrayList<String> sets) throws SQLException {
         for(String firstSet : firstSets) {
             for(String secondSet : sets) {
                 HashSet<String> newSet = new HashSet<String>();
                 String[] secondSetParts = nodeSplit(secondSet);
 
-                if (!checkConstraints(firstSet, secondSetParts)) {
+                if (!checkConstraints(dbConnection, firstSet, secondSetParts)) {
                     continue;
                 }
 
@@ -148,7 +148,7 @@ public class short_rnid_LatticeGenerator {
                 if(newSetName.compareTo(secondSet) != 0) {
                     // Insert ignore is used to remove duplicates by primary keys.
                     // Is this really necessary?  I'd like to enforce foreign key constraints. O.S.
-                    Statement st = con2.createStatement();
+                    Statement st = dbConnection.createStatement();
                     // Add new set.
                     // Adding backticks.
                     newSetName = "`" + newSetName + "`";
@@ -179,11 +179,12 @@ public class short_rnid_LatticeGenerator {
      * Example mappings:
      * orig_rnid                                              rnid
      * `RA(prof0,student0),registration(course0,student0)`    `a,b`
-     * `RA(prof0,student0)` 				      `a`
-     * `registration(course0,student0)` 		      `b`
+     * `RA(prof0,student0)`                                   `a`
+     * `registration(course0,student0)`                       `b`
+     *
      */
-    public static void mapping_rnid() throws SQLException {
-        Statement st = con2.createStatement();
+    private static void mapping_rnid(Connection dbConnection) throws SQLException {
+        Statement st = dbConnection.createStatement();
         st.execute("DROP TABLE IF EXISTS lattice_mapping;");
         st.execute("CREATE TABLE IF NOT EXISTS lattice_mapping (orig_rnid VARCHAR(200), short_rnid VARCHAR(20), PRIMARY KEY(orig_rnid, short_rnid));"); // zqian, max key length limitation, Oct 11, 2013.
 
@@ -233,10 +234,10 @@ public class short_rnid_LatticeGenerator {
     }
 
 
-    public static boolean checkConstraints(String firstSet, String[] secondSetParts) throws SQLException {
+    private static boolean checkConstraints(Connection dbConnection, String firstSet, String[] secondSetParts) throws SQLException {
         HashSet<String> firstSetKeys = new HashSet<String>();
         HashSet<String> secondSetKeys = new HashSet<String>();
-        Statement st = con2.createStatement();
+        Statement st = dbConnection.createStatement();
 
         // Get primary key for first set.
         // Use rnid.
@@ -260,7 +261,7 @@ public class short_rnid_LatticeGenerator {
         // Check if the number of population variables exceeds the limit.
         HashSet<String> unionSetKeys = new HashSet<String>(firstSetKeys);
         unionSetKeys.addAll(secondSetKeys);
-        if (unionSetKeys.size() > maxNumberOfPVars) {
+        if (unionSetKeys.size() > MAX_NUM_OF_PVARS) {
             return false;
         }
 
@@ -274,7 +275,7 @@ public class short_rnid_LatticeGenerator {
     /**
      * Generate a new lattice node by joining a list of relation nodes.
      */
-    public static String nodeJoin(HashSet<String> newSet) {
+    private static String nodeJoin(HashSet<String> newSet) {
         List<String> newList = new ArrayList<String>();
         for (String setItem : newSet) {
             newList.add(setItem);
@@ -299,7 +300,7 @@ public class short_rnid_LatticeGenerator {
     /**
      * Split a lattice node into a list of relation nodes.
      */
-    public static String[] nodeSplit(String node) {
+    private static String[] nodeSplit(String node) {
         // Some portion of original code deleted.
         String[] nodes = node.replace("),", ") ").split(" ");
         return nodes;
