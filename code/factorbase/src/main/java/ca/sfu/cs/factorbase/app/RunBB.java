@@ -8,7 +8,6 @@ import ca.sfu.cs.factorbase.database.MySQLFactorBaseDataBase;
 import ca.sfu.cs.factorbase.exporter.csvexporter.CSVPrecomputor;
 import ca.sfu.cs.factorbase.tables.BayesBaseCT_SortMerge;
 import ca.sfu.cs.factorbase.tables.BayesBaseH;
-import ca.sfu.cs.factorbase.tables.KeepTablesOnly;
 import ca.sfu.cs.factorbase.util.LoggerConfig;
 
 /**
@@ -58,7 +57,7 @@ public class RunBB {
 
         // Now eliminate temporary tables. Keep only the tables for the longest Rchain. Turn this off for debugging.
         logger.info("Cleaning CT database");
-        KeepTablesOnly.Drop_tmpTables();
+        factorBaseDatabase.cleanupDatabase();
 
         long t2 = System.currentTimeMillis();
         logger.info("Total Running time is " + (t2 - t1) + "ms.");

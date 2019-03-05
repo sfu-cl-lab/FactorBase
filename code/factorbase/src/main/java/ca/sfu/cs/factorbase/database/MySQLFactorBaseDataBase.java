@@ -7,6 +7,7 @@ import java.text.MessageFormat;
 
 import ca.sfu.cs.common.Configuration.Config;
 import ca.sfu.cs.factorbase.exception.DataBaseException;
+import ca.sfu.cs.factorbase.tables.KeepTablesOnly;
 import ca.sfu.cs.factorbase.util.BZScriptRunner;
 
 import com.mysql.jdbc.Connection;
@@ -48,6 +49,20 @@ public class MySQLFactorBaseDataBase implements FactorBaseDataBase {
             bzsr.callSP("find_values");
         } catch (SQLException | IOException e) {
             throw new DataBaseException("An error occurred when attempting to setup the database for FactorBase.", e);
+        }
+    }
+
+
+    @Override
+    public void cleanupDatabase() throws DataBaseException {
+        try {
+            KeepTablesOnly.Drop_tmpTables(
+                this.baseConnection,
+                this.baseDatabaseName + "_CT",
+                this.baseDatabaseName + "_BN"
+            );
+        } catch (SQLException e) {
+            throw new DataBaseException("An error occurred when attempting to cleanup the database for FactorBase.", e);
         }
     }
 }
