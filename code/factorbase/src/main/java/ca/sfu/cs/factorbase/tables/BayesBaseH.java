@@ -82,10 +82,6 @@ public class BayesBaseH {
     
     private static Logger logger = Logger.getLogger(BayesBaseH.class.getName());
 
-    public static void main(String[] args) throws Exception {
-        runBBH();
-    }
-
 
     public static void runBBH() throws Exception {
         initProgram(FirstRunning);
@@ -183,7 +179,7 @@ public class BayesBaseH {
     }
 
 
-    public static void StructureLearning(Connection conn) throws Exception {
+    private static void StructureLearning(Connection conn) throws Exception {
         long l = System.currentTimeMillis(); // @zqian: measure structure learning time.
 
         // Handle pvars.
@@ -242,7 +238,7 @@ public class BayesBaseH {
     }
 
 
-    public static void initProgram(int FirstRunning) throws IOException, SQLException {
+    private static void initProgram(int FirstRunning) throws IOException, SQLException {
         // Read config file.
         setVarsFromConfig();
 
@@ -261,7 +257,7 @@ public class BayesBaseH {
     }
 
 
-    public static void setVarsFromConfig() {
+    private static void setVarsFromConfig() {
         Config conf = new Config();
         databaseName = conf.getProperty("dbname");
         databaseName2 = databaseName + "_BN";
@@ -289,7 +285,7 @@ public class BayesBaseH {
     }
 
 
-    public static void connectDB() throws SQLException {
+    private static void connectDB() throws SQLException {
         String CONN_STR1 = "jdbc:" + dbaddress + "/" + databaseName;
         try {
             java.lang.Class.forName("com.mysql.jdbc.Driver");
@@ -322,7 +318,7 @@ public class BayesBaseH {
      * if the tuples greater than 1, then employ tetradlearner.
      * else just insert the 1nid as child into entity_bayesnet.
      */
-    public static void handlePVars() throws Exception {
+    private static void handlePVars() throws Exception {
         // read pvar -> create csv files
         readPvarFromBN();
 
@@ -369,7 +365,7 @@ public class BayesBaseH {
     }
 
 
-    public static void handleRNodes_zqian() throws Exception {
+    private static void handleRNodes_zqian() throws Exception {
         for(int len = 1; len <= maxNumberOfMembers; len++) {
             readRNodesFromLattice(len); // Create csv files for all rnodes.
 
@@ -558,7 +554,7 @@ public class BayesBaseH {
     }
 
 
-    public static void PropagateContextEdges() throws Exception {
+    private static void PropagateContextEdges() throws Exception {
         Statement st = con2.createStatement();
         st.execute("DROP TABLE IF EXISTS RNodeEdges;");
         st.execute("CREATE TABLE RNodeEdges LIKE Path_BayesNets;");
@@ -635,7 +631,7 @@ public class BayesBaseH {
     }
 
 
-    public static void readPvarFromBN() throws SQLException, IOException {
+    private static void readPvarFromBN() throws SQLException, IOException {
         Statement st = con2.createStatement();
 
         // From main db.
@@ -655,7 +651,7 @@ public class BayesBaseH {
     }
 
 
-    public static void readRNodesFromLattice(int len) throws SQLException, IOException {
+    private static void readRNodesFromLattice(int len) throws SQLException, IOException {
         Statement st = con2.createStatement();
         ResultSet rs = st.executeQuery("SELECT name AS RChain FROM lattice_set WHERE lattice_set.length = " + len + ";");
         while(rs.next()) {
@@ -670,7 +666,7 @@ public class BayesBaseH {
 
 
     // Import to Entity_BayesNets.
-    public static void bif1(String id) throws SQLException, IOException, ParsingException {
+    private static void bif1(String id) throws SQLException, IOException, ParsingException {
         // Import @zqian.
         logger.info("Starting to Import the learned path into MySQL::**Entity_BayesNets**"); // @zqian Test
         Statement st = con2.createStatement();
@@ -683,7 +679,7 @@ public class BayesBaseH {
 
 
     // Import to Path_BayesNets // zqian@Oct 2nd 2013.
-    public static void bif2(String id) throws SQLException, IOException, ParsingException {
+    private static void bif2(String id) throws SQLException, IOException, ParsingException {
         logger.info(" Starting to Import the learned path into MySQL::**Path_BayesNets**"); // @zqian
 
         Statement st = con2.createStatement();
@@ -702,7 +698,7 @@ public class BayesBaseH {
     }
 
 
-    public static void exportResults() throws SQLException, IOException {
+    private static void exportResults() throws SQLException, IOException {
         Statement st = con2.createStatement();
 
         ResultSet rs = st.executeQuery("SELECT name FROM lattice_set WHERE length = " + maxNumberOfMembers + ";");
@@ -715,7 +711,7 @@ public class BayesBaseH {
     }
 
 
-    public static void disconnectDB() throws SQLException {
+    private static void disconnectDB() throws SQLException {
         con1.close();
         con2.close();
         con3.close();
