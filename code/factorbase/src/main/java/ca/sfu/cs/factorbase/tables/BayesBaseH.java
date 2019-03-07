@@ -70,9 +70,6 @@ public class BayesBaseH {
 
     static int maxNumberOfMembers = 0;
 
-    static ArrayList<String> rnode_ids;
-    static ArrayList<String> rnode_ids_1;
-    static ArrayList<String> pvar_ids;
 
     /**
      * iff Running Time == 1, then generate the csv files.
@@ -242,11 +239,6 @@ public class BayesBaseH {
         // Read config file.
         setVarsFromConfig();
 
-        // Init ids.
-        pvar_ids = new ArrayList<String>();
-        rnode_ids = new ArrayList<String>();
-        rnode_ids_1 = new ArrayList<String>();
-
         if (FirstRunning==1) {
             new File(databaseName + "/" + File.separator).mkdirs();
             new File(databaseName + "/" + File.separator + "kno" + File.separator).mkdirs();
@@ -320,7 +312,7 @@ public class BayesBaseH {
      */
     private static void handlePVars() throws Exception {
         // read pvar -> create csv files
-        readPvarFromBN();
+        ArrayList<String> pvar_ids = readPvarFromBN();
 
         String NoTuples = "";
         for(String id : pvar_ids) {
@@ -367,7 +359,7 @@ public class BayesBaseH {
 
     private static void handleRNodes_zqian() throws Exception {
         for(int len = 1; len <= maxNumberOfMembers; len++) {
-            readRNodesFromLattice(len); // Create csv files for all rnodes.
+            ArrayList<String> rnode_ids = readRNodesFromLattice(len); // Create csv files for all rnodes.
 
             // Required edges.
             for(String id : rnode_ids) { // rchain
@@ -554,7 +546,7 @@ public class BayesBaseH {
     }
 
 
-    private static void PropagateContextEdges() throws Exception {
+    private static ArrayList<String> PropagateContextEdges() throws Exception {
         Statement st = con2.createStatement();
         st.execute("DROP TABLE IF EXISTS RNodeEdges;");
         st.execute("CREATE TABLE RNodeEdges LIKE Path_BayesNets;");
@@ -614,25 +606,30 @@ public class BayesBaseH {
             "where lattice_set.length = 1;"
         );
 
+        ArrayList<String> rnode_ids = new ArrayList<String>();
+
         while(rs.next()) {
             // Get rvid for further use.
             String rchain = rs.getString("RChain");
-            rnode_ids_1.add(rchain);
+            rnode_ids.add(rchain);
         }
         st1.close();
         Statement st_temp = con2.createStatement();
-        for(String id : rnode_ids_1) { // Feb 7th 2014, zqian; updated May 26, 2014 zqian.
+        for(String id : rnode_ids) { // Feb 7th 2014, zqian; updated May 26, 2014 zqian.
             st_temp.execute("INSERT IGNORE INTO Path_BayesNets (SELECT '" + largest_rchain + "' AS Rchain, '" + id + "' AS child, '' AS parent);");
         }
 
         st_temp.close();
         // End for adding rnode as child, May 26th, 2014 zqian.
         st.close();
+
+        return rnode_ids;
     }
 
 
-    private static void readPvarFromBN() throws SQLException, IOException {
+    private static ArrayList<String> readPvarFromBN() throws SQLException, IOException {
         Statement st = con2.createStatement();
+        ArrayList<String> pvar_ids = new ArrayList<String>();
 
         // From main db.
         ResultSet rs = st.executeQuery("SELECT * FROM PVariables WHERE index_number = 0;"); //O.S. March 21 ignore variables that aren't main.
@@ -648,12 +645,16 @@ public class BayesBaseH {
         // Close statements.
         rs.close();
         st.close();
+
+        return pvar_ids;
     }
 
 
-    private static void readRNodesFromLattice(int len) throws SQLException, IOException {
+    private static ArrayList<String> readRNodesFromLattice(int len) throws SQLException, IOException {
         Statement st = con2.createStatement();
         ResultSet rs = st.executeQuery("SELECT name AS RChain FROM lattice_set WHERE lattice_set.length = " + len + ";");
+        ArrayList<String> rnode_ids = new ArrayList<String>();
+
         while(rs.next()) {
             // Get pvid for further use.
             String rchain = rs.getString("RChain");
@@ -662,6 +663,8 @@ public class BayesBaseH {
         }
 
         st.close();
+
+        return rnode_ids;
     }
 
 
@@ -670,9 +673,9 @@ public class BayesBaseH {
         // Import @zqian.
         logger.info("Starting to Import the learned path into MySQL::**Entity_BayesNets**"); // @zqian Test
         Statement st = con2.createStatement();
-        int i = 0;
+
         BIFImport.Import(databaseName + "/" + File.separator + "xml" + File.separator + id.replace("`","") + ".xml", id, "Entity_BayesNets", con2);
-        logger.info("*** imported Entity_BayesNets " + pvar_ids.get(i++) + " into database");
+        logger.info("*** imported Entity_BayesNets " + id + " into database");
         logger.info(" \n !!!!!!!!!Import is done for **Entity_BayesNets** \n"); // @zqian Test
         st.close();
     }
@@ -683,7 +686,6 @@ public class BayesBaseH {
         logger.info(" Starting to Import the learned path into MySQL::**Path_BayesNets**"); // @zqian
 
         Statement st = con2.createStatement();
-        int j = 0;
 
         BIFImport.Import(databaseName + "/" + File.separator + "xml" + File.separator + id.replace("`","") + ".xml", id, "Path_BayesNets", con2);
 
@@ -691,7 +693,7 @@ public class BayesBaseH {
         // Delete the edges which is already forbidden in a lower level before inserting into the database.
         // Nov 25
         st.execute("DELETE FROM Path_BayesNets WHERE Rchain = '" + id + "' AND (child, parent) IN (SELECT child, parent FROM Path_Forbidden_Edges WHERE Rchain = '" + id + "');"); // Oct 2nd
-        logger.info("*** imported Path_BayesNets " + rnode_ids.get(j++) + "into database");
+        logger.info("*** imported Path_BayesNets " + id + "into database");
 
         logger.info(" Import is done for **Path_BayesNets**"); // @zqian Test
         st.close();
