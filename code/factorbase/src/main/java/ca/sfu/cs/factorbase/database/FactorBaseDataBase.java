@@ -1,6 +1,9 @@
 package ca.sfu.cs.factorbase.database;
 
+import java.util.List;
+
 import ca.sfu.cs.factorbase.exception.DataBaseException;
+import ca.sfu.cs.factorbase.graph.Edge;
 
 /**
  * Methods expected to be implemented to enable the extraction of data from a database for FactorBase.
@@ -22,4 +25,15 @@ public interface FactorBaseDataBase {
      * @throws DataBaseException if an error occurs when attempting to access the database.
      */
     void cleanupDatabase() throws DataBaseException;
+
+
+    /**
+     * Retrieve all the edges that are not allowed for the given rnode IDs.
+     *
+     * @param rnodeIDs - a list of the rnode IDs to get the forbidden edges for.
+     * @return a List of the edges that are forbidden for the given rnode IDs.
+     *
+     * @throws DataBaseException if an error occurs when attempting to retrieve the information.
+     */
+    List<Edge> getForbiddenEdges(List<String> rnodeIDs) throws DataBaseException;
 }

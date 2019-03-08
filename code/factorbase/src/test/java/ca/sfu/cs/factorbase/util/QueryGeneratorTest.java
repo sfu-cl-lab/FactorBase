@@ -2,13 +2,16 @@ package ca.sfu.cs.factorbase.util;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.is;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Arrays;
 
+import org.junit.After;
 import org.junit.AfterClass;
+import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -24,6 +27,7 @@ import testframework.TestDatabaseConnection;
 public class QueryGeneratorTest {
 
     private static TestDatabaseConnection db;
+    private static Statement st;
 
     @BeforeClass
     public static void setUpBeforeClass() throws Exception {
@@ -32,7 +36,19 @@ public class QueryGeneratorTest {
 
     @AfterClass
     public static void tearDownAfterClass() throws Exception {
+        db.con.close();
         db = null;
+    }
+
+    @Before
+    public void setUp() throws Exception {
+        st = db.con.createStatement();
+    }
+
+    @After
+    public void tearDown() throws Exception {
+        st.close();
+        st = null;
     }
 
     @Test
@@ -44,7 +60,6 @@ public class QueryGeneratorTest {
                 "t2"
         );
 
-        Statement st = db.con.createStatement();
         ResultSet rs = st.executeQuery(query);
 
         int count = 0;
@@ -73,6 +88,54 @@ public class QueryGeneratorTest {
         assertThat(count, equalTo(5));
 
         rs.close();
-        st.close();
+    }
+
+    @Test
+    public void createSimpleInQuery_ReturnsCorrectResults_WhenSingleMatch() throws SQLException {
+        String query = QueryGenerator.createSimpleInQuery(
+            "t1",
+            "s_id",
+            Arrays.asList("Jack")
+        );
+
+        ResultSet rs = st.executeQuery(query);
+
+        rs.next();
+        assertThat(rs.getString(1), equalTo("Jack"));
+        assertThat(rs.getMetaData().getColumnCount(), equalTo(4));
+        assertThat(rs.isLast(), is(true));
+
+        rs.close();
+    }
+
+    @Test
+    public void createSimpleInQuery_ReturnsCorrectResults_WhenMultipleMatches() throws SQLException {
+        String query = QueryGenerator.createSimpleInQuery(
+            "t1",
+            "s_id",
+            Arrays.asList("Jack", "Kim", "Paul")
+        );
+
+        ResultSet rs = st.executeQuery(query);
+
+        int count = 0;
+        while (rs.next()) {
+            switch (count) {
+            case 0:
+                assertThat(rs.getString(1), equalTo("Jack"));
+                break;
+            case 1:
+                assertThat(rs.getString(1), equalTo("Kim"));
+                break;
+            case 2:
+                assertThat(rs.getString(1), equalTo("Paul"));
+                break;
+            }
+            count++;
+        }
+
+        assertThat(count, equalTo(3));
+
+        rs.close();
     }
 }

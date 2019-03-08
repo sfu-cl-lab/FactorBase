@@ -42,16 +42,13 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
-import java.util.List;
 import java.util.logging.Logger;
 
 import nu.xom.ParsingException;
 import ca.sfu.cs.common.Configuration.Config;
-import ca.sfu.cs.factorbase.database.FactorBaseDataBase;
 import ca.sfu.cs.factorbase.exporter.bifexporter.BIF_Generator;
 import ca.sfu.cs.factorbase.exporter.bifexporter.bif.BIFExport;
 import ca.sfu.cs.factorbase.exporter.bifexporter.bif.BIFImport;
-import ca.sfu.cs.factorbase.graph.Edge;
 import ca.sfu.cs.factorbase.jbn.BayesNet_Learning_main;
 import ca.sfu.cs.factorbase.util.BZScriptRunner;
 
@@ -83,7 +80,7 @@ public class BayesBaseH {
     private static Logger logger = Logger.getLogger(BayesBaseH.class.getName());
 
 
-    public static void runBBH(FactorBaseDataBase database) throws Exception {
+    public static void runBBH() throws Exception {
         initProgram(FirstRunning);
         connectDB();
 
@@ -107,7 +104,7 @@ public class BayesBaseH {
         logger.info(" ##### lattice is ready for use* "); // @zqian
 
         // Structure learning.
-        StructureLearning(database, con2);
+        StructureLearning(con2);
 
         /**
          * OS: Nov 17, 2016. It can happen that Tetrad learns a forbidden edge. Argh. To catch this, we delete forbidden edges from any insertion. But then
@@ -179,10 +176,7 @@ public class BayesBaseH {
     }
 
 
-    private static void StructureLearning(
-        FactorBaseDataBase database,
-        Connection conn
-    ) throws Exception {
+    private static void StructureLearning(Connection conn) throws Exception {
         long l = System.currentTimeMillis(); // @zqian: measure structure learning time.
 
         // Handle pvars.
@@ -224,7 +218,7 @@ public class BayesBaseH {
 
         // Handle rnodes in a bottom-up way following the lattice.
         // Generating .CSV files by reading _CT tables directly (including TRUE relationship and FALSE relationship).
-        handleRNodes_zqian(database); // import
+        handleRNodes_zqian(); // import
         // Population lattice.
         PropagateContextEdges();
 
@@ -363,7 +357,7 @@ public class BayesBaseH {
     }
 
 
-    private static void handleRNodes_zqian(FactorBaseDataBase database) throws Exception {
+    private static void handleRNodes_zqian() throws Exception {
         for(int len = 1; len <= maxNumberOfMembers; len++) {
             ArrayList<String> rnode_ids = readRNodesFromLattice(len); // Create csv files for all rnodes.
 
@@ -373,8 +367,12 @@ public class BayesBaseH {
                 BIFExport.Export(databaseName + "/" + File.separator + "kno" + File.separator + id.replace("`","") + "_req.xml", "Rchain", "Path_Required_Edges", id, con2);
             }
 
-            // Retrieve the forbidden edge information.
-            List<Edge> forbiddenEdges = database.getForbiddenEdges(rnode_ids);
+            // Nov25
+            // Forbidden edges.
+            for(String id : rnode_ids) {
+                logger.fine("\n !!!!Starting to Export the Forbidden Edges to " + id.replace("`","") + "_for.xml \n");
+                BIFExport.Export(databaseName + "/" + File.separator + "kno" + File.separator + id.replace("`","") + "_for.xml", "Rchain", "Path_Forbidden_Edges", id, con2);
+            }
 
             String NoTuples = "";
             for(String id : rnode_ids) {
@@ -402,7 +400,7 @@ public class BayesBaseH {
                     BayesNet_Learning_main.tetradLearner(
                         databaseName + "/" + File.separator + "csv" + File.separator + id.replace("`","") + ".csv",
                         databaseName + "/" + File.separator + "kno" + File.separator + id.replace("`","") + "_req.xml",
-                        forbiddenEdges,
+                        databaseName + "/" + File.separator + "kno" + File.separator + id.replace("`","") + "_for.xml",
                         databaseName + "/" + File.separator + "xml" + File.separator + id.replace("`","") + ".xml"
                     );
 
