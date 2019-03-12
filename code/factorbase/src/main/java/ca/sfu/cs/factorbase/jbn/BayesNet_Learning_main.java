@@ -6,10 +6,6 @@ import java.io.FileWriter;
 import java.util.HashSet;
 import java.util.List;
 
-import nu.xom.Builder;
-import nu.xom.Document;
-import nu.xom.Element;
-import nu.xom.Elements;
 import ca.sfu.cs.factorbase.graph.Edge;
 import edu.cmu.tetrad.data.DataReader;
 import edu.cmu.tetrad.data.DataSet;
@@ -32,7 +28,7 @@ public class BayesNet_Learning_main {
 
     public static void tetradLearner(
         String srcfile,
-        String required,
+        List<Edge> requiredEdges,
         List<Edge> forbiddenEdges,
         String destfile
     ) throws Exception {
@@ -46,24 +42,10 @@ public class BayesNet_Learning_main {
         Ges3 gesSearch = new Ges3(dataset);
         Knowledge knowledge = new Knowledge();
 
-        /* load required knowledge */
-        if (required != null) {
-            Builder xmlParser = new Builder();
-            Document doc = xmlParser.build(new File(required));
-            Element root = doc.getRootElement();
-            root = root.getFirstChildElement("NETWORK");
-            Elements requiredEdges = root.getChildElements("DEFINITION");
-
-            for (int i = 0; i < requiredEdges.size(); i++) {
-                Element node = requiredEdges.get(i);
-                Element child = node.getFirstChildElement("FOR");
-                Elements parents = node.getChildElements("GIVEN");
-                for (int j = 0; j < parents.size(); j++) {
-                    Element parent = parents.get(j);
-                    String childStr = child.getValue();
-                    String parentStr = parent.getValue();
-                    knowledge.setEdgeRequired(parentStr, childStr, true);
-                }
+        // Load required edge knowledge.
+        if (requiredEdges != null) {
+            for (Edge edge : requiredEdges) {
+                knowledge.setEdgeRequired(edge.getParent(), edge.getChild(), true);
             }
         }
 

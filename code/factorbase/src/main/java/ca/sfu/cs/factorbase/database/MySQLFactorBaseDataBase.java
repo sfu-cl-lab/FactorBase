@@ -73,9 +73,33 @@ public class MySQLFactorBaseDataBase implements FactorBaseDataBase {
     }
 
 
+    /**
+     * Helper method to extract the edges from the given PreparedStatement.
+     * @param statement - the PreparedStatement to extract the edge information from.
+     * @return a List of the extracted edges.
+     * @throws SQLException if an error occurs when attempting to retrieve the information.
+     */
+    private List<Edge> extractEdges(PreparedStatement statement) throws SQLException {
+        ArrayList<Edge> edges = new ArrayList<Edge>();
+        ResultSet results = statement.executeQuery();
+
+        while (results.next()) {
+            // Remove the backticks when creating edges so that they match the names in the CSV
+            // file that gets generated.
+            edges.add(
+                new Edge(
+                    results.getString("parent").replace("`", ""),
+                    results.getString("child").replace("`", "")
+                )
+            );
+        }
+
+        return edges;
+    }
+
+
     @Override
     public List<Edge> getForbiddenEdges(List<String> rnodeIDs) throws DataBaseException {
-        ArrayList<Edge> edges = new ArrayList<Edge>();
         String query = QueryGenerator.createSimpleInQuery(
             this.baseDatabaseName + "_BN.Path_Forbidden_Edges",
             "RChain",
@@ -83,22 +107,25 @@ public class MySQLFactorBaseDataBase implements FactorBaseDataBase {
         );
 
         try (PreparedStatement st = this.baseConnection.prepareStatement(query)) {
-            ResultSet results = st.executeQuery();
-
-            while (results.next()) {
-                // Remove the backticks when creating edges so that they match the names in the CSV
-                // file that gets generated.
-                edges.add(
-                    new Edge(
-                        results.getString("parent").replace("`", ""),
-                        results.getString("child").replace("`", "")
-                    )
-                );
-            }
-
-            return edges;
+            return extractEdges(st);
         } catch (SQLException e) {
             throw new DataBaseException("Failed to retrieve the forbidden edges.", e);
+        }
+    }
+
+
+    @Override
+    public List<Edge> getRequiredEdges(List<String> rnodeIDs) throws DataBaseException {
+        String query = QueryGenerator.createSimpleInQuery(
+            this.baseDatabaseName + "_BN.Path_Required_Edges",
+            "RChain",
+            rnodeIDs
+        );
+
+        try (PreparedStatement st = this.baseConnection.prepareStatement(query)) {
+            return extractEdges(st);
+        } catch (SQLException e) {
+            throw new DataBaseException("Failed to retrieve the required edges.", e);
         }
     }
 }
