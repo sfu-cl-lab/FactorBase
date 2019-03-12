@@ -10,6 +10,7 @@ import nu.xom.Builder;
 import nu.xom.Document;
 import nu.xom.Element;
 import nu.xom.Elements;
+import ca.sfu.cs.factorbase.graph.Edge;
 import edu.cmu.tetrad.data.DataReader;
 import edu.cmu.tetrad.data.DataSet;
 import edu.cmu.tetrad.data.DelimiterType;
@@ -29,7 +30,12 @@ public class BayesNet_Learning_main {
     }
 
 
-    public static void tetradLearner(String srcfile, String required, String forbidden, String destfile) throws Exception {
+    public static void tetradLearner(
+        String srcfile,
+        String required,
+        List<Edge> forbiddenEdges,
+        String destfile
+    ) throws Exception {
         DataSet dataset = null;
 
         File src = new File(srcfile);
@@ -61,24 +67,10 @@ public class BayesNet_Learning_main {
             }
         }
 
-        /* load forbidden knowledge */
-        if (forbidden != null) {
-            Builder xmlParser = new Builder();
-            Document doc = xmlParser.build(new File(forbidden));
-            Element root = doc.getRootElement();
-            root = root.getFirstChildElement("NETWORK");
-            Elements forbiddenEdges = root.getChildElements("DEFINITION");
-
-            for (int i = 0; i < forbiddenEdges.size(); i++) {
-                Element node = forbiddenEdges.get(i);
-                Element child = node.getFirstChildElement("FOR");
-                Elements parents = node.getChildElements("GIVEN");
-                for (int j = 0; j < parents.size(); j++) {
-                    Element parent = parents.get(j);
-                    String childStr = child.getValue();
-                    String parentStr = parent.getValue();
-                    knowledge.setEdgeForbidden(parentStr, childStr, true);
-                }
+        // Load forbidden edge knowledge.
+        if (forbiddenEdges != null) {
+            for (Edge edge : forbiddenEdges) {
+                knowledge.setEdgeForbidden(edge.getParent(), edge.getChild(), true);
             }
         }
 

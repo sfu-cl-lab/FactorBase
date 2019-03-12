@@ -51,7 +51,7 @@ public class RunBB {
         CSVPrecomputor.runCSV();
         logger.info("CSV files are generated.");
         logger.info("*********************************************************");
-        BayesBaseH.runBBH();
+        BayesBaseH.runBBH(factorBaseDatabase);
         logger.info("\nFinish running BayesBaseH.");
         logger.info("*********************************************************");
 

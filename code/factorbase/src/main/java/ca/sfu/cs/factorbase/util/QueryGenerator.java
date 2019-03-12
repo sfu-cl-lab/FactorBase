@@ -3,6 +3,7 @@ package ca.sfu.cs.factorbase.util;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.StringJoiner;
 
 /**
  * Class to generate queries used by FactorBase.
@@ -54,5 +55,31 @@ public final class QueryGenerator {
                 "FROM " + tableB + " " +
                 "WHERE " + whereClauseJoin +
             ")";
+    }
+
+    /**
+     * Generates a MySQL SELECT String that returns the items for the specified table that have a column
+     * value that matches at least one of the items in the given list of Strings {@code inItems}.
+     *
+     * @param tableName - the table to search for matching values.
+     * @param columnName - the column to match the values on.
+     * @param inItems - the values for a row to be considered a match.
+     * @return a String that returns the rows that have values in the column specified by {@code columnName}
+     *         match any of the values in {@code inItems}.
+     */
+    public static String createSimpleInQuery(String tableName, String columnName, List<String> inItems) {
+        StringBuilder builder = new StringBuilder("SELECT * ");
+        builder.append("FROM ").append(tableName).append(" ");
+        builder.append("WHERE ").append(columnName).append(" IN (");
+        StringJoiner quotedCSV = new StringJoiner("\",\"", "\"", "\"");
+
+        for (String item : inItems) {
+            quotedCSV.add(item);
+        }
+
+        builder.append(quotedCSV.toString());
+        builder.append(")");
+
+        return builder.toString();
     }
 }

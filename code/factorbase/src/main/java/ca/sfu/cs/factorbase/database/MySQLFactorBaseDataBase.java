@@ -2,13 +2,19 @@ package ca.sfu.cs.factorbase.database;
 
 import java.io.IOException;
 import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.text.MessageFormat;
+import java.util.ArrayList;
+import java.util.List;
 
 import ca.sfu.cs.common.Configuration.Config;
 import ca.sfu.cs.factorbase.exception.DataBaseException;
+import ca.sfu.cs.factorbase.graph.Edge;
 import ca.sfu.cs.factorbase.tables.KeepTablesOnly;
 import ca.sfu.cs.factorbase.util.BZScriptRunner;
+import ca.sfu.cs.factorbase.util.QueryGenerator;
 
 import com.mysql.jdbc.Connection;
 
@@ -63,6 +69,36 @@ public class MySQLFactorBaseDataBase implements FactorBaseDataBase {
             );
         } catch (SQLException e) {
             throw new DataBaseException("An error occurred when attempting to cleanup the database for FactorBase.", e);
+        }
+    }
+
+
+    @Override
+    public List<Edge> getForbiddenEdges(List<String> rnodeIDs) throws DataBaseException {
+        ArrayList<Edge> edges = new ArrayList<Edge>();
+        String query = QueryGenerator.createSimpleInQuery(
+            this.baseDatabaseName + "_BN.Path_Forbidden_Edges",
+            "RChain",
+            rnodeIDs
+        );
+
+        try (PreparedStatement st = this.baseConnection.prepareStatement(query)) {
+            ResultSet results = st.executeQuery();
+
+            while (results.next()) {
+                // Remove the backticks when creating edges so that they match the names in the CSV
+                // file that gets generated.
+                edges.add(
+                    new Edge(
+                        results.getString("parent").replace("`", ""),
+                        results.getString("child").replace("`", "")
+                    )
+                );
+            }
+
+            return edges;
+        } catch (SQLException e) {
+            throw new DataBaseException("Failed to retrieve the forbidden edges.", e);
         }
     }
 }
