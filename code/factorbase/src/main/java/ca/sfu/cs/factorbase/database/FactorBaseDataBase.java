@@ -36,4 +36,15 @@ public interface FactorBaseDataBase {
      * @throws DataBaseException if an error occurs when attempting to retrieve the information.
      */
     List<Edge> getForbiddenEdges(List<String> rnodeIDs) throws DataBaseException;
+
+
+    /**
+     * Retrieve all the edges that are required for the given rnode IDs.
+     *
+     * @param rnodeIDs - a list of the rnode IDs to get the required edges for.
+     * @return a List of the edges that are required for the given rnode IDs.
+     *
+     * @throws DataBaseException if an error occurs when attempting to retrieve the information.
+     */
+    List<Edge> getRequiredEdges(List<String> rnodeIDs) throws DataBaseException;
 }

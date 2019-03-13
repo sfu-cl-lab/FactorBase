@@ -247,7 +247,6 @@ public class BayesBaseH {
 
         if (FirstRunning==1) {
             new File(databaseName + "/" + File.separator).mkdirs();
-            new File(databaseName + "/" + File.separator + "kno" + File.separator).mkdirs();
             new File(databaseName + "/" + File.separator + "res" + File.separator).mkdirs();
             new File(databaseName + "/" + File.separator + "xml" + File.separator).mkdirs();
         }
@@ -367,11 +366,8 @@ public class BayesBaseH {
         for(int len = 1; len <= maxNumberOfMembers; len++) {
             ArrayList<String> rnode_ids = readRNodesFromLattice(len); // Create csv files for all rnodes.
 
-            // Required edges.
-            for(String id : rnode_ids) { // rchain
-                logger.fine("\n !!!!Starting to Export the Required Edges to " + id.replace("`","") +  "_req.xml \n");
-                BIFExport.Export(databaseName + "/" + File.separator + "kno" + File.separator + id.replace("`","") + "_req.xml", "Rchain", "Path_Required_Edges", id, con2);
-            }
+            // Retrieve the required edge information.
+            List<Edge> requiredEdges = database.getRequiredEdges(rnode_ids);
 
             // Retrieve the forbidden edge information.
             List<Edge> forbiddenEdges = database.getForbiddenEdges(rnode_ids);
@@ -401,7 +397,7 @@ public class BayesBaseH {
                 if(Integer.parseInt(NoTuples) > 1) {
                     BayesNet_Learning_main.tetradLearner(
                         databaseName + "/" + File.separator + "csv" + File.separator + id.replace("`","") + ".csv",
-                        databaseName + "/" + File.separator + "kno" + File.separator + id.replace("`","") + "_req.xml",
+                        requiredEdges,
                         forbiddenEdges,
                         databaseName + "/" + File.separator + "xml" + File.separator + id.replace("`","") + ".xml"
                     );
