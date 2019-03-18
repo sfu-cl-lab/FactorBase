@@ -16,7 +16,6 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -33,31 +32,10 @@ import com.mysql.jdbc.ResultSetMetaData;
 
 */
 public class Sort_merge3 {
-	static Connection con;
 	final static String database = "sort_merge";
 	
 	private static Logger logger = Logger.getLogger(Sort_merge3.class.getName());
 
-	public static void main(String[] args) throws SQLException, IOException {
-		
-		connectDB();
-		
-		String table1="a2_0_star";
-		String table2="a2_0_flat";
-		String table3="final_table_csv";
-		
-		long time1=System.currentTimeMillis();
-		
-		sort_merge(table1,table2,table3,con);
-		
-		long time2=System.currentTimeMillis();
-		
-		logger.info("total time:"+(time2-time1));
-		if(compare_tables(table3,"a2_0_false",con))
-			logger.fine("true");
-		else
-			logger.fine("false");
-	}
 	
 	 public static void sort_merge(String table1,String table2, String table3, Connection conn) throws SQLException, IOException{
 		 //logger.fine("sort merge version 3");
@@ -229,84 +207,4 @@ public class Sort_merge3 {
 			 }
 			 
 }
-	 
-	 public static boolean compare_tables(String table1 , String table2,Connection conn) throws SQLException{
-			
-			
-			
-			
-			java.sql.Statement st1=conn.createStatement();
-			java.sql.Statement st2=conn.createStatement();
-			
-			
-			ResultSet rst1=st1.executeQuery("show columns from "+table1);
-			ResultSet rst2=st2.executeQuery("show columns from "+table2);
-			ArrayList<String> list1=new ArrayList<String>();
-			ArrayList<String> list2=new ArrayList<String>();
-			while(rst1.next()){
-			list1.add(rst1.getString(1));
-			}
-			while(rst2.next()){
-				list2.add(rst2.getString(1));
-				}
-			if(list1.size()!=list2.size()){
-				logger.fine("not equal number of columns in "+table1+" and "+table2);
-				return false;
-			}
-			
-				for(int i=0;i<list1.size();i++){
-				if(!list1.get(i).equals(list2.get(i))){
-				logger.fine(list1.get(i)+" "+list2.get(i));	
-				logger.fine("coulumns are not same or their order is not same");
-				return false;
-			}
-				}
-			rst1.absolute(1);
-			String order=rst1.getString(1);
-			while(rst1.next()){
-				order=order+" , `"+rst1.getString(1)+"`";
-			}
-			
-			 int size1=0;
-			 int size2=0;
-		     rst1=st1.executeQuery("select distinct * from "+table1+" order by "+order+" ;" );
-		     rst2=st2.executeQuery("select distinct * from "+table2+ " order by "+order+" ;");	
-		     while(rst1.next())size1++;
-		     while(rst2.next())size2++;
-		     if(size1!=size2)
-		    	 logger.fine("not equal no. of rows in both the tables");
-		     
-		     rst1.beforeFirst();
-		     rst2.beforeFirst();
-		     
-		     while(rst1.next()&&rst2.next()){
-		     String temp1="",temp2="";
-		    	
-		    for(int i=1;i<=list1.size();i++)
-		    {
-			temp1=temp1+rst1.getString(i);
-			temp2=temp2+rst2.getString(i);
-		    }
-			if(!temp1.equals(temp2)){
-				logger.fine("tables not equal");
-				return false;
-			  }
-		    }
-		
-		     
-		     
-	   logger.fine("tables are equal");
-	   return true;
-	 }
-	
-	
-	public static void connectDB() throws SQLException {
-        String CONN_STR = "jdbc:mysql://kripke.cs.sfu.ca/"+database;
-        try {
-            Class.forName("com.mysql.jdbc.Driver");
-        } catch (Exception ex) {
-            logger.severe("Unable to load MySQL JDBC driver");
-        }
-        con = (Connection) DriverManager.getConnection(CONN_STR, "root", "alibz");
-    }
 }
