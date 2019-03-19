@@ -4,6 +4,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
 
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -51,6 +52,7 @@ public class QueryGeneratorTest {
         st = null;
     }
 
+
     @Test
     public void createDifferenceQuery_ReturnsCorrectResults() throws SQLException {
         String query = QueryGenerator.createDifferenceQuery(
@@ -90,6 +92,7 @@ public class QueryGeneratorTest {
         rs.close();
     }
 
+
     @Test
     public void createSimpleInQuery_ReturnsCorrectResults_WhenSingleMatch() throws SQLException {
         String query = QueryGenerator.createSimpleInQuery(
@@ -107,6 +110,7 @@ public class QueryGeneratorTest {
 
         rs.close();
     }
+
 
     @Test
     public void createSimpleInQuery_ReturnsCorrectResults_WhenMultipleMatches() throws SQLException {
@@ -137,5 +141,38 @@ public class QueryGeneratorTest {
         assertThat(count, equalTo(3));
 
         rs.close();
+    }
+
+
+    @Test
+    public void createSimplePreparedInsertQuery_ReturnsCorrectResults() throws SQLException {
+        String query = QueryGenerator.createSimplePreparedInsertQuery("test_inserts", 3);
+
+        PreparedStatement ps = db.con.prepareStatement(query);
+
+        addToBatch(ps, 1, "text input", true);
+        addToBatch(ps, 2, "more input", false);
+
+        int[] results = ps.executeBatch();
+
+        assertThat(results.length, equalTo(2));
+    }
+
+
+    /**
+     * Helper method to add queries to a prepared statement that will be executed as a batch.
+     *
+     * @param ps - PreparedStatement to add a query to.
+     * @param intValue - the Integer value to set for the query.
+     * @param strValue - the string value to set for the query.
+     * @param boolValue - the Boolean value to set for the query.
+     * @throws SQLException if adding to the batch fails.
+     */
+    private void addToBatch(PreparedStatement ps, int intValue, String strValue, boolean boolValue) throws SQLException {
+        ps.setInt(1, intValue);
+        ps.setString(2, strValue);
+        ps.setBoolean(3, boolValue);
+        ps.addBatch();
+        ps.clearParameters();
     }
 }

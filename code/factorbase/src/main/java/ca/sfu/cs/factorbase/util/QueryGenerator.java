@@ -18,6 +18,7 @@ public final class QueryGenerator {
     private QueryGenerator() {
     }
 
+
     /**
      * Generate the String used to join rows between tableA and tableB.
      *
@@ -35,6 +36,7 @@ public final class QueryGenerator {
 
         return String.join(" AND ", conditions);
     }
+
 
     /**
      * Generates a MySQL SELECT String that returns the items in tableA that are not in tableB.
@@ -56,6 +58,7 @@ public final class QueryGenerator {
                 "WHERE " + whereClauseJoin +
             ")";
     }
+
 
     /**
      * Generates a MySQL SELECT String that returns the items for the specified table that have a column
@@ -79,6 +82,31 @@ public final class QueryGenerator {
 
         builder.append(quotedCSV.toString());
         builder.append(")");
+
+        return builder.toString();
+    }
+
+
+    /**
+     * Generates a MySQL INSERT String for a PreparedStatement that inserts into the given table with the
+     * specified number of columns.
+     *
+     * @param tableName - the table to insert the values into.
+     * @param numberOfColumns - the number of columns for each row in the given table.
+     * @return a String that can be used in a PreparedStatement to insert values into the specified table.
+     */
+    public static String createSimplePreparedInsertQuery(String tableName, int numberOfColumns) {
+        StringBuilder builder = new StringBuilder("INSERT INTO ");
+        builder.append(tableName);
+        builder.append(" VALUES (");
+
+        StringJoiner questionMarkCSV = new StringJoiner(",");
+        for (int i = 0; i < numberOfColumns; i++) {
+            questionMarkCSV.add("?");
+        }
+
+        builder.append(questionMarkCSV.toString());
+        builder.append(");");
 
         return builder.toString();
     }

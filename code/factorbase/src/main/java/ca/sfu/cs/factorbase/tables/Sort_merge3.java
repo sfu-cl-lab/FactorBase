@@ -18,6 +18,7 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -26,6 +27,8 @@ import java.util.logging.Logger;
 
 import com.mysql.jdbc.Connection;
 import com.mysql.jdbc.ResultSetMetaData;
+
+import ca.sfu.cs.factorbase.util.QueryGenerator;
 
 /**
  * Sort merge version3
@@ -37,16 +40,6 @@ public class Sort_merge3 {
 
     public static void sort_merge(String table1, String table2, String table3, Connection conn) throws SQLException, IOException {
         logger.info("\nGenerating false table by Subtraction using Sort_merge, cur_false_Table is: " + table3);
-
-        // !!!!!!!!!!!!!!!!! Remember to change the path and file name.
-        File ftemp = new File("sort_merge.csv");
-        if(ftemp.exists()) {
-            ftemp.delete();
-        }
-
-        File file = new File("sort_merge.csv");
-        BufferedWriter output = new BufferedWriter(new FileWriter(file));
-
         Statement st1 = conn.createStatement();
         Statement st2 = conn.createStatement();
 
@@ -105,6 +98,11 @@ public class Sort_merge3 {
             int j = 1;
             rst1.absolute(1);
             rst2.absolute(1);
+
+            PreparedStatement ps = conn.prepareStatement(
+                QueryGenerator.createSimplePreparedInsertQuery(table3, no_of_colmns)
+            );
+
             long time3 = System.currentTimeMillis();
 
             // Merging starting here.
@@ -130,12 +128,13 @@ public class Sort_merge3 {
                     }
 
                     if(val1 < val2) {
-                        String quer = rst1.getString(1);
-                        for(int c = 2; c <= no_of_colmns; c++) {
-                            quer = quer + "$" + rst1.getString(c);
+                        for(int c = 1; c <= no_of_colmns; c++) {
+                            ps.setString(c, rst1.getString(c));
                         }
 
-                        output.write((quer) + "\n");
+                        ps.addBatch();
+                        ps.clearParameters();
+
                         i++;
                         break;
                     } else if(val1 > val2) {
@@ -146,13 +145,14 @@ public class Sort_merge3 {
 
                 if(val1 == val2) {
 //                    String query = "" + (Integer.parseInt(rst1.getString(1)) - Integer.parseInt(rst2.getString(1)));
-                    String query = "" + (Long.parseLong(rst1.getString(1)) - Long.parseLong(rst2.getString(1)));
+                    ps.setInt(1, rst1.getInt(1) - rst2.getInt(1));
 
                     for(int c = 2; c <= no_of_colmns; c++) {
-                        query = query + "$" + rst1.getString(c);
+                        ps.setString(c, rst1.getString(c));
                     }
 
-                    output.write(query+"\n");
+                    ps.addBatch();
+                    ps.clearParameters();
                     i++;
                     j++;
                 }
@@ -168,20 +168,20 @@ public class Sort_merge3 {
             }
 
             while(rst1.next()) {
-                String query = rst1.getString(1);
+                ps.setInt(1, rst1.getInt(1));
                 for(int c = 2; c <= no_of_colmns; c++) {
-                    query = query + "$" + rst1.getString(c);
+                    ps.setString(c, rst1.getString(c));
                 }
 
-                output.write((query) + "\n");
+                ps.addBatch();
+                ps.clearParameters();
             }
 
-            output.close();
             long time4 = System.currentTimeMillis();
 //            System.out.print("\t insert time: " + (time4 - time3));
             st2.execute("DROP TABLE IF EXISTS " + table3 + ";");
             st2.execute("CREATE TABLE " + table3 + " SELECT * FROM " + table1 + " LIMIT 0;");
-            st2.execute("LOAD DATA LOCAL INFILE 'sort_merge.csv' INTO TABLE " + table3 + " FIELDS TERMINATED BY '$' LINES TERMINATED BY '\\n';");
+            ps.executeBatch();
 
             rst1.close();
             rst2.close();
@@ -191,11 +191,6 @@ public class Sort_merge3 {
             long time5 = System.currentTimeMillis();
 //            System.out.print("\t export csv file to sql: " + (time5 - time4));
             logger.info("\ntotal time: " + (time5 - time1) + "\n");
-
-            // Delete the csv file, zqian.
-            if(ftemp.exists()) {
-                ftemp.delete();
-            }
         } else { // Aug 18, 2014 zqian: Handle the extreme case when there's only `mult` column.
             logger.fine("\n \t Handle the extreme case when there's only `mult` column \n");
             st2.execute("DROP TABLE IF EXISTS " + table3 + ";");

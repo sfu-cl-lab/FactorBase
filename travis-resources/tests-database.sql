@@ -121,6 +121,29 @@ LOCK TABLES `t2` WRITE;
 INSERT INTO `t2` VALUES ('B',NULL,NULL),('C',1,2),('Jack',3,1),('Kim2',2,NULL);
 /*!40000 ALTER TABLE `t2` ENABLE KEYS */;
 UNLOCK TABLES;
+
+--
+-- Table structure for table `test_inserts`
+--
+
+DROP TABLE IF EXISTS `test_inserts`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `test_inserts` (
+  `int_col` int(11) DEFAULT NULL,
+  `str_col` varchar(32) DEFAULT NULL,
+  `bool_col` tinyint(1) DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `test_inserts`
+--
+
+LOCK TABLES `test_inserts` WRITE;
+/*!40000 ALTER TABLE `test_inserts` DISABLE KEYS */;
+/*!40000 ALTER TABLE `test_inserts` ENABLE KEYS */;
+UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
 /*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
