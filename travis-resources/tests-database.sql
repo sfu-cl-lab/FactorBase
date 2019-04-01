@@ -1,8 +1,8 @@
--- MySQL dump 10.13  Distrib 5.1.73, for redhat-linux-gnu (x86_64)
+-- MySQL dump 10.13  Distrib 5.6.41, for Linux (x86_64)
 --
 -- Host: localhost    Database: tests-database
 -- ------------------------------------------------------
--- Server version	5.1.73
+-- Server version	5.6.41
 
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
 /*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
@@ -22,6 +22,54 @@
 CREATE DATABASE /*!32312 IF NOT EXISTS*/ `tests-database` /*!40100 DEFAULT CHARACTER SET latin1 */;
 
 USE `tests-database`;
+
+--
+-- Table structure for table `sort-merge-t1`
+--
+
+DROP TABLE IF EXISTS `sort-merge-t1`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `sort-merge-t1` (
+  `MULT` int(11) DEFAULT NULL,
+  `attr1` varchar(6) DEFAULT NULL,
+  `attr2` varchar(6) DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `sort-merge-t1`
+--
+
+LOCK TABLES `sort-merge-t1` WRITE;
+/*!40000 ALTER TABLE `sort-merge-t1` DISABLE KEYS */;
+INSERT INTO `sort-merge-t1` VALUES (10000,'match1','match2'),(1000,'match3','match4'),(100,'match1','miss1'),(10,'miss1','match1'),(1,'miss1','miss2');
+/*!40000 ALTER TABLE `sort-merge-t1` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `sort-merge-t2`
+--
+
+DROP TABLE IF EXISTS `sort-merge-t2`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `sort-merge-t2` (
+  `MULT` int(11) DEFAULT NULL,
+  `attr1` varchar(6) DEFAULT NULL,
+  `attr2` varchar(6) DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `sort-merge-t2`
+--
+
+LOCK TABLES `sort-merge-t2` WRITE;
+/*!40000 ALTER TABLE `sort-merge-t2` DISABLE KEYS */;
+INSERT INTO `sort-merge-t2` VALUES (5,'match1','match2'),(4,'match3','match4'),(3,'match1','miss2'),(2,'miss2','match1'),(1,'miss2','miss1');
+/*!40000 ALTER TABLE `sort-merge-t2` ENABLE KEYS */;
+UNLOCK TABLES;
 
 --
 -- Table structure for table `t1`
@@ -83,4 +131,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2018-08-16  0:19:17
+-- Dump completed on 2019-04-01 18:02:31
