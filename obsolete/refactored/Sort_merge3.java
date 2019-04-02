@@ -56,15 +56,19 @@ public class Sort_merge3 {
         /**
          * Code for getting the ORDER BY sequence using TABLE1, IT DOES NOT MATTER WHICH TABLE WE USE AS BOTH TABLES HAVE SAME COLUMNS.
          */
-        ResultSet rst = st1.executeQuery(
-            "SHOW COLUMNS FROM " + table1 +
-            "WHERE field <> \"MULT\";"
-        );
+        ResultSet rst = st1.executeQuery("SHOW COLUMNS FROM " + table1 + ";");
 
         while(rst.next()) {
             orderList.add("`" + rst.getString(1) + "`");
         }
         rst.close();
+
+        for(int i = 0; i < orderList.size(); i++) { // zqian, do not need this for loop, just filter the sql query by add condition clause: where field not like '%mult%'.
+            if((orderList.get(i)).contains("MULT")) {
+                orderList.remove(i);
+                break;
+            }
+        }
 
         if (orderList.size() > 0) {
             order = " " + orderList.get(0) + " ";
