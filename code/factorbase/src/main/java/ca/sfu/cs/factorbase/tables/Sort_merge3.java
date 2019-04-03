@@ -19,6 +19,8 @@ import java.io.IOException;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.StringJoiner;
 import java.util.logging.Logger;
 
 import com.mysql.jdbc.Connection;
@@ -70,101 +72,40 @@ public class Sort_merge3 {
             // and then load these files into memory?
             long time1 = System.currentTimeMillis();
             logger.info("\n rst1: " + "SELECT DISTINCT MULT, " + order + " FROM " + table1 + " ORDER BY " + order + ";");
-            ResultSet rst1 = st1.executeQuery("SELECT DISTINCT MULT, " + order + " FROM " + table1 + " ORDER BY " + order + ";");
-            ResultSet rst2 = st2.executeQuery("SELECT DISTINCT MULT, " + order + " FROM " + table2 + " ORDER BY " + order + ";");
+            ResultSet rst1 = st1.executeQuery("SELECT DISTINCT MULT, " + order + " FROM " + table1 + ";");
+            ResultSet rst2 = st2.executeQuery("SELECT DISTINCT MULT, " + order + " FROM " + table2 + ";");
             long time2 = System.currentTimeMillis();
 //            System.out.print("order by time: " + (time2 - time1));
-
-            // Finding the no. of rows in each table.
-            int size1 = 0;
-            int size2 = 0;
-
-            while(rst1.next()) {
-                size1++;
-            }
-
-            while(rst2.next()) {
-                size2++;
-            }
 
             // Finding the no of columns in a table.
             ResultSetMetaData rsmd = (ResultSetMetaData) rst1.getMetaData(); // DO NOT need to run another query, it should be orderList.size() + 1, zqian.
             int no_of_colmns = rsmd.getColumnCount();
 
-            // Index variables for both tables.
-            int i = 1;
-            int j = 1;
-            rst1.absolute(1);
-            rst2.absolute(1);
             long time3 = System.currentTimeMillis();
 
             // Merging starting here.
-            while(i <= size1 && j <= size2) {
-                long val1 = 0;
-                long val2 = 0;
-
-                for(int k = 2; k <= no_of_colmns; k++) {
-                    try {
-//                        val1 = Integer.parseInt(rst1.getString(k));
-//                        val2 = Integer.parseInt(rst2.getString(k));
-                        val1 = Long.parseLong(rst1.getString(k));
-                        val2 = Long.parseLong(rst2.getString(k));
-                    } catch(java.lang.NumberFormatException e) {
-                    } finally {
-                        if(rst1.getString(k).compareTo(rst2.getString(k)) > 0) {
-                            val1 = 1;
-                            val2 = 0;
-                        } else if(rst1.getString(k).compareTo(rst2.getString(k)) < 0) {
-                            val1 = 0;
-                            val2 = 1;
-                        }
-                    }
-
-                    if(val1 < val2) {
-                        String quer = rst1.getString(1);
-                        for(int c = 2; c <= no_of_colmns; c++) {
-                            quer = quer + "$" + rst1.getString(c);
-                        }
-
-                        builder.append(quer + "\n");
-                        i++;
-                        break;
-                    } else if(val1 > val2) {
-                        j++;
-                        break;
-                    }
-                }
-
-                if(val1 == val2) {
-//                    String query = "" + (Integer.parseInt(rst1.getString(1)) - Integer.parseInt(rst2.getString(1)));
-                    String query = "" + (Long.parseLong(rst1.getString(1)) - Long.parseLong(rst2.getString(1)));
-
-                    for(int c = 2; c <= no_of_colmns; c++) {
-                        query = query + "$" + rst1.getString(c);
-                    }
-
-                    builder.append(query + "\n");
-                    i++;
-                    j++;
-                }
-
-                rst1.absolute(i);
-                rst2.absolute(j);
-            }
-
-            if(i > 1) {
-                rst1.absolute(i-1);
-            } else {
-                rst1.beforeFirst();
-            }
-
-            while(rst1.next()) {
-                String query = rst1.getString(1);
+            HashMap<String, Long> counts = new HashMap<String, Long>();
+            while (rst2.next()) {
+                StringJoiner rowData = new StringJoiner("$");
                 for(int c = 2; c <= no_of_colmns; c++) {
-                    query = query + "$" + rst1.getString(c);
+                    rowData.add(rst2.getString(c));
                 }
 
-                builder.append(query + "\n");
+                counts.put(rowData.toString(), rst2.getLong(1));
+            }
+
+            while (rst1.next()) {
+                StringJoiner rowData = new StringJoiner("$");
+                for(int c = 2; c <= no_of_colmns; c++) {
+                    rowData.add(rst1.getString(c));
+                }
+
+                Long count = counts.get(rowData.toString());
+                if (count == null) {
+                    builder.append(String.valueOf(rst1.getLong(1)) + "$" + rowData.toString() + "\n");
+                } else {
+                    builder.append(String.valueOf(rst1.getLong(1) - count) + "$" + rowData.toString() + "\n");
+                }
             }
 
             long time4 = System.currentTimeMillis();
