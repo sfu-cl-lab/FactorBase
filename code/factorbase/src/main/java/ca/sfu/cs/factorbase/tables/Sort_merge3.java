@@ -73,14 +73,6 @@ public class Sort_merge3 {
                 order = order + ", " + orderList.get(i);
             }
 
-            String temp = "MULT decimal ";
-            for(int i = 0; i < orderList.size(); i++) {
-                temp = temp + ", " + orderList.get(i) + " VARCHAR(45)";
-            }
-
-            st1.execute("DROP TABLE IF EXISTS " + table3 + ";");
-            st1.execute("CREATE TABLE " + table3 + " (" + temp + ");");
-
             // Code for merging the two tables.
             // BottleNeck, MOST expensive query for large table, more than 16 columns, zqian.
             // SELECT * INTO OUTFILE '/tmp/result.txt'; // Here the files are stored on the Server Side
