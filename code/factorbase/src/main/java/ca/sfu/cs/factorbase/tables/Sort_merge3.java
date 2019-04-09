@@ -73,14 +73,6 @@ public class Sort_merge3 {
                 order = order + ", " + orderList.get(i);
             }
 
-            String temp = "MULT decimal ";
-            for(int i = 0; i < orderList.size(); i++) {
-                temp = temp + ", " + orderList.get(i) + " VARCHAR(45)";
-            }
-
-            st1.execute("DROP TABLE IF EXISTS " + table3 + ";");
-            st1.execute("CREATE TABLE " + table3 + " (" + temp + ");");
-
             // Code for merging the two tables.
             // BottleNeck, MOST expensive query for large table, more than 16 columns, zqian.
             // SELECT * INTO OUTFILE '/tmp/result.txt'; // Here the files are stored on the Server Side
@@ -188,7 +180,7 @@ public class Sort_merge3 {
             long time4 = System.currentTimeMillis();
 //            System.out.print("\t insert time: " + (time4 - time3));
             st2.execute("DROP TABLE IF EXISTS " + table3 + ";");
-            st2.execute("CREATE TABLE " + table3 + " LIKE " + table1 + ";");
+            st2.execute("CREATE TABLE " + table3 + " SELECT * FROM " + table1 + " LIMIT 0;");
             st2.execute("LOAD DATA LOCAL INFILE 'sort_merge.csv' INTO TABLE " + table3 + " FIELDS TERMINATED BY '$' LINES TERMINATED BY '\\n';");
 
             rst1.close();
@@ -207,7 +199,7 @@ public class Sort_merge3 {
         } else { // Aug 18, 2014 zqian: Handle the extreme case when there's only `mult` column.
             logger.fine("\n \t Handle the extreme case when there's only `mult` column \n");
             st2.execute("DROP TABLE IF EXISTS " + table3 + ";");
-            st2.execute("CREATE TABLE " + table3 + " LIKE " + table1 + ";");
+            st2.execute("CREATE TABLE " + table3 + " SELECT * FROM " + table1 + " LIMIT 0;");
             logger.fine("INSERT INTO " + table3 + " SELECT (" + table1 + ".mult - " + table2 + ".mult) AS mult FROM " + table1 + ", " + table2 + ";");
             st2.execute("INSERT INTO " + table3 + " SELECT (" + table1 + ".mult - " + table2 + ".mult) AS mult FROM " + table1 + ", " + table2 + ";");
         }
