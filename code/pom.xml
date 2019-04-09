@@ -9,6 +9,7 @@
   <url>https://github.com/sfu-cl-lab/FactorBase</url>
   <modules>
     <module>common</module>
+    <module>componentsrunner</module>
     <module>factorbase</module>
     <module>mlnexporter</module>
   </modules>
