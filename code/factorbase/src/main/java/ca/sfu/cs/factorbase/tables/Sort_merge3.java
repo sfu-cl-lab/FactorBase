@@ -14,18 +14,16 @@ package ca.sfu.cs.factorbase.tables;
  * false: mult1-mult2 ?
  * try: Financial_std_Training1_db.`operation(trans0)_a_star`
  */
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileWriter;
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.logging.Logger;
 
 import com.mysql.jdbc.Connection;
 import com.mysql.jdbc.ResultSetMetaData;
+import com.mysql.jdbc.Statement;
 
 /**
  * Sort merge version3
@@ -38,17 +36,10 @@ public class Sort_merge3 {
     public static void sort_merge(String table1, String table2, String table3, Connection conn) throws SQLException, IOException {
         logger.info("\nGenerating false table by Subtraction using Sort_merge, cur_false_Table is: " + table3);
 
-        // !!!!!!!!!!!!!!!!! Remember to change the path and file name.
-        File ftemp = new File("sort_merge.csv");
-        if(ftemp.exists()) {
-            ftemp.delete();
-        }
+        StringBuilder builder = new StringBuilder();
 
-        File file = new File("sort_merge.csv");
-        BufferedWriter output = new BufferedWriter(new FileWriter(file));
-
-        Statement st1 = conn.createStatement();
-        Statement st2 = conn.createStatement();
+        Statement st1 = (Statement) conn.createStatement();
+        Statement st2 = (Statement) conn.createStatement();
 
         ArrayList<String> orderList = new ArrayList<String>();
         String order;
@@ -135,7 +126,7 @@ public class Sort_merge3 {
                             quer = quer + "$" + rst1.getString(c);
                         }
 
-                        output.write((quer) + "\n");
+                        builder.append(quer + "\n");
                         i++;
                         break;
                     } else if(val1 > val2) {
@@ -152,7 +143,7 @@ public class Sort_merge3 {
                         query = query + "$" + rst1.getString(c);
                     }
 
-                    output.write(query+"\n");
+                    builder.append(query + "\n");
                     i++;
                     j++;
                 }
@@ -173,14 +164,14 @@ public class Sort_merge3 {
                     query = query + "$" + rst1.getString(c);
                 }
 
-                output.write((query) + "\n");
+                builder.append(query + "\n");
             }
 
-            output.close();
             long time4 = System.currentTimeMillis();
 //            System.out.print("\t insert time: " + (time4 - time3));
             st2.execute("DROP TABLE IF EXISTS " + table3 + ";");
             st2.execute("CREATE TABLE " + table3 + " SELECT * FROM " + table1 + " LIMIT 0;");
+            st2.setLocalInfileInputStream(new ByteArrayInputStream(builder.toString().getBytes()));
             st2.execute("LOAD DATA LOCAL INFILE 'sort_merge.csv' INTO TABLE " + table3 + " FIELDS TERMINATED BY '$' LINES TERMINATED BY '\\n';");
 
             rst1.close();
@@ -191,11 +182,6 @@ public class Sort_merge3 {
             long time5 = System.currentTimeMillis();
 //            System.out.print("\t export csv file to sql: " + (time5 - time4));
             logger.info("\ntotal time: " + (time5 - time1) + "\n");
-
-            // Delete the csv file, zqian.
-            if(ftemp.exists()) {
-                ftemp.delete();
-            }
         } else { // Aug 18, 2014 zqian: Handle the extreme case when there's only `mult` column.
             logger.fine("\n \t Handle the extreme case when there's only `mult` column \n");
             st2.execute("DROP TABLE IF EXISTS " + table3 + ";");
