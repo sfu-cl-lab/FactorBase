@@ -48,14 +48,14 @@ public class Sort_merge3Test {
                 assertThat(attribute2, equalTo("match2"));
                 break;
             case 1:
-                assertThat(mult, equalTo(100));
-                assertThat(attribute1, equalTo("match1"));
-                assertThat(attribute2, equalTo("miss1"));
-                break;
-            case 2:
                 assertThat(mult, equalTo(996));
                 assertThat(attribute1, equalTo("match3"));
                 assertThat(attribute2, equalTo("match4"));
+                break;
+            case 2:
+                assertThat(mult, equalTo(100));
+                assertThat(attribute1, equalTo("match1"));
+                assertThat(attribute2, equalTo("miss1"));
                 break;
             case 3:
                 assertThat(mult, equalTo(10));
