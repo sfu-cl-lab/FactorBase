@@ -600,7 +600,7 @@ public class BayesBaseH {
             "select orig_rnid as RChain " +
             "from lattice_set " +
             "join lattice_mapping " +
-            "on lattice_set.name = lattice_mapping.short_rnid " +
+            "on lattice_set.name = lattice_mapping.orig_rnid " +
             "where lattice_set.length = 1;"
         );
 

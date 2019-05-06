@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
+import java.util.StringJoiner;
 import java.util.logging.Logger;
 
 import com.mysql.jdbc.Connection;
@@ -203,7 +204,7 @@ public class short_rnid_LatticeGenerator {
         for(String rnid : list_rnid) {
             // Splitting any Rchains into its components.
             String[] rnodes = rnid.substring(1, rnid.length() - 1).replace("),", ") ").split(" ");
-            String short_rnid = "";
+            StringJoiner shortRnidCSV = new StringJoiner(",");
 
             // for loop to find the short RNode ID of the components of any Rchains.
             for(String rnode : rnodes) {
@@ -213,15 +214,12 @@ public class short_rnid_LatticeGenerator {
                 ResultSet rst2 = st.executeQuery("SELECT short_rnid FROM LatticeRNodes WHERE orig_rnid = '" + rnode + "';");
                 rst2.absolute(1); // Moving the cursor to the first item in the results.
 
-                short_rnid = short_rnid + rst2.getString(1) + ",";
+                shortRnidCSV.add(rst2.getString(1));
             }
-
-            // Remove trailing comma (,).
-            short_rnid = short_rnid.substring(0, short_rnid.length() - 1);
 
             // Make sure that all the special characters are escaped properly by only having backticks flanking the
             // string.
-            short_rnid = short_rnid.replace("`", "");
+            String short_rnid = shortRnidCSV.toString().replace("`", "");
             short_rnid = "`" + short_rnid + "`";
 
             st.execute(
