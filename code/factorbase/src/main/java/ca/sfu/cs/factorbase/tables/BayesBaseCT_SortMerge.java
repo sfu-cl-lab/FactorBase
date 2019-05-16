@@ -1164,6 +1164,9 @@ public class BayesBaseCT_SortMerge {
         while(rs.next()&count<16){
 
                 String temp =rs.getString(colName);
+                if (temp.equals("MULT")) {
+                    continue;
+                }
                 temp= "`"+temp+"`";
             parts.add(temp+ " ASC");
             count ++;
