@@ -51,6 +51,7 @@ public class BayesBaseCT_SortMerge {
     private static String dbPassword;
     private static String dbaddress;
     private static String linkCorrelation;
+    private static long dbTemporaryTableSize;
     /*
      * cont is Continuous
      * ToDo: Refactor
@@ -244,6 +245,7 @@ public class BayesBaseCT_SortMerge {
         dbUsername = conf.getProperty("dbusername");
         dbPassword = conf.getProperty("dbpassword");
         dbaddress = conf.getProperty("dbaddress");
+        dbTemporaryTableSize = Math.round(1024 * 1024 * 1024 * Double.valueOf(conf.getProperty("dbtemporarytablesize")));
         linkCorrelation = conf.getProperty("LinkCorrelations");
         cont = conf.getProperty("Continuous");
     }
@@ -614,6 +616,9 @@ public class BayesBaseCT_SortMerge {
 
             String createString = "CREATE TABLE `" + shortRchain.replace("`", "") + "_counts`" + " AS " + queryString;
             logger.fine("create String : " + createString );
+
+            st3.execute("SET tmp_table_size = " + dbTemporaryTableSize + ";");
+            st3.executeQuery("SET max_heap_table_size = " + dbTemporaryTableSize + ";");
             st3.execute(createString);
 
             //adding  covering index May 21
