@@ -1,4 +1,4 @@
-package ca.sfu.cs.factorbase.tables;
+package ca.sfu.cs.factorbase.learning;
 
 /*zqian, April 1st, 2014 fixed the bug of too many connections by adding con4.close()*/
 
@@ -33,6 +33,7 @@ import org.apache.commons.lang.StringUtils;
 import ca.sfu.cs.common.Configuration.Config;
 import ca.sfu.cs.factorbase.lattice.short_rnid_LatticeGenerator;
 import ca.sfu.cs.factorbase.util.BZScriptRunner;
+import ca.sfu.cs.factorbase.util.Sort_merge3;
 
 import com.mysql.jdbc.Connection;
 import com.mysql.jdbc.exceptions.jdbc4.MySQLSyntaxErrorException;

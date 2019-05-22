@@ -12,8 +12,8 @@ import java.util.List;
 import ca.sfu.cs.common.Configuration.Config;
 import ca.sfu.cs.factorbase.exception.DataBaseException;
 import ca.sfu.cs.factorbase.graph.Edge;
-import ca.sfu.cs.factorbase.tables.KeepTablesOnly;
 import ca.sfu.cs.factorbase.util.BZScriptRunner;
+import ca.sfu.cs.factorbase.util.KeepTablesOnly;
 import ca.sfu.cs.factorbase.util.QueryGenerator;
 
 import com.mysql.jdbc.Connection;

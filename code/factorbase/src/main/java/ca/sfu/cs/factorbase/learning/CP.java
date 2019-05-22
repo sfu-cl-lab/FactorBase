@@ -1,4 +1,4 @@
-package ca.sfu.cs.factorbase.tables;
+package ca.sfu.cs.factorbase.learning;
 
 /** update the prior: zqian, June 23 2014
  * for FID who has parents the prior should be [sum(mult) group by FID ]/total_mult,

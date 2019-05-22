@@ -1,4 +1,4 @@
-package ca.sfu.cs.factorbase.tables;
+package ca.sfu.cs.factorbase.learning;
 
 import ca.sfu.cs.common.Configuration.Config;
 

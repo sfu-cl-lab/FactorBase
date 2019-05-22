@@ -1,4 +1,4 @@
-package ca.sfu.cs.factorbase.tables;
+package ca.sfu.cs.factorbase.util;
 
 /**
  * Aug 18, 2014. zqian
@@ -20,8 +20,6 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.logging.Logger;
 
-import ca.sfu.cs.factorbase.util.QueryGenerator;
-
 import com.mysql.jdbc.Connection;
 import com.mysql.jdbc.Statement;
 
@@ -35,8 +33,6 @@ public class Sort_merge3 {
 
     public static void sort_merge(String table1, String table2, String table3, Connection conn) throws SQLException, IOException {
         logger.info("\nGenerating false table by Subtraction using Sort_merge, cur_false_Table is: " + table3);
-
-        StringBuilder builder = new StringBuilder();
 
         Statement st1 = (Statement) conn.createStatement();
         Statement st2 = (Statement) conn.createStatement();

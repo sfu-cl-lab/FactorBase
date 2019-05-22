@@ -1,4 +1,4 @@
-package ca.sfu.cs.factorbase.tables;
+package ca.sfu.cs.factorbase.learning;
 
 /** zqian June 18, 2014
  * add the flag variable to tell if we use local ct or not.
