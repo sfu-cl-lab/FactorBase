@@ -36,8 +36,6 @@ public class Sort_merge3 {
     public static void sort_merge(String table1, String table2, String table3, Connection conn) throws SQLException, IOException {
         logger.info("\nGenerating false table by Subtraction using Sort_merge, cur_false_Table is: " + table3);
 
-        StringBuilder builder = new StringBuilder();
-
         Statement st1 = (Statement) conn.createStatement();
         Statement st2 = (Statement) conn.createStatement();
 
