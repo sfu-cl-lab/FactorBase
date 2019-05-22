@@ -1,4 +1,4 @@
-package ca.sfu.cs.factorbase.tables;
+package ca.sfu.cs.factorbase.util;
 
 /**
  * Aug 18, 2014. zqian
@@ -19,8 +19,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.logging.Logger;
-
-import ca.sfu.cs.factorbase.util.QueryGenerator;
 
 import com.mysql.jdbc.Connection;
 import com.mysql.jdbc.Statement;

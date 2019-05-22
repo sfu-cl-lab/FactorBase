@@ -11,6 +11,7 @@ import java.text.MessageFormat;
 
 import org.junit.Test;
 
+import ca.sfu.cs.factorbase.util.Sort_merge3;
 import testframework.TestDatabaseConnection;
 
 public class Sort_merge3Test {

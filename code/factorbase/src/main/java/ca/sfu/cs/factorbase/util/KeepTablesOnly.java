@@ -1,4 +1,4 @@
-package ca.sfu.cs.factorbase.tables;
+package ca.sfu.cs.factorbase.util;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
