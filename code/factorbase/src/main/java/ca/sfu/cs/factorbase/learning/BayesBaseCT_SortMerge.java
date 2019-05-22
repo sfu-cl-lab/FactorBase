@@ -1,4 +1,4 @@
-package ca.sfu.cs.factorbase.tables;
+package ca.sfu.cs.factorbase.learning;
 
 /*zqian, April 1st, 2014 fixed the bug of too many connections by adding con4.close()*/
 

@@ -1,4 +1,4 @@
-package ca.sfu.cs.factorbase.tables;
+package ca.sfu.cs.factorbase.learning;
 
 /**
  * updated on Feb 6, 2014, fix the bug sum not equals to 1

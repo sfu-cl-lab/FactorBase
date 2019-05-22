@@ -6,8 +6,8 @@ import ca.sfu.cs.common.Configuration.Config;
 import ca.sfu.cs.factorbase.database.FactorBaseDataBase;
 import ca.sfu.cs.factorbase.database.MySQLFactorBaseDataBase;
 import ca.sfu.cs.factorbase.exporter.csvexporter.CSVPrecomputor;
-import ca.sfu.cs.factorbase.tables.BayesBaseCT_SortMerge;
-import ca.sfu.cs.factorbase.tables.BayesBaseH;
+import ca.sfu.cs.factorbase.learning.BayesBaseCT_SortMerge;
+import ca.sfu.cs.factorbase.learning.BayesBaseH;
 import ca.sfu.cs.factorbase.util.LoggerConfig;
 
 /**
