@@ -22,7 +22,6 @@ package ca.sfu.cs.factorbase.learning;
 import java.io.IOException;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
-import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
@@ -52,6 +51,7 @@ public class BayesBaseCT_SortMerge {
     private static String dbPassword;
     private static String dbaddress;
     private static String linkCorrelation;
+    private static long dbTemporaryTableSize;
     /*
      * cont is Continuous
      * ToDo: Refactor
@@ -62,11 +62,6 @@ public class BayesBaseCT_SortMerge {
     
     private static Logger logger = Logger.getLogger(BayesBaseCT_SortMerge.class.getName());
 
-    public static void main(String[] args) throws Exception {
-              
-        buildCT();
-
-    }
 
     /**
      * @Overload
@@ -149,7 +144,7 @@ public class BayesBaseCT_SortMerge {
      *
      * @throws Exception
      */
-    public static void CTGenerator() throws Exception{
+    private static void CTGenerator() throws Exception {
         
         long l = System.currentTimeMillis(); //@zqian : CT table generating time
            // handling Pvars, generating pvars_counts       
@@ -241,7 +236,7 @@ public class BayesBaseCT_SortMerge {
      * setVarsFromConfig
      * ToDo : Remove Duplicate definitions across java files
      */
-    public static void setVarsFromConfig(){
+    private static void setVarsFromConfig() {
         Config conf = new Config();
         databaseName_std = conf.getProperty("dbname");
         databaseName_BN = databaseName_std + "_BN";
@@ -250,6 +245,7 @@ public class BayesBaseCT_SortMerge {
         dbUsername = conf.getProperty("dbusername");
         dbPassword = conf.getProperty("dbpassword");
         dbaddress = conf.getProperty("dbaddress");
+        dbTemporaryTableSize = Math.round(1024 * 1024 * 1024 * Double.valueOf(conf.getProperty("dbtemporarytablesize")));
         linkCorrelation = conf.getProperty("LinkCorrelations");
         cont = conf.getProperty("Continuous");
     }
@@ -257,7 +253,7 @@ public class BayesBaseCT_SortMerge {
     /**
      * Connect to database via MySQL JDBC driver
      */
-    public static Connection connectDB(String databaseName) throws SQLException{
+    private static Connection connectDB(String databaseName) throws SQLException {
         String CONN_STR = "jdbc:" + dbaddress + "/" + databaseName;
         try {
             java.lang.Class.forName("com.mysql.jdbc.Driver");
@@ -274,7 +270,7 @@ public class BayesBaseCT_SortMerge {
      * @throws  SQLException
      * @throws  IOException
      */
-    public static void BuildCT_RChain_flat(int len) throws SQLException, IOException {
+    private static void BuildCT_RChain_flat(int len) throws SQLException, IOException {
         logger.info("\n ****************** \n" +
                 "Building the _CT tables for Length = "+len +"\n" );
 
@@ -291,8 +287,6 @@ public class BayesBaseCT_SortMerge {
         int fc=0;
         while(rs.next())
         {
-            long l1 = System.currentTimeMillis(); 
-
             //System.out.print("fc ::"+ fc);
             // Get the short and full form rnids for further use.
             String rchain = rs.getString("RChain");
@@ -479,7 +473,7 @@ public class BayesBaseCT_SortMerge {
     }
 
     /* building pvars_counts*/
-    public static void BuildCT_Pvars() throws SQLException, IOException {
+    private static void BuildCT_Pvars() throws SQLException, IOException {
         long l = System.currentTimeMillis(); //@zqian : measure structure learning time
         Statement st = con_BN.createStatement();
         st.execute("Drop schema if exists " + databaseName_CT + ";");
@@ -568,7 +562,7 @@ public class BayesBaseCT_SortMerge {
      * building the RNodes_counts tables
      *
      */
-    public static void BuildCT_Rnodes_counts(int len) throws SQLException, IOException {
+    private static void BuildCT_Rnodes_counts(int len) throws SQLException, IOException {
 
         Statement st = con_BN.createStatement();
         ResultSet rs = st.executeQuery(
@@ -622,6 +616,9 @@ public class BayesBaseCT_SortMerge {
 
             String createString = "CREATE TABLE `" + shortRchain.replace("`", "") + "_counts`" + " AS " + queryString;
             logger.fine("create String : " + createString );
+
+            st3.execute("SET tmp_table_size = " + dbTemporaryTableSize + ";");
+            st3.executeQuery("SET max_heap_table_size = " + dbTemporaryTableSize + ";");
             st3.execute(createString);
 
             //adding  covering index May 21
@@ -654,7 +651,7 @@ public class BayesBaseCT_SortMerge {
     /**
      * building the RNodes_counts tables,count2 simply copies the counts to the CT tables
      */
-    public static void BuildCT_Rnodes_counts2(int len) throws SQLException, IOException {
+    private static void BuildCT_Rnodes_counts2(int len) throws SQLException, IOException {
        
          Statement st = con_BN.createStatement();
         ResultSet rs = st.executeQuery("select name as RChain from lattice_set where lattice_set.length = " + len + ";");
@@ -739,7 +736,7 @@ public class BayesBaseCT_SortMerge {
     /**
      * building the _flat tables
      */
-    public static void BuildCT_Rnodes_flat(int len) throws SQLException, IOException {
+    private static void BuildCT_Rnodes_flat(int len) throws SQLException, IOException {
         long l = System.currentTimeMillis(); //@zqian : measure structure learning time
         Statement st = con_BN.createStatement();
         ResultSet rs = st.executeQuery(
@@ -822,7 +819,7 @@ public class BayesBaseCT_SortMerge {
     /**
      * building the _star tables
      */
-    public static void BuildCT_Rnodes_star(int len) throws SQLException, IOException {
+    private static void BuildCT_Rnodes_star(int len) throws SQLException, IOException {
         long l = System.currentTimeMillis(); //@zqian : measure structure learning time
         Statement st = con_BN.createStatement();
         ResultSet rs = st.executeQuery(
@@ -911,7 +908,7 @@ public class BayesBaseCT_SortMerge {
     /**
      * building the _false tables first and then the _CT tables
      */
-    public static void BuildCT_Rnodes_CT(int len) throws SQLException, IOException {
+    private static void BuildCT_Rnodes_CT(int len) throws SQLException, IOException {
         long l = System.currentTimeMillis(); //@zqian : measure structure learning time
         Statement st = con_BN.createStatement();
         ResultSet rs = st.executeQuery(
@@ -1014,7 +1011,7 @@ public class BayesBaseCT_SortMerge {
      * @throws SQLException
      * @throws IOException
      */
-    public static void BuildCT_Rnodes_join() throws SQLException, IOException {
+    private static void BuildCT_Rnodes_join() throws SQLException, IOException {
         //set up the join tables that represent the case where a relationship is false and its attributes are undefined //
 
         Statement st = con_BN.createStatement();
@@ -1069,7 +1066,7 @@ public class BayesBaseCT_SortMerge {
      * @return
      * @throws SQLException
      */
-    public static String makeStarSepQuery(ResultSet rs, String colName, String del) throws SQLException {
+    private static String makeStarSepQuery(ResultSet rs, String colName, String del) throws SQLException {
         ArrayList<String> parts = new ArrayList<String>();
 
         while(rs.next()){
@@ -1095,7 +1092,7 @@ public class BayesBaseCT_SortMerge {
      * @return
      * @throws SQLException
      */
-    public static String makeUnionSepQuery(ResultSet rs, String colName, String del) throws SQLException {
+    private static String makeUnionSepQuery(ResultSet rs, String colName, String del) throws SQLException {
     
         ArrayList<String> parts = new ArrayList<String>();
 
@@ -1113,40 +1110,13 @@ public class BayesBaseCT_SortMerge {
      * @return
      * @throws SQLException
      */
-    public static String makeCommaSepQuery(ResultSet rs, String colName, String del) throws SQLException {
+    private static String makeCommaSepQuery(ResultSet rs, String colName, String del) throws SQLException {
         
         ArrayList<String> parts = new ArrayList<String>();
         while(rs.next()){
             parts.add(rs.getString(colName));
         }
         return StringUtils.join(parts,del);
-    }
-
-    /**
-     * for len>1, false table, part 1, where string
-     * @param rs
-     * @param colName
-     * @param del
-     * @param cur_flat_Table
-     * @param cur_star_Table
-     * @return
-     * @throws SQLException
-     */
-    public static String makeFalseWhereSepQuery(ResultSet rs, String colName, String del, String cur_flat_Table,String cur_star_Table) throws SQLException {
-        ArrayList<String> parts = new ArrayList<String>();
-
-        while(rs.next()){
-            //stringQuery += rs.getString(colName) + del;
-            String temp=rs.getString(colName);
-            String temp1=temp.replace("`", "");
-            temp = "`"+cur_flat_Table.replace("`", "") +"`.`"+temp1+"` = "+ "`"+cur_star_Table.replace("`", "") +"`.`"+temp1+"`";
-            parts.add(temp);
-
-        }
-        //stringQuery = stringQuery.substring(0, stringQuery.length() - del.length());
-
-        return StringUtils.join(parts,del);
-        //return stringQuery;
     }
 
     /**
@@ -1157,7 +1127,7 @@ public class BayesBaseCT_SortMerge {
      * @return
      * @throws SQLException
      */
-    public static String makeIndexQuery(ResultSet rs, String colName, String del) throws SQLException {
+    private static String makeIndexQuery(ResultSet rs, String colName, String del) throws SQLException {
 
         ArrayList<String> parts = new ArrayList<String>();
         int count=0;
@@ -1177,28 +1147,10 @@ public class BayesBaseCT_SortMerge {
     }
 
     /**
-     * Get columns from the metaData
-     * @param rs
-     * @return
-     * @throws SQLException
-     */
-    public static ArrayList<String> getColumns(ResultSet rs) throws SQLException {
-        ArrayList<String> cols = new ArrayList<String>();
-        ResultSetMetaData metaData = rs.getMetaData();
-        rs.next();
-
-        int columnCount = metaData.getColumnCount();
-        for (int i = 1; i <= columnCount; i++) {
-            cols.add(metaData.getColumnLabel(i));
-        }
-        return cols;
-    }
-
-    /**
      * Disconnect all the databases
      * @throws SQLException
      */
-    public static void disconnectDB() throws SQLException {
+    private static void disconnectDB() throws SQLException {
         con_std.close();
         con_BN.close();
         con_CT.close();
