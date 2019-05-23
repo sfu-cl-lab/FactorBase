@@ -90,7 +90,7 @@ public class short_rnid_LatticeGenerator {
         Statement st = dbConnection.createStatement();
 
         st.execute("CREATE TABLE IF NOT EXISTS lattice_membership (name VARCHAR(398), member VARCHAR(398), PRIMARY KEY(name, member));");
-        st.execute("CREATE TABLE IF NOT EXISTS lattice_rel (parent VARCHAR(398), child VARCHAR(398), removed VARCHAR(199), rnid VARCHAR(199), PRIMARY KEY(parent, child));");
+        st.execute("CREATE TABLE IF NOT EXISTS lattice_rel (parent VARCHAR(398), child VARCHAR(398), removed VARCHAR(199), PRIMARY KEY(parent, child));");
         st.execute("CREATE TABLE IF NOT EXISTS lattice_set (name VARCHAR(199), length INT(11), PRIMARY KEY(name, length));");
 
         st.execute("TRUNCATE lattice_rel;");

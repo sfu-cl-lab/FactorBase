@@ -1213,11 +1213,11 @@ name	member
 `RA(prof0,student0),registration(course0,student0)`	`registration(course0,student0)`
 `registration(course0,student0)`	`registration(course0,student0)`
 Table: lattice_rel
-EmptySet	`RA(prof0,student0)`	`RA(prof0,student0)`	NULL
-EmptySet	`registration(course0,student0)`	`registration(course0,student0)`	NULL
-parent	child	removed	rnid
-`RA(prof0,student0)`	`RA(prof0,student0),registration(course0,student0)`	`registration(course0,student0)`	NULL
-`registration(course0,student0)`	`RA(prof0,student0),registration(course0,student0)`	`RA(prof0,student0)`	NULL
+EmptySet	`RA(prof0,student0)`	`RA(prof0,student0)`
+EmptySet	`registration(course0,student0)`	`registration(course0,student0)`
+parent	child	removed
+`RA(prof0,student0)`	`RA(prof0,student0),registration(course0,student0)`	`registration(course0,student0)`
+`registration(course0,student0)`	`RA(prof0,student0),registration(course0,student0)`	`RA(prof0,student0)`
 Table: lattice_set
 name	length
 `RA(prof0,student0)`	1
