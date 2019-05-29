@@ -39,7 +39,11 @@ public class BayesNet_Learning_main {
         DataReader parser = new DataReader();
         parser.setDelimiter(DelimiterType.TAB);
         dataset = parser.parseTabular(src);
-        Ges3 gesSearch = new Ges3(dataset);
+        Ges3 gesSearch = new Ges3(
+            dataset,
+            10.0000,
+            1.0000
+        );
         Knowledge knowledge = new Knowledge();
 
         // Load required edge knowledge.
@@ -58,10 +62,8 @@ public class BayesNet_Learning_main {
 
         System.out.println(knowledge);
         System.out.println("knowledge is DONE~~");
-        /* set GES search parameters */
         gesSearch.setKnowledge(knowledge);
-        gesSearch.setStructurePrior(1.0000);
-        gesSearch.setSamplePrior(10.0000);
+
         /* learn a dag from data */
         Graph graph = gesSearch.search();
         Pattern pattern = new Pattern(graph);

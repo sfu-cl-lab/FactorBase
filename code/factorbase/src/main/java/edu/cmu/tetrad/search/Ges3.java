@@ -190,22 +190,18 @@ public final class Ges3 implements GraphSearch, GraphScorer {
 
     //===========================CONSTRUCTORS=============================//
 
-    public Ges3(DataSet dataSet) {
+    public Ges3(DataSet dataSet, double samplePrior, double structurePrior) {
         setDataSet(dataSet);
         if (dataSet != null) {
-            setDiscreteScore(new BDeuScore(dataSet, 10, 1.0));
-//            discreteScore = new MdluScore(dataSet, .001);
+            setDiscreteScore(new BDeuScore(dataSet, samplePrior, structurePrior));
         }
-        initialize(10., 0.001);
     }
 
     public Ges3(ICovarianceMatrix covMatrix) {
         setCovMatrix(covMatrix);
         if (dataSet != null) {
-//            setDiscreteScore(new BDeuScore(dataSet, 10, .001));
             discreteScore = new MdluScore(dataSet, .001);
         }
-        initialize(10., 1.0);
     }
 
     //==========================PUBLIC METHODS==========================//
@@ -334,18 +330,6 @@ public final class Ges3 implements GraphSearch, GraphScorer {
         this.knowledge = knowledge;
     }
 
-    public void setStructurePrior(double structurePrior) {
-        if (getDiscreteScore() != null) {
-            getDiscreteScore().setStructurePrior(structurePrior);
-        }
-    }
-
-    public void setSamplePrior(double samplePrior) {
-        if (getDiscreteScore() != null) {
-            getDiscreteScore().setSamplePrior(samplePrior);
-        }
-    }
-
     @Override
     public long getElapsedTime() {
         return elapsedTime;
@@ -416,11 +400,6 @@ public final class Ges3 implements GraphSearch, GraphScorer {
 
 
     //===========================PRIVATE METHODS========================//
-
-    private void initialize(double samplePrior, double structurePrior) {
-        setStructurePrior(structurePrior);
-        setSamplePrior(samplePrior);
-    }
 
     /**
      * Forward equivalence search.
