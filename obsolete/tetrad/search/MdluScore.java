@@ -21,60 +21,37 @@
 
 package edu.cmu.tetrad.search;
 
+import java.util.Map;
+import java.util.Set;
+
 import edu.cmu.tetrad.data.DataSet;
 import edu.cmu.tetrad.data.DiscreteVariable;
-import edu.cmu.tetrad.util.ProbUtils;
+import edu.cmu.tetrad.graph.Node;
 
 /**
  * Created by IntelliJ IDEA. User: jdramsey Date: Apr 19, 2009 Time: 7:28:45 PM To change this template use File |
  * Settings | File Templates.
  */
-/**
- * @author diljot,chris
- * We wont be using the localScoreCache anymore as it just runs along with the
- * scoreHash and increases memory consumption while not providing any extra functionality
- * as noted by Dr. Oliver Schulte. The code here uses the globalScoreHash which is initialized
- * in BayesBase.h and does not lose its contents in multiple calls. It doesnt work
- * properly as the scores keep on changing between different calls, thus using the scores from old
- * runs changes the structure of the bayesnet.
- * Instead of adding to the localScoreCache, we write the nodes to hash.
- * A simple way to fix the program would be to clear the cache in Ges3.java. Please see line 262
- * fix it. Although that will clear up cache and we wont get any hits,defeating the whole purpose and increasing the runtime.
- */
-public class BDeuScore implements LocalDiscreteScore {
+public class MdluScore implements LocalDiscreteScore {
     private final LocalScoreCache localScoreCache = new LocalScoreCache();
     private DataSet dataSet;
 
     private double samplePrior = 10;
-    private double structurePrior = 1.0;
+    private double structurePrior = .001;
 
-    public BDeuScore(DataSet dataSet, double samplePrior, double structurePrior) {
-        if (dataSet == null) {
-            throw new NullPointerException();
-        }
-
+    public MdluScore(DataSet dataSet, double structurePrior) {
         this.dataSet = dataSet;
-        this.samplePrior = samplePrior;
         this.structurePrior = structurePrior;
     }
 
     @Override
-    public double localScore(int i, int parents[]) {
-//        System.out.println("zqian##########Entering BDeuScore.localScore() .");
-    //	System.out.println(" for Node " + i +" and it's parents ");
-//    	for (int temp=0; temp<parents.length;temp ++){
-//    		System.out.print(parents[temp] +",");
-//    	}
-   // 	System.out.println("");
- //   	System.out.println("check if already computed or not.");
+	public double localScore(int i, int parents[]) {
         double oldScore = localScoreCache.get(i, parents);
-  //  	System.out.println("zqian##########Entering BDeuScore.localScore().localScoreCache.get(i, parents), oldScore: "+ i + ", "+parents+", "+ oldScore);
 
         if (!Double.isNaN(oldScore)) {
-  //      	System.out.println("using the old Score ");
             return oldScore;
         }
-   //     System.out.println("zqian########## computing the NEW score ");
+
         // Number of categories for i.
         int r = numCategories(i);
 
@@ -90,12 +67,11 @@ public class BDeuScore implements LocalDiscreteScore {
         for (int p = 0; p < parents.length; p++) {
             q *= dims[p];
         }
-   //     System.out.println("q "+ q);
+
         // Conditional cell counts of data for i given parents(i).
-        long n_ijk[][] = new long[q][r];
-      //  int n_ij[] = new int[q];
-        long n_ij[] = new long[q]; // change data type from int to long, zqian
-//        long n_ijk1[][] = new long[q][r];
+        int n_ijk[][] = new int[q][r];
+        int n_ij[] = new int[q];
+
         int values[] = new int[parents.length];
 
         for (int n = 0; n < sampleSize(); n++) {
@@ -118,47 +94,51 @@ public class BDeuScore implements LocalDiscreteScore {
 
             }
 
-            //Oct 9th,2013 zqian
-     /*       for (int m = 0; m < dataSet().getMultiplier(n); m++){ // case expander May 1st, @zqian
-             	n_ijk[getRowIndex(dims, values)][childValue]++;
-             	}      */
-
-             n_ijk[getRowIndex(dims, values)][childValue] = n_ijk[getRowIndex(dims, values)][childValue] +  dataSet().getMultiplier(n);
+            n_ijk[getRowIndex(dims, values)][childValue]++;
         }
 
-      //  System.out.println("n_ijk is done");
         // Row sums.
         for (int j = 0; j < q; j++) {
             for (int k = 0; k < r; k++) {
                 n_ij[j] += n_ijk[j][k];
             }
         }
-     //   System.out.println("n_ij is done");
 
-        //Finally, compute the score
-        double score = (r - 1) * q * Math.log(getStructurePrior());
+        // Degrees of freedom.
+        double k_g = 0;
+
+        for (int j = 0; j < q; j++) {
+            k_g += r - 1;
+        }
+
+        double alpha = getStructurePrior();
+        int n = dataSet().getNumRows();
+
+        double score = 0.0;
 
         for (int j = 0; j < q; j++) {
             for (int k = 0; k < r; k++) {
-                score += ProbUtils.lngamma(getSamplePrior() / (r * q) + n_ijk[j][k]);
+                double top = (alpha / ((double) r * (double) q)) + n_ijk[j][k];
+                double bottom = (alpha / q) + n_ij[j];
+                double product = top * log2(top / bottom);
+                score += product;
             }
-            score -= ProbUtils.lngamma(getSamplePrior() / q + n_ij[j]);
         }
 
-        score += q * ProbUtils.lngamma(getSamplePrior() / q);
-        score -= (r * q) * ProbUtils.lngamma(getSamplePrior() / (r * q));
-//        score -= r * ProbUtils.lngamma(getSamplePrior() / (r * q));
-  //      System.out.println("score is done");
+        score -= ((k_g / 2.0) * log2((alpha + n) / (2.0 * Math.PI)));
 
         localScoreCache.add(i, parents, score);
-//        System.out.println("####Entering BDeuScore.localScore().localScoreCache.add(i, parents, score): "+ i + ", "+parents+", "+ score);
 
         return score;
     }
 
     @Override
-    public DataSet getDataSet() {
+	public DataSet getDataSet() {
         return dataSet;
+    }
+
+    private double log2(double x) {
+        return Math.log(x) / Math.log(2);
     }
 
     private int getRowIndex(int[] dim, int[] values) {
@@ -191,13 +171,27 @@ public class BDeuScore implements LocalDiscreteScore {
     }
 
     @Override
-    public void setStructurePrior(double structurePrior) {
+	public void setStructurePrior(double structurePrior) {
         this.structurePrior = structurePrior;
     }
 
     @Override
-    public void setSamplePrior(double samplePrior) {
+	public void setSamplePrior(double samplePrior) {
         this.samplePrior = samplePrior;
     }
-}
 
+    @Override
+    /**
+     * TODO: This method was added as required by the LocalDiscreteScore interface.  Need to figure out what this should
+     *       return.
+     */
+    public double localScore(
+        int i,
+        int[] parents,
+        Node y,
+        Set<Node> parentNodes,
+        Map<Node, Map<Set<Node>, Double>> globalScoreHash
+    ) {
+        return 0;
+    }
+}

@@ -21,8 +21,16 @@
 
 package edu.cmu.tetrad.search;
 
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
+
 import edu.cmu.tetrad.data.DataSet;
 import edu.cmu.tetrad.data.DiscreteVariable;
+import edu.cmu.tetrad.graph.Node;
 import edu.cmu.tetrad.util.ProbUtils;
 
 /**
@@ -59,8 +67,8 @@ public class BDeuScore implements LocalDiscreteScore {
     }
 
     @Override
-    public double localScore(int i, int parents[]) {
-//        System.out.println("zqian##########Entering BDeuScore.localScore() .");
+	public double localScore(int i, int parents[]) {
+    	//System.out.println("zqian##########Entering BDeuScore.localScore() .");
     //	System.out.println(" for Node " + i +" and it's parents ");
 //    	for (int temp=0; temp<parents.length;temp ++){
 //    		System.out.print(parents[temp] +",");
@@ -84,7 +92,7 @@ public class BDeuScore implements LocalDiscreteScore {
         for (int p = 0; p < parents.length; p++) {
             dims[p] = numCategories(parents[p]);
         }
-
+       
         // Number of parent states.
         int q = 1;
         for (int p = 0; p < parents.length; p++) {
@@ -118,14 +126,14 @@ public class BDeuScore implements LocalDiscreteScore {
 
             }
 
-            //Oct 9th,2013 zqian
+            //Oct 9th,2013 zqian            
      /*       for (int m = 0; m < dataSet().getMultiplier(n); m++){ // case expander May 1st, @zqian
              	n_ijk[getRowIndex(dims, values)][childValue]++;
-             	}      */
-
+             	}      */      
+     
              n_ijk[getRowIndex(dims, values)][childValue] = n_ijk[getRowIndex(dims, values)][childValue] +  dataSet().getMultiplier(n);
         }
-
+        
       //  System.out.println("n_ijk is done");
         // Row sums.
         for (int j = 0; j < q; j++) {
@@ -134,7 +142,7 @@ public class BDeuScore implements LocalDiscreteScore {
             }
         }
      //   System.out.println("n_ij is done");
-
+        
         //Finally, compute the score
         double score = (r - 1) * q * Math.log(getStructurePrior());
 
@@ -149,15 +157,168 @@ public class BDeuScore implements LocalDiscreteScore {
         score -= (r * q) * ProbUtils.lngamma(getSamplePrior() / (r * q));
 //        score -= r * ProbUtils.lngamma(getSamplePrior() / (r * q));
   //      System.out.println("score is done");
-
+        
         localScoreCache.add(i, parents, score);
-//        System.out.println("####Entering BDeuScore.localScore().localScoreCache.add(i, parents, score): "+ i + ", "+parents+", "+ score);
+    	//System.out.println("####Entering BDeuScore.localScore().localScoreCache.add(i, parents, score): "+ i + ", "+parents+", "+ score);
+    
+        return score;
+    }
+
+    @Override
+    public double localScore(int i, int parents[], Node y, Set<Node> parentNodes, Map<Node, Map<Set<Node>, Double>> globalScoreHash) {
+        Double oldscore = null;
+        if(globalScoreHash.containsKey(y)) {
+            if(globalScoreHash.get(y).containsKey(parentNodes)) {
+                oldscore = globalScoreHash.get(y).get(parentNodes);
+            }
+        }
+
+        if(oldscore != null && !Double.isNaN(oldscore)) {
+            //=================Writing to the file.=======================
+            //We just use this file to compare the scores later after execution is complete.
+            //The following code will write the contents of the hit to file
+            try{
+                File file =new File("Hash-Hits");
+
+                if(!file.exists()){
+                    file.createNewFile();
+                }
+
+                FileWriter fileWriter = new FileWriter(file.getName(),true);
+                BufferedWriter bufferWriter = new BufferedWriter(fileWriter);
+                bufferWriter.write("The Node:" +y +"\n The Parents: "+ parentNodes+ "\n The Score:" +oldscore);
+                bufferWriter.write("\n_______________________________________________________________________________\n");
+                bufferWriter.close();
+            }
+            catch(Exception e) {
+                System.out.println("Error Writing");
+            }
+            //===========================Writing to file complete===============
+
+            return oldscore;
+        }
+
+       /* double oldScore = localScoreCache.get(i, parents);
+
+        if (!Double.isNaN(oldScore)) {
+            return oldScore;
+        }*/
+
+        // Number of categories for i.
+        int r = numCategories(i);
+
+        // Numbers of categories of parents.
+        int dims[] = new int[parents.length];
+
+        for (int p = 0; p < parents.length; p++) {
+            dims[p] = numCategories(parents[p]);
+        }
+
+        // Number of parent states.
+        int q = 1;
+        for (int p = 0; p < parents.length; p++) {
+            q *= dims[p];
+        }
+
+        // Conditional cell counts of data for i given parents(i).
+        int n_ijk[][] = new int[q][r];
+        int n_ij[] = new int[q];
+        long n_ijk1[][] = new long[q][r];
+        int values[] = new int[parents.length];
+
+        for (int n = 0; n < sampleSize(); n++) {
+            for (int p = 0; p < parents.length; p++) {
+                int parentValue = dataSet().getInt(n, parents[p]);
+
+                if (parentValue == -99) {
+                    throw new IllegalStateException("Please remove or impute " +
+                            "missing values.");
+                }
+
+                values[p] = parentValue;
+            }
+
+            int childValue = dataSet().getInt(n, i);
+
+            if (childValue == -99) {
+                throw new IllegalStateException("Please remove or impute missing " +
+                        "values (record " + n + " column " + i + ")");
+
+            }
+
+       //     n_ijk[getRowIndex(dims, values)][childValue]++;
+            for (int m = 0; m < dataSet().getMultiplier(n); m++){ // case expander May 1st, @zqian
+                n_ijk[getRowIndex(dims, values)][childValue]++;
+           //  	LoopingCounter++; // LoopingCounter
+            }
+       //      System.out.println(" dataSet().getMultiplier(n) " +dataSet().getMultiplier(n));
+      //       System.out.println(" after looping, n_ijk  :" +getRowIndex(dims, values)+", " +childValue+", "+(n_ijk[getRowIndex(dims, values)][childValue])); //@zqian
+
+             // case expander Jun 13rd, @zqian
+             n_ijk1[getRowIndex(dims, values)][childValue] = n_ijk[getRowIndex(dims, values)][childValue]+dataSet().getMultiplier(n);
+        }
+
+        // Row sums.
+        for (int j = 0; j < q; j++) {
+            for (int k = 0; k < r; k++) {
+                n_ij[j] += n_ijk[j][k];
+            }
+        }
+
+        //Finally, compute the score
+        double score = (r - 1) * q * Math.log(getStructurePrior());
+
+        for (int j = 0; j < q; j++) {
+            for (int k = 0; k < r; k++) {
+                score += ProbUtils.lngamma(
+                        getSamplePrior() / (r * q) + n_ijk[j][k]);
+            }
+
+            score -= ProbUtils.lngamma(getSamplePrior() / q + n_ij[j]);
+        }
+
+        score += q * ProbUtils.lngamma(getSamplePrior() / q);
+        score -= (r * q) * ProbUtils.lngamma(getSamplePrior() / (r * q));
+//        score -= r * ProbUtils.lngamma(getSamplePrior() / (r * q));
+        /**
+         * We don't need the localScoreCache anymore, so instead of hashing into the localscorecache, We
+         * would add the scores to the globalScoreHash which keeps the globalHashScores,
+         * instead we check if we have the parent node in the hash map and put the child and
+         * the score for that entry, else if the parent node doesn't exist in the hash, then we can
+         * add it to the hash and then add the children and scores.
+         */
+       // localScoreCache.add(i, parents, score);
+        if(globalScoreHash.containsKey(y)) {
+            globalScoreHash.get(y).put(parentNodes, score);
+        }
+        else{
+            globalScoreHash.put(y, new HashMap<Set<Node>, Double>());
+            globalScoreHash.get(y).put(parentNodes, score);
+        }
+
+        //===============File =================
+        ///Another file keeps track of the times when we don't get a hit in the cache.
+        try{
+            File file =new File("NoHit");
+
+            if(!file.exists())
+                file.createNewFile();
+
+            FileWriter fileWriter = new FileWriter(file.getName(),true);
+            BufferedWriter bufferWriter = new BufferedWriter(fileWriter);
+            bufferWriter.write("The Node:" +y +"\n The Parents: "+ parentNodes+ "\n The Score:" +score);
+            bufferWriter.write("\n_______________________________________________________________________________\n");
+            bufferWriter.close();
+        }
+        catch(Exception e)
+        {System.out.println("Error Writing");}
+        //======================================End writing===============
 
         return score;
     }
 
     @Override
-    public DataSet getDataSet() {
+	public DataSet getDataSet() {
         return dataSet;
     }
 
@@ -191,12 +352,12 @@ public class BDeuScore implements LocalDiscreteScore {
     }
 
     @Override
-    public void setStructurePrior(double structurePrior) {
+	public void setStructurePrior(double structurePrior) {
         this.structurePrior = structurePrior;
     }
 
     @Override
-    public void setSamplePrior(double samplePrior) {
+	public void setSamplePrior(double samplePrior) {
         this.samplePrior = samplePrior;
     }
 }
