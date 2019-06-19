@@ -21,6 +21,8 @@
 
 package edu.cmu.tetrad.search;
 
+import java.math.BigDecimal;
+
 import edu.cmu.tetrad.data.DataSet;
 import edu.cmu.tetrad.data.DiscreteVariable;
 import edu.cmu.tetrad.util.ProbUtils;
@@ -136,24 +138,24 @@ public class BDeuScore implements LocalDiscreteScore {
      //   System.out.println("n_ij is done");
 
         //Finally, compute the score
-        double score = (r - 1) * q * Math.log(getStructurePrior());
+        BigDecimal score = new BigDecimal((r - 1) * q * Math.log(getStructurePrior()));
 
         for (int j = 0; j < q; j++) {
             for (int k = 0; k < r; k++) {
-                score += ProbUtils.lngamma(getSamplePrior() / (r * q) + n_ijk[j][k]);
+                score = score.add(new BigDecimal(ProbUtils.lngamma(getSamplePrior() / (r * q) + n_ijk[j][k])));
             }
-            score -= ProbUtils.lngamma(getSamplePrior() / q + n_ij[j]);
+            score = score.subtract(new BigDecimal(ProbUtils.lngamma(getSamplePrior() / q + n_ij[j])));
         }
 
-        score += q * ProbUtils.lngamma(getSamplePrior() / q);
-        score -= (r * q) * ProbUtils.lngamma(getSamplePrior() / (r * q));
+        score = score.add(new BigDecimal(q * ProbUtils.lngamma(getSamplePrior() / q)));
+        score = score.subtract(new BigDecimal((r * q) * ProbUtils.lngamma(getSamplePrior() / (r * q))));
 //        score -= r * ProbUtils.lngamma(getSamplePrior() / (r * q));
   //      System.out.println("score is done");
 
-        localScoreCache.add(i, parents, score);
+        localScoreCache.add(i, parents, score.doubleValue());
 //        System.out.println("####Entering BDeuScore.localScore().localScoreCache.add(i, parents, score): "+ i + ", "+parents+", "+ score);
 
-        return score;
+        return score.doubleValue();
     }
 
     @Override

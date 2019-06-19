@@ -45,13 +45,13 @@ public class BDeuScoreTest {
     public void localScore_ReturnsCorrectResults_WhenNoParents() throws SQLException {
         BDeuScore score = new BDeuScore(dataset, SAMPLE_PRIOR, STRUCTURE_PRIOR);
         Double scoreValue = score.localScore(POPULARITY, new int[] {});
-        assertThat(scoreValue, equalTo(-4.26969744970409));
+        assertThat(scoreValue, equalTo(-4.269697449704091));
     }
 
     @Test
     public void localScore_ReturnsCorrectResults_WhenSingleParent() throws SQLException {
         BDeuScore score = new BDeuScore(dataset, SAMPLE_PRIOR, STRUCTURE_PRIOR);
         Double scoreValue = score.localScore(POPULARITY, new int[] {TEACHINGABILITY});
-        assertThat(scoreValue, equalTo(-3.935739532045625));
+        assertThat(scoreValue, equalTo(-3.935739532045626));
     }
 }

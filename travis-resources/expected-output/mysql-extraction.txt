@@ -32,9 +32,9 @@ Table: 2Nodes
 `salary(prof0,student0)`	salary	prof0	student0	RA	1
 `sat(course0,student0)`	sat	course0	student0	registration	1
 Table: 2Nodes_inFamily
+`capability(prof0,student0)`	`salary(prof0,student0)`	3
 ChildNode	2node	NumAtts
 `diff(course0)`	`grade(course0,student0)`	4
-`salary(prof0,student0)`	`capability(prof0,student0)`	5
 `sat(course0,student0)`	`grade(course0,student0)`	4
 Table: AttributeColumns
 course	diff
@@ -198,6 +198,7 @@ Fid	pvid
 `teachingability(prof0)`	prof0
 Table: Final_Path_BayesNets
 `RA(prof0,student0),registration(course0,student0)`	`capability(prof0,student0)`	`RA(prof0,student0)`
+`RA(prof0,student0),registration(course0,student0)`	`capability(prof0,student0)`	`salary(prof0,student0)`
 `RA(prof0,student0),registration(course0,student0)`	`diff(course0)`	`grade(course0,student0)`
 `RA(prof0,student0),registration(course0,student0)`	`grade(course0,student0)`	`intelligence(student0)`
 `RA(prof0,student0),registration(course0,student0)`	`grade(course0,student0)`	`registration(course0,student0)`
@@ -207,7 +208,6 @@ Table: Final_Path_BayesNets
 `RA(prof0,student0),registration(course0,student0)`	`popularity(prof0)`	`teachingability(prof0)`
 `RA(prof0,student0),registration(course0,student0)`	`ranking(student0)`	`intelligence(student0)`
 `RA(prof0,student0),registration(course0,student0)`	`ranking(student0)`	`RA(prof0,student0)`
-`RA(prof0,student0),registration(course0,student0)`	`salary(prof0,student0)`	`capability(prof0,student0)`
 `RA(prof0,student0),registration(course0,student0)`	`salary(prof0,student0)`	`RA(prof0,student0)`
 `RA(prof0,student0),registration(course0,student0)`	`sat(course0,student0)`	`grade(course0,student0)`
 `RA(prof0,student0),registration(course0,student0)`	`sat(course0,student0)`	`registration(course0,student0)`
@@ -215,6 +215,7 @@ Table: Final_Path_BayesNets
 Rchain	child	parent
 Table: Final_Path_BayesNets_view
 `RA(prof0,student0),registration(course0,student0)`	`capability(prof0,student0)`	`RA(prof0,student0)`
+`RA(prof0,student0),registration(course0,student0)`	`capability(prof0,student0)`	`salary(prof0,student0)`
 `RA(prof0,student0),registration(course0,student0)`	`diff(course0)`	`grade(course0,student0)`
 `RA(prof0,student0),registration(course0,student0)`	`grade(course0,student0)`	`intelligence(student0)`
 `RA(prof0,student0),registration(course0,student0)`	`grade(course0,student0)`	`registration(course0,student0)`
@@ -227,7 +228,6 @@ Table: Final_Path_BayesNets_view
 `RA(prof0,student0),registration(course0,student0)`	`RA(prof0,student0)`	
 `RA(prof0,student0),registration(course0,student0)`	`rating(course0)`	
 `RA(prof0,student0),registration(course0,student0)`	`registration(course0,student0)`	
-`RA(prof0,student0),registration(course0,student0)`	`salary(prof0,student0)`	`capability(prof0,student0)`
 `RA(prof0,student0),registration(course0,student0)`	`salary(prof0,student0)`	`RA(prof0,student0)`
 `RA(prof0,student0),registration(course0,student0)`	`sat(course0,student0)`	`grade(course0,student0)`
 `RA(prof0,student0),registration(course0,student0)`	`sat(course0,student0)`	`registration(course0,student0)`
@@ -248,6 +248,7 @@ TABLE_NAME	REFERENCED_TABLE_NAME	COLUMN_NAME	pvid	index_number	ARGUMENT_POSITION
 Table: Groundings
 Table: InheritedEdges
 `RA(prof0,student0),registration(course0,student0)`	`capability(prof0,student0)`	`RA(prof0,student0)`
+`RA(prof0,student0),registration(course0,student0)`	`capability(prof0,student0)`	`salary(prof0,student0)`
 `RA(prof0,student0),registration(course0,student0)`	`diff(course0)`	`grade(course0,student0)`
 `RA(prof0,student0),registration(course0,student0)`	`grade(course0,student0)`	`intelligence(student0)`
 `RA(prof0,student0),registration(course0,student0)`	`grade(course0,student0)`	`registration(course0,student0)`
@@ -255,8 +256,7 @@ Table: InheritedEdges
 `RA(prof0,student0),registration(course0,student0)`	`popularity(prof0)`	`RA(prof0,student0)`
 `RA(prof0,student0),registration(course0,student0)`	`popularity(prof0)`	`teachingability(prof0)`
 `RA(prof0,student0),registration(course0,student0)`	`ranking(student0)`	`intelligence(student0)`
-`RA(prof0,student0),registration(course0,student0)`	`salary(prof0,student0)`	`capability(prof0,student0)`
-`RA(prof0,student0),registration(course0,student0)`	`salary(prof0,student0)`	`RA(prof0,student0)`
+`RA(prof0,student0),registration(course0,student0)`	`RA(prof0,student0)`	`salary(prof0,student0)`
 `RA(prof0,student0),registration(course0,student0)`	`sat(course0,student0)`	`grade(course0,student0)`
 Rchain	child	parent
 Table: InputColumns
@@ -497,12 +497,14 @@ Rchain	node
 `registration(course0,student0)`	`sat(course0,student0)`
 Table: Path_BayesNets
 `RA(prof0,student0)`	`capability(prof0,student0)`	`RA(prof0,student0)`
+`RA(prof0,student0)`	`capability(prof0,student0)`	`salary(prof0,student0)`
 `RA(prof0,student0)`	`intelligence(student0)`	`RA(prof0,student0)`
 `RA(prof0,student0)`	`popularity(prof0)`	`RA(prof0,student0)`
 `RA(prof0,student0)`	`popularity(prof0)`	`teachingability(prof0)`
 `RA(prof0,student0)`	`ranking(student0)`	`intelligence(student0)`
-`RA(prof0,student0)`	`RA(prof0,student0)`	
+`RA(prof0,student0)`	`RA(prof0,student0)`	`salary(prof0,student0)`
 `RA(prof0,student0),registration(course0,student0)`	`capability(prof0,student0)`	`RA(prof0,student0)`
+`RA(prof0,student0),registration(course0,student0)`	`capability(prof0,student0)`	`salary(prof0,student0)`
 `RA(prof0,student0),registration(course0,student0)`	`diff(course0)`	`grade(course0,student0)`
 `RA(prof0,student0),registration(course0,student0)`	`grade(course0,student0)`	`intelligence(student0)`
 `RA(prof0,student0),registration(course0,student0)`	`grade(course0,student0)`	`registration(course0,student0)`
@@ -515,13 +517,11 @@ Table: Path_BayesNets
 `RA(prof0,student0),registration(course0,student0)`	`RA(prof0,student0)`	
 `RA(prof0,student0),registration(course0,student0)`	`rating(course0)`	
 `RA(prof0,student0),registration(course0,student0)`	`registration(course0,student0)`	
-`RA(prof0,student0),registration(course0,student0)`	`salary(prof0,student0)`	`capability(prof0,student0)`
 `RA(prof0,student0),registration(course0,student0)`	`salary(prof0,student0)`	`RA(prof0,student0)`
 `RA(prof0,student0),registration(course0,student0)`	`sat(course0,student0)`	`grade(course0,student0)`
 `RA(prof0,student0),registration(course0,student0)`	`sat(course0,student0)`	`registration(course0,student0)`
 `RA(prof0,student0),registration(course0,student0)`	`teachingability(prof0)`	`RA(prof0,student0)`
-`RA(prof0,student0)`	`salary(prof0,student0)`	`capability(prof0,student0)`
-`RA(prof0,student0)`	`salary(prof0,student0)`	`RA(prof0,student0)`
+`RA(prof0,student0)`	`salary(prof0,student0)`	
 `RA(prof0,student0)`	`teachingability(prof0)`	
 Rchain	child	parent
 `registration(course0,student0)`	`diff(course0)`	`grade(course0,student0)`
@@ -537,7 +537,6 @@ Table: Path_Complement_Edges
 `RA(prof0,student0)`	`capability(prof0,student0)`	`intelligence(student0)`
 `RA(prof0,student0)`	`capability(prof0,student0)`	`popularity(prof0)`
 `RA(prof0,student0)`	`capability(prof0,student0)`	`ranking(student0)`
-`RA(prof0,student0)`	`capability(prof0,student0)`	`salary(prof0,student0)`
 `RA(prof0,student0)`	`capability(prof0,student0)`	`teachingability(prof0)`
 `RA(prof0,student0)`	`intelligence(student0)`	`capability(prof0,student0)`
 `RA(prof0,student0)`	`intelligence(student0)`	`intelligence(student0)`
@@ -561,7 +560,6 @@ Table: Path_Complement_Edges
 `RA(prof0,student0)`	`RA(prof0,student0)`	`popularity(prof0)`
 `RA(prof0,student0)`	`RA(prof0,student0)`	`ranking(student0)`
 `RA(prof0,student0)`	`RA(prof0,student0)`	`RA(prof0,student0)`
-`RA(prof0,student0)`	`RA(prof0,student0)`	`salary(prof0,student0)`
 `RA(prof0,student0)`	`RA(prof0,student0)`	`teachingability(prof0)`
 `RA(prof0,student0),registration(course0,student0)`	`capability(prof0,student0)`	`capability(prof0,student0)`
 `RA(prof0,student0),registration(course0,student0)`	`capability(prof0,student0)`	`diff(course0)`
@@ -571,7 +569,6 @@ Table: Path_Complement_Edges
 `RA(prof0,student0),registration(course0,student0)`	`capability(prof0,student0)`	`ranking(student0)`
 `RA(prof0,student0),registration(course0,student0)`	`capability(prof0,student0)`	`rating(course0)`
 `RA(prof0,student0),registration(course0,student0)`	`capability(prof0,student0)`	`registration(course0,student0)`
-`RA(prof0,student0),registration(course0,student0)`	`capability(prof0,student0)`	`salary(prof0,student0)`
 `RA(prof0,student0),registration(course0,student0)`	`capability(prof0,student0)`	`sat(course0,student0)`
 `RA(prof0,student0),registration(course0,student0)`	`capability(prof0,student0)`	`teachingability(prof0)`
 `RA(prof0,student0),registration(course0,student0)`	`diff(course0)`	`capability(prof0,student0)`
@@ -661,6 +658,7 @@ Table: Path_Complement_Edges
 `RA(prof0,student0),registration(course0,student0)`	`registration(course0,student0)`	`salary(prof0,student0)`
 `RA(prof0,student0),registration(course0,student0)`	`registration(course0,student0)`	`sat(course0,student0)`
 `RA(prof0,student0),registration(course0,student0)`	`registration(course0,student0)`	`teachingability(prof0)`
+`RA(prof0,student0),registration(course0,student0)`	`salary(prof0,student0)`	`capability(prof0,student0)`
 `RA(prof0,student0),registration(course0,student0)`	`salary(prof0,student0)`	`diff(course0)`
 `RA(prof0,student0),registration(course0,student0)`	`salary(prof0,student0)`	`grade(course0,student0)`
 `RA(prof0,student0),registration(course0,student0)`	`salary(prof0,student0)`	`intelligence(student0)`
@@ -692,9 +690,11 @@ Table: Path_Complement_Edges
 `RA(prof0,student0),registration(course0,student0)`	`teachingability(prof0)`	`salary(prof0,student0)`
 `RA(prof0,student0),registration(course0,student0)`	`teachingability(prof0)`	`sat(course0,student0)`
 `RA(prof0,student0),registration(course0,student0)`	`teachingability(prof0)`	`teachingability(prof0)`
+`RA(prof0,student0)`	`salary(prof0,student0)`	`capability(prof0,student0)`
 `RA(prof0,student0)`	`salary(prof0,student0)`	`intelligence(student0)`
 `RA(prof0,student0)`	`salary(prof0,student0)`	`popularity(prof0)`
 `RA(prof0,student0)`	`salary(prof0,student0)`	`ranking(student0)`
+`RA(prof0,student0)`	`salary(prof0,student0)`	`RA(prof0,student0)`
 `RA(prof0,student0)`	`salary(prof0,student0)`	`salary(prof0,student0)`
 `RA(prof0,student0)`	`salary(prof0,student0)`	`teachingability(prof0)`
 `RA(prof0,student0)`	`teachingability(prof0)`	`capability(prof0,student0)`
@@ -758,7 +758,6 @@ Table: Path_Forbidden_Edges
 `RA(prof0,student0),registration(course0,student0)`	`capability(prof0,student0)`	`intelligence(student0)`
 `RA(prof0,student0),registration(course0,student0)`	`capability(prof0,student0)`	`popularity(prof0)`
 `RA(prof0,student0),registration(course0,student0)`	`capability(prof0,student0)`	`ranking(student0)`
-`RA(prof0,student0),registration(course0,student0)`	`capability(prof0,student0)`	`salary(prof0,student0)`
 `RA(prof0,student0),registration(course0,student0)`	`capability(prof0,student0)`	`teachingability(prof0)`
 `RA(prof0,student0),registration(course0,student0)`	`diff(course0)`	`diff(course0)`
 `RA(prof0,student0),registration(course0,student0)`	`diff(course0)`	`intelligence(student0)`
@@ -798,7 +797,6 @@ Table: Path_Forbidden_Edges
 `RA(prof0,student0),registration(course0,student0)`	`RA(prof0,student0)`	`intelligence(student0)`
 `RA(prof0,student0),registration(course0,student0)`	`RA(prof0,student0)`	`popularity(prof0)`
 `RA(prof0,student0),registration(course0,student0)`	`RA(prof0,student0)`	`ranking(student0)`
-`RA(prof0,student0),registration(course0,student0)`	`RA(prof0,student0)`	`salary(prof0,student0)`
 `RA(prof0,student0),registration(course0,student0)`	`RA(prof0,student0)`	`teachingability(prof0)`
 `RA(prof0,student0),registration(course0,student0)`	`rating(course0)`	`diff(course0)`
 `RA(prof0,student0),registration(course0,student0)`	`rating(course0)`	`grade(course0,student0)`
@@ -812,6 +810,7 @@ Table: Path_Forbidden_Edges
 `RA(prof0,student0),registration(course0,student0)`	`registration(course0,student0)`	`ranking(student0)`
 `RA(prof0,student0),registration(course0,student0)`	`registration(course0,student0)`	`rating(course0)`
 `RA(prof0,student0),registration(course0,student0)`	`registration(course0,student0)`	`sat(course0,student0)`
+`RA(prof0,student0),registration(course0,student0)`	`salary(prof0,student0)`	`capability(prof0,student0)`
 `RA(prof0,student0),registration(course0,student0)`	`salary(prof0,student0)`	`intelligence(student0)`
 `RA(prof0,student0),registration(course0,student0)`	`salary(prof0,student0)`	`popularity(prof0)`
 `RA(prof0,student0),registration(course0,student0)`	`salary(prof0,student0)`	`ranking(student0)`
@@ -842,6 +841,7 @@ Table: Path_Required_Edges
 `RA(prof0,student0)`	`popularity(prof0)`	`teachingability(prof0)`
 `RA(prof0,student0)`	`ranking(student0)`	`intelligence(student0)`
 `RA(prof0,student0),registration(course0,student0)`	`capability(prof0,student0)`	`RA(prof0,student0)`
+`RA(prof0,student0),registration(course0,student0)`	`capability(prof0,student0)`	`salary(prof0,student0)`
 `RA(prof0,student0),registration(course0,student0)`	`diff(course0)`	`grade(course0,student0)`
 `RA(prof0,student0),registration(course0,student0)`	`grade(course0,student0)`	`intelligence(student0)`
 `RA(prof0,student0),registration(course0,student0)`	`grade(course0,student0)`	`registration(course0,student0)`
@@ -849,7 +849,6 @@ Table: Path_Required_Edges
 `RA(prof0,student0),registration(course0,student0)`	`popularity(prof0)`	`RA(prof0,student0)`
 `RA(prof0,student0),registration(course0,student0)`	`popularity(prof0)`	`teachingability(prof0)`
 `RA(prof0,student0),registration(course0,student0)`	`ranking(student0)`	`intelligence(student0)`
-`RA(prof0,student0),registration(course0,student0)`	`salary(prof0,student0)`	`capability(prof0,student0)`
 `RA(prof0,student0),registration(course0,student0)`	`salary(prof0,student0)`	`RA(prof0,student0)`
 `RA(prof0,student0),registration(course0,student0)`	`sat(course0,student0)`	`grade(course0,student0)`
 `RA(prof0,student0),registration(course0,student0)`	`sat(course0,student0)`	`registration(course0,student0)`
@@ -924,8 +923,8 @@ Table: RNodes_2Nodes
 `registration(course0,student0)`	`sat(course0,student0)`	1
 rnid	2nid	main
 Table: RNodes_2Nodes_Family
+`capability(prof0,student0)`	`RA(prof0,student0)`	`salary(prof0,student0)`	3
 ChildNode	Rnode	2Node	NumAtts
-`salary(prof0,student0)`	`RA(prof0,student0)`	`capability(prof0,student0)`	5
 `sat(course0,student0)`	`registration(course0,student0)`	`grade(course0,student0)`	4
 Table: RNodes_BN_Nodes
 `RA(prof0,student0)`	`capability(prof0,student0)`	1
@@ -966,6 +965,7 @@ registration	0	0
 TABLE_NAME	SelfRelationship	Many_OneRelationship
 Table: RelationsParents
 `capability(prof0,student0)`	`RA(prof0,student0)`	`RA(prof0,student0)`	1
+`capability(prof0,student0)`	`RA(prof0,student0)`	`salary(prof0,student0)`	3
 ChildNode	rnid	2node	NumAtts
 `diff(course0)`	`registration(course0,student0)`	`grade(course0,student0)`	4
 `grade(course0,student0)`	`registration(course0,student0)`	`registration(course0,student0)`	1
@@ -973,20 +973,19 @@ ChildNode	rnid	2node	NumAtts
 `intelligence(student0)`	`registration(course0,student0)`	`registration(course0,student0)`	1
 `popularity(prof0)`	`RA(prof0,student0)`	`RA(prof0,student0)`	1
 `ranking(student0)`	`RA(prof0,student0)`	`RA(prof0,student0)`	1
-`salary(prof0,student0)`	`RA(prof0,student0)`	`capability(prof0,student0)`	5
 `salary(prof0,student0)`	`RA(prof0,student0)`	`RA(prof0,student0)`	1
 `sat(course0,student0)`	`registration(course0,student0)`	`grade(course0,student0)`	4
 `sat(course0,student0)`	`registration(course0,student0)`	`registration(course0,student0)`	1
 `teachingability(prof0)`	`RA(prof0,student0)`	`RA(prof0,student0)`	1
 Table: RelationsPars
-`capability(prof0,student0)`	2
+`capability(prof0,student0)`	4
 ChildNode	NumPars
 `diff(course0)`	4.999999999999999
 `grade(course0,student0)`	2
 `intelligence(student0)`	4
 `popularity(prof0)`	2
 `ranking(student0)`	2
-`salary(prof0,student0)`	6
+`salary(prof0,student0)`	2
 `sat(course0,student0)`	4.999999999999999
 `teachingability(prof0)`	2
 Table: SchemaEdges
@@ -996,7 +995,7 @@ Table: SchemaEdges
 `RA(prof0,student0),registration(course0,student0)`	`sat(course0,student0)`	`registration(course0,student0)`
 Rchain	child	parent
 Table: Scores
-`capability(prof0,student0)`	-39.67	-0.17	8	228	-122.77	-47.67	-43.77	-8.17	2280
+`capability(prof0,student0)`	-26.22	-0.11	16	228	-139.31	-42.22	-87.09	-16.11	2280
 `diff(course0)`	-253.14	-0.67	5	380	-535.98	-258.14	-31.04	-5.67	2280
 Fid	LogLikelihood	Normal_LogLikelihood	Parameters	SampleSize	BIC	AIC	Pseudo_BIC	Pseudo_AIC	Big_SampleSize
 `grade(course0,student0)`	-73.22	-0.19	18	380	-253.36	-91.22	-107.30	-18.19	2280
@@ -1006,46 +1005,122 @@ Fid	LogLikelihood	Normal_LogLikelihood	Parameters	SampleSize	BIC	AIC	Pseudo_BIC	
 `RA(prof0,student0)`	-78.84	-0.35	1	228	-163.11	-79.84	-6.13	-1.35	2280
 `rating(course0)`	-6.11	-0.61	1	10	-14.52	-7.11	-3.52	-1.61	2280
 `registration(course0,student0)`	-210.33	-0.55	1	380	-426.60	-211.33	-7.04	-1.55	2280
-`salary(prof0,student0)`	-12.84	-0.06	12	228	-90.83	-24.84	-65.27	-12.06	2280
+`salary(prof0,student0)`	-26.27	-0.12	4	228	-74.26	-30.27	-21.96	-4.12	2280
 `sat(course0,student0)`	-47.24	-0.12	10	380	-153.88	-57.24	-59.64	-10.12	2280
 `teachingability(prof0)`	-157.47	-0.69	2	228	-325.80	-159.47	-12.24	-2.69	2280
 Table: TargetNode
 Table: capability(prof0,student0)_CP
-2030	N/A	F	2030	203	1.000000	0.00	0.890351
-40	2	T	250	4	0.160000	-7.33	0.017544
-40	5	T	250	4	0.160000	-7.33	0.017544
-50	1	T	250	5	0.200000	-8.05	0.021930
-50	4	T	250	5	0.200000	-8.05	0.021930
-70	3	T	250	7	0.280000	-8.91	0.030702
-MULT	capability(prof0,student0)	RA(prof0,student0)	ParentSum	local_mult	CP	likelihood	prior
+10	3	T	low	50	1	0.200000	-1.61	0.030702
+20	1	T	low	50	2	0.400000	-1.83	0.021930
+20	2	T	low	50	2	0.400000	-1.83	0.017544
+20	2	T	med	90	2	0.222222	-3.01	0.017544
+2030	N/A	F	N/A	2030	203	1.000000	0.00	0.890351
+20	3	T	high	110	2	0.181818	-3.41	0.030702
+30	1	T	med	90	3	0.333333	-3.30	0.021930
+40	3	T	med	90	4	0.444444	-3.24	0.030702
+40	5	T	high	110	4	0.363636	-4.05	0.017544
+50	4	T	high	110	5	0.454545	-3.94	0.021930
+MULT	capability(prof0,student0)	RA(prof0,student0)	salary(prof0,student0)	ParentSum	local_mult	CP	likelihood	prior
 Table: capability(prof0,student0)_CP_pairs
-0	1	F
-0	1	T
-0	2	F
-0	2	T
-0	3	F
-0	3	T
-0	4	F
-0	4	T
-0	5	F
-0	5	T
-0	N/A	F
-0	N/A	T
-MULT	capability(prof0,student0)	RA(prof0,student0)
+0	1	F	high
+0	1	F	low
+0	1	F	med
+0	1	F	N/A
+0	1	T	high
+0	1	T	low
+0	1	T	med
+0	1	T	N/A
+0	2	F	high
+0	2	F	low
+0	2	F	med
+0	2	F	N/A
+0	2	T	high
+0	2	T	low
+0	2	T	med
+0	2	T	N/A
+0	3	F	high
+0	3	F	low
+0	3	F	med
+0	3	F	N/A
+0	3	T	high
+0	3	T	low
+0	3	T	med
+0	3	T	N/A
+0	4	F	high
+0	4	F	low
+0	4	F	med
+0	4	F	N/A
+0	4	T	high
+0	4	T	low
+0	4	T	med
+0	4	T	N/A
+0	5	F	high
+0	5	F	low
+0	5	F	med
+0	5	F	N/A
+0	5	T	high
+0	5	T	low
+0	5	T	med
+0	5	T	N/A
+0	N/A	F	high
+0	N/A	F	low
+0	N/A	F	med
+0	N/A	F	N/A
+0	N/A	T	high
+0	N/A	T	low
+0	N/A	T	med
+0	N/A	T	N/A
+MULT	capability(prof0,student0)	RA(prof0,student0)	salary(prof0,student0)
 Table: capability(prof0,student0)_CP_smoothed
-1	1	F	2036	NULL	0.000491	NULL	NULL
-1	2	F	2036	NULL	0.000491	NULL	NULL
-1	3	F	2036	NULL	0.000491	NULL	NULL
-1	4	F	2036	NULL	0.000491	NULL	NULL
-1	5	F	2036	NULL	0.000491	NULL	NULL
-1	N/A	T	256	NULL	0.003906	NULL	NULL
-2031	N/A	F	2036	NULL	0.997545	NULL	NULL
-41	2	T	256	NULL	0.160156	NULL	NULL
-41	5	T	256	NULL	0.160156	NULL	NULL
-51	1	T	256	NULL	0.199219	NULL	NULL
-51	4	T	256	NULL	0.199219	NULL	NULL
-71	3	T	256	NULL	0.277344	NULL	NULL
-MULT	capability(prof0,student0)	RA(prof0,student0)	ParentSum	local_mult	CP	likelihood	prior
+11	3	T	low	56	NULL	0.196429	NULL	NULL
+1	1	F	high	6	NULL	0.166665	NULL	NULL
+1	1	F	low	6	NULL	0.166665	NULL	NULL
+1	1	F	med	6	NULL	0.166665	NULL	NULL
+1	1	F	N/A	2036	NULL	0.000491	NULL	NULL
+1	1	T	high	116	NULL	0.008621	NULL	NULL
+1	1	T	N/A	6	NULL	0.166665	NULL	NULL
+1	2	F	high	6	NULL	0.166667	NULL	NULL
+1	2	F	low	6	NULL	0.166667	NULL	NULL
+1	2	F	med	6	NULL	0.166667	NULL	NULL
+1	2	F	N/A	2036	NULL	0.000491	NULL	NULL
+1	2	T	high	116	NULL	0.008621	NULL	NULL
+1	2	T	N/A	6	NULL	0.166667	NULL	NULL
+1	3	F	high	6	NULL	0.166667	NULL	NULL
+1	3	F	low	6	NULL	0.166667	NULL	NULL
+1	3	F	med	6	NULL	0.166667	NULL	NULL
+1	3	F	N/A	2036	NULL	0.000491	NULL	NULL
+1	3	T	N/A	6	NULL	0.166667	NULL	NULL
+1	4	F	high	6	NULL	0.166667	NULL	NULL
+1	4	F	low	6	NULL	0.166667	NULL	NULL
+1	4	F	med	6	NULL	0.166667	NULL	NULL
+1	4	F	N/A	2036	NULL	0.000491	NULL	NULL
+1	4	T	low	56	NULL	0.017857	NULL	NULL
+1	4	T	med	96	NULL	0.010417	NULL	NULL
+1	4	T	N/A	6	NULL	0.166667	NULL	NULL
+1	5	F	high	6	NULL	0.166667	NULL	NULL
+1	5	F	low	6	NULL	0.166667	NULL	NULL
+1	5	F	med	6	NULL	0.166667	NULL	NULL
+1	5	F	N/A	2036	NULL	0.000491	NULL	NULL
+1	5	T	low	56	NULL	0.017857	NULL	NULL
+1	5	T	med	96	NULL	0.010417	NULL	NULL
+1	5	T	N/A	6	NULL	0.166667	NULL	NULL
+1	N/A	F	high	6	NULL	0.166667	NULL	NULL
+1	N/A	F	low	6	NULL	0.166667	NULL	NULL
+1	N/A	F	med	6	NULL	0.166667	NULL	NULL
+1	N/A	T	high	116	NULL	0.008621	NULL	NULL
+1	N/A	T	low	56	NULL	0.017857	NULL	NULL
+1	N/A	T	med	96	NULL	0.010417	NULL	NULL
+1	N/A	T	N/A	6	NULL	0.166667	NULL	NULL
+2031	N/A	F	N/A	2036	NULL	0.997545	NULL	NULL
+21	1	T	low	56	NULL	0.375000	NULL	NULL
+21	2	T	low	56	NULL	0.375000	NULL	NULL
+21	2	T	med	96	NULL	0.218750	NULL	NULL
+21	3	T	high	116	NULL	0.181034	NULL	NULL
+31	1	T	med	96	NULL	0.322917	NULL	NULL
+41	3	T	med	96	NULL	0.427082	NULL	NULL
+41	5	T	high	116	NULL	0.353448	NULL	NULL
+51	4	T	high	116	NULL	0.439655	NULL	NULL
+MULT	capability(prof0,student0)	RA(prof0,student0)	salary(prof0,student0)	ParentSum	local_mult	CP	likelihood	prior
 Table: diff(course0)_CP
 126	2	2	174	21	0.724138	-6.78	0.500000
 156	1	1	192	26	0.812500	-5.40	0.500000
@@ -1347,117 +1422,31 @@ F	0.757669	1729	288	-79.84	0.757895
 registration(course0,student0)	CP	MULT	local_mult	likelihood	prior
 T	0.242331	553	92	-130.49	0.242105
 Table: salary(prof0,student0)_CP
-10	low	3	T	70	1	0.142857	-1.95	0.021930
-2030	N/A	N/A	F	2030	203	1.000000	0.00	0.890351
-20	high	3	T	70	2	0.285714	-2.51	0.048246
-20	low	1	T	50	2	0.400000	-1.83	0.021930
-20	low	2	T	40	2	0.500000	-1.39	0.021930
-20	med	2	T	40	2	0.500000	-1.39	0.039474
-30	med	1	T	50	3	0.600000	-1.53	0.039474
-40	high	5	T	40	4	1.000000	0.00	0.048246
-40	med	3	T	70	4	0.571429	-2.24	0.039474
-50	high	4	T	50	5	1.000000	0.00	0.048246
-MULT	salary(prof0,student0)	capability(prof0,student0)	RA(prof0,student0)	ParentSum	local_mult	CP	likelihood	prior
+110	high	T	250	11	0.440000	-9.03	0.048246
+2030	N/A	F	2030	203	1.000000	0.00	0.890351
+50	low	T	250	5	0.200000	-8.05	0.021930
+90	med	T	250	9	0.360000	-9.19	0.039474
+MULT	salary(prof0,student0)	RA(prof0,student0)	ParentSum	local_mult	CP	likelihood	prior
 Table: salary(prof0,student0)_CP_pairs
-0	high	1	F
-0	high	1	T
-0	high	2	F
-0	high	2	T
-0	high	3	F
-0	high	3	T
-0	high	4	F
-0	high	4	T
-0	high	5	F
-0	high	5	T
-0	high	N/A	F
-0	high	N/A	T
-0	low	1	F
-0	low	1	T
-0	low	2	F
-0	low	2	T
-0	low	3	F
-0	low	3	T
-0	low	4	F
-0	low	4	T
-0	low	5	F
-0	low	5	T
-0	low	N/A	F
-0	low	N/A	T
-0	med	1	F
-0	med	1	T
-0	med	2	F
-0	med	2	T
-0	med	3	F
-0	med	3	T
-0	med	4	F
-0	med	4	T
-0	med	5	F
-0	med	5	T
-0	med	N/A	F
-0	med	N/A	T
-0	N/A	1	F
-0	N/A	1	T
-0	N/A	2	F
-0	N/A	2	T
-0	N/A	3	F
-0	N/A	3	T
-0	N/A	4	F
-0	N/A	4	T
-0	N/A	5	F
-0	N/A	5	T
-0	N/A	N/A	F
-0	N/A	N/A	T
-MULT	salary(prof0,student0)	capability(prof0,student0)	RA(prof0,student0)
+0	high	F
+0	high	T
+0	low	F
+0	low	T
+0	med	F
+0	med	T
+0	N/A	F
+0	N/A	T
+MULT	salary(prof0,student0)	RA(prof0,student0)
 Table: salary(prof0,student0)_CP_smoothed
-11	low	3	T	74	NULL	0.148649	NULL	NULL
-1	high	1	F	4	NULL	0.250000	NULL	NULL
-1	high	1	T	54	NULL	0.018519	NULL	NULL
-1	high	2	F	4	NULL	0.250000	NULL	NULL
-1	high	2	T	44	NULL	0.022727	NULL	NULL
-1	high	3	F	4	NULL	0.250000	NULL	NULL
-1	high	4	F	4	NULL	0.250000	NULL	NULL
-1	high	5	F	4	NULL	0.250000	NULL	NULL
-1	high	N/A	F	2034	NULL	0.000492	NULL	NULL
-1	high	N/A	T	4	NULL	0.250000	NULL	NULL
-1	low	1	F	4	NULL	0.250000	NULL	NULL
-1	low	2	F	4	NULL	0.250000	NULL	NULL
-1	low	3	F	4	NULL	0.250000	NULL	NULL
-1	low	4	F	4	NULL	0.250000	NULL	NULL
-1	low	4	T	54	NULL	0.018519	NULL	NULL
-1	low	5	F	4	NULL	0.250000	NULL	NULL
-1	low	5	T	44	NULL	0.022727	NULL	NULL
-1	low	N/A	F	2034	NULL	0.000492	NULL	NULL
-1	low	N/A	T	4	NULL	0.250000	NULL	NULL
-1	med	1	F	4	NULL	0.250000	NULL	NULL
-1	med	2	F	4	NULL	0.250000	NULL	NULL
-1	med	3	F	4	NULL	0.250000	NULL	NULL
-1	med	4	F	4	NULL	0.250000	NULL	NULL
-1	med	4	T	54	NULL	0.018519	NULL	NULL
-1	med	5	F	4	NULL	0.250000	NULL	NULL
-1	med	5	T	44	NULL	0.022727	NULL	NULL
-1	med	N/A	F	2034	NULL	0.000492	NULL	NULL
-1	med	N/A	T	4	NULL	0.250000	NULL	NULL
-1	N/A	1	F	4	NULL	0.250000	NULL	NULL
-1	N/A	1	T	54	NULL	0.018519	NULL	NULL
-1	N/A	2	F	4	NULL	0.250000	NULL	NULL
-1	N/A	2	T	44	NULL	0.022727	NULL	NULL
-1	N/A	3	F	4	NULL	0.250000	NULL	NULL
-1	N/A	3	T	74	NULL	0.013514	NULL	NULL
-1	N/A	4	F	4	NULL	0.250000	NULL	NULL
-1	N/A	4	T	54	NULL	0.018519	NULL	NULL
-1	N/A	5	F	4	NULL	0.250000	NULL	NULL
-1	N/A	5	T	44	NULL	0.022727	NULL	NULL
-1	N/A	N/A	T	4	NULL	0.250000	NULL	NULL
-2031	N/A	N/A	F	2034	NULL	0.998524	NULL	NULL
-21	high	3	T	74	NULL	0.283784	NULL	NULL
-21	low	1	T	54	NULL	0.388889	NULL	NULL
-21	low	2	T	44	NULL	0.477273	NULL	NULL
-21	med	2	T	44	NULL	0.477273	NULL	NULL
-31	med	1	T	54	NULL	0.574073	NULL	NULL
-41	high	5	T	44	NULL	0.931819	NULL	NULL
-41	med	3	T	74	NULL	0.554053	NULL	NULL
-51	high	4	T	54	NULL	0.944443	NULL	NULL
-MULT	salary(prof0,student0)	capability(prof0,student0)	RA(prof0,student0)	ParentSum	local_mult	CP	likelihood	prior
+111	high	T	254	NULL	0.437008	NULL	NULL
+1	high	F	2034	NULL	0.000492	NULL	NULL
+1	low	F	2034	NULL	0.000492	NULL	NULL
+1	med	F	2034	NULL	0.000492	NULL	NULL
+1	N/A	T	254	NULL	0.003937	NULL	NULL
+2031	N/A	F	2034	NULL	0.998524	NULL	NULL
+51	low	T	254	NULL	0.200787	NULL	NULL
+91	med	T	254	NULL	0.358268	NULL	NULL
+MULT	salary(prof0,student0)	RA(prof0,student0)	ParentSum	local_mult	CP	likelihood	prior
 Table: sat(course0,student0)_CP
 12	3	2	T	174	2	0.068966	-5.35	0.055263
 1728	N/A	N/A	F	1728	288	1.000000	0.00	0.757895
