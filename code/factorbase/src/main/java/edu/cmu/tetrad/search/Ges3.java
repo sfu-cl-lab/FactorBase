@@ -37,12 +37,8 @@ import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.WeakHashMap;
 
-import cern.colt.matrix.DoubleMatrix1D;
-import cern.colt.matrix.DoubleMatrix2D;
-import cern.colt.matrix.linalg.Algebra;
 import edu.cmu.tetrad.data.DataSet;
 import edu.cmu.tetrad.data.DataUtils;
-import edu.cmu.tetrad.data.ICovarianceMatrix;
 import edu.cmu.tetrad.data.Knowledge;
 import edu.cmu.tetrad.data.KnowledgeEdge;
 import edu.cmu.tetrad.graph.Edge;
@@ -50,9 +46,7 @@ import edu.cmu.tetrad.graph.EdgeListGraph;
 import edu.cmu.tetrad.graph.Edges;
 import edu.cmu.tetrad.graph.Graph;
 import edu.cmu.tetrad.graph.Node;
-import edu.cmu.tetrad.util.MatrixUtils;
 import edu.cmu.tetrad.util.NumberFormatUtil;
-import edu.cmu.tetrad.util.ProbUtils;
 import edu.cmu.tetrad.util.TetradLogger;
 
 /**
@@ -72,16 +66,6 @@ public class Ges3 {
      * The data set, various variable subsets of which are to be scored.
      */
     private DataSet dataSet;
-
-    /**
-     * The covariance matrix for the data set.
-     */
-    private DoubleMatrix2D covariances;
-
-    /**
-     * Sample size, either from the data set or from the variances.
-     */
-    private int sampleSize;
 
     /**
      * Specification of forbidden and required edges.
@@ -118,11 +102,6 @@ public class Ges3 {
      * For formatting printed numbers.
      */
     private final NumberFormat nf = NumberFormatUtil.getInstance().getNumberFormat();
-
-    /**
-     * For linear algebra.
-     */
-    private final Algebra algebra = new Algebra();                        // s = vv * x, or s12 = Theta.1 * Theta.12
 
     /**
      * Caches scores for discrete search.
@@ -197,13 +176,6 @@ public class Ges3 {
         }
     }
 
-    public Ges3(ICovarianceMatrix covMatrix) {
-        setCovMatrix(covMatrix);
-        if (dataSet != null) {
-            discreteScore = new MdluScore(dataSet, .001);
-        }
-    }
-
     //==========================PUBLIC METHODS==========================//
 
 
@@ -223,12 +195,6 @@ public class Ges3 {
      */
     public Graph search() {
 //        long startTime = System.currentTimeMillis();
-
-        // Check for missing values.
-        if (covariances != null && DataUtils.containsMissingValue(covariances)) {
-            throw new IllegalArgumentException(
-                    "Please remove or impute missing values first.");
-        }
 
         // Check for missing values.
         if (dataSet != null && DataUtils.containsMissingValue(dataSet)) {
@@ -447,25 +413,6 @@ public class Ges3 {
             Node y = nodes.get(arrow.getY());
             Set<Node> t = arrow.getHOrT();
             double bump = arrow.getBump();
-
-            if (covariances != null && minJump == 0 && isUseFCutoff()) {
-                double _p = getfCutoffP();
-                double v;
-
-                // Find the value for v that will yield p = _p
-
-                for (v = 0.0; ; v += 0.25) {
-                    int n = sampleSize();
-                    double f = Math.exp((v - Math.log(n)) / n);
-                    double p = 1 - ProbUtils.fCdf(f, n, n);
-
-                    if (p <= _p) {
-                        break;
-                    }
-                }
-
-                minJump = v;
-            }
 
             score = score + bump;
             insert(x, y, t, graph, score, true, bump);
@@ -1211,19 +1158,8 @@ public class Ges3 {
         this.discrete = dataSet.isDiscrete();
 
         if (!isDiscrete()) {
-            this.covariances = dataSet.getCovarianceMatrix();
+            throw new UnsupportedOperationException("Not Implemented Yet!");
         }
-
-        this.sampleSize = dataSet.getNumRows();
-    }
-
-    private void setCovMatrix(ICovarianceMatrix covarianceMatrix) {
-        this.covariances = covarianceMatrix.getMatrix();
-        List<String> _varNames = covarianceMatrix.getVariableNames();
-
-        this.varNames = _varNames.toArray(new String[0]);
-        this.variables = covarianceMatrix.getVariables();
-        this.sampleSize = covarianceMatrix.getSampleSize();
     }
 
     private void buildIndexing(Graph graph) {
@@ -1273,7 +1209,7 @@ public class Ges3 {
 
                 score += localDiscreteScore(nextIndex, parentIndices);
             } else {
-                score += localSemScore(nextIndex, parentIndices);
+                throw new UnsupportedOperationException("Not Implemented Yet!");
             }
         }
        // System.out.println("zqian##########Leaving scoreGraph(Graph) which has "+dag.getNodes().size()+ "Nodes.");
@@ -1297,7 +1233,7 @@ public class Ges3 {
             if (isDiscrete()) {
                 score1 = localDiscreteScore(yIndex, parentIndices1);
             } else {
-                score1 = localSemScore(yIndex, parentIndices1);
+                throw new UnsupportedOperationException("Not Implemented Yet!");
             }
 
             scoreHash.get(y).put(parents1, score1);
@@ -1316,7 +1252,7 @@ public class Ges3 {
             if (isDiscrete()) {
                 score2 = localDiscreteScore(yIndex, parentIndices2);
             } else {
-                score2 = localSemScore(yIndex, parentIndices2);
+                throw new UnsupportedOperationException("Not Implemented Yet!");
             }
 
             scoreHash.get(y).put(parents2, score2);
@@ -1334,130 +1270,8 @@ public class Ges3 {
         return getDiscreteScore().localScore(i, parents);
     }
 
-    /**
-     * Calculates the sample likelihood and BIC score for i given its parents in a simple SEM model.
-     */
-    private double localSemScore(int i, int[] parents) {
-
-        // Calculate the unexplained variance of i given z1,...,zn
-        // considered as a naive Bayes model.
-        double variance = getCovMatrix().get(i, i);
-        int n = sampleSize();
-        double k = parents.length + 1;
-
-//        if (regression == null) {
-//            regression = new RegressionDataset(dataSet());
-//        }
-//
-//        List<Node> variables = dataSet.getVariables();
-//        Node target = variables.get(i);
-//
-//        List<Node> regressors = new ArrayList<Node>();
-//
-//        for (int parent : parents) {
-//            regressors.add(variables.get(parent));
-//        }
-//
-//        RegressionResult result = regression.regress(target, regressors);
-//
-//        double[] residuals = result.getResiduals().toArray();
-//
-//        double _variance = StatUtils.variance(residuals);
-
-        if (parents.length > 0) {
-
-            // Regress z onto i, yielding regression coefficients b.
-            DoubleMatrix2D Czz = getCovMatrix().viewSelection(parents, parents);
-            DoubleMatrix2D inverse = invert(Czz, parents);
-            DoubleMatrix1D Cyz = getCovMatrix().viewColumn(i);
-            Cyz = Cyz.viewSelection(parents);
-            DoubleMatrix1D b = algebra().mult(inverse, Cyz);
-
-//            System.out.println("B = " + MatrixUtils.toString(b.toArray()));
-
-            variance -= algebra().mult(Cyz, b);
-        }
-
-        if (variance == 0) {
-            StringBuilder b = localModelString(i, parents);
-            this.logger.log("info", b.toString());
-            this.logger.log("info", "Zero residual variance; returning negative infinity.");
-            return Double.NEGATIVE_INFINITY;
-        }
-
-        double penalty = getPenaltyDiscount();
-
-        // This is the full -BIC formula.
-//        return -0.5 n * Math.log(variance) - n * Math.log(2. * Math.PI) - n
-//                - penalty * k * Math.log(n);
-//        return -.5 * n * (Math.log(variance) + Math.log(2 * Math.PI) + 1) - penalty * k * Math.log(n);
-
-        // 2L - k ln n = 2 * BIC
-//        return -n * (Math.log(variance) + Math.log(2 * Math.PI) + 1) - penalty * k * Math.log(n);
-
-        // This is the formula with contant terms for fixed n removed.
-        return -n * Math.log(variance) - penalty * k * Math.log(n);
-    }
-
-    private StringBuilder localModelString(int i, int[] parents) {
-        StringBuilder b = new StringBuilder();
-        b.append(("*** "));
-        b.append(variables.get(i));
-
-        if (parents.length == 0) {
-            b.append(" with no parents");
-        } else {
-            b.append(" with parents ");
-
-            for (int j = 0; j < parents.length; j++) {
-                b.append(variables.get(parents[j]));
-
-                if (j < parents.length - 1) {
-                    b.append(",");
-                }
-            }
-        }
-        return b;
-    }
-
-    private DoubleMatrix2D invert(DoubleMatrix2D czz, int[] parents) {
-        DoubleMatrix2D inverse;
-        try {
-//            inverse = algebra().inverse(czz);
-//                inverse = MatrixUtils.inverse(czz);
-            inverse = MatrixUtils.ginverse(czz);
-        }
-        catch (Exception e) {
-            StringBuilder buf = new StringBuilder();
-            buf.append("Could not invert matrix for variables: ");
-
-            for (int j = 0; j < parents.length; j++) {
-                buf.append(variables.get(parents[j]));
-
-                if (j < parents.length - 1) {
-                    buf.append(", ");
-                }
-            }
-
-            throw new IllegalArgumentException(buf.toString());
-        }
-        return inverse;
-    }
-
-    private int sampleSize() {
-        return this.sampleSize;
-    }
-
     private List<Node> getVariables() {
         return variables;
-    }
-
-    private DoubleMatrix2D getCovMatrix() {
-        return covariances;
-    }
-
-    private Algebra algebra() {
-        return algebra;
     }
 
     private DataSet dataSet() {
