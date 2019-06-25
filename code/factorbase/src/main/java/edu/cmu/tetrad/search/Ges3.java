@@ -104,16 +104,6 @@ public class Ges3 {
     private final NumberFormat nf = NumberFormatUtil.getInstance().getNumberFormat();
 
     /**
-     * Caches scores for discrete search.
-     */
-    private final LocalScoreCache localScoreCache = new LocalScoreCache();
-
-    /**
-     * Elapsed time of the most recent search.
-     */
-    private long elapsedTime;
-
-    /**
      * True if cycles are to be aggressively prevented. May be expensive for large graphs (but also useful for large
      * graphs).
      */
@@ -125,15 +115,6 @@ public class Ges3 {
     private transient List<PropertyChangeListener> listeners;
 
     /**
-     * Penalty discount--the BIC penalty is multiplied by this (for continuous variables).
-     */
-    private double penaltyDiscount = 1.0;
-
-    private boolean useFCutoff = false;
-
-    private double fCutoffP = 0.01;
-
-    /**
      * The maximum number of edges the algorithm will add to the graph.
      */
     private int maxEdgesAdded = -1;
@@ -142,11 +123,6 @@ public class Ges3 {
      * The score for discrete searches.
      */
     private LocalDiscreteScore discreteScore;
-
-    /**
-     * The logger for this class. The config needs to be set.
-     */
-    private TetradLogger logger = TetradLogger.getInstance();
 
     /**
      * The top n graphs found by the algorithm, where n is <code>numPatternsToStore</code>.
@@ -178,14 +154,6 @@ public class Ges3 {
 
     //==========================PUBLIC METHODS==========================//
 
-
-    public boolean isAggressivelyPreventCycles() {
-        return this.aggressivelyPreventCycles;
-    }
-
-    public void setAggressivelyPreventCycles(boolean aggressivelyPreventCycles) {
-        this.aggressivelyPreventCycles = aggressivelyPreventCycles;
-    }
 
     /**
      * Greedy equivalence search: Start from the empty graph, add edges till model is significant. Then start deleting
@@ -249,36 +217,6 @@ public class Ges3 {
 
     }
 
-    public Graph search(List<Node> nodes) {
-        long startTime = System.currentTimeMillis();
-        localScoreCache.clear();
-
-        if (!dataSet().getVariables().containsAll(nodes)) {
-            throw new IllegalArgumentException(
-                    "All of the nodes must be in " + "the supplied data set.");
-        }
-
-        Graph graph = new EdgeListGraph(nodes);
-        buildIndexing(graph);
-        addRequiredEdges(graph);
-        double score = 0; //scoreGraph(graph);
-
-        // Do forward search.
-        score = fes(graph, score);
-
-        // Do backward search.
-        bes(graph, score);
-
-        long endTime = System.currentTimeMillis();
-        this.elapsedTime = endTime - startTime;
-
-        this.logger.log("graph", "\nReturning this graph: " + graph);
-
-        this.logger.log("info", "Elapsed time = " + (elapsedTime) / 1000. + " s");
-        this.logger.flush();
-        return graph;
-    }
-
     public Knowledge getKnowledge() {
         return knowledge;
     }
@@ -295,63 +233,16 @@ public class Ges3 {
         this.knowledge = knowledge;
     }
 
-    public void addPropertyChangeListener(PropertyChangeListener l) {
-        getListeners().add(l);
-    }
-
-    public double getPenaltyDiscount() {
-        return penaltyDiscount;
-    }
-
-    public void setPenaltyDiscount(double penaltyDiscount) {
-        if (penaltyDiscount < 0) {
-            throw new IllegalArgumentException("Penalty discount must be >= 0: "
-                    + penaltyDiscount);
-        }
-
-        this.penaltyDiscount = penaltyDiscount;
-    }
-
     public int getMaxEdgesAdded() {
         return maxEdgesAdded;
-    }
-
-    public void setMaxEdgesAdded(int maxEdgesAdded) {
-        if (maxEdgesAdded < -1) throw new IllegalArgumentException();
-
-        this.maxEdgesAdded = maxEdgesAdded;
-    }
-
-    public void setTrueGraph(Graph trueGraph) {
-        this.trueGraph = trueGraph;
-    }
-
-    public double getScore(Graph dag) {
-        return scoreGraph(dag);
-    }
-
-    public SortedSet<ScoredGraph> getTopGraphs() {
-        return topGraphs;
     }
 
     public int getNumPatternsToStore() {
         return numPatternsToStore;
     }
 
-    public void setNumPatternsToStore(int numPatternsToStore) {
-        if (numPatternsToStore < 1) {
-            throw new IllegalArgumentException("Must store at least one pattern: " + numPatternsToStore);
-        }
-
-        this.numPatternsToStore = numPatternsToStore;
-    }
-
     public boolean isStoreGraphs() {
         return storeGraphs;
-    }
-
-    public void setStoreGraphs(boolean storeGraphs) {
-        this.storeGraphs = storeGraphs;
     }
 
 
@@ -362,8 +253,8 @@ public class Ges3 {
      *
      * @param graph The graph in the state prior to the forward equivalence search.
      * @param score The score in the state prior to the forward equivalence search
-     * @return the score in the state after the forward equivelance search. Note that the graph is changed as a
-     *         side-effect to its state after the forward equivelance search.
+     * @return the score in the state after the forward equivalence search. Note that the graph is changed as a
+     *         side-effect to its state after the forward equivalence search.
      */
     private double fes(Graph graph, double score) {
 
@@ -691,32 +582,6 @@ public class Ges3 {
                 lookupArrowsBackwards[i][j].add(arrow);
             }
         }
-    }
-
-    /**
-     * True iff the f cutoff should be used in the forward search.
-     */
-    public boolean isUseFCutoff() {
-        return useFCutoff;
-    }
-
-    public void setUseFCutoff(boolean useFCutoff) {
-        this.useFCutoff = useFCutoff;
-    }
-
-    /**
-     * The P value for the f cutoff, if used.
-     */
-    public double getfCutoffP() {
-        return fCutoffP;
-    }
-
-    public void setfCutoffP(double fCutoffP) {
-        if (fCutoffP < 0.0 || fCutoffP > 1.0) {
-            throw new IllegalArgumentException();
-        }
-
-        this.fCutoffP = fCutoffP;
     }
 
     private static class Arrow implements Comparable {
@@ -1272,10 +1137,6 @@ public class Ges3 {
 
     private List<Node> getVariables() {
         return variables;
-    }
-
-    private DataSet dataSet() {
-        return dataSet;
     }
 
     private boolean isDiscrete() {
