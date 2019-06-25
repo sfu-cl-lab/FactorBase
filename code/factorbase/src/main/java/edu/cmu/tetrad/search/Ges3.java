@@ -66,7 +66,7 @@ import edu.cmu.tetrad.util.TetradLogger;
  * @author Joseph Ramsey, Revisions 10/2005
  */
 
-public final class Ges3 implements GraphSearch, GraphScorer {
+public class Ges3 {
 
     /**
      * The data set, various variable subsets of which are to be scored.
@@ -221,7 +221,6 @@ public final class Ges3 implements GraphSearch, GraphScorer {
      *
      * @return the resulting Pattern.
      */
-    @Override
     public Graph search() {
 //        long startTime = System.currentTimeMillis();
 
@@ -328,15 +327,6 @@ public final class Ges3 implements GraphSearch, GraphScorer {
             throw new NullPointerException("Knowledge must not be null.");
         }
         this.knowledge = knowledge;
-    }
-
-    @Override
-    public long getElapsedTime() {
-        return elapsedTime;
-    }
-
-    public void setElapsedTime(long elapsedTime) {
-        this.elapsedTime = elapsedTime;
     }
 
     public void addPropertyChangeListener(PropertyChangeListener l) {
@@ -1251,7 +1241,6 @@ public final class Ges3 implements GraphSearch, GraphScorer {
 
     //===========================SCORING METHODS===========================//
 
-    @Override
     public double scoreGraph(Graph graph) {
         Graph dag = SearchGraphUtils.dagFromPattern(graph);
         double score = 0.;
