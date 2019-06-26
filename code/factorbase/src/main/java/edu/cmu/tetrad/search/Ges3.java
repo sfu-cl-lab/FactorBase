@@ -256,12 +256,13 @@ public class Ges3 {
      * @return the score in the state after the forward equivalence search. Note that the graph is changed as a
      *         side-effect to its state after the forward equivalence search.
      */
+    @SuppressWarnings("unchecked")
     private double fes(Graph graph, double score) {
 
         List<Node> nodes = graph.getNodes();
 
         sortedArrows = new TreeSet<Arrow>();
-        lookupArrows = new HashSet[nodes.size()][nodes.size()];
+        lookupArrows = (HashSet<Arrow>[][]) new HashSet[nodes.size()][nodes.size()];
 
         nodesHash = new HashMap<Node, Integer>();
         int index = -1;
@@ -412,10 +413,11 @@ public class Ges3 {
 
     }
 
+    @SuppressWarnings("unchecked")
     private void initializeArrowsBackward(Graph graph) {
         List<Node> nodes = graph.getNodes();
         sortedArrowsBackwards = new TreeSet<Arrow>();
-        lookupArrowsBackwards = new HashSet[nodes.size()][nodes.size()];
+        lookupArrowsBackwards = (HashSet<Arrow>[][]) new HashSet[nodes.size()][nodes.size()];
 
         List<Edge> graphEdges = graph.getEdges();
         for (Edge edge : graphEdges) {
@@ -584,7 +586,7 @@ public class Ges3 {
         }
     }
 
-    private static class Arrow implements Comparable {
+    private static class Arrow implements Comparable<Arrow> {
         private double bump;
         private int x;
         private int y;
@@ -624,8 +626,8 @@ public class Ges3 {
         // Sorting is by bump, high to low.
 
         @Override
-        public int compareTo(Object o) {
-            Arrow info = (Arrow) o;
+        public int compareTo(Arrow o) {
+            Arrow info = o;
             return new Double(info.getBump()).compareTo(new Double(getBump()));
         }
 
