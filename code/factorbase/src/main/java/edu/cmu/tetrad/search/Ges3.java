@@ -37,12 +37,8 @@ import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.WeakHashMap;
 
-import cern.colt.matrix.DoubleMatrix1D;
-import cern.colt.matrix.DoubleMatrix2D;
-import cern.colt.matrix.linalg.Algebra;
 import edu.cmu.tetrad.data.DataSet;
 import edu.cmu.tetrad.data.DataUtils;
-import edu.cmu.tetrad.data.ICovarianceMatrix;
 import edu.cmu.tetrad.data.Knowledge;
 import edu.cmu.tetrad.data.KnowledgeEdge;
 import edu.cmu.tetrad.graph.Edge;
@@ -50,9 +46,7 @@ import edu.cmu.tetrad.graph.EdgeListGraph;
 import edu.cmu.tetrad.graph.Edges;
 import edu.cmu.tetrad.graph.Graph;
 import edu.cmu.tetrad.graph.Node;
-import edu.cmu.tetrad.util.MatrixUtils;
 import edu.cmu.tetrad.util.NumberFormatUtil;
-import edu.cmu.tetrad.util.ProbUtils;
 import edu.cmu.tetrad.util.TetradLogger;
 
 /**
@@ -66,22 +60,12 @@ import edu.cmu.tetrad.util.TetradLogger;
  * @author Joseph Ramsey, Revisions 10/2005
  */
 
-public final class Ges3 implements GraphSearch, GraphScorer {
+public class Ges3 {
 
     /**
      * The data set, various variable subsets of which are to be scored.
      */
     private DataSet dataSet;
-
-    /**
-     * The covariance matrix for the data set.
-     */
-    private DoubleMatrix2D covariances;
-
-    /**
-     * Sample size, either from the data set or from the variances.
-     */
-    private int sampleSize;
 
     /**
      * Specification of forbidden and required edges.
@@ -120,21 +104,6 @@ public final class Ges3 implements GraphSearch, GraphScorer {
     private final NumberFormat nf = NumberFormatUtil.getInstance().getNumberFormat();
 
     /**
-     * For linear algebra.
-     */
-    private final Algebra algebra = new Algebra();                        // s = vv * x, or s12 = Theta.1 * Theta.12
-
-    /**
-     * Caches scores for discrete search.
-     */
-    private final LocalScoreCache localScoreCache = new LocalScoreCache();
-
-    /**
-     * Elapsed time of the most recent search.
-     */
-    private long elapsedTime;
-
-    /**
      * True if cycles are to be aggressively prevented. May be expensive for large graphs (but also useful for large
      * graphs).
      */
@@ -146,15 +115,6 @@ public final class Ges3 implements GraphSearch, GraphScorer {
     private transient List<PropertyChangeListener> listeners;
 
     /**
-     * Penalty discount--the BIC penalty is multiplied by this (for continuous variables).
-     */
-    private double penaltyDiscount = 1.0;
-
-    private boolean useFCutoff = false;
-
-    private double fCutoffP = 0.01;
-
-    /**
      * The maximum number of edges the algorithm will add to the graph.
      */
     private int maxEdgesAdded = -1;
@@ -163,11 +123,6 @@ public final class Ges3 implements GraphSearch, GraphScorer {
      * The score for discrete searches.
      */
     private LocalDiscreteScore discreteScore;
-
-    /**
-     * The logger for this class. The config needs to be set.
-     */
-    private TetradLogger logger = TetradLogger.getInstance();
 
     /**
      * The top n graphs found by the algorithm, where n is <code>numPatternsToStore</code>.
@@ -197,23 +152,8 @@ public final class Ges3 implements GraphSearch, GraphScorer {
         }
     }
 
-    public Ges3(ICovarianceMatrix covMatrix) {
-        setCovMatrix(covMatrix);
-        if (dataSet != null) {
-            discreteScore = new MdluScore(dataSet, .001);
-        }
-    }
-
     //==========================PUBLIC METHODS==========================//
 
-
-    public boolean isAggressivelyPreventCycles() {
-        return this.aggressivelyPreventCycles;
-    }
-
-    public void setAggressivelyPreventCycles(boolean aggressivelyPreventCycles) {
-        this.aggressivelyPreventCycles = aggressivelyPreventCycles;
-    }
 
     /**
      * Greedy equivalence search: Start from the empty graph, add edges till model is significant. Then start deleting
@@ -221,15 +161,8 @@ public final class Ges3 implements GraphSearch, GraphScorer {
      *
      * @return the resulting Pattern.
      */
-    @Override
     public Graph search() {
 //        long startTime = System.currentTimeMillis();
-
-        // Check for missing values.
-        if (covariances != null && DataUtils.containsMissingValue(covariances)) {
-            throw new IllegalArgumentException(
-                    "Please remove or impute missing values first.");
-        }
 
         // Check for missing values.
         if (dataSet != null && DataUtils.containsMissingValue(dataSet)) {
@@ -284,36 +217,6 @@ public final class Ges3 implements GraphSearch, GraphScorer {
 
     }
 
-    public Graph search(List<Node> nodes) {
-        long startTime = System.currentTimeMillis();
-        localScoreCache.clear();
-
-        if (!dataSet().getVariables().containsAll(nodes)) {
-            throw new IllegalArgumentException(
-                    "All of the nodes must be in " + "the supplied data set.");
-        }
-
-        Graph graph = new EdgeListGraph(nodes);
-        buildIndexing(graph);
-        addRequiredEdges(graph);
-        double score = 0; //scoreGraph(graph);
-
-        // Do forward search.
-        score = fes(graph, score);
-
-        // Do backward search.
-        bes(graph, score);
-
-        long endTime = System.currentTimeMillis();
-        this.elapsedTime = endTime - startTime;
-
-        this.logger.log("graph", "\nReturning this graph: " + graph);
-
-        this.logger.log("info", "Elapsed time = " + (elapsedTime) / 1000. + " s");
-        this.logger.flush();
-        return graph;
-    }
-
     public Knowledge getKnowledge() {
         return knowledge;
     }
@@ -330,72 +233,16 @@ public final class Ges3 implements GraphSearch, GraphScorer {
         this.knowledge = knowledge;
     }
 
-    @Override
-    public long getElapsedTime() {
-        return elapsedTime;
-    }
-
-    public void setElapsedTime(long elapsedTime) {
-        this.elapsedTime = elapsedTime;
-    }
-
-    public void addPropertyChangeListener(PropertyChangeListener l) {
-        getListeners().add(l);
-    }
-
-    public double getPenaltyDiscount() {
-        return penaltyDiscount;
-    }
-
-    public void setPenaltyDiscount(double penaltyDiscount) {
-        if (penaltyDiscount < 0) {
-            throw new IllegalArgumentException("Penalty discount must be >= 0: "
-                    + penaltyDiscount);
-        }
-
-        this.penaltyDiscount = penaltyDiscount;
-    }
-
     public int getMaxEdgesAdded() {
         return maxEdgesAdded;
-    }
-
-    public void setMaxEdgesAdded(int maxEdgesAdded) {
-        if (maxEdgesAdded < -1) throw new IllegalArgumentException();
-
-        this.maxEdgesAdded = maxEdgesAdded;
-    }
-
-    public void setTrueGraph(Graph trueGraph) {
-        this.trueGraph = trueGraph;
-    }
-
-    public double getScore(Graph dag) {
-        return scoreGraph(dag);
-    }
-
-    public SortedSet<ScoredGraph> getTopGraphs() {
-        return topGraphs;
     }
 
     public int getNumPatternsToStore() {
         return numPatternsToStore;
     }
 
-    public void setNumPatternsToStore(int numPatternsToStore) {
-        if (numPatternsToStore < 1) {
-            throw new IllegalArgumentException("Must store at least one pattern: " + numPatternsToStore);
-        }
-
-        this.numPatternsToStore = numPatternsToStore;
-    }
-
     public boolean isStoreGraphs() {
         return storeGraphs;
-    }
-
-    public void setStoreGraphs(boolean storeGraphs) {
-        this.storeGraphs = storeGraphs;
     }
 
 
@@ -406,15 +253,16 @@ public final class Ges3 implements GraphSearch, GraphScorer {
      *
      * @param graph The graph in the state prior to the forward equivalence search.
      * @param score The score in the state prior to the forward equivalence search
-     * @return the score in the state after the forward equivelance search. Note that the graph is changed as a
-     *         side-effect to its state after the forward equivelance search.
+     * @return the score in the state after the forward equivalence search. Note that the graph is changed as a
+     *         side-effect to its state after the forward equivalence search.
      */
+    @SuppressWarnings("unchecked")
     private double fes(Graph graph, double score) {
 
         List<Node> nodes = graph.getNodes();
 
         sortedArrows = new TreeSet<Arrow>();
-        lookupArrows = new HashSet[nodes.size()][nodes.size()];
+        lookupArrows = (HashSet<Arrow>[][]) new HashSet[nodes.size()][nodes.size()];
 
         nodesHash = new HashMap<Node, Integer>();
         int index = -1;
@@ -457,25 +305,6 @@ public final class Ges3 implements GraphSearch, GraphScorer {
             Node y = nodes.get(arrow.getY());
             Set<Node> t = arrow.getHOrT();
             double bump = arrow.getBump();
-
-            if (covariances != null && minJump == 0 && isUseFCutoff()) {
-                double _p = getfCutoffP();
-                double v;
-
-                // Find the value for v that will yield p = _p
-
-                for (v = 0.0; ; v += 0.25) {
-                    int n = sampleSize();
-                    double f = Math.exp((v - Math.log(n)) / n);
-                    double p = 1 - ProbUtils.fCdf(f, n, n);
-
-                    if (p <= _p) {
-                        break;
-                    }
-                }
-
-                minJump = v;
-            }
 
             score = score + bump;
             insert(x, y, t, graph, score, true, bump);
@@ -584,10 +413,11 @@ public final class Ges3 implements GraphSearch, GraphScorer {
 
     }
 
+    @SuppressWarnings("unchecked")
     private void initializeArrowsBackward(Graph graph) {
         List<Node> nodes = graph.getNodes();
         sortedArrowsBackwards = new TreeSet<Arrow>();
-        lookupArrowsBackwards = new HashSet[nodes.size()][nodes.size()];
+        lookupArrowsBackwards = (HashSet<Arrow>[][]) new HashSet[nodes.size()][nodes.size()];
 
         List<Edge> graphEdges = graph.getEdges();
         for (Edge edge : graphEdges) {
@@ -756,33 +586,7 @@ public final class Ges3 implements GraphSearch, GraphScorer {
         }
     }
 
-    /**
-     * True iff the f cutoff should be used in the forward search.
-     */
-    public boolean isUseFCutoff() {
-        return useFCutoff;
-    }
-
-    public void setUseFCutoff(boolean useFCutoff) {
-        this.useFCutoff = useFCutoff;
-    }
-
-    /**
-     * The P value for the f cutoff, if used.
-     */
-    public double getfCutoffP() {
-        return fCutoffP;
-    }
-
-    public void setfCutoffP(double fCutoffP) {
-        if (fCutoffP < 0.0 || fCutoffP > 1.0) {
-            throw new IllegalArgumentException();
-        }
-
-        this.fCutoffP = fCutoffP;
-    }
-
-    private static class Arrow implements Comparable {
+    private static class Arrow implements Comparable<Arrow> {
         private double bump;
         private int x;
         private int y;
@@ -822,8 +626,8 @@ public final class Ges3 implements GraphSearch, GraphScorer {
         // Sorting is by bump, high to low.
 
         @Override
-        public int compareTo(Object o) {
-            Arrow info = (Arrow) o;
+        public int compareTo(Arrow o) {
+            Arrow info = o;
             return new Double(info.getBump()).compareTo(new Double(getBump()));
         }
 
@@ -1221,19 +1025,8 @@ public final class Ges3 implements GraphSearch, GraphScorer {
         this.discrete = dataSet.isDiscrete();
 
         if (!isDiscrete()) {
-            this.covariances = dataSet.getCovarianceMatrix();
+            throw new UnsupportedOperationException("Not Implemented Yet!");
         }
-
-        this.sampleSize = dataSet.getNumRows();
-    }
-
-    private void setCovMatrix(ICovarianceMatrix covarianceMatrix) {
-        this.covariances = covarianceMatrix.getMatrix();
-        List<String> _varNames = covarianceMatrix.getVariableNames();
-
-        this.varNames = _varNames.toArray(new String[0]);
-        this.variables = covarianceMatrix.getVariables();
-        this.sampleSize = covarianceMatrix.getSampleSize();
     }
 
     private void buildIndexing(Graph graph) {
@@ -1251,7 +1044,6 @@ public final class Ges3 implements GraphSearch, GraphScorer {
 
     //===========================SCORING METHODS===========================//
 
-    @Override
     public double scoreGraph(Graph graph) {
         Graph dag = SearchGraphUtils.dagFromPattern(graph);
         double score = 0.;
@@ -1284,7 +1076,7 @@ public final class Ges3 implements GraphSearch, GraphScorer {
 
                 score += localDiscreteScore(nextIndex, parentIndices);
             } else {
-                score += localSemScore(nextIndex, parentIndices);
+                throw new UnsupportedOperationException("Not Implemented Yet!");
             }
         }
        // System.out.println("zqian##########Leaving scoreGraph(Graph) which has "+dag.getNodes().size()+ "Nodes.");
@@ -1308,7 +1100,7 @@ public final class Ges3 implements GraphSearch, GraphScorer {
             if (isDiscrete()) {
                 score1 = localDiscreteScore(yIndex, parentIndices1);
             } else {
-                score1 = localSemScore(yIndex, parentIndices1);
+                throw new UnsupportedOperationException("Not Implemented Yet!");
             }
 
             scoreHash.get(y).put(parents1, score1);
@@ -1327,7 +1119,7 @@ public final class Ges3 implements GraphSearch, GraphScorer {
             if (isDiscrete()) {
                 score2 = localDiscreteScore(yIndex, parentIndices2);
             } else {
-                score2 = localSemScore(yIndex, parentIndices2);
+                throw new UnsupportedOperationException("Not Implemented Yet!");
             }
 
             scoreHash.get(y).put(parents2, score2);
@@ -1345,134 +1137,8 @@ public final class Ges3 implements GraphSearch, GraphScorer {
         return getDiscreteScore().localScore(i, parents);
     }
 
-    /**
-     * Calculates the sample likelihood and BIC score for i given its parents in a simple SEM model.
-     */
-    private double localSemScore(int i, int[] parents) {
-
-        // Calculate the unexplained variance of i given z1,...,zn
-        // considered as a naive Bayes model.
-        double variance = getCovMatrix().get(i, i);
-        int n = sampleSize();
-        double k = parents.length + 1;
-
-//        if (regression == null) {
-//            regression = new RegressionDataset(dataSet());
-//        }
-//
-//        List<Node> variables = dataSet.getVariables();
-//        Node target = variables.get(i);
-//
-//        List<Node> regressors = new ArrayList<Node>();
-//
-//        for (int parent : parents) {
-//            regressors.add(variables.get(parent));
-//        }
-//
-//        RegressionResult result = regression.regress(target, regressors);
-//
-//        double[] residuals = result.getResiduals().toArray();
-//
-//        double _variance = StatUtils.variance(residuals);
-
-        if (parents.length > 0) {
-
-            // Regress z onto i, yielding regression coefficients b.
-            DoubleMatrix2D Czz = getCovMatrix().viewSelection(parents, parents);
-            DoubleMatrix2D inverse = invert(Czz, parents);
-            DoubleMatrix1D Cyz = getCovMatrix().viewColumn(i);
-            Cyz = Cyz.viewSelection(parents);
-            DoubleMatrix1D b = algebra().mult(inverse, Cyz);
-
-//            System.out.println("B = " + MatrixUtils.toString(b.toArray()));
-
-            variance -= algebra().mult(Cyz, b);
-        }
-
-        if (variance == 0) {
-            StringBuilder b = localModelString(i, parents);
-            this.logger.log("info", b.toString());
-            this.logger.log("info", "Zero residual variance; returning negative infinity.");
-            return Double.NEGATIVE_INFINITY;
-        }
-
-        double penalty = getPenaltyDiscount();
-
-        // This is the full -BIC formula.
-//        return -0.5 n * Math.log(variance) - n * Math.log(2. * Math.PI) - n
-//                - penalty * k * Math.log(n);
-//        return -.5 * n * (Math.log(variance) + Math.log(2 * Math.PI) + 1) - penalty * k * Math.log(n);
-
-        // 2L - k ln n = 2 * BIC
-//        return -n * (Math.log(variance) + Math.log(2 * Math.PI) + 1) - penalty * k * Math.log(n);
-
-        // This is the formula with contant terms for fixed n removed.
-        return -n * Math.log(variance) - penalty * k * Math.log(n);
-    }
-
-    private StringBuilder localModelString(int i, int[] parents) {
-        StringBuilder b = new StringBuilder();
-        b.append(("*** "));
-        b.append(variables.get(i));
-
-        if (parents.length == 0) {
-            b.append(" with no parents");
-        } else {
-            b.append(" with parents ");
-
-            for (int j = 0; j < parents.length; j++) {
-                b.append(variables.get(parents[j]));
-
-                if (j < parents.length - 1) {
-                    b.append(",");
-                }
-            }
-        }
-        return b;
-    }
-
-    private DoubleMatrix2D invert(DoubleMatrix2D czz, int[] parents) {
-        DoubleMatrix2D inverse;
-        try {
-//            inverse = algebra().inverse(czz);
-//                inverse = MatrixUtils.inverse(czz);
-            inverse = MatrixUtils.ginverse(czz);
-        }
-        catch (Exception e) {
-            StringBuilder buf = new StringBuilder();
-            buf.append("Could not invert matrix for variables: ");
-
-            for (int j = 0; j < parents.length; j++) {
-                buf.append(variables.get(parents[j]));
-
-                if (j < parents.length - 1) {
-                    buf.append(", ");
-                }
-            }
-
-            throw new IllegalArgumentException(buf.toString());
-        }
-        return inverse;
-    }
-
-    private int sampleSize() {
-        return this.sampleSize;
-    }
-
     private List<Node> getVariables() {
         return variables;
-    }
-
-    private DoubleMatrix2D getCovMatrix() {
-        return covariances;
-    }
-
-    private Algebra algebra() {
-        return algebra;
-    }
-
-    private DataSet dataSet() {
-        return dataSet;
     }
 
     private boolean isDiscrete() {
