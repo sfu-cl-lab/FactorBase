@@ -332,7 +332,8 @@ public class BayesBaseH {
             if (Integer.parseInt(NoTuples) > 1) {
                 BayesNet_Learning_main.tetradLearner(
                     databaseName + "/" + File.separator + "csv" + File.separator + id.replace("`","") + ".csv",
-                    databaseName + "/" + File.separator + "xml" + File.separator + id.replace("`","") + ".xml"
+                    databaseName + "/" + File.separator + "xml" + File.separator + id.replace("`","") + ".xml",
+                    !cont.equals("1")
                 );
 
                 bif1(id);
@@ -399,7 +400,8 @@ public class BayesBaseH {
                         databaseName + "/" + File.separator + "csv" + File.separator + id.replace("`","") + ".csv",
                         requiredEdges,
                         forbiddenEdges,
-                        databaseName + "/" + File.separator + "xml" + File.separator + id.replace("`","") + ".xml"
+                        databaseName + "/" + File.separator + "xml" + File.separator + id.replace("`","") + ".xml",
+                        !cont.equals("1")
                     );
 
                     logger.info("The BN Structure Learning for rnode_id::" + id + "is done."); //@zqian Test
