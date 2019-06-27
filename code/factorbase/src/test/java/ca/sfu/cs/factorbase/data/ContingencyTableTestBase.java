@@ -117,7 +117,7 @@ public abstract class ContingencyTableTestBase<T extends ContingencyTable> {
 
         long counts = this.contingencyTable.getCounts(assignments);
 
-        assertThat(counts, is(equalTo(0L)));
+        assertThat(counts, is(equalTo(4L)));
     }
 
     @Test
@@ -135,14 +135,5 @@ public abstract class ContingencyTableTestBase<T extends ContingencyTable> {
         boolean isDiscrete = this.contingencyTable.isDiscrete();
 
         assertThat(isDiscrete, is(true));
-    }
-
-    @Test
-    public void getTotalInstances_ReturnsCorrectValues_WhenDatasetIsValid() {
-        RandomVariableAssignment assignment = new RandomVariableAssignment("popularity(prof0)", "2");
-
-        long counts = this.contingencyTable.getTotalInstances(assignment);
-
-        assertThat(counts, is(equalTo(4L)));
     }
 }

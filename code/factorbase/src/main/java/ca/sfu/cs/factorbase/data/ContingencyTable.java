@@ -34,8 +34,6 @@ public interface ContingencyTable {
     /**
      * Retrieve the number of times a particular instance (grounding) occurs.
      *
-     * Note: If only a subset of the random variables are assigned, this method is expected to return 0.
-     *
      * @param randomVariableAssignments - list of attribute assignments for the grounding of interest.
      * @return the number of times the grounding occurs.
      */
@@ -54,12 +52,4 @@ public interface ContingencyTable {
      * @return True if the dataset only contains discrete data.
      */
     boolean isDiscrete();
-
-    /**
-     * Determine the total number of occurrences for the given random variable assignment.
-     *
-     * @param variableAssignment - the variable assignment to retrieve the total counts for.
-     * @return the total number of occurrences for the given random variable assignment.
-     */
-    long getTotalInstances(RandomVariableAssignment variableAssignment);
 }

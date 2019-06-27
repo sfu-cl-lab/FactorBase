@@ -98,7 +98,19 @@ public class TSVContingencyTable implements ContingencyTable {
 
     @Override
     public long getCounts(Set<RandomVariableAssignment> randomVariableAssignments) {
-        return this.data.getOrDefault(randomVariableAssignments, 0L);
+        if (randomVariableAssignments.size() == this.variableNames.size()) {
+            return this.data.getOrDefault(randomVariableAssignments, 0L);
+        } else {
+            long count = 0L;
+
+            for (Set<RandomVariableAssignment> assignments : this.data.keySet()) {
+                if (assignments.containsAll(randomVariableAssignments)) {
+                    count += this.data.get(assignments);
+                }
+            }
+
+            return count;
+        }
     }
 
 
@@ -111,19 +123,5 @@ public class TSVContingencyTable implements ContingencyTable {
     @Override
     public boolean isDiscrete() {
         return this.isDiscrete;
-    }
-
-
-    @Override
-    public long getTotalInstances(RandomVariableAssignment variableAssignment) {
-        long total = 0L;
-
-        for (Set<RandomVariableAssignment> assignments : this.data.keySet()) {
-            if (assignments.contains(variableAssignment)) {
-                total += this.data.get(assignments);
-            }
-        }
-
-        return total;
     }
 }

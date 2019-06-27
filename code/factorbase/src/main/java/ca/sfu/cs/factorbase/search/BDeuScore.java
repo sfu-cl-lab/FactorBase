@@ -43,15 +43,9 @@ public class BDeuScore implements DiscreteLocalScore {
             long counts;
             for (String childState : this.contingencyTable.getStates(child)) {
                 RandomVariableAssignment childVariable = new RandomVariableAssignment(child, childState);
-                if (parents.size() == 0) {
-                    counts = this.contingencyTable.getTotalInstances(childVariable);
-                } else {
-                    Set<RandomVariableAssignment> augmentedSet = new HashSet<RandomVariableAssignment>(parentState);
-                    augmentedSet.add(childVariable);
-
-                    counts = this.contingencyTable.getCounts(augmentedSet);
-                }
-
+                Set<RandomVariableAssignment> augmentedSet = new HashSet<RandomVariableAssignment>(parentState);
+                augmentedSet.add(childVariable);
+                counts = this.contingencyTable.getCounts(augmentedSet);
                 countsSum += counts;
                 score = score.add(new BigDecimal(ProbUtils.lngamma(this.samplePrior / (r * q) + counts)));
             }
