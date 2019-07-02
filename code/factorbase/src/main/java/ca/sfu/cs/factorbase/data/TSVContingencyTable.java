@@ -37,14 +37,14 @@ public class TSVContingencyTable implements ContingencyTable {
             this.variableNames.remove(countsColumn);
             String row;
 
-            // while loop to process and extract information from the given file.
+            // while loop to process each row and extract information from the given file.
             while ((row = reader.readLine()) != null) {
 
                 String[] data = row.split("\t");
                 Set<RandomVariableAssignment> attributes = new HashSet<RandomVariableAssignment>();
                 long counts = -1L;
 
-                // for loop to process the data rows.
+                // for loop to process the data for the current row.
                 for (int columnIndex = 0; columnIndex < header.length; columnIndex++) {
                     String variableName = header[columnIndex];
                     String value = data[columnIndex];
@@ -61,7 +61,14 @@ public class TSVContingencyTable implements ContingencyTable {
                     }
                 }
 
-                this.data.put(attributes, counts);
+                // for loop to extract the counts for the power set of the attributes for the current row.
+                for (Set<RandomVariableAssignment> combination : Sets.powerSet(attributes)) {
+                    if (!combination.isEmpty()) {
+                        long currentCount = this.data.getOrDefault(combination, 0L);
+                        this.data.put(combination, currentCount + counts);
+                    }
+                }
+
             }
         }
     }
@@ -98,19 +105,7 @@ public class TSVContingencyTable implements ContingencyTable {
 
     @Override
     public long getCounts(Set<RandomVariableAssignment> randomVariableAssignments) {
-        if (randomVariableAssignments.size() == this.variableNames.size()) {
-            return this.data.getOrDefault(randomVariableAssignments, 0L);
-        } else {
-            long count = 0L;
-
-            for (Set<RandomVariableAssignment> assignments : this.data.keySet()) {
-                if (assignments.containsAll(randomVariableAssignments)) {
-                    count += this.data.get(assignments);
-                }
-            }
-
-            return count;
-        }
+        return this.data.getOrDefault(randomVariableAssignments, 0L);
     }
 
 
