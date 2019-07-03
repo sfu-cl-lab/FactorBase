@@ -16,9 +16,10 @@ import com.google.common.collect.Sets;
 public class TSVContingencyTable implements ContingencyTable {
 
     private boolean isDiscrete;
+    private Map<String, Integer> variableToColumnIndex = new HashMap<String, Integer>();
     private Map<String, Set<String>> variableStates = new HashMap<String, Set<String>>();
     private Set<String> variableNames = new HashSet<String>();
-    private Map<Set<RandomVariableAssignment>, Long> data = new HashMap<Set<RandomVariableAssignment>, Long>();
+    private List<DataRow> data = new ArrayList<DataRow>();
 
 
     /**
@@ -39,30 +40,38 @@ public class TSVContingencyTable implements ContingencyTable {
 
             // while loop to process and extract information from the given file.
             while ((row = reader.readLine()) != null) {
-
                 String[] data = row.split("\t");
-                Set<RandomVariableAssignment> attributes = new HashSet<RandomVariableAssignment>();
+                RandomVariableAssignment[] attributes = new RandomVariableAssignment[this.variableNames.size()];
                 long counts = -1L;
 
                 // for loop to process the data rows.
+                int insertIndex = 0;
                 for (int columnIndex = 0; columnIndex < header.length; columnIndex++) {
                     String variableName = header[columnIndex];
                     String value = data[columnIndex];
                     if (variableName.equals(countsColumn)) {
                         counts = Long.valueOf(value);
                     } else {
-                        attributes.add(new RandomVariableAssignment(variableName, value));
+                        attributes[insertIndex] = new RandomVariableAssignment(variableName, value);
 
                         if (!this.variableStates.containsKey(variableName)) {
                             this.variableStates.put(variableName, new HashSet<String>());
                         }
 
                         this.variableStates.get(variableName).add(value);
+                        insertIndex++;
                     }
                 }
 
-                this.data.put(attributes, counts);
+                this.data.add(new DataRow(attributes, counts));
             }
+        }
+
+        RandomVariableAssignment[] firstRowAssignments = this.data.get(0).getAssignments();
+
+        // for loop to map headers to column indices, ignoring the specified counts column.
+        for (int assignmentIndex = 0; assignmentIndex < firstRowAssignments.length; assignmentIndex++) {
+            this.variableToColumnIndex.put(firstRowAssignments[assignmentIndex].getName(), assignmentIndex);
         }
     }
 
@@ -98,19 +107,27 @@ public class TSVContingencyTable implements ContingencyTable {
 
     @Override
     public long getCounts(Set<RandomVariableAssignment> randomVariableAssignments) {
-        if (randomVariableAssignments.size() == this.variableNames.size()) {
-            return this.data.getOrDefault(randomVariableAssignments, 0L);
-        } else {
-            long count = 0L;
+        long count = 0L;
 
-            for (Set<RandomVariableAssignment> assignments : this.data.keySet()) {
-                if (assignments.containsAll(randomVariableAssignments)) {
-                    count += this.data.get(assignments);
+        // for loop to match the given assignments against all the ones in the dataset.
+        for (DataRow dataRow : this.data) {
+            boolean isMatch = true;
+
+            // for loop to check that the current data row matches the given assignments.
+            for (RandomVariableAssignment assignment : randomVariableAssignments) {
+                int attributeIndex = this.variableToColumnIndex.get(assignment.getName());
+                if (!assignment.equals(dataRow.getAssignments()[attributeIndex])) {
+                    isMatch = false;
+                    break;
                 }
             }
 
-            return count;
+            if (isMatch) {
+                count += dataRow.getCounts();
+            }
         }
+
+        return count;
     }
 
 
