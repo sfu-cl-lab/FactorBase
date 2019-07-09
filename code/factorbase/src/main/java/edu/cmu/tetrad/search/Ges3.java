@@ -39,7 +39,7 @@ import java.util.TreeSet;
 import java.util.WeakHashMap;
 import java.util.stream.Collectors;
 
-import ca.sfu.cs.factorbase.data.ContingencyTable;
+import ca.sfu.cs.factorbase.data.ContingencyTableGenerator;
 import ca.sfu.cs.factorbase.search.BDeuScore;
 import ca.sfu.cs.factorbase.search.DiscreteLocalScore;
 import edu.cmu.tetrad.data.Knowledge;
@@ -144,10 +144,10 @@ public class Ges3 {
 
     //===========================CONSTRUCTORS=============================//
 
-    public Ges3(ContingencyTable ctTable, double samplePrior, double structurePrior) {
-        setDataSet(ctTable);
-        if (ctTable != null) {
-            setDiscreteScore(new BDeuScore(ctTable, samplePrior, structurePrior));
+    public Ges3(ContingencyTableGenerator dataset, double samplePrior, double structurePrior) {
+        setDataSet(dataset);
+        if (dataset != null) {
+            setDiscreteScore(new BDeuScore(dataset, samplePrior, structurePrior));
         }
     }
 
@@ -1007,12 +1007,12 @@ public class Ges3 {
         rules.orientImplied(graph);
     }
 
-    private void setDataSet(ContingencyTable ctTable) {
-        Set<String> _varNames = ctTable.getVariableNames();
+    private void setDataSet(ContingencyTableGenerator ctTableGenerator) {
+        Set<String> _varNames = ctTableGenerator.getVariableNames();
 
         this.varNames = _varNames.toArray(new String[0]);
         this.variables = Arrays.stream(this.varNames).map(name -> new GraphNode(name)).collect(Collectors.toList());
-        this.discrete = ctTable.isDiscrete();
+        this.discrete = ctTableGenerator.isDiscrete();
 
         if (!isDiscrete()) {
             throw new UnsupportedOperationException("Not Implemented Yet!");

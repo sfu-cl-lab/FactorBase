@@ -13,8 +13,7 @@ import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import ca.sfu.cs.factorbase.data.ContingencyTable;
-import ca.sfu.cs.factorbase.data.TSVContingencyTable;
+import ca.sfu.cs.factorbase.data.ContingencyTableGenerator;
 
 
 /**
@@ -27,30 +26,30 @@ public class BDeuScoreTest {
     public static final String POPULARITY = "popularity(prof0)";
     public static final String TEACHINGABILITY = "teachingability(prof0)";
 
-    private static ContingencyTable dataset;
+    private static ContingencyTableGenerator ctGenerator;
 
 
     @BeforeClass
     public static void setUpBeforeClass() throws Exception {
         URL url = BDeuScoreTest.class.getClassLoader().getResource("inputfiles/prof0.tsv");
-        dataset = new TSVContingencyTable(url.getFile(), COUNTS_COLUMN, true);
+        ctGenerator = new ContingencyTableGenerator(url.getFile(), COUNTS_COLUMN, true);
     }
 
     @AfterClass
     public static void tearDownAfterClass() throws Exception {
-        dataset = null;
+        ctGenerator = null;
     }
 
     @Test
     public void localScore_ReturnsCorrectResults_WhenNoParents() throws SQLException {
-        BDeuScore score = new BDeuScore(dataset, SAMPLE_PRIOR, STRUCTURE_PRIOR);
+        BDeuScore score = new BDeuScore(ctGenerator, SAMPLE_PRIOR, STRUCTURE_PRIOR);
         Double scoreValue = score.localScore(POPULARITY, new HashSet<>(new ArrayList<String>()));
         assertThat(scoreValue, equalTo(-4.269697449704091));
     }
 
     @Test
     public void localScore_ReturnsCorrectResults_WhenSingleParent() throws SQLException {
-        BDeuScore score = new BDeuScore(dataset, SAMPLE_PRIOR, STRUCTURE_PRIOR);
+        BDeuScore score = new BDeuScore(ctGenerator, SAMPLE_PRIOR, STRUCTURE_PRIOR);
         Double scoreValue = score.localScore(POPULARITY, new HashSet<>(Arrays.asList(TEACHINGABILITY)));
         assertThat(scoreValue, equalTo(-3.935739532045626));
     }

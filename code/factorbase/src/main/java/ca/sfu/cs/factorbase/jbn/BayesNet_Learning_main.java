@@ -4,8 +4,7 @@ import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.util.List;
 
-import ca.sfu.cs.factorbase.data.ContingencyTable;
-import ca.sfu.cs.factorbase.data.TSVContingencyTable;
+import ca.sfu.cs.factorbase.data.ContingencyTableGenerator;
 import ca.sfu.cs.factorbase.graph.Edge;
 import edu.cmu.tetrad.data.Knowledge;
 import edu.cmu.tetrad.graph.Graph;
@@ -30,13 +29,14 @@ public class BayesNet_Learning_main {
         String destfile,
         boolean isDiscrete
     ) throws Exception {
-        ContingencyTable dataset = new TSVContingencyTable(srcfile, "MULT", isDiscrete);
+        ContingencyTableGenerator dataset = new ContingencyTableGenerator(srcfile, "MULT", isDiscrete);
 
         Ges3 gesSearch = new Ges3(
             dataset,
             10.0000,
             1.0000
         );
+
         Knowledge knowledge = new Knowledge();
 
         // Load required edge knowledge.

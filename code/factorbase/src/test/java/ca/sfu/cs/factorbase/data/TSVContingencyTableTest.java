@@ -7,9 +7,9 @@ import org.junit.After;
 import org.junit.Before;
 
 /**
- * Tests for the file TSVContingencyTable.java.
+ * Tests for contingency tables created using the TSV based constructor in ContingencyTableGenerator.java.
  */
-public class TSVContingencyTableTest extends ContingencyTableTestBase<ContingencyTable> {
+public class TSVContingencyTableTest extends ContingencyTableTestBase {
 
     /* (non-Javadoc)
      * @see ca.sfu.cs.factorbase.data.ContingencyTableTestBase#setUp()
@@ -28,11 +28,11 @@ public class TSVContingencyTableTest extends ContingencyTableTestBase<Contingenc
     }
 
     @Override
-    protected ContingencyTable createInstance() {
+    protected ContingencyTableGenerator createInstance() {
         URL url = TSVContingencyTableTest.class.getClassLoader().getResource("inputfiles/prof0.tsv");
 
         try {
-            return new TSVContingencyTable(url.getFile(), "MULT", true);
+            return new ContingencyTableGenerator(url.getFile(), "MULT", true);
         } catch (IOException e) {
             e.printStackTrace();
             return null;
