@@ -213,8 +213,8 @@ public class ContingencyTableGenerator {
      * @return a CT table for the given variables using the dataset given to the ContingencyTableGenerator.
      */
     public ContingencyTable generateCT(List<String> variables) {
-        List<Integer> selectedIndices = variables.stream().map(variable -> this.metadata.getColumnIndex(variable)).collect(Collectors.toList());
-        List<Integer> statesPerVariable = variables.stream().map(variable -> this.metadata.getNumberOfStates(variable)).collect(Collectors.toList());
+        List<Integer> selectedIndices = variables.stream().map(variable -> this.metadata.getColumnIndex(variable)).sorted().collect(Collectors.toList());
+        List<Integer> statesPerVariable = selectedIndices.stream().map(index -> this.metadata.getNumberOfStates(this.metadata.getHeader()[index])).collect(Collectors.toList());
         int totalNumberOfStates = statesPerVariable.stream().reduce(1, Math::multiplyExact);
         long[] countsArray = new long[totalNumberOfStates];
 

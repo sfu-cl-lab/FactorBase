@@ -60,6 +60,14 @@ public class DataSetMetaData {
      * Note: This method is based on the getRowIndex() method from Tetrad's BDeuScore.java file.
      */
     public int generateIndex(List<RandomVariableAssignment> randomVariableAssignments) {
+        randomVariableAssignments.sort(
+            (assignment1, assignment2) -> {
+                Integer index1 = this.variableNameToColumnIndex.get(assignment1.getName());
+                Integer index2 = this.variableNameToColumnIndex.get(assignment2.getName());
+                return index1.compareTo(index2);
+            }
+        );
+
         int index = 0;
 
         for (RandomVariableAssignment assignment : randomVariableAssignments) {
