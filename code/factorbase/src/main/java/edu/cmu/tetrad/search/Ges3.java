@@ -1008,7 +1008,7 @@ public class Ges3 {
     }
 
     private void setDataSet(ContingencyTableGenerator ctTableGenerator) {
-        Set<String> _varNames = ctTableGenerator.getVariableNames();
+        List<String> _varNames = ctTableGenerator.getVariableNames();
 
         this.varNames = _varNames.toArray(new String[0]);
         this.variables = Arrays.stream(this.varNames).map(name -> new GraphNode(name)).collect(Collectors.toList());

@@ -201,7 +201,7 @@ public class ContingencyTableGenerator {
      *            have this requirement.  If the variables are not in column order, different Bayes
      *            nets can be generated.
      */
-    public Set<String> getVariableNames() {
+    public List<String> getVariableNames() {
         return this.metadata.getVariableNames();
     }
 

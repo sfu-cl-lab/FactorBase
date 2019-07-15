@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import com.google.common.collect.Sets;
 
@@ -15,7 +16,7 @@ import com.google.common.collect.Sets;
  */
 public class DataSetMetaData {
     private Map<String, Integer> variableNameToColumnIndex;
-    private Set<String> variableNames;
+    private List<String> variableNames;
     private Map<String, Integer> variableStateToIntegerEncoding;
     private Map<String, Set<String>> variableStates;
     private int numberOfRows;
@@ -47,7 +48,7 @@ public class DataSetMetaData {
         this.numberOfRows = numberOfRows;
         this.header = header;
         this.countsColumnIndex = countsColumnIndex;
-        this.variableNames = variableNameToColumnIndex.keySet().stream().filter(name -> !name.equals(header[countsColumnIndex])).collect(Collectors.toSet());
+        this.variableNames = IntStream.range(0, header.length).filter(columnIndex -> columnIndex != countsColumnIndex).mapToObj(filteredIndex -> header[filteredIndex]).collect(Collectors.toList());
     }
 
 
@@ -158,7 +159,7 @@ public class DataSetMetaData {
      *            have this requirement.  If the variables are not in column order, different Bayes
      *            nets can be generated.
      */
-    public Set<String> getVariableNames() {
+    public List<String> getVariableNames() {
         return this.variableNames;
     }
 

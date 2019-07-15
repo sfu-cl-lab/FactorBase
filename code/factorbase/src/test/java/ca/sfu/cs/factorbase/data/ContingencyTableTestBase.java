@@ -10,6 +10,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.hamcrest.collection.IsIterableContainingInOrder;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -117,9 +118,9 @@ public abstract class ContingencyTableTestBase {
 
     @Test
     public void getVariableNames_ReturnsCorrectValues_WhenDatasetIsValid() {
-        Set<String> variableNames = this.contingencyTableGenerator.getVariableNames();
+        List<String> variableNames = this.contingencyTableGenerator.getVariableNames();
 
-        assertThat(variableNames, containsInAnyOrder(
+        assertThat(variableNames, IsIterableContainingInOrder.contains(
             "popularity(prof0)",
             "teachingability(prof0)"
         ));
