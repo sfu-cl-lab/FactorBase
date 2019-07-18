@@ -10,7 +10,7 @@ import edu.cmu.tetrad.data.Knowledge;
 import edu.cmu.tetrad.graph.Graph;
 import edu.cmu.tetrad.graph.Node;
 import edu.cmu.tetrad.graph.Pattern;
-import edu.cmu.tetrad.search.Ges3;
+import edu.cmu.tetrad.search.GesCT;
 import edu.cmu.tetrad.search.PatternToDag;
 
 
@@ -31,7 +31,7 @@ public class BayesNet_Learning_main {
     ) throws Exception {
         ContingencyTableGenerator dataset = new ContingencyTableGenerator(srcfile, "MULT", isDiscrete);
 
-        Ges3 gesSearch = new Ges3(
+        GesCT gesSearch = new GesCT(
             dataset,
             10.0000,
             1.0000

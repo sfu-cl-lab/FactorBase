@@ -64,7 +64,7 @@ import edu.cmu.tetrad.util.TetradLogger;
  * @author Joseph Ramsey, Revisions 10/2005
  */
 
-public class Ges3 {
+public class GesCT {
 
     /**
      * Specification of forbidden and required edges.
@@ -144,7 +144,7 @@ public class Ges3 {
 
     //===========================CONSTRUCTORS=============================//
 
-    public Ges3(ContingencyTableGenerator dataset, double samplePrior, double structurePrior) {
+    public GesCT(ContingencyTableGenerator dataset, double samplePrior, double structurePrior) {
         setDataSet(dataset);
         if (dataset != null) {
             setDiscreteScore(new BDeuScore(dataset, samplePrior, structurePrior));
