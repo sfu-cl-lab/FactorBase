@@ -889,7 +889,7 @@ public final class Dag implements Graph /*, KnowledgeTransferable*/ {
     //  
     //should we use getTiers() instead?
 	public List<Node> getExogenousTerms() {
-		List<Node> errorTerms = new Vector();
+		List<Node> errorTerms = new Vector<Node>();
 
 		List<Node> nodes = getNodes();
 		for (int i=0; i<nodes.size(); i++){

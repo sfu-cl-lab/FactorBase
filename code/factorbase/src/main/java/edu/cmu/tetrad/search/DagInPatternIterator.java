@@ -327,7 +327,7 @@ public class DagInPatternIterator {
                 meek.orientImplied(graph);
 
                 // Keep track of changed edges for highlighting
-                Set<Edge> changedEdges = meek.getChangedEdges().keySet();
+//                Set<Edge> changedEdges = meek.getChangedEdges().keySet();
 
 //                System.out.println("Meek oriented: " + changedEdges);
 //
