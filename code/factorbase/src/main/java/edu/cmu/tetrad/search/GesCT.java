@@ -21,8 +21,6 @@
 
 package edu.cmu.tetrad.search;
 
-import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
 import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -72,11 +70,6 @@ public class GesCT {
     private Knowledge knowledge = new Knowledge();
 
     /**
-     * Map from variables to their column indices in the data set.
-     */
-    private HashMap<Node, Integer> hashIndices;
-
-    /**
      * Array of variable names from the data set, in order.
      */
     private String varNames[];
@@ -107,11 +100,6 @@ public class GesCT {
      * graphs).
      */
     private boolean aggressivelyPreventCycles = false;
-
-    /**
-     * Listeners for graph change events.
-     */
-    private transient List<PropertyChangeListener> listeners;
 
     /**
      * The maximum number of edges the algorithm will add to the graph.
@@ -169,8 +157,6 @@ public class GesCT {
             scoreHash.put(node, new HashMap<Set<Node>, Double>());
         }
 
-        fireGraphChange(graph);
-        buildIndexing(graph);
         addRequiredEdges(graph);
 
         // Method 1-- original.
@@ -1019,18 +1005,6 @@ public class GesCT {
         }
     }
 
-    private void buildIndexing(Graph graph) {
-        this.hashIndices = new HashMap<Node, Integer>();
-        for (Node next : graph.getNodes()) {
-            for (int i = 0; i < this.varNames.length; i++) {
-                if (this.varNames[i].equals(next.getName())) {
-                    this.hashIndices.put(next, i);
-                    break;
-                }
-            }
-        }
-    }
-
 
     //===========================SCORING METHODS===========================//
 
@@ -1092,18 +1066,7 @@ public class GesCT {
         return discrete;
     }
 
-    private void fireGraphChange(Graph graph) {
-        for (PropertyChangeListener l : getListeners()) {
-            l.propertyChange(new PropertyChangeEvent(this, "graph", null, graph));
-        }
-    }
 
-    private List<PropertyChangeListener> getListeners() {
-        if (listeners == null) {
-            listeners = new ArrayList<PropertyChangeListener>();
-        }
-        return listeners;
-    }
     // store top N graphs based on score , zqian
     private void storeGraph(Graph graph, double score) {
         if (!isStoreGraphs()) return;
