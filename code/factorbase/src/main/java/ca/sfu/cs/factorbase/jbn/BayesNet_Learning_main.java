@@ -1,28 +1,24 @@
 package ca.sfu.cs.factorbase.jbn;
 
 import java.io.BufferedWriter;
-import java.io.File;
 import java.io.FileWriter;
-import java.util.HashSet;
 import java.util.List;
 
+import ca.sfu.cs.factorbase.data.ContingencyTableGenerator;
 import ca.sfu.cs.factorbase.graph.Edge;
-import edu.cmu.tetrad.data.DataReader;
-import edu.cmu.tetrad.data.DataSet;
-import edu.cmu.tetrad.data.DelimiterType;
 import edu.cmu.tetrad.data.Knowledge;
 import edu.cmu.tetrad.graph.Graph;
 import edu.cmu.tetrad.graph.Node;
 import edu.cmu.tetrad.graph.Pattern;
-import edu.cmu.tetrad.search.Ges3;
+import edu.cmu.tetrad.search.GesCT;
 import edu.cmu.tetrad.search.PatternToDag;
 
 
 public class BayesNet_Learning_main {
 
 
-    public static void tetradLearner(String srcfile, String destfile) throws Exception {
-        tetradLearner(srcfile, null, null, destfile);
+    public static void tetradLearner(String srcfile, String destfile, boolean isDiscrete) throws Exception {
+        tetradLearner(srcfile, null, null, destfile, isDiscrete);
     }
 
 
@@ -30,20 +26,17 @@ public class BayesNet_Learning_main {
         String srcfile,
         List<Edge> requiredEdges,
         List<Edge> forbiddenEdges,
-        String destfile
+        String destfile,
+        boolean isDiscrete
     ) throws Exception {
-        DataSet dataset = null;
+        ContingencyTableGenerator dataset = new ContingencyTableGenerator(srcfile, "MULT", isDiscrete);
 
-        File src = new File(srcfile);
-
-        DataReader parser = new DataReader();
-        parser.setDelimiter(DelimiterType.TAB);
-        dataset = parser.parseTabular(src);
-        Ges3 gesSearch = new Ges3(
+        GesCT gesSearch = new GesCT(
             dataset,
             10.0000,
             1.0000
         );
+
         Knowledge knowledge = new Knowledge();
 
         // Load required edge knowledge.
@@ -81,18 +74,12 @@ public class BayesNet_Learning_main {
         out.write("<NETWORK>\n");
         out.write("<NAME>BayesNet</NAME>\n");
 
-        int col = dataset.getNumColumns();
-        int row = dataset.getNumRows();
-        for (int i = 0; i < col; i++) {
+        for (String variable : dataset.getVariableNames()) {
             out.write("<VARIABLE TYPE=\"nature\">\n");
-            out.write("\t<NAME>" + "`" + dataset.getVariable(i).getName() + "`" + "</NAME>\n"); // @zqian adding apostrophes to the name of bayes nodes
-            HashSet<Object> domain = new HashSet<Object>();
-            for (int j = 0; j < row; j++) {
-                domain.add(dataset.getObject(j, i));
-            }
+            out.write("\t<NAME>" + "`" + variable + "`" + "</NAME>\n"); // @zqian adding back ticks to the name of bayes nodes
 
-            for (Object o : domain) {
-                out.write("\t<OUTCOME>" + o + "</OUTCOME>\n");
+            for (String state : dataset.getStates(variable)) {
+                out.write("\t<OUTCOME>" + state + "</OUTCOME>\n");
             }
 
             out.write("</VARIABLE>\n");

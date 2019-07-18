@@ -1670,7 +1670,7 @@ public final class EdgeListGraph implements Graph {
      */
     @Override
 	public boolean isUnderlineTriple(Node x, Node y, Node z) {
-        Triple triple = new Triple(x, y, z);
+//        Triple triple = new Triple(x, y, z);
 //        if (!triple.alongPathIn(this)) {
 //            throw new IllegalArgumentException("<" + x + ", " + y + ", " + z + "> is not along a path.");
 //        }

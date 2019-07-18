@@ -1,24 +1,39 @@
 package ca.sfu.cs.factorbase.search;
 
 import java.math.BigDecimal;
-import java.util.HashSet;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 
 import ca.sfu.cs.factorbase.data.ContingencyTable;
+import ca.sfu.cs.factorbase.data.ContingencyTableGenerator;
 import ca.sfu.cs.factorbase.data.RandomVariableAssignment;
 import ca.sfu.cs.factorbase.search.DiscreteLocalScore;
 import edu.cmu.tetrad.util.ProbUtils;
 
+/**
+ * Class to compute the BDeuScore for a given child and its parents.
+ */
 public class BDeuScore implements DiscreteLocalScore {
 
-    private ContingencyTable contingencyTable;
+    private ContingencyTableGenerator contingencyTableGenerator;
     private double samplePrior;
     private double structurePrior;
+    private Map<Integer, Double> cache = new HashMap<Integer, Double>();
 
 
-    public BDeuScore (ContingencyTable contingencyTable, double samplePrior, double structurePrior) {
-        this.contingencyTable = contingencyTable;
+    /**
+     * Create a new BDeuScore object for the given dataset and using the given hyperparameters.
+     * @param ctGenerator - {@code ContingencyTableGenerator} object to create the CT tables necessary for computing
+     *                      the BDeuScore of a given child and its parents.
+     * @param samplePrior - the equivalent sample size (N').
+     * @param structurePrior - the prior probability for the network structure.
+     */
+    public BDeuScore (ContingencyTableGenerator ctGenerator, double samplePrior, double structurePrior) {
+        this.contingencyTableGenerator = ctGenerator;
         this.samplePrior = samplePrior;
         this.structurePrior = structurePrior;
     }
@@ -26,32 +41,36 @@ public class BDeuScore implements DiscreteLocalScore {
 
     @Override
     public double localScore(String child, Set<String> parents) {
+        int cacheKey = Objects.hash(child, parents);
+
+        if (this.cache.containsKey(cacheKey)) {
+            return this.cache.get(cacheKey);
+        }
+
+        List<String> allVariables = new ArrayList<String>(parents);
+        allVariables.add(child);
+        ContingencyTable ct = this.contingencyTableGenerator.generateCT(allVariables);
+
         // Number of child states.
-        int r = this.contingencyTable.getNumberOfStates(child);
+        int r = this.contingencyTableGenerator.getNumberOfStates(child);
 
         // Number of parent states.
         int q = 1;
         for (String parent : parents) {
-            q *= this.contingencyTable.getNumberOfStates(parent);
+            q *= this.contingencyTableGenerator.getNumberOfStates(parent);
         }
 
         // Calculate score.
         BigDecimal score = new BigDecimal((r - 1) * q * Math.log(this.structurePrior));
 
-        for (List<RandomVariableAssignment> parentState : this.contingencyTable.getStates(parents)) {
+        for (List<RandomVariableAssignment> parentState : this.contingencyTableGenerator.getStates(parents)) {
             long countsSum = 0;
             long counts;
-            for (String childState : this.contingencyTable.getStates(child)) {
+            for (String childState : this.contingencyTableGenerator.getStates(child)) {
                 RandomVariableAssignment childVariable = new RandomVariableAssignment(child, childState);
-                if (parents.size() == 0) {
-                    counts = this.contingencyTable.getTotalInstances(childVariable);
-                } else {
-                    Set<RandomVariableAssignment> augmentedSet = new HashSet<RandomVariableAssignment>(parentState);
-                    augmentedSet.add(childVariable);
-
-                    counts = this.contingencyTable.getCounts(augmentedSet);
-                }
-
+                List<RandomVariableAssignment> augmentedList = new ArrayList<RandomVariableAssignment>(parentState);
+                augmentedList.add(childVariable);
+                counts = ct.getCounts(augmentedList);
                 countsSum += counts;
                 score = score.add(new BigDecimal(ProbUtils.lngamma(this.samplePrior / (r * q) + counts)));
             }
@@ -61,6 +80,8 @@ public class BDeuScore implements DiscreteLocalScore {
 
         score = score.add(new BigDecimal(q * ProbUtils.lngamma(this.samplePrior / q)));
         score = score.subtract(new BigDecimal((r * q) * ProbUtils.lngamma(this.samplePrior / (r * q))));
+
+        this.cache.put(cacheKey, score.doubleValue());
 
         return score.doubleValue();
     }

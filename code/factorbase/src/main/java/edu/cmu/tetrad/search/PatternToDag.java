@@ -69,7 +69,7 @@ public class PatternToDag {
      //   System.out.println("left patternToDagMeek()/EdgeListGraph(pattern)");
         
         while (nondirectedEdges(dag).size() > 0) {
-            List edges = nondirectedEdges(dag);
+            List<Edge> edges = nondirectedEdges(dag);
             Edge edge = (Edge) edges.get(0);
             Node A = edge.getNode1();
             Node B = edge.getNode2();
@@ -156,17 +156,7 @@ public class PatternToDag {
 //        return new Dag(graph);
     }
 
-    private Edge findUndirectedEdge(Graph graph) {
-        for (Edge edge : graph.getEdges()) {
-            if (Edges.isUndirectedEdge(edge)) {
-                return edge;
-            }
-        }
-
-        return null;
-    }
-
-    private List nondirectedEdges(Graph graph) {
+    private List<Edge> nondirectedEdges(Graph graph) {
         List<Edge> allEdges = graph.getEdges();
         List<Edge> nondirected = new ArrayList<Edge>();
 

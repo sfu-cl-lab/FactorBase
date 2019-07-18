@@ -21,10 +21,9 @@
 
 package edu.cmu.tetrad.search;
 
-import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
 import java.text.NumberFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -36,15 +35,18 @@ import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.WeakHashMap;
+import java.util.stream.Collectors;
 
-import edu.cmu.tetrad.data.DataSet;
-import edu.cmu.tetrad.data.DataUtils;
+import ca.sfu.cs.factorbase.data.ContingencyTableGenerator;
+import ca.sfu.cs.factorbase.search.BDeuScore;
+import ca.sfu.cs.factorbase.search.DiscreteLocalScore;
 import edu.cmu.tetrad.data.Knowledge;
 import edu.cmu.tetrad.data.KnowledgeEdge;
 import edu.cmu.tetrad.graph.Edge;
 import edu.cmu.tetrad.graph.EdgeListGraph;
 import edu.cmu.tetrad.graph.Edges;
 import edu.cmu.tetrad.graph.Graph;
+import edu.cmu.tetrad.graph.GraphNode;
 import edu.cmu.tetrad.graph.Node;
 import edu.cmu.tetrad.util.NumberFormatUtil;
 import edu.cmu.tetrad.util.TetradLogger;
@@ -60,22 +62,12 @@ import edu.cmu.tetrad.util.TetradLogger;
  * @author Joseph Ramsey, Revisions 10/2005
  */
 
-public class Ges3 {
-
-    /**
-     * The data set, various variable subsets of which are to be scored.
-     */
-    private DataSet dataSet;
+public class GesCT {
 
     /**
      * Specification of forbidden and required edges.
      */
     private Knowledge knowledge = new Knowledge();
-
-    /**
-     * Map from variables to their column indices in the data set.
-     */
-    private HashMap<Node, Integer> hashIndices;
 
     /**
      * Array of variable names from the data set, in order.
@@ -110,11 +102,6 @@ public class Ges3 {
     private boolean aggressivelyPreventCycles = false;
 
     /**
-     * Listeners for graph change events.
-     */
-    private transient List<PropertyChangeListener> listeners;
-
-    /**
      * The maximum number of edges the algorithm will add to the graph.
      */
     private int maxEdgesAdded = -1;
@@ -122,7 +109,7 @@ public class Ges3 {
     /**
      * The score for discrete searches.
      */
-    private LocalDiscreteScore discreteScore;
+    private DiscreteLocalScore discreteScore;
 
     /**
      * The top n graphs found by the algorithm, where n is <code>numPatternsToStore</code>.
@@ -145,10 +132,10 @@ public class Ges3 {
 
     //===========================CONSTRUCTORS=============================//
 
-    public Ges3(DataSet dataSet, double samplePrior, double structurePrior) {
-        setDataSet(dataSet);
-        if (dataSet != null) {
-            setDiscreteScore(new BDeuScore(dataSet, samplePrior, structurePrior));
+    public GesCT(ContingencyTableGenerator dataset, double samplePrior, double structurePrior) {
+        setDataSet(dataset);
+        if (dataset != null) {
+            setDiscreteScore(new BDeuScore(dataset, samplePrior, structurePrior));
         }
     }
 
@@ -162,14 +149,6 @@ public class Ges3 {
      * @return the resulting Pattern.
      */
     public Graph search() {
-//        long startTime = System.currentTimeMillis();
-
-        // Check for missing values.
-        if (dataSet != null && DataUtils.containsMissingValue(dataSet)) {
-            throw new IllegalArgumentException(
-                    "Please remove or impute missing values first.");
-        }
-
         Graph graph = new EdgeListGraph(new LinkedList<Node>(getVariables()));
 
         scoreHash = new WeakHashMap<Node, Map<Set<Node>, Double>>();
@@ -178,8 +157,6 @@ public class Ges3 {
             scoreHash.put(node, new HashMap<Set<Node>, Double>());
         }
 
-        fireGraphChange(graph);
-        buildIndexing(graph);
         addRequiredEdges(graph);
 
         // Method 1-- original.
@@ -1016,28 +993,15 @@ public class Ges3 {
         rules.orientImplied(graph);
     }
 
-    private void setDataSet(DataSet dataSet) {
-        List<String> _varNames = dataSet.getVariableNames();
+    private void setDataSet(ContingencyTableGenerator ctTableGenerator) {
+        List<String> _varNames = ctTableGenerator.getVariableNames();
 
         this.varNames = _varNames.toArray(new String[0]);
-        this.variables = dataSet.getVariables();
-        this.dataSet = dataSet;
-        this.discrete = dataSet.isDiscrete();
+        this.variables = Arrays.stream(this.varNames).map(name -> new GraphNode(name)).collect(Collectors.toList());
+        this.discrete = ctTableGenerator.isDiscrete();
 
         if (!isDiscrete()) {
             throw new UnsupportedOperationException("Not Implemented Yet!");
-        }
-    }
-
-    private void buildIndexing(Graph graph) {
-        this.hashIndices = new HashMap<Node, Integer>();
-        for (Node next : graph.getNodes()) {
-            for (int i = 0; i < this.varNames.length; i++) {
-                if (this.varNames[i].equals(next.getName())) {
-                    this.hashIndices.put(next, i);
-                    break;
-                }
-            }
         }
     }
 
@@ -1050,91 +1014,48 @@ public class Ges3 {
 
         for (Node y : dag.getNodes()) {
             Set<Node> parents = new HashSet<Node>(dag.getParents(y));
-            int nextIndex = -1;
-            for (int i = 0; i < getVariables().size(); i++) {
-                if (this.varNames[i].equals(y.getName())) {
-                    nextIndex = i;
-                    break;
-                }
-            }
-            int parentIndices[] = new int[parents.size()];
-            Iterator<Node> pi = parents.iterator();
-            int count = 0;
-            while (pi.hasNext()) {
-                Node nextParent = pi.next();
-                for (int i = 0; i < getVariables().size(); i++) {
-                    if (this.varNames[i].equals(nextParent.getName())) {
-                        parentIndices[count++] = i;
-                        break;
-                    }
-                }
-            }
+            Set<String> parentNames = parents.stream().map(node -> node.getName()).collect(Collectors.toSet());
 
             if (this.isDiscrete()) {
-            //	System.out.println("zqian##########Node " + nextIndex +" has "+count+" Parents." );
-                //System.out.println("zqian##########Entering localDiscreteScore.");
-
-                score += localDiscreteScore(nextIndex, parentIndices);
+                score += localDiscreteScore(y.getName(), parentNames);
             } else {
                 throw new UnsupportedOperationException("Not Implemented Yet!");
             }
         }
-       // System.out.println("zqian##########Leaving scoreGraph(Graph) which has "+dag.getNodes().size()+ "Nodes.");
 
         return score;
     }
 
     private double scoreGraphChange(Node y, Set<Node> parents1,Set<Node> parents2) {
-        int yIndex = hashIndices.get(y);
+        Double score1 = computeScore(y, parents1);
+        Double score2 = computeScore(y, parents2);
 
-        Double score1 = scoreHash.get(y).get(parents1);
-
-        if (score1 == null) {
-            int parentIndices1[] = new int[parents1.size()];
-
-            int count = 0;
-            for (Node aParents1 : parents1) {
-                parentIndices1[count++] = (hashIndices.get(aParents1));
-            }
-
-            if (isDiscrete()) {
-                score1 = localDiscreteScore(yIndex, parentIndices1);
-            } else {
-                throw new UnsupportedOperationException("Not Implemented Yet!");
-            }
-
-            scoreHash.get(y).put(parents1, score1);
-        }
-
-        Double score2 = scoreHash.get(y).get(parents2);
-
-        if (score2 == null) {
-            int parentIndices2[] = new int[parents2.size()];
-
-            int count2 = 0;
-            for (Node aParents2 : parents2) {
-                parentIndices2[count2++] = (hashIndices.get(aParents2));
-            }
-
-            if (isDiscrete()) {
-                score2 = localDiscreteScore(yIndex, parentIndices2);
-            } else {
-                throw new UnsupportedOperationException("Not Implemented Yet!");
-            }
-
-            scoreHash.get(y).put(parents2, score2);
-        }
-
-        // That is, the score for the variable set that contains x minus the score
-        // for the variable set that does not contain x.
         return score1 - score2;
+    }
+
+    private Double computeScore(Node child, Set<Node> parents) {
+        Double score = scoreHash.get(child).get(parents);
+
+        if (score == null) {
+            Set<String> parentNames = parents.stream().map(node -> node.getName()).collect(Collectors.toSet());
+
+            if (isDiscrete()) {
+                score = localDiscreteScore(child.getName(), parentNames);
+            } else {
+                throw new UnsupportedOperationException("Not Implemented Yet!");
+            }
+
+            scoreHash.get(child).put(parents, score);
+        }
+
+        return score;
     }
 
     /**
      * Compute the local BDeu score of (i, parents(i)). See (Chickering, 2002).
      */
-    private double localDiscreteScore(int i, int parents[]) {
-        return getDiscreteScore().localScore(i, parents);
+    private double localDiscreteScore(String child, Set<String> parents) {
+        return getDiscreteScore().localScore(child, parents);
     }
 
     private List<Node> getVariables() {
@@ -1145,18 +1066,7 @@ public class Ges3 {
         return discrete;
     }
 
-    private void fireGraphChange(Graph graph) {
-        for (PropertyChangeListener l : getListeners()) {
-            l.propertyChange(new PropertyChangeEvent(this, "graph", null, graph));
-        }
-    }
 
-    private List<PropertyChangeListener> getListeners() {
-        if (listeners == null) {
-            listeners = new ArrayList<PropertyChangeListener>();
-        }
-        return listeners;
-    }
     // store top N graphs based on score , zqian
     private void storeGraph(Graph graph, double score) {
         if (!isStoreGraphs()) return;
@@ -1177,14 +1087,11 @@ public class Ges3 {
         }
     }
 
-    public LocalDiscreteScore getDiscreteScore() {
+    public DiscreteLocalScore getDiscreteScore() {
         return discreteScore;
     }
 
-    public void setDiscreteScore(LocalDiscreteScore discreteScore) {
-        if (discreteScore.getDataSet() != dataSet) {
-            throw new IllegalArgumentException("Must use the same data set.");
-        }
+    public void setDiscreteScore(DiscreteLocalScore discreteScore) {
         this.discreteScore = discreteScore;
     }
 }

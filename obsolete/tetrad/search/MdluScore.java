@@ -21,12 +21,8 @@
 
 package edu.cmu.tetrad.search;
 
-import java.util.Map;
-import java.util.Set;
-
 import edu.cmu.tetrad.data.DataSet;
 import edu.cmu.tetrad.data.DiscreteVariable;
-import edu.cmu.tetrad.graph.Node;
 
 /**
  * Created by IntelliJ IDEA. User: jdramsey Date: Apr 19, 2009 Time: 7:28:45 PM To change this template use File |
@@ -45,7 +41,7 @@ public class MdluScore implements LocalDiscreteScore {
     }
 
     @Override
-	public double localScore(int i, int parents[]) {
+    public double localScore(int i, int parents[]) {
         double oldScore = localScoreCache.get(i, parents);
 
         if (!Double.isNaN(oldScore)) {
@@ -133,7 +129,7 @@ public class MdluScore implements LocalDiscreteScore {
     }
 
     @Override
-	public DataSet getDataSet() {
+    public DataSet getDataSet() {
         return dataSet;
     }
 
@@ -171,27 +167,12 @@ public class MdluScore implements LocalDiscreteScore {
     }
 
     @Override
-	public void setStructurePrior(double structurePrior) {
+    public void setStructurePrior(double structurePrior) {
         this.structurePrior = structurePrior;
     }
 
     @Override
-	public void setSamplePrior(double samplePrior) {
+    public void setSamplePrior(double samplePrior) {
         this.samplePrior = samplePrior;
-    }
-
-    @Override
-    /**
-     * TODO: This method was added as required by the LocalDiscreteScore interface.  Need to figure out what this should
-     *       return.
-     */
-    public double localScore(
-        int i,
-        int[] parents,
-        Node y,
-        Set<Node> parentNodes,
-        Map<Node, Map<Set<Node>, Double>> globalScoreHash
-    ) {
-        return 0;
     }
 }
