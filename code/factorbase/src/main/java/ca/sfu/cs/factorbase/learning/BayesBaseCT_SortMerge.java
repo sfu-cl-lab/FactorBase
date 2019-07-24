@@ -274,7 +274,7 @@ public class BayesBaseCT_SortMerge {
         logger.info("\n ****************** \n" +
                 "Building the _CT tables for Length = "+len +"\n" );
 
-        long l = System.currentTimeMillis(); 
+//        long l = System.currentTimeMillis();
 
         Statement st = con_BN.createStatement();
         ResultSet rs = st.executeQuery(
@@ -467,7 +467,7 @@ public class BayesBaseCT_SortMerge {
         //logger.fine("count "+count+"\n");
         rs.close();
         st.close();
-        long l2 = System.currentTimeMillis(); //@zqian : measure structure learning time
+//        long l2 = System.currentTimeMillis(); //@zqian : measure structure learning time
         //System.out.print("Building Time(ms): "+(l2-l)+" ms.\n");
         logger.info("\n Build CT_RChain_TABLES for length = "+len+" are DONE \n" );
     }

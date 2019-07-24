@@ -49,7 +49,7 @@ public class CPGenerator {
 
 
 	public static void  Generator( String databaseName2,Connection con2) throws SQLException, IOException{
-		long l = System.currentTimeMillis(); 
+//        long l = System.currentTimeMillis();
 		Statement st1 = con2.createStatement();
 		// adding possible values of Rnodes into Attribute_Value //Jun 6
 		ResultSet rs1 = st1.executeQuery("select rnid from RNodes;;");    
