@@ -30,7 +30,6 @@ import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -39,42 +38,17 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.logging.Logger;
 
-import ca.sfu.cs.common.Configuration.Config;
 import ca.sfu.cs.factorbase.util.QueryGenerator;
 
 public class KLD_generator {
-    static String databaseName, databaseName2, databaseName3;
-    static String dbUsername = "";
-    static String dbPassword = "";
-    static String dbaddress = "";
-    static Connection con2;
-
     // List of columns in original CP table (node_CP) w/o score columns, e.g.: ChildeValue, b, grade, sat...
-    static ArrayList<String> list;
+    private static ArrayList<String> list;
     // List of node columns in the biggest rchain table, also in KLD table.
-    static ArrayList<String> column_names = new ArrayList<String>();
+    private static ArrayList<String> column_names = new ArrayList<String>();
     // List of conditional probability columns for each node in the rchian, used in KLD table.
-    static ArrayList<String> column_names_CP = new ArrayList<String>();
+    private static ArrayList<String> column_names_CP = new ArrayList<String>();
 
     private static Logger logger = Logger.getLogger(KLD_generator.class.getName());
-
-    public static void main(String[] args) throws Exception {
-        setVarsFromConfig();
-        connectDB();
-        KLDGenerator(databaseName, con2);
-        con2.close();
-    }
-
-
-    public static void setVarsFromConfig() {
-        Config conf = new Config();
-        databaseName = conf.getProperty("dbname");
-        databaseName2 = databaseName + "_BN";
-        databaseName3 = databaseName + "_CT";
-        dbUsername = conf.getProperty("dbusername");
-        dbPassword = conf.getProperty("dbpassword");
-        dbaddress = conf.getProperty("dbaddress");
-    }
 
 
     public static void KLDGenerator(String database, Connection con2) throws Exception {
@@ -202,7 +176,7 @@ public class KLD_generator {
     /**
      * Generate full pairs table and smooth CP table for one node.
      */
-    public static void new_table_smoothed(String table_name, Connection con2) throws Exception {
+    private static void new_table_smoothed(String table_name, Connection con2) throws Exception {
         java.sql.Statement st = con2.createStatement();
         String name = table_name.substring(0, table_name.length() - 1) + "_smoothed`";
 
@@ -307,7 +281,7 @@ public class KLD_generator {
      * fast pairs generator, created by YanSun @ Jun 19
      * using recursive loops in java instead of simple inefficient sql joins
      */
-    public static void pairs(String table_name, Connection con2) throws Exception {
+    private static void pairs(String table_name, Connection con2) throws Exception {
         String name = table_name.subSequence(0, table_name.length() - 1) + "_pairs`";
 
         java.sql.Statement st = con2.createStatement();
@@ -407,7 +381,7 @@ public class KLD_generator {
      * The computation is similar to the previous computation of conditional probabilities.
      * The smoothed probabilities are normalized and have at most 6 significant digits.
      */
-    public static void update_ps(String table_final_smoothed, Connection con2) throws SQLException {
+    private static void update_ps(String table_final_smoothed, Connection con2) throws SQLException {
         java.sql.Statement st = con2.createStatement();
         java.sql.Statement st1 = con2.createStatement();
 
@@ -487,86 +461,13 @@ public class KLD_generator {
     }
 
 
-    /**
-     * Updates parent sum (counts), using the extra virtual observation. We use the Laplace correction.
-     * The computation is similar to the previous computation of conditional probabilities.
-     * The smoothed probabilities are normalized and have at most 6 significant digits.
-     */
-    public static void update_ps_compress(String table_final_smoothed, Connection con2) throws SQLException {
-        java.sql.Statement st=con2.createStatement();
-        java.sql.Statement st1=con2.createStatement();
-        String parents = "";
-        for(int i = 1; i < list.size(); i++) {
-            parents = parents + " , `" + list.get(i) + "` ";
-        }
-
-        st.execute("DROP TABLE IF EXISTS temp1;");
-        String query1 = "CREATE TABLE temp1 AS SELECT SUM(mult) AS parsum " + parents + " FROM " + table_final_smoothed + " GROUP BY " + parents.substring(2);
-        st.execute(query1);
-
-        // Add index to temp1.
-        String index_t = "ALTER TABLE temp1 ADD INDEX temp1 (`parsum` ASC";
-        for (int i = 1; i < list.size(); ++i) {
-            index_t = index_t + ", `" + list.get(i) + "` ASC";
-        }
-        index_t = index_t + ");";
-        st.execute(index_t);
-
-        // Compress all parents columns. Yan@Nov 8.
-        // Add a new column cprs=`parent1`,`parent2`,...  Same as temp1.
-        // Update parentsum as by compare these two cprs columns in two tables.
-        // Feel free to drop this column (cprs) in smoothed CP table.
-        st.execute("ALTER TABLE " + table_final_smoothed + " ADD COLUMN `parent_cprs` VARCHAR(200);");
-        st.execute("ALTER TABLE temp1 ADD COLUMN `parent_cprs` VARCHAR(200);");
-        String sql_cprs = "UPDATE " + table_final_smoothed + " SET `parent_cprs` = CONCAT(`" + list.get(1) + "` ";
-        String sql_cprs_temp = "UPDATE temp1 SET `parent_cprs` = CONCAT(`" + list.get(1) + "` ";
-        for (int i = 2; i < list.size(); ++i) {
-            sql_cprs = sql_cprs + ", `" + list.get(i) + "` ";
-            sql_cprs_temp = sql_cprs_temp + ", `" + list.get(i) + "` ";
-        }
-        sql_cprs = sql_cprs + ");";
-        sql_cprs_temp = sql_cprs_temp + ");";
-        st.execute(sql_cprs);
-        st.execute(sql_cprs_temp);
-
-        // zqian@ Oct 21, 2013, Bottleneck??
-        String query2 = "UPDATE " + table_final_smoothed + ", temp1 SET " + table_final_smoothed + ".ParentSum = temp1.parsum WHERE temp1.`parent_cprs` = " + table_final_smoothed + ".`parent_cprs`";
-
-        st.execute(query2);
-        st.execute("UPDATE " + table_final_smoothed + "SET CP = MULT / ParentSum;");
-
-        ResultSet rst_temp1 = st.executeQuery("SELECT DISTINCT" + parents.substring(2) + " FROM temp1;");
-        String whereclause = "";
-        while(rst_temp1.next()) {
-            for (int i = 1; i < list.size(); ++i) {
-                whereclause = whereclause + "`" + list.get(i) + "` = '" + rst_temp1.getString(i) + "' AND ";
-            }
-
-            // Let CV1 be the childvalue with the largest CP.
-            ResultSet rst_temp = st1.executeQuery("SELECT DISTINCT " + list.get(0) + " FROM " + table_final_smoothed + " WHERE " + whereclause.substring(0, whereclause.length() - 4) + " ORDER BY CP DESC;");
-            rst_temp.absolute(0);
-            String CV1 = rst_temp.getString(1);
-
-            ResultSet rst_temp2 = st1.executeQuery("SELECT SUM(CP) FROM " + table_final_smoothed + "WHERE " + whereclause + " " + list.get(0) + " <> '" + CV1 + "';");
-            rst_temp2.absolute(1);
-            float SubTot = rst_temp2.getFloat(1);
-            String query_temp1 = "UPDATE " + table_final_smoothed + " SET CP = 1 - " + SubTot + " WHERE " + whereclause + " " + list.get(0) + " = '" + CV1 + "';";
-            st1.execute(query_temp1);
-
-            whereclause = "";
-        }
-
-        // Feel free to drop this column (cprs) in smoothed CP table.
-        st.execute("ALTER TABLE " + table_final_smoothed + " DROP COLUMN `parent_cprs`;");
-    }
-
     /******************************************************************************************************************/
     /******************************************************************************************************************/
 
     /**
      * Main function to generate KLD table for given Rchain.
      */
-    public static void create_join_CP(String databaseCT, String rchain, Connection con2) throws SQLException {
+    private static void create_join_CP(String databaseCT, String rchain, Connection con2) throws SQLException {
         String table_name = databaseCT + "_CT." + rchain.substring(0, rchain.length() - 1) + "_CT`";
         String newTable_name = rchain.substring(0, rchain.length() - 1) + "_CT_KLD`";
 
@@ -615,7 +516,7 @@ public class KLD_generator {
      * Insert into KLD table conditional probability for each node.
      * Add index to speed up the update statement.
      */
-    public static void insert_CP_Values(String rchain, String newTable_name, Connection con2) throws SQLException {
+    private static void insert_CP_Values(String rchain, String newTable_name, Connection con2) throws SQLException {
         Statement st = con2.createStatement();
 
         // Handle functor nodes with no parents from Path_BayesNet where rchain is given.
@@ -717,7 +618,7 @@ public class KLD_generator {
     /**
      * Calculate joined probability and KLD.
      */
-    public static void cal_KLD(String newTable_name, Connection con2) throws SQLException {
+    private static void cal_KLD(String newTable_name, Connection con2) throws SQLException {
         Statement st = con2.createStatement();
         String query_jp = "UPDATE " + newTable_name + " set JP = " + column_names_CP.get(1);
         for(int l = 2; l < column_names_CP.size(); l++) {
@@ -746,7 +647,7 @@ public class KLD_generator {
      * Main function for generate method for all nodes in table.
      * Rchain needs to be given.
      */
-    public static void generate_CLL(String Rchain_value, Connection con2) throws SQLException {
+    private static void generate_CLL(String Rchain_value, Connection con2) throws SQLException {
         Statement st = con2.createStatement();
 
         // Select all nodes in given Rchain.
@@ -771,7 +672,7 @@ public class KLD_generator {
     /**
      * Generate CLL table for one node.
      */
-    public static void generate_CLL_node(String Node_name, String Rchain_value, Connection con2) throws SQLException {
+    private static void generate_CLL_node(String Node_name, String Rchain_value, Connection con2) throws SQLException {
         Statement st = con2.createStatement();
         String table_name = Node_name.substring(0, Node_name.length() - 1) + "_CLL`";
 
@@ -846,7 +747,7 @@ public class KLD_generator {
     /**
      * Generate markov blanket for one node given its rchain, and return the result in a list.
      */
-     public static ArrayList<String> markov_blank(String node_name, String Rchain_value, Connection con2) throws SQLException {
+    private static ArrayList<String> markov_blank(String node_name, String Rchain_value, Connection con2) throws SQLException {
          // List of the children of the node.
          ArrayList<String> children = new ArrayList<String>();
          // List of markov blanket.
@@ -896,7 +797,7 @@ public class KLD_generator {
     /******************************************************************************************************************/
 
 
-    public static void plot_CLL(String database, String Rchain_value, Connection con2) throws SQLException, IOException {
+    private static void plot_CLL(String database, String Rchain_value, Connection con2) throws SQLException, IOException {
         Statement st = con2.createStatement();
         ArrayList<Double> cll_db = new ArrayList<Double>();
         ArrayList<Double> cll_jp = new ArrayList<Double>();
@@ -977,64 +878,5 @@ public class KLD_generator {
         st1.close();
         rs.close();
         st.close();
-    }
-
-
-    public static double getXc(double[] x, double[] y) {
-        int n = x.length;
-        return (n * pSum(x, y) - sum(x) * sum(y)) / (n * sqSum(x) - Math.pow(sum(x), 2));
-    }
-
-
-    public static double getC(double[] x, double[] y, double a) {
-        int n = x.length;
-        return sum(y) / n - a * sum(x) / n;
-    }
-
-
-    public static double getC(double[] x, double[] y) {
-        int n = x.length;
-        double a = getXc(x, y);
-        return sum(y) / n - a * sum(x) / n;
-    }
-
-
-    private static double sum(double[] ds) {
-        double s = 0;
-        for(double d : ds) {
-            s = s + d;
-        }
-
-        return s;
-    }
-
-
-    private static double sqSum(double[] ds) {
-        double s = 0;
-        for(double d : ds) {
-            s += Math.pow(d, 2);
-        }
-
-        return s;
-    }
-
-
-    private static double pSum(double[] x, double[] y) {
-        double s = 0;
-        for(int i = 0; i < x.length; i++) {
-            s = s + x[i] * y[i];
-        }
-        return s;
-    }
-
-
-    public static void connectDB() throws SQLException {
-        String CONN_STR2 = "jdbc:" + dbaddress + "/" + databaseName2;
-        try {
-            java.lang.Class.forName("com.mysql.jdbc.Driver");
-        } catch (Exception ex) {
-            logger.severe("Unable to load MySQL JDBC driver");
-        }
-        con2 = DriverManager.getConnection(CONN_STR2, dbUsername, dbPassword);
     }
 }
