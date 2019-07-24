@@ -267,6 +267,14 @@ public class BZScriptRunner {
         } catch (FileNotFoundException e) {
             logger.severe("Failed to find file " + newFileName);
             e.printStackTrace();
+
+            // Attempt to close the input file if we have problems with the output file.
+            try {
+                input.close();
+            } catch (IOException e1) {
+                e1.printStackTrace();
+            }
+
             return null;
         }
 
