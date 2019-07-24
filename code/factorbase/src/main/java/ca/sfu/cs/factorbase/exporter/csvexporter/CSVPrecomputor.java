@@ -52,11 +52,6 @@ public class CSVPrecomputor {
     private static Logger logger = Logger.getLogger(CSVPrecomputor.class.getName());
 
 
-    public static void main(String[] args) throws Exception {
-        runCSV();
-    }
-
-
     public static void runCSV() throws Exception {
         initProgram();
         connectDB();
@@ -78,7 +73,7 @@ public class CSVPrecomputor {
     }
 
 
-    public static void Computing_CSV() throws SQLException, IOException {
+    private static void Computing_CSV() throws SQLException, IOException {
         long l = System.currentTimeMillis();
         readPvarFromBN(con2);
 
@@ -93,7 +88,7 @@ public class CSVPrecomputor {
     }
 
 
-    static void initProgram() throws IOException, SQLException {
+    private static void initProgram() throws IOException, SQLException {
         // Read config file.
         setVarsFromConfig();
 
@@ -111,7 +106,7 @@ public class CSVPrecomputor {
     }
 
 
-    static void delete(File f) throws IOException {
+    private static void delete(File f) throws IOException {
         if (f.isDirectory()) {
             for (File c : f.listFiles()) {
                 delete(c);
@@ -124,7 +119,7 @@ public class CSVPrecomputor {
     }
 
 
-    public static void setVarsFromConfig() {
+    private static void setVarsFromConfig() {
         Config conf = new Config();
         databaseName = conf.getProperty("dbname");
         databaseName2 = databaseName + "_BN";
@@ -136,7 +131,7 @@ public class CSVPrecomputor {
     }
 
 
-    public static void connectDB() throws SQLException {
+    private static void connectDB() throws SQLException {
         String CONN_STR1 = "jdbc:" + dbaddress + "/" + databaseName;
         try {
             java.lang.Class.forName("com.mysql.jdbc.Driver");
@@ -166,7 +161,7 @@ public class CSVPrecomputor {
     }
 
 
-    public static void readPvarFromBN(Connection con2) throws SQLException, IOException {
+    private static void readPvarFromBN(Connection con2) throws SQLException, IOException {
         Statement st = con2.createStatement();
 
         // From main db.
@@ -218,7 +213,7 @@ public class CSVPrecomputor {
     }
 
 
-    public static void readRNodesFromLattice(int len) throws SQLException, IOException {
+    private static void readRNodesFromLattice(int len) throws SQLException, IOException {
         Statement st = con2.createStatement();
         ResultSet rs = st.executeQuery(
             "SELECT short_rnid AS short_RChain, orig_rnid AS RChain " +
@@ -284,7 +279,7 @@ public class CSVPrecomputor {
     }
 
 
-    public static ArrayList<String> getColumns(ResultSet rs) throws SQLException {
+    private static ArrayList<String> getColumns(ResultSet rs) throws SQLException {
         ArrayList<String> cols = new ArrayList<String>();
         ResultSetMetaData metaData = rs.getMetaData();
         rs.next();
@@ -298,7 +293,7 @@ public class CSVPrecomputor {
     }
 
 
-    public static void disconnectDB() throws SQLException {
+    private static void disconnectDB() throws SQLException {
         con1.close();
         con2.close();
         con3.close();
