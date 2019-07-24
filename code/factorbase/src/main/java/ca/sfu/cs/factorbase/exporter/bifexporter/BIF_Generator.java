@@ -170,6 +170,7 @@ public class BIF_Generator {
 
                 order = order + ", `" + variables.get(i) + "`";
                 String query = "SELECT CP FROM " + table_name + " ORDER BY " + order + ";";
+                rst2.close();
                 rst2 = st.executeQuery(query);
 
                 int size = 0;
@@ -189,6 +190,7 @@ public class BIF_Generator {
             // When node or variable does not have any parents.
             else {
                 // Change ChildValue to FID -- Feb 7 Yan.
+                rst2.close();
                 rst2 = st.executeQuery("SELECT CP FROM " + table_name + " ORDER BY `" + variables.get(i) + "`");
 
                 while (rst2.next()) {
