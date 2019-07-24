@@ -28,46 +28,24 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.logging.Logger;
-
-import ca.sfu.cs.common.Configuration.Config;
 
 import com.mysql.jdbc.Connection;
 import com.mysql.jdbc.Statement;
 
 
 public class BIF_Generator {
-    static Connection con;
-    static Connection con1, con2, con3;
-
-    // To be read from config file.
-    static String databaseName, databaseName2, databaseName3;
-    static String dbUsername;
-    static String dbPassword;
-    static String dbaddress;
-
+    public static final String BIF_HEADER = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<BIF VERSION=\"0.3\"  xmlns=\"http://www.cs.ubc.ca/labs/lci/fopi/ve/XMLBIFv0_3\"\nxmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\nxsi:schemaLocation=\"http://www.cs.ubc.ca/labs/lci/fopi/ve/XMLBIFv0_3 http://www.cs.ubc.ca/labs/lci/fopi/ve/XMLBIFv0_3/XMLBIFv0_3.xsd\">\n";
     private static Logger logger = Logger.getLogger(BIF_Generator.class.getName());
 
-    public static void main(String[] args) throws SQLException, IOException {
-        // Read config file.
-        setVarsFromConfig();
-        connectDB();
 
-        // mapping the orig_rnid back and create a new table: Final_Path_BayesNets.
-        // Final_Path_BayesNets(con2);
-        generate_bif(databaseName, "src/Bif_" + databaseName + ".xml", con2);
-        disconnectDB();
-    }
-
-
-    public static void generate_bif(String network_name, String bif_file_name_withPath, Connection conn) throws SQLException, IOException {
+    public static void generate_bif(String network_name, String bif_file_name_withPath, Connection con) throws SQLException, IOException {
         logger.info("\n BIF Generator starts");
 
-        Statement st = (Statement) conn.createStatement();
+        Statement st = (Statement) con.createStatement();
         File file = new File(bif_file_name_withPath);
         BufferedWriter output = new BufferedWriter(new FileWriter(file));
 
@@ -267,30 +245,22 @@ public class BIF_Generator {
     }
 
 
-    public static void print(ArrayList<String> al) {
-        for (int i = 0; i < al.size(); i++) {
-            logger.fine(al.get(i));
-        }
+    private static String writeBifHeader() {
+        return BIF_HEADER;
     }
 
 
-    public static String writeBifHeader() {
-        String s = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<BIF VERSION=\"0.3\"  xmlns=\"http://www.cs.ubc.ca/labs/lci/fopi/ve/XMLBIFv0_3\"\nxmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\nxsi:schemaLocation=\"http://www.cs.ubc.ca/labs/lci/fopi/ve/XMLBIFv0_3 http://www.cs.ubc.ca/labs/lci/fopi/ve/XMLBIFv0_3/XMLBIFv0_3.xsd\">\n";
-        return s;
-    }
-
-
-    public static String writeNetworkBegin(String name) {
+    private static String writeNetworkBegin(String name) {
         return "<NETWORK>\n<NAME>" + name + "</NAME>\n";
     }
 
 
-    public static String writeNetworkEnd() {
+    private static String writeNetworkEnd() {
         return "</NETWORK>\n</BIF>\n";
     }
 
 
-    public static String writeVariable(String variable, ArrayList<String> outcomes, double x, double y) {
+    private static String writeVariable(String variable, ArrayList<String> outcomes, double x, double y) {
         String position = "(" + x + "," + y + ")";
         StringBuilder builder = new StringBuilder("<VARIABLE TYPE=\"nature\">\n");
         builder.append("\t<NAME>");
@@ -310,7 +280,7 @@ public class BIF_Generator {
     }
 
 
-    public static String writeDefinition(String forVariable, ArrayList<String> givenVariables, String probabilities) {
+    private static String writeDefinition(String forVariable, ArrayList<String> givenVariables, String probabilities) {
         StringBuilder builder = new StringBuilder("<DEFINITION>\n");
         builder.append("\t<FOR>");
         builder.append(forVariable);
@@ -326,54 +296,5 @@ public class BIF_Generator {
         builder.append("</TABLE>\n");
         builder.append("</DEFINITION>\n");
         return builder.toString();
-    }
-
-
-    public static void setVarsFromConfig() {
-        Config conf = new Config();
-        databaseName = conf.getProperty("dbname");
-        databaseName2 = databaseName + "_BN";
-        databaseName3 = databaseName + "_CT";
-        dbUsername = conf.getProperty("dbusername");
-        dbPassword = conf.getProperty("dbpassword");
-        dbaddress = conf.getProperty("dbaddress");
-    }
-
-
-    public static void connectDB() throws SQLException {
-        String CONN_STR1 = "jdbc:" + dbaddress + "/" + databaseName;
-
-        try {
-            java.lang.Class.forName("com.mysql.jdbc.Driver");
-        } catch (Exception ex) {
-            logger.severe("Unable to load MySQL JDBC driver");
-        }
-
-        con1 = (Connection) DriverManager.getConnection(CONN_STR1, dbUsername, dbPassword);
-
-        String CONN_STR2 = "jdbc:" + dbaddress + "/" + databaseName2;
-        try {
-            java.lang.Class.forName("com.mysql.jdbc.Driver");
-        } catch (Exception ex) {
-            logger.severe("Unable to load MySQL JDBC driver");
-        }
-
-        con2 = (Connection) DriverManager.getConnection(CONN_STR2, dbUsername, dbPassword);
-
-        String CONN_STR3 = "jdbc:" + dbaddress + "/" + databaseName3;
-        try {
-            java.lang.Class.forName("com.mysql.jdbc.Driver");
-        } catch (Exception ex) {
-            logger.severe("Unable to load MySQL JDBC driver");
-        }
-
-        con3 = (Connection) DriverManager.getConnection(CONN_STR3, dbUsername, dbPassword);
-    }
-
-
-    public static void disconnectDB() throws SQLException {
-        con1.close();
-        con2.close();
-        con3.close();
     }
 }
