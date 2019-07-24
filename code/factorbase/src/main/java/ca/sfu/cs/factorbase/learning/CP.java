@@ -100,7 +100,7 @@ public class CP {
         long l = System.currentTimeMillis(); // @zqian : measure parameter learning time
         setVarsFromConfig();
         connectDB();
-        CP(rchain,con1);
+        generateCPTable(rchain, con1);
 
         long l2 = System.currentTimeMillis(); // @zqian : measure parameter learning time
         logger.info("Parameter Learning Time(ms): " + (l2 - l) + " ms.\n");
@@ -109,7 +109,7 @@ public class CP {
     /**
      * Builds CP table for a given rchain. Right now, it's the longest one for the final result.
      */
-    public static void CP(String rchain, Connection con1) throws SQLException {
+    public static void generateCPTable(String rchain, Connection con1) throws SQLException {
         prepare(rchain, con1);
         nopar(rchain, con1);
         haspar(rchain,con1);
