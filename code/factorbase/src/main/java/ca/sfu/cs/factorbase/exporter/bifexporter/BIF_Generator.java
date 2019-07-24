@@ -147,7 +147,6 @@ public class BIF_Generator {
             rst2 = st.executeQuery("SELECT DISTINCT lattice_set.name FROM lattice_membership, lattice_set WHERE length = (SELECT MAX(length) FROM lattice_set);");
             rst2.next();
             String Rchain = rst2.getString(1);
-//            logger.fine("Rchain:" + Rchain);
             rst2 = st.executeQuery("SELECT DISTINCT parent FROM Path_BayesNets WHERE child = '`" + variables.get(i) + "`' AND parent != '' AND Rchain = '" + Rchain + "';");
 
             int nop = 0; // nop -> number of parents for a particular node.
@@ -160,7 +159,7 @@ public class BIF_Generator {
                 while (rst2.next()) {
                     given.add(rst2.getString(1).substring(1, rst2.getString(1).length() - 1));
                 }
-//                print(given);
+
                 // Order of values according to xmlbif specifications.
                 // Change ChildValue to FID -- Feb 7 Yan.
                 String order = "`" + given.get(0) + "`";
@@ -171,7 +170,6 @@ public class BIF_Generator {
 
                 order = order + ", `" + variables.get(i) + "`";
                 String query = "SELECT CP FROM " + table_name + " ORDER BY " + order + ";";
-//                logger.fine(query+"\n"); //zqian
                 rst2 = st.executeQuery(query);
 
                 int size = 0;
@@ -181,25 +179,10 @@ public class BIF_Generator {
                 rst2.beforeFirst();
                 int n = size / outcomes.get(i);
                 for (int l = 1; l <= n; l++) {
-                    int subtot = 0;
-//                    for (int j = 1; j <= (outcomes.get(i) - 1); j++) {
                     for (int j = 1; j <= (outcomes.get(i)); j++) {
                         rst2.next();
-//                        logger.fine(j + ": " + rst2.getString(1) + "\n"); // zqian
                         probabilities = probabilities + " " + rst2.getString(1);
-
-                        // KLD generator has been modified s.t. probabilities sum to 1, and have at most 6 digits.  Oliver
-                        // getString(1) is assigned the conditional probability (CP) as a string
-//                        subtot = subtot + Integer.parseInt((rst2.getString(1).substring(2, rst2.getString(1).length())));
-//                        logger.fine("subtot: " + subtot);
-                        // Convert string representing a conditional probability to an integer.
                     }
-                    /*
-                    rst2.next();
-                    int last = 10000 - subtot;
-                    double last1 = ((double) last / 10000);
-                    probabilities=probabilities+" "+last1;
-                    */
                 }
             }
 
@@ -253,7 +236,6 @@ public class BIF_Generator {
         ArrayList<String>orig_rnid = new ArrayList<String>();
         ArrayList<String>rnid = new ArrayList<String>();
         Statement st1 = (Statement) conn.createStatement();
-//        st1.execute("drop table if exists `Final_Path_BayesNets` ;");
 
         // Creating table Final_Path_BayesNets.
         String query1 = "CREATE TABLE `Final_Path_BayesNets` (SELECT * FROM `Path_BayesNets` WHERE Rchain = '" + rchain + "' AND parent<> '');";
@@ -384,8 +366,6 @@ public class BIF_Generator {
         }
 
         con3 = (Connection) DriverManager.getConnection(CONN_STR3, dbUsername, dbPassword);
-//        handle warnings
-//        handleWarnings();
     }
 
 
