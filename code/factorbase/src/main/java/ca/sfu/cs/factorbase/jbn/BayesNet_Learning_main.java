@@ -5,6 +5,8 @@ import java.io.FileWriter;
 import java.util.List;
 
 import ca.sfu.cs.factorbase.data.ContingencyTableGenerator;
+import ca.sfu.cs.factorbase.data.DataExtractor;
+import ca.sfu.cs.factorbase.data.TSVDataExtractor;
 import ca.sfu.cs.factorbase.graph.Edge;
 import edu.cmu.tetrad.data.Knowledge;
 import edu.cmu.tetrad.graph.Graph;
@@ -29,7 +31,8 @@ public class BayesNet_Learning_main {
         String destfile,
         boolean isDiscrete
     ) throws Exception {
-        ContingencyTableGenerator dataset = new ContingencyTableGenerator(srcfile, "MULT", isDiscrete);
+        DataExtractor dataExtractor = new TSVDataExtractor(srcfile, "MULT", isDiscrete);
+        ContingencyTableGenerator dataset = new ContingencyTableGenerator(dataExtractor);
 
         GesCT gesSearch = new GesCT(
             dataset,

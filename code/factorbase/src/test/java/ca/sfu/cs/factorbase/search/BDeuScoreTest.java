@@ -14,6 +14,8 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import ca.sfu.cs.factorbase.data.ContingencyTableGenerator;
+import ca.sfu.cs.factorbase.data.DataExtractor;
+import ca.sfu.cs.factorbase.data.TSVDataExtractor;
 
 
 /**
@@ -32,7 +34,8 @@ public class BDeuScoreTest {
     @BeforeClass
     public static void setUpBeforeClass() throws Exception {
         URL url = BDeuScoreTest.class.getClassLoader().getResource("inputfiles/prof0.tsv");
-        ctGenerator = new ContingencyTableGenerator(url.getFile(), COUNTS_COLUMN, true);
+        DataExtractor dataExtractor = new TSVDataExtractor(url.getFile(), COUNTS_COLUMN, true);
+        ctGenerator = new ContingencyTableGenerator(dataExtractor);
     }
 
     @AfterClass

@@ -1,13 +1,14 @@
 package ca.sfu.cs.factorbase.data;
 
-import java.io.IOException;
 import java.net.URL;
 
 import org.junit.After;
 import org.junit.Before;
 
+import ca.sfu.cs.factorbase.exception.DataExtractionException;
+
 /**
- * Tests for contingency tables created using the TSV based constructor in ContingencyTableGenerator.java.
+ * Tests for contingency tables created using the TSV based DataExtractor.
  */
 public class TSVContingencyTableTest extends ContingencyTableTestBase {
 
@@ -30,10 +31,11 @@ public class TSVContingencyTableTest extends ContingencyTableTestBase {
     @Override
     protected ContingencyTableGenerator createInstance() {
         URL url = TSVContingencyTableTest.class.getClassLoader().getResource("inputfiles/prof0.tsv");
+        DataExtractor dataExtractor = new TSVDataExtractor(url.getFile(), "MULT", true);
 
         try {
-            return new ContingencyTableGenerator(url.getFile(), "MULT", true);
-        } catch (IOException e) {
+            return new ContingencyTableGenerator(dataExtractor);
+        } catch (DataExtractionException e) {
             e.printStackTrace();
             return null;
         }
