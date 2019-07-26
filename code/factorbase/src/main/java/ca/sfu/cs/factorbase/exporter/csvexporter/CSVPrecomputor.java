@@ -34,7 +34,7 @@ import com.mysql.jdbc.exceptions.MySQLSyntaxErrorException;
  */
 public class CSVPrecomputor {
 
-    static Connection con1, con2, con3;
+    static Connection con2, con3;
 
     // To be read from config.
     static String databaseName, databaseName2, databaseName3;
@@ -42,12 +42,7 @@ public class CSVPrecomputor {
     static String dbPassword;
     static String dbaddress;
 
-    static String opt2;
-
     static int maxNumberOfMembers = 0;
-
-    static ArrayList<String> rnode_ids;
-    static ArrayList<String> pvar_ids;
 
     private static Logger logger = Logger.getLogger(CSVPrecomputor.class.getName());
 
@@ -80,7 +75,6 @@ public class CSVPrecomputor {
         for (int len = 1; len <= maxNumberOfMembers; len++) {
             logger.info("\n processing Rchain.length = " + len); // @zqian
             readRNodesFromLattice(len);
-            rnode_ids.clear(); // Prepare for next loop.
         }
 
         long l2 = System.currentTimeMillis();
@@ -91,10 +85,6 @@ public class CSVPrecomputor {
     private static void initProgram() throws IOException, SQLException {
         // Read config file.
         setVarsFromConfig();
-
-        // Init ids.
-        pvar_ids = new ArrayList<String>();
-        rnode_ids = new ArrayList<String>();
 
         try {
             delete(new File(databaseName + "/"));
@@ -127,20 +117,10 @@ public class CSVPrecomputor {
         dbUsername = conf.getProperty("dbusername");
         dbPassword = conf.getProperty("dbpassword");
         dbaddress = conf.getProperty("dbaddress");
-        opt2 = conf.getProperty("LinkCorrelations");
     }
 
 
     private static void connectDB() throws SQLException {
-        String CONN_STR1 = "jdbc:" + dbaddress + "/" + databaseName;
-        try {
-            java.lang.Class.forName("com.mysql.jdbc.Driver");
-        } catch (Exception ex) {
-            System.err.println("Unable to load MySQL JDBC driver");
-        }
-
-        con1 = (Connection) DriverManager.getConnection(CONN_STR1, dbUsername, dbPassword);
-
         String CONN_STR2 = "jdbc:" + dbaddress + "/" + databaseName2;
         try {
             java.lang.Class.forName("com.mysql.jdbc.Driver");
@@ -200,9 +180,6 @@ public class CSVPrecomputor {
             }
 
             csv.close(); // zqian@Nov 21
-
-            // Add to ids for further use.
-            pvar_ids.add(pvid);
 
             // Close statements.
             st3.close();
@@ -270,8 +247,6 @@ public class CSVPrecomputor {
             csv.close(); // zqian@Nov 21
             // Close statements.
             st3.close();
-
-            rnode_ids.add(rchain);
         }
 
         rs.close();
@@ -294,7 +269,6 @@ public class CSVPrecomputor {
 
 
     private static void disconnectDB() throws SQLException {
-        con1.close();
         con2.close();
         con3.close();
     }
