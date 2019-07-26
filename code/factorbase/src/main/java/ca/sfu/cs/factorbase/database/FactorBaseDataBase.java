@@ -2,7 +2,9 @@ package ca.sfu.cs.factorbase.database;
 
 import java.util.List;
 
+import ca.sfu.cs.factorbase.data.DataExtractor;
 import ca.sfu.cs.factorbase.exception.DataBaseException;
+import ca.sfu.cs.factorbase.exception.DataExtractionException;
 import ca.sfu.cs.factorbase.graph.Edge;
 
 /**
@@ -47,4 +49,16 @@ public interface FactorBaseDataBase {
      * @throws DataBaseException if an error occurs when attempting to retrieve the information.
      */
     List<Edge> getRequiredEdges(List<String> rnodeIDs) throws DataBaseException;
+
+
+    /**
+     * Retrieve the CT table {@code DataExtractor} for the given RNode/PVar ID.
+     *
+     * @param dataExtractorID - the RNode/PVar ID that we want to retrieve the {@code DataExtractor} for.
+     * @return the CT table DataExtractor for the given RNode/PVar ID.
+     *
+     * @throws DataExtractionException if a non database error occurs when retrieving the DataExtractor.
+     * @throws DataBaseException if a database error occurs when retrieving the DataExtractor.
+     */
+    DataExtractor getCTDataExtractor(String dataExtractorID) throws DataBaseException, DataExtractionException;
 }
