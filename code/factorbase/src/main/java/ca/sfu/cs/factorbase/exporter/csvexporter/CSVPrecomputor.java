@@ -1,7 +1,6 @@
 package ca.sfu.cs.factorbase.exporter.csvexporter;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.sql.DriverManager;
@@ -10,11 +9,15 @@ import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.logging.Logger;
 
 import org.apache.commons.lang.StringUtils;
 
 import ca.sfu.cs.common.Configuration.Config;
+import ca.sfu.cs.factorbase.data.DataExtractor;
+import ca.sfu.cs.factorbase.data.TSVDataExtractor;
 
 import com.mysql.jdbc.Connection;
 import com.mysql.jdbc.exceptions.MySQLSyntaxErrorException;
@@ -41,13 +44,14 @@ public class CSVPrecomputor {
     static String dbUsername;
     static String dbPassword;
     static String dbaddress;
+    static String isDiscrete;
 
     static int maxNumberOfMembers = 0;
 
     private static Logger logger = Logger.getLogger(CSVPrecomputor.class.getName());
 
 
-    public static void runCSV() throws Exception {
+    public static Map<String, DataExtractor> runCSV() throws SQLException, IOException {
         initProgram();
         connectDB();
 
@@ -61,51 +65,36 @@ public class CSVPrecomputor {
 
         logger.info("##### lattice is ready for use*"); // @zqian
 
-        Computing_CSV();
+        Map<String, DataExtractor> dataExtractors = Computing_CSV();
 
         // Disconnect from db.
         disconnectDB();
+
+        return dataExtractors;
     }
 
 
-    private static void Computing_CSV() throws SQLException, IOException {
+    private static Map<String, DataExtractor> Computing_CSV() throws SQLException, IOException {
         long l = System.currentTimeMillis();
-        readPvarFromBN(con2);
+        Map<String, DataExtractor> dataExtractors = readPvarFromBN(con2);
 
         for (int len = 1; len <= maxNumberOfMembers; len++) {
             logger.info("\n processing Rchain.length = " + len); // @zqian
-            readRNodesFromLattice(len);
+            readRNodesFromLattice(dataExtractors, len);
         }
 
         long l2 = System.currentTimeMillis();
         logger.info("\n CSVPrecomputor TOTAL Time(ms): " + (l2 - l) + " ms.\n");
+
+        return dataExtractors;
     }
 
 
     private static void initProgram() throws IOException, SQLException {
         // Read config file.
         setVarsFromConfig();
-
-        try {
-            delete(new File(databaseName + "/"));
-        } catch (Exception e) {
-        }
-
         new File(databaseName + File.separator).mkdirs();
         new File(databaseName + File.separator + "csv" + File.separator).mkdirs();
-    }
-
-
-    private static void delete(File f) throws IOException {
-        if (f.isDirectory()) {
-            for (File c : f.listFiles()) {
-                delete(c);
-            }
-        }
-
-        if (!f.delete()) {
-            throw new FileNotFoundException("Failed to delete file: " + f);
-        }
     }
 
 
@@ -117,6 +106,7 @@ public class CSVPrecomputor {
         dbUsername = conf.getProperty("dbusername");
         dbPassword = conf.getProperty("dbpassword");
         dbaddress = conf.getProperty("dbaddress");
+        isDiscrete = conf.getProperty("Continuous");
     }
 
 
@@ -141,15 +131,16 @@ public class CSVPrecomputor {
     }
 
 
-    private static void readPvarFromBN(Connection con2) throws SQLException, IOException {
+    private static Map<String, DataExtractor> readPvarFromBN(Connection con2) throws SQLException, IOException {
+        Map<String, DataExtractor> dataExtractors = new HashMap<String, DataExtractor>();
         Statement st = con2.createStatement();
 
         // From main db.
         ResultSet rs = st.executeQuery("SELECT * FROM PVariables WHERE index_number = 0;"); // O.S. March 21 ignore variables that aren't main.
         while(rs.next()) {
-
             // Get pvid for further use.
             String pvid = rs.getString("pvid");
+            String filePath = databaseName + File.separator + "csv" + File.separator + pvid + ".csv";
             logger.fine("pvid : " + pvid);
 
             // Create new statement.
@@ -165,7 +156,7 @@ public class CSVPrecomputor {
             logger.fine("\nCSV Header : " + csvHeader+ "\n");
 
             // Create csv file.
-            RandomAccessFile csv = new RandomAccessFile(databaseName + File.separator + "csv" + File.separator + pvid + ".csv", "rw");
+            RandomAccessFile csv = new RandomAccessFile(filePath, "rw");
             csv.writeBytes(csvHeader + "\n");
 
             ResultSet rs5 = st3.executeQuery(queryString);
@@ -183,14 +174,18 @@ public class CSVPrecomputor {
 
             // Close statements.
             st3.close();
+
+            dataExtractors.put(pvid, new TSVDataExtractor(filePath, "MULT", !isDiscrete.equals("1")));
         }
 
         rs.close();
         st.close();
+
+        return dataExtractors;
     }
 
 
-    private static void readRNodesFromLattice(int len) throws SQLException, IOException {
+    private static void readRNodesFromLattice(Map<String, DataExtractor> dataExtractors, int len) throws SQLException, IOException {
         Statement st = con2.createStatement();
         ResultSet rs = st.executeQuery(
             "SELECT short_rnid AS short_RChain, orig_rnid AS RChain " +
@@ -202,10 +197,11 @@ public class CSVPrecomputor {
 
         while(rs.next()) {
             // Get the short and full form rnids for further use.
-            String rchain = rs.getString("RChain");
+            String rchain = rs.getString("RChain").replace("`", "");
             logger.fine("\n RChain : " + rchain);
             String shortRchain = rs.getString("short_RChain");
             logger.fine(" Short RChain : " + shortRchain);
+            String filePath = databaseName + File.separator + "csv" + File.separator + rchain + ".csv";
 
             // Create new statement.
             Statement st3 = con3.createStatement();
@@ -228,7 +224,7 @@ public class CSVPrecomputor {
             logger.fine("\n CSV Header : " + csvHeader + "\n");
 
             // Create csv file, reading data from _CT table into .csv file.
-            RandomAccessFile csv = new RandomAccessFile(databaseName + File.separator + "csv" + File.separator + rchain.replace("`", "") + ".csv", "rw");
+            RandomAccessFile csv = new RandomAccessFile(filePath, "rw");
             csv.setLength(0); // File must be cleared before writing.
 
             csv.writeBytes(csvHeader + "\n");
@@ -247,6 +243,8 @@ public class CSVPrecomputor {
             csv.close(); // zqian@Nov 21
             // Close statements.
             st3.close();
+
+            dataExtractors.put(rchain, new TSVDataExtractor(filePath, "MULT", !isDiscrete.equals("1")));
         }
 
         rs.close();

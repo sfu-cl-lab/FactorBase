@@ -36,6 +36,7 @@ package ca.sfu.cs.factorbase.learning;
  */
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
@@ -186,7 +187,7 @@ public class BayesBaseH {
         long l = System.currentTimeMillis(); // @zqian: measure structure learning time.
 
         // Handle pvars.
-        handlePVars(); // import @zqian
+        handlePVars(database); // import @zqian
 
         Statement st = conn.createStatement();
         st.execute(
@@ -245,12 +246,31 @@ public class BayesBaseH {
         // Read config file.
         setVarsFromConfig();
 
+        String databaseDirectory = databaseName + "/" + File.separator;
+
         if (FirstRunning==1) {
-            new File(databaseName + "/" + File.separator).mkdirs();
+            try {
+                delete(new File(databaseDirectory));
+            } catch (Exception e) {
+            }
+
+            new File(databaseDirectory).mkdirs();
             new File(databaseName + "/" + File.separator + "res" + File.separator).mkdirs();
             new File(databaseName + "/" + File.separator + "xml" + File.separator).mkdirs();
         }
+    }
 
+
+    private static void delete(File f) throws IOException {
+        if (f.isDirectory()) {
+            for (File c : f.listFiles()) {
+                delete(c);
+            }
+        }
+
+        if (!f.delete()) {
+            throw new FileNotFoundException("Failed to delete file: " + f);
+        }
     }
 
 
@@ -315,7 +335,7 @@ public class BayesBaseH {
      * if the tuples greater than 1, then employ tetradlearner.
      * else just insert the 1nid as child into entity_bayesnet.
      */
-    private static void handlePVars() throws Exception {
+    private static void handlePVars(FactorBaseDataBase database) throws Exception {
         // read pvar -> create csv files
         ArrayList<String> pvar_ids = readPvarFromBN();
 
@@ -331,7 +351,7 @@ public class BayesBaseH {
 
             if (Integer.parseInt(NoTuples) > 1) {
                 BayesNet_Learning_main.tetradLearner(
-                    databaseName + "/" + File.separator + "csv" + File.separator + id.replace("`","") + ".csv",
+                    database.getCTDataExtractor(id.replace("`","")),
                     databaseName + "/" + File.separator + "xml" + File.separator + id.replace("`","") + ".xml",
                     !cont.equals("1")
                 );
@@ -397,7 +417,7 @@ public class BayesBaseH {
 
                 if(Integer.parseInt(NoTuples) > 1) {
                     BayesNet_Learning_main.tetradLearner(
-                        databaseName + "/" + File.separator + "csv" + File.separator + id.replace("`","") + ".csv",
+                        database.getCTDataExtractor(id.replace("`","")),
                         requiredEdges,
                         forbiddenEdges,
                         databaseName + "/" + File.separator + "xml" + File.separator + id.replace("`","") + ".xml",

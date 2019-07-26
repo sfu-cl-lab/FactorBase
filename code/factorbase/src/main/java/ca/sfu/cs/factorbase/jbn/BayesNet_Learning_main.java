@@ -6,7 +6,6 @@ import java.util.List;
 
 import ca.sfu.cs.factorbase.data.ContingencyTableGenerator;
 import ca.sfu.cs.factorbase.data.DataExtractor;
-import ca.sfu.cs.factorbase.data.TSVDataExtractor;
 import ca.sfu.cs.factorbase.graph.Edge;
 import edu.cmu.tetrad.data.Knowledge;
 import edu.cmu.tetrad.graph.Graph;
@@ -19,20 +18,23 @@ import edu.cmu.tetrad.search.PatternToDag;
 public class BayesNet_Learning_main {
 
 
-    public static void tetradLearner(String srcfile, String destfile, boolean isDiscrete) throws Exception {
-        tetradLearner(srcfile, null, null, destfile, isDiscrete);
+    public static void tetradLearner(
+        DataExtractor dataSource,
+        String destfile,
+        boolean isDiscrete
+    ) throws Exception {
+        tetradLearner(dataSource, null, null, destfile, isDiscrete);
     }
 
 
     public static void tetradLearner(
-        String srcfile,
+        DataExtractor dataSource,
         List<Edge> requiredEdges,
         List<Edge> forbiddenEdges,
         String destfile,
         boolean isDiscrete
     ) throws Exception {
-        DataExtractor dataExtractor = new TSVDataExtractor(srcfile, "MULT", isDiscrete);
-        ContingencyTableGenerator dataset = new ContingencyTableGenerator(dataExtractor);
+        ContingencyTableGenerator dataset = new ContingencyTableGenerator(dataSource);
 
         GesCT gesSearch = new GesCT(
             dataset,

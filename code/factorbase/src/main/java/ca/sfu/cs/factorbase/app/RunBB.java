@@ -5,7 +5,6 @@ import java.util.logging.Logger;
 import ca.sfu.cs.common.Configuration.Config;
 import ca.sfu.cs.factorbase.database.FactorBaseDataBase;
 import ca.sfu.cs.factorbase.database.MySQLFactorBaseDataBase;
-import ca.sfu.cs.factorbase.exporter.csvexporter.CSVPrecomputor;
 import ca.sfu.cs.factorbase.learning.BayesBaseCT_SortMerge;
 import ca.sfu.cs.factorbase.learning.BayesBaseH;
 import ca.sfu.cs.factorbase.util.LoggerConfig;
@@ -47,9 +46,6 @@ public class RunBB {
         // Learn a Bayesian Network.
         BayesBaseCT_SortMerge.buildCT();
         logger.info("The CT database is ready for use.");
-        logger.info("*********************************************************");
-        CSVPrecomputor.runCSV();
-        logger.info("CSV files are generated.");
         logger.info("*********************************************************");
         BayesBaseH.runBBH(factorBaseDatabase);
         logger.info("\nFinish running BayesBaseH.");

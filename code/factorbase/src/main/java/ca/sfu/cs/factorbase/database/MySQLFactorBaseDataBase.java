@@ -8,9 +8,13 @@ import java.sql.SQLException;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import ca.sfu.cs.common.Configuration.Config;
+import ca.sfu.cs.factorbase.data.DataExtractor;
 import ca.sfu.cs.factorbase.exception.DataBaseException;
+import ca.sfu.cs.factorbase.exception.DataExtractionException;
+import ca.sfu.cs.factorbase.exporter.csvexporter.CSVPrecomputor;
 import ca.sfu.cs.factorbase.graph.Edge;
 import ca.sfu.cs.factorbase.util.BZScriptRunner;
 import ca.sfu.cs.factorbase.util.KeepTablesOnly;
@@ -23,6 +27,7 @@ public class MySQLFactorBaseDataBase implements FactorBaseDataBase {
     private static final String CONNECTION_STRING = "jdbc:{0}/{1}";
     private String baseDatabaseName;
     private Connection baseConnection;
+    private Map<String, DataExtractor> dataExtractors;
 
 
     /**
@@ -126,6 +131,34 @@ public class MySQLFactorBaseDataBase implements FactorBaseDataBase {
             return extractEdges(st);
         } catch (SQLException e) {
             throw new DataBaseException("Failed to retrieve the required edges.", e);
+        }
+    }
+
+
+    @Override
+    public DataExtractor getCTDataExtractor(String dataExtractorID) throws DataBaseException, DataExtractionException {
+        if (this.dataExtractors == null) {
+            this.dataExtractors = this.generateDataExtractors();
+        }
+
+        return this.dataExtractors.get(dataExtractorID);
+    }
+
+
+    /**
+     * Generate all the CT table {@code DataExtractor}s of the FactorBase database.
+     *
+     * @return a Map containing key:value pairs of dataExtractorID:DataExtractor.
+     * @throws DataBaseException if a non database error occurs when retrieving the DataExtractor.
+     * @throws DataExtractionException if a database error occurs when retrieving the DataExtractor.
+     */
+    private Map<String, DataExtractor> generateDataExtractors() throws DataBaseException, DataExtractionException {
+        try {
+            return CSVPrecomputor.runCSV();
+        } catch (IOException ioe) {
+            throw new DataExtractionException("Ran into a file issue when generating the TSVDataExtractors", ioe);
+        } catch (SQLException dbe) {
+            throw new DataBaseException("Ran into a database issue when generating the TSVDataExtractors", dbe);
         }
     }
 }
