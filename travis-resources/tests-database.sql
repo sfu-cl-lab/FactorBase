@@ -24,6 +24,31 @@ CREATE DATABASE /*!32312 IF NOT EXISTS*/ `tests-database` /*!40100 DEFAULT CHARA
 USE `tests-database`;
 
 --
+-- Table structure for table `prof0_counts`
+--
+
+DROP TABLE IF EXISTS `prof0_counts`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `prof0_counts` (
+  `MULT` bigint(21) NOT NULL DEFAULT '0',
+  `popularity(prof0)` varchar(45) DEFAULT NULL,
+  `teachingability(prof0)` varchar(45) DEFAULT NULL,
+  KEY `prof0_Index` (`popularity(prof0)`,`teachingability(prof0)`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `prof0_counts`
+--
+
+LOCK TABLES `prof0_counts` WRITE;
+/*!40000 ALTER TABLE `prof0_counts` DISABLE KEYS */;
+INSERT INTO `prof0_counts` VALUES (2,'1','2'),(1,'2','2'),(3,'2','3');
+/*!40000 ALTER TABLE `prof0_counts` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
 -- Table structure for table `sort-merge-t1`
 --
 
@@ -131,4 +156,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2019-04-01 18:02:31
+-- Dump completed on 2019-07-30 16:38:13
