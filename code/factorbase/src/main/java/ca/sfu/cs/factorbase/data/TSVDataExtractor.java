@@ -41,7 +41,7 @@ public class TSVDataExtractor implements DataExtractor {
         DataSetMetaData metadata;
         long[][] data;
         try {
-            metadata = this.extractMetaData(sourceFile, countsColumn);
+            metadata = this.extractMetaData(this.sourceFile, this.countsColumn);
             data = this.convertDataToStateIndices(this.sourceFile, metadata, this.countsColumn);
         } catch (IOException e) {
             throw new DataExtractionException("An error occurred when attempting to extract information from the data source.", e);
