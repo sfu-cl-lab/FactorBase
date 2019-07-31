@@ -16,11 +16,11 @@ public class LoggerConfig {
      * info: only show info, warning and error messages (no debug message).
      * off: show no log message.
      *
-     * @throws Exception if the specified value is not valid
+     * @throws IllegalArgumentException if the specified value is not valid.
      */
     public static Map<String, Level> levelMap;
 
-    public static void setGlobalLevel() throws Exception{
+    public static void setGlobalLevel() throws IllegalArgumentException {
         buildLevelMap();
         Level loggerLevel = getLevelFromConfig();
         Logger rootLogger = LogManager.getLogManager().getLogger("");
@@ -44,15 +44,15 @@ public class LoggerConfig {
      * Get the logger level from config.cfg.
      *
      * @return the specified Level.
-     * @throws Exception if the specified value is not valid.
+     * @throws IllegalArgumentException if the specified value is not valid.
      */
-    private static Level getLevelFromConfig() throws Exception {
+    private static Level getLevelFromConfig() throws IllegalArgumentException {
         String loggingLevel;
         Config conf = new Config();
         loggingLevel = conf.getProperty("LoggingLevel");
 
         if (levelMap.get(loggingLevel) == null) {
-            throw new IllegalArgumentException("Invlid LoggingLevel setting. Please set the loggingLevel in config.cfg to debug/info/off!");
+            throw new IllegalArgumentException("Invalid LoggingLevel setting. Please set the loggingLevel in config.cfg to debug/info/off!");
         }
 
         return levelMap.get(loggingLevel);
