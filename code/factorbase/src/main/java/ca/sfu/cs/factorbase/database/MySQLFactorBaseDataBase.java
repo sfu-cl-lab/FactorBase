@@ -12,9 +12,9 @@ import java.util.Map;
 
 import ca.sfu.cs.common.Configuration.Config;
 import ca.sfu.cs.factorbase.data.DataExtractor;
+import ca.sfu.cs.factorbase.data.DataExtractorGenerator;
 import ca.sfu.cs.factorbase.exception.DataBaseException;
 import ca.sfu.cs.factorbase.exception.DataExtractionException;
-import ca.sfu.cs.factorbase.exporter.csvexporter.CSVPrecomputor;
 import ca.sfu.cs.factorbase.graph.Edge;
 import ca.sfu.cs.factorbase.util.BZScriptRunner;
 import ca.sfu.cs.factorbase.util.KeepTablesOnly;
@@ -27,19 +27,28 @@ public class MySQLFactorBaseDataBase implements FactorBaseDataBase {
     private static final String CONNECTION_STRING = "jdbc:{0}/{1}";
     private String baseDatabaseName;
     private Connection baseConnection;
+    private FactorBaseDataBaseInfo dbInfo;
     private Map<String, DataExtractor> dataExtractors;
 
 
     /**
      * Create connections to the databases required by FactorBase to learn a Bayesian Network.
      *
+     * @param dbInfo - database information related to FactorBase.
      * @param dbaddress - the address of the MySQL database to connect to. e.g. mysql://127.0.0.1
      * @param dbname - the name of the database with the original data. e.g. unielwin
      * @param username - the username to use when accessing the database.
      * @param password - the password to use when accessing the database.
      * @throws SQLException if there is a problem connecting to the required databases.
      */
-    public MySQLFactorBaseDataBase(String dbaddress, String dbname, String username, String password) throws DataBaseException {
+    public MySQLFactorBaseDataBase(
+        FactorBaseDataBaseInfo dbInfo,
+        String dbaddress,
+        String dbname,
+        String username,
+        String password
+    ) throws DataBaseException {
+        this.dbInfo = dbInfo;
         this.baseDatabaseName = dbname;
         String baseConnectionString = MessageFormat.format(CONNECTION_STRING, dbaddress, dbname);
 
@@ -69,8 +78,8 @@ public class MySQLFactorBaseDataBase implements FactorBaseDataBase {
         try {
             KeepTablesOnly.Drop_tmpTables(
                 this.baseConnection,
-                this.baseDatabaseName + "_CT",
-                this.baseDatabaseName + "_BN"
+                this.dbInfo.getCTDatabaseName(),
+                this.dbInfo.getBNDatabaseName()
             );
         } catch (SQLException e) {
             throw new DataBaseException("An error occurred when attempting to cleanup the database for FactorBase.", e);
@@ -136,7 +145,7 @@ public class MySQLFactorBaseDataBase implements FactorBaseDataBase {
 
 
     @Override
-    public DataExtractor getCTDataExtractor(String dataExtractorID) throws DataBaseException, DataExtractionException {
+    public DataExtractor getCTDataExtractor(String dataExtractorID) throws DataExtractionException {
         if (this.dataExtractors == null) {
             this.dataExtractors = this.generateDataExtractors();
         }
@@ -149,16 +158,12 @@ public class MySQLFactorBaseDataBase implements FactorBaseDataBase {
      * Generate all the CT table {@code DataExtractor}s of the FactorBase database.
      *
      * @return a Map containing key:value pairs of dataExtractorID:DataExtractor.
-     * @throws DataBaseException if a non database error occurs when retrieving the DataExtractor.
-     * @throws DataExtractionException if a database error occurs when retrieving the DataExtractor.
+     * @throws DataExtractionException if an error occurs when retrieving the DataExtractors.
      */
-    private Map<String, DataExtractor> generateDataExtractors() throws DataBaseException, DataExtractionException {
-        try {
-            return CSVPrecomputor.runCSV();
-        } catch (IOException ioe) {
-            throw new DataExtractionException("Ran into a file issue when generating the TSVDataExtractors", ioe);
-        } catch (SQLException dbe) {
-            throw new DataBaseException("Ran into a database issue when generating the TSVDataExtractors", dbe);
-        }
+    private Map<String, DataExtractor> generateDataExtractors() throws DataExtractionException {
+        return DataExtractorGenerator.generateMySQLExtractors(
+            this.baseConnection,
+            this.dbInfo
+        );
     }
 }
