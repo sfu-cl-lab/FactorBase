@@ -4,6 +4,7 @@ import java.util.logging.Logger;
 
 import ca.sfu.cs.common.Configuration.Config;
 import ca.sfu.cs.factorbase.database.FactorBaseDataBase;
+import ca.sfu.cs.factorbase.database.FactorBaseDataBaseInfo;
 import ca.sfu.cs.factorbase.database.MySQLFactorBaseDataBase;
 import ca.sfu.cs.factorbase.learning.BayesBaseCT_SortMerge;
 import ca.sfu.cs.factorbase.learning.BayesBaseH;
@@ -29,6 +30,7 @@ public class RunBB {
         logger.info("Start Program...");
 
         FactorBaseDataBase factorBaseDatabase = new MySQLFactorBaseDataBase(
+            new FactorBaseDataBaseInfo(config),
             config.getProperty("dbaddress"),
             config.getProperty("dbname"),
             config.getProperty("dbusername"),
