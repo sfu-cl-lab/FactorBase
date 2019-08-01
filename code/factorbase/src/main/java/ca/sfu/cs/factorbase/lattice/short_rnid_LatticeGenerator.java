@@ -27,8 +27,6 @@ public class short_rnid_LatticeGenerator {
         // Connect to db using jdbc.
         Statement tempst = dbConnection.createStatement();
 
-        logger.info("Enter into short lattice generate.");
-
         // Generate shorter rnid, from a to z.
         int fc = 97;
         char short_rnid;

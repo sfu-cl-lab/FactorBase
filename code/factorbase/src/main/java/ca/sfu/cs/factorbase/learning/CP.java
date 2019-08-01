@@ -103,7 +103,7 @@ public class CP {
         generateCPTable(rchain, con1);
 
         long l2 = System.currentTimeMillis(); // @zqian : measure parameter learning time
-        logger.info("Parameter Learning Time(ms): " + (l2 - l) + " ms.\n");
+        logger.fine("Parameter Learning Time(ms): " + (l2 - l) + " ms.\n");
     }
 
     /**

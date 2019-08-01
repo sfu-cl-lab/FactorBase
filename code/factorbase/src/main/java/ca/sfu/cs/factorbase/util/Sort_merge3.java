@@ -32,7 +32,7 @@ public class Sort_merge3 {
 
 
     public static void sort_merge(String table1, String table2, String table3, Connection conn) throws SQLException, IOException {
-        logger.info("\nGenerating false table by Subtraction using Sort_merge, cur_false_Table is: " + table3);
+        logger.fine("\nGenerating false table by Subtraction using Sort_merge, cur_false_Table is: " + table3);
 
         Statement st1 = (Statement) conn.createStatement();
         Statement st2 = (Statement) conn.createStatement();
@@ -69,7 +69,7 @@ public class Sort_merge3 {
 
             long time5 = System.currentTimeMillis();
 //            System.out.print("\t export csv file to sql: " + (time5 - time4));
-            logger.info("\ntotal time: " + (time5 - time1) + "\n");
+            logger.fine("\ntotal time: " + (time5 - time1) + "\n");
         } else { // Aug 18, 2014 zqian: Handle the extreme case when there's only `mult` column.
             logger.fine("\n \t Handle the extreme case when there's only `mult` column \n");
             st2.execute("DROP TABLE IF EXISTS " + table3 + ";");
