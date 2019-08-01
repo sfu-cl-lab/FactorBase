@@ -21,7 +21,6 @@
 
 package edu.cmu.tetrad.search;
 
-import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -48,8 +47,6 @@ import edu.cmu.tetrad.graph.Edges;
 import edu.cmu.tetrad.graph.Graph;
 import edu.cmu.tetrad.graph.GraphNode;
 import edu.cmu.tetrad.graph.Node;
-import edu.cmu.tetrad.util.NumberFormatUtil;
-import edu.cmu.tetrad.util.TetradLogger;
 
 /**
  * GesSearch is an implementation of the GES algorithm, as specified in Chickering (2002) "Optimal structure
@@ -83,17 +80,6 @@ public class GesCT {
      * True iff the data set is discrete.
      */
     private boolean discrete;
-
-    /**
-     * The true graph, if known. If this is provided, asterisks will be printed out next to false positive added edges
-     * (that is, edges added that aren't adjacencies in the true graph).
-     */
-    private Graph trueGraph;
-
-    /**
-     * For formatting printed numbers.
-     */
-    private final NumberFormat nf = NumberFormatUtil.getInstance().getNumberFormat();
 
     /**
      * True if cycles are to be aggressively prevented. May be expensive for large graphs (but also useful for large
@@ -164,7 +150,6 @@ public class GesCT {
         // Don't need to score the original graph; the BIC scores all up to a constant.
 //        double score = 0;
         double score = scoreGraph(graph);
-        System.out.println("zqian########## get the score for input Graph :"+score);
         //Oct 30, bug? Arrow implies non-ancestor
         //score=0;
         storeGraph(new EdgeListGraph(graph), score);
@@ -172,8 +157,6 @@ public class GesCT {
        // System.out.println("######## finished the storing");
         // Do forward search.
         score = fes(graph, score);
-//zqian
-       System.out.println("Fes Search is Done, here is the final BDeu Score "+ score +"\n");
         // Do backward search.
         score = bes(graph, score);
 //zqian
@@ -248,9 +231,6 @@ public class GesCT {
             nodesHash.put(node, ++index);
         }
 
-        TetradLogger.getInstance().log("info", "** FORWARD EQUIVALENCE SEARCH");
-        TetradLogger.getInstance().log("info", "Initial Model BIC = " + nf.format(score)); //zqian ?? BIC or BDeu
-
         initializeArrowsForward(nodes, graph);
 
         while (!sortedArrows.isEmpty()) {
@@ -306,12 +286,8 @@ public class GesCT {
     private double bes(Graph graph, double score) {
         List<Node> nodes = graph.getNodes();
 
-        TetradLogger.getInstance().log("info", "** BACKWARD EQUIVALENCE SEARCH");
-       TetradLogger.getInstance().log("info", "Initial Model BIC = " + nf.format(score)); // here is BIC socre or BDeu Score //zqian ??
-      // System.out.println("Within BES Search ");// + score );//+ " " + graph); // Oct 23
-
         initializeArrowsBackward(graph);
-      //  System.out.println("sortedArrowsBackwards.isEmpty() is : " + sortedArrowsBackwards.isEmpty() );
+
         while (!sortedArrowsBackwards.isEmpty()) {
             Arrow arrow = sortedArrowsBackwards.first();
             sortedArrowsBackwards.remove(arrow);
@@ -694,25 +670,7 @@ public class GesCT {
             throw new IllegalArgumentException(x + " and " + y + " are already adjacent in the graph.");
         }
 
-        Edge trueEdge = null;
-
-        if (trueGraph != null) {
-            Node _x = trueGraph.getNode(x.getName());
-            Node _y = trueGraph.getNode(y.getName());
-            trueEdge = trueGraph.getEdge(_x, _y);
-        }
-
         graph.addDirectedEdge(x, y);
-
-        if (log) {
-            String label = trueGraph != null && trueEdge != null ? "*" : "";
-            TetradLogger.getInstance().log("insertedEdges", graph.getNumEdges() + ". INSERT " + graph.getEdge(x, y) +
-                    " " + t +
-                    " (" + nf.format(score) + ") " + label);
-            System.out.println(graph.getNumEdges() + ". INSERT " + graph.getEdge(x, y) +
-                    " " + t +
-                    " (" + nf.format(score) + ", " + bump + ") " + label);
-        }
 
         for (Node _t : t) {
             Edge oldEdge = graph.getEdge(_t, y);
@@ -725,13 +683,6 @@ public class GesCT {
 
             graph.removeEdge(_t, y);
             graph.addDirectedEdge(_t, y);
-
-            if (log) {
-                TetradLogger.getInstance().log("directedEdges", "--- Directing " + oldEdge + " to " +
-                        graph.getEdge(_t, y));
-                System.out.println("--- Directing " + oldEdge + " to " +
-                        graph.getEdge(_t, y));
-            }
         }
     }
 
@@ -739,50 +690,17 @@ public class GesCT {
      * Do an actual deletion (Definition 13 from Chickering, 2002).
      */
     private void delete(Node x, Node y, Set<Node> subset, Graph graph, double score, boolean log, double bump) {
-        System.out.println("here comes the delete step"); //zqian
-        Edge trueEdge = null;
-
-        if (trueGraph != null) {
-            Node _x = trueGraph.getNode(x.getName());
-            Node _y = trueGraph.getNode(y.getName());
-            trueEdge = trueGraph.getEdge(_x, _y);
-        }
-
-        if (log) {
-            Edge oldEdge = graph.getEdge(x, y);
-
-            String label = trueGraph != null && trueEdge != null ? "*" : "";
-            TetradLogger.getInstance().log("deletedEdges", (graph.getNumEdges() - 1) + ". DELETE " + oldEdge +
-                    " " + subset +
-                    " (" + nf.format(score) + ") " + label);
-            System.out.println((graph.getNumEdges() - 1) + ". DELETE " + oldEdge +
-                    " " + subset +
-                    " (" + nf.format(score) + ", " + bump + ") " + label);
-        }
-
         graph.removeEdge(x, y);
 
         for (Node h : subset) {
             graph.removeEdge(y, h);
             graph.addDirectedEdge(y, h);
 
-            if (log) {
-                Edge oldEdge = graph.getEdge(y, h);
-                TetradLogger.getInstance().log("directedEdges", "--- Directing " + oldEdge + " to " +
-                        graph.getEdge(y, h));
-            }
-
             if (Edges.isUndirectedEdge(graph.getEdge(y, h))) {
                 if (!graph.isAdjacentTo(x, h)) throw new IllegalArgumentException("Not adjacent: " + x + ", " + h);
 
                 graph.removeEdge(x, h);
                 graph.addDirectedEdge(x, h);
-
-                if (log) {
-                    Edge oldEdge = graph.getEdge(x, h);
-                    TetradLogger.getInstance().log("directedEdges", "--- Directing " + oldEdge + " to " +
-                            graph.getEdge(x, h));
-                }
             }
         }
     }
@@ -841,7 +759,6 @@ public class GesCT {
                 /**************/
                 if(!(nodeA == null || nodeB == null)){/*******************/ /*changed August 27. Need to not add edges with one part null.*/
                 graph.addDirectedEdge(nodeA, nodeB);
-                TetradLogger.getInstance().log("insertedEdges", "Adding edge by knowledge: " + graph.getEdge(nodeA, nodeB));
             }
             }
         }
@@ -976,8 +893,6 @@ public class GesCT {
         SearchGraphUtils.basicPattern(graph);
         addRequiredEdges(graph);
         pdagWithBk(graph, getKnowledge());
-
-        TetradLogger.getInstance().log("rebuiltPatterns", "Rebuilt pattern = " + graph);
     }
 
     /**

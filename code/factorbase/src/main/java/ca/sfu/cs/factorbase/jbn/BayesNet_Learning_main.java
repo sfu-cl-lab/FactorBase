@@ -58,8 +58,6 @@ public class BayesNet_Learning_main {
             }
         }
 
-        System.out.println(knowledge);
-        System.out.println("knowledge is DONE~~");
         gesSearch.setKnowledge(knowledge);
 
         /* learn a dag from data */
@@ -68,8 +66,6 @@ public class BayesNet_Learning_main {
 
         PatternToDag p2d = new PatternToDag(pattern);
         Graph dag = p2d.patternToDagMeek();
-
-        System.out.println("DAG is DONE~~~");
 
         // Output dag into Bayes Interchange format.
         FileWriter fstream = new FileWriter(destfile);
