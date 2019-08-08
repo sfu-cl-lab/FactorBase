@@ -92,7 +92,7 @@ public class LoggerConfig {
 
             builder.append(prefix);
             builder.append(record.getMessage());
-            builder.append("\n\r");
+            builder.append("\n");
 
             return builder.toString();
         }
