@@ -36,18 +36,6 @@ Table: 2Nodes_inFamily
 ChildNode	2node	NumAtts
 `diff(course0)`	`grade(course0,student0)`	4
 `sat(course0,student0)`	`grade(course0,student0)`	4
-Table: AttributeColumns
-course	diff
-course	rating
-prof	popularity
-prof	teachingability
-RA	capability
-RA	salary
-registration	grade
-registration	sat
-student	intelligence
-student	ranking
-TABLE_NAME	COLUMN_NAME
 Table: Attribute_Value
 capability	1
 capability	2
@@ -233,18 +221,6 @@ Table: Final_Path_BayesNets_view
 `RA(prof0,student0),registration(course0,student0)`	`sat(course0,student0)`	`registration(course0,student0)`
 `RA(prof0,student0),registration(course0,student0)`	`teachingability(prof0)`	`RA(prof0,student0)`
 Rchain	child	parent
-Table: ForeignKeyColumns
-RA	prof_id	prof	prof_id	FK_RA_2	2
-RA	student_id	student	student_id	FK_RA_1	3
-registration	course_id	course	course_id	FK_registration_2	1
-registration	student_id	student	student_id	FK_registration_1	2
-TABLE_NAME	COLUMN_NAME	REFERENCED_TABLE_NAME	REFERENCED_COLUMN_NAME	CONSTRAINT_NAME	ORDINAL_POSITION
-Table: ForeignKeys_pvars
-RA	prof	prof_id	prof0	0	2
-RA	student	student_id	student0	0	3
-registration	course	course_id	course0	0	1
-registration	student	student_id	student0	0	2
-TABLE_NAME	REFERENCED_TABLE_NAME	COLUMN_NAME	pvid	index_number	ARGUMENT_POSITION
 Table: Groundings
 Table: InheritedEdges
 `RA(prof0,student0),registration(course0,student0)`	`capability(prof0,student0)`	`RA(prof0,student0)`
@@ -259,15 +235,6 @@ Table: InheritedEdges
 `RA(prof0,student0),registration(course0,student0)`	`RA(prof0,student0)`	`salary(prof0,student0)`
 `RA(prof0,student0),registration(course0,student0)`	`sat(course0,student0)`	`grade(course0,student0)`
 Rchain	child	parent
-Table: InputColumns
-course	course_id	NULL	NULL	PRIMARY	1
-prof	prof_id	NULL	NULL	PRIMARY	1
-RA	prof_id	NULL	NULL	PRIMARY	2
-RA	student_id	NULL	NULL	PRIMARY	3
-registration	course_id	NULL	NULL	PRIMARY	1
-registration	student_id	NULL	NULL	PRIMARY	2
-student	student_id	NULL	NULL	PRIMARY	1
-TABLE_NAME	COLUMN_NAME	REFERENCED_TABLE_NAME	REFERENCED_COLUMN_NAME	CONSTRAINT_NAME	ORDINAL_POSITION
 Table: Knowledge_Forbidden_Edges
 Table: Knowledge_Required_Edges
 Table: LatticeRNodes
@@ -959,10 +926,6 @@ Table: RNodes_pvars
 `registration(course0,student0)`	course0	course	course_id	course_id
 `registration(course0,student0)`	student0	student	student_id	student_id
 rnid	pvid	TABLE_NAME	COLUMN_NAME	REFERENCED_COLUMN_NAME
-Table: RelationTables
-RA	0	0
-registration	0	0
-TABLE_NAME	SelfRelationship	Many_OneRelationship
 Table: RelationsParents
 `capability(prof0,student0)`	`RA(prof0,student0)`	`RA(prof0,student0)`	1
 `capability(prof0,student0)`	`RA(prof0,student0)`	`salary(prof0,student0)`	3
@@ -1008,7 +971,6 @@ Fid	LogLikelihood	Normal_LogLikelihood	Parameters	SampleSize	BIC	AIC	Pseudo_BIC	
 `salary(prof0,student0)`	-26.27	-0.12	4	228	-74.26	-30.27	-21.96	-4.12	2280
 `sat(course0,student0)`	-47.24	-0.12	10	380	-153.88	-57.24	-59.64	-10.12	2280
 `teachingability(prof0)`	-157.47	-0.69	2	228	-325.80	-159.47	-12.24	-2.69	2280
-Table: TargetNode
 Table: capability(prof0,student0)_CP
 10	3	T	low	50	1	0.200000	-1.61	0.030702
 20	1	T	low	50	2	0.400000	-1.83	0.021930

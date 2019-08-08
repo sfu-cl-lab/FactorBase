@@ -126,21 +126,13 @@ FROM @database@_setup.PVariables N, RNodes_pvars F where F.pvid = N.pvid;
 
 
 /*********
-/* transfer the rest. Not sure if I need all of these actually
-*/
+ * transfer the rest.
+ */
 
 create table EntityTables as select * from @database@_setup.EntityTables;
-create table AttributeColumns as select * from @database@_setup.AttributeColumns;
-    create table Attribute_Value as select * from @database@_setup.Attribute_Value;
-/* create table TernaryRelations as select * from @database@_setup.TernaryRelations; */
-create table RelationTables as select * from @database@_setup.RelationTables;
-/* create table NoPKeys as select * from  @database@_setup.NoPKeys; */
-create table ForeignKeyColumns as select * from  @database@_setup.ForeignKeyColumns;
-create table ForeignKeys_pvars as select * from  @database@_setup.ForeignKeys_pvars;
-create table InputColumns as select * from  @database@_setup.InputColumns;
+create table Attribute_Value as select * from @database@_setup.Attribute_Value;
 create table Expansions as select * from @database@_setup.Expansions;
 create table Groundings as select * from @database@_setup.Groundings;
-create table TargetNode as select * from @database@_setup.TargetNode;
 
 /*********
  * prepare lattice generator by copying information from Rnodes to a new temporary table
