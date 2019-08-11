@@ -13,8 +13,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Logger;
 
-import org.apache.commons.lang.StringUtils;
-
 import ca.sfu.cs.common.Configuration.Config;
 import ca.sfu.cs.factorbase.data.DataExtractor;
 import ca.sfu.cs.factorbase.data.TSVDataExtractor;
@@ -152,7 +150,7 @@ public class CSVPrecomputor {
 
             // Create header.
             ArrayList<String> columns = getColumns(rs4);
-            String csvHeader = StringUtils.join(columns, "\t");
+            String csvHeader = String.join("\t", columns);
             logger.fine("\nCSV Header : " + csvHeader+ "\n");
 
             // Create csv file.
@@ -220,7 +218,7 @@ public class CSVPrecomputor {
 
             // Create header.
             ArrayList<String> columns = getColumns(rs5);
-            String csvHeader = StringUtils.join(columns, "\t");
+            String csvHeader = String.join("\t", columns);
             logger.fine("\n CSV Header : " + csvHeader + "\n");
 
             // Create csv file, reading data from _CT table into .csv file.
