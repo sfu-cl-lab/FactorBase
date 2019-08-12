@@ -37,6 +37,12 @@
               <filters>
                 <filter>
                   <artifact>edu.cmu:tetrad-lib</artifact>
+                  <includes>
+                    <include>edu/cmu/tetrad/data/*</include>
+                    <include>edu/cmu/tetrad/graph/*</include>
+                    <include>edu/cmu/tetrad/search/*</include>
+                    <include>edu/cmu/tetrad/util/*</include>
+                  </includes>
                   <excludes>
                     <exclude>edu/cmu/tetrad/data/IKnowledge.class</exclude>
                     <exclude>edu/cmu/tetrad/data/Knowledge.class</exclude>
