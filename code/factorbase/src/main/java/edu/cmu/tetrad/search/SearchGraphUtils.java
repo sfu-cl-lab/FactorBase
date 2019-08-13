@@ -30,8 +30,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
-import org.apache.commons.collections.map.MultiKeyMap;
-
 import edu.cmu.tetrad.data.IKnowledge;
 import edu.cmu.tetrad.data.Knowledge;
 import edu.cmu.tetrad.data.KnowledgeEdge;
@@ -1351,74 +1349,6 @@ public final class SearchGraphUtils {
         return true;
     }
 
-    /**
-     * Returns the set of nodes reachable from the given set of initial nodes in the given graph according to the
-     * criteria in the given legal pairs object.
-     * <p/>
-     * A variable V is reachable from initialNodes iff for some variable X in initialNodes thers is a path U [X, Y1,
-     * ..., V] such that legalPairs.isLegalFirstNode(X, Y1) and for each [H1, H2, H3] as subpaths of U,
-     * legalPairs.isLegalPairs(H1, H2, H3).
-     * <p/>
-     * The algorithm used is a variant of Algorithm 1 from Geiger, Verma, & Pearl (1990).
-     *
-     * @param initialNodes  The nodes that reachability paths start from.
-     * @param legalPairs    Specifies initial edges (given initial nodes) and legal edge pairs.
-     * @param c             a set of vertices (intuitively, the set of variables to be conditioned on.
-     * @param d             a set of vertices (intuitively to be used in tests of legality, for example, the set of
-     *                      ancestors of c).
-     * @param graph         the graph with respect to which reachability is
-     * @param maxPathLength
-     */
-    public static Set<Node> getReachableNodes(List<Node> initialNodes,
-                                              LegalPairs legalPairs, List<Node> c, List<Node> d, Graph graph, int maxPathLength) {
-        HashSet<Node> reachable = new HashSet<Node>();
-        MultiKeyMap visited = new MultiKeyMap();
-        List<ReachabilityEdge> nextEdges = new LinkedList<ReachabilityEdge>();
-
-        for (Node x : initialNodes) {
-            List<Node> adjX = graph.getAdjacentNodes(x);
-
-            for (Node y : adjX) {
-                if (legalPairs.isLegalFirstEdge(x, y)) {
-                    reachable.add(y);
-                    nextEdges.add(new ReachabilityEdge(x, y));
-                    visited.put(x, y, Boolean.TRUE);
-                }
-            }
-        }
-
-        int pathLength = 1;
-
-        while (nextEdges.size() > 0) {
-//            System.out.println("Path length = " + pathLength);
-            if (++pathLength > maxPathLength) return reachable;
-
-            List<ReachabilityEdge> currEdges = nextEdges;
-            nextEdges = new LinkedList<ReachabilityEdge>();
-
-            for (ReachabilityEdge edge : currEdges) {
-                Node x = edge.getFrom();
-                Node y = edge.getTo();
-                List<Node> adjY = graph.getAdjacentNodes(y);
-
-                for (Node z : adjY) {
-                    if ((visited.get(y, z)) == Boolean.TRUE) {
-                        continue;
-                    }
-
-                    if (legalPairs.isLegalPair(x, y, z, c, d)) {
-                        reachable.add(z);
-
-                        nextEdges.add(new ReachabilityEdge(y, z));
-                        visited.put(y, z, Boolean.TRUE);
-                    }
-                }
-            }
-        }
-
-        return reachable;
-    }
-
 
     /**
      * Returns the string in nodelist which matches string in BK.
@@ -1974,48 +1904,6 @@ public final class SearchGraphUtils {
                 allowNewColliders);
         Graph dag = iterator.next();
         return dag;
-    }
-
-    /**
-     * Simple class to store edges for the reachability search.
-     *
-     * @author Joseph Ramsey
-     */
-    private static class ReachabilityEdge {
-        private Node from;
-        private Node to;
-
-        public ReachabilityEdge(Node from, Node to) {
-            this.from = from;
-            this.to = to;
-        }
-
-        @Override
-		public int hashCode() {
-            int hash = 17;
-            hash += 63 * getFrom().hashCode();
-            hash += 71 * getTo().hashCode();
-            return hash;
-        }
-
-        @Override
-		public boolean equals(Object obj) {
-            ReachabilityEdge edge = (ReachabilityEdge) obj;
-
-            if (!(edge.getFrom().equals(this.getFrom()))) {
-                return false;
-            }
-
-            return edge.getTo().equals(this.getTo());
-        }
-
-        public Node getFrom() {
-            return from;
-        }
-
-        public Node getTo() {
-            return to;
-        }
     }
 
     public enum CpcTripleType {
