@@ -64,6 +64,34 @@
                     <include>com/ibatis/common/exception/NestedRuntimeException.class</include>
                   </includes>
                 </filter>
+                <filter>
+                  <artifact>com.google.guava:guava</artifact>
+                  <includes>
+                    <include>com/google/common/base/Preconditions.class</include>
+                    <include>com/google/common/collect/AbstractIndexedListIterator.class</include>
+                    <include>com/google/common/collect/CartesianList*</include>
+                    <include>com/google/common/collect/EmptyImmutableSet.class</include>
+                    <include>com/google/common/collect/ForwardingCollection.class</include>
+                    <include>com/google/common/collect/ForwardingObject.class</include>
+                    <include>com/google/common/collect/Hashing.class</include>
+                    <include>com/google/common/collect/ImmutableCollection*</include>
+                    <include>com/google/common/collect/ImmutableEnumSet.class</include>
+                    <include>com/google/common/collect/ImmutableList*</include>
+                    <include>com/google/common/collect/ImmutableSet.class</include>
+                    <include>com/google/common/collect/ImmutableAsList.class</include>
+                    <include>com/google/common/collect/ObjectArrays.class</include>
+                    <include>com/google/common/collect/RegularImmutableAsList.class</include>
+                    <include>com/google/common/collect/RegularImmutableList.class</include>
+                    <include>com/google/common/collect/RegularImmutableSet.class</include>
+                    <include>com/google/common/collect/Sets*</include>
+                    <include>com/google/common/collect/SingletonImmutableList.class</include>
+                    <include>com/google/common/collect/SingletonImmutableSet.class</include>
+                    <include>com/google/common/collect/UnmodifiableIterator.class</include>
+                    <include>com/google/common/collect/UnmodifiableListIterator.class</include>
+                    <include>com/google/common/math/IntMath.class</include>
+                    <include>com/google/common/math/MathPreconditions.class</include>
+                  </includes>
+                </filter>
               </filters>
               <transformers>
                 <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
