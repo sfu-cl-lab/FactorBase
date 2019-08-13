@@ -57,6 +57,13 @@
                     <exclude>edu/cmu/tetrad/search/SearchGraphUtils*</exclude>
                   </excludes>
                 </filter>
+                <filter>
+                  <artifact>com.ibatis:ibatis2-common</artifact>
+                  <includes>
+                    <include>com/ibatis/common/jdbc/ScriptRunner.class</include>
+                    <include>com/ibatis/common/exception/NestedRuntimeException.class</include>
+                  </includes>
+                </filter>
               </filters>
               <transformers>
                 <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
