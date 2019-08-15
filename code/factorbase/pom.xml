@@ -37,6 +37,38 @@
               <createDependencyReducedPom>false</createDependencyReducedPom>
               <filters>
                 <filter>
+                  <artifact>xom:xom</artifact>
+                  <includes>
+                    <include>nu/xom/jaxen/NamespaceContext.class</include>
+                    <include>nu/xom/Attribute*</include>
+                    <include>nu/xom/Builder.class</include>
+                    <include>nu/xom/C*</include>
+                    <include>nu/xom/DocType.class</include>
+                    <include>nu/xom/Document.class</include>
+                    <include>nu/xom/Element.class</include>
+                    <include>nu/xom/Elements.class</include>
+                    <include>nu/xom/Illegal*</include>
+                    <include>nu/xom/M*</include>
+                    <include>nu/xom/NamespaceConflictException.class</include>
+                    <include>nu/xom/NoSuch*</include>
+                    <include>nu/xom/Node*</include>
+                    <include>nu/xom/NonVerifyingHandler.class</include>
+                    <include>nu/xom/P*</include>
+                    <include>nu/xom/Text.class</include>
+                    <include>nu/xom/URIUtil*</include>
+                    <include>nu/xom/V*</include>
+                    <include>nu/xom/WellformednessException.class</include>
+                    <include>nu/xom/XMLException.class</include>
+                    <include>nu/xom/XOMHandler.class</include>
+                    <include>nu/xom/XPathException.class</include>
+                    <include>nu/xom/characters.dat</include>
+                  </includes>
+                  <excludes>
+                    <include>nu/xom/IllegalTargetException.class</include>
+                    <exclude>nu/xom/Nodes.class</exclude>
+                  </excludes>
+                </filter>
+                <filter>
                   <artifact>edu.cmu:tetrad-lib</artifact>
                   <includes>
                     <include>edu/cmu/tetrad/data/*</include>
