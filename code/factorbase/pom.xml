@@ -71,24 +71,32 @@
                 <filter>
                   <artifact>edu.cmu:tetrad-lib</artifact>
                   <includes>
-                    <include>edu/cmu/tetrad/data/*</include>
-                    <include>edu/cmu/tetrad/graph/*</include>
-                    <include>edu/cmu/tetrad/search/*</include>
-                    <include>edu/cmu/tetrad/util/*</include>
+                    <include>edu/cmu/tetrad/data/KnowledgeEdge.class</include>
+                    <include>edu/cmu/tetrad/graph/AtMostOneEdgePerPair.class</include>
+                    <include>edu/cmu/tetrad/graph/Directed*</include>
+                    <include>edu/cmu/tetrad/graph/Edge.class</include>
+                    <include>edu/cmu/tetrad/graph/Edges.class</include>
+                    <include>edu/cmu/tetrad/graph/Endpoint.class</include>
+                    <include>edu/cmu/tetrad/graph/GraphConstraint.class</include>
+                    <include>edu/cmu/tetrad/graph/GraphNode.class</include>
+                    <include>edu/cmu/tetrad/graph/GraphUtils*</include>
+                    <include>edu/cmu/tetrad/graph/InArrowImpliesNonancestor.class</include>
+                    <include>edu/cmu/tetrad/graph/MeasuredLatentOnly.class</include>
+                    <include>edu/cmu/tetrad/graph/NoEdgesToSelf.class</include>
+                    <include>edu/cmu/tetrad/graph/Node.class</include>
+                    <include>edu/cmu/tetrad/graph/NodeEqualityMode*</include>
+                    <include>edu/cmu/tetrad/graph/NodeType.class</include>
+                    <include>edu/cmu/tetrad/graph/Triple.class</include>
+                    <include>edu/cmu/tetrad/search/ImpliedOrientation.class</include>
+                    <include>edu/cmu/tetrad/search/ScoredGraph.class</include>
+                    <include>edu/cmu/tetrad/search/SearchLogUtils.class</include>
+                    <include>edu/cmu/tetrad/util/ChoiceGenerator.class</include>
+                    <include>edu/cmu/tetrad/util/NumberFormatUtil.class</include>
+                    <include>edu/cmu/tetrad/util/ProbUtils.class</include>
+                    <include>edu/cmu/tetrad/util/TetradLogger.class</include>
+                    <include>edu/cmu/tetrad/util/TetradLoggerConfig.class</include>
+                    <include>edu/cmu/tetrad/util/TetradSerializable.class</include>
                   </includes>
-                  <excludes>
-                    <exclude>edu/cmu/tetrad/data/IKnowledge.class</exclude>
-                    <exclude>edu/cmu/tetrad/data/Knowledge.class</exclude>
-                    <exclude>edu/cmu/tetrad/data/KnowledgeTransferable.class</exclude>
-                    <exclude>edu/cmu/tetrad/graph/EdgeListGraph.class</exclude>
-                    <exclude>edu/cmu/tetrad/graph/Dag.class</exclude>
-                    <exclude>edu/cmu/tetrad/graph/Graph.class</exclude>
-                    <exclude>edu/cmu/tetrad/search/DagInPatternIterator*</exclude>
-                    <exclude>edu/cmu/tetrad/search/GraphScorer.class</exclude>
-                    <exclude>edu/cmu/tetrad/search/MeekRules.class</exclude>
-                    <exclude>edu/cmu/tetrad/search/PatternToDag.class</exclude>
-                    <exclude>edu/cmu/tetrad/search/SearchGraphUtils*</exclude>
-                  </excludes>
                 </filter>
                 <filter>
                   <artifact>com.ibatis:ibatis2-common</artifact>
