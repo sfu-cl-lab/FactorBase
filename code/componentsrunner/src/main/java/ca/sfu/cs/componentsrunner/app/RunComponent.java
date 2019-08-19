@@ -2,12 +2,16 @@ package ca.sfu.cs.componentsrunner.app;
 
 import java.io.IOException;
 import java.sql.DriverManager;
+import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.text.MessageFormat;
 
 import com.mysql.jdbc.Connection;
 
 import ca.sfu.cs.common.Configuration.Config;
+import ca.sfu.cs.factorbase.data.DataExtractor;
+import ca.sfu.cs.factorbase.data.MySQLDataExtractor;
+import ca.sfu.cs.factorbase.exception.DataExtractionException;
 import ca.sfu.cs.factorbase.util.Sort_merge3;
 
 
@@ -23,7 +27,7 @@ public class RunComponent {
     }
 
 
-    public static void main(String[] args) throws SQLException, IOException {
+    public static void main(String[] args) throws SQLException, IOException, DataExtractionException {
         Config config = new Config();
         String connectionString = MessageFormat.format(
             CONNECTION_STRING,
@@ -48,6 +52,20 @@ public class RunComponent {
                 escapeName(config.getProperty("SortMergeOutputTable")),
                 dbConnection
             );
+        } else if (component.equals("DataExtraction")) {
+            System.out.println("Starting Data Extraction");
+            PreparedStatement dbQuery = dbConnection.prepareStatement(
+                "SELECT * FROM " + escapeName(config.getProperty("CountsTable")) + " " +
+                "WHERE MULT > 0;"
+            );
+
+            DataExtractor dataextractor = new MySQLDataExtractor(
+                dbQuery,
+                config.getProperty("CountsColumn"),
+                Boolean.valueOf(config.getProperty("IsDiscrete"))
+            );
+
+            dataextractor.extractData();
         } else {
             System.out.println("Unsupported component specified, given: " + component);
             System.exit(1);
