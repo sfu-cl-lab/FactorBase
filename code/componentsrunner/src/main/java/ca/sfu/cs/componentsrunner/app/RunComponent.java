@@ -11,6 +11,7 @@ import com.mysql.jdbc.Connection;
 import ca.sfu.cs.common.Configuration.Config;
 import ca.sfu.cs.factorbase.data.DataExtractor;
 import ca.sfu.cs.factorbase.data.MySQLDataExtractor;
+import ca.sfu.cs.factorbase.data.TSVDataExtractor;
 import ca.sfu.cs.factorbase.exception.DataExtractionException;
 import ca.sfu.cs.factorbase.util.Sort_merge3;
 
@@ -54,16 +55,30 @@ public class RunComponent {
             );
         } else if (component.equals("DataExtraction")) {
             System.out.println("Starting Data Extraction");
-            PreparedStatement dbQuery = dbConnection.prepareStatement(
-                "SELECT * FROM " + escapeName(config.getProperty("CountsTable")) + " " +
-                "WHERE MULT > 0;"
-            );
+            DataExtractor dataextractor = null;
 
-            DataExtractor dataextractor = new MySQLDataExtractor(
-                dbQuery,
-                config.getProperty("CountsColumn"),
-                Boolean.valueOf(config.getProperty("IsDiscrete"))
-            );
+            String extractorType = config.getProperty("ExtractorType");
+            if (extractorType.equals("MYSQL")) {
+                PreparedStatement dbQuery = dbConnection.prepareStatement(
+                    "SELECT * FROM " + escapeName(config.getProperty("CountsTable")) + " " +
+                    "WHERE MULT > 0;"
+                );
+
+                dataextractor = new MySQLDataExtractor(
+                    dbQuery,
+                    config.getProperty("CountsColumn"),
+                    Boolean.valueOf(config.getProperty("IsDiscrete"))
+                );
+            } else if (extractorType.equals("TSV")) {
+                dataextractor = new TSVDataExtractor(
+                    config.getProperty("TSVFile"),
+                    config.getProperty("CountsColumn"),
+                    Boolean.valueOf(config.getProperty("IsDiscrete"))
+                );
+            } else {
+                System.out.println("Unsupported extractor type specified, given: " + extractorType);
+                System.exit(1);
+            }
 
             dataextractor.extractData();
         } else {
