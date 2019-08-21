@@ -52,6 +52,13 @@ One of the key computational problems in relational learning and inference is to
 	```
 	Where the `<version>` field is the version of FactorBase that you have generated.
 
+	Note: The Maven build will run some tests that expect a test database to be setup.  If you just want to create the JAR file for FactorBase, then you can run the following command instead:
+
+	```shell
+	cd FactorBase/code
+	mvn clean install -DskipTests
+	```
+
 3.  **Update `config.cfg`  with your own configuration according to format explained [here](https://sfu-cl-lab.github.io/FactorBase/options.html)**
 
 4. **Point to the required database in your MySQL server**
