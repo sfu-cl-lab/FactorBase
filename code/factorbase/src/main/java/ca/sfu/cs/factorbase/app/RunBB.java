@@ -24,11 +24,15 @@ public class RunBB {
 
 
     public static void main(String[] args) throws Exception {
-        long t1 = System.currentTimeMillis();
+        // Load configurations and setup the logger.
+        long start = System.currentTimeMillis();
         LoggerConfig.setGlobalLevel();
         Config config = new Config();
+        long configEnd = System.currentTimeMillis();
         logger.info("Start Program...");
+        logRunTime(logger, "Logger + Config Initialization", start, configEnd);
 
+        long databaseStart = System.currentTimeMillis();
         FactorBaseDataBase factorBaseDatabase = new MySQLFactorBaseDataBase(
             new FactorBaseDataBaseInfo(config),
             config.getProperty("dbaddress"),
@@ -36,28 +40,45 @@ public class RunBB {
             config.getProperty("dbusername"),
             config.getProperty("dbpassword")
         );
+        logRunTime(logger, "Creating Database Connection", databaseStart, System.currentTimeMillis());
 
         // Generate the setup database if specified to.
+        long setupStart = System.currentTimeMillis();
         if (config.getProperty("AutomaticSetup").equals("1")) {
             factorBaseDatabase.setupDatabase();
-            logger.info("Setup database is ready.");
         } else {
             logger.info("Setup database exists.");
         }
+        logRunTime(logger, "Creating Setup Database", setupStart, System.currentTimeMillis());
 
         // Learn a Bayesian Network.
+        long buildCTStart = System.currentTimeMillis();
         BayesBaseCT_SortMerge.buildCT();
-        logger.info("The CT database is ready for use.");
-        logger.info("*********************************************************");
+        logRunTime(logger, "Creating CT Tables", buildCTStart, System.currentTimeMillis());
+
+        long bayesBaseHStart = System.currentTimeMillis();
         BayesBaseH.runBBH(factorBaseDatabase);
-        logger.info("\nFinish running BayesBaseH.");
-        logger.info("*********************************************************");
+        logRunTime(logger, "Running BayesBaseH", bayesBaseHStart, System.currentTimeMillis());
 
         // Now eliminate temporary tables. Keep only the tables for the longest Rchain. Turn this off for debugging.
-        logger.info("Cleaning CT database");
+        long cleanupStart = System.currentTimeMillis();
         factorBaseDatabase.cleanupDatabase();
+        logRunTime(logger, "Cleanup Database", cleanupStart, System.currentTimeMillis());
 
-        long t2 = System.currentTimeMillis();
-        logger.info("Total Running time is " + (t2 - t1) + "ms.");
+        logRunTime(logger, "Total", start, System.currentTimeMillis());
+
+        logger.info("Program Done!");
+    }
+
+
+    /**
+     * Helper method to write out the run times in a consistent format.
+     * @param logger - the logger to write the runtime to.
+     * @param stage - the part of the FactorBase program that was run.
+     * @param start - the start time for the given stage (ms).
+     * @param end - the end time for the given stage (ms).
+     */
+    private static void logRunTime(Logger logger, String stage, long start, long end) {
+        logger.info("Runtime[" + stage + "]: " + String.valueOf(end - start) + "ms.");
     }
 }

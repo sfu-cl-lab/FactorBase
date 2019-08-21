@@ -263,7 +263,7 @@ public class KLD_generator {
                     table_name
                 ) +
             ");";
-        logger.warning("bottleneck? query2:" + query2);
+        logger.fine("bottleneck? query2:" + query2);
         st.execute(query2);
 
         // Add all MULT by 1, Laplace.

@@ -86,9 +86,6 @@ public class BayesBaseCT_SortMerge {
         // rnid mapping. maxNumberofMembers = maximum size of lattice element. Should be called LatticeHeight
         maxNumberOfMembers = short_rnid_LatticeGenerator.generate(con_BN);
 
-
-        logger.info(" ##### lattice is ready for use* ");
-
 // may not need to run this script any more, using LatticeRnodes table OS August 25, 2017//
        // bzsr.runScript("scripts/add_orig_rnid.sql");
        // add_orig_rnid should be superseded by using Lattice Rnodes table in metaqueries script
@@ -160,7 +157,7 @@ public class BayesBaseCT_SortMerge {
                 BuildCT_Rnodes_counts(len);
             }
             long l2 = System.currentTimeMillis(); //@zqian : measure structure learning time
-            logger.info("Building Time(ms) for Rnodes_counts: "+(l2-l_1)+" ms.\n");
+            logger.fine("Building Time(ms) for Rnodes_counts: "+(l2-l_1)+" ms.\n");
         }
         else {
             logger.warning("link off !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
@@ -175,7 +172,6 @@ public class BayesBaseCT_SortMerge {
             // handling Rnodes with Lattice Moebius Transform
             //initialize first level of rchain lattice
             for(int len = 1; len <= 1; len++) {
-                logger.info("Building Time(ms) for Rchain =1 \n");
                 //building the _flat tables
                 BuildCT_Rnodes_flat(len);
         
@@ -189,10 +185,10 @@ public class BayesBaseCT_SortMerge {
             //building the _CT tables. Going up the Rchain lattice
             for(int len = 2; len <= maxNumberOfMembers; len++)
             { 
-                logger.info("now we're here for Rchain!");
-                logger.info("Building Time(ms) for Rchain >=2 \n");
+                logger.fine("now we're here for Rchain!");
+                logger.fine("Building Time(ms) for Rchain >=2 \n");
                 BuildCT_RChain_flat(len);
-                logger.info(" Rchain! are done");
+                logger.fine(" Rchain! are done");
             }
         }
         
@@ -229,7 +225,7 @@ public class BayesBaseCT_SortMerge {
         }
         
         long l2 = System.currentTimeMillis();  //@zqian
-        logger.info("Building Time(ms) for ALL CT tables:  "+(l2-l)+" ms.\n");
+        logger.fine("Building Time(ms) for ALL CT tables:  "+(l2-l)+" ms.\n");
     }
 
     /**
@@ -271,7 +267,7 @@ public class BayesBaseCT_SortMerge {
      * @throws  IOException
      */
     private static void BuildCT_RChain_flat(int len) throws SQLException, IOException {
-        logger.info("\n ****************** \n" +
+        logger.fine("\n ****************** \n" +
                 "Building the _CT tables for Length = "+len +"\n" );
 
 //        long l = System.currentTimeMillis();
@@ -373,7 +369,7 @@ public class BayesBaseCT_SortMerge {
                 //logger.fine("alter table "+cur_star_Table+" add index "+cur_star_Table+"   ( "+IndexString+" );");
                 st3.execute("alter table "+cur_star_Table+" add index "+cur_star_Table+"   ( "+IndexString+" );");       
                 long l3 = System.currentTimeMillis(); 
-                logger.info("Building Time(ms) for "+cur_star_Table+ " : "+(l3-l2)+" ms.\n");
+                logger.fine("Building Time(ms) for "+cur_star_Table+ " : "+(l3-l2)+" ms.\n");
                 //staring to create the _flat table
                 // Oct 16 2013
                 // here is the wrong version that always uses _counts table to generate the _flat table. 
@@ -396,7 +392,7 @@ public class BayesBaseCT_SortMerge {
                 //logger.fine("alter table "+cur_flat_Table+" add index "+cur_flat_Table+"   ( "+IndexString2+" );");
                 st3.execute("alter table "+cur_flat_Table+" add index "+cur_flat_Table+"   ( "+IndexString2+" );");
                 long l4 = System.currentTimeMillis(); 
-                logger.info("Building Time(ms) for "+cur_flat_Table+ " : "+(l4-l3)+" ms.\n");
+                logger.fine("Building Time(ms) for "+cur_flat_Table+ " : "+(l4-l3)+" ms.\n");
                 /**********starting to create _flase table***using sort_merge*******************************/
                 // starting to create _flase table : part1
                 String cur_false_Table = "`" + removedShort.replace("`", "") + len + "_" + fc + "_false`";
@@ -416,7 +412,7 @@ public class BayesBaseCT_SortMerge {
                 //logger.fine("alter table "+cur_false_Table+" add index "+cur_false_Table+"   ( "+IndexString3+" );");
                 st3.execute("alter table "+cur_false_Table+" add index "+cur_false_Table+"   ( "+IndexString3+" );");       
                 long l5 = System.currentTimeMillis(); 
-                logger.info("Building Time(ms) for "+cur_false_Table+ " : "+(l5-l4)+" ms.\n");
+                logger.fine("Building Time(ms) for "+cur_false_Table+ " : "+(l5-l4)+" ms.\n");
          
                 // staring to create the CT table
                 ResultSet rs_45 = st2.executeQuery("select column_name as Entries from information_schema.columns where table_schema = '"+databaseName_CT+"' and table_name = '"+cur_CT_Table.replace("`","")+"';");
@@ -459,7 +455,7 @@ public class BayesBaseCT_SortMerge {
                 st2.close();            
                 st3.close();
                 long l6 = System.currentTimeMillis(); 
-                logger.info("Building Time(ms) for "+cur_CT_Table+ " : "+(l6-l5)+" ms.\n");
+                logger.fine("Building Time(ms) for "+cur_CT_Table+ " : "+(l6-l5)+" ms.\n");
             }
             st1.close();
             rs1.close();
@@ -469,7 +465,7 @@ public class BayesBaseCT_SortMerge {
         st.close();
 //        long l2 = System.currentTimeMillis(); //@zqian : measure structure learning time
         //System.out.print("Building Time(ms): "+(l2-l)+" ms.\n");
-        logger.info("\n Build CT_RChain_TABLES for length = "+len+" are DONE \n" );
+        logger.fine("\n Build CT_RChain_TABLES for length = "+len+" are DONE \n" );
     }
 
     /* building pvars_counts*/
@@ -554,8 +550,8 @@ public class BayesBaseCT_SortMerge {
         rs.close();
         st.close();
         long l2 = System.currentTimeMillis(); //@zqian : measure structure learning time
-        logger.info("Building Time(ms) for Pvariables counts: "+(l2-l)+" ms.\n");
-        logger.info("\n Pvariables are DONE \n" );
+        logger.fine("Building Time(ms) for Pvariables counts: "+(l2-l)+" ms.\n");
+        logger.fine("\n Pvariables are DONE \n" );
     }
 
     /**
@@ -645,7 +641,7 @@ public class BayesBaseCT_SortMerge {
         rs.close();
         st.close();
 
-        logger.info("\n Rnodes_counts are DONE \n" );
+        logger.fine("\n Rnodes_counts are DONE \n" );
     }
 
     /**
@@ -730,7 +726,7 @@ public class BayesBaseCT_SortMerge {
 
         rs.close();
         st.close();
-        logger.info("\n Rnodes_counts are DONE \n" );
+        logger.fine("\n Rnodes_counts are DONE \n" );
     }
 
     /**
@@ -812,8 +808,8 @@ public class BayesBaseCT_SortMerge {
         rs.close();
         st.close();
         long l2 = System.currentTimeMillis(); //@zqian : measure structure learning time
-        logger.info("Building Time(ms) for Rnodes_flat: "+(l2-l)+" ms.\n");
-        logger.info("\n Rnodes_flat are DONE \n" );
+        logger.fine("Building Time(ms) for Rnodes_flat: "+(l2-l)+" ms.\n");
+        logger.fine("\n Rnodes_flat are DONE \n" );
     }
 
     /**
@@ -901,8 +897,8 @@ public class BayesBaseCT_SortMerge {
         rs.close();
         st.close();
         long l2 = System.currentTimeMillis(); //@zqian : measure structure learning time
-        logger.info("Building Time(ms) for Rnodes_star: "+(l2-l)+" ms.\n");
-        logger.info("\n Rnodes_star are DONE \n" );
+        logger.fine("Building Time(ms) for Rnodes_star: "+(l2-l)+" ms.\n");
+        logger.fine("\n Rnodes_star are DONE \n" );
     }
 
     /**
@@ -1002,8 +998,8 @@ public class BayesBaseCT_SortMerge {
         rs.close();
         st.close();
         long l2 = System.currentTimeMillis(); //@zqian : measure structure learning time
-        logger.info("Building Time(ms) for Rnodes_false and Rnodes_CT: "+(l2-l)+" ms.\n");
-        logger.info("\n Rnodes_false and Rnodes_CT  are DONE \n" );
+        logger.fine("Building Time(ms) for Rnodes_false and Rnodes_CT: "+(l2-l)+" ms.\n");
+        logger.fine("\n Rnodes_false and Rnodes_CT  are DONE \n" );
     }
 
     /**
@@ -1055,7 +1051,7 @@ public class BayesBaseCT_SortMerge {
         }
         rs.close();
         st.close();
-        logger.info("\n Rnodes_joins are DONE \n" );
+        logger.fine("\n Rnodes_joins are DONE \n" );
     }
 
     /**

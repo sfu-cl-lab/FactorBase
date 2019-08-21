@@ -43,7 +43,7 @@ public class BIF_Generator {
 
 
     public static void generate_bif(String network_name, String bif_file_name_withPath, Connection con) throws SQLException, IOException {
-        logger.info("\n BIF Generator starts");
+        logger.fine("\nBIF Generator starts");
 
         Statement st = (Statement) con.createStatement();
         File file = new File(bif_file_name_withPath);
@@ -207,7 +207,7 @@ public class BIF_Generator {
         output.write(writeNetworkEnd());
         output.close();
         st.close();
-        logger.info("BIF Generator Ends for " + network_name);
+        logger.fine("BIF Generator Ends for " + network_name);
     }
 
 
