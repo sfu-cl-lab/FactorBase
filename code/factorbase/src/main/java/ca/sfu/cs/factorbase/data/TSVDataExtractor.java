@@ -39,16 +39,11 @@ public class TSVDataExtractor implements DataExtractor {
      */
     @Override
     public DataSet extractData() throws DataExtractionException {
-        DataSetMetaData metadata;
-        long[][] data;
         try {
-            metadata = this.extractMetaData(this.sourceFile, this.countsColumn);
-            data = this.convertDataToStateIndices(this.sourceFile, metadata, this.countsColumn);
+            return this.convertDataToStateIndices(this.sourceFile, this.countsColumn, this.isDiscrete);
         } catch (IOException e) {
             throw new DataExtractionException("An error occurred when attempting to extract information from the data source.", e);
         }
-
-        return new DataSet(data, metadata, this.isDiscrete);
     }
 
 
@@ -57,38 +52,60 @@ public class TSVDataExtractor implements DataExtractor {
      * for the counts array of any CT table object that gets created by the {@code generateCT()} method.
      *
      * @param sourceFile - path to the TSV file containing the CT table information.
-     * @param metadata - DataSetMetaData object containing the metadata for the given TSV file.
      * @param countsColumn - the name of the column indicating the counts for each random variable assignment.
+     * @param isDiscrete - true if the dataset only contains discrete information; otherwise false.
      * @return a 2D Long array representation of the given dataset.
      * @throws IOException if unable to process the given TSV file.
      */
-    private long[][] convertDataToStateIndices(String sourceFile, DataSetMetaData metadata, String countsColumn) throws IOException {
-        int numberOfRows = metadata.getNumberOfRows();
-        int numberOfColumns = metadata.getNumberOfColumns();
-        String[] header = metadata.getHeader();
-        int countsColumnIndex = metadata.getColumnIndex(countsColumn);
-
-        long[][] convertedData = new long[numberOfRows][numberOfColumns];
+    private DataSet convertDataToStateIndices(
+        String sourceFile,
+        String countsColumn,
+        boolean isDiscrete
+    ) throws IOException {
+        long[][] convertedData;
+        int numberOfRows;
+        String[] header;
+        int countsColumnIndex;
+        Map<String, Integer> variableStateToIntegerEncoding = new HashMap<String, Integer>();
+        Map<String, Set<String>> variableStates = new HashMap<String, Set<String>>();
 
         try (BufferedReader reader = new BufferedReader(new FileReader(sourceFile))) {
-            // Skip header values; use the ones from the given DataSetMetaData object.
-            reader.readLine();
-            String row;
+            numberOfRows = this.getNumberOfRows(sourceFile);
+            header = reader.readLine().split("\t");
+            int numberOfColumns = header.length;
+            countsColumnIndex = this.getCountColumnIndex(header, countsColumn);
+            convertedData = new long[numberOfRows][numberOfColumns];
 
+            int[] indexStateCounter = new int[numberOfColumns];
             int rowIndex = 0;
+            String row;
 
             // while loop to process and extract information from the given file.
             while ((row = reader.readLine()) != null) {
                 String[] data = row.split("\t");
 
                 // for loop to process the column data for each row.
-                for (int columnIndex = 0; columnIndex < header.length; columnIndex++) {
+                for (int columnIndex = 0; columnIndex < numberOfColumns; columnIndex++) {
                     if (columnIndex == countsColumnIndex) {
                         convertedData[rowIndex][columnIndex] = Long.valueOf(data[countsColumnIndex]);
                     } else {
-                        convertedData[rowIndex][columnIndex] = metadata.getVariableStateIndex(
-                            Mapper.generateVariableStateKey(header[columnIndex], data[columnIndex])
-                        );
+                        String variableName = header[columnIndex];
+                        String state = data[columnIndex];
+                        if (!variableStates.containsKey(variableName)) {
+                            variableStates.put(variableName, new HashSet<String>());
+                        }
+
+                        variableStates.get(variableName).add(state);
+
+                        String stateKey = Mapper.generateVariableStateKey(header[columnIndex], state);
+
+                        Integer stateIndex = variableStateToIntegerEncoding.get(stateKey);
+                        if (stateIndex == null) {
+                            stateIndex = this.getNextIndex(indexStateCounter, columnIndex);
+                            variableStateToIntegerEncoding.put(stateKey, stateIndex);
+                        }
+
+                        convertedData[rowIndex][columnIndex] = stateIndex.longValue();
                     }
                 }
 
@@ -96,55 +113,70 @@ public class TSVDataExtractor implements DataExtractor {
             }
         }
 
-        return convertedData;
+        DataSetMetaData metadata = new DataSetMetaData(
+            Mapper.mapHeadersToColumnIndices(header),
+            variableStateToIntegerEncoding,
+            variableStates,
+            numberOfRows,
+            header,
+            countsColumnIndex
+        );
+
+        return new DataSet(convertedData, metadata, isDiscrete);
     }
 
 
     /**
-     * Extract metadata from the given TSV file.
+     * Retrieve the next state index for the given column.
      *
-     * @param sourceFile - path to the TSV file containing the CT table information.
-     * @param countsColumn - the name of the column indicating the counts for each random variable assignment.
-     * @return DataSetMetaData object containing the metadata for the given dataset.
-     * @throws IOException if unable to process the given TSV file.
+     * @param indexStateCounter - {@code int[]} where each position holds the next state index to return for the
+     *                            associated column.
+     * @param columnIndex - the column to get the next state index for.
+     * @return the next state index for the given column.
      */
-    private DataSetMetaData extractMetaData(String sourceFile, String countsColumn) throws IOException {
-        Map<String, Set<String>> variableStates = new HashMap<String, Set<String>>();
-        String[] header;
-        int numberOfRows = 0;
-        int countsColumnIndex = -1;
+    private int getNextIndex(int[] indexStateCounter, int columnIndex) {
+        int nextIndex = indexStateCounter[columnIndex];
+        indexStateCounter[columnIndex]++;
 
+        return nextIndex;
+    }
+
+
+    /**
+     * Retrieve the number of rows in the given file, excluding the header.
+     *
+     * Note: The first row is assumed to be a header for the file and is ignored.
+     *
+     * @param sourceFile - path to the TSV file to retrieve the number of data rows for.
+     * @return the number of data rows in the given file or -1 if the file is empty.
+     * @throws IOException if unable to process the given file.
+     */
+    private int getNumberOfRows(String sourceFile) throws IOException {
         try (BufferedReader reader = new BufferedReader(new FileReader(sourceFile))) {
-            // Extract header values.
-            header = reader.readLine().split("\t");
-            String row;
+            int lineCount = -1;
+            while (reader.readLine() != null) {
+                lineCount++;
+            }
 
-            // while loop to process and extract information from the given file.
-            while ((row = reader.readLine()) != null) {
-                String[] data = row.split("\t");
+            return lineCount;
+        }
+    }
 
-                // for loop to process the data rows.
-                for (int columnIndex = 0; columnIndex < header.length; columnIndex++) {
-                    String variableName = header[columnIndex];
-                    String value = data[columnIndex];
-                    if (!variableName.equals(countsColumn)) {
-                        if (!variableStates.containsKey(variableName)) {
-                            variableStates.put(variableName, new HashSet<String>());
-                        }
 
-                        variableStates.get(variableName).add(value);
-                    } else {
-                        countsColumnIndex = columnIndex;
-                    }
-                }
-
-                numberOfRows++;
+    /**
+     * Retrieve the column index for the count column.
+     *
+     * @param header - the dataset column names in the order they appear in the dataset.
+     * @param countColumn - the name of the column that contains the count information.
+     * @return the index for the count column or -1 if a match isn't found.
+     */
+    private int getCountColumnIndex(String[] header, String countColumn) {
+        for (int index = 0; index < header.length; index++) {
+            if (header[index].equals(countColumn)) {
+                return index;
             }
         }
 
-        Map<String, Integer> variableNameToColumnIndex = Mapper.mapHeadersToColumnIndices(header);
-        Map<String, Integer> variableStateToIntegerEncoding = Mapper.mapVariableStateToInteger(variableStates);
-
-        return new DataSetMetaData(variableNameToColumnIndex, variableStateToIntegerEncoding, variableStates, numberOfRows, header, countsColumnIndex);
+        return -1;
     }
 }
