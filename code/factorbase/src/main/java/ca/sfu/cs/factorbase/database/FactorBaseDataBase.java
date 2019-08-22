@@ -54,11 +54,14 @@ public interface FactorBaseDataBase {
     /**
      * Retrieve the CT table {@code DataExtractor} for the given RNode/PVar ID.
      *
+     * Note: The {@code DataExtractor} for the given RNode/PVar ID should only be retrievable once and any references
+     *       to it in the FactorBaseDataBase implementation should be removed.
+     *
      * @param dataExtractorID - the RNode/PVar ID that we want to retrieve the {@code DataExtractor} for.
      * @return the CT table DataExtractor for the given RNode/PVar ID.
      *
      * @throws DataExtractionException if a non database error occurs when retrieving the DataExtractor.
      * @throws DataBaseException if a database error occurs when retrieving the DataExtractor.
      */
-    DataExtractor getCTDataExtractor(String dataExtractorID) throws DataBaseException, DataExtractionException;
+    DataExtractor getAndRemoveCTDataExtractor(String dataExtractorID) throws DataBaseException, DataExtractionException;
 }
