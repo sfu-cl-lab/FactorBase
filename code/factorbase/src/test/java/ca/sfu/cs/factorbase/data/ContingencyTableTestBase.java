@@ -96,11 +96,12 @@ public abstract class ContingencyTableTestBase {
         assertThat(variableStates.size(), is(equalTo(0)));
     }
 
+
     @Test
     public void getCounts_ReturnsCorrectValue_WhenGivenAllVariableAssignments() {
         List<RandomVariableAssignment> assignments = Arrays.asList(
-            new RandomVariableAssignment("popularity(prof0)", "2"),
-            new RandomVariableAssignment("teachingability(prof0)", "2")
+            new RandomVariableAssignment("popularity(prof0)", 1),
+            new RandomVariableAssignment("teachingability(prof0)", 0)
         );
 
         long counts = this.contingencyTable.getCounts(assignments);
@@ -111,7 +112,7 @@ public abstract class ContingencyTableTestBase {
     @Test(expected = IllegalArgumentException.class)
     public void getCounts_ThrowsException_WhenGivenSubsetOfVariableAssignments() {
         List<RandomVariableAssignment> assignments = Arrays.asList(
-            new RandomVariableAssignment("popularity(prof0)", "2")
+            new RandomVariableAssignment("popularity(prof0)", 1)
         );
         this.contingencyTable.getCounts(assignments);
     }

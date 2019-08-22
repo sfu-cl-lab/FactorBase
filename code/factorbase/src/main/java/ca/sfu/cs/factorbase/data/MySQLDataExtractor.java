@@ -115,7 +115,6 @@ public class MySQLDataExtractor implements DataExtractor {
 
         DataSetMetaData metadata = new DataSetMetaData(
             Mapper.mapHeadersToColumnIndices(header),
-            variableStateToIntegerEncoding,
             variableStates,
             numberOfRows,
             header,

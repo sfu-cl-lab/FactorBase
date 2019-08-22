@@ -2,7 +2,6 @@ package ca.sfu.cs.factorbase.util;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Set;
 
 /**
  * Class to generate Map objects used by FactorBase.
@@ -32,30 +31,6 @@ public final class Mapper {
         }
 
         return headerToColumnIndex;
-    }
-
-
-    /**
-     * Generate a Map that has key:value pairs of variable-assignment:integer-encoding.
-     *
-     * @param variableStates - a Map containing key:value pairs of variable:possible-states.
-     * @return Map object that maps each variable assignment to an integer value.
-     */
-    public static Map<String, Integer> mapVariableStateToInteger(Map<String, Set<String>> variableStates) {
-        Map<String, Integer> variableStateToInteger = new HashMap<String, Integer>();
-
-        // for loop to process each variable.
-        for (String variable : variableStates.keySet()) {
-            int stateIndex = 0;
-
-            // for loop to create an integer encoding for each possible assignment of the current variable.
-            for (String state : variableStates.get(variable)) {
-                variableStateToInteger.put(generateVariableStateKey(variable, state), stateIndex);
-                stateIndex++;
-            }
-        }
-
-        return variableStateToInteger;
     }
 
 

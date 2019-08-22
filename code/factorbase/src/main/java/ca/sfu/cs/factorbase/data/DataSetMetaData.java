@@ -17,7 +17,6 @@ import com.google.common.collect.Sets;
 public class DataSetMetaData {
     private Map<String, Integer> variableNameToColumnIndex;
     private List<String> variableNames;
-    private Map<String, Integer> variableStateToIntegerEncoding;
     private Map<String, Set<String>> variableStates;
     private int numberOfRows;
     private String[] header;
@@ -28,7 +27,6 @@ public class DataSetMetaData {
      * Create an object to store metadata information for a dataset.
      *
      * @param variableNameToColumnIndex - Map object that maps each variable name to its associated column index in the dataset.
-     * @param variableStateToIntegerEncoding - Map object that maps each variable assignment to an integer value.
      * @param variableStates - a Map containing key:value pairs of variable:possible-states.
      * @param numberOfRows - the total number of rows in the dataset.
      * @param header - the header values for the dataset.
@@ -36,14 +34,12 @@ public class DataSetMetaData {
      */
     public DataSetMetaData(
         Map<String, Integer> variableNameToColumnIndex,
-        Map<String, Integer> variableStateToIntegerEncoding,
         Map<String, Set<String>> variableStates,
         int numberOfRows,
         String[] header,
         int countsColumnIndex
     ) {
         this.variableNameToColumnIndex = variableNameToColumnIndex;
-        this.variableStateToIntegerEncoding = variableStateToIntegerEncoding;
         this.variableStates = variableStates;
         this.numberOfRows = numberOfRows;
         this.header = header;
@@ -73,7 +69,7 @@ public class DataSetMetaData {
 
         for (RandomVariableAssignment assignment : randomVariableAssignments) {
             index *= this.getNumberOfStates(assignment.getName());
-            index += this.variableStateToIntegerEncoding.get(assignment.toString());
+            index += assignment.getValue();
         }
 
         return index;
@@ -129,9 +125,11 @@ public class DataSetMetaData {
 
         for (String variable : variables) {
             Set<RandomVariableAssignment> states = new HashSet<RandomVariableAssignment>();
-            states.addAll(this.getStates(variable).stream().map(
-                state -> new RandomVariableAssignment(variable, state)
-            ).collect(Collectors.toSet()));
+            states.addAll(
+                IntStream.range(0, this.getNumberOfStates(variable)).mapToObj(
+                    stateIndex -> new RandomVariableAssignment(variable, stateIndex)
+                ).collect(Collectors.toSet())
+            );
             variableStateCombinations.add(states);
         }
 
@@ -202,17 +200,6 @@ public class DataSetMetaData {
      */
     public String[] getHeader() {
         return this.header;
-    }
-
-
-    /**
-     * Retrieve the Integer encoding for the given variable and a particular state for it.
-     *
-     * @param variableAssignment - the variable and its assigned state to get the Integer encoding for.
-     * @return the Integer encoding for the given variable state.
-     */
-    public long getVariableStateIndex(String variableAssignment) {
-        return this.variableStateToIntegerEncoding.get(variableAssignment);
     }
 
 
