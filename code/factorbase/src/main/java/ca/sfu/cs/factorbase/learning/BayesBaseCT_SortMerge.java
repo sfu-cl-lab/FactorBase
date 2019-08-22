@@ -27,8 +27,6 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.logging.Logger;
 
-import org.apache.commons.lang.StringUtils;
-
 import ca.sfu.cs.common.Configuration.Config;
 import ca.sfu.cs.factorbase.lattice.short_rnid_LatticeGenerator;
 import ca.sfu.cs.factorbase.util.BZScriptRunner;
@@ -1075,7 +1073,7 @@ public class BayesBaseCT_SortMerge {
         }
         //stringQuery = stringQuery.substring(0, stringQuery.length() - del.length());
 
-        return StringUtils.join(parts,del);
+        return String.join(del, parts);
         //return stringQuery;
     }
 
@@ -1095,7 +1093,7 @@ public class BayesBaseCT_SortMerge {
         while(rs.next()){
             parts.add("`"+rs.getString(colName)+"`");
         }
-        return StringUtils.join(parts,del);
+        return String.join(del, parts);
     }
 
     /**
@@ -1112,7 +1110,7 @@ public class BayesBaseCT_SortMerge {
         while(rs.next()){
             parts.add(rs.getString(colName));
         }
-        return StringUtils.join(parts,del);
+        return String.join(del, parts);
     }
 
     /**
@@ -1139,7 +1137,7 @@ public class BayesBaseCT_SortMerge {
             count ++;
         }
 
-        return StringUtils.join(parts,del);
+        return String.join(del, parts);
     }
 
     /**
