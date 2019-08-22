@@ -111,6 +111,8 @@ public class MySQLDataExtractor implements DataExtractor {
 
                 rowIndex++;
             }
+        } finally {
+            dbQuery.close();
         }
 
         DataSetMetaData metadata = new DataSetMetaData(
