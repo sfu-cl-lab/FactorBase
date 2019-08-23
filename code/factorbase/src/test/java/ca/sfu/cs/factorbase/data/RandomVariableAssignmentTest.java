@@ -9,40 +9,39 @@ import java.util.Objects;
 import org.junit.Test;
 
 public class RandomVariableAssignmentTest {
-
-    private static final String NAME = "Name";
-    private static final int VALUE = 0;
+    private static final int COLUMN_INDEX = 1;
+    private static final int STATE_INDEX = 0;
 
     @Test
     public void constructor_InitializedCorrectly_WhenGivenValidParameters() {
-        RandomVariableAssignment assignment = new RandomVariableAssignment(NAME, VALUE);
+        RandomVariableAssignment assignment = new RandomVariableAssignment(COLUMN_INDEX, STATE_INDEX);
 
-        assertThat(assignment.getName(), equalTo(NAME));
-        assertThat(assignment.getValue(), equalTo(VALUE));
-        assertThat(assignment.hashCode(), equalTo(Objects.hash(NAME, VALUE)));
-        assertThat(assignment.toString(), equalTo("Name = " + VALUE));
+        assertThat(assignment.getVariableColumnIndex(), equalTo(COLUMN_INDEX));
+        assertThat(assignment.getStateIndex(), equalTo(STATE_INDEX));
+        assertThat(assignment.hashCode(), equalTo(Objects.hash(COLUMN_INDEX, STATE_INDEX)));
+        assertThat(assignment.toString(), equalTo(COLUMN_INDEX + " = " + STATE_INDEX));
     }
 
     @Test
     public void equals_ReturnsTrue_WhenRandomVariableAssignmentsAreEqual() {
-        RandomVariableAssignment assignment = new RandomVariableAssignment(NAME, VALUE);
-        RandomVariableAssignment assignment2 = new RandomVariableAssignment(NAME, VALUE);
+        RandomVariableAssignment assignment = new RandomVariableAssignment(COLUMN_INDEX, STATE_INDEX);
+        RandomVariableAssignment assignment2 = new RandomVariableAssignment(COLUMN_INDEX, STATE_INDEX);
 
         assertThat(assignment.equals(assignment2), is(true));
     }
 
     @Test
     public void equals_ReturnsFalse_WhenRandomVariableAssignmentsNamesAreNotEqual() {
-        RandomVariableAssignment assignment = new RandomVariableAssignment(NAME, VALUE);
-        RandomVariableAssignment assignment2 = new RandomVariableAssignment(NAME + "1", VALUE);
+        RandomVariableAssignment assignment = new RandomVariableAssignment(COLUMN_INDEX, STATE_INDEX);
+        RandomVariableAssignment assignment2 = new RandomVariableAssignment(COLUMN_INDEX + 1, STATE_INDEX);
 
         assertThat(assignment.equals(assignment2), is(false));
     }
 
     @Test
     public void equals_ReturnsFalse_WhenRandomVariableAssignmentsValuesAreNotEqual() {
-        RandomVariableAssignment assignment = new RandomVariableAssignment(NAME, VALUE);
-        RandomVariableAssignment assignment2 = new RandomVariableAssignment(NAME, VALUE + 1);
+        RandomVariableAssignment assignment = new RandomVariableAssignment(COLUMN_INDEX, STATE_INDEX);
+        RandomVariableAssignment assignment2 = new RandomVariableAssignment(COLUMN_INDEX, STATE_INDEX + 1);
 
         assertThat(assignment.equals(assignment2), is(false));
     }

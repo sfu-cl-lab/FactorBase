@@ -3,44 +3,44 @@ package ca.sfu.cs.factorbase.data;
 import java.util.Objects;
 
 /**
- * Class to hold information for a random variable with an assignment state.
+ * Class to hold information for the assignment state of a random variable.
  */
 public class RandomVariableAssignment {
-
-    private String name;
-    private int value;
+    private int columnIndex;
+    private int stateIndex;
 
 
     /**
-     * Store information for an assignment for a random variable.
+     * Store information for the assignment of a random variable.
      *
-     * @param name - the name of the random variable.
-     * @param value - the assignment for the random variable, using the index position of the state.
+     * @param columnIndex - the column index of the random variable in the dataset.
+     * @param stateIndex - the assignment for the random variable, using the index position of the state.
      */
-    public RandomVariableAssignment(String name, int value) {
-        this.name = name;
-        this.value = value;
+    public RandomVariableAssignment(int columnIndex, int stateIndex) {
+        this.columnIndex = columnIndex;
+        this.stateIndex = stateIndex;
     }
 
 
     /**
-     * Retrieve the name of the random variable for the assignment.
+     * Retrieve the column index of the random variable for the assignment.
      *
-     * @return the name of the random variable for the assignment.
+     * @return the column index of the random variable for the assignment.
      */
-    public String getName() {
-        return this.name;
+    public int getVariableColumnIndex() {
+        return this.columnIndex;
     }
 
 
     /**
-     * Retrieve the index of the state.
+     * Retrieve the index position of the state.
      *
-     * @return the index of the state.
+     * @return the index position of the state.
      */
-    public int getValue() {
-        return this.value;
+    public int getStateIndex() {
+        return this.stateIndex;
     }
+
 
     @Override
     public boolean equals(Object objectToCompare) {
@@ -52,16 +52,18 @@ public class RandomVariableAssignment {
 
         RandomVariableAssignment randomVariable = (RandomVariableAssignment) objectToCompare;
 
-        return this.name.equals(randomVariable.getName()) && this.value  == randomVariable.getValue();
+        return this.columnIndex == randomVariable.getVariableColumnIndex() && this.stateIndex == randomVariable.getStateIndex();
     }
+
 
     @Override
     public int hashCode() {
-        return Objects.hash(this.name, this.value);
+        return Objects.hash(this.columnIndex, this.stateIndex);
     }
+
 
     @Override
     public String toString() {
-        return this.name + " = " + this.value;
+        return this.columnIndex + " = " + this.stateIndex;
     }
 }
