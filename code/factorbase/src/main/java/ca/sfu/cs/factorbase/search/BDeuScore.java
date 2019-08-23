@@ -1,7 +1,6 @@
 package ca.sfu.cs.factorbase.search;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -41,37 +40,35 @@ public class BDeuScore implements DiscreteLocalScore {
 
     @Override
     public double localScore(String child, Set<String> parents) {
-        int cacheKey = Objects.hash(child, parents);
+        int childColumnIndex = this.contingencyTableGenerator.getColumnIndex(child);
+        int[] parentColumnIndices = this.contingencyTableGenerator.getColumnIndices(parents);
+        int cacheKey = Objects.hash(childColumnIndex, parentColumnIndices);
 
         if (this.cache.containsKey(cacheKey)) {
             return this.cache.get(cacheKey);
         }
 
-        List<String> allVariables = new ArrayList<String>(parents);
-        allVariables.add(child);
-        ContingencyTable ct = this.contingencyTableGenerator.generateCT(allVariables);
-
         // Number of child states.
-        int r = this.contingencyTableGenerator.getNumberOfStates(child);
+        int r = this.contingencyTableGenerator.getNumberOfStates(childColumnIndex);
 
         // Number of parent states.
         int q = 1;
-        for (String parent : parents) {
+        for (int parent : parentColumnIndices) {
             q *= this.contingencyTableGenerator.getNumberOfStates(parent);
         }
+
+        ContingencyTable ct = this.contingencyTableGenerator.generateCT(childColumnIndex, parentColumnIndices, r * q);
 
         // Calculate score.
         BigDecimal score = new BigDecimal((r - 1) * q * Math.log(this.structurePrior));
 
-        for (List<RandomVariableAssignment> parentState : this.contingencyTableGenerator.getStates(parents)) {
+        for (List<RandomVariableAssignment> parentAssignments : this.contingencyTableGenerator.getStates(parentColumnIndices)) {
             long countsSum = 0;
             long counts;
-            int numberOfChildStates = this.contingencyTableGenerator.getNumberOfStates(child);
+            int numberOfChildStates = this.contingencyTableGenerator.getNumberOfStates(childColumnIndex);
             for (int childStateIndex = 0; childStateIndex < numberOfChildStates; childStateIndex++) {
-                RandomVariableAssignment childVariable = new RandomVariableAssignment(child, childStateIndex);
-                List<RandomVariableAssignment> augmentedList = new ArrayList<RandomVariableAssignment>(parentState);
-                augmentedList.add(childVariable);
-                counts = ct.getCounts(augmentedList);
+                RandomVariableAssignment childAssignment = new RandomVariableAssignment(childColumnIndex, childStateIndex);
+                counts = ct.getCounts(childAssignment, parentAssignments);
                 countsSum += counts;
                 score = score.add(new BigDecimal(ProbUtils.lngamma(this.samplePrior / (r * q) + counts)));
             }
