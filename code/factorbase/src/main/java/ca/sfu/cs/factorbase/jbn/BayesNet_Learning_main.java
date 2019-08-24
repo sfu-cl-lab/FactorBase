@@ -79,8 +79,9 @@ public class BayesNet_Learning_main {
             out.write("<VARIABLE TYPE=\"nature\">\n");
             out.write("\t<NAME>" + "`" + variable + "`" + "</NAME>\n"); // @zqian adding back ticks to the name of bayes nodes
 
-            for (String state : dataset.getStates(variable)) {
-                out.write("\t<OUTCOME>" + state + "</OUTCOME>\n");
+            int variableColumnIndex = dataset.getColumnIndex(variable);
+            for (String variableState : dataset.getStates(variableColumnIndex)) {
+                out.write("\t<OUTCOME>" + variableState + "</OUTCOME>\n");
             }
 
             out.write("</VARIABLE>\n");
