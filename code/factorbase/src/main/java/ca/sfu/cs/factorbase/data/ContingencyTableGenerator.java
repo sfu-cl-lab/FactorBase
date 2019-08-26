@@ -68,10 +68,10 @@ public class ContingencyTableGenerator {
         int[] numberOfStatesPerVariable = this.getNumberOfStates(childColumnIndex, parentColumnIndices);
         long[] countsArray = new long[totalNumberOfStates];
         int totalNumberOfVariables = parentColumnIndices.length + 1;
+        long[] rowValues = new long[totalNumberOfVariables];
 
         // for loop to process each row in the dataset.
         for (int rowIndex = 0; rowIndex < this.data.length; rowIndex++) {
-            long[] rowValues = new long[totalNumberOfVariables];
             rowValues[0] = this.data[rowIndex][childColumnIndex];
 
             // for loop to process each parent column for the current row in the dataset.
