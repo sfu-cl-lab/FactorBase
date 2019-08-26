@@ -22,7 +22,6 @@
 package edu.cmu.tetrad.search;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -65,11 +64,6 @@ public class GesCT {
      * Specification of forbidden and required edges.
      */
     private Knowledge knowledge = new Knowledge();
-
-    /**
-     * Array of variable names from the data set, in order.
-     */
-    private String varNames[];
 
     /**
      * List of variables in the data set, in order.
@@ -135,7 +129,7 @@ public class GesCT {
      * @return the resulting Pattern.
      */
     public Graph search() {
-        Graph graph = new EdgeListGraph(new LinkedList<Node>(getVariables()));
+        Graph graph = new EdgeListGraph(getVariables());
 
         scoreHash = new WeakHashMap<Node, Map<Set<Node>, Double>>();
 
@@ -909,10 +903,8 @@ public class GesCT {
     }
 
     private void setDataSet(ContingencyTableGenerator ctTableGenerator) {
-        List<String> _varNames = ctTableGenerator.getVariableNames();
-
-        this.varNames = _varNames.toArray(new String[0]);
-        this.variables = Arrays.stream(this.varNames).map(name -> new GraphNode(name)).collect(Collectors.toList());
+        List<String> varNames = ctTableGenerator.getVariableNames();
+        this.variables = varNames.stream().map(name -> new GraphNode(name)).collect(Collectors.toList());
         this.discrete = ctTableGenerator.isDiscrete();
 
         if (!isDiscrete()) {
