@@ -11,7 +11,7 @@ import org.junit.Test;
 public class RandomVariableAssignmentTest {
 
     private static final String NAME = "Name";
-    private static final String VALUE = "Value";
+    private static final int VALUE = 0;
 
     @Test
     public void constructor_InitializedCorrectly_WhenGivenValidParameters() {
@@ -20,7 +20,7 @@ public class RandomVariableAssignmentTest {
         assertThat(assignment.getName(), equalTo(NAME));
         assertThat(assignment.getValue(), equalTo(VALUE));
         assertThat(assignment.hashCode(), equalTo(Objects.hash(NAME, VALUE)));
-        assertThat(assignment.toString(), equalTo("Name = Value"));
+        assertThat(assignment.toString(), equalTo("Name = " + VALUE));
     }
 
     @Test
@@ -42,7 +42,7 @@ public class RandomVariableAssignmentTest {
     @Test
     public void equals_ReturnsFalse_WhenRandomVariableAssignmentsValuesAreNotEqual() {
         RandomVariableAssignment assignment = new RandomVariableAssignment(NAME, VALUE);
-        RandomVariableAssignment assignment2 = new RandomVariableAssignment(NAME, VALUE + "1");
+        RandomVariableAssignment assignment2 = new RandomVariableAssignment(NAME, VALUE + 1);
 
         assertThat(assignment.equals(assignment2), is(false));
     }

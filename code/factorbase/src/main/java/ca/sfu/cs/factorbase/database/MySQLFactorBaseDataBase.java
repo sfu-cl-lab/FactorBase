@@ -145,12 +145,12 @@ public class MySQLFactorBaseDataBase implements FactorBaseDataBase {
 
 
     @Override
-    public DataExtractor getCTDataExtractor(String dataExtractorID) throws DataExtractionException {
+    public DataExtractor getAndRemoveCTDataExtractor(String dataExtractorID) throws DataExtractionException {
         if (this.dataExtractors == null) {
             this.dataExtractors = this.generateDataExtractors();
         }
 
-        return this.dataExtractors.get(dataExtractorID);
+        return this.dataExtractors.remove(dataExtractorID);
     }
 
 

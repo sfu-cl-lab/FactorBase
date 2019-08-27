@@ -350,7 +350,7 @@ public class BayesBaseH {
 
             if (Integer.parseInt(NoTuples) > 1) {
                 BayesNet_Learning_main.tetradLearner(
-                    database.getCTDataExtractor(id.replace("`","")),
+                    database.getAndRemoveCTDataExtractor(id.replace("`","")),
                     databaseName + "/" + File.separator + "xml" + File.separator + id.replace("`","") + ".xml",
                     !cont.equals("1")
                 );
@@ -416,7 +416,7 @@ public class BayesBaseH {
 
                 if(Integer.parseInt(NoTuples) > 1) {
                     BayesNet_Learning_main.tetradLearner(
-                        database.getCTDataExtractor(id.replace("`","")),
+                        database.getAndRemoveCTDataExtractor(id.replace("`","")),
                         requiredEdges,
                         forbiddenEdges,
                         databaseName + "/" + File.separator + "xml" + File.separator + id.replace("`","") + ".xml",

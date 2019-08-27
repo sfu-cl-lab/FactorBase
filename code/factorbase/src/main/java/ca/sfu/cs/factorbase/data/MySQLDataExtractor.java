@@ -41,16 +41,11 @@ public class MySQLDataExtractor implements DataExtractor {
      */
     @Override
     public DataSet extractData() throws DataExtractionException {
-        DataSetMetaData metadata;
-        long[][] data;
         try {
-            metadata = this.extractMetaData(this.dbQuery, this.countsColumn);
-            data = this.convertDataToStateIndices(this.dbQuery, metadata, this.countsColumn);
+            return this.convertDataToStateIndices(this.dbQuery, this.countsColumn, this.isDiscrete);
         } catch (SQLException e) {
             throw new DataExtractionException("An error occurred when attempting to extract information from the data source.", e);
         }
-
-        return new DataSet(data, metadata, this.isDiscrete);
     }
 
 
@@ -60,91 +55,91 @@ public class MySQLDataExtractor implements DataExtractor {
      *
      * @param dbQuery - {@code PreparedStatement} to generate a {@code ResultSet} containing the information to
      *                  extract.
-     * @param metadata - DataSetMetaData object containing the metadata for the results produced by the given
-     *                   {@code PreparedStatement} when executed.
      * @param countsColumn - the name of the column indicating the counts for each random variable assignment.
+     * @param isDiscrete - true if the dataset only contains discrete information; otherwise false.
      * @return a 2D Long array representation of the given dataset.
      * @throws SQLException if there is a problem extracting the information from the database.
      */
-    private long[][] convertDataToStateIndices(
+    private DataSet convertDataToStateIndices(
         PreparedStatement dbQuery,
-        DataSetMetaData metadata,
-        String countsColumn
+        String countsColumn,
+        boolean isDiscrete
     ) throws SQLException {
-        int numberOfRows = metadata.getNumberOfRows();
-        int numberOfColumns = metadata.getNumberOfColumns();
-        String[] header = metadata.getHeader();
-        int countsColumnIndex = metadata.getColumnIndex(countsColumn);
-
-        long[][] convertedData = new long[numberOfRows][numberOfColumns];
+        long[][] convertedData;
+        int numberOfRows;
+        String[] header;
+        int countsColumnIndex;
+        Map<String, Integer> variableStateToIntegerEncoding = new HashMap<String, Integer>();
+        Map<String, Set<String>> variableStates = new HashMap<String, Set<String>>();
 
         try (ResultSet results = dbQuery.executeQuery()) {
+            numberOfRows = this.getNumberOfRows(results);
+            header = this.getHeader(results);
+            int numberOfColumns = header.length;
+            countsColumnIndex = this.getCountColumnIndex(header, countsColumn);
+            convertedData = new long[numberOfRows][numberOfColumns];
+
+            int[] indexStateCounter = new int[numberOfColumns];
             int rowIndex = 0;
 
             // while loop to process and extract information from the given ResultSet.
             while (results.next()) {
                 // for loop to process the column data for each row.
-                for (int columnIndex = 0; columnIndex < header.length; columnIndex++) {
+                for (int columnIndex = 0; columnIndex < numberOfColumns; columnIndex++) {
                     if (columnIndex == countsColumnIndex) {
                         convertedData[rowIndex][columnIndex] = results.getLong(countsColumnIndex + 1);
                     } else {
-                        convertedData[rowIndex][columnIndex] = metadata.getVariableStateIndex(
-                            Mapper.generateVariableStateKey(header[columnIndex], results.getString(columnIndex + 1))
-                        );
+                        String variableName = header[columnIndex];
+                        String state = results.getString(columnIndex + 1);
+                        if (!variableStates.containsKey(variableName)) {
+                            variableStates.put(variableName, new HashSet<String>());
+                        }
+
+                        variableStates.get(variableName).add(state);
+
+                        String stateKey = Mapper.generateVariableStateKey(header[columnIndex], state);
+
+                        Integer stateIndex = variableStateToIntegerEncoding.get(stateKey);
+                        if (stateIndex == null) {
+                            stateIndex = this.getNextIndex(indexStateCounter, columnIndex);
+                            variableStateToIntegerEncoding.put(stateKey, stateIndex);
+                        }
+
+                        convertedData[rowIndex][columnIndex] = stateIndex.longValue();
                     }
                 }
 
                 rowIndex++;
             }
+        } finally {
+            dbQuery.close();
         }
 
-        return convertedData;
+        DataSetMetaData metadata = new DataSetMetaData(
+            Mapper.mapHeadersToColumnIndices(header),
+            variableStates,
+            numberOfRows,
+            header,
+            countsColumnIndex
+        );
+
+        return new DataSet(convertedData, metadata, isDiscrete);
     }
 
 
     /**
-     * Extract metadata from the for the results produced by the given {@code PreparedStatement} when executed.
+     * Retrieve the next state index for the given column.
      *
-     * @param dbQuery - {@code PreparedStatement} to generate a {@code ResultSet} containing the metadata to
-     *                  extract.
-     * @param countsColumn - the name of the column indicating the counts for each random variable assignment.
-     * @return DataSetMetaData object containing the metadata for the given dataset.
-     * @throws SQLException if there is a problem extracting the information from the database.
+     * @param indexStateCounter - {@code int[]} where each position holds the next state index to return for the
+     *                            associated column.
+     * @param columnIndex - the column to get the next state index for.
+     * @return the next state index for the given column.
      */
-    private DataSetMetaData extractMetaData(PreparedStatement dbQuery, String countsColumn) throws SQLException {
-        Map<String, Set<String>> variableStates = new HashMap<String, Set<String>>();
-        int numberOfRows = 0;
-        int countsColumnIndex = -1;
-        String[] header;
+    private int getNextIndex(int[] indexStateCounter, int columnIndex) {
+        int nextIndex = indexStateCounter[columnIndex];
+        indexStateCounter[columnIndex]++;
 
-        try(ResultSet results = dbQuery.executeQuery()) {
-            header = getHeader(results);
-
-            // while loop to process and extract information from the given ResultSet.
-            while (results.next()) {
-                // for loop to process the data rows.
-                for (int columnIndex = 0; columnIndex < header.length; columnIndex++) {
-                    String variableName = header[columnIndex];
-                    String value = results.getString(columnIndex + 1);
-                    if (!variableName.equals(countsColumn)) {
-                        if (!variableStates.containsKey(variableName)) {
-                            variableStates.put(variableName, new HashSet<String>());
-                        }
-
-                        variableStates.get(variableName).add(value);
-                    } else {
-                        countsColumnIndex = columnIndex;
-                    }
-                }
-
-                numberOfRows++;
-            }
-        }
-
-        Map<String, Integer> variableNameToColumnIndex = Mapper.mapHeadersToColumnIndices(header);
-        Map<String, Integer> variableStateToIntegerEncoding = Mapper.mapVariableStateToInteger(variableStates);
-
-        return new DataSetMetaData(variableNameToColumnIndex, variableStateToIntegerEncoding, variableStates, numberOfRows, header, countsColumnIndex);
+        return nextIndex;
     }
 
 
@@ -152,7 +147,7 @@ public class MySQLDataExtractor implements DataExtractor {
      * Extract the column names from the given {@code ResultSet}.
      *
      * @param results - the {@code ResultSet} to extract the column names from.
-     * @return Array of the column names for the given {@code ResultSet}.
+     * @return the column names for the given {@code ResultSet}.
      * @throws SQLException if there is a problem extracting the information from the database.
      */
     private String[] getHeader(ResultSet results) throws SQLException {
@@ -165,5 +160,42 @@ public class MySQLDataExtractor implements DataExtractor {
         }
 
         return header;
+    }
+
+
+    /**
+     * Retrieve the number of rows in the given {@code ResultSet}.
+     *
+     * @param results - {@code ResultSet} to retrieve the number of rows for.
+     * @return the number of rows in the given {@code ResultSet}.
+     * @throws SQLException if there is a problem extracting the information from the database.
+     */
+    private int getNumberOfRows(ResultSet results) throws SQLException {
+        int rowCount = 0;
+
+        if (results.last()) {
+            rowCount = results.getRow();
+            results.beforeFirst();
+        }
+
+        return rowCount;
+    }
+
+
+    /**
+     * Retrieve the column index for the count column.
+     *
+     * @param header - the dataset column names in the order they appear in the dataset.
+     * @param countColumn - the name of the column that contains the count information.
+     * @return the index for the count column or -1 if a match isn't found.
+     */
+    private int getCountColumnIndex(String[] header, String countColumn) {
+        for (int index = 0; index < header.length; index++) {
+            if (header[index].equals(countColumn)) {
+                return index;
+            }
+        }
+
+        return -1;
     }
 }
