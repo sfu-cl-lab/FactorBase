@@ -17,7 +17,7 @@ import com.google.common.collect.Sets;
 public class DataSetMetaData {
     private Map<String, Integer> variableNameToColumnIndex;
     private List<String> variableNames;
-    private Map<String, Set<String>> variableStates;
+    private List<Set<String>> variableStates;
     private int numberOfRows;
     private String[] header;
     private int countsColumnIndex;
@@ -34,7 +34,7 @@ public class DataSetMetaData {
      */
     public DataSetMetaData(
         Map<String, Integer> variableNameToColumnIndex,
-        Map<String, Set<String>> variableStates,
+        List<Set<String>> variableStates,
         int numberOfRows,
         String[] header,
         int countsColumnIndex
@@ -50,26 +50,25 @@ public class DataSetMetaData {
 
     /**
      * Generate an index value for the given set of {@code RandomVariableAssignment}s.
+     * <p>
+     * <b>IMPORTANT</b>: To ensure that this acts as an injective function, be sure to pass in the variables in a
+     *                   consistent order (e.g. column index order) when calling this method.
+     * </p>
+     * <p>
+     * Note: This method is based on the getRowIndex() method from Tetrad's BDeuScore.java file.  Basically we are
+     *       generating a unique number by treating each column as a different based number and converting it to a
+     *       base 10 number.
+     * </p>
      *
      * @param randomVariableAssignments - a set of {@code RandomVariableAssignment}s to generate an index for.
      * @return Integer value index for the given set of {@code RandomVariableAssignment}s.
-     *
-     * Note: This method is based on the getRowIndex() method from Tetrad's BDeuScore.java file.
      */
-    public int generateIndex(List<RandomVariableAssignment> randomVariableAssignments) {
-        randomVariableAssignments.sort(
-            (assignment1, assignment2) -> {
-                Integer index1 = this.variableNameToColumnIndex.get(assignment1.getName());
-                Integer index2 = this.variableNameToColumnIndex.get(assignment2.getName());
-                return index1.compareTo(index2);
-            }
-        );
-
+    public int generateIndex(RandomVariableAssignment[] randomVariableAssignments) {
         int index = 0;
 
         for (RandomVariableAssignment assignment : randomVariableAssignments) {
-            index *= this.getNumberOfStates(assignment.getName());
-            index += assignment.getValue();
+            index *= this.getNumberOfStates(assignment.getVariableColumnIndex());
+            index += assignment.getStateIndex();
         }
 
         return index;
@@ -79,23 +78,26 @@ public class DataSetMetaData {
     /**
      * Generate an index value for the given lists of numbers containing information for a row from the dataset.
      * <p>
-     * IMPORTANT: To ensure that this acts as an injective function, be sure to pass in the variables in column index
-     *            order for both lists when calling this method.
+     * <b>IMPORTANT</b>: To ensure that this acts as an injective function, be sure to pass in the two arrays in a
+     *                   consistent order (e.g. column index order) when calling this method.
+     * </p>
+     * <p>
+     * Note: This method is based on the getRowIndex() method from Tetrad's BDeuScore.java file.  Basically we are
+     *       generating a unique number by treating each column as a different based number and converting it to a
+     *       base 10 number.
      * </p>
      *
      * @param statesPerVariable - list of numbers where each number indicates the number of states for a column.
      * @param rowValues - matching list of Integer encoded state values for a row from the dataset.
      * @return Integer value index for the given list of number of states per variable and the list of Integer
      *         encoded values for the given row.
-     *
-     * Note: This method is based on the getRowIndex() method from Tetrad's BDeuScore.java file.
      */
-    public int generateIndex(List<Integer> statesPerVariable, List<Long> rowValues) {
+    public int generateIndex(int[] statesPerVariable, long[] rowValues) {
         int index = 0;
 
-        for (int variableIndex = 0; variableIndex < statesPerVariable.size(); variableIndex++) {
-            index *= statesPerVariable.get(variableIndex);
-            index += rowValues.get(variableIndex);
+        for (int variableIndex = 0; variableIndex < statesPerVariable.length; variableIndex++) {
+            index *= statesPerVariable[variableIndex];
+            index += rowValues[variableIndex];
         }
 
         return index;
@@ -105,31 +107,39 @@ public class DataSetMetaData {
     /**
      * Retrieve the number of possible states for the given variable.
      *
-     * @param variable - the name of the variable to get the number of states for.
+     * @param variableColumnIndex - the column index of the variable to retrieve the number of states for.
      * @return the number of possible states for the given variable.
      */
-    public int getNumberOfStates(String variable) {
-        Set<String> states = this.variableStates.getOrDefault(variable, new HashSet<String>());
-        return states.size();
+    public int getNumberOfStates(int variableColumnIndex) {
+        try {
+            return this.variableStates.get(variableColumnIndex).size();
+        } catch(IndexOutOfBoundsException e) {
+            return 0;
+        }
     }
 
 
     /**
      * Create the Cartesian product of all the states for each random variable in the given list.
      *
-     * @param variables - the names of the random variables to create the Cartesian product for their possible states.
+     * @param variableColumnIndices - the column indices of the random variables to create the Cartesian product of
+     *                                their possible states for.
      * @return a set of unique lists containing all possible combinations of the given random variables' states.
      */
-    public Set<List<RandomVariableAssignment>> getStates(Set<String> variables) {
-        List<Set<RandomVariableAssignment>> variableStateCombinations = new ArrayList<Set<RandomVariableAssignment>>();
+    public Set<List<RandomVariableAssignment>> getStates(int[] variableColumnIndices) {
+        int listSize = variableColumnIndices.length;
+        List<Set<RandomVariableAssignment>> variableStateCombinations = new ArrayList<Set<RandomVariableAssignment>>(listSize);
 
-        for (String variable : variables) {
-            Set<RandomVariableAssignment> states = new HashSet<RandomVariableAssignment>();
-            states.addAll(
-                IntStream.range(0, this.getNumberOfStates(variable)).mapToObj(
-                    stateIndex -> new RandomVariableAssignment(variable, stateIndex)
-                ).collect(Collectors.toSet())
+        for (int variableColumnIndex : variableColumnIndices) {
+            Set<RandomVariableAssignment> states = IntStream.range(
+                0,
+                this.getNumberOfStates(variableColumnIndex)
+            ).mapToObj(
+                stateIndex -> new RandomVariableAssignment(variableColumnIndex, stateIndex)
+            ).collect(
+                Collectors.toSet()
             );
+
             variableStateCombinations.add(states);
         }
 
@@ -140,22 +150,27 @@ public class DataSetMetaData {
     /**
      * Retrieve the possible states that a random variable can take.
      *
-     * @param variable - the name of the random variable to retrieve the possible states for.
+     * @param variableColumnIndex - the column index of the variable to retrieve the number of states for.
      * @return a set of the possible states that the given random variable can take.
      */
-    public Set<String> getStates(String variable) {
-        return this.variableStates.getOrDefault(variable, new HashSet<String>());
+    public Set<String> getStates(int variableColumnIndex) {
+        try {
+            return this.variableStates.get(variableColumnIndex);
+        } catch(IndexOutOfBoundsException e) {
+            return new HashSet<String>();
+        }
     }
 
 
     /**
-     * Retrieve all the variable names for the dataset.
+     * Retrieve all the variable names for the dataset in column order.
+     *<p>
+     *<b>IMPORTANT</b>: Tetrad seems to expect the variable names to be in column order, which is why we
+     *                  have this requirement.  If the variables are not in column order, different Bayes
+     *                  nets can be generated.
+     *</p>
      *
      * @return all the variable names in column order.
-     *
-     * IMPORTANT: Tetrad seems to expect the variable names to be in column order, which is why we
-     *            have this requirement.  If the variables are not in column order, different Bayes
-     *            nets can be generated.
      */
     public List<String> getVariableNames() {
         return this.variableNames;
@@ -165,7 +180,7 @@ public class DataSetMetaData {
     /**
      * Retrieve the column index for the given variable.
      *
-     * @param variable the name of the variable to get the column index for.
+     * @param variable - the name of the variable to get the column index for.
      * @return column index of the given variable.
      */
     public int getColumnIndex(String variable) {

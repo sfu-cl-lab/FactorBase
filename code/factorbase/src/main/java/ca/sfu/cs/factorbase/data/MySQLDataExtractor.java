@@ -4,8 +4,10 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -70,7 +72,7 @@ public class MySQLDataExtractor implements DataExtractor {
         String[] header;
         int countsColumnIndex;
         Map<String, Integer> variableStateToIntegerEncoding = new HashMap<String, Integer>();
-        Map<String, Set<String>> variableStates = new HashMap<String, Set<String>>();
+        List<Set<String>> variableStates = new ArrayList<Set<String>>();
 
         try (ResultSet results = dbQuery.executeQuery()) {
             numberOfRows = this.getNumberOfRows(results);
@@ -78,6 +80,15 @@ public class MySQLDataExtractor implements DataExtractor {
             int numberOfColumns = header.length;
             countsColumnIndex = this.getCountColumnIndex(header, countsColumn);
             convertedData = new long[numberOfRows][numberOfColumns];
+
+            // for loop to create a HashSet to store the unique states for each column except the counts column.
+            for (int columnIndex = 0; columnIndex < numberOfColumns; columnIndex++) {
+                if (columnIndex == countsColumnIndex) {
+                    variableStates.add(null);
+                } else {
+                    variableStates.add(new HashSet<String>());
+                }
+            }
 
             int[] indexStateCounter = new int[numberOfColumns];
             int rowIndex = 0;
@@ -89,13 +100,8 @@ public class MySQLDataExtractor implements DataExtractor {
                     if (columnIndex == countsColumnIndex) {
                         convertedData[rowIndex][columnIndex] = results.getLong(countsColumnIndex + 1);
                     } else {
-                        String variableName = header[columnIndex];
                         String state = results.getString(columnIndex + 1);
-                        if (!variableStates.containsKey(variableName)) {
-                            variableStates.put(variableName, new HashSet<String>());
-                        }
-
-                        variableStates.get(variableName).add(state);
+                        variableStates.get(columnIndex).add(state);
 
                         String stateKey = Mapper.generateVariableStateKey(header[columnIndex], state);
 

@@ -6,7 +6,6 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
 
 import java.util.Arrays;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -17,8 +16,8 @@ import org.junit.Test;
 
 public abstract class ContingencyTableTestBase {
 
-    private static final String VALID_VARIABLE = "teachingability(prof0)";
-    private static final String INVALID_VARIABLE = "notacolumn";
+    private static final int VALID_VARIABLE = 2; // teachingability(prof0).
+    private static final int INVALID_VARIABLE = 3; // Not a column.
 
     private ContingencyTableGenerator contingencyTableGenerator;
     private ContingencyTable contingencyTable;
@@ -41,7 +40,9 @@ public abstract class ContingencyTableTestBase {
     @Before
     public void setUp() throws Exception {
         this.contingencyTableGenerator = createInstance();
-        this.contingencyTable = this.contingencyTableGenerator.generateCT(Arrays.asList("popularity(prof0)", "teachingability(prof0)"));
+        int childIndex = 1;
+        int[] parentIndices = {2};
+        this.contingencyTable = this.contingencyTableGenerator.generateCT(childIndex, parentIndices, 4);
     }
 
     @After
@@ -64,7 +65,7 @@ public abstract class ContingencyTableTestBase {
 
     @Test
     public void getStates_CreatesProperCartesianProduct_WhenGivenSetOfVariables() {
-        Set<String> variables = new HashSet<>(Arrays.asList("popularity(prof0)", "teachingability(prof0)"));
+        int[] variables = {1, 2};
         Set<List<RandomVariableAssignment>> assignmentCombinations = this.contingencyTableGenerator.getStates(variables);
         for (List<RandomVariableAssignment> assignmentCombination : assignmentCombinations) {
             assertThat(assignmentCombination.size(), is(equalTo(2)));
@@ -75,7 +76,7 @@ public abstract class ContingencyTableTestBase {
 
     @Test
     public void getStates_CreatesProperCartesianProduct_WhenGivenEmptySetOfVariables() {
-        Set<List<RandomVariableAssignment>> assignmentCombinations = this.contingencyTableGenerator.getStates(new HashSet<String>());
+        Set<List<RandomVariableAssignment>> assignmentCombinations = this.contingencyTableGenerator.getStates(new int[0]);
         assertThat(assignmentCombinations.size(), is(equalTo(1)));
 
         List<RandomVariableAssignment> assignmentCombination = assignmentCombinations.iterator().next();
@@ -99,22 +100,20 @@ public abstract class ContingencyTableTestBase {
 
     @Test
     public void getCounts_ReturnsCorrectValue_WhenGivenAllVariableAssignments() {
-        List<RandomVariableAssignment> assignments = Arrays.asList(
-            new RandomVariableAssignment("popularity(prof0)", 1),
-            new RandomVariableAssignment("teachingability(prof0)", 0)
+        RandomVariableAssignment childAssignment = new RandomVariableAssignment(1, 1);
+        List<RandomVariableAssignment> parentAssignments = Arrays.asList(
+            new RandomVariableAssignment(2, 0)
         );
 
-        long counts = this.contingencyTable.getCounts(assignments);
+        long counts = this.contingencyTable.getCounts(childAssignment, parentAssignments);
 
         assertThat(counts, is(equalTo(1L)));
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void getCounts_ThrowsException_WhenGivenSubsetOfVariableAssignments() {
-        List<RandomVariableAssignment> assignments = Arrays.asList(
-            new RandomVariableAssignment("popularity(prof0)", 1)
-        );
-        this.contingencyTable.getCounts(assignments);
+        RandomVariableAssignment childAssignment = new RandomVariableAssignment(1, 1);
+        this.contingencyTable.getCounts(childAssignment, Arrays.asList());
     }
 
     @Test
