@@ -335,8 +335,8 @@ public class BayesBaseH {
      * else just insert the 1nid as child into entity_bayesnet.
      */
     private static void handlePVars(FactorBaseDataBase database) throws Exception {
-        // read pvar -> create csv files
-        ArrayList<String> pvar_ids = readPvarFromBN();
+        // Retrieve all the PVariables.
+        String[] pvar_ids = database.getPVariables();
 
         String NoTuples = "";
         for(String id : pvar_ids) {
@@ -377,8 +377,6 @@ public class BayesBaseH {
 
             logger.fine("\nEnd for " + id + "\n");
         }
-
-        pvar_ids.clear();
     }
 
 
@@ -643,29 +641,6 @@ public class BayesBaseH {
         st.close();
 
         return rnode_ids;
-    }
-
-
-    private static ArrayList<String> readPvarFromBN() throws SQLException, IOException {
-        Statement st = con2.createStatement();
-        ArrayList<String> pvar_ids = new ArrayList<String>();
-
-        // From main db.
-        ResultSet rs = st.executeQuery("SELECT * FROM PVariables WHERE index_number = 0;"); //O.S. March 21 ignore variables that aren't main.
-        while(rs.next()) {
-            // Get pvid for further use.
-            String pvid = rs.getString("pvid");
-            logger.fine("pvid : " + pvid);
-
-            // Add to ids for further use.
-            pvar_ids.add(pvid);
-        }
-
-        // Close statements.
-        rs.close();
-        st.close();
-
-        return pvar_ids;
     }
 
 
