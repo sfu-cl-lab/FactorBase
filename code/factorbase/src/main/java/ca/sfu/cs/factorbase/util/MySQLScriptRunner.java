@@ -43,8 +43,9 @@ public class MySQLScriptRunner {
         File newFile = new File(newFileName);
         newFile.mkdirs();
         try {
-            if (!newFile.delete())
+            if (!newFile.delete()) {
                 throw new FileNotFoundException("Failed to delete file: " + newFile);
+            }
         } catch (Exception e) {
         }
 
