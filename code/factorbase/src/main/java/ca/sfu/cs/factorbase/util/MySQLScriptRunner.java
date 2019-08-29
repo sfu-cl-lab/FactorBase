@@ -11,26 +11,26 @@ import java.util.regex.Pattern;
  * Jun 25, zqian
  * This is a useful program which could be used to call the sql scripte from Java.
  **/
-public class BZScriptRunner {
+public class MySQLScriptRunner {
     private String databaseName;
     private String dbbase;
     private String largestRchain;
     private Connection con2;
     
-	private static Logger logger = Logger.getLogger(BZScriptRunner.class.getName());
+	private static Logger logger = Logger.getLogger(MySQLScriptRunner.class.getName());
 
-    public BZScriptRunner(String databaseName, Connection con2) {
+    public MySQLScriptRunner(String databaseName, Connection con2) {
         this.databaseName = databaseName;
         this.con2= con2;
     }
 
-    public BZScriptRunner(String databaseName, String dbbase, Connection con2) {
+    public MySQLScriptRunner(String databaseName, String dbbase, Connection con2) {
         this.databaseName = databaseName;
         this.dbbase = dbbase;
         this.con2= con2;
     }
 
-    public BZScriptRunner(String databaseName, Connection con2, String largestRchain) {
+    public MySQLScriptRunner(String databaseName, Connection con2, String largestRchain) {
         this.databaseName = databaseName;
         this.con2 = con2;
         this.largestRchain = largestRchain;

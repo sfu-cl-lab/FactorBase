@@ -54,7 +54,7 @@ import ca.sfu.cs.factorbase.exporter.bifexporter.bif.BIFExport;
 import ca.sfu.cs.factorbase.exporter.bifexporter.bif.BIFImport;
 import ca.sfu.cs.factorbase.graph.Edge;
 import ca.sfu.cs.factorbase.jbn.BayesNet_Learning_main;
-import ca.sfu.cs.factorbase.util.BZScriptRunner;
+import ca.sfu.cs.factorbase.util.MySQLScriptRunner;
 
 import com.mysql.jdbc.Connection;
 
@@ -89,10 +89,10 @@ public class BayesBaseH {
         connectDB();
 
         // Build tables for structure learning.
-        BZScriptRunner bzsr = new BZScriptRunner(databaseName, con2);
+        MySQLScriptRunner mysqlScriptRunner = new MySQLScriptRunner(databaseName, con2);
 
         // Set up the bayes net models O.S. Sep 12, 2017.
-        bzsr.runScript(Config.SCRIPTS_DIRECTORY + "model_manager.sql");
+        mysqlScriptRunner.runScript(Config.SCRIPTS_DIRECTORY + "model_manager.sql");
 
         // Get maxNumberOfMembers (max length of rchain).
         Statement st = con2.createStatement();

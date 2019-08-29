@@ -16,7 +16,7 @@ import ca.sfu.cs.factorbase.data.DataExtractorGenerator;
 import ca.sfu.cs.factorbase.exception.DataBaseException;
 import ca.sfu.cs.factorbase.exception.DataExtractionException;
 import ca.sfu.cs.factorbase.graph.Edge;
-import ca.sfu.cs.factorbase.util.BZScriptRunner;
+import ca.sfu.cs.factorbase.util.MySQLScriptRunner;
 import ca.sfu.cs.factorbase.util.KeepTablesOnly;
 import ca.sfu.cs.factorbase.util.QueryGenerator;
 
@@ -62,11 +62,11 @@ public class MySQLFactorBaseDataBase implements FactorBaseDataBase {
 
     @Override
     public void setupDatabase() throws DataBaseException {
-        BZScriptRunner bzsr = new BZScriptRunner(this.baseDatabaseName, this.baseConnection);
+        MySQLScriptRunner mysqlScriptRunner = new MySQLScriptRunner(this.baseDatabaseName, this.baseConnection);
         try {
-            bzsr.runScript(Config.SCRIPTS_DIRECTORY + "setup.sql");
-            bzsr.createSP(Config.SCRIPTS_DIRECTORY + "storedprocs.sql");
-            bzsr.callSP("find_values");
+            mysqlScriptRunner.runScript(Config.SCRIPTS_DIRECTORY + "setup.sql");
+            mysqlScriptRunner.createSP(Config.SCRIPTS_DIRECTORY + "storedprocs.sql");
+            mysqlScriptRunner.callSP("find_values");
         } catch (SQLException | IOException e) {
             throw new DataBaseException("An error occurred when attempting to setup the database for FactorBase.", e);
         }
