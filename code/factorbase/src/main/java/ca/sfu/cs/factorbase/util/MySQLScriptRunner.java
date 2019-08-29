@@ -1,6 +1,6 @@
 package ca.sfu.cs.factorbase.util;
 
-import com.ibatis.common.jdbc.ScriptRunner;
+import org.apache.ibatis.jdbc.ScriptRunner;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -13,7 +13,6 @@ import java.io.RandomAccessFile;
 import java.sql.CallableStatement;
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.regex.Pattern;
 
 /**
@@ -77,39 +76,40 @@ public class MySQLScriptRunner {
     }
 
 
-    public void createSP(String scriptFileName) throws IOException, SQLException {
-        String newScriptFileName = prepareFile(scriptFileName);
-
-       // con2 = connectDB();
-        RandomAccessFile spInput = new RandomAccessFile(newScriptFileName, "r");
-        String line = "";
-        String sp = "";
-        while (line != null) {
-            sp += line + "\n";
-            line = spInput.readLine();
-        }
-
-        Statement stmt = con2.createStatement();
-        stmt.execute(sp);
-        stmt.close();
-
-        spInput.close();
+    /**
+     * Execute the given MySQL script using ";" as the command delimiter.
+     *
+     * @param scriptFileName - the path to the MySQL script to execute.
+     * @throws SQLException if there is an issue executing the command(s).
+     * @throws IOException if there is an issue reading from the script.
+     */
+    public void runScript(String scriptFileName) throws SQLException, IOException {
+        this.runScript(scriptFileName, ";");
     }
 
 
-    public void runScript(String scriptFileName) throws SQLException, IOException {
-        //con2 = connectDB();
+    /**
+     * Execute the given MySQL script using the specified {@code String} as the command delimiter.
+     *
+     * Note: This method is good for scripts that define the creation of things like stored procedures.
+     *
+     * @param scriptFileName - the path to the MySQL script to execute.
+     * @param delimiter - the delimiter to use when reading the commands from the given script.
+     * @throws SQLException if there is an issue executing the command(s).
+     * @throws IOException if there is an issue reading from the script.
+     */
+    public void runScript(String scriptFileName, String delimiter) throws SQLException, IOException {
         String newScriptFileName = prepareFile(scriptFileName);
 
-        ScriptRunner runner = new ScriptRunner(con2, false, false);
-        //System.out.print("\n within runScript \n");
-        // System.out.print(newScriptFileName);
-        FileReader newScriptFileReader = new FileReader(newScriptFileName);
-        BufferedReader newBuf = new BufferedReader(newScriptFileReader);
-        runner.setLogWriter(null);
-        runner.runScript(newBuf);
-        //System.out.print("\n after runner.runScript \n");
-        newBuf.close();
-        newScriptFileReader.close();
+        ScriptRunner runner = new ScriptRunner(con2);
+        try (
+            FileReader newScriptFileReader = new FileReader(newScriptFileName);
+            BufferedReader newBuf = new BufferedReader(newScriptFileReader)
+        ) {
+            runner.setLogWriter(null);
+            runner.setAutoCommit(true);
+            runner.setDelimiter(delimiter);
+            runner.runScript(newBuf);
+        }
     }
 }
