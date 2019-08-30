@@ -99,10 +99,10 @@
                   </includes>
                 </filter>
                 <filter>
-                  <artifact>com.ibatis:ibatis2-common</artifact>
+                  <artifact>org.mybatis:mybatis</artifact>
                   <includes>
-                    <include>com/ibatis/common/jdbc/ScriptRunner.class</include>
-                    <include>com/ibatis/common/exception/NestedRuntimeException.class</include>
+                    <include>org/apache/ibatis/jdbc/ScriptRunner.class</include>
+                    <include>org/apache/ibatis/jdbc/RuntimeSqlException.class</include>
                   </includes>
                 </filter>
                 <filter>
@@ -238,6 +238,11 @@
       </exclusions>
     </dependency>
     <dependency>
+      <groupId>org.mybatis</groupId>
+      <artifactId>mybatis</artifactId>
+      <version>3.5.2</version>
+    </dependency>
+    <dependency>
       <groupId>org.hamcrest</groupId>
       <artifactId>hamcrest-all</artifactId>
       <version>1.3</version>
@@ -259,11 +264,6 @@
           <artifactId>*</artifactId>
         </exclusion>
       </exclusions>
-    </dependency>
-    <dependency>
-      <groupId>com.ibatis</groupId>
-      <artifactId>ibatis2-common</artifactId>
-      <version>2.1.7.597</version>
     </dependency>
     <dependency>
       <groupId>com.google.guava</groupId>

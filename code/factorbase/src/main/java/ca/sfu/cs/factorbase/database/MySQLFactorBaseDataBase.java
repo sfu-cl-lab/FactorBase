@@ -16,7 +16,7 @@ import ca.sfu.cs.factorbase.data.DataExtractorGenerator;
 import ca.sfu.cs.factorbase.exception.DataBaseException;
 import ca.sfu.cs.factorbase.exception.DataExtractionException;
 import ca.sfu.cs.factorbase.graph.Edge;
-import ca.sfu.cs.factorbase.util.BZScriptRunner;
+import ca.sfu.cs.factorbase.util.MySQLScriptRunner;
 import ca.sfu.cs.factorbase.util.KeepTablesOnly;
 import ca.sfu.cs.factorbase.util.QueryGenerator;
 
@@ -62,11 +62,11 @@ public class MySQLFactorBaseDataBase implements FactorBaseDataBase {
 
     @Override
     public void setupDatabase() throws DataBaseException {
-        BZScriptRunner bzsr = new BZScriptRunner(this.baseDatabaseName, this.baseConnection);
+        MySQLScriptRunner mysqlScriptRunner = new MySQLScriptRunner(this.baseDatabaseName, this.baseConnection);
         try {
-            bzsr.runScript(Config.SCRIPTS_DIRECTORY + "setup.sql");
-            bzsr.createSP(Config.SCRIPTS_DIRECTORY + "storedprocs.sql");
-            bzsr.callSP("find_values");
+            mysqlScriptRunner.runScript(Config.SCRIPTS_DIRECTORY + "metadata.sql");
+            mysqlScriptRunner.runScript(Config.SCRIPTS_DIRECTORY + "storedprocedures.sql", "//");
+            mysqlScriptRunner.callSP("find_values");
         } catch (SQLException | IOException e) {
             throw new DataBaseException("An error occurred when attempting to setup the database for FactorBase.", e);
         }
@@ -83,6 +83,41 @@ public class MySQLFactorBaseDataBase implements FactorBaseDataBase {
             );
         } catch (SQLException e) {
             throw new DataBaseException("An error occurred when attempting to cleanup the database for FactorBase.", e);
+        }
+    }
+
+
+    @Override
+    public String[] getPVariables() throws DataBaseException {
+        String query =
+            "SELECT pvid " +
+            "FROM " + this.baseDatabaseName + "_setup.PVariables " +
+            "WHERE index_number = 0;"; // O.S. March 21 ignore variables that aren't main.
+
+        try (
+            PreparedStatement statement = this.baseConnection.clientPrepareStatement(query);
+            ResultSet results = statement.executeQuery()
+        ) {
+            int size = 0;
+            if (results.last()) {
+                size = results.getRow();
+                results.beforeFirst();
+            }
+
+            String[] pvariables = new String[size];
+
+            int insertIndex = 0;
+            while (results.next()) {
+                pvariables[insertIndex] = results.getString("pvid");
+                insertIndex++;
+            }
+
+            return pvariables;
+        } catch (SQLException e) {
+            throw new DataBaseException(
+                "An error occurred when attempting to retrieve the PVariables from the database for FactorBase.",
+                e
+            );
         }
     }
 

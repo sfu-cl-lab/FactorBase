@@ -30,4 +30,4 @@ END LOOP LOOP1;
 
 CLOSE cur1;
 
-END
+END//
