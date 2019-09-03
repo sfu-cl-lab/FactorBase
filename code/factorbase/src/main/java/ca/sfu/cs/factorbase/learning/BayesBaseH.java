@@ -60,7 +60,7 @@ import com.mysql.jdbc.Connection;
 
 public class BayesBaseH {
 
-    static Connection con1, con2, con3;
+    static Connection con2, con3;
 
     // To be read from config.
     static String databaseName, databaseName2, databaseName3;
@@ -302,15 +302,6 @@ public class BayesBaseH {
 
 
     private static void connectDB() throws SQLException {
-        String CONN_STR1 = "jdbc:" + dbaddress + "/" + databaseName;
-        try {
-            java.lang.Class.forName("com.mysql.jdbc.Driver");
-        } catch (Exception ex) {
-            logger.severe("Unable to load MySQL JDBC driver");
-        }
-
-        con1 = (Connection) DriverManager.getConnection(CONN_STR1, dbUsername, dbPassword);
-
         String CONN_STR2 = "jdbc:" + dbaddress + "/" + databaseName2;
         try {
             java.lang.Class.forName("com.mysql.jdbc.Driver");
@@ -708,7 +699,6 @@ public class BayesBaseH {
 
 
     private static void disconnectDB() throws SQLException {
-        con1.close();
         con2.close();
         con3.close();
     }
