@@ -73,8 +73,11 @@ public class BayesBaseCT_SortMerge {
         con_std = connectDB(databaseName_std);
         con_setup = connectDB(databaseName_setup);
         //build _BN copy from _setup Nov 1st, 2013 Zqiancompute the subset given fid and it's parents
-        MySQLScriptRunner mysqlScriptRunner = new MySQLScriptRunner(databaseName_std, con_setup);
-        mysqlScriptRunner.runScript(Config.SCRIPTS_DIRECTORY + "transfer.sql");
+        MySQLScriptRunner.runScript(
+            con_setup,
+            Config.SCRIPTS_DIRECTORY + "transfer.sql",
+            databaseName_std
+        );
 
         con_BN = connectDB(databaseName_BN);
         con_CT = connectDB(databaseName_CT);
@@ -96,17 +99,33 @@ public class BayesBaseCT_SortMerge {
         // empty query error,fixed by removing one duplicated semicolon. Oct 30, 2013
         //ToDo: No support for executing LinkCorrelation=0;
         if (cont.equals("1")) {
-            mysqlScriptRunner.runScript(Config.SCRIPTS_DIRECTORY + "metaqueries_cont.sql");
+            MySQLScriptRunner.runScript(
+                con_setup,
+                Config.SCRIPTS_DIRECTORY + "metaqueries_cont.sql",
+                databaseName_std
+            );
         } else if (linkCorrelation.equals("1")) { //LinkCorrelations
-            mysqlScriptRunner.runScript(Config.SCRIPTS_DIRECTORY + "metaqueries.sql");
+            MySQLScriptRunner.runScript(
+                con_setup,
+                Config.SCRIPTS_DIRECTORY + "metaqueries.sql",
+                databaseName_std
+            );
         } else {
-            mysqlScriptRunner.runScript(Config.SCRIPTS_DIRECTORY + "metaqueries.sql");
+            MySQLScriptRunner.runScript(
+                con_setup,
+                Config.SCRIPTS_DIRECTORY + "metaqueries.sql",
+                databaseName_std
+            );
             // modified on Feb. 3rd, 2015, zqian, to include rnode as columns
         //          bzsr.runScript("scripts/metadata_2_nolink.sql");
         }
       //  bzsr.runScript("scripts/model_manager.sql");
         //why are we running the model manager first? // commenting this out for now August 22
-        mysqlScriptRunner.runScript(Config.SCRIPTS_DIRECTORY + "metaqueries_RChain.sql");
+        MySQLScriptRunner.runScript(
+            con_setup,
+            Config.SCRIPTS_DIRECTORY + "metaqueries_RChain.sql",
+            databaseName_std
+        );
 
         // building CT tables for Rchain
         CTGenerator();

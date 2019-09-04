@@ -89,10 +89,12 @@ public class BayesBaseH {
         connectDB();
 
         // Build tables for structure learning.
-        MySQLScriptRunner mysqlScriptRunner = new MySQLScriptRunner(databaseName, con2);
-
         // Set up the bayes net models O.S. Sep 12, 2017.
-        mysqlScriptRunner.runScript(Config.SCRIPTS_DIRECTORY + "model_manager.sql");
+        MySQLScriptRunner.runScript(
+            con2,
+            Config.SCRIPTS_DIRECTORY + "model_manager.sql",
+            databaseName
+        );
 
         // Get maxNumberOfMembers (max length of rchain).
         Statement st = con2.createStatement();
