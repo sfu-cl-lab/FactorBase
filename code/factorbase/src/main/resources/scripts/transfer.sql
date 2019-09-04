@@ -1,13 +1,6 @@
 /* copies key metadata tables from @database@_setup to @database@_BN */
 /* should just be able to change Fnodes being copied to restrict to subset */
 
-DROP SCHEMA IF EXISTS @database@_BN; 
-create schema @database@_BN;
-
-DROP SCHEMA IF EXISTS @database@_CT; 
-create schema @database@_CT;
-
-USE @database@_BN;
 SET storage_engine=INNODB;
 
 

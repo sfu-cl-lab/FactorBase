@@ -8,6 +8,7 @@ import ca.sfu.cs.common.Configuration.Config;
 public class FactorBaseDataBaseInfo {
     private String bnDatabaseName;
     private String ctDatabaseName;
+    private String setupDatabaseName;
     private String countColumnName;
     private boolean isDiscrete;
 
@@ -18,8 +19,9 @@ public class FactorBaseDataBaseInfo {
      */
     public FactorBaseDataBaseInfo(Config config) {
         String dbName = config.getProperty("dbname");
-        this.ctDatabaseName = dbName + "_CT";
         this.bnDatabaseName = dbName + "_BN";
+        this.ctDatabaseName = dbName + "_CT";
+        this.setupDatabaseName = dbName + "_setup";
         this.countColumnName = "MULT";
         this.isDiscrete = !config.getProperty("Continuous").equals("1");
     }
@@ -42,6 +44,16 @@ public class FactorBaseDataBaseInfo {
      */
     public String getCTDatabaseName() {
         return this.ctDatabaseName;
+    }
+
+
+    /**
+     * Retrieve the name of the setup database for FactorBase.
+     *
+     * @return the name of the setup database.
+     */
+    public String getSetupDatabaseName() {
+        return this.setupDatabaseName;
     }
 
 

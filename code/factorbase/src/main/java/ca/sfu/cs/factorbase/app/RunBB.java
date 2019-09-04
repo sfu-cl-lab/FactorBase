@@ -42,12 +42,12 @@ public class RunBB {
         );
         logRunTime(logger, "Creating Database Connection", databaseStart, System.currentTimeMillis());
 
-        // Generate the setup database if specified to.
+        // Generate the initial databases if specified to.
         long setupStart = System.currentTimeMillis();
         if (config.getProperty("AutomaticSetup").equals("1")) {
             factorBaseDatabase.setupDatabase();
         } else {
-            logger.info("Setup database exists.");
+            logger.info("Databases are assumed to be setup!");
         }
         logRunTime(logger, "Creating Setup Database", setupStart, System.currentTimeMillis());
 

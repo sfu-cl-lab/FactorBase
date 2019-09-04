@@ -1,4 +1,3 @@
-USE @database@_BN;
 SET storage_engine=INNODB;
 
 /***********************************/
@@ -10,8 +9,6 @@ SET storage_engine=INNODB;
 /* RNodes_2Nodes
 /* RNodes_pvars
  */
-
-DROP TABLE IF EXISTS MetaQueries;
 
 CREATE TABLE MetaQueries (   
   Lattice_Point varchar(199) , /* e.g. pvid, rchain, prof0, a */

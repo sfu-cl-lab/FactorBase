@@ -26,20 +26,20 @@ public class MySQLFactorBaseDataBase implements FactorBaseDataBase {
 
     private static final String CONNECTION_STRING = "jdbc:{0}/{1}";
     private String baseDatabaseName;
-    private Connection baseConnection;
+    private Connection dbConnection;
     private FactorBaseDataBaseInfo dbInfo;
     private Map<String, DataExtractor> dataExtractors;
 
 
     /**
-     * Create connections to the databases required by FactorBase to learn a Bayesian Network.
+     * Create a connection to the database server required by FactorBase to learn a Bayesian Network.
      *
      * @param dbInfo - database information related to FactorBase.
-     * @param dbaddress - the address of the MySQL database to connect to. e.g. mysql://127.0.0.1
+     * @param dbaddress - the address of the MySQL database server to connect to. e.g. mysql://127.0.0.1
      * @param dbname - the name of the database with the original data. e.g. unielwin
      * @param username - the username to use when accessing the database.
      * @param password - the password to use when accessing the database.
-     * @throws SQLException if there is a problem connecting to the required databases.
+     * @throws SQLException if there is a problem connecting to the required database.
      */
     public MySQLFactorBaseDataBase(
         FactorBaseDataBaseInfo dbInfo,
@@ -53,7 +53,7 @@ public class MySQLFactorBaseDataBase implements FactorBaseDataBase {
         String baseConnectionString = MessageFormat.format(CONNECTION_STRING, dbaddress, dbname);
 
         try {
-            this.baseConnection = (Connection) DriverManager.getConnection(baseConnectionString, username, password);
+            this.dbConnection = (Connection) DriverManager.getConnection(baseConnectionString, username, password);
         } catch (SQLException e) {
             throw new DataBaseException("Unable to connect to the provided database.", e);
         }
@@ -64,17 +64,23 @@ public class MySQLFactorBaseDataBase implements FactorBaseDataBase {
     public void setupDatabase() throws DataBaseException {
         try {
             MySQLScriptRunner.runScript(
-                this.baseConnection,
+                this.dbConnection,
+                Config.SCRIPTS_DIRECTORY + "initialize_databases.sql",
+                this.baseDatabaseName
+            );
+            this.dbConnection.setCatalog(this.dbInfo.getSetupDatabaseName());
+            MySQLScriptRunner.runScript(
+                this.dbConnection,
                 Config.SCRIPTS_DIRECTORY + "metadata.sql",
                 this.baseDatabaseName
             );
             MySQLScriptRunner.runScript(
-                this.baseConnection,
+                this.dbConnection,
                 Config.SCRIPTS_DIRECTORY + "metadata_storedprocedures.sql",
                 this.baseDatabaseName,
                 "//"
             );
-            MySQLScriptRunner.callSP(this.baseConnection, "find_values");
+            MySQLScriptRunner.callSP(this.dbConnection, "find_values");
         } catch (SQLException | IOException e) {
             throw new DataBaseException("An error occurred when attempting to setup the database for FactorBase.", e);
         }
@@ -85,7 +91,7 @@ public class MySQLFactorBaseDataBase implements FactorBaseDataBase {
     public void cleanupDatabase() throws DataBaseException {
         try {
             KeepTablesOnly.Drop_tmpTables(
-                this.baseConnection,
+                this.dbConnection,
                 this.dbInfo.getCTDatabaseName(),
                 this.dbInfo.getBNDatabaseName()
             );
@@ -103,7 +109,7 @@ public class MySQLFactorBaseDataBase implements FactorBaseDataBase {
             "WHERE index_number = 0;"; // O.S. March 21 ignore variables that aren't main.
 
         try (
-            PreparedStatement statement = this.baseConnection.clientPrepareStatement(query);
+            PreparedStatement statement = this.dbConnection.clientPrepareStatement(query);
             ResultSet results = statement.executeQuery()
         ) {
             int size = 0;
@@ -163,7 +169,7 @@ public class MySQLFactorBaseDataBase implements FactorBaseDataBase {
             rnodeIDs
         );
 
-        try (PreparedStatement st = this.baseConnection.prepareStatement(query)) {
+        try (PreparedStatement st = this.dbConnection.prepareStatement(query)) {
             return extractEdges(st);
         } catch (SQLException e) {
             throw new DataBaseException("Failed to retrieve the forbidden edges.", e);
@@ -179,7 +185,7 @@ public class MySQLFactorBaseDataBase implements FactorBaseDataBase {
             rnodeIDs
         );
 
-        try (PreparedStatement st = this.baseConnection.prepareStatement(query)) {
+        try (PreparedStatement st = this.dbConnection.prepareStatement(query)) {
             return extractEdges(st);
         } catch (SQLException e) {
             throw new DataBaseException("Failed to retrieve the required edges.", e);
@@ -205,7 +211,7 @@ public class MySQLFactorBaseDataBase implements FactorBaseDataBase {
      */
     private Map<String, DataExtractor> generateDataExtractors() throws DataExtractionException {
         return DataExtractorGenerator.generateMySQLExtractors(
-            this.baseConnection,
+            this.dbConnection,
             this.dbInfo
         );
     }

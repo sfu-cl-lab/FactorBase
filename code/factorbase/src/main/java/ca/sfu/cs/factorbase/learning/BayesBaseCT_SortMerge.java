@@ -40,11 +40,9 @@ public class BayesBaseCT_SortMerge {
     private static Connection con_std;
     private static Connection con_BN;
     private static Connection con_CT;
-    private static Connection con_setup;
     private static String databaseName_std;
     private static String databaseName_BN;
     private static String databaseName_CT;
-    private static String databaseName_setup;
     private static String dbUsername;
     private static String dbPassword;
     private static String dbaddress;
@@ -71,16 +69,15 @@ public class BayesBaseCT_SortMerge {
         setVarsFromConfig();
         //connect to db using jdbc
         con_std = connectDB(databaseName_std);
-        con_setup = connectDB(databaseName_setup);
+        con_BN = connectDB(databaseName_BN);
+        con_CT = connectDB(databaseName_CT);
+
         //build _BN copy from _setup Nov 1st, 2013 Zqiancompute the subset given fid and it's parents
         MySQLScriptRunner.runScript(
-            con_setup,
+            con_BN,
             Config.SCRIPTS_DIRECTORY + "transfer.sql",
             databaseName_std
         );
-
-        con_BN = connectDB(databaseName_BN);
-        con_CT = connectDB(databaseName_CT);
 
         //generate lattice tree
         //maxNumberOfMembers = LatticeGenerator.generate(con2);
@@ -100,19 +97,19 @@ public class BayesBaseCT_SortMerge {
         //ToDo: No support for executing LinkCorrelation=0;
         if (cont.equals("1")) {
             MySQLScriptRunner.runScript(
-                con_setup,
+                con_BN,
                 Config.SCRIPTS_DIRECTORY + "metaqueries_cont.sql",
                 databaseName_std
             );
         } else if (linkCorrelation.equals("1")) { //LinkCorrelations
             MySQLScriptRunner.runScript(
-                con_setup,
+                con_BN,
                 Config.SCRIPTS_DIRECTORY + "metaqueries.sql",
                 databaseName_std
             );
         } else {
             MySQLScriptRunner.runScript(
-                con_setup,
+                con_BN,
                 Config.SCRIPTS_DIRECTORY + "metaqueries.sql",
                 databaseName_std
             );
@@ -122,7 +119,7 @@ public class BayesBaseCT_SortMerge {
       //  bzsr.runScript("scripts/model_manager.sql");
         //why are we running the model manager first? // commenting this out for now August 22
         MySQLScriptRunner.runScript(
-            con_setup,
+            con_BN,
             Config.SCRIPTS_DIRECTORY + "metaqueries_RChain.sql",
             databaseName_std
         );
@@ -254,7 +251,6 @@ public class BayesBaseCT_SortMerge {
         databaseName_std = conf.getProperty("dbname");
         databaseName_BN = databaseName_std + "_BN";
         databaseName_CT = databaseName_std + "_CT";
-        databaseName_setup = databaseName_std + "_setup";
         dbUsername = conf.getProperty("dbusername");
         dbPassword = conf.getProperty("dbpassword");
         dbaddress = conf.getProperty("dbaddress");
@@ -1162,6 +1158,5 @@ public class BayesBaseCT_SortMerge {
         con_std.close();
         con_BN.close();
         con_CT.close();
-        con_setup.close();
     }
 }
