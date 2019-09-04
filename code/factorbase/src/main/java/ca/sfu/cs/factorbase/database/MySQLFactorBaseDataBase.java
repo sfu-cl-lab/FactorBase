@@ -65,7 +65,7 @@ public class MySQLFactorBaseDataBase implements FactorBaseDataBase {
         MySQLScriptRunner mysqlScriptRunner = new MySQLScriptRunner(this.baseDatabaseName, this.baseConnection);
         try {
             mysqlScriptRunner.runScript(Config.SCRIPTS_DIRECTORY + "metadata.sql");
-            mysqlScriptRunner.runScript(Config.SCRIPTS_DIRECTORY + "storedprocedures.sql", "//");
+            mysqlScriptRunner.runScript(Config.SCRIPTS_DIRECTORY + "metadata_storedprocedures.sql", "//");
             mysqlScriptRunner.callSP("find_values");
         } catch (SQLException | IOException e) {
             throw new DataBaseException("An error occurred when attempting to setup the database for FactorBase.", e);
