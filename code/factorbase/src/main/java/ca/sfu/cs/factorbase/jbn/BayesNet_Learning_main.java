@@ -2,10 +2,12 @@ package ca.sfu.cs.factorbase.jbn;
 
 import java.io.BufferedWriter;
 import java.io.FileWriter;
+import java.io.IOException;
 import java.util.List;
 
 import ca.sfu.cs.factorbase.data.ContingencyTableGenerator;
 import ca.sfu.cs.factorbase.data.DataExtractor;
+import ca.sfu.cs.factorbase.exception.DataExtractionException;
 import ca.sfu.cs.factorbase.graph.Edge;
 import edu.cmu.tetrad.data.Knowledge;
 import edu.cmu.tetrad.graph.Graph;
@@ -22,7 +24,7 @@ public class BayesNet_Learning_main {
         DataExtractor dataSource,
         String destfile,
         boolean isDiscrete
-    ) throws Exception {
+    ) throws DataExtractionException, IOException {
         tetradLearner(dataSource, null, null, destfile, isDiscrete);
     }
 
@@ -33,7 +35,7 @@ public class BayesNet_Learning_main {
         List<Edge> forbiddenEdges,
         String destfile,
         boolean isDiscrete
-    ) throws Exception {
+    ) throws DataExtractionException, IOException {
         ContingencyTableGenerator dataset = new ContingencyTableGenerator(dataSource);
 
         GesCT gesSearch = new GesCT(
