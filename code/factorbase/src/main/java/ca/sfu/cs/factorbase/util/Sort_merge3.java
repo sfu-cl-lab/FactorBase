@@ -14,7 +14,6 @@ package ca.sfu.cs.factorbase.util;
  * false: mult1-mult2 ?
  * try: Financial_std_Training1_db.`operation(trans0)_a_star`
  */
-import java.io.IOException;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -31,7 +30,7 @@ public class Sort_merge3 {
     private static Logger logger = Logger.getLogger(Sort_merge3.class.getName());
 
 
-    public static void sort_merge(String table1, String table2, String table3, Connection conn) throws SQLException, IOException {
+    public static void sort_merge(String table1, String table2, String table3, Connection conn) throws SQLException {
         logger.fine("\nGenerating false table by Subtraction using Sort_merge, cur_false_Table is: " + table3);
 
         Statement st1 = (Statement) conn.createStatement();
