@@ -62,9 +62,11 @@ public class BayesBaseCT_SortMerge {
     /**
      * @Overload
      * buildCT
-     * @throws Exception
+     *
+     * @throws SQLException if there are issues executing the SQL queries.
+     * @throws IOException if there are issues reading from the SQL scripts.
      */
-    public static void buildCT() throws Exception {
+    public static void buildCT() throws SQLException, IOException {
 
         setVarsFromConfig();
         //connect to db using jdbc
@@ -153,9 +155,9 @@ public class BayesBaseCT_SortMerge {
      *
      *  BuildCT_Rnodes_CT(len);
      *
-     * @throws Exception
+     * @throws SQLException if there are issues executing the SQL queries.
      */
-    private static void CTGenerator() throws Exception {
+    private static void CTGenerator() throws SQLException {
         
         long l = System.currentTimeMillis(); //@zqian : CT table generating time
            // handling Pvars, generating pvars_counts       
@@ -271,10 +273,9 @@ public class BayesBaseCT_SortMerge {
     /**
      * Building the _CT tables. Going up the Rchain lattice ( When rchain.length >=2)
      * @param int : length of the RChain
-     * @throws  SQLException
-     * @throws  IOException
+     * @throws SQLException if there are issues executing the SQL queries.
      */
-    private static void BuildCT_RChain_flat(int len) throws SQLException, IOException {
+    private static void BuildCT_RChain_flat(int len) throws SQLException {
         logger.fine("\n ****************** \n" +
                 "Building the _CT tables for Length = "+len +"\n" );
 
@@ -477,7 +478,7 @@ public class BayesBaseCT_SortMerge {
     }
 
     /* building pvars_counts*/
-    private static void BuildCT_Pvars() throws SQLException, IOException {
+    private static void BuildCT_Pvars() throws SQLException {
         long l = System.currentTimeMillis(); //@zqian : measure structure learning time
         Statement st = con_BN.createStatement();
         st.execute("Drop schema if exists " + databaseName_CT + ";");
@@ -566,7 +567,7 @@ public class BayesBaseCT_SortMerge {
      * building the RNodes_counts tables
      *
      */
-    private static void BuildCT_Rnodes_counts(int len) throws SQLException, IOException {
+    private static void BuildCT_Rnodes_counts(int len) throws SQLException {
 
         Statement st = con_BN.createStatement();
         ResultSet rs = st.executeQuery(
@@ -655,7 +656,7 @@ public class BayesBaseCT_SortMerge {
     /**
      * building the RNodes_counts tables,count2 simply copies the counts to the CT tables
      */
-    private static void BuildCT_Rnodes_counts2(int len) throws SQLException, IOException {
+    private static void BuildCT_Rnodes_counts2(int len) throws SQLException {
        
          Statement st = con_BN.createStatement();
         ResultSet rs = st.executeQuery("select name as RChain from lattice_set where lattice_set.length = " + len + ";");
@@ -740,7 +741,7 @@ public class BayesBaseCT_SortMerge {
     /**
      * building the _flat tables
      */
-    private static void BuildCT_Rnodes_flat(int len) throws SQLException, IOException {
+    private static void BuildCT_Rnodes_flat(int len) throws SQLException {
         long l = System.currentTimeMillis(); //@zqian : measure structure learning time
         Statement st = con_BN.createStatement();
         ResultSet rs = st.executeQuery(
@@ -823,7 +824,7 @@ public class BayesBaseCT_SortMerge {
     /**
      * building the _star tables
      */
-    private static void BuildCT_Rnodes_star(int len) throws SQLException, IOException {
+    private static void BuildCT_Rnodes_star(int len) throws SQLException {
         long l = System.currentTimeMillis(); //@zqian : measure structure learning time
         Statement st = con_BN.createStatement();
         ResultSet rs = st.executeQuery(
@@ -912,7 +913,7 @@ public class BayesBaseCT_SortMerge {
     /**
      * building the _false tables first and then the _CT tables
      */
-    private static void BuildCT_Rnodes_CT(int len) throws SQLException, IOException {
+    private static void BuildCT_Rnodes_CT(int len) throws SQLException {
         long l = System.currentTimeMillis(); //@zqian : measure structure learning time
         Statement st = con_BN.createStatement();
         ResultSet rs = st.executeQuery(
@@ -1012,10 +1013,10 @@ public class BayesBaseCT_SortMerge {
 
     /**
      * preparing the _join part for _CT tables
-     * @throws SQLException
-     * @throws IOException
+     *
+     * @throws SQLException if there are issues executing the SQL queries.
      */
-    private static void BuildCT_Rnodes_join() throws SQLException, IOException {
+    private static void BuildCT_Rnodes_join() throws SQLException {
         //set up the join tables that represent the case where a relationship is false and its attributes are undefined //
 
         Statement st = con_BN.createStatement();
