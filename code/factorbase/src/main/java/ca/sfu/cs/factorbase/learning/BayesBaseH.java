@@ -84,17 +84,27 @@ public class BayesBaseH {
     private static Logger logger = Logger.getLogger(BayesBaseH.class.getName());
 
 
-    public static void runBBH(FactorBaseDataBase database) throws Exception {
+    /**
+     * Carry out the structure and parameter learning of the Bayesian network for the input database.
+     *
+     * @param database - {@code FactorBaseDataBase} to help extract the necessary information required to learn a
+     *                   Bayesian network for the input database.
+     * @param ctTablesGenerated - True if CT tables have already been generated via precounting; otherwise False.
+     * @throws Exception
+     */
+    public static void runBBH(FactorBaseDataBase database, boolean ctTablesGenerated) throws Exception {
         initProgram(FirstRunning);
         connectDB();
 
         // Build tables for structure learning.
         // Set up the bayes net models O.S. Sep 12, 2017.
-        MySQLScriptRunner.runScript(
-            con2,
-            Config.SCRIPTS_DIRECTORY + "model_manager.sql",
-            databaseName
-        );
+        if (ctTablesGenerated) {
+            MySQLScriptRunner.runScript(
+                con2,
+                Config.SCRIPTS_DIRECTORY + "model_manager.sql",
+                databaseName
+            );
+        }
 
         // Get maxNumberOfMembers (max length of rchain).
         Statement st = con2.createStatement();

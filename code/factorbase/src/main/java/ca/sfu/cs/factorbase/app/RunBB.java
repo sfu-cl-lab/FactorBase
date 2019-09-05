@@ -60,7 +60,7 @@ public class RunBB {
         }
 
         long bayesBaseHStart = System.currentTimeMillis();
-        BayesBaseH.runBBH(factorBaseDatabase);
+        BayesBaseH.runBBH(factorBaseDatabase, usePreCounting);
         logRunTime(logger, "Running BayesBaseH", bayesBaseHStart, System.currentTimeMillis());
 
         // Now eliminate temporary tables. Keep only the tables for the longest Rchain. Turn this off for debugging.
