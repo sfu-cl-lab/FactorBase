@@ -52,9 +52,12 @@ public class RunBB {
         logRunTime(logger, "Creating Setup Database", setupStart, System.currentTimeMillis());
 
         // Learn a Bayesian Network.
-        long buildCTStart = System.currentTimeMillis();
-        BayesBaseCT_SortMerge.buildCT();
-        logRunTime(logger, "Creating CT Tables", buildCTStart, System.currentTimeMillis());
+        boolean usePreCounting = config.getProperty("PreCounting").equals("1");
+        if (usePreCounting) {
+            long buildCTStart = System.currentTimeMillis();
+            BayesBaseCT_SortMerge.buildCT();
+            logRunTime(logger, "Creating CT Tables", buildCTStart, System.currentTimeMillis());
+        }
 
         long bayesBaseHStart = System.currentTimeMillis();
         BayesBaseH.runBBH(factorBaseDatabase);
