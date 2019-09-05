@@ -49,6 +49,8 @@ import java.util.logging.Logger;
 import nu.xom.ParsingException;
 import ca.sfu.cs.common.Configuration.Config;
 import ca.sfu.cs.factorbase.database.FactorBaseDataBase;
+import ca.sfu.cs.factorbase.exception.DataBaseException;
+import ca.sfu.cs.factorbase.exception.DataExtractionException;
 import ca.sfu.cs.factorbase.exporter.bifexporter.BIF_Generator;
 import ca.sfu.cs.factorbase.exporter.bifexporter.bif.BIFExport;
 import ca.sfu.cs.factorbase.exporter.bifexporter.bif.BIFImport;
@@ -89,10 +91,17 @@ public class BayesBaseH {
      *
      * @param database - {@code FactorBaseDataBase} to help extract the necessary information required to learn a
      *                   Bayesian network for the input database.
-     * @param ctTablesGenerated - True if CT tables have already been generated via precounting; otherwise False.
-     * @throws Exception
+     * @param ctTablesGenerated - True if CT tables have already been generated via precounting; otherwise false.
+     * @throws IOException if there are issues reading and writing various files.
+     * @throws SQLException if there are issues executing the SQL queries.
+     * @throws ParsingException if there are issues reading the BIF file.
+     * @throws DataExtractionException if a non database error occurs when retrieving the DataExtractor.
+     * @throws DataBaseException if a database error occurs when retrieving the DataExtractor.
      */
-    public static void runBBH(FactorBaseDataBase database, boolean ctTablesGenerated) throws Exception {
+    public static void runBBH(
+        FactorBaseDataBase database,
+        boolean ctTablesGenerated
+    ) throws SQLException, IOException, DataBaseException, DataExtractionException, ParsingException {
         initProgram(FirstRunning);
         connectDB();
 
@@ -194,7 +203,7 @@ public class BayesBaseH {
     private static void StructureLearning(
         FactorBaseDataBase database,
         Connection conn
-    ) throws Exception {
+    ) throws SQLException, IOException, DataBaseException, DataExtractionException, ParsingException {
         long l = System.currentTimeMillis(); // @zqian: measure structure learning time.
 
         // Handle pvars.
@@ -324,8 +333,16 @@ public class BayesBaseH {
     /** Jun 14
      * if the tuples greater than 1, then employ tetradlearner.
      * else just insert the 1nid as child into entity_bayesnet.
+     *
+     * @throws DataBaseException if a database error occurs when retrieving the DataExtractor.
+     * @throws SQLException if there are issues executing the SQL queries.
+     * @throws IOException if there are issues generating the BIF file.
+     * @throws DataExtractionException if a non database error occurs when retrieving the DataExtractor.
+     * @throws ParsingException if there are issues reading the BIF file.
      */
-    private static void handlePVars(FactorBaseDataBase database) throws Exception {
+    private static void handlePVars(
+        FactorBaseDataBase database
+    ) throws DataBaseException, SQLException, DataExtractionException, IOException, ParsingException {
         // Retrieve all the PVariables.
         String[] pvar_ids = database.getPVariables();
 
@@ -371,7 +388,9 @@ public class BayesBaseH {
     }
 
 
-    private static void handleRNodes_zqian(FactorBaseDataBase database) throws Exception {
+    private static void handleRNodes_zqian(
+        FactorBaseDataBase database
+    ) throws SQLException, IOException, DataBaseException, DataExtractionException, ParsingException {
         for(int len = 1; len <= maxNumberOfMembers; len++) {
             ArrayList<String> rnode_ids = readRNodesFromLattice(len); // Create csv files for all rnodes.
 
@@ -554,7 +573,7 @@ public class BayesBaseH {
     }
 
 
-    private static ArrayList<String> PropagateContextEdges() throws Exception {
+    private static ArrayList<String> PropagateContextEdges() throws SQLException {
         Statement st = con2.createStatement();
         st.execute("DROP TABLE IF EXISTS RNodeEdges;");
         st.execute("CREATE TABLE RNodeEdges LIKE Path_BayesNets;");
