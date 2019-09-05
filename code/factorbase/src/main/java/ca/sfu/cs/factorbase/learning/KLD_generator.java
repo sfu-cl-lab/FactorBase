@@ -27,8 +27,10 @@ package ca.sfu.cs.factorbase.learning;
  */
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.io.UnsupportedEncodingException;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -51,7 +53,7 @@ public class KLD_generator {
     private static Logger logger = Logger.getLogger(KLD_generator.class.getName());
 
 
-    public static void KLDGenerator(String database, Connection con2) throws Exception {
+    public static void KLDGenerator(String database, Connection con2) throws SQLException, IOException {
         logger.info("KLD Generator starts");
         String Rchain="";
         Statement st = con2.createStatement();
@@ -88,9 +90,14 @@ public class KLD_generator {
     /**
      * Main function to generate all smoothed CP table.
      *
-     * @throws Exception
+     * @throws SQLException if there are issues executing the SQL queries.
+     * @throws UnsupportedEncodingException if there are issues generating the CSV file for the pairs tables.
+     * @throws FileNotFoundException if there are issues generating the CSV file for the pairs tables.
      */
-    public static void smoothed_CP(String rchain, Connection con2) throws Exception {
+    public static void smoothed_CP(
+        String rchain,
+        Connection con2
+    ) throws SQLException, FileNotFoundException, UnsupportedEncodingException {
         java.sql.Statement st = con2.createStatement();
 
         // Find all the nodes that have parents and store them in list final_tables1.
@@ -175,8 +182,15 @@ public class KLD_generator {
 
     /**
      * Generate full pairs table and smooth CP table for one node.
+     *
+     * @throws SQLException if there are issues executing the SQL queries.
+     * @throws UnsupportedEncodingException if there are issues generating the CSV file for the pairs tables.
+     * @throws FileNotFoundException if there are issues generating the CSV file for the pairs tables.
      */
-    private static void new_table_smoothed(String table_name, Connection con2) throws Exception {
+    private static void new_table_smoothed(
+        String table_name,
+        Connection con2
+    ) throws SQLException, FileNotFoundException, UnsupportedEncodingException {
         java.sql.Statement st = con2.createStatement();
         String name = table_name.substring(0, table_name.length() - 1) + "_smoothed`";
 
@@ -280,8 +294,15 @@ public class KLD_generator {
      * Generate full pairs table for one node
      * fast pairs generator, created by YanSun @ Jun 19
      * using recursive loops in java instead of simple inefficient sql joins
+     *
+     * @throws SQLException if there are issues executing the SQL queries.
+     * @throws UnsupportedEncodingException if there are issues generating the CSV file for the pairs tables.
+     * @throws FileNotFoundException if there are issues generating the CSV file for the pairs tables.
      */
-    private static void pairs(String table_name, Connection con2) throws Exception {
+    private static void pairs(
+        String table_name,
+        Connection con2
+    ) throws SQLException, FileNotFoundException, UnsupportedEncodingException {
         String name = table_name.subSequence(0, table_name.length() - 1) + "_pairs`";
 
         java.sql.Statement st = con2.createStatement();
