@@ -60,7 +60,7 @@ import com.mysql.jdbc.Connection;
 
 public class BayesBaseH {
 
-    static Connection con1, con2, con3;
+    static Connection con2, con3;
 
     // To be read from config.
     static String databaseName, databaseName2, databaseName3;
@@ -89,10 +89,12 @@ public class BayesBaseH {
         connectDB();
 
         // Build tables for structure learning.
-        MySQLScriptRunner mysqlScriptRunner = new MySQLScriptRunner(databaseName, con2);
-
         // Set up the bayes net models O.S. Sep 12, 2017.
-        mysqlScriptRunner.runScript(Config.SCRIPTS_DIRECTORY + "model_manager.sql");
+        MySQLScriptRunner.runScript(
+            con2,
+            Config.SCRIPTS_DIRECTORY + "model_manager.sql",
+            databaseName
+        );
 
         // Get maxNumberOfMembers (max length of rchain).
         Statement st = con2.createStatement();
@@ -302,31 +304,10 @@ public class BayesBaseH {
 
 
     private static void connectDB() throws SQLException {
-        String CONN_STR1 = "jdbc:" + dbaddress + "/" + databaseName;
-        try {
-            java.lang.Class.forName("com.mysql.jdbc.Driver");
-        } catch (Exception ex) {
-            logger.severe("Unable to load MySQL JDBC driver");
-        }
-
-        con1 = (Connection) DriverManager.getConnection(CONN_STR1, dbUsername, dbPassword);
-
         String CONN_STR2 = "jdbc:" + dbaddress + "/" + databaseName2;
-        try {
-            java.lang.Class.forName("com.mysql.jdbc.Driver");
-        } catch (Exception ex) {
-            logger.severe("Unable to load MySQL JDBC driver");
-        }
-
         con2 = (Connection) DriverManager.getConnection(CONN_STR2, dbUsername, dbPassword);
 
         String CONN_STR3 = "jdbc:" + dbaddress + "/" + databaseName3;
-        try {
-            java.lang.Class.forName("com.mysql.jdbc.Driver");
-        } catch (Exception ex) {
-            logger.severe("Unable to load MySQL JDBC driver");
-        }
-
         con3 = (Connection) DriverManager.getConnection(CONN_STR3, dbUsername, dbPassword);
     }
 
@@ -708,7 +689,6 @@ public class BayesBaseH {
 
 
     private static void disconnectDB() throws SQLException {
-        con1.close();
         con2.close();
         con3.close();
     }

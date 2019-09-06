@@ -1,4 +1,3 @@
-USE @database@_BN;
 SET storage_engine=INNODB;
 
 /* May 16th, last step for _CT tables, preparing the colunmname_list */

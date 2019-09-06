@@ -1,4 +1,3 @@
-USE @database@_BN;
 SET storage_engine=INNODB;
 /******************************************************
 find columns associated with Rnodes. These should be the same as used in group by clauses except that you also use the main auxilliary information.

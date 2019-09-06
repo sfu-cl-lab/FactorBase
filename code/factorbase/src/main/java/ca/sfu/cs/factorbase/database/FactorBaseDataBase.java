@@ -12,8 +12,8 @@ import ca.sfu.cs.factorbase.graph.Edge;
  */
 public interface FactorBaseDataBase {
     /**
-     * This method should setup all the extra tables required for FactorBase to learn a Bayesian
-     * network for the provided database.
+     * This method should setup all the extra databases/tables required for FactorBase to learn a
+     * Bayesian network for the provided database.
      *
      * @throws DataBaseException if an error occurs when attempting to access the database.
      */

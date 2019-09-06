@@ -40,11 +40,9 @@ public class BayesBaseCT_SortMerge {
     private static Connection con_std;
     private static Connection con_BN;
     private static Connection con_CT;
-    private static Connection con_setup;
     private static String databaseName_std;
     private static String databaseName_BN;
     private static String databaseName_CT;
-    private static String databaseName_setup;
     private static String dbUsername;
     private static String dbPassword;
     private static String dbaddress;
@@ -71,13 +69,15 @@ public class BayesBaseCT_SortMerge {
         setVarsFromConfig();
         //connect to db using jdbc
         con_std = connectDB(databaseName_std);
-        con_setup = connectDB(databaseName_setup);
-        //build _BN copy from _setup Nov 1st, 2013 Zqiancompute the subset given fid and it's parents
-        MySQLScriptRunner mysqlScriptRunner = new MySQLScriptRunner(databaseName_std, con_setup);
-        mysqlScriptRunner.runScript(Config.SCRIPTS_DIRECTORY + "transfer.sql");
-
         con_BN = connectDB(databaseName_BN);
         con_CT = connectDB(databaseName_CT);
+
+        //build _BN copy from _setup Nov 1st, 2013 Zqiancompute the subset given fid and it's parents
+        MySQLScriptRunner.runScript(
+            con_BN,
+            Config.SCRIPTS_DIRECTORY + "transfer.sql",
+            databaseName_std
+        );
 
         //generate lattice tree
         //maxNumberOfMembers = LatticeGenerator.generate(con2);
@@ -96,17 +96,33 @@ public class BayesBaseCT_SortMerge {
         // empty query error,fixed by removing one duplicated semicolon. Oct 30, 2013
         //ToDo: No support for executing LinkCorrelation=0;
         if (cont.equals("1")) {
-            mysqlScriptRunner.runScript(Config.SCRIPTS_DIRECTORY + "metaqueries_cont.sql");
+            MySQLScriptRunner.runScript(
+                con_BN,
+                Config.SCRIPTS_DIRECTORY + "metaqueries_cont.sql",
+                databaseName_std
+            );
         } else if (linkCorrelation.equals("1")) { //LinkCorrelations
-            mysqlScriptRunner.runScript(Config.SCRIPTS_DIRECTORY + "metaqueries.sql");
+            MySQLScriptRunner.runScript(
+                con_BN,
+                Config.SCRIPTS_DIRECTORY + "metaqueries.sql",
+                databaseName_std
+            );
         } else {
-            mysqlScriptRunner.runScript(Config.SCRIPTS_DIRECTORY + "metaqueries.sql");
+            MySQLScriptRunner.runScript(
+                con_BN,
+                Config.SCRIPTS_DIRECTORY + "metaqueries.sql",
+                databaseName_std
+            );
             // modified on Feb. 3rd, 2015, zqian, to include rnode as columns
         //          bzsr.runScript("scripts/metadata_2_nolink.sql");
         }
       //  bzsr.runScript("scripts/model_manager.sql");
         //why are we running the model manager first? // commenting this out for now August 22
-        mysqlScriptRunner.runScript(Config.SCRIPTS_DIRECTORY + "metaqueries_RChain.sql");
+        MySQLScriptRunner.runScript(
+            con_BN,
+            Config.SCRIPTS_DIRECTORY + "metaqueries_RChain.sql",
+            databaseName_std
+        );
 
         // building CT tables for Rchain
         CTGenerator();
@@ -235,7 +251,6 @@ public class BayesBaseCT_SortMerge {
         databaseName_std = conf.getProperty("dbname");
         databaseName_BN = databaseName_std + "_BN";
         databaseName_CT = databaseName_std + "_CT";
-        databaseName_setup = databaseName_std + "_setup";
         dbUsername = conf.getProperty("dbusername");
         dbPassword = conf.getProperty("dbpassword");
         dbaddress = conf.getProperty("dbaddress");
@@ -249,11 +264,6 @@ public class BayesBaseCT_SortMerge {
      */
     private static Connection connectDB(String databaseName) throws SQLException {
         String CONN_STR = "jdbc:" + dbaddress + "/" + databaseName;
-        try {
-            java.lang.Class.forName("com.mysql.jdbc.Driver");
-        } catch (Exception ex) {
-            logger.severe("Unable to load MySQL JDBC driver");
-        }
         return (Connection) DriverManager.getConnection(CONN_STR, dbUsername, dbPassword);
     }
         
@@ -1148,6 +1158,5 @@ public class BayesBaseCT_SortMerge {
         con_std.close();
         con_BN.close();
         con_CT.close();
-        con_setup.close();
     }
 }

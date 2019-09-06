@@ -3,12 +3,7 @@ Analyze schema information to prepare for statistical analysis.
 @database@ stands for a generic database. This is replaced with the name of the actual target database schema by the program that calls this sql script.
 */
 
-DROP SCHEMA IF EXISTS @database@_setup; 
-create schema @database@_setup;
-
-USE @database@_setup;
-SET storage_engine=INNODB;
-/* allows adding foreign key constraints */
+SET storage_engine=INNODB; -- Allows adding foreign key constraints.
 
 
 CREATE TABLE Schema_Key_Info AS SELECT TABLE_NAME,
