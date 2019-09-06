@@ -1,14 +1,19 @@
 package ca.sfu.cs.factorbase.app;
 
+import java.io.IOException;
+import java.sql.SQLException;
 import java.util.logging.Logger;
 
 import ca.sfu.cs.common.Configuration.Config;
 import ca.sfu.cs.factorbase.database.FactorBaseDataBase;
 import ca.sfu.cs.factorbase.database.FactorBaseDataBaseInfo;
 import ca.sfu.cs.factorbase.database.MySQLFactorBaseDataBase;
+import ca.sfu.cs.factorbase.exception.DataBaseException;
+import ca.sfu.cs.factorbase.exception.DataExtractionException;
 import ca.sfu.cs.factorbase.learning.BayesBaseCT_SortMerge;
 import ca.sfu.cs.factorbase.learning.BayesBaseH;
 import ca.sfu.cs.factorbase.util.LoggerConfig;
+import nu.xom.ParsingException;
 
 /**
  * July 3rd, 2014, zqian
@@ -23,7 +28,9 @@ public class RunBB {
     private static Logger logger = Logger.getLogger(RunBB.class.getName());
 
 
-    public static void main(String[] args) throws Exception {
+    public static void main(
+        String[] args
+    ) throws DataBaseException, SQLException, IOException, DataExtractionException, ParsingException {
         // Load configurations and setup the logger.
         long start = System.currentTimeMillis();
         LoggerConfig.setGlobalLevel();
