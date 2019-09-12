@@ -3,6 +3,7 @@ package ca.sfu.cs.factorbase.database;
 import java.util.List;
 
 import ca.sfu.cs.factorbase.data.DataExtractor;
+import ca.sfu.cs.factorbase.data.FunctorNodesInfo;
 import ca.sfu.cs.factorbase.exception.DataBaseException;
 import ca.sfu.cs.factorbase.exception.DataExtractionException;
 import ca.sfu.cs.factorbase.graph.Edge;
@@ -74,4 +75,13 @@ public interface FactorBaseDataBase {
      * @throws DataBaseException if a database error occurs when retrieving the DataExtractor.
      */
     DataExtractor getAndRemoveCTDataExtractor(String dataExtractorID) throws DataBaseException, DataExtractionException;
+
+
+    /**
+     * Retrieve the functor node information for all the PVariables.
+     *
+     * @return Information for all the functor nodes of each PVariable in the database.
+     * @throws DataBaseException if an error occurs when attempting to retrieve the information.
+     */
+    List<FunctorNodesInfo> getPVariablesFunctorNodeInfo() throws DataBaseException;
 }

@@ -48,6 +48,7 @@ import java.util.logging.Logger;
 
 import nu.xom.ParsingException;
 import ca.sfu.cs.common.Configuration.Config;
+import ca.sfu.cs.factorbase.data.FunctorNodesInfo;
 import ca.sfu.cs.factorbase.database.FactorBaseDataBase;
 import ca.sfu.cs.factorbase.exception.DataBaseException;
 import ca.sfu.cs.factorbase.exception.DataExtractionException;
@@ -210,7 +211,11 @@ public class BayesBaseH {
         long l = System.currentTimeMillis(); // @zqian: measure structure learning time.
 
         // Handle pvars.
-        handlePVars(database); // import @zqian
+        if (ctTablesGenerated) {
+            learnStructurePVars(database); // import @zqian
+        } else {
+            learnStructurePVarsOnDemand(database);
+        }
 
         Statement st = conn.createStatement();
         st.execute(
@@ -344,7 +349,7 @@ public class BayesBaseH {
      * @throws ParsingException if there are issues reading the BIF file.
      * @throws ScoringException if an error occurs when trying to compute the score for the graphs being generated.
      */
-    private static void handlePVars(
+    private static void learnStructurePVars(
         FactorBaseDataBase database
     ) throws DataBaseException, SQLException, DataExtractionException, IOException, ParsingException, ScoringException {
         // Retrieve all the PVariables.
@@ -386,6 +391,41 @@ public class BayesBaseH {
                 rs2.close();
                 st2.close();
             }
+
+            logger.fine("\nEnd for " + id + "\n");
+        }
+    }
+
+
+    /**
+     * Learn the Bayesian network structure for the PVariables.
+     *
+     * @param database - {@code FactorBaseDataBase} to help extract the necessary information required to learn a
+     *                   Bayesian network for PVariables.
+     * @throws SQLException if there are issues executing the SQL queries.
+     * @throws IOException if there are issues generating the BIF file.
+     * @throws ParsingException if there are issues reading the BIF file.
+     * @throws DataBaseException if a database error occurs when retrieving the information from the database.
+     * @throws ScoringException if an error occurs when trying to compute the score for the graphs being generated.
+     */
+    private static void learnStructurePVarsOnDemand(
+        FactorBaseDataBase database
+    ) throws SQLException, IOException, ParsingException, DataBaseException, ScoringException {
+        // Retrieve all the PVariables.
+        List<FunctorNodesInfo> pvarFunctorNodeInfos = database.getPVariablesFunctorNodeInfo();
+
+        for(FunctorNodesInfo pvarFunctorNodeInfo : pvarFunctorNodeInfos) {
+            String id = pvarFunctorNodeInfo.getID();
+            logger.fine("\nStarting Learning the BN Structure of pvar_ids: " + id + "\n");
+
+            BayesNet_Learning_main.tetradLearner(
+                database,
+                pvarFunctorNodeInfo,
+                databaseName + "/" + File.separator + "xml" + File.separator + id.replace("`","") + ".xml",
+                !cont.equals("1")
+            );
+
+            bif1(id);
 
             logger.fine("\nEnd for " + id + "\n");
         }
