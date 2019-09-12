@@ -36,6 +36,7 @@ import java.util.WeakHashMap;
 import java.util.stream.Collectors;
 
 import ca.sfu.cs.factorbase.data.ContingencyTableGenerator;
+import ca.sfu.cs.factorbase.exception.ScoringException;
 import ca.sfu.cs.factorbase.search.BDeuScore;
 import ca.sfu.cs.factorbase.search.DiscreteLocalScore;
 import edu.cmu.tetrad.data.Knowledge;
@@ -127,8 +128,9 @@ public class GesCT {
      * edges till a minimum is achieved.
      *
      * @return the resulting Pattern.
+     * @throws ScoringException if an error occurs when trying to compute the score for the graphs being generated.
      */
-    public Graph search() {
+    public Graph search() throws ScoringException {
         Graph graph = new EdgeListGraph(getVariables());
 
         scoreHash = new WeakHashMap<Node, Map<Set<Node>, Double>>();
@@ -209,9 +211,10 @@ public class GesCT {
      * @param score The score in the state prior to the forward equivalence search
      * @return the score in the state after the forward equivalence search. Note that the graph is changed as a
      *         side-effect to its state after the forward equivalence search.
+     * @throws ScoringException if an error occurs when trying to compute the score for the graphs being generated.
      */
     @SuppressWarnings("unchecked")
-    private double fes(Graph graph, double score) {
+    private double fes(Graph graph, double score) throws ScoringException {
 
         List<Node> nodes = graph.getNodes();
 
@@ -277,7 +280,7 @@ public class GesCT {
     private double minNeg = 0; //-1000000;
 
 
-    private double bes(Graph graph, double score) {
+    private double bes(Graph graph, double score) throws ScoringException {
         List<Node> nodes = graph.getNodes();
 
         initializeArrowsBackward(graph);
@@ -324,7 +327,7 @@ public class GesCT {
         return score;
     }
 
-    private void initializeArrowsForward(List<Node> nodes, Graph graph) {
+    private void initializeArrowsForward(List<Node> nodes, Graph graph) throws ScoringException {
         Set<Node> empty = Collections.emptySet();
 
         for (int j = 0; j < nodes.size(); j++) {
@@ -361,7 +364,7 @@ public class GesCT {
     }
 
     @SuppressWarnings("unchecked")
-    private void initializeArrowsBackward(Graph graph) {
+    private void initializeArrowsBackward(Graph graph) throws ScoringException {
         List<Node> nodes = graph.getNodes();
         sortedArrowsBackwards = new TreeSet<Arrow>();
         lookupArrowsBackwards = (HashSet<Arrow>[][]) new HashSet[nodes.size()][nodes.size()];
@@ -390,7 +393,7 @@ public class GesCT {
         }
     }
 
-    private void reevaluateFoward(Graph graph, List<Node> nodes, Arrow arrow) {
+    private void reevaluateFoward(Graph graph, List<Node> nodes, Arrow arrow) throws ScoringException {
         Node x = nodes.get(arrow.getX());
         Node y = nodes.get(arrow.getY());
 
@@ -417,7 +420,7 @@ public class GesCT {
         }
     }
 
-    private void reevaluateBackward(Graph graph, List<Node> nodes, Arrow arrow) {
+    private void reevaluateBackward(Graph graph, List<Node> nodes, Arrow arrow) throws ScoringException {
         Node x = nodes.get(arrow.getX());
         Node y = nodes.get(arrow.getY());
 
@@ -436,7 +439,7 @@ public class GesCT {
         }
     }
 
-    private void calculateArrowsForward(int i, int j, List<Node> nodes, Graph graph) {
+    private void calculateArrowsForward(int i, int j, List<Node> nodes, Graph graph) throws ScoringException {
         if (i == j) {
             return;
         }
@@ -486,7 +489,7 @@ public class GesCT {
         }
     }
 
-    private void calculateArrowsBackward(int i, int j, List<Node> nodes, Graph graph) {
+    private void calculateArrowsBackward(int i, int j, List<Node> nodes, Graph graph) throws ScoringException {
         if (i == j) {
             return;
         }
@@ -625,8 +628,10 @@ public class GesCT {
 
     /**
      * Evaluate the Insert(X, Y, T) operator (Definition 12 from Chickering, 2002).
+     *
+     * @throws ScoringException if an error occurs when trying to compute the score for the graphs being generated.
      */
-    private double insertEval(Node x, Node y, Set<Node> t, Set<Node> naYX, Graph graph) {
+    private double insertEval(Node x, Node y, Set<Node> t, Set<Node> naYX, Graph graph) throws ScoringException {
 
         // set1 contains x; set2 does not.
         Set<Node> set2 = new HashSet<Node>(naYX);
@@ -642,8 +647,10 @@ public class GesCT {
 
     /**
      * Evaluate the Delete(X, Y, T) operator (Definition 12 from Chickering, 2002).
+     *
+     * @throws ScoringException if an error occurs when trying to compute the score for the graphs being generated.
      */
-    private double deleteEval(Node x, Node y, Set<Node> h, Set<Node> naYX, Graph graph) {
+    private double deleteEval(Node x, Node y, Set<Node> h, Set<Node> naYX, Graph graph) throws ScoringException {
 
         // set2 contains x; set1 does not.
         Set<Node> set2 = new HashSet<Node>(naYX);
@@ -915,7 +922,7 @@ public class GesCT {
 
     //===========================SCORING METHODS===========================//
 
-    public double scoreGraph(Graph graph) {
+    public double scoreGraph(Graph graph) throws ScoringException {
         Graph dag = SearchGraphUtils.dagFromPattern(graph);
         double score = 0.;
 
@@ -933,14 +940,14 @@ public class GesCT {
         return score;
     }
 
-    private double scoreGraphChange(Node y, Set<Node> parents1,Set<Node> parents2) {
+    private double scoreGraphChange(Node y, Set<Node> parents1,Set<Node> parents2) throws ScoringException {
         Double score1 = computeScore(y, parents1);
         Double score2 = computeScore(y, parents2);
 
         return score1 - score2;
     }
 
-    private Double computeScore(Node child, Set<Node> parents) {
+    private Double computeScore(Node child, Set<Node> parents) throws ScoringException {
         Double score = scoreHash.get(child).get(parents);
 
         if (score == null) {
@@ -960,8 +967,10 @@ public class GesCT {
 
     /**
      * Compute the local BDeu score of (i, parents(i)). See (Chickering, 2002).
+     *
+     * @throws ScoringException if there is an issue when computing the score.
      */
-    private double localDiscreteScore(String child, Set<String> parents) {
+    private double localDiscreteScore(String child, Set<String> parents) throws ScoringException {
         return getDiscreteScore().localScore(child, parents);
     }
 

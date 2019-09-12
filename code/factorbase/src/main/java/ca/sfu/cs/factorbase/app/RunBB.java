@@ -10,6 +10,7 @@ import ca.sfu.cs.factorbase.database.FactorBaseDataBaseInfo;
 import ca.sfu.cs.factorbase.database.MySQLFactorBaseDataBase;
 import ca.sfu.cs.factorbase.exception.DataBaseException;
 import ca.sfu.cs.factorbase.exception.DataExtractionException;
+import ca.sfu.cs.factorbase.exception.ScoringException;
 import ca.sfu.cs.factorbase.learning.BayesBaseCT_SortMerge;
 import ca.sfu.cs.factorbase.learning.BayesBaseH;
 import ca.sfu.cs.factorbase.util.LoggerConfig;
@@ -30,7 +31,7 @@ public class RunBB {
 
     public static void main(
         String[] args
-    ) throws DataBaseException, SQLException, IOException, DataExtractionException, ParsingException {
+    ) throws DataBaseException, SQLException, IOException, DataExtractionException, ParsingException, ScoringException {
         // Load configurations and setup the logger.
         long start = System.currentTimeMillis();
         LoggerConfig.setGlobalLevel();

@@ -51,6 +51,7 @@ import ca.sfu.cs.common.Configuration.Config;
 import ca.sfu.cs.factorbase.database.FactorBaseDataBase;
 import ca.sfu.cs.factorbase.exception.DataBaseException;
 import ca.sfu.cs.factorbase.exception.DataExtractionException;
+import ca.sfu.cs.factorbase.exception.ScoringException;
 import ca.sfu.cs.factorbase.exporter.bifexporter.BIF_Generator;
 import ca.sfu.cs.factorbase.exporter.bifexporter.bif.BIFExport;
 import ca.sfu.cs.factorbase.exporter.bifexporter.bif.BIFImport;
@@ -97,11 +98,12 @@ public class BayesBaseH {
      * @throws ParsingException if there are issues reading the BIF file.
      * @throws DataExtractionException if a non database error occurs when retrieving the DataExtractor.
      * @throws DataBaseException if a database error occurs when retrieving the DataExtractor.
+     * @throws ScoringException if an error occurs when trying to compute the score for the graphs being generated.
      */
     public static void runBBH(
         FactorBaseDataBase database,
         boolean ctTablesGenerated
-    ) throws SQLException, IOException, DataBaseException, DataExtractionException, ParsingException {
+    ) throws SQLException, IOException, DataBaseException, DataExtractionException, ParsingException, ScoringException {
         initProgram(FirstRunning);
         connectDB();
 
@@ -128,7 +130,7 @@ public class BayesBaseH {
         rchain = rst1.getString(1);
 
         // Structure learning.
-        StructureLearning(database, con2);
+        StructureLearning(database, con2, ctTablesGenerated);
 
         /**
          * OS: Nov 17, 2016. It can happen that Tetrad learns a forbidden edge. Argh. To catch this, we delete forbidden edges from any insertion. But then
@@ -202,8 +204,9 @@ public class BayesBaseH {
 
     private static void StructureLearning(
         FactorBaseDataBase database,
-        Connection conn
-    ) throws SQLException, IOException, DataBaseException, DataExtractionException, ParsingException {
+        Connection conn,
+        boolean ctTablesGenerated
+    ) throws SQLException, IOException, DataBaseException, DataExtractionException, ParsingException, ScoringException {
         long l = System.currentTimeMillis(); // @zqian: measure structure learning time.
 
         // Handle pvars.
@@ -339,10 +342,11 @@ public class BayesBaseH {
      * @throws IOException if there are issues generating the BIF file.
      * @throws DataExtractionException if a non database error occurs when retrieving the DataExtractor.
      * @throws ParsingException if there are issues reading the BIF file.
+     * @throws ScoringException if an error occurs when trying to compute the score for the graphs being generated.
      */
     private static void handlePVars(
         FactorBaseDataBase database
-    ) throws DataBaseException, SQLException, DataExtractionException, IOException, ParsingException {
+    ) throws DataBaseException, SQLException, DataExtractionException, IOException, ParsingException, ScoringException {
         // Retrieve all the PVariables.
         String[] pvar_ids = database.getPVariables();
 
@@ -390,7 +394,7 @@ public class BayesBaseH {
 
     private static void handleRNodes_zqian(
         FactorBaseDataBase database
-    ) throws SQLException, IOException, DataBaseException, DataExtractionException, ParsingException {
+    ) throws SQLException, IOException, DataBaseException, DataExtractionException, ParsingException, ScoringException {
         for(int len = 1; len <= maxNumberOfMembers; len++) {
             ArrayList<String> rnode_ids = readRNodesFromLattice(len); // Create csv files for all rnodes.
 
