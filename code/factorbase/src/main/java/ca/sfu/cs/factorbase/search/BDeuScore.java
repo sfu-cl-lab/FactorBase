@@ -65,8 +65,7 @@ public class BDeuScore implements DiscreteLocalScore {
         for (List<RandomVariableAssignment> parentAssignments : this.contingencyTableGenerator.getStates(parentColumnIndices)) {
             long countsSum = 0;
             long counts;
-            int numberOfChildStates = this.contingencyTableGenerator.getNumberOfStates(childColumnIndex);
-            for (int childStateIndex = 0; childStateIndex < numberOfChildStates; childStateIndex++) {
+            for (int childStateIndex = 0; childStateIndex < r; childStateIndex++) {
                 RandomVariableAssignment childAssignment = new RandomVariableAssignment(childColumnIndex, childStateIndex);
                 counts = ct.getCounts(childAssignment, parentAssignments);
                 countsSum += counts;

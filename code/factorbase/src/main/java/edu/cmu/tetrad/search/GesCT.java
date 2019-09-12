@@ -113,10 +113,17 @@ public class GesCT {
 
     //===========================CONSTRUCTORS=============================//
 
-    public GesCT(ContingencyTableGenerator dataset, double samplePrior, double structurePrior) {
-        setDataSet(dataset);
-        if (dataset != null) {
-            setDiscreteScore(new BDeuScore(dataset, samplePrior, structurePrior));
+    public GesCT(ContingencyTableGenerator ctTableGenerator, double samplePrior, double structurePrior) {
+        List<String> varNames = ctTableGenerator.getVariableNames();
+        this.variables = varNames.stream().map(name -> new GraphNode(name)).collect(Collectors.toList());
+        this.discrete = ctTableGenerator.isDiscrete();
+
+        if (!isDiscrete()) {
+            throw new UnsupportedOperationException("Not Implemented Yet!");
+        }
+
+        if (ctTableGenerator != null) {
+            this.discreteScore = new BDeuScore(ctTableGenerator, samplePrior, structurePrior);
         }
     }
 
@@ -909,16 +916,6 @@ public class GesCT {
         rules.orientImplied(graph);
     }
 
-    private void setDataSet(ContingencyTableGenerator ctTableGenerator) {
-        List<String> varNames = ctTableGenerator.getVariableNames();
-        this.variables = varNames.stream().map(name -> new GraphNode(name)).collect(Collectors.toList());
-        this.discrete = ctTableGenerator.isDiscrete();
-
-        if (!isDiscrete()) {
-            throw new UnsupportedOperationException("Not Implemented Yet!");
-        }
-    }
-
 
     //===========================SCORING METHODS===========================//
 
@@ -1005,9 +1002,5 @@ public class GesCT {
 
     public DiscreteLocalScore getDiscreteScore() {
         return discreteScore;
-    }
-
-    public void setDiscreteScore(DiscreteLocalScore discreteScore) {
-        this.discreteScore = discreteScore;
     }
 }
