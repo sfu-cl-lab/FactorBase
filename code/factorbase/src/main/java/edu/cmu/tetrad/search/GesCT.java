@@ -36,9 +36,12 @@ import java.util.WeakHashMap;
 import java.util.stream.Collectors;
 
 import ca.sfu.cs.factorbase.data.ContingencyTableGenerator;
+import ca.sfu.cs.factorbase.data.FunctorNodesInfo;
+import ca.sfu.cs.factorbase.database.FactorBaseDataBase;
 import ca.sfu.cs.factorbase.exception.ScoringException;
 import ca.sfu.cs.factorbase.search.BDeuScore;
 import ca.sfu.cs.factorbase.search.DiscreteLocalScore;
+
 import edu.cmu.tetrad.data.Knowledge;
 import edu.cmu.tetrad.data.KnowledgeEdge;
 import edu.cmu.tetrad.graph.Edge;
@@ -113,6 +116,14 @@ public class GesCT {
 
     //===========================CONSTRUCTORS=============================//
 
+    /**
+     * Create a GesCT using a contingency table that has already been generated.
+     *
+     * @param ctTableGenerator - {@code ContingencyTableGenerator} that extracts information from the contingency table
+     *                           of interest.
+     * @param samplePrior - the equivalent sample size (N').
+     * @param structurePrior - the prior probability for the network structure.
+     */
     public GesCT(ContingencyTableGenerator ctTableGenerator, double samplePrior, double structurePrior) {
         List<String> varNames = ctTableGenerator.getVariableNames();
         this.variables = varNames.stream().map(name -> new GraphNode(name)).collect(Collectors.toList());
@@ -124,6 +135,35 @@ public class GesCT {
 
         if (ctTableGenerator != null) {
             this.discreteScore = new BDeuScore(ctTableGenerator, samplePrior, structurePrior);
+        }
+    }
+
+    /**
+     * Create a GesCT creating contingency tables as needed using the given FactorBaseDataBase.
+     *
+     * @param database - {@code FactorBaseDataBase} to help generate contingency tables as needed.
+     * @param functorNodesInfo - the information for the functornodes of interest.
+     * @param samplePrior - the equivalent sample size (N').
+     * @param structurePrior - the prior probability for the network structure.
+     */
+    public GesCT(
+        FactorBaseDataBase database,
+        FunctorNodesInfo functorNodesInfo,
+        double samplePrior,
+        double structurePrior
+    ) {
+        this.variables = functorNodesInfo.getFunctorNodes().stream().map(
+            functorNode -> new GraphNode(functorNode.getFunctorNodeID())
+        ).collect(Collectors.toList());
+
+        this.discrete = functorNodesInfo.isDiscrete();
+
+        if (!isDiscrete()) {
+            throw new UnsupportedOperationException("Not Implemented Yet!");
+        }
+
+        if (functorNodesInfo != null) {
+            this.discreteScore = new BDeuScoreOnDemand(database, functorNodesInfo, samplePrior, structurePrior);
         }
     }
 
