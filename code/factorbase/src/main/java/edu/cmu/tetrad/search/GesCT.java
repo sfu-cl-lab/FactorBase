@@ -40,6 +40,7 @@ import ca.sfu.cs.factorbase.data.FunctorNodesInfo;
 import ca.sfu.cs.factorbase.database.FactorBaseDataBase;
 import ca.sfu.cs.factorbase.exception.ScoringException;
 import ca.sfu.cs.factorbase.search.BDeuScore;
+import ca.sfu.cs.factorbase.search.BDeuScoreOnDemand;
 import ca.sfu.cs.factorbase.search.DiscreteLocalScore;
 
 import edu.cmu.tetrad.data.Knowledge;

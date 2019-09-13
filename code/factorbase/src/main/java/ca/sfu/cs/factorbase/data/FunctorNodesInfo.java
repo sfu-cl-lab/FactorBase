@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import ca.sfu.cs.factorbase.util.Mapper;
 
 /**
  * Class to hold all the relevant FunctorNode information for a given ID (PVar/RNode).
@@ -70,5 +72,38 @@ public class FunctorNodesInfo {
      */
     public boolean isDiscrete() {
         return this.valuesAreDiscrete;
+    }
+
+
+    /**
+     * Retrieve the number of states for the functornode at the given index.
+     *
+     * @param index - the index of the functornode to get the number of states for.
+     * @return the number of states for the given functornode index.
+     */
+    public int getNumberOfStates(int index) {
+        return this.functorNodes.get(index).getFunctorNodeStates().size();
+    }
+
+
+    /**
+     * Retrieve the index of the functornode for the given functornode ID.
+     *
+     * @param functorNodeID - the ID of the functornode to retrieve the index for.
+     * @return the index of the functornode for the given functornode ID.
+     */
+    public int getIndex(String functorNodeID) {
+        return this.functorNodeIndices.get(functorNodeID);
+    }
+
+
+    /**
+     * Retrieve the indices of the functornodes for the given functornode IDs.
+     *
+     * @param functorNodeIDs - the IDs of the functornodes to retrieve the indices for.
+     * @return the indices of the functornodes for the given functornode IDs.
+     */
+    public int[] getIndices(Set<String> functorNodeIDs) {
+        return Mapper.convertToIndices(functorNodeIDs, this::getIndex);
     }
 }

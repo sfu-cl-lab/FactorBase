@@ -10,17 +10,22 @@ import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import ca.sfu.cs.common.Configuration.Config;
+import ca.sfu.cs.factorbase.data.ContingencyTable;
+import ca.sfu.cs.factorbase.data.ContingencyTableGenerator;
 import ca.sfu.cs.factorbase.data.DataExtractor;
 import ca.sfu.cs.factorbase.data.DataExtractorGenerator;
 import ca.sfu.cs.factorbase.data.FunctorNode;
 import ca.sfu.cs.factorbase.data.FunctorNodesInfo;
+import ca.sfu.cs.factorbase.data.MySQLDataExtractor;
 import ca.sfu.cs.factorbase.exception.DataBaseException;
 import ca.sfu.cs.factorbase.exception.DataExtractionException;
 import ca.sfu.cs.factorbase.graph.Edge;
-import ca.sfu.cs.factorbase.util.MySQLScriptRunner;
+import ca.sfu.cs.factorbase.learning.BayesBaseCT_SortMerge;
 import ca.sfu.cs.factorbase.util.KeepTablesOnly;
+import ca.sfu.cs.factorbase.util.MySQLScriptRunner;
 import ca.sfu.cs.factorbase.util.QueryGenerator;
 
 import com.mysql.jdbc.Connection;
@@ -262,5 +267,39 @@ public class MySQLFactorBaseDataBase implements FactorBaseDataBase {
         }
 
         return functorInfos;
+    }
+
+
+    @Override
+    public ContingencyTable getContingencyTable(
+        FunctorNodesInfo functorInfos,
+        String child,
+        Set<String> parents,
+        int totalNumberOfStates
+    ) throws DataBaseException {
+        try {
+            this.dbConnection.setCatalog(this.dbInfo.getSetupDatabaseName());
+            try (Statement statement = this.dbConnection.createStatement()) {
+                // Initialize FunctorSet table.
+                statement.executeUpdate(QueryGenerator.createTruncateQuery("FunctorSet"));
+                statement.executeUpdate(QueryGenerator.createSimpleExtendedInsertQuery("FunctorSet", child, parents));
+            }
+
+            // Generate CT tables.
+            // TODO: Figure out best way to reuse substituted file instead of recreating a new one each time.
+            BayesBaseCT_SortMerge.buildCT();
+
+            PreparedStatement query = this.dbConnection.prepareStatement(
+                "SELECT * FROM " + dbInfo.getCTDatabaseName() + ".`" + functorInfos.getID() + "_counts` WHERE MULT > 0;"
+            );
+
+            DataExtractor dataextractor = new MySQLDataExtractor(query, dbInfo.getCountColumnName(), dbInfo.isDiscrete());
+            ContingencyTableGenerator ctGenerator = new ContingencyTableGenerator(dataextractor);
+            int childColumnIndex = ctGenerator.getColumnIndex(child);
+            int[] parentColumnIndices = ctGenerator.getColumnIndices(parents);
+            return ctGenerator.generateCT(childColumnIndex, parentColumnIndices, totalNumberOfStates);
+        } catch (DataExtractionException | IOException | SQLException e) {
+            throw new DataBaseException("Failed to generate the CT table.", e);
+        }
     }
 }

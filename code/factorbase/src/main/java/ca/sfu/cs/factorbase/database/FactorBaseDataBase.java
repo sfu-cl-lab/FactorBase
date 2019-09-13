@@ -1,7 +1,9 @@
 package ca.sfu.cs.factorbase.database;
 
 import java.util.List;
+import java.util.Set;
 
+import ca.sfu.cs.factorbase.data.ContingencyTable;
 import ca.sfu.cs.factorbase.data.DataExtractor;
 import ca.sfu.cs.factorbase.data.FunctorNodesInfo;
 import ca.sfu.cs.factorbase.exception.DataBaseException;
@@ -84,4 +86,17 @@ public interface FactorBaseDataBase {
      * @throws DataBaseException if an error occurs when attempting to retrieve the information.
      */
     List<FunctorNodesInfo> getPVariablesFunctorNodeInfo() throws DataBaseException;
+
+
+    /**
+     * Retrieve the contingency table for the given child and parent variables.
+     *
+     * @param functorInfos - {@code FunctorNodesInfo} with the ID that is the prefix of the "_counts" table to get the counts from.
+     * @param child - the child variable to get the counts for.
+     * @param parents - the parent variables to get the counts for.
+     * @param totalNumberOfStates - the total number of combination of states between the child and parent variables.
+     * @return contingency table for the given child and parent variables.
+     * @throws DataBaseException if an error occurs when attempting to retrieve the information.
+     */
+    ContingencyTable getContingencyTable(FunctorNodesInfo functorInfos, String child, Set<String> parents, int totalNumberOfStates) throws DataBaseException;
 }

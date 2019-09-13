@@ -8,6 +8,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Arrays;
+import java.util.HashSet;
 
 import org.junit.After;
 import org.junit.AfterClass;
@@ -26,6 +27,7 @@ import testframework.TestDatabaseConnection;
  */
 public class QueryGeneratorTest {
 
+    private static final String SINGLE_COLUMN_INSERTS_TABLE = "`single-column-inserts`";
     private static TestDatabaseConnection db;
     private static Statement st;
 
@@ -137,5 +139,55 @@ public class QueryGeneratorTest {
         assertThat(count, equalTo(3));
 
         rs.close();
+    }
+
+    @Test
+    public void createSimpleExtendedInsertQuery_InsertsResults_WhenNoParentsGiven() throws SQLException {
+        String query = QueryGenerator.createSimpleExtendedInsertQuery(
+            SINGLE_COLUMN_INSERTS_TABLE,
+            "child",
+            new HashSet<String>()
+        );
+
+        int numberOfInserts = st.executeUpdate(query);
+        assertThat(numberOfInserts, equalTo(1));
+
+        // Clean up the inserted values.
+        truncateTable(SINGLE_COLUMN_INSERTS_TABLE);
+    }
+
+    @Test
+    public void createSimpleExtendedInsertQuery_InsertsResults_WhenOneParentGiven() throws SQLException {
+        String query = QueryGenerator.createSimpleExtendedInsertQuery(
+            SINGLE_COLUMN_INSERTS_TABLE,
+            "child",
+            new HashSet<String>(Arrays.asList("parent"))
+        );
+
+        int numberOfInserts = st.executeUpdate(query);
+        assertThat(numberOfInserts, equalTo(2));
+
+        // Clean up the inserted values.
+        truncateTable(SINGLE_COLUMN_INSERTS_TABLE);
+    }
+
+    @Test
+    public void createSimpleExtendedInsertQuery_InsertsResults_WhenMultipleParentsGiven() throws SQLException {
+        String query = QueryGenerator.createSimpleExtendedInsertQuery(
+            SINGLE_COLUMN_INSERTS_TABLE,
+            "child",
+            new HashSet<String>(Arrays.asList("parent1", "parent2"))
+        );
+
+        int numberOfInserts = st.executeUpdate(query);
+        assertThat(numberOfInserts, equalTo(3));
+
+        // Clean up the inserted values.
+        truncateTable(SINGLE_COLUMN_INSERTS_TABLE);
+    }
+
+    private void truncateTable(String tableToTruncate) throws SQLException {
+        String query = QueryGenerator.createTruncateQuery(tableToTruncate);
+        st.executeUpdate(query);
     }
 }
