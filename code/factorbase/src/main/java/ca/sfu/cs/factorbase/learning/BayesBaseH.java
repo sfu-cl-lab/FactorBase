@@ -76,15 +76,13 @@ public class BayesBaseH {
     static boolean linkAnalysis;
     static boolean Flag_UseLocal_CT; //zqian June 18, 2014
 
-    static int maxNumberOfMembers = 0;
-
 
     /**
      * iff Running Time == 1, then generate the csv files.
      * else, just reuse the old csv files. May 1st @zqian.
      */
     static int FirstRunning = 1;
-    
+
     private static Logger logger = Logger.getLogger(BayesBaseH.class.getName());
 
 
@@ -122,7 +120,7 @@ public class BayesBaseH {
         Statement st = con2.createStatement();
         ResultSet rst = st.executeQuery("SELECT MAX(length) FROM lattice_set;");
         rst.absolute(1);
-        maxNumberOfMembers = rst.getInt(1);
+        int maxNumberOfMembers = rst.getInt(1);
 
         // Get the longest rchain.
         String rchain = null;
@@ -131,7 +129,7 @@ public class BayesBaseH {
         rchain = rst1.getString(1);
 
         // Structure learning.
-        StructureLearning(database, con2, ctTablesGenerated);
+        StructureLearning(database, con2, ctTablesGenerated, maxNumberOfMembers);
 
         /**
          * OS: Nov 17, 2016. It can happen that Tetrad learns a forbidden edge. Argh. To catch this, we delete forbidden edges from any insertion. But then
@@ -161,7 +159,7 @@ public class BayesBaseH {
 
             // Export the final result to xml.  We assume that there is a single largest relationship chain and write the Bayes net for that relationship chain to xml.
             // Only export the structure, prepare for the pruning phase, Oct 23, 2013.
-            exportResults();
+            exportResults(maxNumberOfMembers);
 
             //      @zqian  for TestScoreComputation, use local ct to compute local CP.
             if (Flag_UseLocal_CT) {
@@ -206,7 +204,8 @@ public class BayesBaseH {
     private static void StructureLearning(
         FactorBaseDataBase database,
         Connection conn,
-        boolean ctTablesGenerated
+        boolean ctTablesGenerated,
+        int maxNumberOfMembers
     ) throws SQLException, IOException, DataBaseException, DataExtractionException, ParsingException, ScoringException {
         long l = System.currentTimeMillis(); // @zqian: measure structure learning time.
 
@@ -253,9 +252,9 @@ public class BayesBaseH {
 
         // Handle rnodes in a bottom-up way following the lattice.
         // Generating .CSV files by reading _CT tables directly (including TRUE relationship and FALSE relationship).
-        handleRNodes_zqian(database); // import
+        handleRNodes_zqian(database, maxNumberOfMembers); // import
         // Population lattice.
-        PropagateContextEdges();
+        PropagateContextEdges(maxNumberOfMembers);
 
         /**
          * OS May 23. 2014 This looks like a much too complicated way to find the context edges. How about this:
@@ -433,7 +432,8 @@ public class BayesBaseH {
 
 
     private static void handleRNodes_zqian(
-        FactorBaseDataBase database
+        FactorBaseDataBase database,
+        int maxNumberOfMembers
     ) throws SQLException, IOException, DataBaseException, DataExtractionException, ParsingException, ScoringException {
         for(int len = 1; len <= maxNumberOfMembers; len++) {
             ArrayList<String> rnode_ids = readRNodesFromLattice(len); // Create csv files for all rnodes.
@@ -617,7 +617,7 @@ public class BayesBaseH {
     }
 
 
-    private static ArrayList<String> PropagateContextEdges() throws SQLException {
+    private static ArrayList<String> PropagateContextEdges(int maxNumberOfMembers) throws SQLException {
         Statement st = con2.createStatement();
         st.execute("DROP TABLE IF EXISTS RNodeEdges;");
         st.execute("CREATE TABLE RNodeEdges LIKE Path_BayesNets;");
@@ -748,7 +748,7 @@ public class BayesBaseH {
     }
 
 
-    private static void exportResults() throws SQLException, IOException {
+    private static void exportResults(int maxNumberOfMembers) throws SQLException, IOException {
         Statement st = con2.createStatement();
 
         ResultSet rs = st.executeQuery("SELECT name FROM lattice_set WHERE length = " + maxNumberOfMembers + ";");
