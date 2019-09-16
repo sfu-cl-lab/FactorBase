@@ -331,9 +331,21 @@ public class BayesBaseH {
 
     private static void connectDB() throws SQLException {
         String CONN_STR2 = "jdbc:" + dbaddress + "/" + databaseName2;
+        try {
+            java.lang.Class.forName("com.mysql.jdbc.Driver");
+        } catch (Exception ex) {
+            logger.severe("Unable to load MySQL JDBC driver");
+        }
+
         con2 = (Connection) DriverManager.getConnection(CONN_STR2, dbUsername, dbPassword);
 
         String CONN_STR3 = "jdbc:" + dbaddress + "/" + databaseName3;
+        try {
+            java.lang.Class.forName("com.mysql.jdbc.Driver");
+        } catch (Exception ex) {
+            logger.severe("Unable to load MySQL JDBC driver");
+        }
+
         con3 = (Connection) DriverManager.getConnection(CONN_STR3, dbUsername, dbPassword);
     }
 
