@@ -1,5 +1,6 @@
 /* Cascade the information (based on the FunctorSet table) into the tables created by the transfer_initialize.sql script. */
 
+TRUNCATE 1Nodes;
 INSERT INTO 1Nodes
     SELECT
         N.1nid,
@@ -13,6 +14,7 @@ INSERT INTO 1Nodes
         N.1nid = F.fid;
 
 
+TRUNCATE 2Nodes;
 INSERT INTO 2Nodes
     SELECT
         N.2nid,
@@ -29,6 +31,7 @@ INSERT INTO 2Nodes
 
 
 /* Map the 2nodes to rnodes for the given 2Nodes in the functor set. */
+TRUNCATE RNodes_2Nodes;
 INSERT INTO RNodes_2Nodes
     SELECT
         N.rnid,
@@ -42,6 +45,7 @@ INSERT INTO RNodes_2Nodes
 
 
 /* Copy the rnodes for the functor set. */
+TRUNCATE RNodes;
 INSERT INTO RNodes
     SELECT
         N.rnid,
@@ -76,6 +80,7 @@ INSERT INTO RNodes
 
 
 /* Make comprehensive table for all functor nodes but restricted to the functor set. */
+TRUNCATE FNodes;
 INSERT INTO FNodes
     SELECT
         1nid AS Fid,
@@ -107,6 +112,7 @@ INSERT INTO FNodes
 
 
 /* Transfer links to pvariables.  Restrict only to functor nodes in the functor set, now known as FNodes. */
+TRUNCATE FNodes_pvars;
 INSERT INTO FNodes_pvars
     SELECT
         N.Fid,
@@ -118,6 +124,7 @@ INSERT INTO FNodes_pvars
         N.Fid = F.Fid;
 
 
+TRUNCATE RNodes_pvars;
 INSERT INTO RNodes_pvars
     SELECT
         N.rnid,
@@ -133,6 +140,7 @@ INSERT INTO RNodes_pvars
 
 
 /* Transfer pvariables.  Only those that occur in the functor set. */
+TRUNCATE PVariables;
 INSERT INTO PVariables
     SELECT DISTINCT
         N.pvid,
@@ -149,6 +157,7 @@ INSERT INTO PVariables
 /**
  * Transfer the rest.
  */
+TRUNCATE EntityTables;
 INSERT INTO EntityTables
     SELECT
         *
@@ -156,6 +165,7 @@ INSERT INTO EntityTables
         @database@_setup.EntityTables;
 
 
+TRUNCATE Attribute_Value;
 INSERT INTO Attribute_Value
     SELECT
         *
@@ -163,6 +173,7 @@ INSERT INTO Attribute_Value
         @database@_setup.Attribute_Value;
 
 
+TRUNCATE Expansions;
 INSERT INTO Expansions
     SELECT
         *
@@ -170,6 +181,7 @@ INSERT INTO Expansions
         @database@_setup.Expansions;
 
 
+TRUNCATE Groundings;
 INSERT INTO Groundings
     SELECT
         *
@@ -181,6 +193,7 @@ INSERT INTO Groundings
  * Prepare lattice generator by copying information from Rnodes to a new temporary table.
  * The temporary table will have the original rnids and short rnids.
  */
+TRUNCATE LatticeRNodes;
 INSERT INTO LatticeRNodes
     SELECT
         rnid AS orig_rnid,
