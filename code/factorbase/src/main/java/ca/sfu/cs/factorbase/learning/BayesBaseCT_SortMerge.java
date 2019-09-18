@@ -95,17 +95,7 @@ public class BayesBaseCT_SortMerge {
         // empty query error,fixed by removing one duplicated semicolon. Oct 30, 2013
         //ToDo: No support for executing LinkCorrelation=0;
         if (cont.equals("1")) {
-            MySQLScriptRunner.runScript(
-                con_BN,
-                Config.SCRIPTS_DIRECTORY + "metaqueries_cont.sql",
-                databaseName_std
-            );
-        } else if (linkCorrelation.equals("1")) { //LinkCorrelations
-            MySQLScriptRunner.runScript(
-                con_BN,
-                Config.SCRIPTS_DIRECTORY + "metaqueries.sql",
-                databaseName_std
-            );
+            throw new UnsupportedOperationException("Not Implemented Yet!");
         } else {
             MySQLScriptRunner.runScript(
                 con_BN,
