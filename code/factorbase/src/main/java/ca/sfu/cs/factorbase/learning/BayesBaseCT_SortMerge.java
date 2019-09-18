@@ -99,7 +99,7 @@ public class BayesBaseCT_SortMerge {
         } else {
             MySQLScriptRunner.runScript(
                 con_BN,
-                Config.SCRIPTS_DIRECTORY + "metaqueries.sql",
+                Config.SCRIPTS_DIRECTORY + "metaqueries_initialize.sql",
                 databaseName_std
             );
             // modified on Feb. 3rd, 2015, zqian, to include rnode as columns
