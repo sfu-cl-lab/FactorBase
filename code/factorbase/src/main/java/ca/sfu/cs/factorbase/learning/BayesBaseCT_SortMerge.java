@@ -53,9 +53,6 @@ public class BayesBaseCT_SortMerge {
      * ToDo: Refactor
      */
     private static String cont;
-
-    private static int maxNumberOfMembers = 0;
-    
     private static Logger logger = Logger.getLogger(BayesBaseCT_SortMerge.class.getName());
 
 
@@ -84,7 +81,7 @@ public class BayesBaseCT_SortMerge {
         //generate lattice tree
         //maxNumberOfMembers = LatticeGenerator.generate(con2);
         // rnid mapping. maxNumberofMembers = maximum size of lattice element. Should be called LatticeHeight
-        maxNumberOfMembers = short_rnid_LatticeGenerator.generate(con_BN);
+        int maxNumberOfMembers = short_rnid_LatticeGenerator.generate(con_BN);
 
 // may not need to run this script any more, using LatticeRnodes table OS August 25, 2017//
        // bzsr.runScript("scripts/add_orig_rnid.sql");
@@ -127,7 +124,7 @@ public class BayesBaseCT_SortMerge {
         );
 
         // building CT tables for Rchain
-        CTGenerator();
+        CTGenerator(maxNumberOfMembers);
         disconnectDB();
     }
  
@@ -157,7 +154,7 @@ public class BayesBaseCT_SortMerge {
      *
      * @throws SQLException if there are issues executing the SQL queries.
      */
-    private static void CTGenerator() throws SQLException {
+    private static void CTGenerator(int maxNumberOfMembers) throws SQLException {
         
         long l = System.currentTimeMillis(); //@zqian : CT table generating time
            // handling Pvars, generating pvars_counts       
