@@ -77,12 +77,6 @@ public class BayesBaseCT_SortMerge {
         //build _BN copy from _setup Nov 1st, 2013 Zqiancompute the subset given fid and it's parents
         MySQLScriptRunner.runScript(
             con_BN,
-            Config.SCRIPTS_DIRECTORY + "transfer_initialize.sql",
-            databaseName_std
-        );
-
-        MySQLScriptRunner.runScript(
-            con_BN,
             Config.SCRIPTS_DIRECTORY + "transfer_cascade.sql",
             databaseName_std
         );
