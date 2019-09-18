@@ -81,6 +81,12 @@ public class BayesBaseCT_SortMerge {
             databaseName_std
         );
 
+        MySQLScriptRunner.runScript(
+            con_BN,
+            Config.SCRIPTS_DIRECTORY + "transfer_cascade.sql",
+            databaseName_std
+        );
+
         //generate lattice tree
         //maxNumberOfMembers = LatticeGenerator.generate(con2);
         // rnid mapping. maxNumberofMembers = maximum size of lattice element. Should be called LatticeHeight
