@@ -611,6 +611,12 @@ public class CP {
 
     public static void connectDB() throws SQLException {
         String CONN_STR1 = "jdbc:" + dbaddress + "/" + databaseName;
+
+        try {
+            java.lang.Class.forName("com.mysql.jdbc.Driver");
+        } catch (Exception ex) {
+            logger.severe("Unable to load MySQL JDBC driver");
+        }
         con1 = DriverManager.getConnection(CONN_STR1, dbUsername, dbPassword);
         java.sql.Statement st = con1.createStatement();
         // TODO: Check to see if other queries are more efficient.
