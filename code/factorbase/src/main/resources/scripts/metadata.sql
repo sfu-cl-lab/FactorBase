@@ -214,11 +214,11 @@ so that we can represent transitivity.
 */
 
 CREATE TABLE PVariables (
-  `pvid` varchar(100),
-  `TABLE_NAME` varchar(100),
-  `ID_COLUMN_NAME` varchar(100),
-   `index_number` varchar(1), 
-  PRIMARY KEY (`pvid`)
+    pvid VARCHAR(100),
+    TABLE_NAME VARCHAR(100),
+    ID_COLUMN_NAME VARCHAR(100),
+    index_number CHAR(1),
+    PRIMARY KEY (pvid)
 );
 
 INSERT  INTO PVariables 
@@ -499,16 +499,16 @@ CREATE TABLE 2Nodes AS SELECT CONCAT('`',
     
 ALTER TABLE 2Nodes ADD PRIMARY KEY (COLUMN_NAME,pvid1,pvid2); 
 
-ALTER TABLE `2Nodes` ADD INDEX `index`  (`pvid1` ASC, `pvid2` ASC, `TABLE_NAME` ASC) ; /*July 17 vidhij--moved from metadata_2*/
+ALTER TABLE 2Nodes ADD INDEX `index` (pvid1 ASC, pvid2 ASC, TABLE_NAME ASC); /* July 17 vidhij -- moved from metadata_2 */
 
 /* Set up a table that contains all functor nodes of any arity. summarizes all the work we've done. CAn also be used for foreign key constraints */
 
-CREATE TABLE FNodes (   
-  `Fid` varchar(199) ,
-  `FunctorName` varchar(64) ,
-  `Type` varchar(5) ,
-  `main` int(11) ,
-  PRIMARY KEY  (`Fid`)
+CREATE TABLE FNodes (
+    Fid VARCHAR(199),
+    FunctorName VARCHAR(64),
+    Type VARCHAR(5),
+    main INT(11),
+    PRIMARY KEY (Fid)
 );
 
 
@@ -566,27 +566,27 @@ CREATE TABLE IF NOT EXISTS lattice_set (
 /* Now add tables that support user input: counting for contingency tables, classification, outlier detection */
 /**********************************************************************/
 
-CREATE TABLE `Expansions` (
-  `pvid` varchar(40),
-  PRIMARY KEY (`pvid`),
-  FOREIGN KEY (pvid) REFERENCES PVariables(pvid)
+CREATE TABLE Expansions (
+    pvid VARCHAR(40),
+    PRIMARY KEY (pvid),
+    FOREIGN KEY (pvid) REFERENCES PVariables(pvid)
 );
 
 CREATE TABLE Groundings (pvid varchar(40), id varchar(256), primary key (pvid, id), FOREIGN KEY (pvid) REFERENCES PVariables(pvid));
 
 
-CREATE TABLE FunctorSet (   
-  `Fid` varchar(199),
-   PRIMARY KEY  (Fid), FOREIGN KEY (Fid) REFERENCES FNodes(Fid)
+CREATE TABLE FunctorSet (
+    Fid VARCHAR(199),
+    PRIMARY KEY (Fid), FOREIGN KEY (Fid) REFERENCES FNodes(Fid)
 );
 
 /* By default, FunctorSet contains all Fnodes */
 INSERT  INTO FunctorSet 
 SELECT DISTINCT Fid from FNodes;
 
-CREATE TABLE TargetNode (   
-  `Fid` varchar(199),
-   PRIMARY KEY  (Fid), FOREIGN KEY (Fid) REFERENCES FNodes(Fid)
+CREATE TABLE TargetNode (
+    Fid VARCHAR(199),
+    PRIMARY KEY (Fid), FOREIGN KEY (Fid) REFERENCES FNodes(Fid)
 );
 
 /**************************************************************

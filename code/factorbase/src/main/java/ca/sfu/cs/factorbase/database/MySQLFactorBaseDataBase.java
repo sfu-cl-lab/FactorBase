@@ -89,6 +89,17 @@ public class MySQLFactorBaseDataBase implements FactorBaseDataBase {
                 "//"
             );
             MySQLScriptRunner.callSP(this.dbConnection, "find_values");
+            this.dbConnection.setCatalog(this.dbInfo.getBNDatabaseName());
+            MySQLScriptRunner.runScript(
+                this.dbConnection,
+                Config.SCRIPTS_DIRECTORY + "transfer_initialize.sql",
+                this.baseDatabaseName
+            );
+            MySQLScriptRunner.runScript(
+                this.dbConnection,
+                Config.SCRIPTS_DIRECTORY + "metaqueries_initialize.sql",
+                this.baseDatabaseName
+            );
         } catch (SQLException | IOException e) {
             throw new DataBaseException("An error occurred when attempting to setup the database for FactorBase.", e);
         }

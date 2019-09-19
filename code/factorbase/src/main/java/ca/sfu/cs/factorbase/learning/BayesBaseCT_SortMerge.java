@@ -53,9 +53,6 @@ public class BayesBaseCT_SortMerge {
      * ToDo: Refactor
      */
     private static String cont;
-
-    private static int maxNumberOfMembers = 0;
-    
     private static Logger logger = Logger.getLogger(BayesBaseCT_SortMerge.class.getName());
 
 
@@ -77,14 +74,14 @@ public class BayesBaseCT_SortMerge {
         //build _BN copy from _setup Nov 1st, 2013 Zqiancompute the subset given fid and it's parents
         MySQLScriptRunner.runScript(
             con_BN,
-            Config.SCRIPTS_DIRECTORY + "transfer.sql",
+            Config.SCRIPTS_DIRECTORY + "transfer_cascade.sql",
             databaseName_std
         );
 
         //generate lattice tree
         //maxNumberOfMembers = LatticeGenerator.generate(con2);
         // rnid mapping. maxNumberofMembers = maximum size of lattice element. Should be called LatticeHeight
-        maxNumberOfMembers = short_rnid_LatticeGenerator.generate(con_BN);
+        int maxNumberOfMembers = short_rnid_LatticeGenerator.generate(con_BN);
 
 // may not need to run this script any more, using LatticeRnodes table OS August 25, 2017//
        // bzsr.runScript("scripts/add_orig_rnid.sql");
@@ -98,21 +95,11 @@ public class BayesBaseCT_SortMerge {
         // empty query error,fixed by removing one duplicated semicolon. Oct 30, 2013
         //ToDo: No support for executing LinkCorrelation=0;
         if (cont.equals("1")) {
-            MySQLScriptRunner.runScript(
-                con_BN,
-                Config.SCRIPTS_DIRECTORY + "metaqueries_cont.sql",
-                databaseName_std
-            );
-        } else if (linkCorrelation.equals("1")) { //LinkCorrelations
-            MySQLScriptRunner.runScript(
-                con_BN,
-                Config.SCRIPTS_DIRECTORY + "metaqueries.sql",
-                databaseName_std
-            );
+            throw new UnsupportedOperationException("Not Implemented Yet!");
         } else {
             MySQLScriptRunner.runScript(
                 con_BN,
-                Config.SCRIPTS_DIRECTORY + "metaqueries.sql",
+                Config.SCRIPTS_DIRECTORY + "metaqueries_populate.sql",
                 databaseName_std
             );
             // modified on Feb. 3rd, 2015, zqian, to include rnode as columns
@@ -127,7 +114,7 @@ public class BayesBaseCT_SortMerge {
         );
 
         // building CT tables for Rchain
-        CTGenerator();
+        CTGenerator(maxNumberOfMembers);
         disconnectDB();
     }
  
@@ -157,7 +144,7 @@ public class BayesBaseCT_SortMerge {
      *
      * @throws SQLException if there are issues executing the SQL queries.
      */
-    private static void CTGenerator() throws SQLException {
+    private static void CTGenerator(int maxNumberOfMembers) throws SQLException {
         
         long l = System.currentTimeMillis(); //@zqian : CT table generating time
            // handling Pvars, generating pvars_counts       
