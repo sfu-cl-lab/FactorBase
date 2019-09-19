@@ -1,14 +1,20 @@
 package ca.sfu.cs.factorbase.app;
 
+import java.io.IOException;
+import java.sql.SQLException;
 import java.util.logging.Logger;
 
 import ca.sfu.cs.common.Configuration.Config;
 import ca.sfu.cs.factorbase.database.FactorBaseDataBase;
 import ca.sfu.cs.factorbase.database.FactorBaseDataBaseInfo;
 import ca.sfu.cs.factorbase.database.MySQLFactorBaseDataBase;
+import ca.sfu.cs.factorbase.exception.DataBaseException;
+import ca.sfu.cs.factorbase.exception.DataExtractionException;
+import ca.sfu.cs.factorbase.exception.ScoringException;
 import ca.sfu.cs.factorbase.learning.BayesBaseCT_SortMerge;
 import ca.sfu.cs.factorbase.learning.BayesBaseH;
 import ca.sfu.cs.factorbase.util.LoggerConfig;
+import nu.xom.ParsingException;
 
 /**
  * July 3rd, 2014, zqian
@@ -23,7 +29,9 @@ public class RunBB {
     private static Logger logger = Logger.getLogger(RunBB.class.getName());
 
 
-    public static void main(String[] args) throws Exception {
+    public static void main(
+        String[] args
+    ) throws DataBaseException, SQLException, IOException, DataExtractionException, ParsingException, ScoringException {
         // Load configurations and setup the logger.
         long start = System.currentTimeMillis();
         LoggerConfig.setGlobalLevel();
@@ -52,12 +60,15 @@ public class RunBB {
         logRunTime(logger, "Creating Setup Database", setupStart, System.currentTimeMillis());
 
         // Learn a Bayesian Network.
-        long buildCTStart = System.currentTimeMillis();
-        BayesBaseCT_SortMerge.buildCT();
-        logRunTime(logger, "Creating CT Tables", buildCTStart, System.currentTimeMillis());
+        boolean usePreCounting = config.getProperty("PreCounting").equals("1");
+        if (usePreCounting) {
+            long buildCTStart = System.currentTimeMillis();
+            BayesBaseCT_SortMerge.buildCT();
+            logRunTime(logger, "Creating CT Tables", buildCTStart, System.currentTimeMillis());
+        }
 
         long bayesBaseHStart = System.currentTimeMillis();
-        BayesBaseH.runBBH(factorBaseDatabase);
+        BayesBaseH.runBBH(factorBaseDatabase, usePreCounting);
         logRunTime(logger, "Running BayesBaseH", bayesBaseHStart, System.currentTimeMillis());
 
         // Now eliminate temporary tables. Keep only the tables for the longest Rchain. Turn this off for debugging.

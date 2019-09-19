@@ -80,4 +80,34 @@ public class ContingencyTable {
         int countsIndex = this.metadata.generateIndex(selectedRandomVariables);
         return this.countsArray[countsIndex];
     }
+
+
+    /**
+     * Retrieve the metadata associated with the contingency table.
+     *
+     * @return the metadata for the contingency table.
+     */
+    public DataSetMetaData getMetaData() {
+        return this.metadata;
+    }
+
+
+    /**
+     * Retrieve the column indices of the parent variables.
+     *
+     * @return the column indices of the parent variables.
+     */
+    public int[] getParentColumnIndices() {
+        return this.parentColumnIndices;
+    }
+
+
+    /**
+     * Retrieve the column index of the child variable.
+     *
+     * @return the column index of the child variable.
+     */
+    public int getChildColumnIndex() {
+        return this.childColumnIndex;
+    }
 }

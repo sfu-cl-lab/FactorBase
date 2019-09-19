@@ -2,11 +2,18 @@ package ca.sfu.cs.factorbase.jbn;
 
 import java.io.BufferedWriter;
 import java.io.FileWriter;
+import java.io.IOException;
 import java.util.List;
 
 import ca.sfu.cs.factorbase.data.ContingencyTableGenerator;
 import ca.sfu.cs.factorbase.data.DataExtractor;
+import ca.sfu.cs.factorbase.data.FunctorNode;
+import ca.sfu.cs.factorbase.data.FunctorNodesInfo;
+import ca.sfu.cs.factorbase.database.FactorBaseDataBase;
+import ca.sfu.cs.factorbase.exception.DataExtractionException;
+import ca.sfu.cs.factorbase.exception.ScoringException;
 import ca.sfu.cs.factorbase.graph.Edge;
+
 import edu.cmu.tetrad.data.Knowledge;
 import edu.cmu.tetrad.graph.Graph;
 import edu.cmu.tetrad.graph.Node;
@@ -22,8 +29,18 @@ public class BayesNet_Learning_main {
         DataExtractor dataSource,
         String destfile,
         boolean isDiscrete
-    ) throws Exception {
+    ) throws DataExtractionException, IOException, ScoringException {
         tetradLearner(dataSource, null, null, destfile, isDiscrete);
+    }
+
+
+    public static void tetradLearner(
+        FactorBaseDataBase database,
+        FunctorNodesInfo functorNodesInfo,
+        String destfile,
+        boolean isDiscrete
+    ) throws IOException, ScoringException {
+        tetradLearner(database, functorNodesInfo, null, null, destfile, isDiscrete);
     }
 
 
@@ -33,7 +50,7 @@ public class BayesNet_Learning_main {
         List<Edge> forbiddenEdges,
         String destfile,
         boolean isDiscrete
-    ) throws Exception {
+    ) throws DataExtractionException, IOException, ScoringException {
         ContingencyTableGenerator dataset = new ContingencyTableGenerator(dataSource);
 
         GesCT gesSearch = new GesCT(
@@ -81,6 +98,86 @@ public class BayesNet_Learning_main {
 
             int variableColumnIndex = dataset.getColumnIndex(variable);
             for (String variableState : dataset.getStates(variableColumnIndex)) {
+                out.write("\t<OUTCOME>" + variableState + "</OUTCOME>\n");
+            }
+
+            out.write("</VARIABLE>\n");
+        }
+
+        List<Node> nodes = dag.getNodes();
+        int nodesNum = nodes.size();
+        for (int i = 0; i < nodesNum; i++) {
+            Node current = nodes.get(i);
+            List<Node> parents = dag.getParents(current);
+            int parentsNum = parents.size();
+            out.write("<DEFINITION>\n");
+            out.write("\t<FOR>" + "`" + current + "`" + "</FOR>\n"); // @zqian
+            for (int j = 0; j < parentsNum; j++) {
+                out.write("\t<GIVEN>" + "`" + parents.get(j) + "`" + "</GIVEN>\n"); // @zqian
+            }
+
+            out.write("</DEFINITION>\n");
+        }
+
+        out.write("</NETWORK>\n");
+        out.write("</BIF>\n");
+        out.close();
+    }
+
+
+    public static void tetradLearner(
+        FactorBaseDataBase database,
+        FunctorNodesInfo functorNodesInfo,
+        List<Edge> requiredEdges,
+        List<Edge> forbiddenEdges,
+        String destfile,
+        boolean isDiscrete
+    ) throws IOException, ScoringException {
+        GesCT gesSearch = new GesCT(
+            database,
+            functorNodesInfo,
+            10.0000,
+            1.0000
+        );
+
+        Knowledge knowledge = new Knowledge();
+
+        // Load required edge knowledge.
+        if (requiredEdges != null) {
+            for (Edge edge : requiredEdges) {
+                knowledge.setEdgeRequired(edge.getParent(), edge.getChild(), true);
+            }
+        }
+
+        // Load forbidden edge knowledge.
+        if (forbiddenEdges != null) {
+            for (Edge edge : forbiddenEdges) {
+                knowledge.setEdgeForbidden(edge.getParent(), edge.getChild(), true);
+            }
+        }
+
+        gesSearch.setKnowledge(knowledge);
+
+        /* learn a dag from data */
+        Graph graph = gesSearch.search();
+        Pattern pattern = new Pattern(graph);
+
+        PatternToDag p2d = new PatternToDag(pattern);
+        Graph dag = p2d.patternToDagMeek();
+
+        // Output dag into Bayes Interchange format.
+        FileWriter fstream = new FileWriter(destfile);
+        BufferedWriter out = new BufferedWriter(fstream);
+        out.write(BIFHeader.header);
+        out.write("<BIF VERSION=\"0.3\">\n");
+        out.write("<NETWORK>\n");
+        out.write("<NAME>BayesNet</NAME>\n");
+
+        for (FunctorNode functorNode : functorNodesInfo.getFunctorNodes()) {
+            out.write("<VARIABLE TYPE=\"nature\">\n");
+            out.write("\t<NAME>" + "`" + functorNode.getFunctorNodeID() + "`" + "</NAME>\n"); // @zqian adding back ticks to the name of bayes nodes
+
+            for (String variableState : functorNode.getFunctorNodeStates()) {
                 out.write("\t<OUTCOME>" + variableState + "</OUTCOME>\n");
             }
 

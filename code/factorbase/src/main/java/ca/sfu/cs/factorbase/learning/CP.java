@@ -96,7 +96,7 @@ public class CP {
         CP.databaseName2 = databaseName2;
     }
 
-    public void cp() throws Exception {
+    public void cp() throws SQLException {
         long l = System.currentTimeMillis(); // @zqian : measure parameter learning time
         setVarsFromConfig();
         connectDB();

@@ -3,6 +3,7 @@ package ca.sfu.cs.factorbase.data;
 import java.util.List;
 import java.util.Set;
 import ca.sfu.cs.factorbase.exception.DataExtractionException;
+import ca.sfu.cs.factorbase.util.Mapper;
 
 
 /**
@@ -158,16 +159,7 @@ public class ContingencyTableGenerator {
      * @return column indices of the given variables.
      */
     public int[] getColumnIndices(Set<String> variables) {
-        int[] columnIndices = new int[variables.size()];
-
-        // for loop to get the associated column index for each variable name.
-        int insertIndex = 0;
-        for (String variable : variables) {
-            columnIndices[insertIndex] = this.getColumnIndex(variable);
-            insertIndex++;
-        }
-
-        return columnIndices;
+        return Mapper.convertToIndices(variables, this::getColumnIndex);
     }
 
 

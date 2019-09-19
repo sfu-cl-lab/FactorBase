@@ -1,10 +1,12 @@
 package ca.sfu.cs.factorbase.util;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.function.Function;
 
 /**
- * Class to generate Map objects used by FactorBase.
+ * Class related to Map objects used by FactorBase.
  */
 public final class Mapper {
     private static StringBuilder builder = new StringBuilder();
@@ -48,5 +50,30 @@ public final class Mapper {
         builder.append(" = ");
         builder.append(state);
         return builder.toString();
+    }
+
+
+    /**
+     * Retrieve the indices for the given {@code String}s using the provided mapping {@code Function}.
+     * <p>
+     * Note: From testing, this implementation seems a bit faster than using Java's built-in .map() function when the
+     *       number of items is small and about the same when the number of items is large.
+     * </p>
+     *
+     * @param items - the items to translate into its associated index.
+     * @param indexMapper - {@code Function} to map each of the given items to an associated index.
+     * @return the indices of the given items.
+     */
+    public static int[] convertToIndices(Collection<String> items, Function<String, Integer> indexMapper) {
+        int[] columnIndices = new int[items.size()];
+
+        // for loop to get the associated index for each item.
+        int insertIndex = 0;
+        for (String item : items) {
+            columnIndices[insertIndex] = indexMapper.apply(item);
+            insertIndex++;
+        }
+
+        return columnIndices;
     }
 }

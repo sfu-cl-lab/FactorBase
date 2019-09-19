@@ -1,8 +1,11 @@
 package ca.sfu.cs.factorbase.database;
 
 import java.util.List;
+import java.util.Set;
 
+import ca.sfu.cs.factorbase.data.ContingencyTable;
 import ca.sfu.cs.factorbase.data.DataExtractor;
+import ca.sfu.cs.factorbase.data.FunctorNodesInfo;
 import ca.sfu.cs.factorbase.exception.DataBaseException;
 import ca.sfu.cs.factorbase.exception.DataExtractionException;
 import ca.sfu.cs.factorbase.graph.Edge;
@@ -63,9 +66,10 @@ public interface FactorBaseDataBase {
 
     /**
      * Retrieve the CT table {@code DataExtractor} for the given RNode/PVar ID.
-     *
+     * <p>
      * Note: The {@code DataExtractor} for the given RNode/PVar ID should only be retrievable once and any references
      *       to it in the FactorBaseDataBase implementation should be removed.
+     * </p>
      *
      * @param dataExtractorID - the RNode/PVar ID that we want to retrieve the {@code DataExtractor} for.
      * @return the CT table DataExtractor for the given RNode/PVar ID.
@@ -74,4 +78,26 @@ public interface FactorBaseDataBase {
      * @throws DataBaseException if a database error occurs when retrieving the DataExtractor.
      */
     DataExtractor getAndRemoveCTDataExtractor(String dataExtractorID) throws DataBaseException, DataExtractionException;
+
+
+    /**
+     * Retrieve the functor node information for all the PVariables.
+     *
+     * @return Information for all the functor nodes of each PVariable in the database.
+     * @throws DataBaseException if an error occurs when attempting to retrieve the information.
+     */
+    List<FunctorNodesInfo> getPVariablesFunctorNodeInfo() throws DataBaseException;
+
+
+    /**
+     * Retrieve the contingency table for the given child and parent variables.
+     *
+     * @param functorInfos - {@code FunctorNodesInfo} with the ID that is the prefix of the "_counts" table to get the counts from.
+     * @param child - the child variable to get the counts for.
+     * @param parents - the parent variables to get the counts for.
+     * @param totalNumberOfStates - the total number of combination of states between the child and parent variables.
+     * @return contingency table for the given child and parent variables.
+     * @throws DataBaseException if an error occurs when attempting to retrieve the information.
+     */
+    ContingencyTable getContingencyTable(FunctorNodesInfo functorInfos, String child, Set<String> parents, int totalNumberOfStates) throws DataBaseException;
 }

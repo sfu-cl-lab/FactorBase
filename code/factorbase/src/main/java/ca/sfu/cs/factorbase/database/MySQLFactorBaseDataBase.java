@@ -5,19 +5,27 @@ import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import ca.sfu.cs.common.Configuration.Config;
+import ca.sfu.cs.factorbase.data.ContingencyTable;
+import ca.sfu.cs.factorbase.data.ContingencyTableGenerator;
 import ca.sfu.cs.factorbase.data.DataExtractor;
 import ca.sfu.cs.factorbase.data.DataExtractorGenerator;
+import ca.sfu.cs.factorbase.data.FunctorNode;
+import ca.sfu.cs.factorbase.data.FunctorNodesInfo;
+import ca.sfu.cs.factorbase.data.MySQLDataExtractor;
 import ca.sfu.cs.factorbase.exception.DataBaseException;
 import ca.sfu.cs.factorbase.exception.DataExtractionException;
 import ca.sfu.cs.factorbase.graph.Edge;
-import ca.sfu.cs.factorbase.util.MySQLScriptRunner;
+import ca.sfu.cs.factorbase.learning.BayesBaseCT_SortMerge;
 import ca.sfu.cs.factorbase.util.KeepTablesOnly;
+import ca.sfu.cs.factorbase.util.MySQLScriptRunner;
 import ca.sfu.cs.factorbase.util.QueryGenerator;
 
 import com.mysql.jdbc.Connection;
@@ -214,5 +222,84 @@ public class MySQLFactorBaseDataBase implements FactorBaseDataBase {
             this.dbConnection,
             this.dbInfo
         );
+    }
+
+
+    @Override
+    public List<FunctorNodesInfo> getPVariablesFunctorNodeInfo() throws DataBaseException {
+        String query =
+            "SELECT P.pvid, N.1nid, A.Value " +
+            "FROM " +
+                this.baseDatabaseName + "_setup.PVariables P," +
+                this.baseDatabaseName + "_setup.1Nodes N, " +
+                this.baseDatabaseName + "_setup.Attribute_Value A " +
+            "WHERE P.pvid = N.pvid " +
+            "AND N.COLUMN_NAME = A.COLUMN_NAME";
+
+        List<FunctorNodesInfo> functorInfos = new ArrayList<FunctorNodesInfo>();
+        String previousID = null;
+        String previousFunctorID = null;
+        try (
+            Statement statement = this.dbConnection.createStatement();
+            ResultSet results = statement.executeQuery(query)
+        ) {
+            FunctorNodesInfo info = null;
+            FunctorNode functor = null;
+            while (results.next()) {
+                String currentID = results.getString("pvid");
+                String currentFunctorID = results.getString("1nid");
+                if (!currentID.equals(previousID)) {
+                    info = new FunctorNodesInfo(currentID, this.dbInfo.isDiscrete());
+                    functorInfos.add(info);
+                    previousID = currentID;
+                }
+
+                if (!currentFunctorID.equals(previousFunctorID)) {
+                    functor = new FunctorNode(currentFunctorID);
+                    info.addFunctorNode(functor);
+                    previousFunctorID = currentFunctorID;
+                }
+
+                functor.addState(results.getString("Value"));
+            }
+        } catch (SQLException e) {
+            throw new DataBaseException("Failed to retrieve the functors for the PVariables.", e);
+        }
+
+        return functorInfos;
+    }
+
+
+    @Override
+    public ContingencyTable getContingencyTable(
+        FunctorNodesInfo functorInfos,
+        String child,
+        Set<String> parents,
+        int totalNumberOfStates
+    ) throws DataBaseException {
+        try {
+            this.dbConnection.setCatalog(this.dbInfo.getSetupDatabaseName());
+            try (Statement statement = this.dbConnection.createStatement()) {
+                // Initialize FunctorSet table.
+                statement.executeUpdate(QueryGenerator.createTruncateQuery("FunctorSet"));
+                statement.executeUpdate(QueryGenerator.createSimpleExtendedInsertQuery("FunctorSet", child, parents));
+            }
+
+            // Generate CT tables.
+            // TODO: Figure out best way to reuse substituted file instead of recreating a new one each time.
+            BayesBaseCT_SortMerge.buildCT();
+
+            PreparedStatement query = this.dbConnection.prepareStatement(
+                "SELECT * FROM " + dbInfo.getCTDatabaseName() + ".`" + functorInfos.getID() + "_counts` WHERE MULT > 0;"
+            );
+
+            DataExtractor dataextractor = new MySQLDataExtractor(query, dbInfo.getCountColumnName(), dbInfo.isDiscrete());
+            ContingencyTableGenerator ctGenerator = new ContingencyTableGenerator(dataextractor);
+            int childColumnIndex = ctGenerator.getColumnIndex(child);
+            int[] parentColumnIndices = ctGenerator.getColumnIndices(parents);
+            return ctGenerator.generateCT(childColumnIndex, parentColumnIndices, totalNumberOfStates);
+        } catch (DataExtractionException | IOException | SQLException e) {
+            throw new DataBaseException("Failed to generate the CT table.", e);
+        }
     }
 }

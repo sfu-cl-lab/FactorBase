@@ -49,6 +49,28 @@ INSERT INTO `prof0_counts` VALUES (2,'1','2'),(1,'2','2'),(3,'2','3');
 UNLOCK TABLES;
 
 --
+-- Table structure for table `single-column-inserts`
+--
+
+DROP TABLE IF EXISTS `single-column-inserts`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `single-column-inserts` (
+  `inserted-value` varchar(7) NOT NULL,
+  UNIQUE KEY `inserted-value` (`inserted-value`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `single-column-inserts`
+--
+
+LOCK TABLES `single-column-inserts` WRITE;
+/*!40000 ALTER TABLE `single-column-inserts` DISABLE KEYS */;
+/*!40000 ALTER TABLE `single-column-inserts` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
 -- Table structure for table `sort-merge-t1`
 --
 
@@ -156,4 +178,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2019-07-30 16:38:13
+-- Dump completed on 2019-09-10 15:41:24

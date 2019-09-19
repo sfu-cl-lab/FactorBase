@@ -3,6 +3,7 @@ package ca.sfu.cs.factorbase.util;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import java.util.StringJoiner;
 
 /**
@@ -127,6 +128,53 @@ public final class QueryGenerator {
         builder.append("FROM " + table1 + " ");
         builder.append("LEFT JOIN " + table2 + " ");
         builder.append("ON " + constructWhereClauseJoin(joinOnColumns, table1, table2, false));
+
+        return builder.toString();
+    }
+
+
+    /**
+     * Generates a MySQL INSERT String that inserts the given data into the specified table, which should have only one
+     * column.
+     *
+     * @param table - the name of the table to insert the data into.
+     * @param child - the child variable to insert into the table.
+     * @param parents - the parent variables to insert into the table.
+     * @return String that will insert the given variables into the specified table.
+     */
+    public static String createSimpleExtendedInsertQuery(String table, String child, Set<String> parents) {
+        StringBuilder builder = new StringBuilder("INSERT INTO ");
+        builder.append(table);
+        builder.append(" VALUES ('");
+        builder.append(child);
+        builder.append("')");
+
+        StringJoiner csv = new StringJoiner("'), ('", "('", "')");
+        for (String parent : parents) {
+            csv.add(parent);
+        }
+
+        if (parents.size() != 0) {
+            builder.append(", ");
+            builder.append(csv.toString());
+        }
+
+        builder.append(";");
+
+        return builder.toString();
+    }
+
+
+    /**
+     * Generates a MySQL TRUNCATE String that removes all the data from the specified table.
+     *
+     * @param table - the name of the table to truncate.
+     * @return String that will remove all the data from the specified table.
+     */
+    public static String createTruncateQuery(String table) {
+        StringBuilder builder = new StringBuilder("TRUNCATE ");
+        builder.append(table);
+        builder.append(";");
 
         return builder.toString();
     }

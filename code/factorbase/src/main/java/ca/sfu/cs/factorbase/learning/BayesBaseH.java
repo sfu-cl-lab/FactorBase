@@ -48,7 +48,11 @@ import java.util.logging.Logger;
 
 import nu.xom.ParsingException;
 import ca.sfu.cs.common.Configuration.Config;
+import ca.sfu.cs.factorbase.data.FunctorNodesInfo;
 import ca.sfu.cs.factorbase.database.FactorBaseDataBase;
+import ca.sfu.cs.factorbase.exception.DataBaseException;
+import ca.sfu.cs.factorbase.exception.DataExtractionException;
+import ca.sfu.cs.factorbase.exception.ScoringException;
 import ca.sfu.cs.factorbase.exporter.bifexporter.BIF_Generator;
 import ca.sfu.cs.factorbase.exporter.bifexporter.bif.BIFExport;
 import ca.sfu.cs.factorbase.exporter.bifexporter.bif.BIFImport;
@@ -84,17 +88,35 @@ public class BayesBaseH {
     private static Logger logger = Logger.getLogger(BayesBaseH.class.getName());
 
 
-    public static void runBBH(FactorBaseDataBase database) throws Exception {
+    /**
+     * Carry out the structure and parameter learning of the Bayesian network for the input database.
+     *
+     * @param database - {@code FactorBaseDataBase} to help extract the necessary information required to learn a
+     *                   Bayesian network for the input database.
+     * @param ctTablesGenerated - True if CT tables have already been generated via precounting; otherwise false.
+     * @throws IOException if there are issues reading and writing various files.
+     * @throws SQLException if there are issues executing the SQL queries.
+     * @throws ParsingException if there are issues reading the BIF file.
+     * @throws DataExtractionException if a non database error occurs when retrieving the DataExtractor.
+     * @throws DataBaseException if a database error occurs when retrieving the DataExtractor.
+     * @throws ScoringException if an error occurs when trying to compute the score for the graphs being generated.
+     */
+    public static void runBBH(
+        FactorBaseDataBase database,
+        boolean ctTablesGenerated
+    ) throws SQLException, IOException, DataBaseException, DataExtractionException, ParsingException, ScoringException {
         initProgram(FirstRunning);
         connectDB();
 
         // Build tables for structure learning.
         // Set up the bayes net models O.S. Sep 12, 2017.
-        MySQLScriptRunner.runScript(
-            con2,
-            Config.SCRIPTS_DIRECTORY + "model_manager.sql",
-            databaseName
-        );
+        if (ctTablesGenerated) {
+            MySQLScriptRunner.runScript(
+                con2,
+                Config.SCRIPTS_DIRECTORY + "model_manager.sql",
+                databaseName
+            );
+        }
 
         // Get maxNumberOfMembers (max length of rchain).
         Statement st = con2.createStatement();
@@ -109,7 +131,7 @@ public class BayesBaseH {
         rchain = rst1.getString(1);
 
         // Structure learning.
-        StructureLearning(database, con2);
+        StructureLearning(database, con2, ctTablesGenerated);
 
         /**
          * OS: Nov 17, 2016. It can happen that Tetrad learns a forbidden edge. Argh. To catch this, we delete forbidden edges from any insertion. But then
@@ -183,12 +205,17 @@ public class BayesBaseH {
 
     private static void StructureLearning(
         FactorBaseDataBase database,
-        Connection conn
-    ) throws Exception {
+        Connection conn,
+        boolean ctTablesGenerated
+    ) throws SQLException, IOException, DataBaseException, DataExtractionException, ParsingException, ScoringException {
         long l = System.currentTimeMillis(); // @zqian: measure structure learning time.
 
         // Handle pvars.
-        handlePVars(database); // import @zqian
+        if (ctTablesGenerated) {
+            learnStructurePVars(database); // import @zqian
+        } else {
+            learnStructurePVarsOnDemand(database);
+        }
 
         Statement st = conn.createStatement();
         st.execute(
@@ -314,8 +341,17 @@ public class BayesBaseH {
     /** Jun 14
      * if the tuples greater than 1, then employ tetradlearner.
      * else just insert the 1nid as child into entity_bayesnet.
+     *
+     * @throws DataBaseException if a database error occurs when retrieving the DataExtractor.
+     * @throws SQLException if there are issues executing the SQL queries.
+     * @throws IOException if there are issues generating the BIF file.
+     * @throws DataExtractionException if a non database error occurs when retrieving the DataExtractor.
+     * @throws ParsingException if there are issues reading the BIF file.
+     * @throws ScoringException if an error occurs when trying to compute the score for the graphs being generated.
      */
-    private static void handlePVars(FactorBaseDataBase database) throws Exception {
+    private static void learnStructurePVars(
+        FactorBaseDataBase database
+    ) throws DataBaseException, SQLException, DataExtractionException, IOException, ParsingException, ScoringException {
         // Retrieve all the PVariables.
         String[] pvar_ids = database.getPVariables();
 
@@ -361,7 +397,44 @@ public class BayesBaseH {
     }
 
 
-    private static void handleRNodes_zqian(FactorBaseDataBase database) throws Exception {
+    /**
+     * Learn the Bayesian network structure for the PVariables.
+     *
+     * @param database - {@code FactorBaseDataBase} to help extract the necessary information required to learn a
+     *                   Bayesian network for PVariables.
+     * @throws SQLException if there are issues executing the SQL queries.
+     * @throws IOException if there are issues generating the BIF file.
+     * @throws ParsingException if there are issues reading the BIF file.
+     * @throws DataBaseException if a database error occurs when retrieving the information from the database.
+     * @throws ScoringException if an error occurs when trying to compute the score for the graphs being generated.
+     */
+    private static void learnStructurePVarsOnDemand(
+        FactorBaseDataBase database
+    ) throws SQLException, IOException, ParsingException, DataBaseException, ScoringException {
+        // Retrieve all the PVariables.
+        List<FunctorNodesInfo> pvarFunctorNodeInfos = database.getPVariablesFunctorNodeInfo();
+
+        for(FunctorNodesInfo pvarFunctorNodeInfo : pvarFunctorNodeInfos) {
+            String id = pvarFunctorNodeInfo.getID();
+            logger.fine("\nStarting Learning the BN Structure of pvar_ids: " + id + "\n");
+
+            BayesNet_Learning_main.tetradLearner(
+                database,
+                pvarFunctorNodeInfo,
+                databaseName + "/" + File.separator + "xml" + File.separator + id.replace("`","") + ".xml",
+                !cont.equals("1")
+            );
+
+            bif1(id);
+
+            logger.fine("\nEnd for " + id + "\n");
+        }
+    }
+
+
+    private static void handleRNodes_zqian(
+        FactorBaseDataBase database
+    ) throws SQLException, IOException, DataBaseException, DataExtractionException, ParsingException, ScoringException {
         for(int len = 1; len <= maxNumberOfMembers; len++) {
             ArrayList<String> rnode_ids = readRNodesFromLattice(len); // Create csv files for all rnodes.
 
@@ -544,7 +617,7 @@ public class BayesBaseH {
     }
 
 
-    private static ArrayList<String> PropagateContextEdges() throws Exception {
+    private static ArrayList<String> PropagateContextEdges() throws SQLException {
         Statement st = con2.createStatement();
         st.execute("DROP TABLE IF EXISTS RNodeEdges;");
         st.execute("CREATE TABLE RNodeEdges LIKE Path_BayesNets;");
