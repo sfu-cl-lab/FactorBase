@@ -10,6 +10,8 @@
 
 SET storage_engine=INNODB;
 
+TRUNCATE MetaQueries;
+
 /* metaqueries for population variables */
 
 --- map Pvariables to entity tables ---
