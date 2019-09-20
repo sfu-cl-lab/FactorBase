@@ -114,6 +114,11 @@ public class BayesBaseH {
                 Config.SCRIPTS_DIRECTORY + "modelmanager_initialize.sql",
                 databaseName
             );
+            MySQLScriptRunner.runScript(
+                con2,
+                Config.SCRIPTS_DIRECTORY + "modelmanager_populate.sql",
+                databaseName
+            );
         }
 
         // Get maxNumberOfMembers (max length of rchain).
