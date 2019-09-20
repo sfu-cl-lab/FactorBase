@@ -71,11 +71,14 @@ public class MySQLFactorBaseDataBase implements FactorBaseDataBase {
     @Override
     public void setupDatabase() throws DataBaseException {
         try {
+            // Using the base database connection.
             MySQLScriptRunner.runScript(
                 this.dbConnection,
                 Config.SCRIPTS_DIRECTORY + "initialize_databases.sql",
                 this.baseDatabaseName
             );
+
+            // Switch to start using the setup database.
             this.dbConnection.setCatalog(this.dbInfo.getSetupDatabaseName());
             MySQLScriptRunner.runScript(
                 this.dbConnection,
@@ -89,10 +92,22 @@ public class MySQLFactorBaseDataBase implements FactorBaseDataBase {
                 "//"
             );
             MySQLScriptRunner.callSP(this.dbConnection, "find_values");
+
+            // Switch to start using the BN database.
             this.dbConnection.setCatalog(this.dbInfo.getBNDatabaseName());
             MySQLScriptRunner.runScript(
                 this.dbConnection,
+                Config.SCRIPTS_DIRECTORY + "latticegenerator_initialize.sql",
+                this.baseDatabaseName
+            );
+            MySQLScriptRunner.runScript(
+                this.dbConnection,
                 Config.SCRIPTS_DIRECTORY + "transfer_initialize.sql",
+                this.baseDatabaseName
+            );
+            MySQLScriptRunner.runScript(
+                this.dbConnection,
+                Config.SCRIPTS_DIRECTORY + "modelmanager_initialize.sql",
                 this.baseDatabaseName
             );
             MySQLScriptRunner.runScript(

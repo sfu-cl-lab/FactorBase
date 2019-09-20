@@ -111,11 +111,6 @@ public class BayesBaseH {
         if (ctTablesGenerated) {
             MySQLScriptRunner.runScript(
                 con2,
-                Config.SCRIPTS_DIRECTORY + "modelmanager_initialize.sql",
-                databaseName
-            );
-            MySQLScriptRunner.runScript(
-                con2,
                 Config.SCRIPTS_DIRECTORY + "modelmanager_populate.sql",
                 databaseName
             );
