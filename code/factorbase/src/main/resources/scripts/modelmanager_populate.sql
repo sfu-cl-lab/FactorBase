@@ -5,6 +5,7 @@
  * TODO: should reconcile Rnodes_BN_NOdes and Path_BN_Nodes with metaqueries at some point.
  */
 
+TRUNCATE RNodes_BN_Nodes;
 INSERT INTO RNodes_BN_Nodes
     SELECT DISTINCT
         rnid,
@@ -41,6 +42,7 @@ INSERT INTO RNodes_BN_Nodes
 /**
  * Propagate BNnodes to rchains.
  */
+TRUNCATE Path_BN_nodes;
 INSERT INTO Path_BN_nodes
     SELECT DISTINCT
         lattice_membership.name AS Rchain,
@@ -55,6 +57,7 @@ INSERT INTO Path_BN_nodes
 
 
 
+TRUNCATE Path_Aux_Edges;
 INSERT INTO Path_Aux_Edges
     SELECT
         BN_nodes1.Rchain AS Rchain,
@@ -72,6 +75,7 @@ INSERT INTO Path_Aux_Edges
         FNodes.main = 0;
 
 
+TRUNCATE SchemaEdges;
 INSERT INTO SchemaEdges
     SELECT DISTINCT
         lattice_membership.name AS Rchain,
@@ -106,6 +110,7 @@ INSERT INTO SchemaEdges
 
 
 
+TRUNCATE Path_Required_Edges;
 INSERT INTO Path_Required_Edges
     SELECT DISTINCT
         *
@@ -120,6 +125,7 @@ INSERT INTO Path_Required_Edges
         SchemaEdges;
 
 
+TRUNCATE Path_Forbidden_Edges;
 INSERT INTO Path_Forbidden_Edges
     SELECT DISTINCT
         *
@@ -138,6 +144,7 @@ INSERT INTO Path_Forbidden_Edges
  * Now we can find the complement edges as the pairs of potential nodes that do not appear in the learned Bayes net.
  * Unfortunately MySQL doesn't support set difference directly, so we use EXISTS to work around.
  */
+TRUNCATE Entity_Complement_Edges;
 INSERT INTO Entity_Complement_Edges
     SELECT DISTINCT
         BN_nodes1.pvid AS pvid,
