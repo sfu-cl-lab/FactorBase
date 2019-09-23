@@ -58,6 +58,7 @@ import ca.sfu.cs.factorbase.exporter.bifexporter.bif.BIFExport;
 import ca.sfu.cs.factorbase.exporter.bifexporter.bif.BIFImport;
 import ca.sfu.cs.factorbase.graph.Edge;
 import ca.sfu.cs.factorbase.jbn.BayesNet_Learning_main;
+import ca.sfu.cs.factorbase.lattice.RelationshipLattice;
 import ca.sfu.cs.factorbase.util.MySQLScriptRunner;
 
 import com.mysql.jdbc.Connection;
@@ -116,20 +117,17 @@ public class BayesBaseH {
             );
         }
 
-        // Get maxNumberOfMembers (max length of rchain).
-        Statement st = con2.createStatement();
-        ResultSet rst = st.executeQuery("SELECT MAX(length) FROM lattice_set;");
-        rst.absolute(1);
-        int maxNumberOfMembers = rst.getInt(1);
+        // Generate the relationship lattice to guide the structure learning search.
+        RelationshipLattice lattice = database.getGlobalLattice();
 
-        // Get the longest rchain.
-        String rchain = null;
-        ResultSet rst1 = st.executeQuery("SELECT name FROM lattice_set WHERE length = " + maxNumberOfMembers + ";");
-        rst1.absolute(1);
-        rchain = rst1.getString(1);
+        // Get the height of the lattice (max length of RChain).
+        int latticeHeight = lattice.getHeight();
+
+        // Get the longest RChain.
+        String rchain = lattice.getLongestRChain();
 
         // Structure learning.
-        StructureLearning(database, con2, ctTablesGenerated, maxNumberOfMembers);
+        StructureLearning(database, con2, ctTablesGenerated, latticeHeight);
 
         /**
          * OS: Nov 17, 2016. It can happen that Tetrad learns a forbidden edge. Argh. To catch this, we delete forbidden edges from any insertion. But then
@@ -137,6 +135,7 @@ public class BayesBaseH {
          * orphaned nodes in the next statement.
          */
         logger.fine("Inserting the Missing Fid as Child into Path_Bayes_Nets \n");
+        Statement st = con2.createStatement();
         st.execute(
             "INSERT IGNORE INTO Path_BayesNets " +
             "SELECT '" + rchain + "' AS Rchain, Fid AS child, '' AS parent " +
@@ -159,7 +158,7 @@ public class BayesBaseH {
 
             // Export the final result to xml.  We assume that there is a single largest relationship chain and write the Bayes net for that relationship chain to xml.
             // Only export the structure, prepare for the pruning phase, Oct 23, 2013.
-            exportResults(maxNumberOfMembers);
+            exportResults(latticeHeight);
 
             //      @zqian  for TestScoreComputation, use local ct to compute local CP.
             if (Flag_UseLocal_CT) {

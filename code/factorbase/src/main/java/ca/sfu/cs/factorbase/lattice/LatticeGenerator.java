@@ -48,13 +48,17 @@ public class LatticeGenerator {
         tempst.close();
 
         // Lattice read first sets from RFunctors.
-        List<String> firstSets = retrieveFirstSets(dbConnection);
+        List<String> rnodeIDs = retrieveRNodeIDs(
+            dbConnection,
+            "LatticeRNodes",
+            "orig_rnid"
+        );
 
         // Lattice init -> init createdSet + truncate tables + add first sets to db.
-        int maxNumberOfMembers = init(dbConnection, firstSets);
+        int maxNumberOfMembers = init(dbConnection, rnodeIDs);
 
         // Lattice generate lattice tree.
-        generateTree(dbConnection, firstSets, maxNumberOfMembers);
+        generateTree(dbConnection, rnodeIDs, maxNumberOfMembers);
 
         // Create a table of orig_rnid and rnid.
         mapping_rnid(dbConnection);
@@ -64,23 +68,78 @@ public class LatticeGenerator {
 
 
     /**
-     * Change orig_rnid to rnid, make it shorter.
+     * Generate the global relationship lattice for the entire database.
+     *
+     * @param dbConnection - connection to the database that has had the
+     *                       latticegenerator_initialize.sql script executed on it.
+     * @param tableName - the table containing all the RNode IDs for the entire database.
+     * @param columnName - the column name of the specified table containing the RNode IDs.
+     * @return the relationship lattice for the entire database.
+     * @throws SQLException if an issue occurs when attempting to retrieve the information.
      */
-    private static List<String> retrieveFirstSets(Connection dbConnection) throws SQLException {
-        ArrayList<String> firstSets = new ArrayList<String>();
+    public static RelationshipLattice generateGlobal(
+        Connection dbConnection,
+        String tableName,
+        String columnName
+    ) throws SQLException {
+        List<String> rnodeIDs = retrieveRNodeIDs(dbConnection, tableName, columnName);
+
+        init(dbConnection, rnodeIDs);
+        generateTree(dbConnection, rnodeIDs, rnodeIDs.size());
+
+        try(
+            Statement statement = dbConnection.createStatement();
+            ResultSet results = statement.executeQuery(
+                "SELECT * " +
+                "FROM lattice_set;"
+            )
+        ) {
+            RelationshipLattice lattice = new RelationshipLattice();
+
+            while(results.next()) {
+                lattice.addRChain(
+                    results.getString("name"),
+                    results.getInt("length")
+                );
+            }
+
+            return lattice;
+        }
+    }
+
+
+    /**
+     * Retrieve the RNode IDs.
+     *
+     * @param dbConnection - connection to the database that had the
+     *                       latticegenerator_initialize.sql script executed on it.
+     * @param rnodeTable - the table containing all the RNode IDs for the entire database.
+     * @param rnodeColumnName - the column name of the specified table containing the RNode IDs.
+     * @return the RNode IDs in the specified table and column.
+     * @throws SQLException if an issue occurs when attempting to retrieve the information.
+     */
+    private static List<String> retrieveRNodeIDs(
+        Connection dbConnection,
+        String rnodeTable,
+        String rnodeColumnName
+    ) throws SQLException {
+        ArrayList<String> rnodeIDs = new ArrayList<String>();
         Statement st = dbConnection.createStatement();
-        ResultSet rs = st.executeQuery("SELECT orig_rnid FROM LatticeRNodes;");
+        ResultSet rs = st.executeQuery(
+            "SELECT " + rnodeColumnName + " " +
+            "FROM " + rnodeTable + ";"
+        );
 
         while(rs.next()) {
             // Remove the flanking backticks from the orig_rnid before adding them to the set.
-            String rnodeID = rs.getString("orig_rnid");
-            firstSets.add(rnodeID.substring(1, rnodeID.length() - 1));
+            String rnodeID = rs.getString(rnodeColumnName);
+            rnodeIDs.add(rnodeID.substring(1, rnodeID.length() - 1));
             logger.fine("The rnid is: " + rnodeID);
         }
 
         st.close();
 
-        return firstSets;
+        return rnodeIDs;
     }
 
 

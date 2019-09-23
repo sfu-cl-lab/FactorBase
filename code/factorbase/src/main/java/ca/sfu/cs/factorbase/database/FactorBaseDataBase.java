@@ -9,6 +9,7 @@ import ca.sfu.cs.factorbase.data.FunctorNodesInfo;
 import ca.sfu.cs.factorbase.exception.DataBaseException;
 import ca.sfu.cs.factorbase.exception.DataExtractionException;
 import ca.sfu.cs.factorbase.graph.Edge;
+import ca.sfu.cs.factorbase.lattice.RelationshipLattice;
 
 /**
  * Methods expected to be implemented to enable the extraction of data from a database for FactorBase.
@@ -100,4 +101,13 @@ public interface FactorBaseDataBase {
      * @throws DataBaseException if an error occurs when attempting to retrieve the information.
      */
     ContingencyTable getContingencyTable(FunctorNodesInfo functorInfos, String child, Set<String> parents, int totalNumberOfStates) throws DataBaseException;
+
+
+    /**
+     * Retrieve the relationship lattice for the entire database.
+     *
+     * @return the {@code RelationshipLattice} for the entire database.
+     * @throws DataBaseException if an error occurs when attempting to retrieve the information.
+     */
+    RelationshipLattice getGlobalLattice() throws DataBaseException;
 }

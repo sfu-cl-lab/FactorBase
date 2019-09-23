@@ -23,6 +23,8 @@ import ca.sfu.cs.factorbase.data.MySQLDataExtractor;
 import ca.sfu.cs.factorbase.exception.DataBaseException;
 import ca.sfu.cs.factorbase.exception.DataExtractionException;
 import ca.sfu.cs.factorbase.graph.Edge;
+import ca.sfu.cs.factorbase.lattice.LatticeGenerator;
+import ca.sfu.cs.factorbase.lattice.RelationshipLattice;
 import ca.sfu.cs.factorbase.learning.BayesBaseCT_SortMerge;
 import ca.sfu.cs.factorbase.util.KeepTablesOnly;
 import ca.sfu.cs.factorbase.util.MySQLScriptRunner;
@@ -326,6 +328,21 @@ public class MySQLFactorBaseDataBase implements FactorBaseDataBase {
             return ctGenerator.generateCT(childColumnIndex, parentColumnIndices, totalNumberOfStates);
         } catch (DataExtractionException | IOException | SQLException e) {
             throw new DataBaseException("Failed to generate the CT table.", e);
+        }
+    }
+
+
+    @Override
+    public RelationshipLattice getGlobalLattice() throws DataBaseException {
+        try {
+            this.dbConnection.setCatalog(this.dbInfo.getBNDatabaseName());
+            return LatticeGenerator.generateGlobal(
+                this.dbConnection,
+                this.dbInfo.getSetupDatabaseName() + ".RNodes",
+                "rnid"
+            );
+        } catch (SQLException e) {
+            throw new DataBaseException("Failed to retrieve the relationship lattice for the database.", e);
         }
     }
 }
