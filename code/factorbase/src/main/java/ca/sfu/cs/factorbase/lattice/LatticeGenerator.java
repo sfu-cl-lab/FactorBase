@@ -17,10 +17,10 @@ import com.mysql.jdbc.Connection;
 /**
  * Assumes that a table LatticeRnodes has been generated. See transfer.sql.
  */
-public class short_rnid_LatticeGenerator {
+public class LatticeGenerator {
     private static final int MAX_NUM_OF_PVARS = 10;
     private static final String delimiter = ",";
-    private static Logger logger = Logger.getLogger(short_rnid_LatticeGenerator.class.getName());
+    private static Logger logger = Logger.getLogger(LatticeGenerator.class.getName());
 
 
     public static int generate(Connection dbConnection) throws SQLException {

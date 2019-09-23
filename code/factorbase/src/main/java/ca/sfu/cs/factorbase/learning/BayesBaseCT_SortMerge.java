@@ -28,7 +28,7 @@ import java.util.ArrayList;
 import java.util.logging.Logger;
 
 import ca.sfu.cs.common.Configuration.Config;
-import ca.sfu.cs.factorbase.lattice.short_rnid_LatticeGenerator;
+import ca.sfu.cs.factorbase.lattice.LatticeGenerator;
 import ca.sfu.cs.factorbase.util.MySQLScriptRunner;
 import ca.sfu.cs.factorbase.util.Sort_merge3;
 
@@ -79,9 +79,7 @@ public class BayesBaseCT_SortMerge {
         );
 
         //generate lattice tree
-        //maxNumberOfMembers = LatticeGenerator.generate(con2);
-        // rnid mapping. maxNumberofMembers = maximum size of lattice element. Should be called LatticeHeight
-        int maxNumberOfMembers = short_rnid_LatticeGenerator.generate(con_BN);
+        int latticeHeight = LatticeGenerator.generate(con_BN);
 
 // may not need to run this script any more, using LatticeRnodes table OS August 25, 2017//
        // bzsr.runScript("scripts/add_orig_rnid.sql");
@@ -114,7 +112,7 @@ public class BayesBaseCT_SortMerge {
         );
 
         // building CT tables for Rchain
-        CTGenerator(maxNumberOfMembers);
+        CTGenerator(latticeHeight);
         disconnectDB();
     }
  
