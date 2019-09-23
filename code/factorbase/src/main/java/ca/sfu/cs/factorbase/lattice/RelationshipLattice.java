@@ -59,4 +59,15 @@ public class RelationshipLattice {
             _level -> new ArrayList<String>()
         ).add(rchain);
     }
+
+
+    /**
+     * Retrieve all the RChains with the specified length.
+     *
+     * @param length - the length of the RChains to retrieve.
+     * @return the RChains with the specified length.
+     */
+    public List<String> getRChains(int length) {
+        return this.rchainsPerLevel.get(length);
+    }
 }

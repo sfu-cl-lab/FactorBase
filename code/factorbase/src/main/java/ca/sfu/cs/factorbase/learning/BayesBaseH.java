@@ -127,7 +127,7 @@ public class BayesBaseH {
         String rchain = lattice.getLongestRChain();
 
         // Structure learning.
-        StructureLearning(database, con2, ctTablesGenerated, latticeHeight);
+        StructureLearning(database, con2, ctTablesGenerated, lattice);
 
         /**
          * OS: Nov 17, 2016. It can happen that Tetrad learns a forbidden edge. Argh. To catch this, we delete forbidden edges from any insertion. But then
@@ -204,7 +204,7 @@ public class BayesBaseH {
         FactorBaseDataBase database,
         Connection conn,
         boolean ctTablesGenerated,
-        int maxNumberOfMembers
+        RelationshipLattice lattice
     ) throws SQLException, IOException, DataBaseException, DataExtractionException, ParsingException, ScoringException {
         long l = System.currentTimeMillis(); // @zqian: measure structure learning time.
 
@@ -251,9 +251,9 @@ public class BayesBaseH {
 
         // Handle rnodes in a bottom-up way following the lattice.
         // Generating .CSV files by reading _CT tables directly (including TRUE relationship and FALSE relationship).
-        handleRNodes_zqian(database, maxNumberOfMembers); // import
+        handleRNodes_zqian(database, lattice);
         // Population lattice.
-        PropagateContextEdges(maxNumberOfMembers);
+        PropagateContextEdges(lattice.getHeight());
 
         /**
          * OS May 23. 2014 This looks like a much too complicated way to find the context edges. How about this:
@@ -444,10 +444,10 @@ public class BayesBaseH {
 
     private static void handleRNodes_zqian(
         FactorBaseDataBase database,
-        int maxNumberOfMembers
+        RelationshipLattice lattice
     ) throws SQLException, IOException, DataBaseException, DataExtractionException, ParsingException, ScoringException {
-        for(int len = 1; len <= maxNumberOfMembers; len++) {
-            ArrayList<String> rnode_ids = readRNodesFromLattice(len); // Create csv files for all rnodes.
+        for(int len = 1; len <= lattice.getHeight(); len++) {
+            List<String> rnode_ids = lattice.getRChains(len);
 
             // Retrieve the required edge information.
             List<Edge> requiredEdges = database.getRequiredEdges(rnode_ids);
@@ -703,24 +703,6 @@ public class BayesBaseH {
 
         st_temp.close();
         // End for adding rnode as child, May 26th, 2014 zqian.
-        st.close();
-
-        return rnode_ids;
-    }
-
-
-    private static ArrayList<String> readRNodesFromLattice(int len) throws SQLException, IOException {
-        Statement st = con2.createStatement();
-        ResultSet rs = st.executeQuery("SELECT name AS RChain FROM lattice_set WHERE lattice_set.length = " + len + ";");
-        ArrayList<String> rnode_ids = new ArrayList<String>();
-
-        while(rs.next()) {
-            // Get pvid for further use.
-            String rchain = rs.getString("RChain");
-            logger.fine("\n RChain: " + rchain);
-            rnode_ids.add(rchain);
-        }
-
         st.close();
 
         return rnode_ids;
