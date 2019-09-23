@@ -73,8 +73,9 @@ public class LatticeGenerator {
 
         while(rs.next()) {
             // Remove the flanking backticks from the orig_rnid before adding them to the set.
-            firstSets.add(rs.getString("orig_rnid").substring(1, rs.getString("orig_rnid").length() - 1));
-            logger.fine("The orig_rnid is: " + rs.getString("orig_rnid"));
+            String rnodeID = rs.getString("orig_rnid");
+            firstSets.add(rnodeID.substring(1, rnodeID.length() - 1));
+            logger.fine("The rnid is: " + rnodeID);
         }
 
         st.close();
@@ -275,16 +276,7 @@ public class LatticeGenerator {
         // Sort by alphabetical order.
         Collections.sort(newList);
 
-        String joinStr = "";
-        for (String listItem : newList) {
-            joinStr = joinStr + delimiter + listItem;
-        }
-
-        if (joinStr.length() > 0) {
-            joinStr = joinStr.substring(1);
-        }
-
-        return joinStr;
+        return String.join(delimiter, newList);
     }
 
 
