@@ -142,7 +142,7 @@ public class BayesBaseCT_SortMerge {
      *
      * @throws SQLException if there are issues executing the SQL queries.
      */
-    private static void CTGenerator(int maxNumberOfMembers) throws SQLException {
+    private static void CTGenerator(int latticeHeight) throws SQLException {
         
         long l = System.currentTimeMillis(); //@zqian : CT table generating time
            // handling Pvars, generating pvars_counts       
@@ -154,7 +154,7 @@ public class BayesBaseCT_SortMerge {
         //building the RNodes_counts tables. should be called Rchains since it goes up the lattice.
         if(linkCorrelation.equals("1")) {
             long l_1 = System.currentTimeMillis(); //@zqian : measure structure learning time
-            for(int len = 1; len <= maxNumberOfMembers; len++){
+            for(int len = 1; len <= latticeHeight; len++){
                 BuildCT_Rnodes_counts(len);
             }
             long l2 = System.currentTimeMillis(); //@zqian : measure structure learning time
@@ -162,7 +162,7 @@ public class BayesBaseCT_SortMerge {
         }
         else {
             logger.warning("link off !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
-            for(int len = 1; len <= maxNumberOfMembers; len++)
+            for(int len = 1; len <= latticeHeight; len++)
                 BuildCT_Rnodes_counts2(len);
             //count2 simply copies the counts to the CT tables
             //copying the code seems very inelegant OS August 22
@@ -184,7 +184,7 @@ public class BayesBaseCT_SortMerge {
             }
             
             //building the _CT tables. Going up the Rchain lattice
-            for(int len = 2; len <= maxNumberOfMembers; len++)
+            for(int len = 2; len <= latticeHeight; len++)
             { 
                 logger.fine("now we're here for Rchain!");
                 logger.fine("Building Time(ms) for Rchain >=2 \n");
