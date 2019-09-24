@@ -1,21 +1,16 @@
 package ca.sfu.cs.factorbase.data;
 
-import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
-import java.util.Set;
-import ca.sfu.cs.factorbase.util.Mapper;
 
 /**
  * Class to hold all the relevant FunctorNode information for a given ID (PVar/RNode).
  */
 public class FunctorNodesInfo {
     private String id;
-    private List<FunctorNode> functorNodes;
-    private Map<String, Integer> functorNodeIndices;
+    private Map<String, FunctorNode> functorNodes;
     private boolean valuesAreDiscrete;
-    private int nextFunctorNodeIndex = 0;
 
 
     /**
@@ -27,8 +22,7 @@ public class FunctorNodesInfo {
     public FunctorNodesInfo(String id, boolean valuesAreDiscrete) {
         this.id = id;
         this.valuesAreDiscrete = valuesAreDiscrete;
-        this.functorNodes = new ArrayList<FunctorNode>();
-        this.functorNodeIndices = new HashMap<String, Integer>();
+        this.functorNodes = new HashMap<String, FunctorNode>();
     }
 
 
@@ -39,9 +33,7 @@ public class FunctorNodesInfo {
      * @param functorNode - the functornode to add.
      */
     public void addFunctorNode(FunctorNode functorNode) {
-        this.functorNodes.add(functorNode);
-        this.functorNodeIndices.put(functorNode.getFunctorNodeID(), nextFunctorNodeIndex);
-        nextFunctorNodeIndex++;
+        this.functorNodes.put(functorNode.getFunctorNodeID(), functorNode);
     }
 
 
@@ -60,8 +52,8 @@ public class FunctorNodesInfo {
      *
      * @return the functornodes associated with the ID returned by {@link FunctorNodesInfo#getID()}.
      */
-    public List<FunctorNode> getFunctorNodes() {
-        return this.functorNodes;
+    public Collection<FunctorNode> getFunctorNodes() {
+        return this.functorNodes.values();
     }
 
 
@@ -76,34 +68,12 @@ public class FunctorNodesInfo {
 
 
     /**
-     * Retrieve the number of states for the functornode at the given index.
+     * Retrieve the number of states for the given functornode ID.
      *
-     * @param index - the index of the functornode to get the number of states for.
-     * @return the number of states for the given functornode index.
+     * @param functorNodeID - the ID of the functornode to get the number of states for.
+     * @return the number of states for the given functornode ID.
      */
-    public int getNumberOfStates(int index) {
-        return this.functorNodes.get(index).getFunctorNodeStates().size();
-    }
-
-
-    /**
-     * Retrieve the index of the functornode for the given functornode ID.
-     *
-     * @param functorNodeID - the ID of the functornode to retrieve the index for.
-     * @return the index of the functornode for the given functornode ID.
-     */
-    public int getIndex(String functorNodeID) {
-        return this.functorNodeIndices.get(functorNodeID);
-    }
-
-
-    /**
-     * Retrieve the indices of the functornodes for the given functornode IDs.
-     *
-     * @param functorNodeIDs - the IDs of the functornodes to retrieve the indices for.
-     * @return the indices of the functornodes for the given functornode IDs.
-     */
-    public int[] getIndices(Set<String> functorNodeIDs) {
-        return Mapper.convertToIndices(functorNodeIDs, this::getIndex);
+    public int getNumberOfStates(String functorNodeID) {
+        return this.functorNodes.get(functorNodeID).getFunctorNodeStates().size();
     }
 }
