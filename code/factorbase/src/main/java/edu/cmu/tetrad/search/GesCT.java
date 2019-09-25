@@ -143,7 +143,7 @@ public class GesCT {
      * Create a GesCT creating contingency tables as needed using the given FactorBaseDataBase.
      *
      * @param database - {@code FactorBaseDataBase} to help generate contingency tables as needed.
-     * @param functorNodesInfo - the information for the functornodes of interest.
+     * @param functorNodesInfo - the information for the functor nodes of interest.
      * @param samplePrior - the equivalent sample size (N').
      * @param structurePrior - the prior probability for the network structure.
      */

@@ -30,10 +30,10 @@ public class BDeuScoreOnDemand implements DiscreteLocalScore {
 
 
     /**
-     * Create a new BDeuScore object for the given database and functornodes, using the given hyperparameters.
+     * Create a new BDeuScore object for the given database and functor nodes, using the given hyperparameters.
      *
      * @param database - FactorBaseDataBase to get the count information from.
-     * @param functorInfos - the functornodes of interest in the given {@code FactorBaseDataBase}.
+     * @param functorInfos - the functor nodes of interest in the given {@code FactorBaseDataBase}.
      * @param samplePrior - the equivalent sample size (N').
      * @param structurePrior - the prior probability for the network structure.
      */
@@ -52,20 +52,18 @@ public class BDeuScoreOnDemand implements DiscreteLocalScore {
 
     @Override
     public double localScore(String child, Set<String> parents) throws ScoringException {
-        int childIndex = this.functorInfos.getIndex(child);
-        int[] parentIndices = this.functorInfos.getIndices(parents);
-        int cacheKey = Objects.hash(childIndex, parentIndices);
+        int cacheKey = Objects.hash(child, parents);
 
         if (this.cache.containsKey(cacheKey)) {
             return this.cache.get(cacheKey);
         }
 
         // Number of child states.
-        int r = this.functorInfos.getNumberOfStates(childIndex);
+        int r = this.functorInfos.getNumberOfStates(child);
 
         // Number of parent states.
         int q = 1;
-        for (int parent : parentIndices) {
+        for (String parent : parents) {
             q *= this.functorInfos.getNumberOfStates(parent);
         }
 

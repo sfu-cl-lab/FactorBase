@@ -8,19 +8,22 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.StringJoiner;
 import java.util.logging.Logger;
 
 import com.mysql.jdbc.Connection;
 
+import ca.sfu.cs.factorbase.data.FunctorNodesInfo;
+
 
 /**
  * Assumes that a table LatticeRnodes has been generated. See transfer.sql.
  */
-public class short_rnid_LatticeGenerator {
+public class LatticeGenerator {
     private static final int MAX_NUM_OF_PVARS = 10;
     private static final String delimiter = ",";
-    private static Logger logger = Logger.getLogger(short_rnid_LatticeGenerator.class.getName());
+    private static Logger logger = Logger.getLogger(LatticeGenerator.class.getName());
 
 
     public static int generate(Connection dbConnection) throws SQLException {
@@ -48,13 +51,17 @@ public class short_rnid_LatticeGenerator {
         tempst.close();
 
         // Lattice read first sets from RFunctors.
-        List<String> firstSets = retrieveFirstSets(dbConnection);
+        List<String> rnodeIDs = retrieveRNodeIDs(
+            dbConnection,
+            "LatticeRNodes",
+            "orig_rnid"
+        );
 
         // Lattice init -> init createdSet + truncate tables + add first sets to db.
-        int maxNumberOfMembers = init(dbConnection, firstSets);
+        int maxNumberOfMembers = init(dbConnection, rnodeIDs);
 
         // Lattice generate lattice tree.
-        generateTree(dbConnection, firstSets, maxNumberOfMembers);
+        generateTree(dbConnection, rnodeIDs, maxNumberOfMembers);
 
         // Create a table of orig_rnid and rnid.
         mapping_rnid(dbConnection);
@@ -64,22 +71,111 @@ public class short_rnid_LatticeGenerator {
 
 
     /**
-     * Change orig_rnid to rnid, make it shorter.
+     * Generate the global relationship lattice for the entire database.
+     *
+     * @param functorNodesInfos - {@code FunctorNodesInfo}s with the functor node information for all the RNodes in the
+     *                            database.
+     * @param dbConnection - connection to the database that has had the
+     *                       latticegenerator_initialize.sql script executed on it.
+     * @param tableName - the table containing all the RNode IDs for the entire database.
+     * @param columnName - the column name of the specified table containing the RNode IDs.
+     * @return the relationship lattice for the entire database.
+     * @throws SQLException if an issue occurs when attempting to retrieve the information.
      */
-    private static List<String> retrieveFirstSets(Connection dbConnection) throws SQLException {
-        ArrayList<String> firstSets = new ArrayList<String>();
+    public static RelationshipLattice generateGlobal(
+        Map<String, FunctorNodesInfo> functorNodesInfos,
+        Connection dbConnection,
+        String tableName,
+        String columnName
+    ) throws SQLException {
+        List<String> rnodeIDs = retrieveRNodeIDs(dbConnection, tableName, columnName);
+
+        init(dbConnection, rnodeIDs);
+        generateTree(dbConnection, rnodeIDs, rnodeIDs.size());
+
+        try(
+            Statement statement = dbConnection.createStatement();
+            ResultSet results = statement.executeQuery(
+                "SELECT * " +
+                "FROM lattice_set;"
+            )
+        ) {
+            RelationshipLattice lattice = new RelationshipLattice();
+
+            while(results.next()) {
+                FunctorNodesInfo rchainInfo = extractRChainFunctorNodeInfo(
+                    results.getString("name"),
+                    functorNodesInfos
+                );
+
+                lattice.addRChainInfo(
+                    rchainInfo,
+                    results.getInt("length")
+                );
+            }
+
+            return lattice;
+        }
+    }
+
+
+    /**
+     * Retrieve all the functor node information for the given RChain.
+     *
+     * @param rchain - the name of the RChain.
+     * @param functorNodesInfos - {@code FunctorNodesInfo}s with the functor node information for all the RNodes in the
+     *                            database that the RChain is from.
+     * @return all the functor node information for the given RChain.
+     */
+    private static FunctorNodesInfo extractRChainFunctorNodeInfo(
+        String rchain,
+        Map<String, FunctorNodesInfo> functorNodesInfos
+    ) {
+        String[] rnodeIDs = rchain.replace("`", "").replace("),", ") ").split(" ");
+        FunctorNodesInfo rchainFunctorNodeInfo = new FunctorNodesInfo(rchain, true);
+
+        // for loop to merge all the functor node information into a single FunctorNodesInfo for the RChain.
+        for (String rnodeID : rnodeIDs) {
+            FunctorNodesInfo rnodeFunctorInfo = functorNodesInfos.get("`" + rnodeID + "`");
+            rchainFunctorNodeInfo.merge(rnodeFunctorInfo);
+        }
+
+        return rchainFunctorNodeInfo;
+    }
+
+
+    /**
+     * Retrieve the RNode IDs.
+     *
+     * @param dbConnection - connection to the database that had the
+     *                       latticegenerator_initialize.sql script executed on it.
+     * @param rnodeTable - the table containing all the RNode IDs for the entire database.
+     * @param rnodeColumnName - the column name of the specified table containing the RNode IDs.
+     * @return the RNode IDs in the specified table and column.
+     * @throws SQLException if an issue occurs when attempting to retrieve the information.
+     */
+    private static List<String> retrieveRNodeIDs(
+        Connection dbConnection,
+        String rnodeTable,
+        String rnodeColumnName
+    ) throws SQLException {
+        ArrayList<String> rnodeIDs = new ArrayList<String>();
         Statement st = dbConnection.createStatement();
-        ResultSet rs = st.executeQuery("SELECT orig_rnid FROM LatticeRNodes;");
+        ResultSet rs = st.executeQuery(
+            "SELECT " + rnodeColumnName + " " +
+            "FROM " + rnodeTable + ";"
+        );
 
         while(rs.next()) {
             // Remove the flanking backticks from the orig_rnid before adding them to the set.
-            firstSets.add(rs.getString("orig_rnid").substring(1, rs.getString("orig_rnid").length() - 1));
-            logger.fine("The orig_rnid is: " + rs.getString("orig_rnid"));
+            String rnodeID = rs.getString(rnodeColumnName);
+            rnodeIDs.add(rnodeID.substring(1, rnodeID.length() - 1));
+            logger.fine("The rnid is: " + rnodeID);
         }
 
         st.close();
 
-        return firstSets;
+        return rnodeIDs;
     }
 
 
@@ -275,16 +371,7 @@ public class short_rnid_LatticeGenerator {
         // Sort by alphabetical order.
         Collections.sort(newList);
 
-        String joinStr = "";
-        for (String listItem : newList) {
-            joinStr = joinStr + delimiter + listItem;
-        }
-
-        if (joinStr.length() > 0) {
-            joinStr = joinStr.substring(1);
-        }
-
-        return joinStr;
+        return String.join(delimiter, newList);
     }
 
 
