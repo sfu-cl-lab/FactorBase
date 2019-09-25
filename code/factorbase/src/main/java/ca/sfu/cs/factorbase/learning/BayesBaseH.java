@@ -45,6 +45,7 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 import nu.xom.ParsingException;
 import ca.sfu.cs.common.Configuration.Config;
@@ -447,7 +448,9 @@ public class BayesBaseH {
         RelationshipLattice lattice
     ) throws SQLException, IOException, DataBaseException, DataExtractionException, ParsingException, ScoringException {
         for(int len = 1; len <= lattice.getHeight(); len++) {
-            List<String> rnode_ids = lattice.getRChains(len);
+            List<String> rnode_ids = lattice.getRChainsInfo(len).stream().map(
+                functorNodeInfo -> functorNodeInfo.getID()
+            ).collect(Collectors.toList());
 
             // Retrieve the required edge information.
             List<Edge> requiredEdges = database.getRequiredEdges(rnode_ids);

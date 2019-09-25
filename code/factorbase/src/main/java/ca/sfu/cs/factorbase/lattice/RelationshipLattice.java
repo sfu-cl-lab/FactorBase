@@ -5,11 +5,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import ca.sfu.cs.factorbase.data.FunctorNodesInfo;
+
 /**
  * Class to store the information for a relationship lattice.
  */
 public class RelationshipLattice {
-    private Map<Integer, List<String>> rchainsPerLevel = new HashMap<Integer, List<String>>();
+    private Map<Integer, List<FunctorNodesInfo>> rchainInfosPerLevel = new HashMap<Integer, List<FunctorNodesInfo>>();
     private int latticeHeight = 0;
     private String longestRChain;
 
@@ -42,32 +44,32 @@ public class RelationshipLattice {
 
 
     /**
-     * Add the given RChain to the specified lattice level.
+     * Add the given functor node information of an RChain to the specified lattice level.
      *
-     * @param rchain - the name of the RChain to add.
+     * @param rchainInfo - the functor node information of the RChain to add.
      * @param level - the level (height) of the RChain in the lattice.
      */
-    public void addRChain(String rchain, int level) {
+    public void addRChainInfo(FunctorNodesInfo rchainInfo, int level) {
         // Update some information if the new RChain being added is the longest we've seen so far.
         if (level > this.latticeHeight) {
             this.latticeHeight = level;
-            this.longestRChain = rchain;
+            this.longestRChain = rchainInfo.getID();
         }
 
-        this.rchainsPerLevel.computeIfAbsent(
+        this.rchainInfosPerLevel.computeIfAbsent(
             level,
-            _level -> new ArrayList<String>()
-        ).add(rchain);
+            _level -> new ArrayList<FunctorNodesInfo>()
+        ).add(rchainInfo);
     }
 
 
     /**
-     * Retrieve all the RChains with the specified length.
+     * Retrieve all the functor node information for the RChains with the specified length.
      *
      * @param length - the length of the RChains to retrieve.
-     * @return the RChains with the specified length.
+     * @return the {@code FunctorNodesInfo}s for RChains with the specified length.
      */
-    public List<String> getRChains(int length) {
-        return this.rchainsPerLevel.get(length);
+    public List<FunctorNodesInfo> getRChainsInfo(int length) {
+        return this.rchainInfosPerLevel.get(length);
     }
 }

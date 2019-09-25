@@ -8,6 +8,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.text.MessageFormat;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -299,6 +300,80 @@ public class MySQLFactorBaseDataBase implements FactorBaseDataBase {
     }
 
 
+    /**
+     * Retrieve the functor node information for all the RNodes.
+     *
+     * @return Information for all the functor nodes of each RNode in the database.
+     * @throws DataBaseException if an error occurs when attempting to retrieve the information.
+     */
+    private Map<String, FunctorNodesInfo> getRNodesFunctorNodeInfo() throws DataBaseException {
+        String setupDatabaseName = this.dbInfo.getSetupDatabaseName();
+        String query =
+            "SELECT R.rnid, N.1nid as Fid, '1Node' AS Type, A.value " +
+            "FROM " +
+                setupDatabaseName + ".1Nodes AS N, " +
+                setupDatabaseName + ".RNodes_pvars AS R, " +
+                setupDatabaseName + ".Attribute_Value AS A " +
+            "WHERE N.pvid = R.pvid AND N.COLUMN_NAME = A.COLUMN_NAME " +
+
+            "UNION ALL " +
+
+            "SELECT R.rnid, R.2nid as Fid, '2Node' AS Type, A.value " +
+            "FROM " +
+                setupDatabaseName + ".2Nodes AS N, " +
+                setupDatabaseName + ".RNodes_2Nodes AS R, " +
+                setupDatabaseName + ".Attribute_Value AS A " +
+            "WHERE N.2nid = R.2nid AND N.COLUMN_NAME = A.COLUMN_NAME " +
+
+            "ORDER BY rnid, Fid;";
+
+        Map<String, FunctorNodesInfo> functorNodesInfos = new HashMap<String, FunctorNodesInfo>();
+        String previousID = null;
+        String previousFunctorNodeID = null;
+        try (
+            Statement statement = this.dbConnection.createStatement();
+            ResultSet results = statement.executeQuery(query)
+        ) {
+            FunctorNodesInfo info = null;
+            FunctorNode functorNode = null;
+            while (results.next()) {
+                String currentID = results.getString("rnid");
+                String currentFunctorNodeID = results.getString("Fid");
+                if (!currentID.equals(previousID)) {
+                    info = new FunctorNodesInfo(currentID, this.dbInfo.isDiscrete());
+
+                    // The SELECT statement above doesn't retrieve the RNode as a functor node so we add it here.
+                    FunctorNode fnode = new FunctorNode(currentID);
+                    fnode.addState("T");
+                    fnode.addState("F");
+                    info.addFunctorNode(fnode);
+
+                    functorNodesInfos.put(currentID, info);
+                    previousID = currentID;
+                }
+
+                if (!currentFunctorNodeID.equals(previousFunctorNodeID)) {
+                    functorNode = new FunctorNode(currentFunctorNodeID);
+
+                    // The SELECT statement above doesn't retrieve the "N/A" value so we add it in here.
+                    if (results.getString("Type").equals("2Node")) {
+                        functorNode.addState("N/A");
+                    }
+
+                    info.addFunctorNode(functorNode);
+                    previousFunctorNodeID = currentFunctorNodeID;
+                }
+
+                functorNode.addState(results.getString("Value"));
+            }
+        } catch (SQLException e) {
+            throw new DataBaseException("Failed to retrieve the functor nodes information for the RNodes.", e);
+        }
+
+        return functorNodesInfos;
+    }
+
+
     @Override
     public ContingencyTable getContingencyTable(
         FunctorNodesInfo functorInfos,
@@ -335,9 +410,12 @@ public class MySQLFactorBaseDataBase implements FactorBaseDataBase {
 
     @Override
     public RelationshipLattice getGlobalLattice() throws DataBaseException {
+        Map<String, FunctorNodesInfo> functorNodesInfos = this.getRNodesFunctorNodeInfo();
+
         try {
             this.dbConnection.setCatalog(this.dbInfo.getBNDatabaseName());
             return LatticeGenerator.generateGlobal(
+                functorNodesInfos,
                 this.dbConnection,
                 this.dbInfo.getSetupDatabaseName() + ".RNodes",
                 "rnid"

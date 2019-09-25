@@ -58,6 +58,16 @@ public class FunctorNodesInfo {
 
 
     /**
+     * Retrieve the functor nodes associated with the ID returned by {@link FunctorNodesInfo#getID()}, mapped by their ID.
+     *
+     * @return the functor nodes associated with the ID returned by {@link FunctorNodesInfo#getID()}.
+     */
+    public Map<String, FunctorNode> getMappedFunctorNodes() {
+        return this.functorNodes;
+    }
+
+
+    /**
      * Determine if all the functor node states are discrete.
      *
      * @return true if all the functor node states are discrete; otherwise false.
@@ -75,5 +85,16 @@ public class FunctorNodesInfo {
      */
     public int getNumberOfStates(String functorNodeID) {
         return this.functorNodes.get(functorNodeID).getFunctorNodeStates().size();
+    }
+
+
+    /**
+     * Merge the information from the given {@code FunctorNodesInfo} into this one.
+     *
+     * @param functorNodesInfo - the {@code FunctorNodesInfo} with the information to merge into this one.
+     */
+    public void merge(FunctorNodesInfo functorNodesInfo) {
+        this.functorNodes.putAll(functorNodesInfo.getMappedFunctorNodes());
+        this.valuesAreDiscrete = this.valuesAreDiscrete && functorNodesInfo.isDiscrete();
     }
 }

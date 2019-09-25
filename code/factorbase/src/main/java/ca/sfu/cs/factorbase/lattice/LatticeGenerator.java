@@ -8,10 +8,13 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.StringJoiner;
 import java.util.logging.Logger;
 
 import com.mysql.jdbc.Connection;
+
+import ca.sfu.cs.factorbase.data.FunctorNodesInfo;
 
 
 /**
@@ -70,6 +73,8 @@ public class LatticeGenerator {
     /**
      * Generate the global relationship lattice for the entire database.
      *
+     * @param functorNodesInfos - {@code FunctorNodesInfo}s with the functor node information for all the RNodes in the
+     *                            database.
      * @param dbConnection - connection to the database that has had the
      *                       latticegenerator_initialize.sql script executed on it.
      * @param tableName - the table containing all the RNode IDs for the entire database.
@@ -78,6 +83,7 @@ public class LatticeGenerator {
      * @throws SQLException if an issue occurs when attempting to retrieve the information.
      */
     public static RelationshipLattice generateGlobal(
+        Map<String, FunctorNodesInfo> functorNodesInfos,
         Connection dbConnection,
         String tableName,
         String columnName
@@ -97,14 +103,44 @@ public class LatticeGenerator {
             RelationshipLattice lattice = new RelationshipLattice();
 
             while(results.next()) {
-                lattice.addRChain(
+                FunctorNodesInfo rchainInfo = extractRChainFunctorNodeInfo(
                     results.getString("name"),
+                    functorNodesInfos
+                );
+
+                lattice.addRChainInfo(
+                    rchainInfo,
                     results.getInt("length")
                 );
             }
 
             return lattice;
         }
+    }
+
+
+    /**
+     * Retrieve all the functor node information for the given RChain.
+     *
+     * @param rchain - the name of the RChain.
+     * @param functorNodesInfos - {@code FunctorNodesInfo}s with the functor node information for all the RNodes in the
+     *                            database that the RChain is from.
+     * @return all the functor node information for the given RChain.
+     */
+    private static FunctorNodesInfo extractRChainFunctorNodeInfo(
+        String rchain,
+        Map<String, FunctorNodesInfo> functorNodesInfos
+    ) {
+        String[] rnodeIDs = rchain.replace("`", "").replace("),", ") ").split(" ");
+        FunctorNodesInfo rchainFunctorNodeInfo = new FunctorNodesInfo(rchain, true);
+
+        // for loop to merge all the functor node information into a single FunctorNodesInfo for the RChain.
+        for (String rnodeID : rnodeIDs) {
+            FunctorNodesInfo rnodeFunctorInfo = functorNodesInfos.get("`" + rnodeID + "`");
+            rchainFunctorNodeInfo.merge(rnodeFunctorInfo);
+        }
+
+        return rchainFunctorNodeInfo;
     }
 
 
