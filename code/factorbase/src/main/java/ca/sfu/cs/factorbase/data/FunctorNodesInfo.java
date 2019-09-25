@@ -14,10 +14,10 @@ public class FunctorNodesInfo {
 
 
     /**
-     * Create a FunctorNodesInfo to store the functornode information for the given ID.
+     * Create a FunctorNodesInfo to store the functor node information for the given ID.
      *
-     * @param id - the ID associated with the functornode information being stored.
-     * @param valuesAreDiscrete - true if all the functornode states are discrete; otherwise false.
+     * @param id - the ID associated with the functor node information being stored.
+     * @param valuesAreDiscrete - true if all the functor node states are discrete; otherwise false.
      */
     public FunctorNodesInfo(String id, boolean valuesAreDiscrete) {
         this.id = id;
@@ -27,10 +27,10 @@ public class FunctorNodesInfo {
 
 
     /**
-     * Store a functornode associated with the ID returned by {@link FunctorNodesInfo#getID()}, duplicates will be
+     * Store a functor node associated with the ID returned by {@link FunctorNodesInfo#getID()}, duplicates will be
      * ignored.
      *
-     * @param functorNode - the functornode to add.
+     * @param functorNode - the functor node to add.
      */
     public void addFunctorNode(FunctorNode functorNode) {
         this.functorNodes.put(functorNode.getFunctorNodeID(), functorNode);
@@ -38,9 +38,9 @@ public class FunctorNodesInfo {
 
 
     /**
-     * The ID associated with the stored functornodes.
+     * The ID associated with the stored functor nodes.
      *
-     * @return the ID associated with the stored functornodes.
+     * @return the ID associated with the stored functor nodes.
      */
     public String getID() {
         return this.id;
@@ -48,9 +48,9 @@ public class FunctorNodesInfo {
 
 
     /**
-     * Retrieve the functornodes associated with the ID returned by {@link FunctorNodesInfo#getID()}.
+     * Retrieve the functor nodes associated with the ID returned by {@link FunctorNodesInfo#getID()}.
      *
-     * @return the functornodes associated with the ID returned by {@link FunctorNodesInfo#getID()}.
+     * @return the functor nodes associated with the ID returned by {@link FunctorNodesInfo#getID()}.
      */
     public Collection<FunctorNode> getFunctorNodes() {
         return this.functorNodes.values();
@@ -58,9 +58,9 @@ public class FunctorNodesInfo {
 
 
     /**
-     * Determine if all the functornode states are discrete.
+     * Determine if all the functor node states are discrete.
      *
-     * @return true if all the functornode states are discrete; otherwise false.
+     * @return true if all the functor node states are discrete; otherwise false.
      */
     public boolean isDiscrete() {
         return this.valuesAreDiscrete;
@@ -68,10 +68,10 @@ public class FunctorNodesInfo {
 
 
     /**
-     * Retrieve the number of states for the given functornode ID.
+     * Retrieve the number of states for the given functor node ID.
      *
-     * @param functorNodeID - the ID of the functornode to get the number of states for.
-     * @return the number of states for the given functornode ID.
+     * @param functorNodeID - the ID of the functor node to get the number of states for.
+     * @return the number of states for the given functor node ID.
      */
     public int getNumberOfStates(String functorNodeID) {
         return this.functorNodes.get(functorNodeID).getFunctorNodeStates().size();

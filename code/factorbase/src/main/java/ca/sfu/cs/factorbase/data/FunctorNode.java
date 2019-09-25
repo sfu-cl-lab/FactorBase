@@ -14,7 +14,7 @@ public class FunctorNode {
     /**
      * Create a FunctorNode to store its metadata.
      *
-     * @param functorNodeID - the ID for the functornode.
+     * @param functorNodeID - the ID for the functor node.
      */
     public FunctorNode(String functorNodeID) {
         this.functorNodeID = functorNodeID;
@@ -23,9 +23,9 @@ public class FunctorNode {
 
 
     /**
-     * Store a possible state for the functornode (duplicates will be ignored).
+     * Store a possible state for the functor node (duplicates will be ignored).
      *
-     * @param stateValue - the value of the state for the functornode.
+     * @param stateValue - the value of the state for the functor node.
      */
     public void addState(String stateValue) {
         this.functorNodeStates.add(stateValue);
@@ -33,9 +33,9 @@ public class FunctorNode {
 
 
     /**
-     * Retrieve the ID for the functornode.
+     * Retrieve the ID for the functor node.
      *
-     * @return the ID for the functornode.
+     * @return the ID for the functor node.
      */
     public String getFunctorNodeID() {
         return this.functorNodeID;
@@ -43,9 +43,9 @@ public class FunctorNode {
 
 
     /**
-     * Retrieve the possible states for the functornode.
+     * Retrieve the possible states for the functor node.
      *
-     * @return the possible states for the functornode.
+     * @return the possible states for the functor node.
      */
     public Set<String> getFunctorNodeStates() {
         return this.functorNodeStates;

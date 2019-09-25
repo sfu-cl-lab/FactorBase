@@ -30,10 +30,10 @@ public class BDeuScoreOnDemand implements DiscreteLocalScore {
 
 
     /**
-     * Create a new BDeuScore object for the given database and functornodes, using the given hyperparameters.
+     * Create a new BDeuScore object for the given database and functor nodes, using the given hyperparameters.
      *
      * @param database - FactorBaseDataBase to get the count information from.
-     * @param functorInfos - the functornodes of interest in the given {@code FactorBaseDataBase}.
+     * @param functorInfos - the functor nodes of interest in the given {@code FactorBaseDataBase}.
      * @param samplePrior - the equivalent sample size (N').
      * @param structurePrior - the prior probability for the network structure.
      */

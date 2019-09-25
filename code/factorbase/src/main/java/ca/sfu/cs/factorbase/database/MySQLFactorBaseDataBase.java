@@ -255,46 +255,47 @@ public class MySQLFactorBaseDataBase implements FactorBaseDataBase {
 
     @Override
     public List<FunctorNodesInfo> getPVariablesFunctorNodeInfo() throws DataBaseException {
+        String setupDatabaseName = this.dbInfo.getSetupDatabaseName();
         String query =
-            "SELECT P.pvid, N.1nid, A.Value " +
+            "SELECT P.pvid, N.1nid AS Fid, A.Value " +
             "FROM " +
-                this.baseDatabaseName + "_setup.PVariables P," +
-                this.baseDatabaseName + "_setup.1Nodes N, " +
-                this.baseDatabaseName + "_setup.Attribute_Value A " +
+                setupDatabaseName + ".PVariables P, " +
+                setupDatabaseName + ".1Nodes N, " +
+                setupDatabaseName + ".Attribute_Value A " +
             "WHERE P.pvid = N.pvid " +
             "AND N.COLUMN_NAME = A.COLUMN_NAME";
 
-        List<FunctorNodesInfo> functorInfos = new ArrayList<FunctorNodesInfo>();
+        List<FunctorNodesInfo> functorNodesInfos = new ArrayList<FunctorNodesInfo>();
         String previousID = null;
-        String previousFunctorID = null;
+        String previousFunctorNodeID = null;
         try (
             Statement statement = this.dbConnection.createStatement();
             ResultSet results = statement.executeQuery(query)
         ) {
             FunctorNodesInfo info = null;
-            FunctorNode functor = null;
+            FunctorNode functorNode = null;
             while (results.next()) {
                 String currentID = results.getString("pvid");
-                String currentFunctorID = results.getString("1nid");
+                String currentFunctorNodeID = results.getString("Fid");
                 if (!currentID.equals(previousID)) {
                     info = new FunctorNodesInfo(currentID, this.dbInfo.isDiscrete());
-                    functorInfos.add(info);
+                    functorNodesInfos.add(info);
                     previousID = currentID;
                 }
 
-                if (!currentFunctorID.equals(previousFunctorID)) {
-                    functor = new FunctorNode(currentFunctorID);
-                    info.addFunctorNode(functor);
-                    previousFunctorID = currentFunctorID;
+                if (!currentFunctorNodeID.equals(previousFunctorNodeID)) {
+                    functorNode = new FunctorNode(currentFunctorNodeID);
+                    info.addFunctorNode(functorNode);
+                    previousFunctorNodeID = currentFunctorNodeID;
                 }
 
-                functor.addState(results.getString("Value"));
+                functorNode.addState(results.getString("Value"));
             }
         } catch (SQLException e) {
-            throw new DataBaseException("Failed to retrieve the functors for the PVariables.", e);
+            throw new DataBaseException("Failed to retrieve the functor nodes information for the PVariables.", e);
         }
 
-        return functorInfos;
+        return functorNodesInfos;
     }
 
 
