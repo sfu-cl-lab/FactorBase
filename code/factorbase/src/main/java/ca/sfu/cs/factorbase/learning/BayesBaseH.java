@@ -364,7 +364,9 @@ public class BayesBaseH {
         FactorBaseDataBase database
     ) throws DataBaseException, SQLException, DataExtractionException, IOException, ParsingException, ScoringException {
         // Retrieve all the PVariables.
-        String[] pvar_ids = database.getPVariables();
+        List<String> pvar_ids = database.getPVariablesFunctorNodeInfo().stream().map(
+            functorNodeInfo -> functorNodeInfo.getID()
+        ).collect(Collectors.toList());
 
         String NoTuples = "";
         for(String id : pvar_ids) {

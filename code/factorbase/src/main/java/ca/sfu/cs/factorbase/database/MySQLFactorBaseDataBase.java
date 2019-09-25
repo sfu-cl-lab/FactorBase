@@ -138,41 +138,6 @@ public class MySQLFactorBaseDataBase implements FactorBaseDataBase {
     }
 
 
-    @Override
-    public String[] getPVariables() throws DataBaseException {
-        String query =
-            "SELECT pvid " +
-            "FROM " + this.baseDatabaseName + "_setup.PVariables " +
-            "WHERE index_number = 0;"; // O.S. March 21 ignore variables that aren't main.
-
-        try (
-            PreparedStatement statement = this.dbConnection.clientPrepareStatement(query);
-            ResultSet results = statement.executeQuery()
-        ) {
-            int size = 0;
-            if (results.last()) {
-                size = results.getRow();
-                results.beforeFirst();
-            }
-
-            String[] pvariables = new String[size];
-
-            int insertIndex = 0;
-            while (results.next()) {
-                pvariables[insertIndex] = results.getString("pvid");
-                insertIndex++;
-            }
-
-            return pvariables;
-        } catch (SQLException e) {
-            throw new DataBaseException(
-                "An error occurred when attempting to retrieve the PVariables from the database for FactorBase.",
-                e
-            );
-        }
-    }
-
-
     /**
      * Helper method to extract the edges from the given PreparedStatement.
      * @param statement - the PreparedStatement to extract the edge information from.

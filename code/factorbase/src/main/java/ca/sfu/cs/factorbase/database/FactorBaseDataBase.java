@@ -34,16 +34,6 @@ public interface FactorBaseDataBase {
 
 
     /**
-     * Retrieve all the PVariables for the database that FactorBase is trying to learn a Bayesian network for.
-     *
-     * @return the PVariables for the database that FactorBase is trying to learn a Bayesian network for.
-     *
-     * @throws DataBaseException if an error occurs when attempting to access the database.
-     */
-    String[] getPVariables() throws DataBaseException;
-
-
-    /**
      * Retrieve all the edges that are not allowed for the given rnode IDs.
      *
      * @param rnodeIDs - a list of the rnode IDs to get the forbidden edges for.
