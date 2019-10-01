@@ -53,7 +53,14 @@ INSERT INTO MetaQueries
         'Counts' AS TableType,
         'SELECT' AS ClauseType,
         '1node' AS EntryType,
-        CONCAT(P.pvid, '.', N.COLUMN_NAME, ' AS ', 1nid) AS Entries
+        CONCAT(
+            P.pvid,
+            '.',
+            N.COLUMN_NAME,
+            ' AS `',
+            1nid,
+            '`'
+        ) AS Entries
     FROM
         1Nodes N,
         PVariables P
@@ -85,7 +92,11 @@ INSERT INTO MetaQueries
        'Counts' AS TableType,
        'GROUPBY' AS ClauseType,
        '1node' AS EntryType,
-        1nid AS Entries
+        CONCAT(
+            '`',
+            1nid,
+            '`'
+        ) AS Entries
     FROM
         1Nodes N,
         PVariables P
@@ -129,7 +140,13 @@ INSERT INTO MetaQueries
         'Counts' AS TableType,
         'FROM' AS ClauseType,
         'rtable' AS EntryType,
-        CONCAT('@database@.', R.TABLE_NAME, ' AS ', rnid) AS Entries
+        CONCAT(
+            '@database@.',
+            R.TABLE_NAME,
+            ' AS `',
+            rnid,
+            '`'
+        ) AS Entries
     FROM
         RNodes R, LatticeRNodes L
     WHERE
@@ -138,8 +155,7 @@ INSERT INTO MetaQueries
 
 /**
  * We add a table to the FROM list that has a single column and single row that contains "T" for "true", whose header is
- * the rnid.  This simulates the case where all the relationships are true.  We need to replace the backticks in rnid to
- * make the rnid a valid name for the temporary table.
+ * the rnid.  This simulates the case where all the relationships are true.
  */
 INSERT INTO MetaQueries
     SELECT DISTINCT
@@ -147,7 +163,14 @@ INSERT INTO MetaQueries
         'Counts' AS TableType,
         'FROM' AS ClauseType,
         'rtable' AS EntryType,
-        CONCAT('(SELECT "T" AS ', rnid, ') AS ', '`temp_', replace(rnid, '`', ''), '`') AS Entries
+        CONCAT(
+            '(SELECT "T" AS `',
+            rnid,
+            '`) AS ',
+            '`temp_',
+            rnid,
+            '`'
+        ) AS Entries
     FROM
         RNodes R,
         LatticeRNodes L
@@ -165,7 +188,16 @@ INSERT INTO MetaQueries
         'Counts' AS TableType,
         'WHERE' AS ClauseType,
         'rtable' AS EntryType,
-        CONCAT(rnid, '.', COLUMN_NAME, ' = ', pvid, '.', REFERENCED_COLUMN_NAME) AS Entries
+        CONCAT(
+            '`',
+            rnid,
+            '`.',
+            COLUMN_NAME,
+            ' = ',
+            pvid,
+            '.',
+            REFERENCED_COLUMN_NAME
+        ) AS Entries
     FROM
         RNodes_pvars R,
         LatticeRNodes L
@@ -184,7 +216,11 @@ INSERT INTO MetaQueries
         'Counts' AS TableType,
         'SELECT' AS ClauseType,
         'rnid' AS EntryType,
-        orig_rnid AS Entries
+        CONCAT(
+            '`',
+            orig_rnid,
+            '`'
+        ) AS Entries
     FROM
         LatticeRNodes;
 
@@ -195,7 +231,15 @@ INSERT INTO MetaQueries
         'Counts' AS TableType,
         'SELECT' AS ClauseType,
         '2nid' AS EntryType,
-        CONCAT(L.orig_rnid, '.', COLUMN_NAME, ' AS ', N.2nid) AS Entries
+        CONCAT(
+            '`',
+            L.orig_rnid,
+            '`.',
+            COLUMN_NAME,
+            ' AS `',
+            N.2nid,
+            '`'
+        ) AS Entries
     FROM
         LatticeRNodes L,
         RNodes_2Nodes RN,
@@ -215,7 +259,11 @@ INSERT INTO MetaQueries
         'Counts' AS TableType,
         'GROUPBY' AS ClauseType,
         'rnid' AS EntryType,
-        orig_rnid AS Entries
+        CONCAT(
+            '`',
+            orig_rnid,
+            '`'
+        ) AS Entries
     FROM
         LatticeRNodes;
 
@@ -226,7 +274,11 @@ INSERT INTO MetaQueries
         'Counts' AS TableType,
         'GROUPBY' AS ClauseType,
         '2nid' AS EntryType,
-        N.2nid AS Entries
+        CONCAT(
+            '`',
+            N.2nid,
+            '`'
+        ) AS Entries
     FROM
         LatticeRNodes L,
         RNodes_2Nodes RN,
