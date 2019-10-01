@@ -9,7 +9,11 @@ SELECT DISTINCT
     'Join' as TableType,
     'COLUMN' as ClauseType,
     '2nid' as EntryType,
-    CONCAT(2nid, ' varchar(5)  default ', ' "N/A" ') AS Entries
+    CONCAT(
+        '`',
+        2nid,
+        '` VARCHAR(5) DEFAULT "N/A"'
+    ) AS Entries
 FROM
     RNodes_2Nodes N, LatticeRNodes L
 WHERE
@@ -35,7 +39,11 @@ select DISTINCT
     'Flat' AS TableType,
     'FROM' AS ClauseType,
     'table' AS EntryType,
-    concat('`',replace(short_rnid, '`', ''),'_counts`') AS Entries
+    CONCAT(
+        '`',
+        short_rnid,
+        '_counts`'
+    ) AS Entries
 from LatticeRNodes;
 
 /********
@@ -77,7 +85,11 @@ SELECT DISTINCT
     'Flat' AS TableType,
     'SELECT' AS ClauseType,
     'aggregate' AS EntryType,
-    CONCAT('SUM(`',REPLACE(short_rnid, '`', ''),'_counts`.`MULT`)',' as "MULT"') AS Entries
+    CONCAT(
+        'SUM(`',
+        short_rnid,
+        '_counts`.MULT) AS "MULT"'
+    ) AS Entries
 from
     LatticeRNodes;
 
@@ -119,19 +131,22 @@ SELECT DISTINCT
     'Star' AS TableType,
     'FROM' AS ClauseType,
     'table' AS EntryType,
-concat('`',replace(pvid, '`', ''),'_counts`')
-    AS Entries FROM
+    CONCAT(
+        pvid,
+        '_counts'
+    ) AS Entries
+FROM
     LatticeRNodes L, RNodes_pvars R
     where L.orig_rnid = R.rnid;
-    
-   
+
+
 /********************
  * August 24, 2017. The false table seems to be computed exclusively in the Java code and no longer in the script. This is probably because using SQL to do the join is too slow.
  * May change with Maria DB or Spark
  * 
  * now compute the False table. This is the difference of the star and R_counts table (R = F = R=* - R=T)
  */
-    
+
     /********************
 create table ADT_RNodes_False_Select_List as
 SELECT DISTINCT rnid, concat('(`',replace(rnid, '`', ''),'_star`.MULT','-','`',replace(rnid, '`', ''),'_flat`.MULT)',' AS "MULT"') as Entries
@@ -191,7 +206,11 @@ SELECT DISTINCT
     lattice_rel.removed as EntryType, 
     /** rnid = lattice_rel.removed should now point to the R_i of our paper **/
     /* a bit awkward to call it entry type */
-    concat('`', replace(lattice_mapping.short_rnid, '`', ''), '_CT`') AS Entries
+    CONCAT(
+        '`',
+        lattice_mapping.short_rnid,
+        '_CT`'
+    ) AS Entries
     /* current CT should be like conditioning on all other relationships being true */
     /* the parent represents the shortened Rchain */
 FROM
@@ -211,7 +230,10 @@ SELECT DISTINCT
     'STAR' as TableType, 
     'FROM' as ClauseType,
     LR.removed as EntryType,
-concat('`',replace(R.pvid, '`', ''),'_counts`')    AS Entries 
+    CONCAT(
+        R.pvid,
+        '_counts'
+    ) AS Entries
 /* should check that this includes expansion for pvid = course 0 */
 FROM
     lattice_rel LR, LatticeRNodes L, RNodes_pvars R
@@ -235,7 +257,11 @@ SELECT DISTINCT
     'STAR' as TableType, 
     'WHERE' as ClauseType,
     lattice_rel.removed as EntryType, 
-    concat(L.orig_rnid,' = "T"')  AS Entries 
+    CONCAT(
+        '`',
+        L.orig_rnid,
+        '` = "T"'
+    ) AS Entries
 FROM
     lattice_rel,    lattice_membership, LatticeRNodes L
 where 
