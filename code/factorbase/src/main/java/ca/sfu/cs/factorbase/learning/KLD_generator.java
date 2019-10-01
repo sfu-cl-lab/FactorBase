@@ -55,11 +55,14 @@ public class KLD_generator {
 
     public static void KLDGenerator(String database, Connection con2) throws SQLException, IOException {
         logger.info("KLD Generator starts");
-        String Rchain="";
+        String Rchain = "";
+        String shortRChain = "";
         Statement st = con2.createStatement();
         ResultSet rs = st.executeQuery(
-            "SELECT name AS RChain " +
+            "SELECT name AS RChain, short_rnid AS ShortRChain " +
             "FROM lattice_set " +
+            "JOIN lattice_mapping " +
+            "ON lattice_set.name = lattice_mapping.orig_rnid " +
             "WHERE lattice_set.length = (" +
                 "SELECT MAX(length) " +
                 "FROM lattice_set" +
@@ -68,6 +71,7 @@ public class KLD_generator {
 
         while(rs.next()) {
             Rchain = rs.getString("RChain");
+            shortRChain = rs.getString("ShortRChain");
         }
         rs.close();
         st.close();
@@ -75,13 +79,13 @@ public class KLD_generator {
         smoothed_CP(Rchain, con2); // Updated the pairs generator Jun 19.
         logger.info("smoothed CP tables are already to use.");
 
-        create_join_CP(database,Rchain, con2);  // Input the biggest rchain.
+        create_join_CP(database, Rchain, shortRChain, con2);  // Input the biggest rchain.
         logger.info("KLD table is already to use.");
 
-        generate_CLL(Rchain, con2);
+        generate_CLL(Rchain, shortRChain, con2);
         logger.info("CLL tables are already to use.");
 
-        plot_CLL(database, Rchain, con2);
+        plot_CLL(database, Rchain, shortRChain, con2);
 
         logger.info("\nKLD Generator Ends");
     }
@@ -218,7 +222,9 @@ public class KLD_generator {
         ArrayList<String> indexlist2 = new ArrayList<String>(indexlist1);
         // Delete MULT, FID.
         indexlist2.remove(0);
-        indexlist2.remove(0);
+        if (indexlist2.get(0).equalsIgnoreCase("FID")) {
+            indexlist2.remove(0);
+        }
 
         // Create clauses to add those indexes.
         // index1: MULT, current node and its parents.
@@ -488,9 +494,14 @@ public class KLD_generator {
     /**
      * Main function to generate KLD table for given Rchain.
      */
-    private static void create_join_CP(String databaseCT, String rchain, Connection con2) throws SQLException {
-        String table_name = databaseCT + "_CT." + rchain.substring(0, rchain.length() - 1) + "_CT`";
-        String newTable_name = rchain.substring(0, rchain.length() - 1) + "_CT_KLD`";
+    private static void create_join_CP(
+        String databaseCT,
+        String rchain,
+        String shortRChain,
+        Connection con2
+    ) throws SQLException {
+        String table_name = databaseCT + "_CT." + shortRChain.substring(0, shortRChain.length() - 1) + "_CT`";
+        String newTable_name = shortRChain.substring(0, shortRChain.length() - 1) + "_CT_KLD`";
 
         // table_name is input contingency table, newTable_name will be  output KLD table.
         Statement st = con2.createStatement();
@@ -668,12 +679,20 @@ public class KLD_generator {
      * Main function for generate method for all nodes in table.
      * Rchain needs to be given.
      */
-    private static void generate_CLL(String Rchain_value, Connection con2) throws SQLException {
+    private static void generate_CLL(
+        String rchain,
+        String shortRChain,
+        Connection con2
+    ) throws SQLException {
         Statement st = con2.createStatement();
 
         // Select all nodes in given Rchain.
         // Should be Path_BayesNets.
-        ResultSet rst = st.executeQuery("SELECT DISTINCT child FROM Path_BayesNets WHERE Rchain = '" + Rchain_value + "';");
+        ResultSet rst = st.executeQuery(
+            "SELECT DISTINCT child " +
+            "FROM Path_BayesNets " +
+            "WHERE Rchain = '" + rchain + "';"
+        );
         ArrayList<String> node_list=new ArrayList<String>();
 
         while(rst.next()) {
@@ -682,8 +701,7 @@ public class KLD_generator {
 
         // Generate CLL table for every node.
         for(int i = 0; i < node_list.size(); i++) {
-            generate_CLL_node(node_list.get(i), Rchain_value, con2);
-
+            generate_CLL_node(node_list.get(i), rchain, shortRChain, con2);
         }
 
         st.close();
@@ -693,12 +711,17 @@ public class KLD_generator {
     /**
      * Generate CLL table for one node.
      */
-    private static void generate_CLL_node(String Node_name, String Rchain_value, Connection con2) throws SQLException {
+    private static void generate_CLL_node(
+        String Node_name,
+        String rchain,
+        String shortRChain,
+        Connection con2
+    ) throws SQLException {
         Statement st = con2.createStatement();
         String table_name = Node_name.substring(0, Node_name.length() - 1) + "_CLL`";
 
         // Get markov blanket for given node in rchain.
-        ArrayList<String> node_blanket = markov_blank(Node_name, Rchain_value, con2);
+        ArrayList<String> node_blanket = markov_blank(Node_name, rchain, con2);
 
         // mrk: made markov blanket as a string for query.
         String mrk="";
@@ -721,7 +744,7 @@ public class KLD_generator {
             query2 = query2 + mrk;
             query2 = query2 + " , JP_DB, JP) SELECT " + Node_name;
             query2 = query2 + mrk;
-            query2 = query2 + " , SUM(JP_DB), SUM(JP) FROM " + Rchain_value.substring(0, Rchain_value.length() - 1) + "_CT_KLD` " + "GROUP BY " + Node_name;
+            query2 = query2 + " , SUM(JP_DB), SUM(JP) FROM " + shortRChain.substring(0, shortRChain.length() - 1) + "_CT_KLD` " + "GROUP BY " + Node_name;
             // To optimize.
             // Nov 28 @ zqian, adding covering index for group by list.
             query2 = query2 + mrk;
@@ -750,7 +773,7 @@ public class KLD_generator {
             query1 = query1 + ", JP_DB FLOAT, JP_DB_blanket FLOAT, CLL_DB FLOAT, JP FLOAT, JP_blanket FLOAT, CLL_JP FLOAT, AbsDif FLOAT) ENGINE=INNODB;";
             st.execute(query1);
             String query2 = "INSERT INTO " + table_name + "(" + Node_name + " , JP_DB, JP) SELECT " + Node_name;
-            query2 = query2 + " , SUM(JP_DB), SUM(JP) FROM " + Rchain_value.substring(0, Rchain_value.length() - 1) + "_CT_KLD` " + "GROUP BY " + Node_name;
+            query2 = query2 + " , SUM(JP_DB), SUM(JP) FROM " + shortRChain.substring(0, shortRChain.length() - 1) + "_CT_KLD` " + "GROUP BY " + Node_name;
             logger.fine("CLL query2: " + query2);
             st.execute(query2);
 
@@ -818,11 +841,16 @@ public class KLD_generator {
     /******************************************************************************************************************/
 
 
-    private static void plot_CLL(String database, String Rchain_value, Connection con2) throws SQLException, IOException {
+    private static void plot_CLL(
+        String database,
+        String rchain,
+        String shortRChain,
+        Connection con2
+    ) throws SQLException, IOException {
         Statement st = con2.createStatement();
         ArrayList<Double> cll_db = new ArrayList<Double>();
         ArrayList<Double> cll_jp = new ArrayList<Double>();
-        ResultSet rst_p = st.executeQuery("SELECT DISTINCT child FROM Path_BayesNets WHERE Rchain = '" + Rchain_value + "';");
+        ResultSet rst_p = st.executeQuery("SELECT DISTINCT child FROM Path_BayesNets WHERE Rchain = '" + rchain + "';");
         ArrayList<String> node_list = new ArrayList<String>();
 
         while(rst_p.next()) {
@@ -880,24 +908,13 @@ public class KLD_generator {
 
         String KLD="";
         Statement st1 = con2.createStatement();
-
-        ResultSet rs = st1.executeQuery(
-            "SELECT name AS RChain " +
-            "FROM lattice_set " +
-            "WHERE lattice_set.length = (" +
-                "SELECT MAX(length) " +
-                "FROM lattice_set " +
-            ");"
-        );
-        rs.next();
-        ResultSet rs1 = st1.executeQuery("SELECT SUM(kld) AS KLD FROM " + database + "_BN" + ".`" + rs.getString("RChain").replace("`", "") + "_CT_KLD`;");
+        ResultSet rs1 = st1.executeQuery("SELECT SUM(kld) AS KLD FROM " + database + "_BN" + ".`" + shortRChain.replace("`", "") + "_CT_KLD`;");
         rs1.next();
         KLD = rs1.getString("KLD");
         logger.fine(" KLD is: " + KLD);
         logger.fine("database: " + database);
         rs1.close();
         st1.close();
-        rs.close();
         st.close();
     }
 }
