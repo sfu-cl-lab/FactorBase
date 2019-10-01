@@ -532,106 +532,7 @@ public class BayesBaseCT_SortMerge {
             String shortRchain = rs.getString("shortRChain");
             logger.fine(" Short RChain: " + shortRchain);
 
-            // Create new statements.
-            Statement st2 = con_BN.createStatement();
-            Statement st3 = con_CT.createStatement();
-
-            // Create SELECT query string.
-            ResultSet rs2 = st2.executeQuery(
-                "SELECT DISTINCT Entries " +
-                "FROM MetaQueries " +
-                "WHERE Lattice_Point = '" + rchain + "' " +
-                "AND ClauseType = 'SELECT' " +
-                "AND TableType = 'Counts' " +
-                "AND EntryType = 'aggregate' " +
-
-                "UNION " +
-
-                "SELECT DISTINCT Entries " +
-                "FROM MetaQueries " +
-                "WHERE Lattice_Point = '" + rchain + "' " +
-                "AND ClauseType = 'SELECT' " +
-                "AND TableType = 'Counts' " +
-                "AND EntryType <> 'aggregate';"
-            );
-
-            String selectString = makeCommaSepQuery(rs2, "Entries", ", ");
-            logger.fine("SELECT String: " + selectString);
-
-            // Create FROM query string.
-            ResultSet rs3 = st2.executeQuery(
-                "SELECT DISTINCT Entries " +
-                "FROM MetaQueries " +
-                "WHERE Lattice_Point = '" + rchain + "' " +
-                "AND ClauseType = 'FROM' " +
-                "AND TableType = 'Counts';"
-            );
-
-            String fromString = makeCommaSepQuery(rs3, "Entries", ", ");
-            logger.fine("FROM String: " + fromString);
-
-            // Create WHERE query string.
-            ResultSet rs4 = st2.executeQuery(
-                "SELECT DISTINCT Entries " +
-                "FROM MetaQueries " +
-                "WHERE Lattice_Point = '" + rchain + "' " +
-                "AND ClauseType = 'WHERE' " +
-                "AND TableType = 'Counts';"
-            );
-
-            String whereString = makeCommaSepQuery(rs4, "Entries", " AND ");
-
-            // Create the final query.
-            String queryString =
-                "SELECT " + selectString + " " +
-                "FROM " + fromString + " " +
-                "WHERE " + whereString;
-
-            // Create GROUP BY query string.
-            // This seems unnecessarily complicated - isn't there always a GROUP BY clause?
-            // Okay, not with continuous data, but still.
-            // Continuous probably requires a different approach.  OS August 22.
-            if (!cont.equals("1")) {
-                ResultSet rs_6 = st2.executeQuery(
-                    "SELECT DISTINCT Entries " +
-                    "FROM MetaQueries " +
-                    "WHERE Lattice_Point = '" + rchain + "' " +
-                    "AND ClauseType = 'GROUPBY' " +
-                    "AND TableType = 'Counts';"
-                );
-
-                String GroupByString = makeCommaSepQuery(rs_6, "Entries", ", ");
-
-                if (!GroupByString.isEmpty()) {
-                    queryString = queryString + " GROUP BY "  + GroupByString;
-                }
-            }
-
-            String createString = "CREATE TABLE `" + shortRchain.replace("`", "") + "_counts`" + " AS " + queryString;
-            logger.fine("CREATE string: " + createString);
-
-            st3.execute("SET tmp_table_size = " + dbTemporaryTableSize + ";");
-            st3.executeQuery("SET max_heap_table_size = " + dbTemporaryTableSize + ";");
-            st3.execute(createString);
-
-            // Adding covering index May 21.
-            // Create index string.
-            ResultSet rs5 = st2.executeQuery(
-                "SELECT column_name AS Entries " +
-                "FROM information_schema.columns " +
-                "WHERE table_schema = '" + databaseName_CT + "' " +
-                "AND table_name = '" + shortRchain.replace("`", "") + "_counts';"
-            );
-
-            String IndexString = makeIndexQuery(rs5, "Entries", ", ");
-            st3.execute(
-                "ALTER TABLE `" + shortRchain.replace("`", "") + "_counts` " +
-                "ADD INDEX `" + shortRchain.replace("`", "") + "_Index` (" + IndexString + ");"
-            );
-
-            // Close statements.
-            st2.close();
-            st3.close();
+            generateCountsTable(rchain, shortRchain);
         }
 
         rs.close();
@@ -639,6 +540,7 @@ public class BayesBaseCT_SortMerge {
 
         logger.fine("\n Rnodes_counts are DONE \n");
     }
+
 
     /**
      * building the RNodes_counts tables,count2 simply copies the counts to the CT tables
@@ -659,124 +561,19 @@ public class BayesBaseCT_SortMerge {
             String shortRchain = rs.getString("shortRChain");
             logger.fine(" Short RChain: " + shortRchain);
 
-            // Create new statements.
-            Statement st2 = con_BN.createStatement();
+            String countsTableName = generateCountsTable(rchain, shortRchain);
+
+            // Create new statement.
             Statement st3 = con_CT.createStatement();
 
-            // Create SELECT query string.
-            ResultSet rs2 = st2.executeQuery(
-                "SELECT DISTINCT Entries " +
-                "FROM MetaQueries " +
-                "WHERE Lattice_Point = '" + rchain + "' " +
-                "AND ClauseType = 'SELECT' " +
-                "AND TableType = 'Counts' " +
-                "AND EntryType = 'aggregate' " +
-
-                "UNION " +
-
-                "SELECT DISTINCT Entries " +
-                "FROM MetaQueries " +
-                "WHERE Lattice_Point = '" + rchain + "' " +
-                "AND ClauseType = 'SELECT' " +
-                "AND TableType = 'Counts' " +
-                "AND EntryType <> 'aggregate';"
-            );
-
-            String selectString = makeCommaSepQuery(rs2, "Entries", ", ");
-            logger.fine("SELECT String: " + selectString);
-
-            // Create FROM query string.
-            ResultSet rs3 = st2.executeQuery(
-                "SELECT DISTINCT Entries " +
-                "FROM MetaQueries " +
-                "WHERE Lattice_Point = '" + rchain + "' " +
-                "AND ClauseType = 'FROM' " +
-                "AND TableType = 'Counts';"
-            );
-
-            String fromString = makeCommaSepQuery(rs3, "Entries", ", ");
-            logger.fine("FROM String: " + fromString);
-
-            // Create WHERE query string.
-            ResultSet rs4 = st2.executeQuery(
-                "SELECT DISTINCT Entries " +
-                "FROM MetaQueries " +
-                "WHERE Lattice_Point = '" + rchain + "' " +
-                "AND ClauseType = 'WHERE' " +
-                "AND TableType = 'Counts';"
-            );
-
-            String whereString = makeCommaSepQuery(rs4, "Entries", " AND ");
-
-            // Create the final query.
-            String queryString =
-                "SELECT " + selectString + " " +
-                "FROM " + fromString + " " +
-                "WHERE " + whereString;
-
-            // Create GROUP BY query string.
-            // This seems unnecessarily complicated - isn't there always a GROUP BY clause?
-            // Okay, not with continuous data, but still.
-            // Continuous probably requires a different approach.  OS August 22.
-            if (!cont.equals("1")) {
-                ResultSet rs_6 = st2.executeQuery(
-                    "SELECT DISTINCT Entries " +
-                    "FROM MetaQueries " +
-                    "WHERE Lattice_Point = '" + rchain + "' " +
-                    "AND ClauseType = 'GROUPBY' " +
-                    "AND TableType = 'Counts';"
-                );
-
-                String GroupByString = makeCommaSepQuery(rs_6, "Entries", ", ");
-
-                if (!GroupByString.isEmpty()) {
-                    queryString = queryString + " GROUP BY "  + GroupByString;
-                }
-            }
-
-            String createString = "CREATE TABLE `" + shortRchain.replace("`", "") + "_counts`" + " AS " + queryString;
-            logger.fine("CREATE string: " + createString);
-
-            st3.execute("SET tmp_table_size = " + dbTemporaryTableSize + ";");
-            st3.executeQuery("SET max_heap_table_size = " + dbTemporaryTableSize + ";");
-            st3.execute(createString);
-
-            // Adding covering index May 21.
-            // Create index string.
-            ResultSet rs5 = st2.executeQuery(
-                "SELECT column_name AS Entries " +
-                "FROM information_schema.columns " +
-                "WHERE table_schema = '" + databaseName_CT + "' " +
-                "AND table_name = '" + shortRchain.replace("`", "") + "_counts';"
-            );
-
-            String IndexString = makeIndexQuery(rs5, "Entries", ", ");
-            st3.execute(
-                "ALTER TABLE `" + shortRchain.replace("`", "") + "_counts` " +
-                "ADD INDEX `" + shortRchain.replace("`", "") + "_Index` (" + IndexString + ");"
-            );
-
-            String createString_CT = "CREATE TABLE `" + shortRchain.replace("`", "") + "_CT`" + " AS " + queryString;
+            String createString_CT =
+                "CREATE TABLE `" + shortRchain.replace("`", "") + "_CT`" + " AS " +
+                "SELECT * " +
+                "FROM `" + countsTableName + "`";
             logger.fine("CREATE String: " + createString_CT);
             st3.execute(createString_CT);
 
-            // Adding covering index May 21.
-            // Create index string.
-            ResultSet rs5_CT = st2.executeQuery(
-                "SELECT column_name AS Entries " +
-                "FROM information_schema.columns " +
-                "WHERE table_schema = '" + databaseName_CT + "' " +
-                "AND table_name = '" + shortRchain.replace("`", "") +"_CT';"
-            );
-
-            String IndexString_CT = makeIndexQuery(rs5_CT, "Entries", ", ");
-            st3.execute(
-                "ALTER TABLE `" + shortRchain.replace("`", "") + "_CT` " +
-                "ADD INDEX `" + shortRchain.replace("`", "") + "_Index` (" + IndexString_CT + ");"
-            );
-
-            // Close statements.
-            st2.close();
+            // Close statement.
             st3.close();
         }
 
@@ -784,6 +581,121 @@ public class BayesBaseCT_SortMerge {
         st.close();
 
         logger.fine("\n Rnodes_counts are DONE \n");
+    }
+
+
+    /**
+     * Generate the "_counts" table for the given RChain.
+     *
+     * @param rchain - the full form name of the RChain.
+     * @param shortRchain - the short form name of the RChain.
+     * @return the name of the "_counts" table generated.
+     * @throws SQLException if an error occurs when executing the queries.
+     */
+    private static String generateCountsTable(String rchain, String shortRchain) throws SQLException {
+        // Create new statements.
+        Statement st2 = con_BN.createStatement();
+        Statement st3 = con_CT.createStatement();
+
+        // Create SELECT query string.
+        ResultSet rs2 = st2.executeQuery(
+            "SELECT DISTINCT Entries " +
+            "FROM MetaQueries " +
+            "WHERE Lattice_Point = '" + rchain + "' " +
+            "AND ClauseType = 'SELECT' " +
+            "AND TableType = 'Counts' " +
+            "AND EntryType = 'aggregate' " +
+
+            "UNION " +
+
+            "SELECT DISTINCT Entries " +
+            "FROM MetaQueries " +
+            "WHERE Lattice_Point = '" + rchain + "' " +
+            "AND ClauseType = 'SELECT' " +
+            "AND TableType = 'Counts' " +
+            "AND EntryType <> 'aggregate';"
+        );
+
+        String selectString = makeCommaSepQuery(rs2, "Entries", ", ");
+        logger.fine("SELECT String: " + selectString);
+
+        // Create FROM query string.
+        ResultSet rs3 = st2.executeQuery(
+            "SELECT DISTINCT Entries " +
+            "FROM MetaQueries " +
+            "WHERE Lattice_Point = '" + rchain + "' " +
+            "AND ClauseType = 'FROM' " +
+            "AND TableType = 'Counts';"
+        );
+
+        String fromString = makeCommaSepQuery(rs3, "Entries", ", ");
+        logger.fine("FROM String: " + fromString);
+
+        // Create WHERE query string.
+        ResultSet rs4 = st2.executeQuery(
+            "SELECT DISTINCT Entries " +
+            "FROM MetaQueries " +
+            "WHERE Lattice_Point = '" + rchain + "' " +
+            "AND ClauseType = 'WHERE' " +
+            "AND TableType = 'Counts';"
+        );
+
+        String whereString = makeCommaSepQuery(rs4, "Entries", " AND ");
+
+        // Create the final query.
+        String queryString =
+            "SELECT " + selectString + " " +
+            "FROM " + fromString + " " +
+            "WHERE " + whereString;
+
+        // Create GROUP BY query string.
+        // This seems unnecessarily complicated - isn't there always a GROUP BY clause?
+        // Okay, not with continuous data, but still.
+        // Continuous probably requires a different approach.  OS August 22.
+        if (!cont.equals("1")) {
+            ResultSet rs_6 = st2.executeQuery(
+                "SELECT DISTINCT Entries " +
+                "FROM MetaQueries " +
+                "WHERE Lattice_Point = '" + rchain + "' " +
+                "AND ClauseType = 'GROUPBY' " +
+                "AND TableType = 'Counts';"
+            );
+
+            String GroupByString = makeCommaSepQuery(rs_6, "Entries", ", ");
+
+            if (!GroupByString.isEmpty()) {
+                queryString = queryString + " GROUP BY "  + GroupByString;
+            }
+        }
+
+        String countsTableName = shortRchain.replace("`", "") + "_counts";
+        String createString = "CREATE TABLE `" + countsTableName + "`" + " AS " + queryString;
+        logger.fine("CREATE string: " + createString);
+
+        st3.execute("SET tmp_table_size = " + dbTemporaryTableSize + ";");
+        st3.executeQuery("SET max_heap_table_size = " + dbTemporaryTableSize + ";");
+        st3.execute(createString);
+
+        // Adding covering index May 21.
+        // Create index string.
+        ResultSet rs5 = st2.executeQuery(
+            "SELECT column_name AS Entries " +
+            "FROM information_schema.columns " +
+            "WHERE table_schema = '" + databaseName_CT + "' " +
+            "AND table_name = '" + shortRchain.replace("`", "") + "_counts';"
+        );
+
+        String IndexString = makeIndexQuery(rs5, "Entries", ", ");
+        st3.execute(
+            "ALTER TABLE `" + shortRchain.replace("`", "") + "_counts` " +
+            "ADD INDEX `" + shortRchain.replace("`", "") + "_Index` (" + IndexString + ");"
+        );
+
+        // Close statements.
+        st2.close();
+        st3.close();
+
+        return countsTableName;
     }
 
     /**
