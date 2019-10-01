@@ -81,15 +81,6 @@ public class BayesBaseCT_SortMerge {
         //generate lattice tree
         int latticeHeight = LatticeGenerator.generate(con_BN);
 
-// may not need to run this script any more, using LatticeRnodes table OS August 25, 2017//
-       // bzsr.runScript("scripts/add_orig_rnid.sql");
-       // add_orig_rnid should be superseded by using Lattice Rnodes table in metaqueries script
-       // OS Sep 12, 2017
-        //build _BN part2: from metadata_2.sql
-
-       // bzsr.runScript("scripts/metadata.sql");
-       // this metadata is now created as views in db_setup, transferred by transfer.sql
-
         // empty query error,fixed by removing one duplicated semicolon. Oct 30, 2013
         //ToDo: No support for executing LinkCorrelation=0;
         if (cont.equals("1")) {
@@ -100,11 +91,8 @@ public class BayesBaseCT_SortMerge {
                 Config.SCRIPTS_DIRECTORY + "metaqueries_populate.sql",
                 databaseName_std
             );
-            // modified on Feb. 3rd, 2015, zqian, to include rnode as columns
-        //          bzsr.runScript("scripts/metadata_2_nolink.sql");
         }
-      //  bzsr.runScript("scripts/model_manager.sql");
-        //why are we running the model manager first? // commenting this out for now August 22
+
         MySQLScriptRunner.runScript(
             con_BN,
             Config.SCRIPTS_DIRECTORY + "metaqueries_RChain.sql",
@@ -168,14 +156,14 @@ public class BayesBaseCT_SortMerge {
             //copying the code seems very inelegant OS August 22
 
         }
-                                                                      
+
         if (linkCorrelation.equals("1")) {
             // handling Rnodes with Lattice Moebius Transform
             //initialize first level of rchain lattice
             for(int len = 1; len <= 1; len++) {
                 //building the _flat tables
                 BuildCT_Rnodes_flat(len);
-        
+
                 //building the _star tables
                 BuildCT_Rnodes_star(len);
 
@@ -245,7 +233,7 @@ public class BayesBaseCT_SortMerge {
         linkCorrelation = conf.getProperty("LinkCorrelations");
         cont = conf.getProperty("Continuous");
     }
-  
+
     /**
      * Connect to database via MySQL JDBC driver
      */
@@ -258,8 +246,8 @@ public class BayesBaseCT_SortMerge {
         }
         return (Connection) DriverManager.getConnection(CONN_STR, dbUsername, dbPassword);
     }
-        
-        
+
+
     /**
      * Building the _CT tables. Going up the Rchain lattice ( When rchain.length >=2)
      * @param int : length of the RChain
@@ -268,8 +256,6 @@ public class BayesBaseCT_SortMerge {
     private static void BuildCT_RChain_flat(int len) throws SQLException {
         logger.fine("\n ****************** \n" +
                 "Building the _CT tables for Length = "+len +"\n" );
-
-//        long l = System.currentTimeMillis();
 
         Statement st = con_BN.createStatement();
         ResultSet rs = st.executeQuery(
@@ -282,7 +268,6 @@ public class BayesBaseCT_SortMerge {
         int fc=0;
         while(rs.next())
         {
-            //System.out.print("fc ::"+ fc);
             // Get the short and full form rnids for further use.
             String rchain = rs.getString("RChain");
             logger.fine("\n RChain : " + rchain);
@@ -304,7 +289,7 @@ public class BayesBaseCT_SortMerge {
                 "WHERE child = '" + rchain + "' " +
                 "ORDER BY removed ASC;"
             ); // members of rchain
-            
+
             while(rs1.next())
             {       
                 long l2 = System.currentTimeMillis(); 
@@ -316,13 +301,13 @@ public class BayesBaseCT_SortMerge {
                 logger.fine("\n removed short : " + removedShort);
                 String BaseName = "`" + shortRchain.replace("`", "") + "_" + removedShort.replace("`", "") + "`";
                 logger.fine(" BaseName : " + BaseName );
-                
+
                 Statement st2 = con_BN.createStatement();
                 Statement st3 = con_CT.createStatement();
-                    
+
                 //  create select query string  
-                
-                            
+
+
                 ResultSet rs2 = st2.executeQuery("SELECT DISTINCT Entries FROM MetaQueries WHERE Lattice_Point = '" + rchain + "' and '"+removed+"' = EntryType and ClauseType = 'SELECT' and TableType = 'Star';");
                 String selectString = makeCommaSepQuery(rs2, "Entries", " , ");         
                 logger.fine("Select String : " + selectString);
@@ -349,30 +334,25 @@ public class BayesBaseCT_SortMerge {
                 else 
                     queryString = "Select " +  MultString+ " as `MULT` ,"+selectString + " from " + fromString;
                 logger.fine("Query String : " + queryString );   
-                
+
                 //make the rnid shorter 
                 String rnid_or=removedShort;
             
                 String cur_star_Table = "`" + removedShort.replace("`", "") + len + "_" + fc + "_star`";
                 String createStarString = "create table "+cur_star_Table +" as "+queryString;
-                    
-            
+
                 logger.fine("\n create star String : " + createStarString );
                 st3.execute(createStarString);      //create star table     
-            
+
                  //adding  covering index May 21
                 //create index string
                 ResultSet rs15 = st2.executeQuery("select column_name as Entries from information_schema.columns where table_schema = '"+databaseName_CT+"' and table_name = '"+cur_star_Table.replace("`","")+"';");
                 String IndexString = makeIndexQuery(rs15, "Entries", " , ");
-                //logger.fine("Index String : " + IndexString);
-                //logger.fine("alter table "+cur_star_Table+" add index "+cur_star_Table+"   ( "+IndexString+" );");
                 st3.execute("alter table "+cur_star_Table+" add index "+cur_star_Table+"   ( "+IndexString+" );");       
                 long l3 = System.currentTimeMillis(); 
                 logger.fine("Building Time(ms) for "+cur_star_Table+ " : "+(l3-l2)+" ms.\n");
                 //staring to create the _flat table
                 // Oct 16 2013
-                // here is the wrong version that always uses _counts table to generate the _flat table. 
-                //String    cur_CT_Table="`"+rchain.replace("`", "")+"_counts`";
                 // cur_CT_Table should be the one generated in the previous iteration
                 // for the very first iteration, it's _counts table
                 logger.fine("cur_CT_Table is : " + cur_CT_Table);
@@ -382,13 +362,11 @@ public class BayesBaseCT_SortMerge {
                 String createStringflat = "create table "+cur_flat_Table+" as "+queryStringflat;
                 logger.fine("\n create flat String : " + createStringflat );         
                 st3.execute(createStringflat);      //create flat table
-            
+
                  //adding  covering index May 21
                 //create index string
                 ResultSet rs25 = st2.executeQuery("select column_name as Entries from information_schema.columns where table_schema = '"+databaseName_CT+"' and table_name = '"+cur_flat_Table.replace("`","")+"';");
                 String IndexString2 = makeIndexQuery(rs25, "Entries", " , ");
-                //logger.fine("Index String : " + IndexString2);
-                //logger.fine("alter table "+cur_flat_Table+" add index "+cur_flat_Table+"   ( "+IndexString2+" );");
                 st3.execute("alter table "+cur_flat_Table+" add index "+cur_flat_Table+"   ( "+IndexString2+" );");
                 long l4 = System.currentTimeMillis(); 
                 logger.fine("Building Time(ms) for "+cur_flat_Table+ " : "+(l4-l3)+" ms.\n");
@@ -397,33 +375,25 @@ public class BayesBaseCT_SortMerge {
                 String cur_false_Table = "`" + removedShort.replace("`", "") + len + "_" + fc + "_false`";
                 
                 //create false table                    
-                //Sort_merge5.sort_merge(cur_star_Table,cur_flat_Table,cur_false_Table,con3);
-                //Sort_merge4.sort_merge(cur_star_Table,cur_flat_Table,cur_false_Table,con3);
                 Sort_merge3.sort_merge(cur_star_Table,cur_flat_Table,cur_false_Table,con_CT);
                  // a separate procedure for computing the false table as the mult difference between star and flat
                  // trying to optimize this big join
-                
+
                  //adding  covering index May 21
                 //create index string
                 ResultSet rs35 = st2.executeQuery("select column_name as Entries from information_schema.columns where table_schema = '"+databaseName_CT+"' and table_name = '"+cur_false_Table.replace("`","")+"';");
                 String IndexString3 = makeIndexQuery(rs35, "Entries", " , ");
-                //logger.fine("Index String : " + IndexString3);
-                //logger.fine("alter table "+cur_false_Table+" add index "+cur_false_Table+"   ( "+IndexString3+" );");
                 st3.execute("alter table "+cur_false_Table+" add index "+cur_false_Table+"   ( "+IndexString3+" );");       
                 long l5 = System.currentTimeMillis(); 
                 logger.fine("Building Time(ms) for "+cur_false_Table+ " : "+(l5-l4)+" ms.\n");
-         
+
                 // staring to create the CT table
                 ResultSet rs_45 = st2.executeQuery("select column_name as Entries from information_schema.columns where table_schema = '"+databaseName_CT+"' and table_name = '"+cur_CT_Table.replace("`","")+"';");
                 String CTJoinString = makeUnionSepQuery(rs_45, "Entries", " , ");
-                //logger.fine("select column_name as Entries from information_schema.columns where table_schema = '"+databaseName3+"' and table_name = '"+cur_CT_Table.replace("`","")+"';");
                 logger.fine("CT Join String : " + CTJoinString);
-                
+
                 //join false table with join table to add in rnid (= F) and 2nid (= n/a). then can union with CT table
                 String QueryStringCT = "select "+CTJoinString+" from "+cur_CT_Table + " union " + "select "+CTJoinString+" from " + cur_false_Table +", `" + rnid_or.replace("`", "") +"_join`";
-                //logger.fine("\n Query String for CT Table: "+ QueryStringCT);
-                
-                //String Next_CT_Table="OS_Dummy";
                 String Next_CT_Table="";
                 if (rs1.next())
                     Next_CT_Table="`"+BaseName.replace("`", "")+"_CT`";
@@ -433,9 +403,7 @@ public class BayesBaseCT_SortMerge {
                 // Oct 16 2013
                 // preparing the CT table for next iteration
                 cur_CT_Table = Next_CT_Table;   
-                
-                //logger.fine("\n name for Next_CT_Table : "+Next_CT_Table);
-             
+
                 logger.fine("\n create CT table string: create table "+Next_CT_Table+" as " + QueryStringCT +"\n*****\n");
                 st3.execute("create  table "+Next_CT_Table+" as " + QueryStringCT);  //create CT table  
                 rs1.previous();
@@ -444,12 +412,10 @@ public class BayesBaseCT_SortMerge {
                 //create index string
                 ResultSet rs45 = st2.executeQuery("select column_name as Entries from information_schema.columns where table_schema = '"+databaseName_CT+"' and table_name = '"+Next_CT_Table.replace("`","")+"';");
                 String IndexString4 = makeIndexQuery(rs45, "Entries", " , ");
-                //logger.fine("Index String : " + IndexString4);
-                //logger.fine("alter table "+Next_CT_Table+" add index "+Next_CT_Table+"   ( "+IndexString4+" );");
                 st3.execute("alter table "+Next_CT_Table+" add index "+Next_CT_Table+"   ( "+IndexString4+" );");       
 
                 fc++;   
-                
+
                 //  close statements
                 st2.close();            
                 st3.close();
@@ -459,11 +425,8 @@ public class BayesBaseCT_SortMerge {
             st1.close();
             rs1.close();
         }
-        //logger.fine("count "+count+"\n");
         rs.close();
         st.close();
-//        long l2 = System.currentTimeMillis(); //@zqian : measure structure learning time
-        //System.out.print("Building Time(ms): "+(l2-l)+" ms.\n");
         logger.fine("\n Build CT_RChain_TABLES for length = "+len+" are DONE \n" );
     }
 
@@ -489,21 +452,19 @@ public class BayesBaseCT_SortMerge {
             //  create from query string
             ResultSet rs3 = st2.executeQuery("select distinct Entries from MetaQueries where Lattice_Point = '" + pvid + "' and ClauseType = 'FROM' and TableType = 'Counts' ;");
             String fromString = makeCommaSepQuery(rs3, "Entries", " , ");
-            //logger.fine("From String : " + fromString);and TableType = 'Counts'and TableType = 'Counts'
 
             ResultSet rs_6 = st2.executeQuery("select distinct Entries from MetaQueries where Lattice_Point = '" + pvid + "' and ClauseType = 'GROUPBY' and TableType = 'Counts' ;");
             String GroupByString = makeCommaSepQuery(rs_6, "Entries", " , ");
-            //logger.fine("GroupBy String : " + GroupByString);
 
             /*
              *  Check for groundings on pvid
              *  If exist, add as where clause
              */
             logger.fine( "con_BN:SELECT id FROM Groundings WHERE pvid = '"+pvid+"';" );
-            
+
             ResultSet rsGrounding = null;
             String whereString = "";
-            
+
             try
             {
                 rsGrounding = st2.executeQuery("select distinct Entries from MetaQueries where Lattice_Point = '" + pvid + "' and ClauseType = 'WHERE' and TableType = 'Counts' ;");
@@ -512,14 +473,14 @@ public class BayesBaseCT_SortMerge {
             {
                 logger.severe( "No WHERE clause for groundings" );
             }
-            
+
             if ( null != rsGrounding )
             {
 
                 whereString = makeCommaSepQuery(rsGrounding, "Entries", " AND ");
 
             }
-            
+
             logger.fine( "whereString:" + whereString );
 
             //  create the final query
@@ -531,14 +492,12 @@ public class BayesBaseCT_SortMerge {
             if (!cont.equals("1"))
                 if (!GroupByString.isEmpty()) queryString = queryString + " group by"  + GroupByString;
 
-            //logger.fine("Query String : " + queryString );
             logger.fine("Create String : " + "create table "+pvid+"_counts"+" as "+queryString );
             st3.execute("create table "+pvid+"_counts"+" as "+queryString);
             //adding  covering index May 21
             //create index string
             ResultSet rs4 = st2.executeQuery("select column_name as Entries from information_schema.columns where table_schema = '"+databaseName_CT+"' and table_name = '"+pvid+"_counts';");
             String IndexString = makeIndexQuery(rs4, "Entries", " , ");
-            //logger.fine("Index String : " + IndexString);
             st3.execute("alter table "+pvid+"_counts"+" add  index "+pvid+"_Index   ( "+IndexString+" );");
 
             //  close statements
@@ -593,7 +552,6 @@ public class BayesBaseCT_SortMerge {
             //  create where query string
             ResultSet rs4 = st2.executeQuery("select distinct Entries from MetaQueries where Lattice_Point = '" + rchain + "' and ClauseType = 'WHERE' and TableType = 'Counts' ;" );
             String whereString = makeCommaSepQuery(rs4, "Entries", " and ");
-            //logger.fine("Where String : " + whereString);
 
             //  create the final query
             String queryString = "Select " + selectString + " from " + fromString + " where " + whereString;
@@ -603,10 +561,8 @@ public class BayesBaseCT_SortMerge {
             if (!cont.equals("1")) {
                 ResultSet rs_6 = st2.executeQuery("select distinct Entries from MetaQueries where Lattice_Point = '" + rchain + "' and ClauseType = 'GROUPBY' and TableType = 'Counts' ;");
                 String GroupByString = makeCommaSepQuery(rs_6, "Entries", " , ");
-                //logger.fine("GroupBy String : " + GroupByString);
 
                 if (!GroupByString.isEmpty()) queryString = queryString + " group by"  + GroupByString;
-                //logger.fine("Query String : " + queryString );
             }
 
             String createString = "CREATE TABLE `" + shortRchain.replace("`", "") + "_counts`" + " AS " + queryString;
@@ -625,8 +581,6 @@ public class BayesBaseCT_SortMerge {
                 "AND table_name = '" + shortRchain.replace("`", "") + "_counts';"
             );
             String IndexString = makeIndexQuery(rs5, "Entries", " , ");
-            //logger.fine("Index String : " + IndexString);
-            //logger.fine("alter table `"+rchain.replace("`", "") +"_counts`"+" add index `"+rchain.replace("`", "") +"_Index`   ( "+IndexString+" );");
             st3.execute(
                 "ALTER TABLE `" + shortRchain.replace("`", "") + "_counts` " +
                 "ADD INDEX `" + shortRchain.replace("`", "") +"_Index` (" + IndexString + ");"
@@ -664,17 +618,14 @@ public class BayesBaseCT_SortMerge {
             ResultSet rs2 = st2.executeQuery("select distinct Entries from MetaQueries where Lattice_Point = '" + rchain + "' and ClauseType = 'SELECT' and TableType = 'Counts' and EntryType = 'aggregate' union select distinct Entries from MetaQueries where Lattice_Point = '" + rchain + "' and ClauseType = 'SELECT' and TableType = 'Counts' and EntryType <> 'aggregate';;");
                                               
             String selectString = makeCommaSepQuery(rs2, "Entries", " , ");
-            //logger.fine("Select String : " + selectString);
 
             //  create from query string
             ResultSet rs3 = st2.executeQuery("select distinct Entries from MetaQueries where Lattice_Point = '" + rchain + "' and ClauseType = 'FROM' and TableType = 'Counts';" );
             String fromString = makeCommaSepQuery(rs3, "Entries", " , ");
-            //logger.fine("From String : " + fromString);
 
             //  create where query string
             ResultSet rs4 = st2.executeQuery("select distinct Entries from MetaQueries where Lattice_Point = '" + rchain + "' and ClauseType = 'WHERE' and TableType = 'Counts';" );
             String whereString = makeCommaSepQuery(rs4, "Entries", " and ");
-            //logger.fine("Where String : " + whereString);
 
             //  create the final query
             String queryString = "Select " + selectString + " from " + fromString + " where " + whereString;
@@ -684,10 +635,8 @@ public class BayesBaseCT_SortMerge {
             if (!cont.equals("1")) {
                 ResultSet rs_6 = st2.executeQuery("select distinct Entries from MetaQueries where Lattice_Point = '" + rchain + "' and ClauseType = 'GROUPBY' and TableType = 'Counts';");
                 String GroupByString = makeCommaSepQuery(rs_6, "Entries", " , ");
-                //logger.fine("GroupBy String : " + GroupByString);
 
                 if (!GroupByString.isEmpty()) queryString = queryString + " group by"  + GroupByString;
-                //logger.fine("Query String : " + queryString );
             }
 
             String createString = "create table `"+rchain.replace("`", "") +"_counts`"+" as "+queryString;
@@ -698,8 +647,6 @@ public class BayesBaseCT_SortMerge {
             //create index string
             ResultSet rs5 = st2.executeQuery("select column_name as Entries from information_schema.columns where table_schema = '"+databaseName_CT+"' and table_name = '"+rchain.replace("`", "") +"_counts';");
             String IndexString = makeIndexQuery(rs5, "Entries", " , ");
-            //logger.fine("Index String : " + IndexString);
-            //logger.fine("alter table `"+rchain.replace("`", "") +"_counts`"+" add index `"+rchain.replace("`", "") +"_Index`   ( "+IndexString+" );");
             st3.execute("alter table `"+rchain.replace("`", "") +"_counts`"+" add index `"+rchain.replace("`", "") +"_Index`   ( "+IndexString+" );");
 
             String createString_CT = "create table `"+rchain.replace("`", "") +"_CT`"+" as "+queryString;
@@ -708,19 +655,14 @@ public class BayesBaseCT_SortMerge {
 
             //adding  covering index May 21
             //create index string
-            
+
             ResultSet rs5_CT = st2.executeQuery("select column_name as Entries from information_schema.columns where table_schema = '"+databaseName_CT+"' and table_name = '"+rchain.replace("`", "") +"_CT';");
             String IndexString_CT = makeIndexQuery(rs5_CT, "Entries", " , ");
-            //logger.fine("Index String : " + IndexString);
-            //logger.fine("alter table `"+rchain.replace("`", "") +"_counts`"+" add index `"+rchain.replace("`", "") +"_Index`   ( "+IndexString+" );");
             st3.execute("alter table `"+rchain.replace("`", "") +"_CT`"+" add index `"+rchain.replace("`", "") +"_Index`   ( "+IndexString_CT+" );");
-
 
             //  close statements
             st2.close();
             st3.close();
-
-
         }
 
         rs.close();
@@ -757,12 +699,10 @@ public class BayesBaseCT_SortMerge {
             //  create select query string
             ResultSet rs2 = st2.executeQuery("select distinct Entries from MetaQueries where Lattice_Point = '" + rchain + "' and TableType = 'Flat' and ClauseType = 'SELECT';");
             String selectString = makeCommaSepQuery(rs2, "Entries", " , ");
-            //logger.fine("Select String : " + selectString);
 
             //  create from query string
             ResultSet rs3 = st2.executeQuery("select distinct Entries from MetaQueries where Lattice_Point = '" + rchain + "' and TableType = 'Flat' and ClauseType = 'FROM';" );
             String fromString = makeCommaSepQuery(rs3, "Entries", " , ");
-            //logger.fine("From String : " + fromString);
 
             //  create the final query
             String queryString = "Select " + selectString + " from " + fromString ;
@@ -771,7 +711,6 @@ public class BayesBaseCT_SortMerge {
             if (!cont.equals("1")) {
                 ResultSet rs_6 = st2.executeQuery("select distinct Entries from MetaQueries where Lattice_Point = '" + rchain + "' and TableType = 'Flat' and ClauseType = 'GROUPBY';");
                 String GroupByString = makeCommaSepQuery(rs_6, "Entries", " , ");
-                //logger.fine("GroupBy String : " + GroupByString);
 
                 if (!GroupByString.isEmpty()) queryString = queryString + " group by"  + GroupByString;
                 logger.fine("Query String : " + queryString );
@@ -790,8 +729,6 @@ public class BayesBaseCT_SortMerge {
                 "AND table_name = '" + shortRchain.replace("`", "") + "_flat';"
             );
             String IndexString = makeIndexQuery(rs5, "Entries", " , ");
-            //logger.fine("Index String : " + IndexString);
-            //logger.fine("alter table `"+rchain.replace("`", "") +"_flat`"+" add index `"+rchain.replace("`", "") +"_flat`   ( "+IndexString+" );");
             st3.execute(
                 "ALTER TABLE `" + shortRchain.replace("`", "") + "_flat` " +
                 "ADD INDEX `" + shortRchain.replace("`", "") + "_flat` (" + IndexString + ");"
@@ -840,20 +777,17 @@ public class BayesBaseCT_SortMerge {
             
             ResultSet rs2 = st2.executeQuery("select distinct Entries from MetaQueries where Lattice_Point = '" + rchain + "' and TableType = 'Star' and ClauseType = 'SELECT';");
             String selectString = makeCommaSepQuery(rs2, "Entries", " , ");
-            //logger.fine("Select String : " + selectString);
 
 
             //  create from MULT string
             ResultSet rs3 = st2.executeQuery("select distinct Entries from MetaQueries where Lattice_Point = '" + rchain + "' and TableType = 'Star' and ClauseType = 'FROM';");
             String MultString = makeStarSepQuery(rs3, "Entries", " * ");
             //makes the aggregate function to be used in the select clause //
-            //logger.fine("Mult String : " + MultString+ " as `MULT`");
             // looks like rs3 and rs4 contain the same data. Ugly! OS August 24, 2017
 
             //  create from query string
             ResultSet rs4 = st2.executeQuery("select distinct Entries from MetaQueries where Lattice_Point = '" + rchain + "' and TableType = 'Star' and ClauseType = 'FROM';");
             String fromString = makeCommaSepQuery(rs4, "Entries", " , ");
-            //logger.fine("From String : " + fromString);
 
             //  create the final query
             String queryString = "";
@@ -861,9 +795,7 @@ public class BayesBaseCT_SortMerge {
                 queryString = "Select " +  MultString+ " as `MULT` ,"+selectString + " from " + fromString ;
             } else {
                 queryString = "Select " +  MultString+ " as `MULT`  from " + fromString ;
-
             }
-            //logger.fine("Query String : " + queryString );
 
             String createString = "CREATE TABLE `" + shortRchain.replace("`", "") + "_star`" + " as " + queryString;
             logger.fine("\n create String : " + createString );
@@ -878,13 +810,10 @@ public class BayesBaseCT_SortMerge {
                 "AND table_name = '" + shortRchain.replace("`", "") + "_star';"
             );
             String IndexString = makeIndexQuery(rs5, "Entries", " , ");
-            //logger.fine("Index String : " + IndexString);
-            //logger.fine("alter table `"+rchain.replace("`", "") +"_star`"+" add index `"+rchain.replace("`", "") +"_star`   ( "+IndexString+" );");
             st3.execute(
                 "ALTER TABLE `" + shortRchain.replace("`", "") + "_star` " +
                 "ADD INDEX `" + shortRchain.replace("`", "") + "_star` (" + IndexString + ");"
             );
-
 
             //  close statements
             st2.close();
@@ -925,8 +854,6 @@ public class BayesBaseCT_SortMerge {
             Statement st2 = con_BN.createStatement();
             Statement st3 = con_CT.createStatement();
             /**********starting to create _flase table***using sort_merge*******************************/
-            //Sort_merge5.sort_merge("`"+rchain.replace("`", "")+"_star`","`"+rchain.replace("`", "") +"_flat`","`"+rchain.replace("`", "") +"_false`",con3);
-            //Sort_merge4.sort_merge("`"+rchain.replace("`", "")+"_star`","`"+rchain.replace("`", "") +"_flat`","`"+rchain.replace("`", "") +"_false`",con3);
             Sort_merge3.sort_merge(
                 "`" + shortRchain.replace("`", "") + "_star`",
                 "`" + shortRchain.replace("`", "") + "_flat`",
@@ -934,7 +861,7 @@ public class BayesBaseCT_SortMerge {
                 con_CT
             );
             // computing false table as mult difference between star and false. Separate procedure for optimizing this big join.
-            
+
             //adding  covering index May 21
             //create index string
             ResultSet rs15 = st2.executeQuery(
@@ -944,8 +871,6 @@ public class BayesBaseCT_SortMerge {
                 "AND table_name = '" + shortRchain.replace("`", "") + "_false';"
             );
             String IndexString = makeIndexQuery(rs15, "Entries", " , ");
-            //logger.fine("Index String : " + IndexString);
-            //  logger.fine("alter table `"+rchain.replace("`", "") +"_false`"+" add index `"+rchain.replace("`", "") +"_false`   ( "+IndexString+" );");
             st3.execute(
                 "ALTER TABLE `" + shortRchain.replace("`", "") + "_false` " +
                 "ADD INDEX `" + shortRchain.replace("`", "") +"_false` (" + IndexString + ");"
@@ -962,7 +887,6 @@ public class BayesBaseCT_SortMerge {
             // reading the column names from information_schema.columns, and the output will remove the "`" automatically,
             // however some columns contain "()" and MySQL does not support "()" well, so we have to add the "`" back.
             String UnionColumnString = makeUnionSepQuery(rs5, "Entries", " , ");
-            //logger.fine("Union Column String : " + UnionColumnString);
 
             //join false table with join table to introduce rnid (=F) and 2nids (= n/a). Then union result with counts table.
             String createCTString = "CREATE TABLE `" + shortRchain.replace("`", "") + "_CT` AS SELECT " + UnionColumnString +
@@ -982,8 +906,6 @@ public class BayesBaseCT_SortMerge {
                 "AND table_name = '" + shortRchain.replace("`", "") + "_CT';"
             );
             String IndexString2 = makeIndexQuery(rs25, "Entries", " , ");
-            //logger.fine("Index String : " + IndexString2);
-            //logger.fine("alter table `"+rchain.replace("`", "") +"_CT`"+" add index `"+rchain.replace("`", "") +"_CT`   ( "+IndexString2+" );");
             st3.execute(
                 "ALTER TABLE `" + shortRchain.replace("`", "") + "_CT` " +
                 "ADD INDEX `" + shortRchain.replace("`", "") + "_CT` (" + IndexString2 + ");"
@@ -1037,7 +959,6 @@ public class BayesBaseCT_SortMerge {
             {
                 ColumnString = ColumnString.substring(0, ColumnString.length()-1);
             }
-                //logger.fine("Column String : " + ColumnString);
             String createString = "create table `"+short_rnid.replace("`", "") +"_join` ("+ ColumnString +");";
                 logger.fine("create String : " + createString);
 
@@ -1065,17 +986,13 @@ public class BayesBaseCT_SortMerge {
         ArrayList<String> parts = new ArrayList<String>();
 
         while(rs.next()){
-            //stringQuery += rs.getString(colName) + del;
             String temp=rs.getString(colName);
             String temp1=temp.replace("`", "");
             temp = "`"+temp1+"`.`MULT` ";
             parts.add(temp);
-
         }
-        //stringQuery = stringQuery.substring(0, stringQuery.length() - del.length());
 
         return String.join(del, parts);
-        //return stringQuery;
     }
 
 
@@ -1126,7 +1043,6 @@ public class BayesBaseCT_SortMerge {
 
         ArrayList<String> parts = new ArrayList<String>();
         int count=0;
-        //String stringQuery = "";
         while(rs.next()&count<16){
 
                 String temp =rs.getString(colName);
