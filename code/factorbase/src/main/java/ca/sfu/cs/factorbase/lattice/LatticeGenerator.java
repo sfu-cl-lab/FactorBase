@@ -45,7 +45,11 @@ public class LatticeGenerator {
         for(int i = 0; i < tempList.size(); i++) {
             short_rnid = (char) fc; // Explict type casting to convert integer to character.
             fc++;
-            tempst.execute("UPDATE LatticeRNodes SET short_rnid = '`" + short_rnid + "`' WHERE orig_rnid = '" + tempList.get(i) + "';");
+            tempst.execute(
+                "UPDATE LatticeRNodes " +
+                "SET short_rnid = '" + short_rnid + "' " +
+                "WHERE orig_rnid = '" + tempList.get(i) + "';"
+            );
         }
 
         tempst.close();
@@ -131,12 +135,12 @@ public class LatticeGenerator {
         String rchain,
         Map<String, FunctorNodesInfo> functorNodesInfos
     ) {
-        String[] rnodeIDs = rchain.replace("`", "").replace("),", ") ").split(" ");
+        String[] rnodeIDs = rchain.replace("),", ") ").split(" ");
         FunctorNodesInfo rchainFunctorNodeInfo = new FunctorNodesInfo(rchain, true);
 
         // for loop to merge all the functor node information into a single FunctorNodesInfo for the RChain.
         for (String rnodeID : rnodeIDs) {
-            FunctorNodesInfo rnodeFunctorInfo = functorNodesInfos.get("`" + rnodeID + "`");
+            FunctorNodesInfo rnodeFunctorInfo = functorNodesInfos.get(rnodeID);
             rchainFunctorNodeInfo.merge(rnodeFunctorInfo);
         }
 
@@ -167,9 +171,8 @@ public class LatticeGenerator {
         );
 
         while(rs.next()) {
-            // Remove the flanking backticks from the orig_rnid before adding them to the set.
             String rnodeID = rs.getString(rnodeColumnName);
-            rnodeIDs.add(rnodeID.substring(1, rnodeID.length() - 1));
+            rnodeIDs.add(rnodeID);
             logger.fine("The rnid is: " + rnodeID);
         }
 
@@ -187,9 +190,9 @@ public class LatticeGenerator {
         st.execute("TRUNCATE lattice_set;");
 
         for(String set : firstSets) {
-            st.execute("INSERT INTO lattice_set (name, length) VALUES ('`" + set + "`', 1);"); // Adding backticks.
-            st.execute("INSERT INTO lattice_rel (parent, child, removed) VALUES ('EmptySet', '`" + set + "`', '`" + set + "`');");
-            st.execute("INSERT INTO lattice_membership (name, member) VALUES ('`" + set + "`', '`" + set + "`');");
+            st.execute("INSERT INTO lattice_set (name, length) VALUES ('" + set + "', 1);");
+            st.execute("INSERT INTO lattice_rel (parent, child, removed) VALUES ('EmptySet', '" + set + "', '" + set + "');");
+            st.execute("INSERT INTO lattice_membership (name, member) VALUES ('" + set + "', '" + set + "');");
         }
 
         st.close();
@@ -204,7 +207,7 @@ public class LatticeGenerator {
             ArrayList<String> sets = new ArrayList<String>();
             ResultSet rs = st.executeQuery("SELECT name FROM lattice_set WHERE length = " + setLength + ";");
             while(rs.next()) {
-                String h = rs.getString("name").substring(1, rs.getString("name").length() - 1); // Deleting backticks from beginning and end.
+                String h = rs.getString("name");
                 sets.add(h);
             }
 
@@ -240,20 +243,16 @@ public class LatticeGenerator {
                     // Is this really necessary?  I'd like to enforce foreign key constraints. O.S.
                     Statement st = dbConnection.createStatement();
                     // Add new set.
-                    // Adding backticks.
-                    newSetName = "`" + newSetName + "`";
-                    secondSet = "`" + secondSet + "`";
-
                     st.execute("INSERT IGNORE INTO lattice_set (name, length) VALUES ('" + newSetName + "', " + newSetLength + ");");
                     // Add relation.
                     // Add first set to the table, first set is the removed child from the child to build the parent.
-                    st.execute("INSERT IGNORE INTO lattice_rel (parent, child, removed) VALUES ('" + secondSet + "', '" + newSetName + "', '`" + firstSet + "`');");
+                    st.execute("INSERT IGNORE INTO lattice_rel (parent, child, removed) VALUES ('" + secondSet + "', '" + newSetName + "', '" + firstSet + "');");
                     // Add members.
                     // Add first member.
-                    st.execute("INSERT IGNORE INTO lattice_membership (name, member) VALUES ('" + newSetName +"', '`" + firstSet + "`');");
+                    st.execute("INSERT IGNORE INTO lattice_membership (name, member) VALUES ('" + newSetName +"', '" + firstSet + "');");
                     // Add the rest.
                     for (String secondSetMembers : newSet) {
-                        st.execute("INSERT IGNORE INTO lattice_membership (name, member) VALUES ('" + newSetName + "', '`" + secondSetMembers + "`');");
+                        st.execute("INSERT IGNORE INTO lattice_membership (name, member) VALUES ('" + newSetName + "', '" + secondSetMembers + "');");
                     }
 
                     st.close();
@@ -268,9 +267,9 @@ public class LatticeGenerator {
      *
      * Example mappings:
      * orig_rnid                                              rnid
-     * `RA(prof0,student0),registration(course0,student0)`    `a,b`
-     * `RA(prof0,student0)`                                   `a`
-     * `registration(course0,student0)`                       `b`
+     * RA(prof0,student0),registration(course0,student0)      a,b
+     * RA(prof0,student0)                                     a
+     * registration(course0,student0)                         b
      *
      */
     private static void mapping_rnid(Connection dbConnection) throws SQLException {
@@ -283,22 +282,16 @@ public class LatticeGenerator {
         ArrayList <String>list_rnid = new ArrayList<String>(); // For storing lattice_set name.
 
         while(rst.next()) {
-            // Make sure that all the special characters are escaped properly by only having backticks that flank the
-            // string.
-            String cleanedName = rst.getString(1).replace("`", "");
-            cleanedName = "`" + cleanedName + "`";
-            list_rnid.add(cleanedName);
+            list_rnid.add(rst.getString("name"));
         }
 
         for(String rnid : list_rnid) {
             // Splitting any Rchains into its components.
-            String[] rnodes = rnid.substring(1, rnid.length() - 1).replace("),", ") ").split(" ");
+            String[] rnodes = rnid.replace("),", ") ").split(" ");
             StringJoiner shortRnidCSV = new StringJoiner(",");
 
             // for loop to find the short RNode ID of the components of any Rchains.
             for(String rnode : rnodes) {
-                rnode = "`" + rnode + "`";
-
                 // Getting short RNodes ID from LatticeRNodes table.
                 ResultSet rst2 = st.executeQuery("SELECT short_rnid FROM LatticeRNodes WHERE orig_rnid = '" + rnode + "';");
                 rst2.absolute(1); // Moving the cursor to the first item in the results.
@@ -306,10 +299,7 @@ public class LatticeGenerator {
                 shortRnidCSV.add(rst2.getString(1));
             }
 
-            // Make sure that all the special characters are escaped properly by only having backticks flanking the
-            // string.
-            String short_rnid = shortRnidCSV.toString().replace("`", "");
-            short_rnid = "`" + short_rnid + "`";
+            String short_rnid = shortRnidCSV.toString();
 
             st.execute(
                 "INSERT INTO lattice_mapping (orig_rnid, short_rnid) " +
@@ -328,7 +318,7 @@ public class LatticeGenerator {
 
         // Get primary key for first set.
         // Use rnid.
-        ResultSet rs = st.executeQuery("SELECT pvid1, pvid2 FROM LatticeRNodes WHERE orig_rnid = '`" + firstSet + "`';");
+        ResultSet rs = st.executeQuery("SELECT pvid1, pvid2 FROM LatticeRNodes WHERE orig_rnid = '" + firstSet + "';");
         while(rs.next()) {
             firstSetKeys.add(rs.getString("pvid1"));
             firstSetKeys.add(rs.getString("pvid2"));
@@ -336,7 +326,7 @@ public class LatticeGenerator {
 
         // Get primary key for second set.
         for (String secondSet : secondSetParts) {
-            rs = st.executeQuery("SELECT pvid1, pvid2 FROM LatticeRNodes WHERE orig_rnid = '`" + secondSet + "`';");
+            rs = st.executeQuery("SELECT pvid1, pvid2 FROM LatticeRNodes WHERE orig_rnid = '" + secondSet + "';");
             while(rs.next()) {
                 secondSetKeys.add(rs.getString("pvid1"));
                 secondSetKeys.add(rs.getString("pvid2"));
