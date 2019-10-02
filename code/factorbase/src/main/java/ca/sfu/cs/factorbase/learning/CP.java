@@ -70,6 +70,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.StringJoiner;
 import java.util.logging.Logger;
 
 import ca.sfu.cs.common.Configuration.Config;
@@ -262,7 +263,7 @@ public class CP {
         );
         ArrayList<String> noparent_tables = new ArrayList<String>();
 
-        String bigTable = shortRchain.substring(0, shortRchain.length() - 1) + "_CT`";
+        String bigTable = shortRchain + "_CT";
         logger.fine("bigTable Name: " + bigTable + "\n");
         while(rst.next()) {
             logger.fine("noparent node: " + rst.getString(1));
@@ -271,7 +272,9 @@ public class CP {
         // zqian Nov 13, computing sum(mult) from biggest CT table
         // and close the connections
         java.sql.Statement st2 = con1.createStatement();
-        String sql2 = "select sum(MULT) from " + databaseName2 + "." + bigTable + ";"; // only need to do this query once, Nov 12 zqian
+        String sql2 =
+            "SELECT SUM(MULT) " +
+            "FROM " + databaseName2 + ".`" + bigTable + "`;"; // Only need to do this query once, Nov 12 zqian.
         logger.fine(sql2 + "\n");
         ResultSet deno = st2.executeQuery(sql2);
         deno.absolute(1);
@@ -291,14 +294,29 @@ public class CP {
     public static void nopar_update(String rchain, String bigTable, String nodeName, Connection con1, long mydeno) throws SQLException {
         java.sql.Statement st = con1.createStatement();
         java.sql.Statement st2 = con1.createStatement();
-        String table_name = nodeName.substring(0, nodeName.length() - 1) + "_CP`";
-        st.execute("drop table if exists " + table_name + ";");
-        logger.fine(table_name + "\n");
+        String tableName = nodeName + "_CP";
+        st.execute("DROP TABLE IF EXISTS `" + tableName + "`;");
+        logger.fine(tableName + "\n");
         // change the ChildValue to FID -- Jan 23 Yan
-        st.execute("create table " + table_name + " ( " + nodeName + " varchar(200) NOT NULL, CP float(7,6), MULT bigint(20), local_mult bigint(20))");
-        st.execute("insert into " + table_name + "(" + nodeName + ") select distinct " + nodeName + " from " +databaseName2 + "." + bigTable + ";");
+        st.execute(
+            "CREATE TABLE `" + tableName + "` (" +
+                "`" + nodeName + "` VARCHAR(200) NOT NULL, " +
+                "CP FLOAT(7,6), " +
+                "MULT BIGINT(20), " +
+                "local_mult BIGINT(20)" +
+            ");"
+        );
+        st.execute(
+            "INSERT INTO `" + tableName + "` (`" + nodeName + "`) " +
+            "SELECT DISTINCT `" + nodeName + "` " +
+            "FROM " + databaseName2 + ".`" + bigTable + "`;"
+        );
 
-        ResultSet rst=st.executeQuery("select " + nodeName + " from " + table_name + ";");
+        ResultSet rst = st.executeQuery(
+            "SELECT `" + nodeName + "` " +
+            "FROM `" + tableName + "`;"
+        );
+
         ArrayList<String> column_value = new ArrayList<String>();
         while(rst.next()) {
             logger.fine("column value: " + rst.getString(1) + "\n");
@@ -306,7 +324,10 @@ public class CP {
         }
 
         for(int i = 0; i < column_value.size(); i++) {
-            String sql = "select sum(MULT) from " + databaseName2 + "." + bigTable + " where " + nodeName + " = '" + column_value.get(i) + "';";
+            String sql =
+                "SELECT SUM(MULT) " +
+                "FROM " + databaseName2 + ".`" + bigTable + "` " +
+                "WHERE `" + nodeName + "` = '" + column_value.get(i) + "';";
             logger.fine(sql+"\n");
             ResultSet nume = st2.executeQuery(sql);
             // nume is the sum over all contingency table rows for a specific value.
@@ -316,10 +337,17 @@ public class CP {
             logger.fine(mynume + "\n");
 
             // change the ChildValue to FID -- Jan 23 Yan
-            String sql3 = "update " + table_name + " set MULT = " + mynume + " where " + nodeName + " = '" + column_value.get(i) + "';";
+            String sql3 =
+                "UPDATE `" + tableName + "` " +
+                "SET MULT = " + mynume + " " +
+                "WHERE `" + nodeName + "` = '" + column_value.get(i) + "';";
             logger.fine(sql3 + "\n");
             st2.execute(sql3);
-            st2.execute("update " + table_name + " set CP = MULT / " + mydeno + " where "  + nodeName + " = '" + column_value.get(i) +"';");
+            st2.execute(
+                "UPDATE `" + tableName + "` " +
+                "SET CP = MULT / " + mydeno + " " +
+                "WHERE `" + nodeName + "` = '" + column_value.get(i) + "';"
+            );
 
             ResultSet rs = st.executeQuery("select Tuples from  Pvars_Not_In_Family where child = '" + nodeName + "' ;");
             long local = 1;
@@ -335,35 +363,66 @@ public class CP {
                 mynume = mynume / local;
             }
             // updating the local_mult = mult / local , Dec 3rd
-            String sql4 = "update " + table_name + " set local_mult = " + mynume + " where " + nodeName + " = '" + column_value.get(i) + "';";
+            String sql4 =
+                "UPDATE `" + tableName + "` " +
+                "SET local_mult = " + mynume + " " +
+                "WHERE `" + nodeName + "` = '" + column_value.get(i) + "';";
             logger.fine(sql4 + "\n");
             st2.execute(sql4);
         }
 
-        st2.execute("Alter table " + table_name + " add `likelihood` float(20,2);");
-        st2.execute("update " + table_name + " set `likelihood` =log(CP)*local_mult;"); // Dec 2nd, likelihood = log(cp) * mult
+        st2.execute(
+            "ALTER TABLE `" + tableName + "` " +
+            "ADD likelihood FLOAT(20,2);"
+        );
+        st2.execute(
+            "UPDATE `" + tableName + "` " +
+            "SET likelihood = LOG(CP) * local_mult;" // Dec 2nd, likelihood = log(cp) * mult.
+        );
         // LOG10() Return the base-10 logarithm of the argument LOG2() Return the base-2 logarithm of the argument //
         // LOG() Return the natural logarithm of the first argument
 
-        ResultSet logsum = st2.executeQuery("select sum(likelihood) as loglike from " + table_name + ";");
+        ResultSet logsum = st2.executeQuery(
+            "SELECT SUM(likelihood) AS loglike " +
+            "FROM `" + tableName + "`;");
         logsum.absolute(1);
         double mylogsum = logsum.getDouble(1);
-        st2.execute("update Scores set LogLikelihood= " + mylogsum + " where Scores.Fid = '" + nodeName + "';");
-        ResultSet samplesize = st2.executeQuery("select sum(local_mult) from " + table_name + ";");
+        st2.execute(
+            "UPDATE Scores " +
+            "SET LogLikelihood = " + mylogsum + " " +
+            "WHERE Scores.Fid = '" + nodeName + "';"
+        );
+        ResultSet samplesize = st2.executeQuery(
+            "SELECT SUM(local_mult) " +
+            "FROM `" + tableName + "`;"
+        );
 //        ResultSet samplesize = st2.executeQuery("select sum(local_mult) from " + table_name + " where cp < 1.0;");
 
         samplesize.absolute(1);
         long mysize = Long.parseLong(samplesize.getString(1));
-        st2.execute("update Scores set SampleSize = " + mysize + " where Scores.Fid = '" + nodeName + "';");
-        ResultSet big_samplesize = st2.executeQuery("select sum(mult) from " + table_name + ";");
+        st2.execute(
+            "UPDATE Scores " +
+            "SET SampleSize = " + mysize + " " +
+            "WHERE Scores.Fid = '" + nodeName + "';"
+        );
+        ResultSet big_samplesize = st2.executeQuery(
+            "SELECT SUM(MULT) " +
+            "FROM `" + tableName + "`;"
+        );
 
         big_samplesize.absolute(1);
         long big_mysize = Long.parseLong(big_samplesize.getString(1));
         st2.execute("update Scores set Big_SampleSize = " + big_mysize + " where Scores.Fid = '" + nodeName + "';");
 
         // compute the prior June 23, 2014, zqian
-        st.execute("alter table " + table_name + " add prior float(7,6);");
-        st.execute("UPDATE " + table_name + " SET prior = CP ;");
+        st.execute(
+            "ALTER TABLE `" + tableName + "` " +
+            "ADD prior FLOAT(7,6);"
+        );
+        st.execute(
+            "UPDATE `" + tableName + "` " +
+            "SET prior = CP;"
+        );
 
         st2.close();
         st.close();
@@ -378,7 +437,7 @@ public class CP {
         ResultSet rst = st.executeQuery("select distinct child FROM Path_BayesNets where Rchain = '" + rchain + "' and parent <> ''");
         ArrayList<String> hasparent_tables = new ArrayList<String>();
 
-        String bigTable = shortRchain.substring(0, shortRchain.length() - 1) + "_CT`";
+        String bigTable = shortRchain + "_CT";
         // find name of contingency table that has the data we need for the chain
 
         while(rst.next()) {
@@ -403,67 +462,91 @@ public class CP {
             parent_name.add(parents.getString(1));
         }
 
-        String from_st = parent_name.get(0);
-        for(int i = 1; i < parent_name.size(); i++) {
-            from_st = from_st + " , " + parent_name.get(i);
+        StringJoiner csvJoiner = new StringJoiner("`, `", "`", "`");
+        for(String parent : parent_name) {
+            csvJoiner.add(parent);
         }
-        logger.fine("from clause: " +from_st+"\n");
+
+        String tableColumns = csvJoiner.toString();
+        logger.fine("Table columns: " + tableColumns + "\n");
 
         // general strategy: apply group by parent values to CT table, to find sum of parent counts. Then use that to divide the joint child-family count, which we get from the CT table.
-        String table_name = nodeName.substring(0, nodeName.length() - 1) + "_CP`";
-        logger.fine(table_name + "\n");
-        st.execute("drop table if exists " + table_name + ";");
+        String escapedTableName = "`" + nodeName + "_CP`";
+        st.execute("DROP TABLE IF EXISTS " + escapedTableName + ";");
         st.execute("drop table if exists temp;");
 
+        String createTableString =
+            "CREATE TABLE " + escapedTableName + " AS " +
+            "SELECT SUM(MULT) AS MULT, `" + nodeName + "`, " + tableColumns + ", 0 as ParentSum " +
+            "FROM " + databaseName2 + ".`" + bigTable + "` " +
+            "GROUP BY `" + nodeName + "`, " + tableColumns + ";";
+
         // Change the ChildValue to FID -- Jan 23 Yan
-        logger.fine(
-            "create table " + table_name + " as select sum(MULT) as MULT, " + nodeName + " , " + from_st +
-            " , 0 as ParentSum from " + databaseName2 + "." + bigTable + " group by " + nodeName + ", " + from_st + ";"
+        logger.fine(createTableString);
+        st.execute(createTableString);
+        st.execute(
+            "ALTER TABLE " + escapedTableName + " " +
+            "CHANGE COLUMN ParentSum ParentSum bigint(20);"
         );
         st.execute(
-            "create table " + table_name + " as select sum(MULT) as MULT, " + nodeName + "  , " + from_st +
-            " , 0 as ParentSum from " + databaseName2 + "." + bigTable + " group by " + nodeName + ", " + from_st + ";"
+            "ALTER TABLE " + escapedTableName + " " +
+            "ADD `local_mult` bigint(20);"
         );
-        st.execute("Alter table " + table_name + " CHANGE COLUMN ParentSum ParentSum bigint(20);");
-        st.execute("Alter table " + table_name + " add `local_mult` bigint(20);");
 
         // Add index to CP table
         // Change the ChildValue to FID -- Jan 23 Yan
-        String index = "ALTER TABLE " +  table_name + " ADD INDEX " + table_name + "( " + nodeName + " ASC ";
-        for (int i = 0; i < parent_name.size(); ++i) {
-            index = index + ", " + parent_name.get(i) + " ASC ";
+        String indexQuery =
+            "ALTER TABLE " +  escapedTableName + " " +
+            "ADD INDEX " + escapedTableName + " (`" + nodeName + "` ASC, ";
+
+        StringJoiner csvAscJoiner = new StringJoiner("` ASC, `", "`", "` ASC");
+        for(String parent : parent_name) {
+            csvAscJoiner.add(parent);
         }
-        index = index + ");";
+
+        String parentIndexColumns = csvAscJoiner.toString();
+        indexQuery += parentIndexColumns;
+        indexQuery += ");";
 //        logger.fine(index);
         // Dec 12
-        st.execute(index);
+        st.execute(indexQuery);
 
-        logger.fine("create table temp as select MULT, " + from_st + ", sum(MULT) as ParentSum from " + table_name + " group by " + from_st + ";");
-        st.execute("create table temp as select MULT, " + from_st + ", sum(MULT) as ParentSum from " + table_name + " group by " + from_st + ";");
+        String createTableQuery =
+            "CREATE TABLE temp AS " +
+            "SELECT MULT, " + tableColumns + ", SUM(MULT) AS ParentSum " +
+            "FROM " + escapedTableName + " " +
+            "GROUP BY " + tableColumns + ";";
+        logger.fine(createTableQuery);
+        st.execute(createTableQuery);
 
         // Add index to temp table
-        String index_temp = "ALTER TABLE temp ADD INDEX  temp_ ( " + parent_name.get(0) +" ASC";
-        for (int i = 1; i < parent_name.size(); ++i) {
-            index_temp = index_temp + ", " + parent_name.get(i) + " ASC ";
-        }
+        String index_temp = "ALTER TABLE temp ADD INDEX  temp_ (";
+        index_temp += parentIndexColumns;
         index_temp = index_temp + ");";
 //        logger.fine(index_temp);
         // Dec 12
         st.execute(index_temp);
 
-        String updateclause = "update " + table_name + ", temp set " + table_name + ".ParentSum=temp.ParentSum where "
-            + table_name + "." + parent_name.get(0) + " = temp." + parent_name.get(0);
+        String updateclause =
+            "UPDATE " + escapedTableName + ", temp SET " + escapedTableName + ".ParentSum = temp.ParentSum " +
+            "WHERE " + escapedTableName + ".`" + parent_name.get(0) + "` = temp.`" + parent_name.get(0) + "`";
         for (int i = 1; i < parent_name.size(); ++i) {
-            updateclause = updateclause + " and " + table_name + "." + parent_name.get(i) + " = temp." + parent_name.get(i);
+            updateclause += " AND " + escapedTableName + ".`" + parent_name.get(i) + "` = temp.`" + parent_name.get(i) + "`";
         }
         logger.fine(updateclause + ";");
         st.execute(updateclause + ";");
 
-        st.execute("alter table " + table_name + " add CP float(7,6);");
+        st.execute(
+            "ALTER TABLE " + escapedTableName + " " +
+            "ADD CP FLOAT(7,6);"
+        );
         // Our resolution is only up to 6 digits. This is mainly to help with exporting to BIF format later.
-        st.execute("alter table " + table_name + " add likelihood float(20,2);");
+        st.execute(
+            "ALTER TABLE " + escapedTableName + " " +
+            "ADD likelihood FLOAT(20,2);"
+        );
 
-        st.execute("update " + table_name + " set CP = MULT / ParentSum ;");
+        st.execute("UPDATE " + escapedTableName + " SET CP = MULT / ParentSum;");
 
 //        st.execute("update " + table_name + " set likelihood = log(CP) * mult;"); // Nov 29, likelihood = log(cp) * mult
 
@@ -474,7 +557,7 @@ public class CP {
         while(rs.next()) {
             local = Long.parseLong (rs.getString("Tuples"));
             logger.fine("local is " + local);
-            String sql = "update "+ table_name + " set local_mult = mult / " + local + ";";
+            String sql = "UPDATE " + escapedTableName + " SET local_mult = MULT / " + local + ";";
 //            String sql = "update " + table_name + " set local_mult = mult;";
             logger.fine(sql);
             // set local_mult = mult, May 21, 2014 zqian
@@ -482,27 +565,36 @@ public class CP {
         }
         if (!rs.first()) {
             logger.fine("local is 1, ******" );
-            String sql = "update " + table_name + " set local_mult = mult / " + local + ";";
+            String sql = "UPDATE " + escapedTableName + " SET local_mult = MULT / " + local + ";";
             st1.execute(sql);
         }
 
-        st.execute("update " + table_name + " set likelihood = log(CP) * local_mult;");
+        st.execute("UPDATE " + escapedTableName + " SET likelihood = LOG(CP) * local_mult;");
         st.execute("drop table if exists temp;");
 
         // Next, compute scores for each node.
 
-        ResultSet mylog = st.executeQuery("select sum(likelihood) from " + table_name + ";");
+        ResultSet mylog = st.executeQuery(
+            "SELECT SUM(likelihood) " +
+            "FROM " + escapedTableName + ";"
+        );
         mylog.absolute(1);
         double mylogsum = mylog.getDouble(1);
         st.execute("update Scores set LogLikelihood= " + mylogsum + " where Scores.Fid = '" + nodeName + "';");
 
-        ResultSet mysample = st.executeQuery("select sum(local_mult) from " + table_name + ";");
+        ResultSet mysample = st.executeQuery(
+            "SELECT SUM(local_mult) " +
+            "FROM " + escapedTableName + ";"
+        );
 
 //        ResultSet mysample = st.executeQuery("select sum(local_mult) from " + table_name + " where cp < 1.0 ;");
         long size = 0;
         mysample.absolute(1);
         size = Long.parseLong(mysample.getString(1));
-        ResultSet big_mysample = st.executeQuery("select sum(mult) from " + table_name + ";");
+        ResultSet big_mysample = st.executeQuery(
+            "SELECT SUM(MULT) " +
+            "FROM " + escapedTableName + ";"
+        );
         long big_size = 0;
         big_mysample.absolute(1);
         big_size = Long.parseLong(big_mysample.getString(1));
@@ -515,18 +607,29 @@ public class CP {
 //        st.execute("update Scores set BICNormal = BIC / SampleSize where Scores.Fid = '" + nodeName + "';");
 
         // Compute the prior June 23, 2014, zqian
-        st.execute("alter table " + table_name + " add prior float(7,6);");
-        ResultSet rst1 = st.executeQuery("Select sum(local_mult) from " + table_name);
+        st.execute(
+            "ALTER TABLE " + escapedTableName + " " +
+            "ADD prior FLOAT(7,6);"
+        );
+        ResultSet rst1 = st.executeQuery(
+            "SELECT SUM(local_mult) " +
+            "FROM " + escapedTableName
+        );
         rst1.absolute(1);
         long total_sum = rst1.getLong(1);
 
         st.execute("DROP TABLE IF EXISTS temp;");
-        String createtemp = "CREATE TABLE IF NOT EXISTS temp SELECT sum(local_mult) as prior_parsum, `"+ nodeName.replace("`","") + "` FROM " + table_name + " GROUP BY `" +  nodeName.replace("`","")   +"` ;";
+        String createtemp =
+            "CREATE TABLE IF NOT EXISTS temp " +
+            "SELECT SUM(local_mult) AS prior_parsum, `"+ nodeName + "` " +
+            "FROM " + escapedTableName + " " +
+            "GROUP BY `" + nodeName + "`;";
         logger.fine("temp: " + createtemp);
         st.execute(createtemp);
 
-        String updateprior = "UPDATE " + table_name + ", temp" + " SET " + table_name + ".prior = temp.prior_parsum / " + total_sum
-            + " WHERE " + table_name + ".`" + nodeName.replace("`","") + "`=temp.`" + nodeName.replace("`","") + "`;";
+        String updateprior =
+            "UPDATE " + escapedTableName + ", temp" + " SET " + escapedTableName + ".prior = temp.prior_parsum / " + total_sum + " " +
+            "WHERE " + escapedTableName + ".`" + nodeName + "` = temp.`" + nodeName + "`;";
 
         logger.fine("updateprior: " + updateprior);
         st.execute(updateprior);
