@@ -193,8 +193,7 @@ public class Exporter {
         while(temp.next()) {
             ID = "";
             MLNStr = "";
-            t = temp.getString(N + "nid").substring(1);
-            t = t.substring(0, t.length() - 1);
+            t = temp.getString(N + "nid");
             int last = 0;
 
             for(int i = 0; i < t.length(); i++) { // Build MLN string.
@@ -206,8 +205,7 @@ public class Exporter {
             }
 
             MLNStr += "," + temp.getString("COLUMN_NAME").toUpperCase() + "_";
-            ID = temp.getString(N + "nid").substring(1);
-            ID = ID.substring(0, ID.length() - 1);
+            ID = temp.getString(N + "nid");
             nodes[counter] = new BNNode(temp.getString("COLUMN_NAME"), ID, MLNStr, false); // Create corresponding BNNode.
             counter++;
         }
@@ -240,8 +238,7 @@ public class Exporter {
             while(temp.next()) {
                 ID = "";
                 MLNStr = "B_";
-                t = temp.getString("rnid").substring(1); // Get rnid without ''.
-                t = t.substring(0, t.length() - 1);
+                t = temp.getString("rnid");
                 int last = 0;
 
                 for(int i = 0; i < t.length(); i++) { // Build MLN string from rnid.
@@ -253,8 +250,7 @@ public class Exporter {
                 }
 
                 MLNStr += ")";
-                ID = temp.getString("rnid").substring(1); // Get rnid without ''.
-                ID = ID.substring(0, ID.length() - 1);
+                ID = temp.getString("rnid");
                 nodes[counter] = new BNNode(ID, ID, MLNStr, true); // Create corresponding BNNode.
                 counter++;
             }
