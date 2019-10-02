@@ -48,9 +48,9 @@ public class RunComponent {
         if (component.equals("SortMerge")) {
             System.out.println("Starting Sort Merge!");
             Sort_merge3.sort_merge(
-                escapeName(config.getProperty("SortMergeCartesianTable")),
-                escapeName(config.getProperty("SortMergeSubsetTable")),
-                escapeName(config.getProperty("SortMergeOutputTable")),
+                config.getProperty("SortMergeCartesianTable"),
+                config.getProperty("SortMergeSubsetTable"),
+                config.getProperty("SortMergeOutputTable"),
                 dbConnection
             );
         } else if (component.equals("DataExtraction")) {
