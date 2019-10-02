@@ -153,8 +153,8 @@ public class MySQLFactorBaseDataBase implements FactorBaseDataBase {
             // file that gets generated.
             edges.add(
                 new Edge(
-                    results.getString("parent").replace("`", ""),
-                    results.getString("child").replace("`", "")
+                    results.getString("parent"),
+                    results.getString("child")
                 )
             );
         }

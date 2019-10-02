@@ -47,12 +47,9 @@ public class BIFExport {
 		while (rs.next()) {
 			//get the child and parent for this row
 			String childVar = rs.getString("child");
-			childVar= childVar.replace("`","") ;
-			// @zqian replace the "`" with during export the data to .csv file since tetrad does not support this  Apr.3rd, 2013
-			
+
 			String parentVar = rs.getString("parent");
-			parentVar =parentVar.replace("`",""); // @zqian replace the "`" with during export the data to .csv file since tetrad does not support this
-			
+
 			//if we haven't see this child yet, write it out as a variable to the bif file
 			if (!variables.contains(childVar)) {
 				variables.add(childVar);

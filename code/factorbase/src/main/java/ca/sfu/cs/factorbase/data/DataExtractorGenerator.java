@@ -120,7 +120,7 @@ public class DataExtractorGenerator {
 
             while(results.next()) {
                 pvid = results.getString("pvid");
-                extractionQuery = "SELECT * FROM " + dbInfo.getCTDatabaseName() + ".`" + pvid.replace("`", "") + "_counts` WHERE MULT > 0;";
+                extractionQuery = "SELECT * FROM " + dbInfo.getCTDatabaseName() + ".`" + pvid + "_counts` WHERE MULT > 0;";
                 dbQuery = dbConnection.prepareStatement(extractionQuery);
                 dataExtractors.put(pvid, new MySQLDataExtractor(dbQuery, dbInfo.getCountColumnName(), dbInfo.isDiscrete()));
             }
@@ -162,9 +162,9 @@ public class DataExtractorGenerator {
             );
 
             while(results.next()) {
-                rchain = results.getString("RChain").replace("`", "");
+                rchain = results.getString("RChain");
                 shortRchain = results.getString("short_RChain");
-                extractionQuery = "SELECT * FROM " + dbInfo.getCTDatabaseName() + ".`" + shortRchain.replace("`", "") + "_CT` WHERE MULT > 0;";
+                extractionQuery = "SELECT * FROM " + dbInfo.getCTDatabaseName() + ".`" + shortRchain + "_CT` WHERE MULT > 0;";
                 dbQuery = dbConnection.prepareStatement(extractionQuery);
                 dataExtractors.put(rchain, new MySQLDataExtractor(dbQuery, dbInfo.getCountColumnName(), dbInfo.isDiscrete()));
             }
