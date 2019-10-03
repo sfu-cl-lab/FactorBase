@@ -96,8 +96,17 @@ public class MySQLFactorBaseDataBase implements FactorBaseDataBase {
             );
             MySQLScriptRunner.callSP(this.dbConnection, "find_values");
 
+            // Initialize tables for the global relationship lattice.
+            MySQLScriptRunner.runScript(
+                this.dbConnection,
+                Config.SCRIPTS_DIRECTORY + "latticegenerator_initialize.sql",
+                this.baseDatabaseName
+            );
+
             // Switch to start using the BN database.
             this.dbConnection.setCatalog(this.dbInfo.getBNDatabaseName());
+
+            // Initialize tables for the local relationship lattice.
             MySQLScriptRunner.runScript(
                 this.dbConnection,
                 Config.SCRIPTS_DIRECTORY + "latticegenerator_initialize.sql",
@@ -378,11 +387,11 @@ public class MySQLFactorBaseDataBase implements FactorBaseDataBase {
         Map<String, FunctorNodesInfo> functorNodesInfos = this.getRNodesFunctorNodeInfo();
 
         try {
-            this.dbConnection.setCatalog(this.dbInfo.getBNDatabaseName());
+            this.dbConnection.setCatalog(this.dbInfo.getSetupDatabaseName());
             return LatticeGenerator.generateGlobal(
                 functorNodesInfos,
                 this.dbConnection,
-                this.dbInfo.getSetupDatabaseName() + ".RNodes",
+                "RNodes",
                 "rnid"
             );
         } catch (SQLException e) {

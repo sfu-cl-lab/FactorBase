@@ -318,7 +318,11 @@ public class LatticeGenerator {
 
         // Get primary key for first set.
         // Use rnid.
-        ResultSet rs = st.executeQuery("SELECT pvid1, pvid2 FROM LatticeRNodes WHERE orig_rnid = '" + firstSet + "';");
+        ResultSet rs = st.executeQuery(
+            "SELECT pvid1, pvid2 " +
+            "FROM RNodes " +
+            "WHERE rnid = '" + firstSet + "';"
+        );
         while(rs.next()) {
             firstSetKeys.add(rs.getString("pvid1"));
             firstSetKeys.add(rs.getString("pvid2"));
@@ -326,7 +330,11 @@ public class LatticeGenerator {
 
         // Get primary key for second set.
         for (String secondSet : secondSetParts) {
-            rs = st.executeQuery("SELECT pvid1, pvid2 FROM LatticeRNodes WHERE orig_rnid = '" + secondSet + "';");
+            rs = st.executeQuery(
+                "SELECT pvid1, pvid2 " +
+                "FROM RNodes " +
+                "WHERE rnid = '" + secondSet + "';"
+            );
             while(rs.next()) {
                 secondSetKeys.add(rs.getString("pvid1"));
                 secondSetKeys.add(rs.getString("pvid2"));

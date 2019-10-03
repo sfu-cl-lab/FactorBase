@@ -2128,3 +2128,20 @@ TABLE_NAME	COLUMN_NAME	ORDINAL_POSITION
 Table: SelfRelationships
 Table: TargetNode
 Table: TernaryRelations
+Table: lattice_membership
+name	member
+RA(prof0,student0)	RA(prof0,student0)
+RA(prof0,student0),registration(course0,student0)	RA(prof0,student0)
+RA(prof0,student0),registration(course0,student0)	registration(course0,student0)
+registration(course0,student0)	registration(course0,student0)
+Table: lattice_rel
+EmptySet	RA(prof0,student0)	RA(prof0,student0)
+EmptySet	registration(course0,student0)	registration(course0,student0)
+parent	child	removed
+RA(prof0,student0)	RA(prof0,student0),registration(course0,student0)	registration(course0,student0)
+registration(course0,student0)	RA(prof0,student0),registration(course0,student0)	RA(prof0,student0)
+Table: lattice_set
+name	length
+RA(prof0,student0)	1
+RA(prof0,student0),registration(course0,student0)	2
+registration(course0,student0)	1
