@@ -44,7 +44,7 @@ public class KeepTablesOnly {
         while(rst.next()) {
             logger.fine(rst.getString("name"));
             String tables = rst.getString("name");
-            sets.add(tables.substring(1, tables.length() - 1) + "_CT");
+            sets.add(tables + "_CT");
         }
 
         return sets;

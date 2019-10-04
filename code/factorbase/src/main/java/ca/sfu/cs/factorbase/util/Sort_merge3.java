@@ -33,6 +33,11 @@ public class Sort_merge3 {
     public static void sort_merge(String table1, String table2, String table3, Connection conn) throws SQLException {
         logger.fine("\nGenerating false table by Subtraction using Sort_merge, cur_false_Table is: " + table3);
 
+        // Ensure that all the table names are escaped before attempting to execute any queries with them.
+        table1 = "`" + table1 + "`";
+        table2 = "`" + table2 + "`";
+        table3 = "`" + table3 + "`";
+
         Statement st1 = (Statement) conn.createStatement();
         Statement st2 = (Statement) conn.createStatement();
 

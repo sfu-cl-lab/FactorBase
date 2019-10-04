@@ -58,8 +58,8 @@ public class BIF_Generator {
         ArrayList<String> orig_rnid = new ArrayList<String>(); // orig_rnid
         ResultSet rst = st.executeQuery("SELECT * FROM lattice_mapping");
         while (rst.next()) {
-            rnid.add(rst.getString("short_rnid").substring(1, rst.getString("short_rnid").length() - 1)); // Removing back tick and then adding back later.
-            orig_rnid.add(rst.getString("orig_rnid").substring(1, rst.getString("orig_rnid").length() - 1)); // Removing back tick and then adding back later.
+            rnid.add(rst.getString("short_rnid"));
+            orig_rnid.add(rst.getString("orig_rnid"));
         }
 
         // Feb 7th 2014, zqian;
@@ -67,7 +67,7 @@ public class BIF_Generator {
         // <child,''>, <child,parent>
         rst = st.executeQuery("SELECT DISTINCT child FROM Path_BayesNets;");
         while (rst.next()) {
-            variables.add(rst.getString(1).substring(1, rst.getString(1).length() - 1)); // Removing back stick and then adding back later.
+            variables.add(rst.getString("child"));
         }
 
         ArrayList<String> values;
@@ -125,7 +125,13 @@ public class BIF_Generator {
             rst2 = st.executeQuery("SELECT DISTINCT lattice_set.name FROM lattice_membership, lattice_set WHERE length = (SELECT MAX(length) FROM lattice_set);");
             rst2.next();
             String Rchain = rst2.getString(1);
-            rst2 = st.executeQuery("SELECT DISTINCT parent FROM Path_BayesNets WHERE child = '`" + variables.get(i) + "`' AND parent != '' AND Rchain = '" + Rchain + "';");
+            rst2 = st.executeQuery(
+                "SELECT DISTINCT parent " +
+                "FROM Path_BayesNets " +
+                "WHERE child = '" + variables.get(i) + "' " +
+                "AND parent <> '' " +
+                "AND Rchain = '" + Rchain + "';"
+            );
 
             int nop = 0; // nop -> number of parents for a particular node.
             while (rst2.next()) {
@@ -135,7 +141,7 @@ public class BIF_Generator {
             if (nop > 0) {
                 rst2.beforeFirst();
                 while (rst2.next()) {
-                    given.add(rst2.getString(1).substring(1, rst2.getString(1).length() - 1));
+                    given.add(rst2.getString("parent"));
                 }
 
                 // Order of values according to xmlbif specifications.

@@ -94,7 +94,7 @@ public class BayesNet_Learning_main {
 
         for (String variable : dataset.getVariableNames()) {
             out.write("<VARIABLE TYPE=\"nature\">\n");
-            out.write("\t<NAME>" + "`" + variable + "`" + "</NAME>\n"); // @zqian adding back ticks to the name of bayes nodes
+            out.write("\t<NAME>" + variable + "</NAME>\n"); // @zqian adding back ticks to the name of bayes nodes
 
             int variableColumnIndex = dataset.getColumnIndex(variable);
             for (String variableState : dataset.getStates(variableColumnIndex)) {
@@ -111,9 +111,9 @@ public class BayesNet_Learning_main {
             List<Node> parents = dag.getParents(current);
             int parentsNum = parents.size();
             out.write("<DEFINITION>\n");
-            out.write("\t<FOR>" + "`" + current + "`" + "</FOR>\n"); // @zqian
+            out.write("\t<FOR>" + current + "</FOR>\n"); // @zqian
             for (int j = 0; j < parentsNum; j++) {
-                out.write("\t<GIVEN>" + "`" + parents.get(j) + "`" + "</GIVEN>\n"); // @zqian
+                out.write("\t<GIVEN>" + parents.get(j) + "</GIVEN>\n"); // @zqian
             }
 
             out.write("</DEFINITION>\n");
@@ -175,7 +175,7 @@ public class BayesNet_Learning_main {
 
         for (FunctorNode functorNode : functorNodesInfo.getFunctorNodes()) {
             out.write("<VARIABLE TYPE=\"nature\">\n");
-            out.write("\t<NAME>" + "`" + functorNode.getFunctorNodeID() + "`" + "</NAME>\n"); // @zqian adding back ticks to the name of bayes nodes
+            out.write("\t<NAME>" + functorNode.getFunctorNodeID() + "</NAME>\n"); // @zqian adding back ticks to the name of bayes nodes
 
             for (String variableState : functorNode.getFunctorNodeStates()) {
                 out.write("\t<OUTCOME>" + variableState + "</OUTCOME>\n");
@@ -191,9 +191,9 @@ public class BayesNet_Learning_main {
             List<Node> parents = dag.getParents(current);
             int parentsNum = parents.size();
             out.write("<DEFINITION>\n");
-            out.write("\t<FOR>" + "`" + current + "`" + "</FOR>\n"); // @zqian
+            out.write("\t<FOR>" + current + "</FOR>\n"); // @zqian
             for (int j = 0; j < parentsNum; j++) {
-                out.write("\t<GIVEN>" + "`" + parents.get(j) + "`" + "</GIVEN>\n"); // @zqian
+                out.write("\t<GIVEN>" + parents.get(j) + "</GIVEN>\n"); // @zqian
             }
 
             out.write("</DEFINITION>\n");

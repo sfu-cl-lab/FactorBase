@@ -144,7 +144,7 @@ public class CSVPrecomputor {
             // Create new statement.
             Statement st3 = con3.createStatement();
 
-            String queryString= "SELECT * FROM `"+pvid.replace("`", "")+"_counts` WHERE MULT > 0;";
+            String queryString = "SELECT * FROM `" + pvid + "_counts` WHERE MULT > 0;";
             ResultSet rs4 = st3.executeQuery(queryString);
             logger.fine("query string : "+queryString);
 
@@ -195,7 +195,7 @@ public class CSVPrecomputor {
 
         while(rs.next()) {
             // Get the short and full form rnids for further use.
-            String rchain = rs.getString("RChain").replace("`", "");
+            String rchain = rs.getString("RChain");
             logger.fine("\n RChain : " + rchain);
             String shortRchain = rs.getString("short_RChain");
             logger.fine(" Short RChain : " + shortRchain);
@@ -204,7 +204,7 @@ public class CSVPrecomputor {
             // Create new statement.
             Statement st3 = con3.createStatement();
 
-            String queryString = "SELECT * FROM `" + shortRchain.replace("`", "") + "_CT` WHERE MULT > 0;";
+            String queryString = "SELECT * FROM `" + shortRchain + "_CT` WHERE MULT > 0;";
             ResultSet rs5 = null;
             try {
                 rs5 = st3.executeQuery(queryString);

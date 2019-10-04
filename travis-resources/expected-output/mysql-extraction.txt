@@ -1,41 +1,41 @@
 Table: 1NodePars
-`capability(prof0,student0)`	1
+capability(prof0,student0)	1
 ChildNode	NumPars
-`diff(course0)`	1
-`grade(course0,student0)`	3.0000000000000004
-`intelligence(student0)`	1
-`popularity(prof0)`	2
-`ranking(student0)`	3.0000000000000004
-`RA(prof0,student0)`	1
-`rating(course0)`	1
-`registration(course0,student0)`	1
-`salary(prof0,student0)`	1
-`sat(course0,student0)`	1
-`teachingability(prof0)`	1
+diff(course0)	1
+grade(course0,student0)	3.0000000000000004
+intelligence(student0)	1
+popularity(prof0)	2
+ranking(student0)	3.0000000000000004
+RA(prof0,student0)	1
+rating(course0)	1
+registration(course0,student0)	1
+salary(prof0,student0)	1
+sat(course0,student0)	1
+teachingability(prof0)	1
 Table: 1Nodes
 1nid	COLUMN_NAME	pvid	main
-`diff(course0)`	diff	course0	1
-`intelligence(student0)`	intelligence	student0	1
-`popularity(prof0)`	popularity	prof0	1
-`ranking(student0)`	ranking	student0	1
-`rating(course0)`	rating	course0	1
-`teachingability(prof0)`	teachingability	prof0	1
+diff(course0)	diff	course0	1
+intelligence(student0)	intelligence	student0	1
+popularity(prof0)	popularity	prof0	1
+ranking(student0)	ranking	student0	1
+rating(course0)	rating	course0	1
+teachingability(prof0)	teachingability	prof0	1
 Table: 1Nodes_inFamily
 ChildNode	1node	NumAtts
-`grade(course0,student0)`	`intelligence(student0)`	3
-`popularity(prof0)`	`teachingability(prof0)`	2
-`ranking(student0)`	`intelligence(student0)`	3
+grade(course0,student0)	intelligence(student0)	3
+popularity(prof0)	teachingability(prof0)	2
+ranking(student0)	intelligence(student0)	3
 Table: 2Nodes
 2nid	COLUMN_NAME	pvid1	pvid2	TABLE_NAME	main
-`capability(prof0,student0)`	capability	prof0	student0	RA	1
-`grade(course0,student0)`	grade	course0	student0	registration	1
-`salary(prof0,student0)`	salary	prof0	student0	RA	1
-`sat(course0,student0)`	sat	course0	student0	registration	1
+capability(prof0,student0)	capability	prof0	student0	RA	1
+grade(course0,student0)	grade	course0	student0	registration	1
+salary(prof0,student0)	salary	prof0	student0	RA	1
+sat(course0,student0)	sat	course0	student0	registration	1
 Table: 2Nodes_inFamily
-`capability(prof0,student0)`	`salary(prof0,student0)`	3
+capability(prof0,student0)	salary(prof0,student0)	3
 ChildNode	2node	NumAtts
-`diff(course0)`	`grade(course0,student0)`	4
-`sat(course0,student0)`	`grade(course0,student0)`	4
+diff(course0)	grade(course0,student0)	4
+sat(course0,student0)	grade(course0,student0)	4
 Table: Attribute_Value
 capability	1
 capability	2
@@ -59,12 +59,12 @@ ranking	2
 ranking	3
 ranking	4
 ranking	5
-`RA(prof0,student0)`	F
-`RA(prof0,student0)`	T
+RA(prof0,student0)	F
+RA(prof0,student0)	T
 rating	1
 rating	2
-`registration(course0,student0)`	F
-`registration(course0,student0)`	T
+registration(course0,student0)	F
+registration(course0,student0)	T
 salary	high
 salary	low
 salary	med
@@ -74,18 +74,18 @@ sat	3
 teachingability	2
 teachingability	3
 Table: ChildPars
-1	`diff(course0)`
-1	`popularity(prof0)`
-1	`RA(prof0,student0)`
-1	`rating(course0)`
-1	`registration(course0,student0)`
-1	`teachingability(prof0)`
-2	`intelligence(student0)`
-2	`salary(prof0,student0)`
-2	`sat(course0,student0)`
-3	`grade(course0,student0)`
-4	`capability(prof0,student0)`
-4	`ranking(student0)`
+1	diff(course0)
+1	popularity(prof0)
+1	RA(prof0,student0)
+1	rating(course0)
+1	registration(course0,student0)
+1	teachingability(prof0)
+2	intelligence(student0)
+2	salary(prof0,student0)
+2	sat(course0,student0)
+3	grade(course0,student0)
+4	capability(prof0,student0)
+4	ranking(student0)
 NumPars	ChildNode
 Table: ContextEdges
 Table: EntityTables
@@ -94,153 +94,153 @@ prof	prof_id
 student	student_id
 TABLE_NAME	COLUMN_NAME
 Table: Entity_BN_Nodes
-course0	`diff(course0)`
-course0	`rating(course0)`
-prof0	`popularity(prof0)`
-prof0	`teachingability(prof0)`
+course0	diff(course0)
+course0	rating(course0)
+prof0	popularity(prof0)
+prof0	teachingability(prof0)
 pvid	node
-student0	`intelligence(student0)`
-student0	`ranking(student0)`
+student0	intelligence(student0)
+student0	ranking(student0)
 Table: Entity_BN_nodes
-course0	`diff(course0)`
-course0	`rating(course0)`
-prof0	`popularity(prof0)`
-prof0	`teachingability(prof0)`
+course0	diff(course0)
+course0	rating(course0)
+prof0	popularity(prof0)
+prof0	teachingability(prof0)
 pvid	node
-student0	`intelligence(student0)`
-student0	`ranking(student0)`
+student0	intelligence(student0)
+student0	ranking(student0)
 Table: Entity_BayesNets
-course0	`diff(course0)`	
-course0	`rating(course0)`	
-prof0	`popularity(prof0)`	`teachingability(prof0)`
-prof0	`teachingability(prof0)`	
+course0	diff(course0)	
+course0	rating(course0)	
+prof0	popularity(prof0)	teachingability(prof0)
+prof0	teachingability(prof0)	
 pvid	child	parent
-student0	`intelligence(student0)`	
-student0	`ranking(student0)`	`intelligence(student0)`
+student0	intelligence(student0)	
+student0	ranking(student0)	intelligence(student0)
 Table: Entity_Complement_Edges
-course0	`diff(course0)`	`diff(course0)`
-course0	`diff(course0)`	`rating(course0)`
-course0	`rating(course0)`	`diff(course0)`
-course0	`rating(course0)`	`rating(course0)`
-prof0	`popularity(prof0)`	`popularity(prof0)`
-prof0	`teachingability(prof0)`	`popularity(prof0)`
-prof0	`teachingability(prof0)`	`teachingability(prof0)`
+course0	diff(course0)	diff(course0)
+course0	diff(course0)	rating(course0)
+course0	rating(course0)	diff(course0)
+course0	rating(course0)	rating(course0)
+prof0	popularity(prof0)	popularity(prof0)
+prof0	teachingability(prof0)	popularity(prof0)
+prof0	teachingability(prof0)	teachingability(prof0)
 pvid	child	parent
-student0	`intelligence(student0)`	`intelligence(student0)`
-student0	`intelligence(student0)`	`ranking(student0)`
-student0	`ranking(student0)`	`ranking(student0)`
+student0	intelligence(student0)	intelligence(student0)
+student0	intelligence(student0)	ranking(student0)
+student0	ranking(student0)	ranking(student0)
 Table: Expansions
 Table: FNodes
-`capability(prof0,student0)`	capability	2Node	1
-`diff(course0)`	diff	1Node	1
+capability(prof0,student0)	capability	2Node	1
+diff(course0)	diff	1Node	1
 Fid	FunctorName	Type	main
-`grade(course0,student0)`	grade	2Node	1
-`intelligence(student0)`	intelligence	1Node	1
-`popularity(prof0)`	popularity	1Node	1
-`ranking(student0)`	ranking	1Node	1
-`RA(prof0,student0)`	`RA(prof0,student0)`	Rnode	1
-`rating(course0)`	rating	1Node	1
-`registration(course0,student0)`	`registration(course0,student0)`	Rnode	1
-`salary(prof0,student0)`	salary	2Node	1
-`sat(course0,student0)`	sat	2Node	1
-`teachingability(prof0)`	teachingability	1Node	1
+grade(course0,student0)	grade	2Node	1
+intelligence(student0)	intelligence	1Node	1
+popularity(prof0)	popularity	1Node	1
+ranking(student0)	ranking	1Node	1
+RA(prof0,student0)	RA(prof0,student0)	Rnode	1
+rating(course0)	rating	1Node	1
+registration(course0,student0)	registration(course0,student0)	Rnode	1
+salary(prof0,student0)	salary	2Node	1
+sat(course0,student0)	sat	2Node	1
+teachingability(prof0)	teachingability	1Node	1
 Table: FNodes_pvars
-`capability(prof0,student0)`	prof0
-`capability(prof0,student0)`	student0
-`diff(course0)`	course0
+capability(prof0,student0)	prof0
+capability(prof0,student0)	student0
+diff(course0)	course0
 Fid	pvid
-`grade(course0,student0)`	course0
-`grade(course0,student0)`	student0
-`intelligence(student0)`	student0
-`popularity(prof0)`	prof0
-`ranking(student0)`	student0
-`RA(prof0,student0)`	prof0
-`RA(prof0,student0)`	student0
-`rating(course0)`	course0
-`registration(course0,student0)`	course0
-`registration(course0,student0)`	student0
-`salary(prof0,student0)`	prof0
-`salary(prof0,student0)`	student0
-`sat(course0,student0)`	course0
-`sat(course0,student0)`	student0
-`teachingability(prof0)`	prof0
+grade(course0,student0)	course0
+grade(course0,student0)	student0
+intelligence(student0)	student0
+popularity(prof0)	prof0
+ranking(student0)	student0
+RA(prof0,student0)	prof0
+RA(prof0,student0)	student0
+rating(course0)	course0
+registration(course0,student0)	course0
+registration(course0,student0)	student0
+salary(prof0,student0)	prof0
+salary(prof0,student0)	student0
+sat(course0,student0)	course0
+sat(course0,student0)	student0
+teachingability(prof0)	prof0
 Table: FNodes_pvars_UNION_RNodes_pvars
-`capability(prof0,student0)`	prof0
-`capability(prof0,student0)`	student0
-`diff(course0)`	course0
+capability(prof0,student0)	prof0
+capability(prof0,student0)	student0
+diff(course0)	course0
 Fid	pvid
-`grade(course0,student0)`	course0
-`grade(course0,student0)`	student0
-`intelligence(student0)`	student0
-`popularity(prof0)`	prof0
-`ranking(student0)`	student0
-`RA(prof0,student0)`	prof0
-`RA(prof0,student0)`	student0
-`rating(course0)`	course0
-`registration(course0,student0)`	course0
-`registration(course0,student0)`	student0
-`salary(prof0,student0)`	prof0
-`salary(prof0,student0)`	student0
-`sat(course0,student0)`	course0
-`sat(course0,student0)`	student0
-`teachingability(prof0)`	prof0
+grade(course0,student0)	course0
+grade(course0,student0)	student0
+intelligence(student0)	student0
+popularity(prof0)	prof0
+ranking(student0)	student0
+RA(prof0,student0)	prof0
+RA(prof0,student0)	student0
+rating(course0)	course0
+registration(course0,student0)	course0
+registration(course0,student0)	student0
+salary(prof0,student0)	prof0
+salary(prof0,student0)	student0
+sat(course0,student0)	course0
+sat(course0,student0)	student0
+teachingability(prof0)	prof0
 Table: Final_Path_BayesNets
-`RA(prof0,student0),registration(course0,student0)`	`capability(prof0,student0)`	`RA(prof0,student0)`
-`RA(prof0,student0),registration(course0,student0)`	`capability(prof0,student0)`	`salary(prof0,student0)`
-`RA(prof0,student0),registration(course0,student0)`	`diff(course0)`	`grade(course0,student0)`
-`RA(prof0,student0),registration(course0,student0)`	`grade(course0,student0)`	`intelligence(student0)`
-`RA(prof0,student0),registration(course0,student0)`	`grade(course0,student0)`	`registration(course0,student0)`
-`RA(prof0,student0),registration(course0,student0)`	`intelligence(student0)`	`RA(prof0,student0)`
-`RA(prof0,student0),registration(course0,student0)`	`intelligence(student0)`	`registration(course0,student0)`
-`RA(prof0,student0),registration(course0,student0)`	`popularity(prof0)`	`RA(prof0,student0)`
-`RA(prof0,student0),registration(course0,student0)`	`popularity(prof0)`	`teachingability(prof0)`
-`RA(prof0,student0),registration(course0,student0)`	`ranking(student0)`	`intelligence(student0)`
-`RA(prof0,student0),registration(course0,student0)`	`ranking(student0)`	`RA(prof0,student0)`
-`RA(prof0,student0),registration(course0,student0)`	`salary(prof0,student0)`	`RA(prof0,student0)`
-`RA(prof0,student0),registration(course0,student0)`	`sat(course0,student0)`	`grade(course0,student0)`
-`RA(prof0,student0),registration(course0,student0)`	`sat(course0,student0)`	`registration(course0,student0)`
-`RA(prof0,student0),registration(course0,student0)`	`teachingability(prof0)`	`RA(prof0,student0)`
+RA(prof0,student0),registration(course0,student0)	capability(prof0,student0)	RA(prof0,student0)
+RA(prof0,student0),registration(course0,student0)	capability(prof0,student0)	salary(prof0,student0)
+RA(prof0,student0),registration(course0,student0)	diff(course0)	grade(course0,student0)
+RA(prof0,student0),registration(course0,student0)	grade(course0,student0)	intelligence(student0)
+RA(prof0,student0),registration(course0,student0)	grade(course0,student0)	registration(course0,student0)
+RA(prof0,student0),registration(course0,student0)	intelligence(student0)	RA(prof0,student0)
+RA(prof0,student0),registration(course0,student0)	intelligence(student0)	registration(course0,student0)
+RA(prof0,student0),registration(course0,student0)	popularity(prof0)	RA(prof0,student0)
+RA(prof0,student0),registration(course0,student0)	popularity(prof0)	teachingability(prof0)
+RA(prof0,student0),registration(course0,student0)	ranking(student0)	intelligence(student0)
+RA(prof0,student0),registration(course0,student0)	ranking(student0)	RA(prof0,student0)
+RA(prof0,student0),registration(course0,student0)	salary(prof0,student0)	RA(prof0,student0)
+RA(prof0,student0),registration(course0,student0)	sat(course0,student0)	grade(course0,student0)
+RA(prof0,student0),registration(course0,student0)	sat(course0,student0)	registration(course0,student0)
+RA(prof0,student0),registration(course0,student0)	teachingability(prof0)	RA(prof0,student0)
 Rchain	child	parent
 Table: Final_Path_BayesNets_view
-`RA(prof0,student0),registration(course0,student0)`	`capability(prof0,student0)`	`RA(prof0,student0)`
-`RA(prof0,student0),registration(course0,student0)`	`capability(prof0,student0)`	`salary(prof0,student0)`
-`RA(prof0,student0),registration(course0,student0)`	`diff(course0)`	`grade(course0,student0)`
-`RA(prof0,student0),registration(course0,student0)`	`grade(course0,student0)`	`intelligence(student0)`
-`RA(prof0,student0),registration(course0,student0)`	`grade(course0,student0)`	`registration(course0,student0)`
-`RA(prof0,student0),registration(course0,student0)`	`intelligence(student0)`	`RA(prof0,student0)`
-`RA(prof0,student0),registration(course0,student0)`	`intelligence(student0)`	`registration(course0,student0)`
-`RA(prof0,student0),registration(course0,student0)`	`popularity(prof0)`	`RA(prof0,student0)`
-`RA(prof0,student0),registration(course0,student0)`	`popularity(prof0)`	`teachingability(prof0)`
-`RA(prof0,student0),registration(course0,student0)`	`ranking(student0)`	`intelligence(student0)`
-`RA(prof0,student0),registration(course0,student0)`	`ranking(student0)`	`RA(prof0,student0)`
-`RA(prof0,student0),registration(course0,student0)`	`RA(prof0,student0)`	
-`RA(prof0,student0),registration(course0,student0)`	`rating(course0)`	
-`RA(prof0,student0),registration(course0,student0)`	`registration(course0,student0)`	
-`RA(prof0,student0),registration(course0,student0)`	`salary(prof0,student0)`	`RA(prof0,student0)`
-`RA(prof0,student0),registration(course0,student0)`	`sat(course0,student0)`	`grade(course0,student0)`
-`RA(prof0,student0),registration(course0,student0)`	`sat(course0,student0)`	`registration(course0,student0)`
-`RA(prof0,student0),registration(course0,student0)`	`teachingability(prof0)`	`RA(prof0,student0)`
+RA(prof0,student0),registration(course0,student0)	capability(prof0,student0)	RA(prof0,student0)
+RA(prof0,student0),registration(course0,student0)	capability(prof0,student0)	salary(prof0,student0)
+RA(prof0,student0),registration(course0,student0)	diff(course0)	grade(course0,student0)
+RA(prof0,student0),registration(course0,student0)	grade(course0,student0)	intelligence(student0)
+RA(prof0,student0),registration(course0,student0)	grade(course0,student0)	registration(course0,student0)
+RA(prof0,student0),registration(course0,student0)	intelligence(student0)	RA(prof0,student0)
+RA(prof0,student0),registration(course0,student0)	intelligence(student0)	registration(course0,student0)
+RA(prof0,student0),registration(course0,student0)	popularity(prof0)	RA(prof0,student0)
+RA(prof0,student0),registration(course0,student0)	popularity(prof0)	teachingability(prof0)
+RA(prof0,student0),registration(course0,student0)	ranking(student0)	intelligence(student0)
+RA(prof0,student0),registration(course0,student0)	ranking(student0)	RA(prof0,student0)
+RA(prof0,student0),registration(course0,student0)	RA(prof0,student0)	
+RA(prof0,student0),registration(course0,student0)	rating(course0)	
+RA(prof0,student0),registration(course0,student0)	registration(course0,student0)	
+RA(prof0,student0),registration(course0,student0)	salary(prof0,student0)	RA(prof0,student0)
+RA(prof0,student0),registration(course0,student0)	sat(course0,student0)	grade(course0,student0)
+RA(prof0,student0),registration(course0,student0)	sat(course0,student0)	registration(course0,student0)
+RA(prof0,student0),registration(course0,student0)	teachingability(prof0)	RA(prof0,student0)
 Rchain	child	parent
 Table: Groundings
 Table: InheritedEdges
-`RA(prof0,student0),registration(course0,student0)`	`capability(prof0,student0)`	`RA(prof0,student0)`
-`RA(prof0,student0),registration(course0,student0)`	`capability(prof0,student0)`	`salary(prof0,student0)`
-`RA(prof0,student0),registration(course0,student0)`	`diff(course0)`	`grade(course0,student0)`
-`RA(prof0,student0),registration(course0,student0)`	`grade(course0,student0)`	`intelligence(student0)`
-`RA(prof0,student0),registration(course0,student0)`	`grade(course0,student0)`	`registration(course0,student0)`
-`RA(prof0,student0),registration(course0,student0)`	`intelligence(student0)`	`RA(prof0,student0)`
-`RA(prof0,student0),registration(course0,student0)`	`popularity(prof0)`	`RA(prof0,student0)`
-`RA(prof0,student0),registration(course0,student0)`	`popularity(prof0)`	`teachingability(prof0)`
-`RA(prof0,student0),registration(course0,student0)`	`ranking(student0)`	`intelligence(student0)`
-`RA(prof0,student0),registration(course0,student0)`	`RA(prof0,student0)`	`salary(prof0,student0)`
-`RA(prof0,student0),registration(course0,student0)`	`sat(course0,student0)`	`grade(course0,student0)`
+RA(prof0,student0),registration(course0,student0)	capability(prof0,student0)	RA(prof0,student0)
+RA(prof0,student0),registration(course0,student0)	capability(prof0,student0)	salary(prof0,student0)
+RA(prof0,student0),registration(course0,student0)	diff(course0)	grade(course0,student0)
+RA(prof0,student0),registration(course0,student0)	grade(course0,student0)	intelligence(student0)
+RA(prof0,student0),registration(course0,student0)	grade(course0,student0)	registration(course0,student0)
+RA(prof0,student0),registration(course0,student0)	intelligence(student0)	RA(prof0,student0)
+RA(prof0,student0),registration(course0,student0)	popularity(prof0)	RA(prof0,student0)
+RA(prof0,student0),registration(course0,student0)	popularity(prof0)	teachingability(prof0)
+RA(prof0,student0),registration(course0,student0)	ranking(student0)	intelligence(student0)
+RA(prof0,student0),registration(course0,student0)	RA(prof0,student0)	salary(prof0,student0)
+RA(prof0,student0),registration(course0,student0)	sat(course0,student0)	grade(course0,student0)
 Rchain	child	parent
 Table: Knowledge_Forbidden_Edges
 Table: Knowledge_Required_Edges
 Table: LatticeRNodes
 orig_rnid	TABLE_NAME	pvid1	pvid2	COLUMN_NAME1	COLUMN_NAME2	main	short_rnid
-`RA(prof0,student0)`	RA	prof0	student0	prof_id	student_id	1	`a`
-`registration(course0,student0)`	registration	course0	student0	course_id	student_id	1	`b`
+RA(prof0,student0)	RA	prof0	student0	prof_id	student_id	1	a
+registration(course0,student0)	registration	course0	student0	course_id	student_id	1	b
 Table: LearnedEdges
 Table: MetaQueries
 course0	Counts	FROM	table	unielwin.course AS course0
@@ -256,157 +256,157 @@ prof0	Counts	GROUPBY	1node	`teachingability(prof0)`
 prof0	Counts	SELECT	1node	prof0.popularity AS `popularity(prof0)`
 prof0	Counts	SELECT	1node	prof0.teachingability AS `teachingability(prof0)`
 prof0	Counts	SELECT	aggregate	COUNT(*) AS "MULT"
-`RA(prof0,student0)`	Counts	FROM	rtable	(SELECT "T" AS `RA(prof0,student0)`) AS `temp_RA(prof0,student0)`
-`RA(prof0,student0)`	Counts	FROM	rtable	unielwin.RA AS `RA(prof0,student0)`
-`RA(prof0,student0)`	Counts	FROM	table	unielwin.prof AS prof0
-`RA(prof0,student0)`	Counts	FROM	table	unielwin.student AS student0
-`RA(prof0,student0)`	Counts	GROUPBY	1node	`intelligence(student0)`
-`RA(prof0,student0)`	Counts	GROUPBY	1node	`popularity(prof0)`
-`RA(prof0,student0)`	Counts	GROUPBY	1node	`ranking(student0)`
-`RA(prof0,student0)`	Counts	GROUPBY	1node	`teachingability(prof0)`
-`RA(prof0,student0)`	Counts	GROUPBY	2nid	`capability(prof0,student0)`
-`RA(prof0,student0)`	Counts	GROUPBY	2nid	`salary(prof0,student0)`
-`RA(prof0,student0)`	Counts	GROUPBY	rnid	`RA(prof0,student0)`
-`RA(prof0,student0)`	Counts	SELECT	1node	prof0.popularity AS `popularity(prof0)`
-`RA(prof0,student0)`	Counts	SELECT	1node	prof0.teachingability AS `teachingability(prof0)`
-`RA(prof0,student0)`	Counts	SELECT	1node	student0.intelligence AS `intelligence(student0)`
-`RA(prof0,student0)`	Counts	SELECT	1node	student0.ranking AS `ranking(student0)`
-`RA(prof0,student0)`	Counts	SELECT	2nid	`RA(prof0,student0)`.capability AS `capability(prof0,student0)`
-`RA(prof0,student0)`	Counts	SELECT	2nid	`RA(prof0,student0)`.salary AS `salary(prof0,student0)`
-`RA(prof0,student0)`	Counts	SELECT	aggregate	COUNT(*) AS "MULT"
-`RA(prof0,student0)`	Counts	SELECT	rnid	`RA(prof0,student0)`
-`RA(prof0,student0)`	Counts	WHERE	rtable	`RA(prof0,student0)`.prof_id = prof0.prof_id
-`RA(prof0,student0)`	Counts	WHERE	rtable	`RA(prof0,student0)`.student_id = student0.student_id
-`RA(prof0,student0)`	Flat	FROM	table	`a_counts`
-`RA(prof0,student0)`	Flat	GROUPBY	1node	`intelligence(student0)`
-`RA(prof0,student0)`	Flat	GROUPBY	1node	`popularity(prof0)`
-`RA(prof0,student0)`	Flat	GROUPBY	1node	`ranking(student0)`
-`RA(prof0,student0)`	Flat	GROUPBY	1node	`teachingability(prof0)`
-`RA(prof0,student0)`	Flat	SELECT	1node	`intelligence(student0)`
-`RA(prof0,student0)`	Flat	SELECT	1node	`popularity(prof0)`
-`RA(prof0,student0)`	Flat	SELECT	1node	`ranking(student0)`
-`RA(prof0,student0)`	Flat	SELECT	1node	`teachingability(prof0)`
-`RA(prof0,student0)`	Flat	SELECT	aggregate	SUM(`a_counts`.`MULT`) as "MULT"
-`RA(prof0,student0)`	Join	COLUMN	2nid	`capability(prof0,student0)` varchar(5)  default  "N/A" 
-`RA(prof0,student0)`	Join	COLUMN	2nid	`salary(prof0,student0)` varchar(5)  default  "N/A" 
-`RA(prof0,student0),registration(course0,student0)`	Counts	FROM	rtable	(SELECT "T" AS `RA(prof0,student0)`) AS `temp_RA(prof0,student0)`
-`RA(prof0,student0),registration(course0,student0)`	Counts	FROM	rtable	(SELECT "T" AS `registration(course0,student0)`) AS `temp_registration(course0,student0)`
-`RA(prof0,student0),registration(course0,student0)`	Counts	FROM	rtable	unielwin.RA AS `RA(prof0,student0)`
-`RA(prof0,student0),registration(course0,student0)`	Counts	FROM	rtable	unielwin.registration AS `registration(course0,student0)`
-`RA(prof0,student0),registration(course0,student0)`	Counts	FROM	table	unielwin.course AS course0
-`RA(prof0,student0),registration(course0,student0)`	Counts	FROM	table	unielwin.prof AS prof0
-`RA(prof0,student0),registration(course0,student0)`	Counts	FROM	table	unielwin.student AS student0
-`RA(prof0,student0),registration(course0,student0)`	Counts	FROM	table	unielwin.student AS student0
-`RA(prof0,student0),registration(course0,student0)`	Counts	GROUPBY	1node	`diff(course0)`
-`RA(prof0,student0),registration(course0,student0)`	Counts	GROUPBY	1node	`intelligence(student0)`
-`RA(prof0,student0),registration(course0,student0)`	Counts	GROUPBY	1node	`intelligence(student0)`
-`RA(prof0,student0),registration(course0,student0)`	Counts	GROUPBY	1node	`popularity(prof0)`
-`RA(prof0,student0),registration(course0,student0)`	Counts	GROUPBY	1node	`ranking(student0)`
-`RA(prof0,student0),registration(course0,student0)`	Counts	GROUPBY	1node	`ranking(student0)`
-`RA(prof0,student0),registration(course0,student0)`	Counts	GROUPBY	1node	`rating(course0)`
-`RA(prof0,student0),registration(course0,student0)`	Counts	GROUPBY	1node	`teachingability(prof0)`
-`RA(prof0,student0),registration(course0,student0)`	Counts	GROUPBY	2nid	`capability(prof0,student0)`
-`RA(prof0,student0),registration(course0,student0)`	Counts	GROUPBY	2nid	`grade(course0,student0)`
-`RA(prof0,student0),registration(course0,student0)`	Counts	GROUPBY	2nid	`salary(prof0,student0)`
-`RA(prof0,student0),registration(course0,student0)`	Counts	GROUPBY	2nid	`sat(course0,student0)`
-`RA(prof0,student0),registration(course0,student0)`	Counts	GROUPBY	rnid	`RA(prof0,student0)`
-`RA(prof0,student0),registration(course0,student0)`	Counts	GROUPBY	rnid	`registration(course0,student0)`
-`RA(prof0,student0),registration(course0,student0)`	Counts	SELECT	1node	course0.diff AS `diff(course0)`
-`RA(prof0,student0),registration(course0,student0)`	Counts	SELECT	1node	course0.rating AS `rating(course0)`
-`RA(prof0,student0),registration(course0,student0)`	Counts	SELECT	1node	prof0.popularity AS `popularity(prof0)`
-`RA(prof0,student0),registration(course0,student0)`	Counts	SELECT	1node	prof0.teachingability AS `teachingability(prof0)`
-`RA(prof0,student0),registration(course0,student0)`	Counts	SELECT	1node	student0.intelligence AS `intelligence(student0)`
-`RA(prof0,student0),registration(course0,student0)`	Counts	SELECT	1node	student0.intelligence AS `intelligence(student0)`
-`RA(prof0,student0),registration(course0,student0)`	Counts	SELECT	1node	student0.ranking AS `ranking(student0)`
-`RA(prof0,student0),registration(course0,student0)`	Counts	SELECT	1node	student0.ranking AS `ranking(student0)`
-`RA(prof0,student0),registration(course0,student0)`	Counts	SELECT	2nid	`RA(prof0,student0)`.capability AS `capability(prof0,student0)`
-`RA(prof0,student0),registration(course0,student0)`	Counts	SELECT	2nid	`RA(prof0,student0)`.salary AS `salary(prof0,student0)`
-`RA(prof0,student0),registration(course0,student0)`	Counts	SELECT	2nid	`registration(course0,student0)`.grade AS `grade(course0,student0)`
-`RA(prof0,student0),registration(course0,student0)`	Counts	SELECT	2nid	`registration(course0,student0)`.sat AS `sat(course0,student0)`
-`RA(prof0,student0),registration(course0,student0)`	Counts	SELECT	aggregate	COUNT(*) AS "MULT"
-`RA(prof0,student0),registration(course0,student0)`	Counts	SELECT	aggregate	COUNT(*) AS "MULT"
-`RA(prof0,student0),registration(course0,student0)`	Counts	SELECT	rnid	`RA(prof0,student0)`
-`RA(prof0,student0),registration(course0,student0)`	Counts	SELECT	rnid	`registration(course0,student0)`
-`RA(prof0,student0),registration(course0,student0)`	Counts	WHERE	rtable	`RA(prof0,student0)`.prof_id = prof0.prof_id
-`RA(prof0,student0),registration(course0,student0)`	Counts	WHERE	rtable	`RA(prof0,student0)`.student_id = student0.student_id
-`RA(prof0,student0),registration(course0,student0)`	Counts	WHERE	rtable	`registration(course0,student0)`.course_id = course0.course_id
-`RA(prof0,student0),registration(course0,student0)`	Counts	WHERE	rtable	`registration(course0,student0)`.student_id = student0.student_id
-`RA(prof0,student0),registration(course0,student0)`	STAR	FROM	`RA(prof0,student0)`	`b_CT`
-`RA(prof0,student0),registration(course0,student0)`	STAR	FROM	`RA(prof0,student0)`	`prof0_counts`
-`RA(prof0,student0),registration(course0,student0)`	STAR	FROM	`registration(course0,student0)`	`a_CT`
-`RA(prof0,student0),registration(course0,student0)`	STAR	FROM	`registration(course0,student0)`	`course0_counts`
-`RA(prof0,student0),registration(course0,student0)`	STAR	SELECT	`RA(prof0,student0)`	`diff(course0)`
-`RA(prof0,student0),registration(course0,student0)`	STAR	SELECT	`RA(prof0,student0)`	`grade(course0,student0)`
-`RA(prof0,student0),registration(course0,student0)`	STAR	SELECT	`RA(prof0,student0)`	`intelligence(student0)`
-`RA(prof0,student0),registration(course0,student0)`	STAR	SELECT	`RA(prof0,student0)`	`popularity(prof0)`
-`RA(prof0,student0),registration(course0,student0)`	STAR	SELECT	`RA(prof0,student0)`	`ranking(student0)`
-`RA(prof0,student0),registration(course0,student0)`	STAR	SELECT	`RA(prof0,student0)`	`rating(course0)`
-`RA(prof0,student0),registration(course0,student0)`	STAR	SELECT	`RA(prof0,student0)`	`registration(course0,student0)`
-`RA(prof0,student0),registration(course0,student0)`	STAR	SELECT	`RA(prof0,student0)`	`sat(course0,student0)`
-`RA(prof0,student0),registration(course0,student0)`	STAR	SELECT	`RA(prof0,student0)`	`teachingability(prof0)`
-`RA(prof0,student0),registration(course0,student0)`	STAR	SELECT	`registration(course0,student0)`	`capability(prof0,student0)`
-`RA(prof0,student0),registration(course0,student0)`	STAR	SELECT	`registration(course0,student0)`	`diff(course0)`
-`RA(prof0,student0),registration(course0,student0)`	STAR	SELECT	`registration(course0,student0)`	`intelligence(student0)`
-`RA(prof0,student0),registration(course0,student0)`	STAR	SELECT	`registration(course0,student0)`	`popularity(prof0)`
-`RA(prof0,student0),registration(course0,student0)`	STAR	SELECT	`registration(course0,student0)`	`ranking(student0)`
-`RA(prof0,student0),registration(course0,student0)`	STAR	SELECT	`registration(course0,student0)`	`RA(prof0,student0)`
-`RA(prof0,student0),registration(course0,student0)`	STAR	SELECT	`registration(course0,student0)`	`rating(course0)`
-`RA(prof0,student0),registration(course0,student0)`	STAR	SELECT	`registration(course0,student0)`	`salary(prof0,student0)`
-`RA(prof0,student0),registration(course0,student0)`	STAR	SELECT	`registration(course0,student0)`	`teachingability(prof0)`
-`RA(prof0,student0),registration(course0,student0)`	STAR	WHERE	`RA(prof0,student0)`	`registration(course0,student0)` = "T"
-`RA(prof0,student0)`	Star	FROM	table	`prof0_counts`
-`RA(prof0,student0)`	Star	FROM	table	`student0_counts`
-`RA(prof0,student0)`	Star	SELECT	1nid	`intelligence(student0)`
-`RA(prof0,student0)`	Star	SELECT	1nid	`popularity(prof0)`
-`RA(prof0,student0)`	Star	SELECT	1nid	`ranking(student0)`
-`RA(prof0,student0)`	Star	SELECT	1nid	`teachingability(prof0)`
-`RA(prof0,student0)`	STAR	SELECT	`RA(prof0,student0)`	`intelligence(student0)`
-`RA(prof0,student0)`	STAR	SELECT	`RA(prof0,student0)`	`popularity(prof0)`
-`RA(prof0,student0)`	STAR	SELECT	`RA(prof0,student0)`	`ranking(student0)`
-`RA(prof0,student0)`	STAR	SELECT	`RA(prof0,student0)`	`teachingability(prof0)`
-`registration(course0,student0)`	Counts	FROM	rtable	(SELECT "T" AS `registration(course0,student0)`) AS `temp_registration(course0,student0)`
-`registration(course0,student0)`	Counts	FROM	rtable	unielwin.registration AS `registration(course0,student0)`
-`registration(course0,student0)`	Counts	FROM	table	unielwin.course AS course0
-`registration(course0,student0)`	Counts	FROM	table	unielwin.student AS student0
-`registration(course0,student0)`	Counts	GROUPBY	1node	`diff(course0)`
-`registration(course0,student0)`	Counts	GROUPBY	1node	`intelligence(student0)`
-`registration(course0,student0)`	Counts	GROUPBY	1node	`ranking(student0)`
-`registration(course0,student0)`	Counts	GROUPBY	1node	`rating(course0)`
-`registration(course0,student0)`	Counts	GROUPBY	2nid	`grade(course0,student0)`
-`registration(course0,student0)`	Counts	GROUPBY	2nid	`sat(course0,student0)`
-`registration(course0,student0)`	Counts	GROUPBY	rnid	`registration(course0,student0)`
-`registration(course0,student0)`	Counts	SELECT	1node	course0.diff AS `diff(course0)`
-`registration(course0,student0)`	Counts	SELECT	1node	course0.rating AS `rating(course0)`
-`registration(course0,student0)`	Counts	SELECT	1node	student0.intelligence AS `intelligence(student0)`
-`registration(course0,student0)`	Counts	SELECT	1node	student0.ranking AS `ranking(student0)`
-`registration(course0,student0)`	Counts	SELECT	2nid	`registration(course0,student0)`.grade AS `grade(course0,student0)`
-`registration(course0,student0)`	Counts	SELECT	2nid	`registration(course0,student0)`.sat AS `sat(course0,student0)`
-`registration(course0,student0)`	Counts	SELECT	aggregate	COUNT(*) AS "MULT"
-`registration(course0,student0)`	Counts	SELECT	rnid	`registration(course0,student0)`
-`registration(course0,student0)`	Counts	WHERE	rtable	`registration(course0,student0)`.course_id = course0.course_id
-`registration(course0,student0)`	Counts	WHERE	rtable	`registration(course0,student0)`.student_id = student0.student_id
-`registration(course0,student0)`	Flat	FROM	table	`b_counts`
-`registration(course0,student0)`	Flat	GROUPBY	1node	`diff(course0)`
-`registration(course0,student0)`	Flat	GROUPBY	1node	`intelligence(student0)`
-`registration(course0,student0)`	Flat	GROUPBY	1node	`ranking(student0)`
-`registration(course0,student0)`	Flat	GROUPBY	1node	`rating(course0)`
-`registration(course0,student0)`	Flat	SELECT	1node	`diff(course0)`
-`registration(course0,student0)`	Flat	SELECT	1node	`intelligence(student0)`
-`registration(course0,student0)`	Flat	SELECT	1node	`ranking(student0)`
-`registration(course0,student0)`	Flat	SELECT	1node	`rating(course0)`
-`registration(course0,student0)`	Flat	SELECT	aggregate	SUM(`b_counts`.`MULT`) as "MULT"
-`registration(course0,student0)`	Join	COLUMN	2nid	`grade(course0,student0)` varchar(5)  default  "N/A" 
-`registration(course0,student0)`	Join	COLUMN	2nid	`sat(course0,student0)` varchar(5)  default  "N/A" 
-`registration(course0,student0)`	Star	FROM	table	`course0_counts`
-`registration(course0,student0)`	Star	FROM	table	`student0_counts`
-`registration(course0,student0)`	Star	SELECT	1nid	`diff(course0)`
-`registration(course0,student0)`	Star	SELECT	1nid	`intelligence(student0)`
-`registration(course0,student0)`	Star	SELECT	1nid	`ranking(student0)`
-`registration(course0,student0)`	Star	SELECT	1nid	`rating(course0)`
-`registration(course0,student0)`	STAR	SELECT	`registration(course0,student0)`	`diff(course0)`
-`registration(course0,student0)`	STAR	SELECT	`registration(course0,student0)`	`intelligence(student0)`
-`registration(course0,student0)`	STAR	SELECT	`registration(course0,student0)`	`ranking(student0)`
-`registration(course0,student0)`	STAR	SELECT	`registration(course0,student0)`	`rating(course0)`
+RA(prof0,student0)	Counts	FROM	rtable	(SELECT "T" AS `RA(prof0,student0)`) AS `temp_RA(prof0,student0)`
+RA(prof0,student0)	Counts	FROM	rtable	unielwin.RA AS `RA(prof0,student0)`
+RA(prof0,student0)	Counts	FROM	table	unielwin.prof AS prof0
+RA(prof0,student0)	Counts	FROM	table	unielwin.student AS student0
+RA(prof0,student0)	Counts	GROUPBY	1node	`intelligence(student0)`
+RA(prof0,student0)	Counts	GROUPBY	1node	`popularity(prof0)`
+RA(prof0,student0)	Counts	GROUPBY	1node	`ranking(student0)`
+RA(prof0,student0)	Counts	GROUPBY	1node	`teachingability(prof0)`
+RA(prof0,student0)	Counts	GROUPBY	2nid	`capability(prof0,student0)`
+RA(prof0,student0)	Counts	GROUPBY	2nid	`salary(prof0,student0)`
+RA(prof0,student0)	Counts	GROUPBY	rnid	`RA(prof0,student0)`
+RA(prof0,student0)	Counts	SELECT	1node	prof0.popularity AS `popularity(prof0)`
+RA(prof0,student0)	Counts	SELECT	1node	prof0.teachingability AS `teachingability(prof0)`
+RA(prof0,student0)	Counts	SELECT	1node	student0.intelligence AS `intelligence(student0)`
+RA(prof0,student0)	Counts	SELECT	1node	student0.ranking AS `ranking(student0)`
+RA(prof0,student0)	Counts	SELECT	2nid	`RA(prof0,student0)`.capability AS `capability(prof0,student0)`
+RA(prof0,student0)	Counts	SELECT	2nid	`RA(prof0,student0)`.salary AS `salary(prof0,student0)`
+RA(prof0,student0)	Counts	SELECT	aggregate	COUNT(*) AS "MULT"
+RA(prof0,student0)	Counts	SELECT	rnid	`RA(prof0,student0)`
+RA(prof0,student0)	Counts	WHERE	rtable	`RA(prof0,student0)`.prof_id = prof0.prof_id
+RA(prof0,student0)	Counts	WHERE	rtable	`RA(prof0,student0)`.student_id = student0.student_id
+RA(prof0,student0)	Flat	FROM	table	`a_counts`
+RA(prof0,student0)	Flat	GROUPBY	1node	`intelligence(student0)`
+RA(prof0,student0)	Flat	GROUPBY	1node	`popularity(prof0)`
+RA(prof0,student0)	Flat	GROUPBY	1node	`ranking(student0)`
+RA(prof0,student0)	Flat	GROUPBY	1node	`teachingability(prof0)`
+RA(prof0,student0)	Flat	SELECT	1node	`intelligence(student0)`
+RA(prof0,student0)	Flat	SELECT	1node	`popularity(prof0)`
+RA(prof0,student0)	Flat	SELECT	1node	`ranking(student0)`
+RA(prof0,student0)	Flat	SELECT	1node	`teachingability(prof0)`
+RA(prof0,student0)	Flat	SELECT	aggregate	SUM(`a_counts`.MULT) AS "MULT"
+RA(prof0,student0)	Join	COLUMN	2nid	`capability(prof0,student0)` VARCHAR(5) DEFAULT "N/A"
+RA(prof0,student0)	Join	COLUMN	2nid	`salary(prof0,student0)` VARCHAR(5) DEFAULT "N/A"
+RA(prof0,student0),registration(course0,student0)	Counts	FROM	rtable	(SELECT "T" AS `RA(prof0,student0)`) AS `temp_RA(prof0,student0)`
+RA(prof0,student0),registration(course0,student0)	Counts	FROM	rtable	(SELECT "T" AS `registration(course0,student0)`) AS `temp_registration(course0,student0)`
+RA(prof0,student0),registration(course0,student0)	Counts	FROM	rtable	unielwin.RA AS `RA(prof0,student0)`
+RA(prof0,student0),registration(course0,student0)	Counts	FROM	rtable	unielwin.registration AS `registration(course0,student0)`
+RA(prof0,student0),registration(course0,student0)	Counts	FROM	table	unielwin.course AS course0
+RA(prof0,student0),registration(course0,student0)	Counts	FROM	table	unielwin.prof AS prof0
+RA(prof0,student0),registration(course0,student0)	Counts	FROM	table	unielwin.student AS student0
+RA(prof0,student0),registration(course0,student0)	Counts	FROM	table	unielwin.student AS student0
+RA(prof0,student0),registration(course0,student0)	Counts	GROUPBY	1node	`diff(course0)`
+RA(prof0,student0),registration(course0,student0)	Counts	GROUPBY	1node	`intelligence(student0)`
+RA(prof0,student0),registration(course0,student0)	Counts	GROUPBY	1node	`intelligence(student0)`
+RA(prof0,student0),registration(course0,student0)	Counts	GROUPBY	1node	`popularity(prof0)`
+RA(prof0,student0),registration(course0,student0)	Counts	GROUPBY	1node	`ranking(student0)`
+RA(prof0,student0),registration(course0,student0)	Counts	GROUPBY	1node	`ranking(student0)`
+RA(prof0,student0),registration(course0,student0)	Counts	GROUPBY	1node	`rating(course0)`
+RA(prof0,student0),registration(course0,student0)	Counts	GROUPBY	1node	`teachingability(prof0)`
+RA(prof0,student0),registration(course0,student0)	Counts	GROUPBY	2nid	`capability(prof0,student0)`
+RA(prof0,student0),registration(course0,student0)	Counts	GROUPBY	2nid	`grade(course0,student0)`
+RA(prof0,student0),registration(course0,student0)	Counts	GROUPBY	2nid	`salary(prof0,student0)`
+RA(prof0,student0),registration(course0,student0)	Counts	GROUPBY	2nid	`sat(course0,student0)`
+RA(prof0,student0),registration(course0,student0)	Counts	GROUPBY	rnid	`RA(prof0,student0)`
+RA(prof0,student0),registration(course0,student0)	Counts	GROUPBY	rnid	`registration(course0,student0)`
+RA(prof0,student0),registration(course0,student0)	Counts	SELECT	1node	course0.diff AS `diff(course0)`
+RA(prof0,student0),registration(course0,student0)	Counts	SELECT	1node	course0.rating AS `rating(course0)`
+RA(prof0,student0),registration(course0,student0)	Counts	SELECT	1node	prof0.popularity AS `popularity(prof0)`
+RA(prof0,student0),registration(course0,student0)	Counts	SELECT	1node	prof0.teachingability AS `teachingability(prof0)`
+RA(prof0,student0),registration(course0,student0)	Counts	SELECT	1node	student0.intelligence AS `intelligence(student0)`
+RA(prof0,student0),registration(course0,student0)	Counts	SELECT	1node	student0.intelligence AS `intelligence(student0)`
+RA(prof0,student0),registration(course0,student0)	Counts	SELECT	1node	student0.ranking AS `ranking(student0)`
+RA(prof0,student0),registration(course0,student0)	Counts	SELECT	1node	student0.ranking AS `ranking(student0)`
+RA(prof0,student0),registration(course0,student0)	Counts	SELECT	2nid	`RA(prof0,student0)`.capability AS `capability(prof0,student0)`
+RA(prof0,student0),registration(course0,student0)	Counts	SELECT	2nid	`RA(prof0,student0)`.salary AS `salary(prof0,student0)`
+RA(prof0,student0),registration(course0,student0)	Counts	SELECT	2nid	`registration(course0,student0)`.grade AS `grade(course0,student0)`
+RA(prof0,student0),registration(course0,student0)	Counts	SELECT	2nid	`registration(course0,student0)`.sat AS `sat(course0,student0)`
+RA(prof0,student0),registration(course0,student0)	Counts	SELECT	aggregate	COUNT(*) AS "MULT"
+RA(prof0,student0),registration(course0,student0)	Counts	SELECT	aggregate	COUNT(*) AS "MULT"
+RA(prof0,student0),registration(course0,student0)	Counts	SELECT	rnid	`RA(prof0,student0)`
+RA(prof0,student0),registration(course0,student0)	Counts	SELECT	rnid	`registration(course0,student0)`
+RA(prof0,student0),registration(course0,student0)	Counts	WHERE	rtable	`RA(prof0,student0)`.prof_id = prof0.prof_id
+RA(prof0,student0),registration(course0,student0)	Counts	WHERE	rtable	`RA(prof0,student0)`.student_id = student0.student_id
+RA(prof0,student0),registration(course0,student0)	Counts	WHERE	rtable	`registration(course0,student0)`.course_id = course0.course_id
+RA(prof0,student0),registration(course0,student0)	Counts	WHERE	rtable	`registration(course0,student0)`.student_id = student0.student_id
+RA(prof0,student0),registration(course0,student0)	STAR	FROM	RA(prof0,student0)	`b_CT`
+RA(prof0,student0),registration(course0,student0)	STAR	FROM	RA(prof0,student0)	prof0_counts
+RA(prof0,student0),registration(course0,student0)	STAR	FROM	registration(course0,student0)	`a_CT`
+RA(prof0,student0),registration(course0,student0)	STAR	FROM	registration(course0,student0)	course0_counts
+RA(prof0,student0),registration(course0,student0)	STAR	SELECT	RA(prof0,student0)	`diff(course0)`
+RA(prof0,student0),registration(course0,student0)	STAR	SELECT	RA(prof0,student0)	`grade(course0,student0)`
+RA(prof0,student0),registration(course0,student0)	STAR	SELECT	RA(prof0,student0)	`intelligence(student0)`
+RA(prof0,student0),registration(course0,student0)	STAR	SELECT	RA(prof0,student0)	`popularity(prof0)`
+RA(prof0,student0),registration(course0,student0)	STAR	SELECT	RA(prof0,student0)	`ranking(student0)`
+RA(prof0,student0),registration(course0,student0)	STAR	SELECT	RA(prof0,student0)	`rating(course0)`
+RA(prof0,student0),registration(course0,student0)	STAR	SELECT	RA(prof0,student0)	`registration(course0,student0)`
+RA(prof0,student0),registration(course0,student0)	STAR	SELECT	RA(prof0,student0)	`sat(course0,student0)`
+RA(prof0,student0),registration(course0,student0)	STAR	SELECT	RA(prof0,student0)	`teachingability(prof0)`
+RA(prof0,student0),registration(course0,student0)	STAR	SELECT	registration(course0,student0)	`capability(prof0,student0)`
+RA(prof0,student0),registration(course0,student0)	STAR	SELECT	registration(course0,student0)	`diff(course0)`
+RA(prof0,student0),registration(course0,student0)	STAR	SELECT	registration(course0,student0)	`intelligence(student0)`
+RA(prof0,student0),registration(course0,student0)	STAR	SELECT	registration(course0,student0)	`popularity(prof0)`
+RA(prof0,student0),registration(course0,student0)	STAR	SELECT	registration(course0,student0)	`ranking(student0)`
+RA(prof0,student0),registration(course0,student0)	STAR	SELECT	registration(course0,student0)	`RA(prof0,student0)`
+RA(prof0,student0),registration(course0,student0)	STAR	SELECT	registration(course0,student0)	`rating(course0)`
+RA(prof0,student0),registration(course0,student0)	STAR	SELECT	registration(course0,student0)	`salary(prof0,student0)`
+RA(prof0,student0),registration(course0,student0)	STAR	SELECT	registration(course0,student0)	`teachingability(prof0)`
+RA(prof0,student0),registration(course0,student0)	STAR	WHERE	RA(prof0,student0)	`registration(course0,student0)` = "T"
+RA(prof0,student0)	Star	FROM	table	prof0_counts
+RA(prof0,student0)	Star	FROM	table	student0_counts
+RA(prof0,student0)	Star	SELECT	1nid	`intelligence(student0)`
+RA(prof0,student0)	Star	SELECT	1nid	`popularity(prof0)`
+RA(prof0,student0)	Star	SELECT	1nid	`ranking(student0)`
+RA(prof0,student0)	Star	SELECT	1nid	`teachingability(prof0)`
+RA(prof0,student0)	STAR	SELECT	RA(prof0,student0)	`intelligence(student0)`
+RA(prof0,student0)	STAR	SELECT	RA(prof0,student0)	`popularity(prof0)`
+RA(prof0,student0)	STAR	SELECT	RA(prof0,student0)	`ranking(student0)`
+RA(prof0,student0)	STAR	SELECT	RA(prof0,student0)	`teachingability(prof0)`
+registration(course0,student0)	Counts	FROM	rtable	(SELECT "T" AS `registration(course0,student0)`) AS `temp_registration(course0,student0)`
+registration(course0,student0)	Counts	FROM	rtable	unielwin.registration AS `registration(course0,student0)`
+registration(course0,student0)	Counts	FROM	table	unielwin.course AS course0
+registration(course0,student0)	Counts	FROM	table	unielwin.student AS student0
+registration(course0,student0)	Counts	GROUPBY	1node	`diff(course0)`
+registration(course0,student0)	Counts	GROUPBY	1node	`intelligence(student0)`
+registration(course0,student0)	Counts	GROUPBY	1node	`ranking(student0)`
+registration(course0,student0)	Counts	GROUPBY	1node	`rating(course0)`
+registration(course0,student0)	Counts	GROUPBY	2nid	`grade(course0,student0)`
+registration(course0,student0)	Counts	GROUPBY	2nid	`sat(course0,student0)`
+registration(course0,student0)	Counts	GROUPBY	rnid	`registration(course0,student0)`
+registration(course0,student0)	Counts	SELECT	1node	course0.diff AS `diff(course0)`
+registration(course0,student0)	Counts	SELECT	1node	course0.rating AS `rating(course0)`
+registration(course0,student0)	Counts	SELECT	1node	student0.intelligence AS `intelligence(student0)`
+registration(course0,student0)	Counts	SELECT	1node	student0.ranking AS `ranking(student0)`
+registration(course0,student0)	Counts	SELECT	2nid	`registration(course0,student0)`.grade AS `grade(course0,student0)`
+registration(course0,student0)	Counts	SELECT	2nid	`registration(course0,student0)`.sat AS `sat(course0,student0)`
+registration(course0,student0)	Counts	SELECT	aggregate	COUNT(*) AS "MULT"
+registration(course0,student0)	Counts	SELECT	rnid	`registration(course0,student0)`
+registration(course0,student0)	Counts	WHERE	rtable	`registration(course0,student0)`.course_id = course0.course_id
+registration(course0,student0)	Counts	WHERE	rtable	`registration(course0,student0)`.student_id = student0.student_id
+registration(course0,student0)	Flat	FROM	table	`b_counts`
+registration(course0,student0)	Flat	GROUPBY	1node	`diff(course0)`
+registration(course0,student0)	Flat	GROUPBY	1node	`intelligence(student0)`
+registration(course0,student0)	Flat	GROUPBY	1node	`ranking(student0)`
+registration(course0,student0)	Flat	GROUPBY	1node	`rating(course0)`
+registration(course0,student0)	Flat	SELECT	1node	`diff(course0)`
+registration(course0,student0)	Flat	SELECT	1node	`intelligence(student0)`
+registration(course0,student0)	Flat	SELECT	1node	`ranking(student0)`
+registration(course0,student0)	Flat	SELECT	1node	`rating(course0)`
+registration(course0,student0)	Flat	SELECT	aggregate	SUM(`b_counts`.MULT) AS "MULT"
+registration(course0,student0)	Join	COLUMN	2nid	`grade(course0,student0)` VARCHAR(5) DEFAULT "N/A"
+registration(course0,student0)	Join	COLUMN	2nid	`sat(course0,student0)` VARCHAR(5) DEFAULT "N/A"
+registration(course0,student0)	Star	FROM	table	course0_counts
+registration(course0,student0)	Star	FROM	table	student0_counts
+registration(course0,student0)	Star	SELECT	1nid	`diff(course0)`
+registration(course0,student0)	Star	SELECT	1nid	`intelligence(student0)`
+registration(course0,student0)	Star	SELECT	1nid	`ranking(student0)`
+registration(course0,student0)	Star	SELECT	1nid	`rating(course0)`
+registration(course0,student0)	STAR	SELECT	registration(course0,student0)	`diff(course0)`
+registration(course0,student0)	STAR	SELECT	registration(course0,student0)	`intelligence(student0)`
+registration(course0,student0)	STAR	SELECT	registration(course0,student0)	`ranking(student0)`
+registration(course0,student0)	STAR	SELECT	registration(course0,student0)	`rating(course0)`
 student0	Counts	FROM	table	unielwin.student AS student0
 student0	Counts	GROUPBY	1node	`intelligence(student0)`
 student0	Counts	GROUPBY	1node	`ranking(student0)`
@@ -417,9 +417,9 @@ Table: NewLearnedEdges
 Table: NumAttributes
 2	diff
 2	popularity
-2	`RA(prof0,student0)`
+2	RA(prof0,student0)
 2	rating
-2	`registration(course0,student0)`
+2	registration(course0,student0)
 2	teachingability
 3	intelligence
 3	salary
@@ -435,432 +435,432 @@ pvid	ID_COLUMN_NAME	TABLE_NAME	index_number	Tuples
 student0	student_id	student	0	38
 Table: Path_Aux_Edges
 Table: Path_BN_nodes
-`RA(prof0,student0)`	`capability(prof0,student0)`
-`RA(prof0,student0)`	`intelligence(student0)`
-`RA(prof0,student0)`	`popularity(prof0)`
-`RA(prof0,student0)`	`ranking(student0)`
-`RA(prof0,student0)`	`RA(prof0,student0)`
-`RA(prof0,student0),registration(course0,student0)`	`capability(prof0,student0)`
-`RA(prof0,student0),registration(course0,student0)`	`diff(course0)`
-`RA(prof0,student0),registration(course0,student0)`	`grade(course0,student0)`
-`RA(prof0,student0),registration(course0,student0)`	`intelligence(student0)`
-`RA(prof0,student0),registration(course0,student0)`	`popularity(prof0)`
-`RA(prof0,student0),registration(course0,student0)`	`ranking(student0)`
-`RA(prof0,student0),registration(course0,student0)`	`RA(prof0,student0)`
-`RA(prof0,student0),registration(course0,student0)`	`rating(course0)`
-`RA(prof0,student0),registration(course0,student0)`	`registration(course0,student0)`
-`RA(prof0,student0),registration(course0,student0)`	`salary(prof0,student0)`
-`RA(prof0,student0),registration(course0,student0)`	`sat(course0,student0)`
-`RA(prof0,student0),registration(course0,student0)`	`teachingability(prof0)`
-`RA(prof0,student0)`	`salary(prof0,student0)`
-`RA(prof0,student0)`	`teachingability(prof0)`
+RA(prof0,student0)	capability(prof0,student0)
+RA(prof0,student0)	intelligence(student0)
+RA(prof0,student0)	popularity(prof0)
+RA(prof0,student0)	ranking(student0)
+RA(prof0,student0)	RA(prof0,student0)
+RA(prof0,student0),registration(course0,student0)	capability(prof0,student0)
+RA(prof0,student0),registration(course0,student0)	diff(course0)
+RA(prof0,student0),registration(course0,student0)	grade(course0,student0)
+RA(prof0,student0),registration(course0,student0)	intelligence(student0)
+RA(prof0,student0),registration(course0,student0)	popularity(prof0)
+RA(prof0,student0),registration(course0,student0)	ranking(student0)
+RA(prof0,student0),registration(course0,student0)	RA(prof0,student0)
+RA(prof0,student0),registration(course0,student0)	rating(course0)
+RA(prof0,student0),registration(course0,student0)	registration(course0,student0)
+RA(prof0,student0),registration(course0,student0)	salary(prof0,student0)
+RA(prof0,student0),registration(course0,student0)	sat(course0,student0)
+RA(prof0,student0),registration(course0,student0)	teachingability(prof0)
+RA(prof0,student0)	salary(prof0,student0)
+RA(prof0,student0)	teachingability(prof0)
 Rchain	node
-`registration(course0,student0)`	`diff(course0)`
-`registration(course0,student0)`	`grade(course0,student0)`
-`registration(course0,student0)`	`intelligence(student0)`
-`registration(course0,student0)`	`ranking(student0)`
-`registration(course0,student0)`	`rating(course0)`
-`registration(course0,student0)`	`registration(course0,student0)`
-`registration(course0,student0)`	`sat(course0,student0)`
+registration(course0,student0)	diff(course0)
+registration(course0,student0)	grade(course0,student0)
+registration(course0,student0)	intelligence(student0)
+registration(course0,student0)	ranking(student0)
+registration(course0,student0)	rating(course0)
+registration(course0,student0)	registration(course0,student0)
+registration(course0,student0)	sat(course0,student0)
 Table: Path_BayesNets
-`RA(prof0,student0)`	`capability(prof0,student0)`	`RA(prof0,student0)`
-`RA(prof0,student0)`	`capability(prof0,student0)`	`salary(prof0,student0)`
-`RA(prof0,student0)`	`intelligence(student0)`	`RA(prof0,student0)`
-`RA(prof0,student0)`	`popularity(prof0)`	`RA(prof0,student0)`
-`RA(prof0,student0)`	`popularity(prof0)`	`teachingability(prof0)`
-`RA(prof0,student0)`	`ranking(student0)`	`intelligence(student0)`
-`RA(prof0,student0)`	`RA(prof0,student0)`	`salary(prof0,student0)`
-`RA(prof0,student0),registration(course0,student0)`	`capability(prof0,student0)`	`RA(prof0,student0)`
-`RA(prof0,student0),registration(course0,student0)`	`capability(prof0,student0)`	`salary(prof0,student0)`
-`RA(prof0,student0),registration(course0,student0)`	`diff(course0)`	`grade(course0,student0)`
-`RA(prof0,student0),registration(course0,student0)`	`grade(course0,student0)`	`intelligence(student0)`
-`RA(prof0,student0),registration(course0,student0)`	`grade(course0,student0)`	`registration(course0,student0)`
-`RA(prof0,student0),registration(course0,student0)`	`intelligence(student0)`	`RA(prof0,student0)`
-`RA(prof0,student0),registration(course0,student0)`	`intelligence(student0)`	`registration(course0,student0)`
-`RA(prof0,student0),registration(course0,student0)`	`popularity(prof0)`	`RA(prof0,student0)`
-`RA(prof0,student0),registration(course0,student0)`	`popularity(prof0)`	`teachingability(prof0)`
-`RA(prof0,student0),registration(course0,student0)`	`ranking(student0)`	`intelligence(student0)`
-`RA(prof0,student0),registration(course0,student0)`	`ranking(student0)`	`RA(prof0,student0)`
-`RA(prof0,student0),registration(course0,student0)`	`RA(prof0,student0)`	
-`RA(prof0,student0),registration(course0,student0)`	`rating(course0)`	
-`RA(prof0,student0),registration(course0,student0)`	`registration(course0,student0)`	
-`RA(prof0,student0),registration(course0,student0)`	`salary(prof0,student0)`	`RA(prof0,student0)`
-`RA(prof0,student0),registration(course0,student0)`	`sat(course0,student0)`	`grade(course0,student0)`
-`RA(prof0,student0),registration(course0,student0)`	`sat(course0,student0)`	`registration(course0,student0)`
-`RA(prof0,student0),registration(course0,student0)`	`teachingability(prof0)`	`RA(prof0,student0)`
-`RA(prof0,student0)`	`salary(prof0,student0)`	
-`RA(prof0,student0)`	`teachingability(prof0)`	
+RA(prof0,student0)	capability(prof0,student0)	RA(prof0,student0)
+RA(prof0,student0)	capability(prof0,student0)	salary(prof0,student0)
+RA(prof0,student0)	intelligence(student0)	RA(prof0,student0)
+RA(prof0,student0)	popularity(prof0)	RA(prof0,student0)
+RA(prof0,student0)	popularity(prof0)	teachingability(prof0)
+RA(prof0,student0)	ranking(student0)	intelligence(student0)
+RA(prof0,student0)	RA(prof0,student0)	salary(prof0,student0)
+RA(prof0,student0),registration(course0,student0)	capability(prof0,student0)	RA(prof0,student0)
+RA(prof0,student0),registration(course0,student0)	capability(prof0,student0)	salary(prof0,student0)
+RA(prof0,student0),registration(course0,student0)	diff(course0)	grade(course0,student0)
+RA(prof0,student0),registration(course0,student0)	grade(course0,student0)	intelligence(student0)
+RA(prof0,student0),registration(course0,student0)	grade(course0,student0)	registration(course0,student0)
+RA(prof0,student0),registration(course0,student0)	intelligence(student0)	RA(prof0,student0)
+RA(prof0,student0),registration(course0,student0)	intelligence(student0)	registration(course0,student0)
+RA(prof0,student0),registration(course0,student0)	popularity(prof0)	RA(prof0,student0)
+RA(prof0,student0),registration(course0,student0)	popularity(prof0)	teachingability(prof0)
+RA(prof0,student0),registration(course0,student0)	ranking(student0)	intelligence(student0)
+RA(prof0,student0),registration(course0,student0)	ranking(student0)	RA(prof0,student0)
+RA(prof0,student0),registration(course0,student0)	RA(prof0,student0)	
+RA(prof0,student0),registration(course0,student0)	rating(course0)	
+RA(prof0,student0),registration(course0,student0)	registration(course0,student0)	
+RA(prof0,student0),registration(course0,student0)	salary(prof0,student0)	RA(prof0,student0)
+RA(prof0,student0),registration(course0,student0)	sat(course0,student0)	grade(course0,student0)
+RA(prof0,student0),registration(course0,student0)	sat(course0,student0)	registration(course0,student0)
+RA(prof0,student0),registration(course0,student0)	teachingability(prof0)	RA(prof0,student0)
+RA(prof0,student0)	salary(prof0,student0)	
+RA(prof0,student0)	teachingability(prof0)	
 Rchain	child	parent
-`registration(course0,student0)`	`diff(course0)`	`grade(course0,student0)`
-`registration(course0,student0)`	`grade(course0,student0)`	`intelligence(student0)`
-`registration(course0,student0)`	`grade(course0,student0)`	`registration(course0,student0)`
-`registration(course0,student0)`	`intelligence(student0)`	
-`registration(course0,student0)`	`ranking(student0)`	`intelligence(student0)`
-`registration(course0,student0)`	`rating(course0)`	
-`registration(course0,student0)`	`registration(course0,student0)`	
-`registration(course0,student0)`	`sat(course0,student0)`	`grade(course0,student0)`
+registration(course0,student0)	diff(course0)	grade(course0,student0)
+registration(course0,student0)	grade(course0,student0)	intelligence(student0)
+registration(course0,student0)	grade(course0,student0)	registration(course0,student0)
+registration(course0,student0)	intelligence(student0)	
+registration(course0,student0)	ranking(student0)	intelligence(student0)
+registration(course0,student0)	rating(course0)	
+registration(course0,student0)	registration(course0,student0)	
+registration(course0,student0)	sat(course0,student0)	grade(course0,student0)
 Table: Path_Complement_Edges
-`RA(prof0,student0)`	`capability(prof0,student0)`	`capability(prof0,student0)`
-`RA(prof0,student0)`	`capability(prof0,student0)`	`intelligence(student0)`
-`RA(prof0,student0)`	`capability(prof0,student0)`	`popularity(prof0)`
-`RA(prof0,student0)`	`capability(prof0,student0)`	`ranking(student0)`
-`RA(prof0,student0)`	`capability(prof0,student0)`	`teachingability(prof0)`
-`RA(prof0,student0)`	`intelligence(student0)`	`capability(prof0,student0)`
-`RA(prof0,student0)`	`intelligence(student0)`	`intelligence(student0)`
-`RA(prof0,student0)`	`intelligence(student0)`	`popularity(prof0)`
-`RA(prof0,student0)`	`intelligence(student0)`	`ranking(student0)`
-`RA(prof0,student0)`	`intelligence(student0)`	`salary(prof0,student0)`
-`RA(prof0,student0)`	`intelligence(student0)`	`teachingability(prof0)`
-`RA(prof0,student0)`	`popularity(prof0)`	`capability(prof0,student0)`
-`RA(prof0,student0)`	`popularity(prof0)`	`intelligence(student0)`
-`RA(prof0,student0)`	`popularity(prof0)`	`popularity(prof0)`
-`RA(prof0,student0)`	`popularity(prof0)`	`ranking(student0)`
-`RA(prof0,student0)`	`popularity(prof0)`	`salary(prof0,student0)`
-`RA(prof0,student0)`	`ranking(student0)`	`capability(prof0,student0)`
-`RA(prof0,student0)`	`ranking(student0)`	`popularity(prof0)`
-`RA(prof0,student0)`	`ranking(student0)`	`ranking(student0)`
-`RA(prof0,student0)`	`ranking(student0)`	`RA(prof0,student0)`
-`RA(prof0,student0)`	`ranking(student0)`	`salary(prof0,student0)`
-`RA(prof0,student0)`	`ranking(student0)`	`teachingability(prof0)`
-`RA(prof0,student0)`	`RA(prof0,student0)`	`capability(prof0,student0)`
-`RA(prof0,student0)`	`RA(prof0,student0)`	`intelligence(student0)`
-`RA(prof0,student0)`	`RA(prof0,student0)`	`popularity(prof0)`
-`RA(prof0,student0)`	`RA(prof0,student0)`	`ranking(student0)`
-`RA(prof0,student0)`	`RA(prof0,student0)`	`RA(prof0,student0)`
-`RA(prof0,student0)`	`RA(prof0,student0)`	`teachingability(prof0)`
-`RA(prof0,student0),registration(course0,student0)`	`capability(prof0,student0)`	`capability(prof0,student0)`
-`RA(prof0,student0),registration(course0,student0)`	`capability(prof0,student0)`	`diff(course0)`
-`RA(prof0,student0),registration(course0,student0)`	`capability(prof0,student0)`	`grade(course0,student0)`
-`RA(prof0,student0),registration(course0,student0)`	`capability(prof0,student0)`	`intelligence(student0)`
-`RA(prof0,student0),registration(course0,student0)`	`capability(prof0,student0)`	`popularity(prof0)`
-`RA(prof0,student0),registration(course0,student0)`	`capability(prof0,student0)`	`ranking(student0)`
-`RA(prof0,student0),registration(course0,student0)`	`capability(prof0,student0)`	`rating(course0)`
-`RA(prof0,student0),registration(course0,student0)`	`capability(prof0,student0)`	`registration(course0,student0)`
-`RA(prof0,student0),registration(course0,student0)`	`capability(prof0,student0)`	`sat(course0,student0)`
-`RA(prof0,student0),registration(course0,student0)`	`capability(prof0,student0)`	`teachingability(prof0)`
-`RA(prof0,student0),registration(course0,student0)`	`diff(course0)`	`capability(prof0,student0)`
-`RA(prof0,student0),registration(course0,student0)`	`diff(course0)`	`diff(course0)`
-`RA(prof0,student0),registration(course0,student0)`	`diff(course0)`	`intelligence(student0)`
-`RA(prof0,student0),registration(course0,student0)`	`diff(course0)`	`popularity(prof0)`
-`RA(prof0,student0),registration(course0,student0)`	`diff(course0)`	`ranking(student0)`
-`RA(prof0,student0),registration(course0,student0)`	`diff(course0)`	`RA(prof0,student0)`
-`RA(prof0,student0),registration(course0,student0)`	`diff(course0)`	`rating(course0)`
-`RA(prof0,student0),registration(course0,student0)`	`diff(course0)`	`registration(course0,student0)`
-`RA(prof0,student0),registration(course0,student0)`	`diff(course0)`	`salary(prof0,student0)`
-`RA(prof0,student0),registration(course0,student0)`	`diff(course0)`	`sat(course0,student0)`
-`RA(prof0,student0),registration(course0,student0)`	`diff(course0)`	`teachingability(prof0)`
-`RA(prof0,student0),registration(course0,student0)`	`grade(course0,student0)`	`capability(prof0,student0)`
-`RA(prof0,student0),registration(course0,student0)`	`grade(course0,student0)`	`diff(course0)`
-`RA(prof0,student0),registration(course0,student0)`	`grade(course0,student0)`	`grade(course0,student0)`
-`RA(prof0,student0),registration(course0,student0)`	`grade(course0,student0)`	`popularity(prof0)`
-`RA(prof0,student0),registration(course0,student0)`	`grade(course0,student0)`	`ranking(student0)`
-`RA(prof0,student0),registration(course0,student0)`	`grade(course0,student0)`	`RA(prof0,student0)`
-`RA(prof0,student0),registration(course0,student0)`	`grade(course0,student0)`	`rating(course0)`
-`RA(prof0,student0),registration(course0,student0)`	`grade(course0,student0)`	`salary(prof0,student0)`
-`RA(prof0,student0),registration(course0,student0)`	`grade(course0,student0)`	`sat(course0,student0)`
-`RA(prof0,student0),registration(course0,student0)`	`grade(course0,student0)`	`teachingability(prof0)`
-`RA(prof0,student0),registration(course0,student0)`	`intelligence(student0)`	`capability(prof0,student0)`
-`RA(prof0,student0),registration(course0,student0)`	`intelligence(student0)`	`diff(course0)`
-`RA(prof0,student0),registration(course0,student0)`	`intelligence(student0)`	`grade(course0,student0)`
-`RA(prof0,student0),registration(course0,student0)`	`intelligence(student0)`	`intelligence(student0)`
-`RA(prof0,student0),registration(course0,student0)`	`intelligence(student0)`	`popularity(prof0)`
-`RA(prof0,student0),registration(course0,student0)`	`intelligence(student0)`	`ranking(student0)`
-`RA(prof0,student0),registration(course0,student0)`	`intelligence(student0)`	`rating(course0)`
-`RA(prof0,student0),registration(course0,student0)`	`intelligence(student0)`	`salary(prof0,student0)`
-`RA(prof0,student0),registration(course0,student0)`	`intelligence(student0)`	`sat(course0,student0)`
-`RA(prof0,student0),registration(course0,student0)`	`intelligence(student0)`	`teachingability(prof0)`
-`RA(prof0,student0),registration(course0,student0)`	`popularity(prof0)`	`capability(prof0,student0)`
-`RA(prof0,student0),registration(course0,student0)`	`popularity(prof0)`	`diff(course0)`
-`RA(prof0,student0),registration(course0,student0)`	`popularity(prof0)`	`grade(course0,student0)`
-`RA(prof0,student0),registration(course0,student0)`	`popularity(prof0)`	`intelligence(student0)`
-`RA(prof0,student0),registration(course0,student0)`	`popularity(prof0)`	`popularity(prof0)`
-`RA(prof0,student0),registration(course0,student0)`	`popularity(prof0)`	`ranking(student0)`
-`RA(prof0,student0),registration(course0,student0)`	`popularity(prof0)`	`rating(course0)`
-`RA(prof0,student0),registration(course0,student0)`	`popularity(prof0)`	`registration(course0,student0)`
-`RA(prof0,student0),registration(course0,student0)`	`popularity(prof0)`	`salary(prof0,student0)`
-`RA(prof0,student0),registration(course0,student0)`	`popularity(prof0)`	`sat(course0,student0)`
-`RA(prof0,student0),registration(course0,student0)`	`ranking(student0)`	`capability(prof0,student0)`
-`RA(prof0,student0),registration(course0,student0)`	`ranking(student0)`	`diff(course0)`
-`RA(prof0,student0),registration(course0,student0)`	`ranking(student0)`	`grade(course0,student0)`
-`RA(prof0,student0),registration(course0,student0)`	`ranking(student0)`	`popularity(prof0)`
-`RA(prof0,student0),registration(course0,student0)`	`ranking(student0)`	`ranking(student0)`
-`RA(prof0,student0),registration(course0,student0)`	`ranking(student0)`	`rating(course0)`
-`RA(prof0,student0),registration(course0,student0)`	`ranking(student0)`	`registration(course0,student0)`
-`RA(prof0,student0),registration(course0,student0)`	`ranking(student0)`	`salary(prof0,student0)`
-`RA(prof0,student0),registration(course0,student0)`	`ranking(student0)`	`sat(course0,student0)`
-`RA(prof0,student0),registration(course0,student0)`	`ranking(student0)`	`teachingability(prof0)`
-`RA(prof0,student0),registration(course0,student0)`	`RA(prof0,student0)`	`capability(prof0,student0)`
-`RA(prof0,student0),registration(course0,student0)`	`RA(prof0,student0)`	`diff(course0)`
-`RA(prof0,student0),registration(course0,student0)`	`RA(prof0,student0)`	`grade(course0,student0)`
-`RA(prof0,student0),registration(course0,student0)`	`RA(prof0,student0)`	`intelligence(student0)`
-`RA(prof0,student0),registration(course0,student0)`	`RA(prof0,student0)`	`popularity(prof0)`
-`RA(prof0,student0),registration(course0,student0)`	`RA(prof0,student0)`	`ranking(student0)`
-`RA(prof0,student0),registration(course0,student0)`	`RA(prof0,student0)`	`RA(prof0,student0)`
-`RA(prof0,student0),registration(course0,student0)`	`RA(prof0,student0)`	`rating(course0)`
-`RA(prof0,student0),registration(course0,student0)`	`RA(prof0,student0)`	`registration(course0,student0)`
-`RA(prof0,student0),registration(course0,student0)`	`RA(prof0,student0)`	`salary(prof0,student0)`
-`RA(prof0,student0),registration(course0,student0)`	`RA(prof0,student0)`	`sat(course0,student0)`
-`RA(prof0,student0),registration(course0,student0)`	`RA(prof0,student0)`	`teachingability(prof0)`
-`RA(prof0,student0),registration(course0,student0)`	`rating(course0)`	`capability(prof0,student0)`
-`RA(prof0,student0),registration(course0,student0)`	`rating(course0)`	`diff(course0)`
-`RA(prof0,student0),registration(course0,student0)`	`rating(course0)`	`grade(course0,student0)`
-`RA(prof0,student0),registration(course0,student0)`	`rating(course0)`	`intelligence(student0)`
-`RA(prof0,student0),registration(course0,student0)`	`rating(course0)`	`popularity(prof0)`
-`RA(prof0,student0),registration(course0,student0)`	`rating(course0)`	`ranking(student0)`
-`RA(prof0,student0),registration(course0,student0)`	`rating(course0)`	`RA(prof0,student0)`
-`RA(prof0,student0),registration(course0,student0)`	`rating(course0)`	`rating(course0)`
-`RA(prof0,student0),registration(course0,student0)`	`rating(course0)`	`registration(course0,student0)`
-`RA(prof0,student0),registration(course0,student0)`	`rating(course0)`	`salary(prof0,student0)`
-`RA(prof0,student0),registration(course0,student0)`	`rating(course0)`	`sat(course0,student0)`
-`RA(prof0,student0),registration(course0,student0)`	`rating(course0)`	`teachingability(prof0)`
-`RA(prof0,student0),registration(course0,student0)`	`registration(course0,student0)`	`capability(prof0,student0)`
-`RA(prof0,student0),registration(course0,student0)`	`registration(course0,student0)`	`diff(course0)`
-`RA(prof0,student0),registration(course0,student0)`	`registration(course0,student0)`	`grade(course0,student0)`
-`RA(prof0,student0),registration(course0,student0)`	`registration(course0,student0)`	`intelligence(student0)`
-`RA(prof0,student0),registration(course0,student0)`	`registration(course0,student0)`	`popularity(prof0)`
-`RA(prof0,student0),registration(course0,student0)`	`registration(course0,student0)`	`ranking(student0)`
-`RA(prof0,student0),registration(course0,student0)`	`registration(course0,student0)`	`RA(prof0,student0)`
-`RA(prof0,student0),registration(course0,student0)`	`registration(course0,student0)`	`rating(course0)`
-`RA(prof0,student0),registration(course0,student0)`	`registration(course0,student0)`	`registration(course0,student0)`
-`RA(prof0,student0),registration(course0,student0)`	`registration(course0,student0)`	`salary(prof0,student0)`
-`RA(prof0,student0),registration(course0,student0)`	`registration(course0,student0)`	`sat(course0,student0)`
-`RA(prof0,student0),registration(course0,student0)`	`registration(course0,student0)`	`teachingability(prof0)`
-`RA(prof0,student0),registration(course0,student0)`	`salary(prof0,student0)`	`capability(prof0,student0)`
-`RA(prof0,student0),registration(course0,student0)`	`salary(prof0,student0)`	`diff(course0)`
-`RA(prof0,student0),registration(course0,student0)`	`salary(prof0,student0)`	`grade(course0,student0)`
-`RA(prof0,student0),registration(course0,student0)`	`salary(prof0,student0)`	`intelligence(student0)`
-`RA(prof0,student0),registration(course0,student0)`	`salary(prof0,student0)`	`popularity(prof0)`
-`RA(prof0,student0),registration(course0,student0)`	`salary(prof0,student0)`	`ranking(student0)`
-`RA(prof0,student0),registration(course0,student0)`	`salary(prof0,student0)`	`rating(course0)`
-`RA(prof0,student0),registration(course0,student0)`	`salary(prof0,student0)`	`registration(course0,student0)`
-`RA(prof0,student0),registration(course0,student0)`	`salary(prof0,student0)`	`salary(prof0,student0)`
-`RA(prof0,student0),registration(course0,student0)`	`salary(prof0,student0)`	`sat(course0,student0)`
-`RA(prof0,student0),registration(course0,student0)`	`salary(prof0,student0)`	`teachingability(prof0)`
-`RA(prof0,student0),registration(course0,student0)`	`sat(course0,student0)`	`capability(prof0,student0)`
-`RA(prof0,student0),registration(course0,student0)`	`sat(course0,student0)`	`diff(course0)`
-`RA(prof0,student0),registration(course0,student0)`	`sat(course0,student0)`	`intelligence(student0)`
-`RA(prof0,student0),registration(course0,student0)`	`sat(course0,student0)`	`popularity(prof0)`
-`RA(prof0,student0),registration(course0,student0)`	`sat(course0,student0)`	`ranking(student0)`
-`RA(prof0,student0),registration(course0,student0)`	`sat(course0,student0)`	`RA(prof0,student0)`
-`RA(prof0,student0),registration(course0,student0)`	`sat(course0,student0)`	`rating(course0)`
-`RA(prof0,student0),registration(course0,student0)`	`sat(course0,student0)`	`salary(prof0,student0)`
-`RA(prof0,student0),registration(course0,student0)`	`sat(course0,student0)`	`sat(course0,student0)`
-`RA(prof0,student0),registration(course0,student0)`	`sat(course0,student0)`	`teachingability(prof0)`
-`RA(prof0,student0),registration(course0,student0)`	`teachingability(prof0)`	`capability(prof0,student0)`
-`RA(prof0,student0),registration(course0,student0)`	`teachingability(prof0)`	`diff(course0)`
-`RA(prof0,student0),registration(course0,student0)`	`teachingability(prof0)`	`grade(course0,student0)`
-`RA(prof0,student0),registration(course0,student0)`	`teachingability(prof0)`	`intelligence(student0)`
-`RA(prof0,student0),registration(course0,student0)`	`teachingability(prof0)`	`popularity(prof0)`
-`RA(prof0,student0),registration(course0,student0)`	`teachingability(prof0)`	`ranking(student0)`
-`RA(prof0,student0),registration(course0,student0)`	`teachingability(prof0)`	`rating(course0)`
-`RA(prof0,student0),registration(course0,student0)`	`teachingability(prof0)`	`registration(course0,student0)`
-`RA(prof0,student0),registration(course0,student0)`	`teachingability(prof0)`	`salary(prof0,student0)`
-`RA(prof0,student0),registration(course0,student0)`	`teachingability(prof0)`	`sat(course0,student0)`
-`RA(prof0,student0),registration(course0,student0)`	`teachingability(prof0)`	`teachingability(prof0)`
-`RA(prof0,student0)`	`salary(prof0,student0)`	`capability(prof0,student0)`
-`RA(prof0,student0)`	`salary(prof0,student0)`	`intelligence(student0)`
-`RA(prof0,student0)`	`salary(prof0,student0)`	`popularity(prof0)`
-`RA(prof0,student0)`	`salary(prof0,student0)`	`ranking(student0)`
-`RA(prof0,student0)`	`salary(prof0,student0)`	`RA(prof0,student0)`
-`RA(prof0,student0)`	`salary(prof0,student0)`	`salary(prof0,student0)`
-`RA(prof0,student0)`	`salary(prof0,student0)`	`teachingability(prof0)`
-`RA(prof0,student0)`	`teachingability(prof0)`	`capability(prof0,student0)`
-`RA(prof0,student0)`	`teachingability(prof0)`	`intelligence(student0)`
-`RA(prof0,student0)`	`teachingability(prof0)`	`popularity(prof0)`
-`RA(prof0,student0)`	`teachingability(prof0)`	`ranking(student0)`
-`RA(prof0,student0)`	`teachingability(prof0)`	`RA(prof0,student0)`
-`RA(prof0,student0)`	`teachingability(prof0)`	`salary(prof0,student0)`
-`RA(prof0,student0)`	`teachingability(prof0)`	`teachingability(prof0)`
+RA(prof0,student0)	capability(prof0,student0)	capability(prof0,student0)
+RA(prof0,student0)	capability(prof0,student0)	intelligence(student0)
+RA(prof0,student0)	capability(prof0,student0)	popularity(prof0)
+RA(prof0,student0)	capability(prof0,student0)	ranking(student0)
+RA(prof0,student0)	capability(prof0,student0)	teachingability(prof0)
+RA(prof0,student0)	intelligence(student0)	capability(prof0,student0)
+RA(prof0,student0)	intelligence(student0)	intelligence(student0)
+RA(prof0,student0)	intelligence(student0)	popularity(prof0)
+RA(prof0,student0)	intelligence(student0)	ranking(student0)
+RA(prof0,student0)	intelligence(student0)	salary(prof0,student0)
+RA(prof0,student0)	intelligence(student0)	teachingability(prof0)
+RA(prof0,student0)	popularity(prof0)	capability(prof0,student0)
+RA(prof0,student0)	popularity(prof0)	intelligence(student0)
+RA(prof0,student0)	popularity(prof0)	popularity(prof0)
+RA(prof0,student0)	popularity(prof0)	ranking(student0)
+RA(prof0,student0)	popularity(prof0)	salary(prof0,student0)
+RA(prof0,student0)	ranking(student0)	capability(prof0,student0)
+RA(prof0,student0)	ranking(student0)	popularity(prof0)
+RA(prof0,student0)	ranking(student0)	ranking(student0)
+RA(prof0,student0)	ranking(student0)	RA(prof0,student0)
+RA(prof0,student0)	ranking(student0)	salary(prof0,student0)
+RA(prof0,student0)	ranking(student0)	teachingability(prof0)
+RA(prof0,student0)	RA(prof0,student0)	capability(prof0,student0)
+RA(prof0,student0)	RA(prof0,student0)	intelligence(student0)
+RA(prof0,student0)	RA(prof0,student0)	popularity(prof0)
+RA(prof0,student0)	RA(prof0,student0)	ranking(student0)
+RA(prof0,student0)	RA(prof0,student0)	RA(prof0,student0)
+RA(prof0,student0)	RA(prof0,student0)	teachingability(prof0)
+RA(prof0,student0),registration(course0,student0)	capability(prof0,student0)	capability(prof0,student0)
+RA(prof0,student0),registration(course0,student0)	capability(prof0,student0)	diff(course0)
+RA(prof0,student0),registration(course0,student0)	capability(prof0,student0)	grade(course0,student0)
+RA(prof0,student0),registration(course0,student0)	capability(prof0,student0)	intelligence(student0)
+RA(prof0,student0),registration(course0,student0)	capability(prof0,student0)	popularity(prof0)
+RA(prof0,student0),registration(course0,student0)	capability(prof0,student0)	ranking(student0)
+RA(prof0,student0),registration(course0,student0)	capability(prof0,student0)	rating(course0)
+RA(prof0,student0),registration(course0,student0)	capability(prof0,student0)	registration(course0,student0)
+RA(prof0,student0),registration(course0,student0)	capability(prof0,student0)	sat(course0,student0)
+RA(prof0,student0),registration(course0,student0)	capability(prof0,student0)	teachingability(prof0)
+RA(prof0,student0),registration(course0,student0)	diff(course0)	capability(prof0,student0)
+RA(prof0,student0),registration(course0,student0)	diff(course0)	diff(course0)
+RA(prof0,student0),registration(course0,student0)	diff(course0)	intelligence(student0)
+RA(prof0,student0),registration(course0,student0)	diff(course0)	popularity(prof0)
+RA(prof0,student0),registration(course0,student0)	diff(course0)	ranking(student0)
+RA(prof0,student0),registration(course0,student0)	diff(course0)	RA(prof0,student0)
+RA(prof0,student0),registration(course0,student0)	diff(course0)	rating(course0)
+RA(prof0,student0),registration(course0,student0)	diff(course0)	registration(course0,student0)
+RA(prof0,student0),registration(course0,student0)	diff(course0)	salary(prof0,student0)
+RA(prof0,student0),registration(course0,student0)	diff(course0)	sat(course0,student0)
+RA(prof0,student0),registration(course0,student0)	diff(course0)	teachingability(prof0)
+RA(prof0,student0),registration(course0,student0)	grade(course0,student0)	capability(prof0,student0)
+RA(prof0,student0),registration(course0,student0)	grade(course0,student0)	diff(course0)
+RA(prof0,student0),registration(course0,student0)	grade(course0,student0)	grade(course0,student0)
+RA(prof0,student0),registration(course0,student0)	grade(course0,student0)	popularity(prof0)
+RA(prof0,student0),registration(course0,student0)	grade(course0,student0)	ranking(student0)
+RA(prof0,student0),registration(course0,student0)	grade(course0,student0)	RA(prof0,student0)
+RA(prof0,student0),registration(course0,student0)	grade(course0,student0)	rating(course0)
+RA(prof0,student0),registration(course0,student0)	grade(course0,student0)	salary(prof0,student0)
+RA(prof0,student0),registration(course0,student0)	grade(course0,student0)	sat(course0,student0)
+RA(prof0,student0),registration(course0,student0)	grade(course0,student0)	teachingability(prof0)
+RA(prof0,student0),registration(course0,student0)	intelligence(student0)	capability(prof0,student0)
+RA(prof0,student0),registration(course0,student0)	intelligence(student0)	diff(course0)
+RA(prof0,student0),registration(course0,student0)	intelligence(student0)	grade(course0,student0)
+RA(prof0,student0),registration(course0,student0)	intelligence(student0)	intelligence(student0)
+RA(prof0,student0),registration(course0,student0)	intelligence(student0)	popularity(prof0)
+RA(prof0,student0),registration(course0,student0)	intelligence(student0)	ranking(student0)
+RA(prof0,student0),registration(course0,student0)	intelligence(student0)	rating(course0)
+RA(prof0,student0),registration(course0,student0)	intelligence(student0)	salary(prof0,student0)
+RA(prof0,student0),registration(course0,student0)	intelligence(student0)	sat(course0,student0)
+RA(prof0,student0),registration(course0,student0)	intelligence(student0)	teachingability(prof0)
+RA(prof0,student0),registration(course0,student0)	popularity(prof0)	capability(prof0,student0)
+RA(prof0,student0),registration(course0,student0)	popularity(prof0)	diff(course0)
+RA(prof0,student0),registration(course0,student0)	popularity(prof0)	grade(course0,student0)
+RA(prof0,student0),registration(course0,student0)	popularity(prof0)	intelligence(student0)
+RA(prof0,student0),registration(course0,student0)	popularity(prof0)	popularity(prof0)
+RA(prof0,student0),registration(course0,student0)	popularity(prof0)	ranking(student0)
+RA(prof0,student0),registration(course0,student0)	popularity(prof0)	rating(course0)
+RA(prof0,student0),registration(course0,student0)	popularity(prof0)	registration(course0,student0)
+RA(prof0,student0),registration(course0,student0)	popularity(prof0)	salary(prof0,student0)
+RA(prof0,student0),registration(course0,student0)	popularity(prof0)	sat(course0,student0)
+RA(prof0,student0),registration(course0,student0)	ranking(student0)	capability(prof0,student0)
+RA(prof0,student0),registration(course0,student0)	ranking(student0)	diff(course0)
+RA(prof0,student0),registration(course0,student0)	ranking(student0)	grade(course0,student0)
+RA(prof0,student0),registration(course0,student0)	ranking(student0)	popularity(prof0)
+RA(prof0,student0),registration(course0,student0)	ranking(student0)	ranking(student0)
+RA(prof0,student0),registration(course0,student0)	ranking(student0)	rating(course0)
+RA(prof0,student0),registration(course0,student0)	ranking(student0)	registration(course0,student0)
+RA(prof0,student0),registration(course0,student0)	ranking(student0)	salary(prof0,student0)
+RA(prof0,student0),registration(course0,student0)	ranking(student0)	sat(course0,student0)
+RA(prof0,student0),registration(course0,student0)	ranking(student0)	teachingability(prof0)
+RA(prof0,student0),registration(course0,student0)	RA(prof0,student0)	capability(prof0,student0)
+RA(prof0,student0),registration(course0,student0)	RA(prof0,student0)	diff(course0)
+RA(prof0,student0),registration(course0,student0)	RA(prof0,student0)	grade(course0,student0)
+RA(prof0,student0),registration(course0,student0)	RA(prof0,student0)	intelligence(student0)
+RA(prof0,student0),registration(course0,student0)	RA(prof0,student0)	popularity(prof0)
+RA(prof0,student0),registration(course0,student0)	RA(prof0,student0)	ranking(student0)
+RA(prof0,student0),registration(course0,student0)	RA(prof0,student0)	RA(prof0,student0)
+RA(prof0,student0),registration(course0,student0)	RA(prof0,student0)	rating(course0)
+RA(prof0,student0),registration(course0,student0)	RA(prof0,student0)	registration(course0,student0)
+RA(prof0,student0),registration(course0,student0)	RA(prof0,student0)	salary(prof0,student0)
+RA(prof0,student0),registration(course0,student0)	RA(prof0,student0)	sat(course0,student0)
+RA(prof0,student0),registration(course0,student0)	RA(prof0,student0)	teachingability(prof0)
+RA(prof0,student0),registration(course0,student0)	rating(course0)	capability(prof0,student0)
+RA(prof0,student0),registration(course0,student0)	rating(course0)	diff(course0)
+RA(prof0,student0),registration(course0,student0)	rating(course0)	grade(course0,student0)
+RA(prof0,student0),registration(course0,student0)	rating(course0)	intelligence(student0)
+RA(prof0,student0),registration(course0,student0)	rating(course0)	popularity(prof0)
+RA(prof0,student0),registration(course0,student0)	rating(course0)	ranking(student0)
+RA(prof0,student0),registration(course0,student0)	rating(course0)	RA(prof0,student0)
+RA(prof0,student0),registration(course0,student0)	rating(course0)	rating(course0)
+RA(prof0,student0),registration(course0,student0)	rating(course0)	registration(course0,student0)
+RA(prof0,student0),registration(course0,student0)	rating(course0)	salary(prof0,student0)
+RA(prof0,student0),registration(course0,student0)	rating(course0)	sat(course0,student0)
+RA(prof0,student0),registration(course0,student0)	rating(course0)	teachingability(prof0)
+RA(prof0,student0),registration(course0,student0)	registration(course0,student0)	capability(prof0,student0)
+RA(prof0,student0),registration(course0,student0)	registration(course0,student0)	diff(course0)
+RA(prof0,student0),registration(course0,student0)	registration(course0,student0)	grade(course0,student0)
+RA(prof0,student0),registration(course0,student0)	registration(course0,student0)	intelligence(student0)
+RA(prof0,student0),registration(course0,student0)	registration(course0,student0)	popularity(prof0)
+RA(prof0,student0),registration(course0,student0)	registration(course0,student0)	ranking(student0)
+RA(prof0,student0),registration(course0,student0)	registration(course0,student0)	RA(prof0,student0)
+RA(prof0,student0),registration(course0,student0)	registration(course0,student0)	rating(course0)
+RA(prof0,student0),registration(course0,student0)	registration(course0,student0)	registration(course0,student0)
+RA(prof0,student0),registration(course0,student0)	registration(course0,student0)	salary(prof0,student0)
+RA(prof0,student0),registration(course0,student0)	registration(course0,student0)	sat(course0,student0)
+RA(prof0,student0),registration(course0,student0)	registration(course0,student0)	teachingability(prof0)
+RA(prof0,student0),registration(course0,student0)	salary(prof0,student0)	capability(prof0,student0)
+RA(prof0,student0),registration(course0,student0)	salary(prof0,student0)	diff(course0)
+RA(prof0,student0),registration(course0,student0)	salary(prof0,student0)	grade(course0,student0)
+RA(prof0,student0),registration(course0,student0)	salary(prof0,student0)	intelligence(student0)
+RA(prof0,student0),registration(course0,student0)	salary(prof0,student0)	popularity(prof0)
+RA(prof0,student0),registration(course0,student0)	salary(prof0,student0)	ranking(student0)
+RA(prof0,student0),registration(course0,student0)	salary(prof0,student0)	rating(course0)
+RA(prof0,student0),registration(course0,student0)	salary(prof0,student0)	registration(course0,student0)
+RA(prof0,student0),registration(course0,student0)	salary(prof0,student0)	salary(prof0,student0)
+RA(prof0,student0),registration(course0,student0)	salary(prof0,student0)	sat(course0,student0)
+RA(prof0,student0),registration(course0,student0)	salary(prof0,student0)	teachingability(prof0)
+RA(prof0,student0),registration(course0,student0)	sat(course0,student0)	capability(prof0,student0)
+RA(prof0,student0),registration(course0,student0)	sat(course0,student0)	diff(course0)
+RA(prof0,student0),registration(course0,student0)	sat(course0,student0)	intelligence(student0)
+RA(prof0,student0),registration(course0,student0)	sat(course0,student0)	popularity(prof0)
+RA(prof0,student0),registration(course0,student0)	sat(course0,student0)	ranking(student0)
+RA(prof0,student0),registration(course0,student0)	sat(course0,student0)	RA(prof0,student0)
+RA(prof0,student0),registration(course0,student0)	sat(course0,student0)	rating(course0)
+RA(prof0,student0),registration(course0,student0)	sat(course0,student0)	salary(prof0,student0)
+RA(prof0,student0),registration(course0,student0)	sat(course0,student0)	sat(course0,student0)
+RA(prof0,student0),registration(course0,student0)	sat(course0,student0)	teachingability(prof0)
+RA(prof0,student0),registration(course0,student0)	teachingability(prof0)	capability(prof0,student0)
+RA(prof0,student0),registration(course0,student0)	teachingability(prof0)	diff(course0)
+RA(prof0,student0),registration(course0,student0)	teachingability(prof0)	grade(course0,student0)
+RA(prof0,student0),registration(course0,student0)	teachingability(prof0)	intelligence(student0)
+RA(prof0,student0),registration(course0,student0)	teachingability(prof0)	popularity(prof0)
+RA(prof0,student0),registration(course0,student0)	teachingability(prof0)	ranking(student0)
+RA(prof0,student0),registration(course0,student0)	teachingability(prof0)	rating(course0)
+RA(prof0,student0),registration(course0,student0)	teachingability(prof0)	registration(course0,student0)
+RA(prof0,student0),registration(course0,student0)	teachingability(prof0)	salary(prof0,student0)
+RA(prof0,student0),registration(course0,student0)	teachingability(prof0)	sat(course0,student0)
+RA(prof0,student0),registration(course0,student0)	teachingability(prof0)	teachingability(prof0)
+RA(prof0,student0)	salary(prof0,student0)	capability(prof0,student0)
+RA(prof0,student0)	salary(prof0,student0)	intelligence(student0)
+RA(prof0,student0)	salary(prof0,student0)	popularity(prof0)
+RA(prof0,student0)	salary(prof0,student0)	ranking(student0)
+RA(prof0,student0)	salary(prof0,student0)	RA(prof0,student0)
+RA(prof0,student0)	salary(prof0,student0)	salary(prof0,student0)
+RA(prof0,student0)	salary(prof0,student0)	teachingability(prof0)
+RA(prof0,student0)	teachingability(prof0)	capability(prof0,student0)
+RA(prof0,student0)	teachingability(prof0)	intelligence(student0)
+RA(prof0,student0)	teachingability(prof0)	popularity(prof0)
+RA(prof0,student0)	teachingability(prof0)	ranking(student0)
+RA(prof0,student0)	teachingability(prof0)	RA(prof0,student0)
+RA(prof0,student0)	teachingability(prof0)	salary(prof0,student0)
+RA(prof0,student0)	teachingability(prof0)	teachingability(prof0)
 Rchain	child	parent
-`registration(course0,student0)`	`diff(course0)`	`diff(course0)`
-`registration(course0,student0)`	`diff(course0)`	`intelligence(student0)`
-`registration(course0,student0)`	`diff(course0)`	`ranking(student0)`
-`registration(course0,student0)`	`diff(course0)`	`rating(course0)`
-`registration(course0,student0)`	`diff(course0)`	`registration(course0,student0)`
-`registration(course0,student0)`	`diff(course0)`	`sat(course0,student0)`
-`registration(course0,student0)`	`grade(course0,student0)`	`diff(course0)`
-`registration(course0,student0)`	`grade(course0,student0)`	`grade(course0,student0)`
-`registration(course0,student0)`	`grade(course0,student0)`	`ranking(student0)`
-`registration(course0,student0)`	`grade(course0,student0)`	`rating(course0)`
-`registration(course0,student0)`	`grade(course0,student0)`	`sat(course0,student0)`
-`registration(course0,student0)`	`intelligence(student0)`	`diff(course0)`
-`registration(course0,student0)`	`intelligence(student0)`	`grade(course0,student0)`
-`registration(course0,student0)`	`intelligence(student0)`	`intelligence(student0)`
-`registration(course0,student0)`	`intelligence(student0)`	`ranking(student0)`
-`registration(course0,student0)`	`intelligence(student0)`	`rating(course0)`
-`registration(course0,student0)`	`intelligence(student0)`	`registration(course0,student0)`
-`registration(course0,student0)`	`intelligence(student0)`	`sat(course0,student0)`
-`registration(course0,student0)`	`ranking(student0)`	`diff(course0)`
-`registration(course0,student0)`	`ranking(student0)`	`grade(course0,student0)`
-`registration(course0,student0)`	`ranking(student0)`	`ranking(student0)`
-`registration(course0,student0)`	`ranking(student0)`	`rating(course0)`
-`registration(course0,student0)`	`ranking(student0)`	`registration(course0,student0)`
-`registration(course0,student0)`	`ranking(student0)`	`sat(course0,student0)`
-`registration(course0,student0)`	`rating(course0)`	`diff(course0)`
-`registration(course0,student0)`	`rating(course0)`	`grade(course0,student0)`
-`registration(course0,student0)`	`rating(course0)`	`intelligence(student0)`
-`registration(course0,student0)`	`rating(course0)`	`ranking(student0)`
-`registration(course0,student0)`	`rating(course0)`	`rating(course0)`
-`registration(course0,student0)`	`rating(course0)`	`registration(course0,student0)`
-`registration(course0,student0)`	`rating(course0)`	`sat(course0,student0)`
-`registration(course0,student0)`	`registration(course0,student0)`	`diff(course0)`
-`registration(course0,student0)`	`registration(course0,student0)`	`grade(course0,student0)`
-`registration(course0,student0)`	`registration(course0,student0)`	`intelligence(student0)`
-`registration(course0,student0)`	`registration(course0,student0)`	`ranking(student0)`
-`registration(course0,student0)`	`registration(course0,student0)`	`rating(course0)`
-`registration(course0,student0)`	`registration(course0,student0)`	`registration(course0,student0)`
-`registration(course0,student0)`	`registration(course0,student0)`	`sat(course0,student0)`
-`registration(course0,student0)`	`sat(course0,student0)`	`diff(course0)`
-`registration(course0,student0)`	`sat(course0,student0)`	`intelligence(student0)`
-`registration(course0,student0)`	`sat(course0,student0)`	`ranking(student0)`
-`registration(course0,student0)`	`sat(course0,student0)`	`rating(course0)`
-`registration(course0,student0)`	`sat(course0,student0)`	`registration(course0,student0)`
-`registration(course0,student0)`	`sat(course0,student0)`	`sat(course0,student0)`
+registration(course0,student0)	diff(course0)	diff(course0)
+registration(course0,student0)	diff(course0)	intelligence(student0)
+registration(course0,student0)	diff(course0)	ranking(student0)
+registration(course0,student0)	diff(course0)	rating(course0)
+registration(course0,student0)	diff(course0)	registration(course0,student0)
+registration(course0,student0)	diff(course0)	sat(course0,student0)
+registration(course0,student0)	grade(course0,student0)	diff(course0)
+registration(course0,student0)	grade(course0,student0)	grade(course0,student0)
+registration(course0,student0)	grade(course0,student0)	ranking(student0)
+registration(course0,student0)	grade(course0,student0)	rating(course0)
+registration(course0,student0)	grade(course0,student0)	sat(course0,student0)
+registration(course0,student0)	intelligence(student0)	diff(course0)
+registration(course0,student0)	intelligence(student0)	grade(course0,student0)
+registration(course0,student0)	intelligence(student0)	intelligence(student0)
+registration(course0,student0)	intelligence(student0)	ranking(student0)
+registration(course0,student0)	intelligence(student0)	rating(course0)
+registration(course0,student0)	intelligence(student0)	registration(course0,student0)
+registration(course0,student0)	intelligence(student0)	sat(course0,student0)
+registration(course0,student0)	ranking(student0)	diff(course0)
+registration(course0,student0)	ranking(student0)	grade(course0,student0)
+registration(course0,student0)	ranking(student0)	ranking(student0)
+registration(course0,student0)	ranking(student0)	rating(course0)
+registration(course0,student0)	ranking(student0)	registration(course0,student0)
+registration(course0,student0)	ranking(student0)	sat(course0,student0)
+registration(course0,student0)	rating(course0)	diff(course0)
+registration(course0,student0)	rating(course0)	grade(course0,student0)
+registration(course0,student0)	rating(course0)	intelligence(student0)
+registration(course0,student0)	rating(course0)	ranking(student0)
+registration(course0,student0)	rating(course0)	rating(course0)
+registration(course0,student0)	rating(course0)	registration(course0,student0)
+registration(course0,student0)	rating(course0)	sat(course0,student0)
+registration(course0,student0)	registration(course0,student0)	diff(course0)
+registration(course0,student0)	registration(course0,student0)	grade(course0,student0)
+registration(course0,student0)	registration(course0,student0)	intelligence(student0)
+registration(course0,student0)	registration(course0,student0)	ranking(student0)
+registration(course0,student0)	registration(course0,student0)	rating(course0)
+registration(course0,student0)	registration(course0,student0)	registration(course0,student0)
+registration(course0,student0)	registration(course0,student0)	sat(course0,student0)
+registration(course0,student0)	sat(course0,student0)	diff(course0)
+registration(course0,student0)	sat(course0,student0)	intelligence(student0)
+registration(course0,student0)	sat(course0,student0)	ranking(student0)
+registration(course0,student0)	sat(course0,student0)	rating(course0)
+registration(course0,student0)	sat(course0,student0)	registration(course0,student0)
+registration(course0,student0)	sat(course0,student0)	sat(course0,student0)
 Table: Path_Forbidden_Edges
-`RA(prof0,student0)`	`intelligence(student0)`	`intelligence(student0)`
-`RA(prof0,student0)`	`intelligence(student0)`	`ranking(student0)`
-`RA(prof0,student0)`	`popularity(prof0)`	`popularity(prof0)`
-`RA(prof0,student0)`	`ranking(student0)`	`ranking(student0)`
-`RA(prof0,student0),registration(course0,student0)`	`capability(prof0,student0)`	`capability(prof0,student0)`
-`RA(prof0,student0),registration(course0,student0)`	`capability(prof0,student0)`	`intelligence(student0)`
-`RA(prof0,student0),registration(course0,student0)`	`capability(prof0,student0)`	`popularity(prof0)`
-`RA(prof0,student0),registration(course0,student0)`	`capability(prof0,student0)`	`ranking(student0)`
-`RA(prof0,student0),registration(course0,student0)`	`capability(prof0,student0)`	`teachingability(prof0)`
-`RA(prof0,student0),registration(course0,student0)`	`diff(course0)`	`diff(course0)`
-`RA(prof0,student0),registration(course0,student0)`	`diff(course0)`	`intelligence(student0)`
-`RA(prof0,student0),registration(course0,student0)`	`diff(course0)`	`ranking(student0)`
-`RA(prof0,student0),registration(course0,student0)`	`diff(course0)`	`rating(course0)`
-`RA(prof0,student0),registration(course0,student0)`	`diff(course0)`	`sat(course0,student0)`
-`RA(prof0,student0),registration(course0,student0)`	`grade(course0,student0)`	`diff(course0)`
-`RA(prof0,student0),registration(course0,student0)`	`grade(course0,student0)`	`grade(course0,student0)`
-`RA(prof0,student0),registration(course0,student0)`	`grade(course0,student0)`	`ranking(student0)`
-`RA(prof0,student0),registration(course0,student0)`	`grade(course0,student0)`	`rating(course0)`
-`RA(prof0,student0),registration(course0,student0)`	`grade(course0,student0)`	`sat(course0,student0)`
-`RA(prof0,student0),registration(course0,student0)`	`intelligence(student0)`	`capability(prof0,student0)`
-`RA(prof0,student0),registration(course0,student0)`	`intelligence(student0)`	`diff(course0)`
-`RA(prof0,student0),registration(course0,student0)`	`intelligence(student0)`	`grade(course0,student0)`
-`RA(prof0,student0),registration(course0,student0)`	`intelligence(student0)`	`intelligence(student0)`
-`RA(prof0,student0),registration(course0,student0)`	`intelligence(student0)`	`popularity(prof0)`
-`RA(prof0,student0),registration(course0,student0)`	`intelligence(student0)`	`ranking(student0)`
-`RA(prof0,student0),registration(course0,student0)`	`intelligence(student0)`	`rating(course0)`
-`RA(prof0,student0),registration(course0,student0)`	`intelligence(student0)`	`salary(prof0,student0)`
-`RA(prof0,student0),registration(course0,student0)`	`intelligence(student0)`	`sat(course0,student0)`
-`RA(prof0,student0),registration(course0,student0)`	`intelligence(student0)`	`teachingability(prof0)`
-`RA(prof0,student0),registration(course0,student0)`	`popularity(prof0)`	`capability(prof0,student0)`
-`RA(prof0,student0),registration(course0,student0)`	`popularity(prof0)`	`intelligence(student0)`
-`RA(prof0,student0),registration(course0,student0)`	`popularity(prof0)`	`popularity(prof0)`
-`RA(prof0,student0),registration(course0,student0)`	`popularity(prof0)`	`ranking(student0)`
-`RA(prof0,student0),registration(course0,student0)`	`popularity(prof0)`	`salary(prof0,student0)`
-`RA(prof0,student0),registration(course0,student0)`	`ranking(student0)`	`capability(prof0,student0)`
-`RA(prof0,student0),registration(course0,student0)`	`ranking(student0)`	`diff(course0)`
-`RA(prof0,student0),registration(course0,student0)`	`ranking(student0)`	`grade(course0,student0)`
-`RA(prof0,student0),registration(course0,student0)`	`ranking(student0)`	`popularity(prof0)`
-`RA(prof0,student0),registration(course0,student0)`	`ranking(student0)`	`ranking(student0)`
-`RA(prof0,student0),registration(course0,student0)`	`ranking(student0)`	`rating(course0)`
-`RA(prof0,student0),registration(course0,student0)`	`ranking(student0)`	`salary(prof0,student0)`
-`RA(prof0,student0),registration(course0,student0)`	`ranking(student0)`	`sat(course0,student0)`
-`RA(prof0,student0),registration(course0,student0)`	`ranking(student0)`	`teachingability(prof0)`
-`RA(prof0,student0),registration(course0,student0)`	`RA(prof0,student0)`	`capability(prof0,student0)`
-`RA(prof0,student0),registration(course0,student0)`	`RA(prof0,student0)`	`intelligence(student0)`
-`RA(prof0,student0),registration(course0,student0)`	`RA(prof0,student0)`	`popularity(prof0)`
-`RA(prof0,student0),registration(course0,student0)`	`RA(prof0,student0)`	`ranking(student0)`
-`RA(prof0,student0),registration(course0,student0)`	`RA(prof0,student0)`	`teachingability(prof0)`
-`RA(prof0,student0),registration(course0,student0)`	`rating(course0)`	`diff(course0)`
-`RA(prof0,student0),registration(course0,student0)`	`rating(course0)`	`grade(course0,student0)`
-`RA(prof0,student0),registration(course0,student0)`	`rating(course0)`	`intelligence(student0)`
-`RA(prof0,student0),registration(course0,student0)`	`rating(course0)`	`ranking(student0)`
-`RA(prof0,student0),registration(course0,student0)`	`rating(course0)`	`rating(course0)`
-`RA(prof0,student0),registration(course0,student0)`	`rating(course0)`	`sat(course0,student0)`
-`RA(prof0,student0),registration(course0,student0)`	`registration(course0,student0)`	`diff(course0)`
-`RA(prof0,student0),registration(course0,student0)`	`registration(course0,student0)`	`grade(course0,student0)`
-`RA(prof0,student0),registration(course0,student0)`	`registration(course0,student0)`	`intelligence(student0)`
-`RA(prof0,student0),registration(course0,student0)`	`registration(course0,student0)`	`ranking(student0)`
-`RA(prof0,student0),registration(course0,student0)`	`registration(course0,student0)`	`rating(course0)`
-`RA(prof0,student0),registration(course0,student0)`	`registration(course0,student0)`	`sat(course0,student0)`
-`RA(prof0,student0),registration(course0,student0)`	`salary(prof0,student0)`	`capability(prof0,student0)`
-`RA(prof0,student0),registration(course0,student0)`	`salary(prof0,student0)`	`intelligence(student0)`
-`RA(prof0,student0),registration(course0,student0)`	`salary(prof0,student0)`	`popularity(prof0)`
-`RA(prof0,student0),registration(course0,student0)`	`salary(prof0,student0)`	`ranking(student0)`
-`RA(prof0,student0),registration(course0,student0)`	`salary(prof0,student0)`	`salary(prof0,student0)`
-`RA(prof0,student0),registration(course0,student0)`	`salary(prof0,student0)`	`teachingability(prof0)`
-`RA(prof0,student0),registration(course0,student0)`	`sat(course0,student0)`	`diff(course0)`
-`RA(prof0,student0),registration(course0,student0)`	`sat(course0,student0)`	`intelligence(student0)`
-`RA(prof0,student0),registration(course0,student0)`	`sat(course0,student0)`	`ranking(student0)`
-`RA(prof0,student0),registration(course0,student0)`	`sat(course0,student0)`	`rating(course0)`
-`RA(prof0,student0),registration(course0,student0)`	`sat(course0,student0)`	`sat(course0,student0)`
-`RA(prof0,student0),registration(course0,student0)`	`teachingability(prof0)`	`capability(prof0,student0)`
-`RA(prof0,student0),registration(course0,student0)`	`teachingability(prof0)`	`intelligence(student0)`
-`RA(prof0,student0),registration(course0,student0)`	`teachingability(prof0)`	`popularity(prof0)`
-`RA(prof0,student0),registration(course0,student0)`	`teachingability(prof0)`	`ranking(student0)`
-`RA(prof0,student0),registration(course0,student0)`	`teachingability(prof0)`	`salary(prof0,student0)`
-`RA(prof0,student0),registration(course0,student0)`	`teachingability(prof0)`	`teachingability(prof0)`
-`RA(prof0,student0)`	`teachingability(prof0)`	`popularity(prof0)`
-`RA(prof0,student0)`	`teachingability(prof0)`	`teachingability(prof0)`
+RA(prof0,student0)	intelligence(student0)	intelligence(student0)
+RA(prof0,student0)	intelligence(student0)	ranking(student0)
+RA(prof0,student0)	popularity(prof0)	popularity(prof0)
+RA(prof0,student0)	ranking(student0)	ranking(student0)
+RA(prof0,student0),registration(course0,student0)	capability(prof0,student0)	capability(prof0,student0)
+RA(prof0,student0),registration(course0,student0)	capability(prof0,student0)	intelligence(student0)
+RA(prof0,student0),registration(course0,student0)	capability(prof0,student0)	popularity(prof0)
+RA(prof0,student0),registration(course0,student0)	capability(prof0,student0)	ranking(student0)
+RA(prof0,student0),registration(course0,student0)	capability(prof0,student0)	teachingability(prof0)
+RA(prof0,student0),registration(course0,student0)	diff(course0)	diff(course0)
+RA(prof0,student0),registration(course0,student0)	diff(course0)	intelligence(student0)
+RA(prof0,student0),registration(course0,student0)	diff(course0)	ranking(student0)
+RA(prof0,student0),registration(course0,student0)	diff(course0)	rating(course0)
+RA(prof0,student0),registration(course0,student0)	diff(course0)	sat(course0,student0)
+RA(prof0,student0),registration(course0,student0)	grade(course0,student0)	diff(course0)
+RA(prof0,student0),registration(course0,student0)	grade(course0,student0)	grade(course0,student0)
+RA(prof0,student0),registration(course0,student0)	grade(course0,student0)	ranking(student0)
+RA(prof0,student0),registration(course0,student0)	grade(course0,student0)	rating(course0)
+RA(prof0,student0),registration(course0,student0)	grade(course0,student0)	sat(course0,student0)
+RA(prof0,student0),registration(course0,student0)	intelligence(student0)	capability(prof0,student0)
+RA(prof0,student0),registration(course0,student0)	intelligence(student0)	diff(course0)
+RA(prof0,student0),registration(course0,student0)	intelligence(student0)	grade(course0,student0)
+RA(prof0,student0),registration(course0,student0)	intelligence(student0)	intelligence(student0)
+RA(prof0,student0),registration(course0,student0)	intelligence(student0)	popularity(prof0)
+RA(prof0,student0),registration(course0,student0)	intelligence(student0)	ranking(student0)
+RA(prof0,student0),registration(course0,student0)	intelligence(student0)	rating(course0)
+RA(prof0,student0),registration(course0,student0)	intelligence(student0)	salary(prof0,student0)
+RA(prof0,student0),registration(course0,student0)	intelligence(student0)	sat(course0,student0)
+RA(prof0,student0),registration(course0,student0)	intelligence(student0)	teachingability(prof0)
+RA(prof0,student0),registration(course0,student0)	popularity(prof0)	capability(prof0,student0)
+RA(prof0,student0),registration(course0,student0)	popularity(prof0)	intelligence(student0)
+RA(prof0,student0),registration(course0,student0)	popularity(prof0)	popularity(prof0)
+RA(prof0,student0),registration(course0,student0)	popularity(prof0)	ranking(student0)
+RA(prof0,student0),registration(course0,student0)	popularity(prof0)	salary(prof0,student0)
+RA(prof0,student0),registration(course0,student0)	ranking(student0)	capability(prof0,student0)
+RA(prof0,student0),registration(course0,student0)	ranking(student0)	diff(course0)
+RA(prof0,student0),registration(course0,student0)	ranking(student0)	grade(course0,student0)
+RA(prof0,student0),registration(course0,student0)	ranking(student0)	popularity(prof0)
+RA(prof0,student0),registration(course0,student0)	ranking(student0)	ranking(student0)
+RA(prof0,student0),registration(course0,student0)	ranking(student0)	rating(course0)
+RA(prof0,student0),registration(course0,student0)	ranking(student0)	salary(prof0,student0)
+RA(prof0,student0),registration(course0,student0)	ranking(student0)	sat(course0,student0)
+RA(prof0,student0),registration(course0,student0)	ranking(student0)	teachingability(prof0)
+RA(prof0,student0),registration(course0,student0)	RA(prof0,student0)	capability(prof0,student0)
+RA(prof0,student0),registration(course0,student0)	RA(prof0,student0)	intelligence(student0)
+RA(prof0,student0),registration(course0,student0)	RA(prof0,student0)	popularity(prof0)
+RA(prof0,student0),registration(course0,student0)	RA(prof0,student0)	ranking(student0)
+RA(prof0,student0),registration(course0,student0)	RA(prof0,student0)	teachingability(prof0)
+RA(prof0,student0),registration(course0,student0)	rating(course0)	diff(course0)
+RA(prof0,student0),registration(course0,student0)	rating(course0)	grade(course0,student0)
+RA(prof0,student0),registration(course0,student0)	rating(course0)	intelligence(student0)
+RA(prof0,student0),registration(course0,student0)	rating(course0)	ranking(student0)
+RA(prof0,student0),registration(course0,student0)	rating(course0)	rating(course0)
+RA(prof0,student0),registration(course0,student0)	rating(course0)	sat(course0,student0)
+RA(prof0,student0),registration(course0,student0)	registration(course0,student0)	diff(course0)
+RA(prof0,student0),registration(course0,student0)	registration(course0,student0)	grade(course0,student0)
+RA(prof0,student0),registration(course0,student0)	registration(course0,student0)	intelligence(student0)
+RA(prof0,student0),registration(course0,student0)	registration(course0,student0)	ranking(student0)
+RA(prof0,student0),registration(course0,student0)	registration(course0,student0)	rating(course0)
+RA(prof0,student0),registration(course0,student0)	registration(course0,student0)	sat(course0,student0)
+RA(prof0,student0),registration(course0,student0)	salary(prof0,student0)	capability(prof0,student0)
+RA(prof0,student0),registration(course0,student0)	salary(prof0,student0)	intelligence(student0)
+RA(prof0,student0),registration(course0,student0)	salary(prof0,student0)	popularity(prof0)
+RA(prof0,student0),registration(course0,student0)	salary(prof0,student0)	ranking(student0)
+RA(prof0,student0),registration(course0,student0)	salary(prof0,student0)	salary(prof0,student0)
+RA(prof0,student0),registration(course0,student0)	salary(prof0,student0)	teachingability(prof0)
+RA(prof0,student0),registration(course0,student0)	sat(course0,student0)	diff(course0)
+RA(prof0,student0),registration(course0,student0)	sat(course0,student0)	intelligence(student0)
+RA(prof0,student0),registration(course0,student0)	sat(course0,student0)	ranking(student0)
+RA(prof0,student0),registration(course0,student0)	sat(course0,student0)	rating(course0)
+RA(prof0,student0),registration(course0,student0)	sat(course0,student0)	sat(course0,student0)
+RA(prof0,student0),registration(course0,student0)	teachingability(prof0)	capability(prof0,student0)
+RA(prof0,student0),registration(course0,student0)	teachingability(prof0)	intelligence(student0)
+RA(prof0,student0),registration(course0,student0)	teachingability(prof0)	popularity(prof0)
+RA(prof0,student0),registration(course0,student0)	teachingability(prof0)	ranking(student0)
+RA(prof0,student0),registration(course0,student0)	teachingability(prof0)	salary(prof0,student0)
+RA(prof0,student0),registration(course0,student0)	teachingability(prof0)	teachingability(prof0)
+RA(prof0,student0)	teachingability(prof0)	popularity(prof0)
+RA(prof0,student0)	teachingability(prof0)	teachingability(prof0)
 Rchain	child	parent
-`registration(course0,student0)`	`diff(course0)`	`diff(course0)`
-`registration(course0,student0)`	`diff(course0)`	`rating(course0)`
-`registration(course0,student0)`	`intelligence(student0)`	`intelligence(student0)`
-`registration(course0,student0)`	`intelligence(student0)`	`ranking(student0)`
-`registration(course0,student0)`	`ranking(student0)`	`ranking(student0)`
-`registration(course0,student0)`	`rating(course0)`	`diff(course0)`
-`registration(course0,student0)`	`rating(course0)`	`rating(course0)`
+registration(course0,student0)	diff(course0)	diff(course0)
+registration(course0,student0)	diff(course0)	rating(course0)
+registration(course0,student0)	intelligence(student0)	intelligence(student0)
+registration(course0,student0)	intelligence(student0)	ranking(student0)
+registration(course0,student0)	ranking(student0)	ranking(student0)
+registration(course0,student0)	rating(course0)	diff(course0)
+registration(course0,student0)	rating(course0)	rating(course0)
 Table: Path_Required_Edges
-`RA(prof0,student0)`	`popularity(prof0)`	`teachingability(prof0)`
-`RA(prof0,student0)`	`ranking(student0)`	`intelligence(student0)`
-`RA(prof0,student0),registration(course0,student0)`	`capability(prof0,student0)`	`RA(prof0,student0)`
-`RA(prof0,student0),registration(course0,student0)`	`capability(prof0,student0)`	`salary(prof0,student0)`
-`RA(prof0,student0),registration(course0,student0)`	`diff(course0)`	`grade(course0,student0)`
-`RA(prof0,student0),registration(course0,student0)`	`grade(course0,student0)`	`intelligence(student0)`
-`RA(prof0,student0),registration(course0,student0)`	`grade(course0,student0)`	`registration(course0,student0)`
-`RA(prof0,student0),registration(course0,student0)`	`intelligence(student0)`	`RA(prof0,student0)`
-`RA(prof0,student0),registration(course0,student0)`	`popularity(prof0)`	`RA(prof0,student0)`
-`RA(prof0,student0),registration(course0,student0)`	`popularity(prof0)`	`teachingability(prof0)`
-`RA(prof0,student0),registration(course0,student0)`	`ranking(student0)`	`intelligence(student0)`
-`RA(prof0,student0),registration(course0,student0)`	`salary(prof0,student0)`	`RA(prof0,student0)`
-`RA(prof0,student0),registration(course0,student0)`	`sat(course0,student0)`	`grade(course0,student0)`
-`RA(prof0,student0),registration(course0,student0)`	`sat(course0,student0)`	`registration(course0,student0)`
+RA(prof0,student0)	popularity(prof0)	teachingability(prof0)
+RA(prof0,student0)	ranking(student0)	intelligence(student0)
+RA(prof0,student0),registration(course0,student0)	capability(prof0,student0)	RA(prof0,student0)
+RA(prof0,student0),registration(course0,student0)	capability(prof0,student0)	salary(prof0,student0)
+RA(prof0,student0),registration(course0,student0)	diff(course0)	grade(course0,student0)
+RA(prof0,student0),registration(course0,student0)	grade(course0,student0)	intelligence(student0)
+RA(prof0,student0),registration(course0,student0)	grade(course0,student0)	registration(course0,student0)
+RA(prof0,student0),registration(course0,student0)	intelligence(student0)	RA(prof0,student0)
+RA(prof0,student0),registration(course0,student0)	popularity(prof0)	RA(prof0,student0)
+RA(prof0,student0),registration(course0,student0)	popularity(prof0)	teachingability(prof0)
+RA(prof0,student0),registration(course0,student0)	ranking(student0)	intelligence(student0)
+RA(prof0,student0),registration(course0,student0)	salary(prof0,student0)	RA(prof0,student0)
+RA(prof0,student0),registration(course0,student0)	sat(course0,student0)	grade(course0,student0)
+RA(prof0,student0),registration(course0,student0)	sat(course0,student0)	registration(course0,student0)
 Rchain	child	parent
-`registration(course0,student0)`	`ranking(student0)`	`intelligence(student0)`
+registration(course0,student0)	ranking(student0)	intelligence(student0)
 Table: Pvars_Family
-`capability(prof0,student0)`	prof0
-`capability(prof0,student0)`	student0
+capability(prof0,student0)	prof0
+capability(prof0,student0)	student0
 child	pvid
-`diff(course0)`	course0
-`diff(course0)`	student0
-`grade(course0,student0)`	course0
-`grade(course0,student0)`	student0
-`intelligence(student0)`	course0
-`intelligence(student0)`	prof0
-`intelligence(student0)`	student0
-`popularity(prof0)`	prof0
-`popularity(prof0)`	student0
-`ranking(student0)`	prof0
-`ranking(student0)`	student0
-`RA(prof0,student0)`	prof0
-`RA(prof0,student0)`	student0
-`rating(course0)`	course0
-`registration(course0,student0)`	course0
-`registration(course0,student0)`	student0
-`salary(prof0,student0)`	prof0
-`salary(prof0,student0)`	student0
-`sat(course0,student0)`	course0
-`sat(course0,student0)`	student0
-`teachingability(prof0)`	prof0
-`teachingability(prof0)`	student0
+diff(course0)	course0
+diff(course0)	student0
+grade(course0,student0)	course0
+grade(course0,student0)	student0
+intelligence(student0)	course0
+intelligence(student0)	prof0
+intelligence(student0)	student0
+popularity(prof0)	prof0
+popularity(prof0)	student0
+ranking(student0)	prof0
+ranking(student0)	student0
+RA(prof0,student0)	prof0
+RA(prof0,student0)	student0
+rating(course0)	course0
+registration(course0,student0)	course0
+registration(course0,student0)	student0
+salary(prof0,student0)	prof0
+salary(prof0,student0)	student0
+sat(course0,student0)	course0
+sat(course0,student0)	student0
+teachingability(prof0)	prof0
+teachingability(prof0)	student0
 Table: Pvars_Not_In_Family
-`capability(prof0,student0)`	course0	10
+capability(prof0,student0)	course0	10
 child	pvid	Tuples
-`diff(course0)`	prof0	6
-`grade(course0,student0)`	prof0	6
-`popularity(prof0)`	course0	10
-`ranking(student0)`	course0	10
-`RA(prof0,student0)`	course0	10
-`rating(course0)`	prof0	6
-`rating(course0)`	student0	38
-`registration(course0,student0)`	prof0	6
-`salary(prof0,student0)`	course0	10
-`sat(course0,student0)`	prof0	6
-`teachingability(prof0)`	course0	10
+diff(course0)	prof0	6
+grade(course0,student0)	prof0	6
+popularity(prof0)	course0	10
+ranking(student0)	course0	10
+RA(prof0,student0)	course0	10
+rating(course0)	prof0	6
+rating(course0)	student0	38
+registration(course0,student0)	prof0	6
+salary(prof0,student0)	course0	10
+sat(course0,student0)	prof0	6
+teachingability(prof0)	course0	10
 Table: RA(prof0,student0)_CP
 F	0.890351	2030	203	-23.58	0.890351
 RA(prof0,student0)	CP	MULT	local_mult	likelihood	prior
@@ -870,107 +870,107 @@ F	0.890009	2031	203	-23.58	0.890351
 RA(prof0,student0)	CP	MULT	local_mult	likelihood	prior
 T	0.109991	251	25	-55.26	0.109649
 Table: RChain_pvars
-`RA(prof0,student0)`	prof0
-`RA(prof0,student0),registration(course0,student0)`	course0
-`RA(prof0,student0),registration(course0,student0)`	prof0
-`RA(prof0,student0),registration(course0,student0)`	student0
-`RA(prof0,student0)`	student0
+RA(prof0,student0)	prof0
+RA(prof0,student0),registration(course0,student0)	course0
+RA(prof0,student0),registration(course0,student0)	prof0
+RA(prof0,student0),registration(course0,student0)	student0
+RA(prof0,student0)	student0
 rchain	pvid
-`registration(course0,student0)`	course0
-`registration(course0,student0)`	student0
+registration(course0,student0)	course0
+registration(course0,student0)	student0
 Table: RNodeEdges
 Table: RNodes
-`RA(prof0,student0)`	RA	prof0	student0	prof_id	student_id	1
-`registration(course0,student0)`	registration	course0	student0	course_id	student_id	1
+RA(prof0,student0)	RA	prof0	student0	prof_id	student_id	1
+registration(course0,student0)	registration	course0	student0	course_id	student_id	1
 rnid	TABLE_NAME	pvid1	pvid2	COLUMN_NAME1	COLUMN_NAME2	main
 Table: RNodes_2Nodes
-`RA(prof0,student0)`	`capability(prof0,student0)`	1
-`RA(prof0,student0)`	`salary(prof0,student0)`	1
-`registration(course0,student0)`	`grade(course0,student0)`	1
-`registration(course0,student0)`	`sat(course0,student0)`	1
+RA(prof0,student0)	capability(prof0,student0)	1
+RA(prof0,student0)	salary(prof0,student0)	1
+registration(course0,student0)	grade(course0,student0)	1
+registration(course0,student0)	sat(course0,student0)	1
 rnid	2nid	main
 Table: RNodes_2Nodes_Family
-`capability(prof0,student0)`	`RA(prof0,student0)`	`salary(prof0,student0)`	3
+capability(prof0,student0)	RA(prof0,student0)	salary(prof0,student0)	3
 ChildNode	Rnode	2Node	NumAtts
-`sat(course0,student0)`	`registration(course0,student0)`	`grade(course0,student0)`	4
+sat(course0,student0)	registration(course0,student0)	grade(course0,student0)	4
 Table: RNodes_BN_Nodes
-`RA(prof0,student0)`	`capability(prof0,student0)`	1
-`RA(prof0,student0)`	`intelligence(student0)`	1
-`RA(prof0,student0)`	`popularity(prof0)`	1
-`RA(prof0,student0)`	`ranking(student0)`	1
-`RA(prof0,student0)`	`RA(prof0,student0)`	1
-`RA(prof0,student0)`	`salary(prof0,student0)`	1
-`RA(prof0,student0)`	`teachingability(prof0)`	1
-`registration(course0,student0)`	`diff(course0)`	1
-`registration(course0,student0)`	`grade(course0,student0)`	1
-`registration(course0,student0)`	`intelligence(student0)`	1
-`registration(course0,student0)`	`ranking(student0)`	1
-`registration(course0,student0)`	`rating(course0)`	1
-`registration(course0,student0)`	`registration(course0,student0)`	1
-`registration(course0,student0)`	`sat(course0,student0)`	1
+RA(prof0,student0)	capability(prof0,student0)	1
+RA(prof0,student0)	intelligence(student0)	1
+RA(prof0,student0)	popularity(prof0)	1
+RA(prof0,student0)	ranking(student0)	1
+RA(prof0,student0)	RA(prof0,student0)	1
+RA(prof0,student0)	salary(prof0,student0)	1
+RA(prof0,student0)	teachingability(prof0)	1
+registration(course0,student0)	diff(course0)	1
+registration(course0,student0)	grade(course0,student0)	1
+registration(course0,student0)	intelligence(student0)	1
+registration(course0,student0)	ranking(student0)	1
+registration(course0,student0)	rating(course0)	1
+registration(course0,student0)	registration(course0,student0)	1
+registration(course0,student0)	sat(course0,student0)	1
 rnid	Fid	main
 Table: RNodes_inFamily
-`capability(prof0,student0)`	`RA(prof0,student0)`
+capability(prof0,student0)	RA(prof0,student0)
 ChildNode	Rnode
-`grade(course0,student0)`	`registration(course0,student0)`
-`intelligence(student0)`	`RA(prof0,student0)`
-`intelligence(student0)`	`registration(course0,student0)`
-`popularity(prof0)`	`RA(prof0,student0)`
-`ranking(student0)`	`RA(prof0,student0)`
-`salary(prof0,student0)`	`RA(prof0,student0)`
-`sat(course0,student0)`	`registration(course0,student0)`
-`teachingability(prof0)`	`RA(prof0,student0)`
+grade(course0,student0)	registration(course0,student0)
+intelligence(student0)	RA(prof0,student0)
+intelligence(student0)	registration(course0,student0)
+popularity(prof0)	RA(prof0,student0)
+ranking(student0)	RA(prof0,student0)
+salary(prof0,student0)	RA(prof0,student0)
+sat(course0,student0)	registration(course0,student0)
+teachingability(prof0)	RA(prof0,student0)
 Table: RNodes_pvars
-`RA(prof0,student0)`	prof0	prof	prof_id	prof_id
-`RA(prof0,student0)`	student0	student	student_id	student_id
-`registration(course0,student0)`	course0	course	course_id	course_id
-`registration(course0,student0)`	student0	student	student_id	student_id
+RA(prof0,student0)	prof0	prof	prof_id	prof_id
+RA(prof0,student0)	student0	student	student_id	student_id
+registration(course0,student0)	course0	course	course_id	course_id
+registration(course0,student0)	student0	student	student_id	student_id
 rnid	pvid	TABLE_NAME	COLUMN_NAME	REFERENCED_COLUMN_NAME
 Table: RelationsParents
-`capability(prof0,student0)`	`RA(prof0,student0)`	`RA(prof0,student0)`	1
-`capability(prof0,student0)`	`RA(prof0,student0)`	`salary(prof0,student0)`	3
+capability(prof0,student0)	RA(prof0,student0)	RA(prof0,student0)	1
+capability(prof0,student0)	RA(prof0,student0)	salary(prof0,student0)	3
 ChildNode	rnid	2node	NumAtts
-`diff(course0)`	`registration(course0,student0)`	`grade(course0,student0)`	4
-`grade(course0,student0)`	`registration(course0,student0)`	`registration(course0,student0)`	1
-`intelligence(student0)`	`RA(prof0,student0)`	`RA(prof0,student0)`	1
-`intelligence(student0)`	`registration(course0,student0)`	`registration(course0,student0)`	1
-`popularity(prof0)`	`RA(prof0,student0)`	`RA(prof0,student0)`	1
-`ranking(student0)`	`RA(prof0,student0)`	`RA(prof0,student0)`	1
-`salary(prof0,student0)`	`RA(prof0,student0)`	`RA(prof0,student0)`	1
-`sat(course0,student0)`	`registration(course0,student0)`	`grade(course0,student0)`	4
-`sat(course0,student0)`	`registration(course0,student0)`	`registration(course0,student0)`	1
-`teachingability(prof0)`	`RA(prof0,student0)`	`RA(prof0,student0)`	1
+diff(course0)	registration(course0,student0)	grade(course0,student0)	4
+grade(course0,student0)	registration(course0,student0)	registration(course0,student0)	1
+intelligence(student0)	RA(prof0,student0)	RA(prof0,student0)	1
+intelligence(student0)	registration(course0,student0)	registration(course0,student0)	1
+popularity(prof0)	RA(prof0,student0)	RA(prof0,student0)	1
+ranking(student0)	RA(prof0,student0)	RA(prof0,student0)	1
+salary(prof0,student0)	RA(prof0,student0)	RA(prof0,student0)	1
+sat(course0,student0)	registration(course0,student0)	grade(course0,student0)	4
+sat(course0,student0)	registration(course0,student0)	registration(course0,student0)	1
+teachingability(prof0)	RA(prof0,student0)	RA(prof0,student0)	1
 Table: RelationsPars
-`capability(prof0,student0)`	4
+capability(prof0,student0)	4
 ChildNode	NumPars
-`diff(course0)`	4.999999999999999
-`grade(course0,student0)`	2
-`intelligence(student0)`	4
-`popularity(prof0)`	2
-`ranking(student0)`	2
-`salary(prof0,student0)`	2
-`sat(course0,student0)`	4.999999999999999
-`teachingability(prof0)`	2
+diff(course0)	4.999999999999999
+grade(course0,student0)	2
+intelligence(student0)	4
+popularity(prof0)	2
+ranking(student0)	2
+salary(prof0,student0)	2
+sat(course0,student0)	4.999999999999999
+teachingability(prof0)	2
 Table: SchemaEdges
-`RA(prof0,student0),registration(course0,student0)`	`capability(prof0,student0)`	`RA(prof0,student0)`
-`RA(prof0,student0),registration(course0,student0)`	`grade(course0,student0)`	`registration(course0,student0)`
-`RA(prof0,student0),registration(course0,student0)`	`salary(prof0,student0)`	`RA(prof0,student0)`
-`RA(prof0,student0),registration(course0,student0)`	`sat(course0,student0)`	`registration(course0,student0)`
+RA(prof0,student0),registration(course0,student0)	capability(prof0,student0)	RA(prof0,student0)
+RA(prof0,student0),registration(course0,student0)	grade(course0,student0)	registration(course0,student0)
+RA(prof0,student0),registration(course0,student0)	salary(prof0,student0)	RA(prof0,student0)
+RA(prof0,student0),registration(course0,student0)	sat(course0,student0)	registration(course0,student0)
 Rchain	child	parent
 Table: Scores
-`capability(prof0,student0)`	-26.22	-0.11	16	228	-139.31	-42.22	-87.09	-16.11	2280
-`diff(course0)`	-253.14	-0.67	5	380	-535.98	-258.14	-31.04	-5.67	2280
+capability(prof0,student0)	-26.22	-0.11	16	228	-139.31	-42.22	-87.09	-16.11	2280
+diff(course0)	-253.14	-0.67	5	380	-535.98	-258.14	-31.04	-5.67	2280
 Fid	LogLikelihood	Normal_LogLikelihood	Parameters	SampleSize	BIC	AIC	Pseudo_BIC	Pseudo_AIC	Big_SampleSize
-`grade(course0,student0)`	-73.22	-0.19	18	380	-253.36	-91.22	-107.30	-18.19	2280
-`intelligence(student0)`	-2440.73	-1.07	8	2280	-4943.32	-2448.73	-64.00	-9.07	2280
-`popularity(prof0)`	-70.93	-0.31	4	228	-163.58	-74.93	-22.34	-4.31	2280
-`ranking(student0)`	-162.56	-0.71	24	228	-455.42	-186.56	-131.72	-24.71	2280
-`RA(prof0,student0)`	-78.84	-0.35	1	228	-163.11	-79.84	-6.13	-1.35	2280
-`rating(course0)`	-6.11	-0.61	1	10	-14.52	-7.11	-3.52	-1.61	2280
-`registration(course0,student0)`	-210.33	-0.55	1	380	-426.60	-211.33	-7.04	-1.55	2280
-`salary(prof0,student0)`	-26.27	-0.12	4	228	-74.26	-30.27	-21.96	-4.12	2280
-`sat(course0,student0)`	-47.24	-0.12	10	380	-153.88	-57.24	-59.64	-10.12	2280
-`teachingability(prof0)`	-157.47	-0.69	2	228	-325.80	-159.47	-12.24	-2.69	2280
+grade(course0,student0)	-73.22	-0.19	18	380	-253.36	-91.22	-107.30	-18.19	2280
+intelligence(student0)	-2440.73	-1.07	8	2280	-4943.32	-2448.73	-64.00	-9.07	2280
+popularity(prof0)	-70.93	-0.31	4	228	-163.58	-74.93	-22.34	-4.31	2280
+ranking(student0)	-162.56	-0.71	24	228	-455.42	-186.56	-131.72	-24.71	2280
+RA(prof0,student0)	-78.84	-0.35	1	228	-163.11	-79.84	-6.13	-1.35	2280
+rating(course0)	-6.11	-0.61	1	10	-14.52	-7.11	-3.52	-1.61	2280
+registration(course0,student0)	-210.33	-0.55	1	380	-426.60	-211.33	-7.04	-1.55	2280
+salary(prof0,student0)	-26.27	-0.12	4	228	-74.26	-30.27	-21.96	-4.12	2280
+sat(course0,student0)	-47.24	-0.12	10	380	-153.88	-57.24	-59.64	-10.12	2280
+teachingability(prof0)	-157.47	-0.69	2	228	-325.80	-159.47	-12.24	-2.69	2280
 Table: capability(prof0,student0)_CP
 10	3	T	low	50	1	0.200000	-1.61	0.030702
 20	1	T	low	50	2	0.400000	-1.83	0.021930
@@ -1240,26 +1240,26 @@ Table: intelligence(student0)_CP_smoothed
 MULT	intelligence(student0)	RA(prof0,student0)	registration(course0,student0)	ParentSum	local_mult	CP	likelihood	prior
 Table: lattice_mapping
 orig_rnid	short_rnid
-`RA(prof0,student0)`	`a`
-`RA(prof0,student0),registration(course0,student0)`	`a,b`
-`registration(course0,student0)`	`b`
+RA(prof0,student0)	a
+RA(prof0,student0),registration(course0,student0)	a,b
+registration(course0,student0)	b
 Table: lattice_membership
 name	member
-`RA(prof0,student0)`	`RA(prof0,student0)`
-`RA(prof0,student0),registration(course0,student0)`	`RA(prof0,student0)`
-`RA(prof0,student0),registration(course0,student0)`	`registration(course0,student0)`
-`registration(course0,student0)`	`registration(course0,student0)`
+RA(prof0,student0)	RA(prof0,student0)
+RA(prof0,student0),registration(course0,student0)	RA(prof0,student0)
+RA(prof0,student0),registration(course0,student0)	registration(course0,student0)
+registration(course0,student0)	registration(course0,student0)
 Table: lattice_rel
-EmptySet	`RA(prof0,student0)`	`RA(prof0,student0)`
-EmptySet	`registration(course0,student0)`	`registration(course0,student0)`
+EmptySet	RA(prof0,student0)	RA(prof0,student0)
+EmptySet	registration(course0,student0)	registration(course0,student0)
 parent	child	removed
-`RA(prof0,student0)`	`RA(prof0,student0),registration(course0,student0)`	`registration(course0,student0)`
-`registration(course0,student0)`	`RA(prof0,student0),registration(course0,student0)`	`RA(prof0,student0)`
+RA(prof0,student0)	RA(prof0,student0),registration(course0,student0)	registration(course0,student0)
+registration(course0,student0)	RA(prof0,student0),registration(course0,student0)	RA(prof0,student0)
 Table: lattice_set
 name	length
-`RA(prof0,student0)`	1
-`RA(prof0,student0),registration(course0,student0)`	2
-`registration(course0,student0)`	1
+RA(prof0,student0)	1
+RA(prof0,student0),registration(course0,student0)	2
+registration(course0,student0)	1
 Table: popularity(prof0)_CP
 150	2	T	3	150	15	1.000000	0.00	0.666667
 320	2	F	2	1040	32	0.307692	-37.72	0.666667
@@ -1906,18 +1906,18 @@ Table: a,b_CT
 MULT	RA(prof0,student0)	registration(course0,student0)	capability(prof0,student0)	grade(course0,student0)	salary(prof0,student0)	sat(course0,student0)	diff(course0)	intelligence(student0)	popularity(prof0)	ranking(student0)	rating(course0)	teachingability(prof0)
 Table: 1Nodes
 1nid	COLUMN_NAME	pvid	main
-`diff(course0)`	diff	course0	1
-`intelligence(student0)`	intelligence	student0	1
-`popularity(prof0)`	popularity	prof0	1
-`ranking(student0)`	ranking	student0	1
-`rating(course0)`	rating	course0	1
-`teachingability(prof0)`	teachingability	prof0	1
+diff(course0)	diff	course0	1
+intelligence(student0)	intelligence	student0	1
+popularity(prof0)	popularity	prof0	1
+ranking(student0)	ranking	student0	1
+rating(course0)	rating	course0	1
+teachingability(prof0)	teachingability	prof0	1
 Table: 2Nodes
 2nid	COLUMN_NAME	pvid1	pvid2	TABLE_NAME	main
-`capability(prof0,student0)`	capability	prof0	student0	RA	1
-`grade(course0,student0)`	grade	course0	student0	registration	1
-`salary(prof0,student0)`	salary	prof0	student0	RA	1
-`sat(course0,student0)`	sat	course0	student0	registration	1
+capability(prof0,student0)	capability	prof0	student0	RA	1
+grade(course0,student0)	grade	course0	student0	registration	1
+salary(prof0,student0)	salary	prof0	student0	RA	1
+sat(course0,student0)	sat	course0	student0	registration	1
 Table: AttributeColumns
 course	diff
 course	rating
@@ -1970,39 +1970,39 @@ student	student_id
 TABLE_NAME	COLUMN_NAME
 Table: Expansions
 Table: FNodes
-`capability(prof0,student0)`	capability	2Node	1
-`diff(course0)`	diff	1Node	1
+capability(prof0,student0)	capability	2Node	1
+diff(course0)	diff	1Node	1
 Fid	FunctorName	Type	main
-`grade(course0,student0)`	grade	2Node	1
-`intelligence(student0)`	intelligence	1Node	1
-`popularity(prof0)`	popularity	1Node	1
-`ranking(student0)`	ranking	1Node	1
-`RA(prof0,student0)`	RA	Rnode	1
-`rating(course0)`	rating	1Node	1
-`registration(course0,student0)`	registration	Rnode	1
-`salary(prof0,student0)`	salary	2Node	1
-`sat(course0,student0)`	sat	2Node	1
-`teachingability(prof0)`	teachingability	1Node	1
+grade(course0,student0)	grade	2Node	1
+intelligence(student0)	intelligence	1Node	1
+popularity(prof0)	popularity	1Node	1
+ranking(student0)	ranking	1Node	1
+RA(prof0,student0)	RA	Rnode	1
+rating(course0)	rating	1Node	1
+registration(course0,student0)	registration	Rnode	1
+salary(prof0,student0)	salary	2Node	1
+sat(course0,student0)	sat	2Node	1
+teachingability(prof0)	teachingability	1Node	1
 Table: FNodes_pvars
-`capability(prof0,student0)`	prof0
-`capability(prof0,student0)`	student0
-`diff(course0)`	course0
+capability(prof0,student0)	prof0
+capability(prof0,student0)	student0
+diff(course0)	course0
 Fid	pvid
-`grade(course0,student0)`	course0
-`grade(course0,student0)`	student0
-`intelligence(student0)`	student0
-`popularity(prof0)`	prof0
-`ranking(student0)`	student0
-`RA(prof0,student0)`	prof0
-`RA(prof0,student0)`	student0
-`rating(course0)`	course0
-`registration(course0,student0)`	course0
-`registration(course0,student0)`	student0
-`salary(prof0,student0)`	prof0
-`salary(prof0,student0)`	student0
-`sat(course0,student0)`	course0
-`sat(course0,student0)`	student0
-`teachingability(prof0)`	prof0
+grade(course0,student0)	course0
+grade(course0,student0)	student0
+intelligence(student0)	student0
+popularity(prof0)	prof0
+ranking(student0)	student0
+RA(prof0,student0)	prof0
+RA(prof0,student0)	student0
+rating(course0)	course0
+registration(course0,student0)	course0
+registration(course0,student0)	student0
+salary(prof0,student0)	prof0
+salary(prof0,student0)	student0
+sat(course0,student0)	course0
+sat(course0,student0)	student0
+teachingability(prof0)	prof0
 Table: ForeignKeyColumns
 RA	prof_id	prof	prof_id	FK_RA_2	2
 RA	student_id	student	student_id	FK_RA_1	3
@@ -2016,19 +2016,19 @@ registration	course	course_id	course0	0	1
 registration	student	student_id	student0	0	2
 TABLE_NAME	REFERENCED_TABLE_NAME	COLUMN_NAME	pvid	index_number	ARGUMENT_POSITION
 Table: FunctorSet
-`capability(prof0,student0)`
-`diff(course0)`
+capability(prof0,student0)
+diff(course0)
 Fid
-`grade(course0,student0)`
-`intelligence(student0)`
-`popularity(prof0)`
-`ranking(student0)`
-`RA(prof0,student0)`
-`rating(course0)`
-`registration(course0,student0)`
-`salary(prof0,student0)`
-`sat(course0,student0)`
-`teachingability(prof0)`
+grade(course0,student0)
+intelligence(student0)
+popularity(prof0)
+ranking(student0)
+RA(prof0,student0)
+rating(course0)
+registration(course0,student0)
+salary(prof0,student0)
+sat(course0,student0)
+teachingability(prof0)
 Table: Groundings
 Table: InputColumns
 course	course_id	NULL	NULL	PRIMARY	1
@@ -2067,27 +2067,27 @@ prof0	prof	prof_id	0
 pvid	TABLE_NAME	ID_COLUMN_NAME	index_number
 student0	student	student_id	0
 Table: RNodes
-`RA(prof0,student0)`	RA	prof0	student0	prof_id	student_id	1
-`registration(course0,student0)`	registration	course0	student0	course_id	student_id	1
+RA(prof0,student0)	RA	prof0	student0	prof_id	student_id	1
+registration(course0,student0)	registration	course0	student0	course_id	student_id	1
 rnid	TABLE_NAME	pvid1	pvid2	COLUMN_NAME1	COLUMN_NAME2	main
 Table: RNodes_2Nodes
-`RA(prof0,student0)`	`capability(prof0,student0)`	1
-`RA(prof0,student0)`	`salary(prof0,student0)`	1
-`registration(course0,student0)`	`grade(course0,student0)`	1
-`registration(course0,student0)`	`sat(course0,student0)`	1
+RA(prof0,student0)	capability(prof0,student0)	1
+RA(prof0,student0)	salary(prof0,student0)	1
+registration(course0,student0)	grade(course0,student0)	1
+registration(course0,student0)	sat(course0,student0)	1
 rnid	2nid	main
 Table: RNodes_MM_NotSelf
-`RA(prof0,student0)`	RA	prof0	student0	prof_id	student_id	1
-`registration(course0,student0)`	registration	course0	student0	course_id	student_id	1
+RA(prof0,student0)	RA	prof0	student0	prof_id	student_id	1
+registration(course0,student0)	registration	course0	student0	course_id	student_id	1
 rnid	TABLE_NAME	pvid1	pvid2	COLUMN_NAME1	COLUMN_NAME2	main
 Table: RNodes_MM_Self
 Table: RNodes_MO_NotSelf
 Table: RNodes_MO_Self
 Table: RNodes_pvars
-`RA(prof0,student0)`	prof0	prof	prof_id	prof_id
-`RA(prof0,student0)`	student0	student	student_id	student_id
-`registration(course0,student0)`	course0	course	course_id	course_id
-`registration(course0,student0)`	student0	student	student_id	student_id
+RA(prof0,student0)	prof0	prof	prof_id	prof_id
+RA(prof0,student0)	student0	student	student_id	student_id
+registration(course0,student0)	course0	course	course_id	course_id
+registration(course0,student0)	student0	student	student_id	student_id
 rnid	pvid	TABLE_NAME	COLUMN_NAME	REFERENCED_COLUMN_NAME
 Table: RelationTables
 RA	0	0

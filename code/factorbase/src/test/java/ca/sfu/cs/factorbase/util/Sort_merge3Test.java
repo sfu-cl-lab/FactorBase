@@ -1,4 +1,4 @@
-package ca.sfu.cs.factorbase.tables;
+package ca.sfu.cs.factorbase.util;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
@@ -18,12 +18,12 @@ public class Sort_merge3Test {
 
     @Test
     public void testSort_merge() throws SQLException, IOException {
-        String SORT_MERGE_TABLE = "`sort-merge-output`";
+        String SORT_MERGE_TABLE = "sort-merge-output";
         TestDatabaseConnection db = new TestDatabaseConnection();
 
         Sort_merge3.sort_merge(
-            "`sort-merge-t1`",
-            "`sort-merge-t2`",
+            "sort-merge-t1",
+            "sort-merge-t2",
             SORT_MERGE_TABLE,
             db.con
         );
@@ -32,7 +32,7 @@ public class Sort_merge3Test {
         ResultSet rs = st.executeQuery(
             MessageFormat.format(
                 "SELECT * FROM {0}",
-                SORT_MERGE_TABLE
+                "`" + SORT_MERGE_TABLE + "`"
             )
         );
 
@@ -81,7 +81,7 @@ public class Sort_merge3Test {
         st.executeUpdate(
             MessageFormat.format(
                 "DROP TABLE {0}",
-                SORT_MERGE_TABLE
+                "`" + SORT_MERGE_TABLE + "`"
             )
         );
     }

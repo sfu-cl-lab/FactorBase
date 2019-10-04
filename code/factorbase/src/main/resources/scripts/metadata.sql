@@ -279,15 +279,24 @@ Now we start working on defining functor random variables, which eventually beco
 First, unary functors apply to entities defined by Population variables.
 */
 
-CREATE TABLE 1Nodes AS SELECT CONCAT('`', COLUMN_NAME, '(', pvid, ')', '`') AS 1nid,
-    COLUMN_NAME,
-    pvid,
-    index_number = 0 AS main FROM
-    PVariables
-        NATURAL JOIN
+CREATE TABLE 1Nodes AS
+    SELECT
+        CONCAT(
+            COLUMN_NAME,
+            '(',
+            pvid,
+            ')'
+        ) AS 1nid,
+        COLUMN_NAME,
+        pvid,
+        index_number = 0 AS main
+    FROM
+        PVariables
+
+    NATURAL JOIN
+
     AttributeColumns;
 /* natural join on table name */
-/* Unfortunately MYSQL doesn't seem to like having parentheses in field names, so we have to escape the functor Ids with single quotes */
 
 ALTER TABLE 1Nodes ADD PRIMARY KEY (1nid);
 ALTER TABLE 1Nodes ADD UNIQUE(pvid,COLUMN_NAME);
@@ -313,14 +322,14 @@ Materializing it speeds up processing. */
 /*CREATE OR REPLACE VIEW RNodes_MM_NotSelf AS*/
 CREATE table RNodes_MM_NotSelf AS
     SELECT 
-        CONCAT('`',
-                ForeignKeys_pvars1.TABLE_NAME,
-                '(',
-                ForeignKeys_pvars1.pvid,
-                ',',
-                ForeignKeys_pvars2.pvid,
-                ')',
-                '`') AS rnid,
+        CONCAT(
+            ForeignKeys_pvars1.TABLE_NAME,
+            '(',
+            ForeignKeys_pvars1.pvid,
+            ',',
+            ForeignKeys_pvars2.pvid,
+            ')'
+        ) AS rnid,
         ForeignKeys_pvars1.TABLE_NAME,
         ForeignKeys_pvars1.pvid AS pvid1,
         ForeignKeys_pvars2.pvid AS pvid2,
@@ -345,14 +354,14 @@ functor nodes whose first argument has a lower index than the second. */
 /*CREATE OR REPLACE VIEW RNodes_MM_Self AS*/
 CREATE table RNodes_MM_Self AS
     SELECT 
-        CONCAT('`',
-                ForeignKeys_pvars1.TABLE_NAME,
-                '(',
-                ForeignKeys_pvars1.pvid,
-                ',',
-                ForeignKeys_pvars2.pvid,
-                ')',
-                '`') AS rnid,
+        CONCAT(
+            ForeignKeys_pvars1.TABLE_NAME,
+            '(',
+            ForeignKeys_pvars1.pvid,
+            ',',
+            ForeignKeys_pvars2.pvid,
+            ')'
+        ) AS rnid,
         ForeignKeys_pvars1.TABLE_NAME,
         ForeignKeys_pvars1.pvid AS pvid1,
         ForeignKeys_pvars2.pvid AS pvid2,
@@ -379,13 +388,13 @@ Also, we switch to functional notation for legibility. */
 
 CREATE table RNodes_MO_NotSelf AS
     SELECT 
-        CONCAT('`',
-                ForeignKeys_pvars.REFERENCED_TABLE_NAME,
-                '(',
-                PVariables.pvid,
-                ')=',
-                ForeignKeys_pvars.pvid,
-                '`') AS rnid,
+        CONCAT(
+            ForeignKeys_pvars.REFERENCED_TABLE_NAME,
+            '(',
+            PVariables.pvid,
+            ') = ',
+            ForeignKeys_pvars.pvid
+        ) AS rnid,
         ForeignKeys_pvars.TABLE_NAME,
         PVariables.pvid AS pvid1,
         ForeignKeys_pvars.pvid AS pvid2,
@@ -410,13 +419,13 @@ CREATE table RNodes_MO_NotSelf AS
 /*CREATE OR REPLACE VIEW RNodes_MO_Self AS*/
 CREATE table RNodes_MO_Self AS
     SELECT 
-        CONCAT('`',
-                ForeignKeys_pvars.REFERENCED_TABLE_NAME,
-                '(',
-                PVariables.pvid,
-                ')=',
-                ForeignKeys_pvars.pvid,
-                '`') AS rnid,
+        CONCAT(
+            ForeignKeys_pvars.REFERENCED_TABLE_NAME,
+            '(',
+            PVariables.pvid,
+            ') = ',
+            ForeignKeys_pvars.pvid
+        ) AS rnid,
         ForeignKeys_pvars.TABLE_NAME,
         PVariables.pvid AS pvid1,
         ForeignKeys_pvars.pvid AS pvid2,
@@ -477,26 +486,30 @@ ALTER TABLE RNodes ADD PRIMARY KEY (TABLE_NAME, pvid1, pvid2);
 By default, all ***nonkey columns*** of a relation table are possible attribute functors, with the appropriate population ids.
 */
 
-CREATE TABLE 2Nodes AS SELECT CONCAT('`',
+CREATE TABLE 2Nodes AS
+    SELECT
+        CONCAT(
             COLUMN_NAME,
             '(',
             pvid1,
             ',',
             pvid2,
-            ')',
-            '`') AS 2nid,
-    COLUMN_NAME,
-    pvid1,
-    pvid2,
-    TABLE_NAME,
-    main FROM
-    RNodes
-        NATURAL JOIN
+            ')'
+        ) AS 2nid,
+        COLUMN_NAME,
+        pvid1,
+        pvid2,
+        TABLE_NAME,
+        main
+    FROM
+        RNodes
+
+    NATURAL JOIN
+
     AttributeColumns;
 
 /* ALTER TABLE 2Nodes ADD PRIMARY KEY (2nid); */
 /* violates key length restriction. OS August 15 */
-    
 ALTER TABLE 2Nodes ADD PRIMARY KEY (COLUMN_NAME,pvid1,pvid2); 
 
 ALTER TABLE 2Nodes ADD INDEX `index` (pvid1 ASC, pvid2 ASC, TABLE_NAME ASC); /* July 17 vidhij -- moved from metadata_2 */

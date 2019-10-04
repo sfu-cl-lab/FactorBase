@@ -372,7 +372,7 @@ public class BayesBaseH {
         for(String id : pvar_ids) {
             logger.fine("\nStarting Learning the BN Structure of pvar_ids: " + id + "\n");
             Statement st = con3.createStatement();
-            ResultSet rs = st.executeQuery("SELECT count(*) FROM `" + id.replace("`","") + "_counts`;"); // Optimize this query, too slow, Nov 13, zqian.
+            ResultSet rs = st.executeQuery("SELECT count(*) FROM `" + id + "_counts`;"); // Optimize this query, too slow, Nov 13, zqian.
             while(rs.next()) {
                 NoTuples = rs.getString(1);
                 logger.fine("NoTuples : " + NoTuples);
@@ -380,8 +380,8 @@ public class BayesBaseH {
 
             if (Integer.parseInt(NoTuples) > 1) {
                 BayesNet_Learning_main.tetradLearner(
-                    database.getAndRemoveCTDataExtractor(id.replace("`","")),
-                    databaseName + "/" + File.separator + "xml" + File.separator + id.replace("`","") + ".xml",
+                    database.getAndRemoveCTDataExtractor(id),
+                    databaseName + "/" + File.separator + "xml" + File.separator + id + ".xml",
                     !cont.equals("1")
                 );
 
@@ -434,7 +434,7 @@ public class BayesBaseH {
             BayesNet_Learning_main.tetradLearner(
                 database,
                 pvarFunctorNodeInfo,
-                databaseName + "/" + File.separator + "xml" + File.separator + id.replace("`","") + ".xml",
+                databaseName + "/" + File.separator + "xml" + File.separator + id + ".xml",
                 !cont.equals("1")
             );
 
@@ -474,7 +474,7 @@ public class BayesBaseH {
                 String short_rnid = rnidMappingResult.getString("short_rnid");
                 ResultSet rs = st.executeQuery(
                     "SELECT COUNT(*) " +
-                    "FROM `" + short_rnid.replace("`","") + "_CT`;"
+                    "FROM `" + short_rnid + "_CT`;"
                 ); // Oct 2nd, Why not check the csv file directly? faster for larger CT? Oct 23, Comment from: Unknown since lacking Git history.
 
                 while(rs.next()) {
@@ -484,10 +484,10 @@ public class BayesBaseH {
 
                 if(Integer.parseInt(NoTuples) > 1) {
                     BayesNet_Learning_main.tetradLearner(
-                        database.getAndRemoveCTDataExtractor(id.replace("`","")),
+                        database.getAndRemoveCTDataExtractor(id),
                         requiredEdges,
                         forbiddenEdges,
-                        databaseName + "/" + File.separator + "xml" + File.separator + id.replace("`","") + ".xml",
+                        databaseName + "/" + File.separator + "xml" + File.separator + id + ".xml",
                         !cont.equals("1")
                     );
 
@@ -729,7 +729,7 @@ public class BayesBaseH {
         logger.fine("Starting to Import the learned path into MySQL::**Entity_BayesNets**"); // @zqian Test
         Statement st = con2.createStatement();
 
-        BIFImport.Import(databaseName + "/" + File.separator + "xml" + File.separator + id.replace("`","") + ".xml", id, "Entity_BayesNets", con2);
+        BIFImport.Import(databaseName + "/" + File.separator + "xml" + File.separator + id + ".xml", id, "Entity_BayesNets", con2);
         logger.fine("*** imported Entity_BayesNets " + id + " into database");
         logger.fine(" \n !!!!!!!!!Import is done for **Entity_BayesNets** \n"); // @zqian Test
         st.close();
@@ -742,7 +742,7 @@ public class BayesBaseH {
 
         Statement st = con2.createStatement();
 
-        BIFImport.Import(databaseName + "/" + File.separator + "xml" + File.separator + id.replace("`","") + ".xml", id, "Path_BayesNets", con2);
+        BIFImport.Import(databaseName + "/" + File.separator + "xml" + File.separator + id + ".xml", id, "Path_BayesNets", con2);
 
         // zqian@Oct 2nd 2013.
         // Delete the edges which is already forbidden in a lower level before inserting into the database.
@@ -761,7 +761,7 @@ public class BayesBaseH {
         ResultSet rs = st.executeQuery("SELECT name FROM lattice_set WHERE length = " + maxNumberOfMembers + ";");
         while (rs.next()) {
             String setName = rs.getString("name");
-            BIFExport.Export(databaseName + "/" + File.separator + "res" + File.separator + setName.replace("`","") + ".xml", "Rchain", "Path_BayesNets", setName, con2);
+            BIFExport.Export(databaseName + "/" + File.separator + "res" + File.separator + setName + ".xml", "Rchain", "Path_BayesNets", setName, con2);
         }
 
         st.close();
