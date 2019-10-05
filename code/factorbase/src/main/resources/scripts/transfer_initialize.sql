@@ -157,19 +157,19 @@ CREATE TABLE Groundings AS
 
 CREATE TABLE LatticeRNodes AS
     SELECT
-        rnid AS orig_rnid,
+        orig_rnid,
         TABLE_NAME,
         pvid1,
         pvid2,
         COLUMN_NAME1,
         COLUMN_NAME2,
-        main
+        main,
+        short_rnid
     FROM
-        RNodes
+        @database@_setup.LatticeRNodes
     LIMIT
         0;
 
 
 ALTER TABLE LatticeRNodes
-    ADD COLUMN short_rnid VARCHAR(10) NULL,
     ADD UNIQUE INDEX rnid_UNIQUE (short_rnid ASC);

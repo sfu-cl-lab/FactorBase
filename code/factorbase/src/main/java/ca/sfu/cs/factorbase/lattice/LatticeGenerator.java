@@ -27,33 +27,6 @@ public class LatticeGenerator {
 
 
     public static int generate(Connection dbConnection) throws SQLException {
-        // Connect to db using jdbc.
-        Statement tempst = dbConnection.createStatement();
-
-        // Generate shorter rnid, from a to z.
-        int fc = 97;
-        char short_rnid;
-        ResultSet temprs = tempst.executeQuery("SELECT orig_rnid FROM LatticeRNodes;");
-
-        logger.fine("About to execute the following query: SELECT orig_rnid FROM LatticeRNodes");
-
-        ArrayList<String> tempList=new ArrayList<String>();
-        while(temprs.next()) {
-            tempList.add(temprs.getString("orig_rnid"));
-        }
-
-        for(int i = 0; i < tempList.size(); i++) {
-            short_rnid = (char) fc; // Explict type casting to convert integer to character.
-            fc++;
-            tempst.execute(
-                "UPDATE LatticeRNodes " +
-                "SET short_rnid = '" + short_rnid + "' " +
-                "WHERE orig_rnid = '" + tempList.get(i) + "';"
-            );
-        }
-
-        tempst.close();
-
         // Lattice read first sets from RFunctors.
         List<String> rnodeIDs = retrieveRNodeIDs(
             dbConnection,

@@ -486,6 +486,21 @@ ALTER TABLE RNodes ADD PRIMARY KEY (TABLE_NAME, pvid1, pvid2);
 By default, all ***nonkey columns*** of a relation table are possible attribute functors, with the appropriate population ids.
 */
 
+SET @count = 96;
+CREATE TABLE LatticeRNodes AS
+    SELECT
+        rnid AS orig_rnid,
+        TABLE_NAME,
+        pvid1,
+        pvid2,
+        COLUMN_NAME1,
+        COLUMN_NAME2,
+        main,
+        CHAR(@count := @count + 1) AS short_rnid
+    FROM
+        RNodes;
+
+
 CREATE TABLE 2Nodes AS
     SELECT
         CONCAT(

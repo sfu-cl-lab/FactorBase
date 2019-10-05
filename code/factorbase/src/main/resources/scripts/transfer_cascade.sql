@@ -190,19 +190,22 @@ INSERT INTO Groundings
 
 
 /**
- * Prepare lattice generator by copying information from Rnodes to a new temporary table.
- * The temporary table will have the original rnids and short rnids.
+ * Prepare lattice generator by copying information from LatticeRNodes in the "_setup" database, restricted to the
+ * FunctorSet.
  */
 TRUNCATE LatticeRNodes;
 INSERT INTO LatticeRNodes
     SELECT
-        rnid AS orig_rnid,
-        TABLE_NAME,
-        pvid1,
-        pvid2,
-        COLUMN_NAME1,
-        COLUMN_NAME2,
-        main,
-        NULL
+        LR.orig_rnid,
+        LR.TABLE_NAME,
+        LR.pvid1,
+        LR.pvid2,
+        LR.COLUMN_NAME1,
+        LR.COLUMN_NAME2,
+        LR.main,
+        LR.short_rnid
     FROM
-        RNodes;
+        @database@_setup.LatticeRNodes LR,
+        RNodes R
+    WHERE
+        LR.orig_rnid = R.rnid;
