@@ -11,6 +11,7 @@ import ca.sfu.cs.factorbase.database.MySQLFactorBaseDataBase;
 import ca.sfu.cs.factorbase.exception.DataBaseException;
 import ca.sfu.cs.factorbase.exception.DataExtractionException;
 import ca.sfu.cs.factorbase.exception.ScoringException;
+import ca.sfu.cs.factorbase.lattice.RelationshipLattice;
 import ca.sfu.cs.factorbase.learning.BayesBaseCT_SortMerge;
 import ca.sfu.cs.factorbase.learning.BayesBaseH;
 import ca.sfu.cs.factorbase.util.LoggerConfig;
@@ -59,6 +60,11 @@ public class RunBB {
         }
         logRunTime(logger, "Creating Setup Database", setupStart, System.currentTimeMillis());
 
+        // Generate the relationship lattice to guide the structure learning search.
+        long globalLatticeStart = System.currentTimeMillis();
+        RelationshipLattice globalLattice = factorBaseDatabase.getGlobalLattice();
+        logRunTime(logger, "Creating Global Lattice", globalLatticeStart, System.currentTimeMillis());
+
         // Learn a Bayesian Network.
         boolean usePreCounting = config.getProperty("PreCounting").equals("1");
         if (usePreCounting) {
@@ -68,7 +74,11 @@ public class RunBB {
         }
 
         long bayesBaseHStart = System.currentTimeMillis();
-        BayesBaseH.runBBH(factorBaseDatabase, usePreCounting);
+        BayesBaseH.runBBH(
+            factorBaseDatabase,
+            globalLattice,
+            usePreCounting
+        );
         logRunTime(logger, "Running BayesBaseH", bayesBaseHStart, System.currentTimeMillis());
 
         // Now eliminate temporary tables. Keep only the tables for the longest Rchain. Turn this off for debugging.

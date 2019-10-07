@@ -103,6 +103,7 @@ public class BayesBaseH {
      */
     public static void runBBH(
         FactorBaseDataBase database,
+        RelationshipLattice globalLattice,
         boolean ctTablesGenerated
     ) throws SQLException, IOException, DataBaseException, DataExtractionException, ParsingException, ScoringException {
         initProgram(FirstRunning);
@@ -118,17 +119,14 @@ public class BayesBaseH {
             );
         }
 
-        // Generate the relationship lattice to guide the structure learning search.
-        RelationshipLattice lattice = database.getGlobalLattice();
-
         // Get the height of the lattice (max length of RChain).
-        int latticeHeight = lattice.getHeight();
+        int latticeHeight = globalLattice.getHeight();
 
         // Get the longest RChain.
-        String rchain = lattice.getLongestRChain();
+        String rchain = globalLattice.getLongestRChain();
 
         // Structure learning.
-        StructureLearning(database, con2, ctTablesGenerated, lattice);
+        StructureLearning(database, con2, ctTablesGenerated, globalLattice);
 
         /**
          * OS: Nov 17, 2016. It can happen that Tetrad learns a forbidden edge. Argh. To catch this, we delete forbidden edges from any insertion. But then
