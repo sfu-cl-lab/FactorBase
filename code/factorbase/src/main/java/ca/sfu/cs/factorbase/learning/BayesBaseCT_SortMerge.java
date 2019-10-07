@@ -79,7 +79,10 @@ public class BayesBaseCT_SortMerge {
         );
 
         //generate lattice tree
-        int latticeHeight = LatticeGenerator.generate(con_BN);
+        int latticeHeight = LatticeGenerator.generate(
+            con_BN,
+            databaseName_std
+        );
 
         // empty query error,fixed by removing one duplicated semicolon. Oct 30, 2013
         //ToDo: No support for executing LinkCorrelation=0;
