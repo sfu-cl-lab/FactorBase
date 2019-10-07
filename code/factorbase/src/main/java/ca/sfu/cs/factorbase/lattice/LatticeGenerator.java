@@ -27,33 +27,6 @@ public class LatticeGenerator {
 
 
     public static int generate(Connection dbConnection) throws SQLException {
-        // Connect to db using jdbc.
-        Statement tempst = dbConnection.createStatement();
-
-        // Generate shorter rnid, from a to z.
-        int fc = 97;
-        char short_rnid;
-        ResultSet temprs = tempst.executeQuery("SELECT orig_rnid FROM LatticeRNodes;");
-
-        logger.fine("About to execute the following query: SELECT orig_rnid FROM LatticeRNodes");
-
-        ArrayList<String> tempList=new ArrayList<String>();
-        while(temprs.next()) {
-            tempList.add(temprs.getString("orig_rnid"));
-        }
-
-        for(int i = 0; i < tempList.size(); i++) {
-            short_rnid = (char) fc; // Explict type casting to convert integer to character.
-            fc++;
-            tempst.execute(
-                "UPDATE LatticeRNodes " +
-                "SET short_rnid = '" + short_rnid + "' " +
-                "WHERE orig_rnid = '" + tempList.get(i) + "';"
-            );
-        }
-
-        tempst.close();
-
         // Lattice read first sets from RFunctors.
         List<String> rnodeIDs = retrieveRNodeIDs(
             dbConnection,
@@ -96,6 +69,9 @@ public class LatticeGenerator {
 
         init(dbConnection, rnodeIDs);
         generateTree(dbConnection, rnodeIDs, rnodeIDs.size());
+
+        // Create a table of RChains with original rnids and short rnids.
+        mapping_rnid(dbConnection);
 
         try(
             Statement statement = dbConnection.createStatement();
@@ -274,9 +250,6 @@ public class LatticeGenerator {
      */
     private static void mapping_rnid(Connection dbConnection) throws SQLException {
         Statement st = dbConnection.createStatement();
-        st.execute("DROP TABLE IF EXISTS lattice_mapping;");
-        st.execute("CREATE TABLE IF NOT EXISTS lattice_mapping (orig_rnid VARCHAR(200), short_rnid VARCHAR(20), PRIMARY KEY(orig_rnid, short_rnid));"); // zqian, max key length limitation, Oct 11, 2013.
-
         ResultSet rst = st.executeQuery("SELECT name FROM lattice_set ORDER BY length;"); // Getting nodes from lattice_set table.
 
         ArrayList <String>list_rnid = new ArrayList<String>(); // For storing lattice_set name.
@@ -318,7 +291,11 @@ public class LatticeGenerator {
 
         // Get primary key for first set.
         // Use rnid.
-        ResultSet rs = st.executeQuery("SELECT pvid1, pvid2 FROM LatticeRNodes WHERE orig_rnid = '" + firstSet + "';");
+        ResultSet rs = st.executeQuery(
+            "SELECT pvid1, pvid2 " +
+            "FROM RNodes " +
+            "WHERE rnid = '" + firstSet + "';"
+        );
         while(rs.next()) {
             firstSetKeys.add(rs.getString("pvid1"));
             firstSetKeys.add(rs.getString("pvid2"));
@@ -326,7 +303,11 @@ public class LatticeGenerator {
 
         // Get primary key for second set.
         for (String secondSet : secondSetParts) {
-            rs = st.executeQuery("SELECT pvid1, pvid2 FROM LatticeRNodes WHERE orig_rnid = '" + secondSet + "';");
+            rs = st.executeQuery(
+                "SELECT pvid1, pvid2 " +
+                "FROM RNodes " +
+                "WHERE rnid = '" + secondSet + "';"
+            );
             while(rs.next()) {
                 secondSetKeys.add(rs.getString("pvid1"));
                 secondSetKeys.add(rs.getString("pvid2"));

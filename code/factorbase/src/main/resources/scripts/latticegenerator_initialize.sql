@@ -21,3 +21,10 @@ CREATE TABLE lattice_set (
     length INT(11),
     PRIMARY KEY(name, length)
 );
+
+
+CREATE TABLE lattice_mapping (
+    orig_rnid VARCHAR(200),
+    short_rnid VARCHAR(20),
+    PRIMARY KEY(orig_rnid, short_rnid)
+);
