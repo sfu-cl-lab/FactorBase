@@ -158,12 +158,6 @@ CREATE TABLE Groundings AS
 CREATE TABLE LatticeRNodes AS
     SELECT
         orig_rnid,
-        TABLE_NAME,
-        pvid1,
-        pvid2,
-        COLUMN_NAME1,
-        COLUMN_NAME2,
-        main,
         short_rnid
     FROM
         @database@_setup.LatticeRNodes

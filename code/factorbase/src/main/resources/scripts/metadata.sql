@@ -490,12 +490,6 @@ SET @count = 96;
 CREATE TABLE LatticeRNodes AS
     SELECT
         rnid AS orig_rnid,
-        TABLE_NAME,
-        pvid1,
-        pvid2,
-        COLUMN_NAME1,
-        COLUMN_NAME2,
-        main,
         CHAR(@count := @count + 1) AS short_rnid
     FROM
         RNodes;

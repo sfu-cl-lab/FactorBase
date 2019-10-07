@@ -197,12 +197,6 @@ TRUNCATE LatticeRNodes;
 INSERT INTO LatticeRNodes
     SELECT
         LR.orig_rnid,
-        LR.TABLE_NAME,
-        LR.pvid1,
-        LR.pvid2,
-        LR.COLUMN_NAME1,
-        LR.COLUMN_NAME2,
-        LR.main,
         LR.short_rnid
     FROM
         @database@_setup.LatticeRNodes LR,

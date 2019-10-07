@@ -238,9 +238,9 @@ Rchain	child	parent
 Table: Knowledge_Forbidden_Edges
 Table: Knowledge_Required_Edges
 Table: LatticeRNodes
-orig_rnid	TABLE_NAME	pvid1	pvid2	COLUMN_NAME1	COLUMN_NAME2	main	short_rnid
-RA(prof0,student0)	RA	prof0	student0	prof_id	student_id	1	a
-registration(course0,student0)	registration	course0	student0	course_id	student_id	1	b
+orig_rnid	short_rnid
+RA(prof0,student0)	a
+registration(course0,student0)	b
 Table: LearnedEdges
 Table: MetaQueries
 course0	Counts	FROM	table	unielwin.course AS course0
@@ -2053,9 +2053,9 @@ registration	student_id	student	student_id	FK_registration_1	2
 student	student_id	NULL	NULL	PRIMARY	1
 TABLE_NAME	COLUMN_NAME	REFERENCED_TABLE_NAME	REFERENCED_COLUMN_NAME	CONSTRAINT_NAME	ORDINAL_POSITION
 Table: LatticeRNodes
-orig_rnid	TABLE_NAME	pvid1	pvid2	COLUMN_NAME1	COLUMN_NAME2	main	short_rnid
-RA(prof0,student0)	RA	prof0	student0	prof_id	student_id	1	a
-registration(course0,student0)	registration	course0	student0	course_id	student_id	1	b
+orig_rnid	short_rnid
+RA(prof0,student0)	a
+registration(course0,student0)	b
 Table: Many_OneRelationships
 Table: NoPKeys
 Table: NumEntityColumns
