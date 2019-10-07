@@ -2132,6 +2132,11 @@ TABLE_NAME	COLUMN_NAME	ORDINAL_POSITION
 Table: SelfRelationships
 Table: TargetNode
 Table: TernaryRelations
+Table: lattice_mapping
+orig_rnid	short_rnid
+RA(prof0,student0)	a
+RA(prof0,student0),registration(course0,student0)	a,b
+registration(course0,student0)	b
 Table: lattice_membership
 name	member
 RA(prof0,student0)	RA(prof0,student0)

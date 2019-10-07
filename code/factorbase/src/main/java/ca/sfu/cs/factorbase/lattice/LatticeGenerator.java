@@ -70,6 +70,9 @@ public class LatticeGenerator {
         init(dbConnection, rnodeIDs);
         generateTree(dbConnection, rnodeIDs, rnodeIDs.size());
 
+        // Create a table of RChains with original rnids and short rnids.
+        mapping_rnid(dbConnection);
+
         try(
             Statement statement = dbConnection.createStatement();
             ResultSet results = statement.executeQuery(
@@ -247,9 +250,6 @@ public class LatticeGenerator {
      */
     private static void mapping_rnid(Connection dbConnection) throws SQLException {
         Statement st = dbConnection.createStatement();
-        st.execute("DROP TABLE IF EXISTS lattice_mapping;");
-        st.execute("CREATE TABLE IF NOT EXISTS lattice_mapping (orig_rnid VARCHAR(200), short_rnid VARCHAR(20), PRIMARY KEY(orig_rnid, short_rnid));"); // zqian, max key length limitation, Oct 11, 2013.
-
         ResultSet rst = st.executeQuery("SELECT name FROM lattice_set ORDER BY length;"); // Getting nodes from lattice_set table.
 
         ArrayList <String>list_rnid = new ArrayList<String>(); // For storing lattice_set name.
