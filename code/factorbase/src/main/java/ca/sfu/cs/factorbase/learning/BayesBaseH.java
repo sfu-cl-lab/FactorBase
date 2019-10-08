@@ -249,7 +249,11 @@ public class BayesBaseH {
         st.close();
 
         // Handle rnodes in a bottom-up way following the lattice.
-        handleRNodes(database, lattice);
+        if (ctTablesGenerated) {
+            learnStructureRChains(database, lattice);
+        } else {
+            learnStructureRChainsOnDemand(database, lattice);
+        }
 
         // Population lattice.
         PropagateContextEdges(lattice.getHeight());
@@ -443,10 +447,11 @@ public class BayesBaseH {
     }
 
 
-    private static void handleRNodes(
+    private static void learnStructureRChains(
         FactorBaseDataBase database,
         RelationshipLattice lattice
     ) throws SQLException, IOException, DataBaseException, DataExtractionException, ParsingException, ScoringException {
+        // for loop to build the Bayesian network by following the relationship lattice in a bottom-up manner.
         for(int len = 1; len <= lattice.getHeight(); len++) {
             List<String> rnode_ids = lattice.getRChainsInfo(len).stream().map(
                 functorNodeInfo -> functorNodeInfo.getID()
@@ -458,6 +463,7 @@ public class BayesBaseH {
             // Retrieve the forbidden edge information.
             List<Edge> forbiddenEdges = database.getForbiddenEdges(rnode_ids);
 
+            // for loop to build the Bayesian network for each RChain at the currently specified length.
             String NoTuples = "";
             for(String id : rnode_ids) {
                 logger.fine("\nStarting Learning the BN Structure of rnode_ids: " + id + "\n");
@@ -489,16 +495,67 @@ public class BayesBaseH {
                         !cont.equals("1")
                     );
 
-                    logger.fine("The BN Structure Learning for rnode_id::" + id + "is done."); //@zqian Test
+                    logger.fine("The BN Structure Learning for rnode_id:" + id + "is done."); //@zqian Test
                     bif2(id); // import to db   @zqian
                 }
             }
 
             propagateEdgeInformation(len);
 
-            rnode_ids.clear(); // Prepare for next loop.
-
             logger.fine(" Import is done for length = " + len + "."); // @zqian Test
+        }
+    }
+
+
+    /**
+     * Learn the Bayesian network structure for the chains of RNodes (RChains).
+     *
+     * @param database - {@code FactorBaseDataBase} to help extract the necessary information required to learn a
+     *                   Bayesian network for chains of RNodes.
+     * @param lattice - global relationship lattice for the input database.
+     * @throws SQLException if there are issues executing the SQL queries.
+     * @throws IOException if there are issues generating the BIF file.
+     * @throws DataBaseException if a database error occurs when retrieving the information from the database.
+     * @throws ParsingException if there are issues reading the BIF file.
+     * @throws ScoringException if an error occurs when trying to compute the score for the graphs being generated.
+     */
+    private static void learnStructureRChainsOnDemand(
+        FactorBaseDataBase database,
+        RelationshipLattice lattice
+    ) throws SQLException, IOException, DataBaseException, ParsingException, ScoringException {
+        // for loop to build the Bayesian network by following the relationship lattice in a bottom-up manner.
+        for(int height = 1; height <= lattice.getHeight(); height++) {
+            List<FunctorNodesInfo> rchainFunctorNodeInfos = lattice.getRChainsInfo(height);
+            List<String> rchainIDs = rchainFunctorNodeInfos.stream().map(
+                functorNodeInfo -> functorNodeInfo.getID()
+            ).collect(Collectors.toList());
+
+            // Retrieve the required edge information.
+            List<Edge> requiredEdges = database.getRequiredEdges(rchainIDs);
+
+            // Retrieve the forbidden edge information.
+            List<Edge> forbiddenEdges = database.getForbiddenEdges(rchainIDs);
+
+            // for loop to build the Bayesian network for each RChain at the currently specified length.
+            for(FunctorNodesInfo rchainFunctorNodeInfo : rchainFunctorNodeInfos) {
+                String rchainID = rchainFunctorNodeInfo.getID();
+                logger.fine("\nStart Learning the BN Structure of the RChain: " + rchainID + "\n");
+                BayesNet_Learning_main.tetradLearner(
+                    database,
+                    rchainFunctorNodeInfo,
+                    requiredEdges,
+                    forbiddenEdges,
+                    databaseName + "/" + File.separator + "xml" + File.separator + rchainID + ".xml",
+                    !cont.equals("1")
+                );
+
+                logger.fine("The BN Structure Learning for RChain:" + rchainID + "is done.");
+                bif2(rchainID); // Import the Bayesian network into the database.
+            }
+
+            propagateEdgeInformation(height);
+
+            logger.fine(" Import is done for length = " + height + ".");
         }
     }
 
