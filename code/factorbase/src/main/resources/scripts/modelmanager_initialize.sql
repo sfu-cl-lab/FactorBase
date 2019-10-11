@@ -77,9 +77,6 @@ ALTER TABLE Path_BN_nodes ADD INDEX HashIndex (Rchain, node);
  * Create tables that allow us to represent background knowledge.
  */
 
-CREATE TABLE Knowledge_Forbidden_Edges LIKE Path_BayesNets;
-CREATE TABLE Knowledge_Required_Edges LIKE Path_BayesNets;
-
 CREATE TABLE Path_Aux_Edges AS
     SELECT
         BN_nodes1.Rchain AS Rchain,

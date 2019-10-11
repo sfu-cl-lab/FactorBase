@@ -235,8 +235,6 @@ RA(prof0,student0),registration(course0,student0)	ranking(student0)	intelligence
 RA(prof0,student0),registration(course0,student0)	RA(prof0,student0)	salary(prof0,student0)
 RA(prof0,student0),registration(course0,student0)	sat(course0,student0)	grade(course0,student0)
 Rchain	child	parent
-Table: Knowledge_Forbidden_Edges
-Table: Knowledge_Required_Edges
 Table: LatticeRNodes
 orig_rnid	short_rnid
 RA(prof0,student0)	a
