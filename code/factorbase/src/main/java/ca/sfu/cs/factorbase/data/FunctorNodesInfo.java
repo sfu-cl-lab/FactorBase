@@ -1,7 +1,7 @@
 package ca.sfu.cs.factorbase.data;
 
 import java.util.Collection;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 /**
@@ -22,7 +22,7 @@ public class FunctorNodesInfo {
     public FunctorNodesInfo(String id, boolean valuesAreDiscrete) {
         this.id = id;
         this.valuesAreDiscrete = valuesAreDiscrete;
-        this.functorNodes = new HashMap<String, FunctorNode>();
+        this.functorNodes = new LinkedHashMap<String, FunctorNode>();
     }
 
 
