@@ -1,76 +1,8 @@
 package ca.sfu.cs.factorbase.exporter.bifexporter.bif;
 
-import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 
-import nu.xom.Builder;
-import nu.xom.Document;
-import nu.xom.Element;
-import nu.xom.Elements;
-import nu.xom.ParsingException;
-import nu.xom.ValidityException;
-
 public class BIF_IO {
-    public static ArrayList<String[]> getLinksFromFile(String filePath) throws ValidityException, ParsingException, IOException {
-        Builder xmlParser = new Builder();
-        Document doc = xmlParser.build(new File(filePath));
-        Element root = doc.getRootElement();
-        root = root.getFirstChildElement("NETWORK");
-
-        // First, get a list of all variables.
-        ArrayList<String> variables = new ArrayList<String>();
-        Elements varElements = root.getChildElements("VARIABLE");
-        for (int i = 0; i < varElements.size(); i++) {
-            Element curVar = varElements.get(i);
-            variables.add(curVar.getChildElements("NAME").get(0).getValue());
-        }
-
-        // Next, get a list of links.
-        ArrayList<String[]> links = new ArrayList<String[]>();
-        Elements defElements = root.getChildElements("DEFINITION");
-        for (int i = 0; i < defElements.size(); i++) {
-            // First, get all the GIVEN values from this definition.
-            ArrayList<String> givenVals = new ArrayList<String>();
-            Elements givenElements = defElements.get(i).getChildElements("GIVEN");
-
-            for (int j = 0; j < givenElements.size(); j++) {
-                givenVals.add(givenElements.get(j).getValue());
-            }
-
-            // Next, get the FOR value from this definition.
-            Elements forElements = defElements.get(i).getChildElements("FOR");
-            String forVal = forElements.get(0).getValue();
-
-            // If the file contains FOR's with no GIVEN's, then record the FOR as a child with no parents.
-            if (givenVals.size() == 0) {
-                String[] edge = {"", forVal};
-                links.add(edge);
-            } else {
-                // For each GIVEN value, add an edge from it to the FOR value.
-                for (String givenVal : givenVals) {
-                    String[] edge = {givenVal, forVal};
-                    links.add(edge);
-                }
-            }
-
-            // Finally, remove the forVal from the list of variables.
-            if (variables.contains(forVal)) {
-                variables.remove(forVal);
-            }
-        }
-
-        // For each remaining variable which was never used as a FOR value, we know that it is never a child,
-        // so add it as a child with no parents.
-        for (String var : variables) {
-            String[] edge = {"", var};
-            links.add(edge);
-        }
-
-        return links;
-    }
-
-
     public static String writeBifHeader() {
         StringBuilder builder = new StringBuilder();
         builder.append("<?xml version=\"1.0\"?>\n");
