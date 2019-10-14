@@ -79,7 +79,10 @@ public class BayesBaseCT_SortMerge {
         );
 
         //generate lattice tree
-        int latticeHeight = LatticeGenerator.generate(con_BN);
+        int latticeHeight = LatticeGenerator.generate(
+            con_BN,
+            databaseName_std
+        );
 
         // empty query error,fixed by removing one duplicated semicolon. Oct 30, 2013
         //ToDo: No support for executing LinkCorrelation=0;
@@ -185,7 +188,14 @@ public class BayesBaseCT_SortMerge {
         //delete the tuples with MULT=0 in the biggest CT table
         String BiggestRchain="";
         Statement st_BN= con_BN.createStatement();
-        ResultSet rs = st_BN.executeQuery("select name as RChain from lattice_set where lattice_set.length = (SELECT max(length)  FROM lattice_set);" );
+        ResultSet rs = st_BN.executeQuery(
+            "SELECT LM.short_rnid AS RChain " +
+            "FROM lattice_set LS, lattice_mapping LM " +
+            "WHERE LS.length = (" +
+                "SELECT MAX(length) " +
+                "FROM lattice_set" +
+            ") AND LS.name = LM.orig_rnid;"
+        );
 
         boolean RChainCreated = false;
         while(rs.next())
@@ -199,18 +209,11 @@ public class BayesBaseCT_SortMerge {
         
         if ( RChainCreated )
         {
-            Statement st_CT = con_CT.createStatement();
-            try
-            {
+            try (Statement st_CT = con_CT.createStatement()) {
                 String deleteQuery = "DELETE FROM `" + BiggestRchain + "_CT` WHERE MULT = '0';";
                 logger.fine(deleteQuery);
                 st_CT.execute(deleteQuery);
             }
-            catch ( MySQLSyntaxErrorException e )
-            {
-                //Do nothing
-            }
-            st_CT.close();
         }
         
         long l2 = System.currentTimeMillis();  //@zqian

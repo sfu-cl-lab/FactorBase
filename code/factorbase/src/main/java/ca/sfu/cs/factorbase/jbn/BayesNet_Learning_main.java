@@ -1,13 +1,11 @@
 package ca.sfu.cs.factorbase.jbn;
 
-import java.io.BufferedWriter;
-import java.io.FileWriter;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 import ca.sfu.cs.factorbase.data.ContingencyTableGenerator;
 import ca.sfu.cs.factorbase.data.DataExtractor;
-import ca.sfu.cs.factorbase.data.FunctorNode;
 import ca.sfu.cs.factorbase.data.FunctorNodesInfo;
 import ca.sfu.cs.factorbase.database.FactorBaseDataBase;
 import ca.sfu.cs.factorbase.exception.DataExtractionException;
@@ -25,30 +23,27 @@ import edu.cmu.tetrad.search.PatternToDag;
 public class BayesNet_Learning_main {
 
 
-    public static void tetradLearner(
+    public static List<Edge> tetradLearner(
         DataExtractor dataSource,
-        String destfile,
         boolean isDiscrete
     ) throws DataExtractionException, IOException, ScoringException {
-        tetradLearner(dataSource, null, null, destfile, isDiscrete);
+        return tetradLearner(dataSource, null, null, isDiscrete);
     }
 
 
-    public static void tetradLearner(
+    public static List<Edge> tetradLearner(
         FactorBaseDataBase database,
         FunctorNodesInfo functorNodesInfo,
-        String destfile,
         boolean isDiscrete
     ) throws IOException, ScoringException {
-        tetradLearner(database, functorNodesInfo, null, null, destfile, isDiscrete);
+        return tetradLearner(database, functorNodesInfo, null, null, isDiscrete);
     }
 
 
-    public static void tetradLearner(
+    public static List<Edge> tetradLearner(
         DataExtractor dataSource,
         List<Edge> requiredEdges,
         List<Edge> forbiddenEdges,
-        String destfile,
         boolean isDiscrete
     ) throws DataExtractionException, IOException, ScoringException {
         ContingencyTableGenerator dataset = new ContingencyTableGenerator(dataSource);
@@ -59,78 +54,15 @@ public class BayesNet_Learning_main {
             1.0000
         );
 
-        Knowledge knowledge = new Knowledge();
-
-        // Load required edge knowledge.
-        if (requiredEdges != null) {
-            for (Edge edge : requiredEdges) {
-                knowledge.setEdgeRequired(edge.getParent(), edge.getChild(), true);
-            }
-        }
-
-        // Load forbidden edge knowledge.
-        if (forbiddenEdges != null) {
-            for (Edge edge : forbiddenEdges) {
-                knowledge.setEdgeForbidden(edge.getParent(), edge.getChild(), true);
-            }
-        }
-
-        gesSearch.setKnowledge(knowledge);
-
-        /* learn a dag from data */
-        Graph graph = gesSearch.search();
-        Pattern pattern = new Pattern(graph);
-
-        PatternToDag p2d = new PatternToDag(pattern);
-        Graph dag = p2d.patternToDagMeek();
-
-        // Output dag into Bayes Interchange format.
-        FileWriter fstream = new FileWriter(destfile);
-        BufferedWriter out = new BufferedWriter(fstream);
-        out.write(BIFHeader.header);
-        out.write("<BIF VERSION=\"0.3\">\n");
-        out.write("<NETWORK>\n");
-        out.write("<NAME>BayesNet</NAME>\n");
-
-        for (String variable : dataset.getVariableNames()) {
-            out.write("<VARIABLE TYPE=\"nature\">\n");
-            out.write("\t<NAME>" + variable + "</NAME>\n"); // @zqian adding back ticks to the name of bayes nodes
-
-            int variableColumnIndex = dataset.getColumnIndex(variable);
-            for (String variableState : dataset.getStates(variableColumnIndex)) {
-                out.write("\t<OUTCOME>" + variableState + "</OUTCOME>\n");
-            }
-
-            out.write("</VARIABLE>\n");
-        }
-
-        List<Node> nodes = dag.getNodes();
-        int nodesNum = nodes.size();
-        for (int i = 0; i < nodesNum; i++) {
-            Node current = nodes.get(i);
-            List<Node> parents = dag.getParents(current);
-            int parentsNum = parents.size();
-            out.write("<DEFINITION>\n");
-            out.write("\t<FOR>" + current + "</FOR>\n"); // @zqian
-            for (int j = 0; j < parentsNum; j++) {
-                out.write("\t<GIVEN>" + parents.get(j) + "</GIVEN>\n"); // @zqian
-            }
-
-            out.write("</DEFINITION>\n");
-        }
-
-        out.write("</NETWORK>\n");
-        out.write("</BIF>\n");
-        out.close();
+        return learnGraph(gesSearch, requiredEdges, forbiddenEdges);
     }
 
 
-    public static void tetradLearner(
+    public static List<Edge> tetradLearner(
         FactorBaseDataBase database,
         FunctorNodesInfo functorNodesInfo,
         List<Edge> requiredEdges,
         List<Edge> forbiddenEdges,
-        String destfile,
         boolean isDiscrete
     ) throws IOException, ScoringException {
         GesCT gesSearch = new GesCT(
@@ -140,6 +72,23 @@ public class BayesNet_Learning_main {
             1.0000
         );
 
+        return learnGraph(gesSearch, requiredEdges, forbiddenEdges);
+    }
+
+
+    /**
+     * Learn the graph for the given initialized GES object with the provided required and forbidden edges.
+     * @param gesSearch - GES object initialized with all the information needed to learn a Bayesian Network.
+     * @param requiredEdges - required edges to help guide the graph search.
+     * @param forbiddenEdges - forbidden edges to help guide the graph search.
+     * @return the edges of the graph that is learned.
+     * @throws ScoringException if there are issues when scoring the graph candidates during the search.
+     */
+    private static List<Edge> learnGraph(
+        GesCT gesSearch,
+        List<Edge> requiredEdges,
+        List<Edge> forbiddenEdges
+     ) throws ScoringException {
         Knowledge knowledge = new Knowledge();
 
         // Load required edge knowledge.
@@ -165,65 +114,25 @@ public class BayesNet_Learning_main {
         PatternToDag p2d = new PatternToDag(pattern);
         Graph dag = p2d.patternToDagMeek();
 
-        // Output dag into Bayes Interchange format.
-        FileWriter fstream = new FileWriter(destfile);
-        BufferedWriter out = new BufferedWriter(fstream);
-        out.write(BIFHeader.header);
-        out.write("<BIF VERSION=\"0.3\">\n");
-        out.write("<NETWORK>\n");
-        out.write("<NAME>BayesNet</NAME>\n");
+        // Extract directed edge information.
+        // Note: We use our Edge implementation to prevent us from becoming dependent on the Tetrad implementation,
+        //       it will also make it easier to replace Tetrad if we need to in the future.
+        int numberOfEdges = dag.getEdges().size();
+        List<Edge> directedEdgesLearned = new ArrayList<Edge>(numberOfEdges);
 
-        for (FunctorNode functorNode : functorNodesInfo.getFunctorNodes()) {
-            out.write("<VARIABLE TYPE=\"nature\">\n");
-            out.write("\t<NAME>" + functorNode.getFunctorNodeID() + "</NAME>\n"); // @zqian adding back ticks to the name of bayes nodes
-
-            for (String variableState : functorNode.getFunctorNodeStates()) {
-                out.write("\t<OUTCOME>" + variableState + "</OUTCOME>\n");
+        // for loop to extract the directed edge information for each node in the graph.
+        for (Node childNode : dag.getNodes()) {
+            List<Node> parentNodes = dag.getParents(childNode);
+            if (parentNodes.isEmpty()) {
+                directedEdgesLearned.add(new Edge("", childNode.getName()));
+            } else {
+                // for loop to extract the directed edge information for the given child node in the graph.
+                for (Node parentNode : parentNodes) {
+                    directedEdgesLearned.add(new Edge(parentNode.getName(), childNode.getName()));
+                }
             }
-
-            out.write("</VARIABLE>\n");
         }
 
-        List<Node> nodes = dag.getNodes();
-        int nodesNum = nodes.size();
-        for (int i = 0; i < nodesNum; i++) {
-            Node current = nodes.get(i);
-            List<Node> parents = dag.getParents(current);
-            int parentsNum = parents.size();
-            out.write("<DEFINITION>\n");
-            out.write("\t<FOR>" + current + "</FOR>\n"); // @zqian
-            for (int j = 0; j < parentsNum; j++) {
-                out.write("\t<GIVEN>" + parents.get(j) + "</GIVEN>\n"); // @zqian
-            }
-
-            out.write("</DEFINITION>\n");
-        }
-
-        out.write("</NETWORK>\n");
-        out.write("</BIF>\n");
-        out.close();
+        return directedEdgesLearned;
     }
-}
-
-
-class BIFHeader {
-
-
-    public final static String header =
-        "<?xml version=\"1.0\"?>\n" +
-        "<!-- DTD for the XMLBIF 0.3 format -->\n" +
-        "<!DOCTYPE BIF [\n" +
-        "	<!ELEMENT BIF ( NETWORK )*>\n" +
-        "		<!ATTLIST BIF VERSION CDATA #REQUIRED>\n" +
-        "	<!ELEMENT NETWORK ( NAME, ( PROPERTY | VARIABLE | DEFINITION )* )>\n" +
-        "	<!ELEMENT NAME (#PCDATA)>\n" +
-        "	<!ELEMENT VARIABLE ( NAME, ( OUTCOME |  PROPERTY )* ) >\n" +
-        "		<!ATTLIST VARIABLE TYPE (nature|decision|utility) \"nature\">\n" +
-        "	<!ELEMENT OUTCOME (#PCDATA)>\n" +
-        "	<!ELEMENT DEFINITION ( FOR | GIVEN | TABLE | PROPERTY )* >\n" +
-        "	<!ELEMENT FOR (#PCDATA)>\n" +
-        "	<!ELEMENT GIVEN (#PCDATA)>\n" +
-        "	<!ELEMENT TABLE (#PCDATA)>\n" +
-        "	<!ELEMENT PROPERTY (#PCDATA)>\n" +
-        "]>\n\n";
 }

@@ -56,7 +56,6 @@ import ca.sfu.cs.factorbase.exception.DataExtractionException;
 import ca.sfu.cs.factorbase.exception.ScoringException;
 import ca.sfu.cs.factorbase.exporter.bifexporter.BIF_Generator;
 import ca.sfu.cs.factorbase.exporter.bifexporter.bif.BIFExport;
-import ca.sfu.cs.factorbase.exporter.bifexporter.bif.BIFImport;
 import ca.sfu.cs.factorbase.graph.Edge;
 import ca.sfu.cs.factorbase.jbn.BayesNet_Learning_main;
 import ca.sfu.cs.factorbase.lattice.RelationshipLattice;
@@ -103,6 +102,7 @@ public class BayesBaseH {
      */
     public static void runBBH(
         FactorBaseDataBase database,
+        RelationshipLattice globalLattice,
         boolean ctTablesGenerated
     ) throws SQLException, IOException, DataBaseException, DataExtractionException, ParsingException, ScoringException {
         initProgram(FirstRunning);
@@ -118,17 +118,14 @@ public class BayesBaseH {
             );
         }
 
-        // Generate the relationship lattice to guide the structure learning search.
-        RelationshipLattice lattice = database.getGlobalLattice();
-
         // Get the height of the lattice (max length of RChain).
-        int latticeHeight = lattice.getHeight();
+        int latticeHeight = globalLattice.getHeight();
 
         // Get the longest RChain.
-        String rchain = lattice.getLongestRChain();
+        String rchain = globalLattice.getLongestRChain();
 
         // Structure learning.
-        StructureLearning(database, con2, ctTablesGenerated, lattice);
+        StructureLearning(database, con2, ctTablesGenerated, globalLattice);
 
         /**
          * OS: Nov 17, 2016. It can happen that Tetrad learns a forbidden edge. Argh. To catch this, we delete forbidden edges from any insertion. But then
@@ -251,7 +248,11 @@ public class BayesBaseH {
         st.close();
 
         // Handle rnodes in a bottom-up way following the lattice.
-        handleRNodes(database, lattice);
+        if (ctTablesGenerated) {
+            learnStructureRChains(database, lattice);
+        } else {
+            learnStructureRChainsOnDemand(database, lattice);
+        }
 
         // Population lattice.
         PropagateContextEdges(lattice.getHeight());
@@ -283,7 +284,6 @@ public class BayesBaseH {
 
             new File(databaseDirectory).mkdirs();
             new File(databaseName + "/" + File.separator + "res" + File.separator).mkdirs();
-            new File(databaseName + "/" + File.separator + "xml" + File.separator).mkdirs();
         }
     }
 
@@ -379,13 +379,12 @@ public class BayesBaseH {
             }
 
             if (Integer.parseInt(NoTuples) > 1) {
-                BayesNet_Learning_main.tetradLearner(
+                List<Edge> graphEdges = BayesNet_Learning_main.tetradLearner(
                     database.getAndRemoveCTDataExtractor(id),
-                    databaseName + "/" + File.separator + "xml" + File.separator + id + ".xml",
                     !cont.equals("1")
                 );
 
-                bif1(id);
+                insertLearnedEdges(id, graphEdges, "Entity_BayesNets", false);
             } else {
                 Statement st2 = con2.createStatement();
                 // Insert the BN nodes into Entity_BayesNet.
@@ -431,24 +430,24 @@ public class BayesBaseH {
             String id = pvarFunctorNodeInfo.getID();
             logger.fine("\nStarting Learning the BN Structure of pvar_ids: " + id + "\n");
 
-            BayesNet_Learning_main.tetradLearner(
+            List<Edge> graphEdges = BayesNet_Learning_main.tetradLearner(
                 database,
                 pvarFunctorNodeInfo,
-                databaseName + "/" + File.separator + "xml" + File.separator + id + ".xml",
                 !cont.equals("1")
             );
 
-            bif1(id);
+            insertLearnedEdges(id, graphEdges, "Entity_BayesNets", false);
 
             logger.fine("\nEnd for " + id + "\n");
         }
     }
 
 
-    private static void handleRNodes(
+    private static void learnStructureRChains(
         FactorBaseDataBase database,
         RelationshipLattice lattice
     ) throws SQLException, IOException, DataBaseException, DataExtractionException, ParsingException, ScoringException {
+        // for loop to build the Bayesian network by following the relationship lattice in a bottom-up manner.
         for(int len = 1; len <= lattice.getHeight(); len++) {
             List<String> rnode_ids = lattice.getRChainsInfo(len).stream().map(
                 functorNodeInfo -> functorNodeInfo.getID()
@@ -460,6 +459,7 @@ public class BayesBaseH {
             // Retrieve the forbidden edge information.
             List<Edge> forbiddenEdges = database.getForbiddenEdges(rnode_ids);
 
+            // for loop to build the Bayesian network for each RChain at the currently specified length.
             String NoTuples = "";
             for(String id : rnode_ids) {
                 logger.fine("\nStarting Learning the BN Structure of rnode_ids: " + id + "\n");
@@ -483,24 +483,73 @@ public class BayesBaseH {
                 }
 
                 if(Integer.parseInt(NoTuples) > 1) {
-                    BayesNet_Learning_main.tetradLearner(
+                    List<Edge> graphEdges = BayesNet_Learning_main.tetradLearner(
                         database.getAndRemoveCTDataExtractor(id),
                         requiredEdges,
                         forbiddenEdges,
-                        databaseName + "/" + File.separator + "xml" + File.separator + id + ".xml",
                         !cont.equals("1")
                     );
 
-                    logger.fine("The BN Structure Learning for rnode_id::" + id + "is done."); //@zqian Test
-                    bif2(id); // import to db   @zqian
+                    logger.fine("The BN Structure Learning for rnode_id:" + id + "is done."); //@zqian Test
+                    insertLearnedEdges(id, graphEdges, "Path_BayesNets", true);
                 }
             }
 
             propagateEdgeInformation(len);
 
-            rnode_ids.clear(); // Prepare for next loop.
-
             logger.fine(" Import is done for length = " + len + "."); // @zqian Test
+        }
+    }
+
+
+    /**
+     * Learn the Bayesian network structure for the chains of RNodes (RChains).
+     *
+     * @param database - {@code FactorBaseDataBase} to help extract the necessary information required to learn a
+     *                   Bayesian network for chains of RNodes.
+     * @param lattice - global relationship lattice for the input database.
+     * @throws SQLException if there are issues executing the SQL queries.
+     * @throws IOException if there are issues generating the BIF file.
+     * @throws DataBaseException if a database error occurs when retrieving the information from the database.
+     * @throws ParsingException if there are issues reading the BIF file.
+     * @throws ScoringException if an error occurs when trying to compute the score for the graphs being generated.
+     */
+    private static void learnStructureRChainsOnDemand(
+        FactorBaseDataBase database,
+        RelationshipLattice lattice
+    ) throws SQLException, IOException, DataBaseException, ParsingException, ScoringException {
+        // for loop to build the Bayesian network by following the relationship lattice in a bottom-up manner.
+        for(int height = 1; height <= lattice.getHeight(); height++) {
+            List<FunctorNodesInfo> rchainFunctorNodeInfos = lattice.getRChainsInfo(height);
+            List<String> rchainIDs = rchainFunctorNodeInfos.stream().map(
+                functorNodeInfo -> functorNodeInfo.getID()
+            ).collect(Collectors.toList());
+
+            // Retrieve the required edge information.
+            List<Edge> requiredEdges = database.getRequiredEdges(rchainIDs);
+
+            // Retrieve the forbidden edge information.
+            List<Edge> forbiddenEdges = database.getForbiddenEdges(rchainIDs);
+
+            // for loop to build the Bayesian network for each RChain at the currently specified length.
+            for(FunctorNodesInfo rchainFunctorNodeInfo : rchainFunctorNodeInfos) {
+                String rchainID = rchainFunctorNodeInfo.getID();
+                logger.fine("\nStart Learning the BN Structure of the RChain: " + rchainID + "\n");
+                List<Edge> graphEdges = BayesNet_Learning_main.tetradLearner(
+                    database,
+                    rchainFunctorNodeInfo,
+                    requiredEdges,
+                    forbiddenEdges,
+                    !cont.equals("1")
+                );
+
+                logger.fine("The BN Structure Learning for RChain:" + rchainID + "is done.");
+                insertLearnedEdges(rchainID, graphEdges, "Path_BayesNets", true);
+            }
+
+            propagateEdgeInformation(height);
+
+            logger.fine(" Import is done for length = " + height + ".");
         }
     }
 
@@ -723,35 +772,52 @@ public class BayesBaseH {
     }
 
 
-    // Import to Entity_BayesNets.
-    private static void bif1(String id) throws SQLException, IOException, ParsingException {
-        // Import @zqian.
-        logger.fine("Starting to Import the learned path into MySQL::**Entity_BayesNets**"); // @zqian Test
-        Statement st = con2.createStatement();
+    /**
+     * Insert the given edges into the specified table.
+     *
+     * @param id - the ID of the RChain or pvid.
+     * @param graphEdges - the graph edges to insert into the specified table.
+     * @param destTableName - the table to insert the edge information into.
+     * @param isRchainEdges - True if the edges are generated during the search through RChains; otherwise false.
+     * @throws SQLException if an error occurs when trying to insert the information into the database.
+     */
+    private static void insertLearnedEdges(
+        String id,
+        List<Edge> graphEdges,
+        String destTableName,
+        boolean isRchainEdges
+    ) throws SQLException {
+        logger.fine("Starting to Import the learned edges into MySQL::**" + destTableName + "**");
 
-        BIFImport.Import(databaseName + "/" + File.separator + "xml" + File.separator + id + ".xml", id, "Entity_BayesNets", con2);
-        logger.fine("*** imported Entity_BayesNets " + id + " into database");
-        logger.fine(" \n !!!!!!!!!Import is done for **Entity_BayesNets** \n"); // @zqian Test
-        st.close();
-    }
+        try (Statement st = con2.createStatement()) {
+            for (Edge graphEdge : graphEdges) {
+                st.execute(
+                    "INSERT IGNORE INTO " + destTableName + " " +
+                    "VALUES (" +
+                        "'" + id + "', " +
+                        "'" + graphEdge.getChild() + "', " +
+                        "'" + graphEdge.getParent() + "'" +
+                    ");"
+                );
+            }
 
+            // Delete the edges which are already forbidden in a lower level.
+            // TODO: Figure out if this is actually necessary.
+            if (isRchainEdges) {
+                st.execute(
+                    "DELETE FROM Path_BayesNets " +
+                    "WHERE Rchain = '" + id + "' " +
+                    "AND (child, parent) IN (" +
+                        "SELECT child, parent " +
+                        "FROM Path_Forbidden_Edges " +
+                        "WHERE Rchain = '" + id + "'" +
+                    ");"
+                );
+            }
+        }
 
-    // Import to Path_BayesNets // zqian@Oct 2nd 2013.
-    private static void bif2(String id) throws SQLException, IOException, ParsingException {
-        logger.fine(" Starting to Import the learned path into MySQL::**Path_BayesNets**"); // @zqian
-
-        Statement st = con2.createStatement();
-
-        BIFImport.Import(databaseName + "/" + File.separator + "xml" + File.separator + id + ".xml", id, "Path_BayesNets", con2);
-
-        // zqian@Oct 2nd 2013.
-        // Delete the edges which is already forbidden in a lower level before inserting into the database.
-        // Nov 25
-        st.execute("DELETE FROM Path_BayesNets WHERE Rchain = '" + id + "' AND (child, parent) IN (SELECT child, parent FROM Path_Forbidden_Edges WHERE Rchain = '" + id + "');"); // Oct 2nd
-        logger.fine("*** imported Path_BayesNets " + id + "into database");
-
-        logger.fine(" Import is done for **Path_BayesNets**"); // @zqian Test
-        st.close();
+        logger.fine("*** Imported " + destTableName + ": " + id + " into the database.");
+        logger.fine("*** Import is done for **" + destTableName + "** \n");
     }
 
 

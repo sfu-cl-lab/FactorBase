@@ -1,6 +1,7 @@
 
 package ca.sfu.cs.factorbase.lattice;
 
+import java.io.IOException;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -14,7 +15,9 @@ import java.util.logging.Logger;
 
 import com.mysql.jdbc.Connection;
 
+import ca.sfu.cs.common.Configuration.Config;
 import ca.sfu.cs.factorbase.data.FunctorNodesInfo;
+import ca.sfu.cs.factorbase.util.MySQLScriptRunner;
 
 
 /**
@@ -26,24 +29,38 @@ public class LatticeGenerator {
     private static Logger logger = Logger.getLogger(LatticeGenerator.class.getName());
 
 
-    public static int generate(Connection dbConnection) throws SQLException {
-        // Lattice read first sets from RFunctors.
-        List<String> rnodeIDs = retrieveRNodeIDs(
+    /**
+     * Generate the local relationship lattice (relationship lattice restricted based on the FunctorSet).
+     *
+     * @param dbConnection - connection to the database to copy the local relationship lattice to from the global
+     *                       relationship lattice in the "_setup" database.
+     * @param databaseName - name of the input database we are trying to learn the Bayesian Network for.
+     * @return the height of the local relationship lattice.
+     * @throws SQLException if an issue occurs when attempting to copy the information.
+     * @throws IOException if an issue occurs when attempting to create or read the SQL script.
+     */
+    public static int generate(
+        Connection dbConnection,
+        String databaseName
+    ) throws SQLException, IOException {
+        // Transfer all the local relationship lattice information from the global relationship lattice.
+        MySQLScriptRunner.runScript(
             dbConnection,
-            "LatticeRNodes",
-            "orig_rnid"
+            Config.SCRIPTS_DIRECTORY + "latticegenerator_populate.sql",
+            databaseName
         );
 
-        // Lattice init -> init createdSet + truncate tables + add first sets to db.
-        int maxNumberOfMembers = init(dbConnection, rnodeIDs);
+        try (
+            Statement statement = dbConnection.createStatement();
+            ResultSet result = statement.executeQuery(
+                "SELECT MAX(length) AS latticeHeight " +
+                "FROM lattice_set;"
+            )) {
 
-        // Lattice generate lattice tree.
-        generateTree(dbConnection, rnodeIDs, maxNumberOfMembers);
+            result.next();
 
-        // Create a table of orig_rnid and rnid.
-        mapping_rnid(dbConnection);
-
-        return maxNumberOfMembers;
+            return result.getInt("latticeHeight");
+        }
     }
 
 
