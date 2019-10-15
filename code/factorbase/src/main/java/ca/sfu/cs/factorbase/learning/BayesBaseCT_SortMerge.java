@@ -332,10 +332,20 @@ public class BayesBaseCT_SortMerge {
                 rs5.close();
                 //  create the final query
                 String queryString ="";
-                if (!whereString.isEmpty())     
+                if (!selectString.isEmpty() && !whereString.isEmpty()) {
                     queryString = "Select " +  MultString+ " as `MULT` ,"+selectString + " from " + fromString  + " where " + whereString;
-                else 
+                } else if (!selectString.isEmpty()) {
                     queryString = "Select " +  MultString+ " as `MULT` ,"+selectString + " from " + fromString;
+                } else if (!whereString.isEmpty()) {
+                    queryString =
+                        "SELECT " + MultString + " AS `MULT` " +
+                        "FROM " + fromString  + " " +
+                        "WHERE " + whereString;
+                } else {
+                    queryString =
+                        "SELECT " + MultString + " AS `MULT` " +
+                        "FROM " + fromString;
+                }
                 logger.fine("Query String : " + queryString );   
 
                 //make the rnid shorter 
@@ -363,10 +373,18 @@ public class BayesBaseCT_SortMerge {
                 logger.fine("cur_CT_Table is : " + cur_CT_Table);
 
                 String cur_flat_Table = removedShort + len + "_" + fc + "_flat";
-                String queryStringflat =
-                    "SELECT SUM(`" + cur_CT_Table + "`.MULT) AS 'MULT', " + selectString + " " +
-                    "FROM `" + cur_CT_Table + "` " +
-                    "GROUP BY " + selectString + ";";
+                String queryStringflat = "SELECT SUM(`" + cur_CT_Table + "`.MULT) AS 'MULT' ";
+
+                if (!selectString.isEmpty()) {
+                    queryStringflat +=
+                        ", " + selectString + " " +
+                        "FROM `" + cur_CT_Table + "` " +
+                        "GROUP BY " + selectString + ";";
+                } else {
+                    queryStringflat +=
+                        "FROM `" + cur_CT_Table + "`;";
+                }
+
                 String createStringflat = "create table "+cur_flat_Table+" as "+queryStringflat;
                 logger.fine("\n create flat String : " + createStringflat );         
                 st3.execute(createStringflat);      //create flat table
@@ -996,8 +1014,11 @@ public class BayesBaseCT_SortMerge {
                 "AND TableType = 'Join';"
             );
 
-            String ColumnString = makeCommaSepQuery(rs2, "Entries", " , ");
-            ColumnString = "`" + orig_rnid + "` VARCHAR(5)," + ColumnString;
+            String additionalColumns = makeCommaSepQuery(rs2, "Entries", ", ");
+            String ColumnString = "`" + orig_rnid + "` VARCHAR(5)";
+            if (!additionalColumns.isEmpty()) {
+                ColumnString += ", " + additionalColumns;
+            }
             //if there's no relational attribute, then should remove the "," in the ColumnString
             String createString = "CREATE TABLE `" + short_rnid + "_join` (" + ColumnString + ");";
                 logger.fine("create String : " + createString);
