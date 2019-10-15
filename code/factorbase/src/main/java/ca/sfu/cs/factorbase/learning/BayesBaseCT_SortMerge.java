@@ -1073,7 +1073,8 @@ public class BayesBaseCT_SortMerge {
     /**
      * Add a covering index to the specified table.
      * <p>
-     * Note: All columns will be part of the index except for the "MULT" column.
+     * Note: All columns will be part of the index except for the "MULT" column.  If there is only a "MULT" column in
+     *       the table, no index will be created.
      * </p>
      *
      * @param dbConnection - connection to the database containing the table to create the covering index for.
@@ -1093,10 +1094,12 @@ public class BayesBaseCT_SortMerge {
             ResultSet columnsResults = dbStatement.executeQuery(allColumnsQuery)
         ) {
             String columnsCSV = makeIndexQuery(columnsResults, "column_name", ", ");
-            dbStatement.execute(
-                "ALTER TABLE `" + tableName + "` " +
-                "ADD INDEX CoveringIndex (" + columnsCSV + ");"
-            );
+            if (!columnsCSV.isEmpty()) {
+                dbStatement.execute(
+                    "ALTER TABLE `" + tableName + "` " +
+                    "ADD INDEX CoveringIndex (" + columnsCSV + ");"
+                );
+            }
         }
     }
 
