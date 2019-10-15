@@ -347,16 +347,13 @@ public class BayesBaseCT_SortMerge {
                 logger.fine("\n create star String : " + createStarString );
                 st3.execute(createStarString);      //create star table     
 
-                 //adding  covering index May 21
-                //create index string
-                ResultSet rs15 = st2.executeQuery(
-                    "SELECT column_name AS Entries " +
-                    "FROM information_schema.columns " +
-                    "WHERE table_schema = '" + databaseName_CT + "' " +
-                    "AND table_name = '" + cur_star_Table + "';"
+                // Add covering index.
+                addCoveringIndex(
+                    con_CT,
+                    databaseName_CT,
+                    cur_star_Table
                 );
-                String IndexString = makeIndexQuery(rs15, "Entries", ", ");
-                st3.execute("alter table "+cur_star_Table+" add index "+cur_star_Table+"   ( "+IndexString+" );");       
+
                 long l3 = System.currentTimeMillis(); 
                 logger.fine("Building Time(ms) for "+cur_star_Table+ " : "+(l3-l2)+" ms.\n");
                 //staring to create the _flat table
@@ -1105,6 +1102,38 @@ public class BayesBaseCT_SortMerge {
 
         return String.join(del, parts);
     }
+
+
+    /**
+     * Add a covering index to the specified table.
+     * <p>
+     * Note: All columns will be part of the index except for the "MULT" column.
+     * </p>
+     *
+     * @param dbConnection - connection to the database containing the table to create the covering index for.
+     * @param databaseName - the name of the database that the specified table is located in.
+     * @param tableName - the name of the table to add a covering index to.
+     * @throws SQLException if an error occurs when executing the queries.
+     */
+    private static void addCoveringIndex(Connection dbConnection, String databaseName, String tableName) throws SQLException {
+        String allColumnsQuery =
+            "SELECT column_name " +
+            "FROM information_schema.columns " +
+            "WHERE table_schema = '" + databaseName + "' " +
+            "AND table_name = '" + tableName + "';";
+
+        try (
+            Statement dbStatement = dbConnection.createStatement();
+            ResultSet columnsResults = dbStatement.executeQuery(allColumnsQuery)
+        ) {
+            String columnsCSV = makeIndexQuery(columnsResults, "column_name", ", ");
+            dbStatement.execute(
+                "ALTER TABLE `" + tableName + "` " +
+                "ADD INDEX CoveringIndex (" + columnsCSV + ");"
+            );
+        }
+    }
+
 
     /**
      * Making Index Query by adding "`" and appending ASC
