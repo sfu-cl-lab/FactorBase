@@ -112,6 +112,13 @@ INSERT INTO SchemaEdges
 
 TRUNCATE Path_Required_Edges;
 INSERT INTO Path_Required_Edges
+    SELECT DISTINCT
+        *
+    FROM
+        Knowledge_Required_Edges;
+
+
+INSERT INTO Path_Required_Edges
     SELECT  DISTINCT
         *
     FROM
@@ -119,6 +126,13 @@ INSERT INTO Path_Required_Edges
 
 
 TRUNCATE Path_Forbidden_Edges;
+INSERT INTO Path_Forbidden_Edges
+    SELECT DISTINCT
+        *
+    FROM
+        Knowledge_Forbidden_Edges;
+
+
 INSERT INTO Path_Forbidden_Edges
     SELECT DISTINCT
         *

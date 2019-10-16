@@ -347,16 +347,13 @@ public class BayesBaseCT_SortMerge {
                 logger.fine("\n create star String : " + createStarString );
                 st3.execute(createStarString);      //create star table     
 
-                 //adding  covering index May 21
-                //create index string
-                ResultSet rs15 = st2.executeQuery(
-                    "SELECT column_name AS Entries " +
-                    "FROM information_schema.columns " +
-                    "WHERE table_schema = '" + databaseName_CT + "' " +
-                    "AND table_name = '" + cur_star_Table + "';"
+                // Add covering index.
+                addCoveringIndex(
+                    con_CT,
+                    databaseName_CT,
+                    cur_star_Table
                 );
-                String IndexString = makeIndexQuery(rs15, "Entries", ", ");
-                st3.execute("alter table "+cur_star_Table+" add index "+cur_star_Table+"   ( "+IndexString+" );");       
+
                 long l3 = System.currentTimeMillis(); 
                 logger.fine("Building Time(ms) for "+cur_star_Table+ " : "+(l3-l2)+" ms.\n");
                 //staring to create the _flat table
@@ -374,16 +371,13 @@ public class BayesBaseCT_SortMerge {
                 logger.fine("\n create flat String : " + createStringflat );         
                 st3.execute(createStringflat);      //create flat table
 
-                 //adding  covering index May 21
-                //create index string
-                ResultSet rs25 = st2.executeQuery(
-                    "SELECT column_name AS Entries " +
-                    "FROM information_schema.columns " +
-                    "WHERE table_schema = '" + databaseName_CT + "' " +
-                    "AND table_name = '" + cur_flat_Table + "';"
+                // Add covering index.
+                addCoveringIndex(
+                    con_CT,
+                    databaseName_CT,
+                    cur_flat_Table
                 );
-                String IndexString2 = makeIndexQuery(rs25, "Entries", ", ");
-                st3.execute("alter table "+cur_flat_Table+" add index "+cur_flat_Table+"   ( "+IndexString2+" );");
+
                 long l4 = System.currentTimeMillis(); 
                 logger.fine("Building Time(ms) for "+cur_flat_Table+ " : "+(l4-l3)+" ms.\n");
                 /**********starting to create _flase table***using sort_merge*******************************/
@@ -401,16 +395,13 @@ public class BayesBaseCT_SortMerge {
                  // a separate procedure for computing the false table as the mult difference between star and flat
                  // trying to optimize this big join
 
-                 //adding  covering index May 21
-                //create index string
-                ResultSet rs35 = st2.executeQuery(
-                    "SELECT column_name AS Entries " +
-                    "FROM information_schema.columns " +
-                    "WHERE table_schema = '" + databaseName_CT + "' " +
-                    "AND table_name = '" + cur_false_Table + "';"
+                // Add covering index.
+                addCoveringIndex(
+                    con_CT,
+                    databaseName_CT,
+                    cur_false_Table
                 );
-                String IndexString3 = makeIndexQuery(rs35, "Entries", ", ");
-                st3.execute("alter table "+cur_false_Table+" add index "+cur_false_Table+"   ( "+IndexString3+" );");       
+
                 long l5 = System.currentTimeMillis(); 
                 logger.fine("Building Time(ms) for "+cur_false_Table+ " : "+(l5-l4)+" ms.\n");
 
@@ -450,18 +441,11 @@ public class BayesBaseCT_SortMerge {
                 st3.execute("CREATE TABLE `" + Next_CT_Table + "` AS " + QueryStringCT);
                 rs1.previous();
 
-                //adding  covering index May 21
-                //create index string
-                ResultSet rs45 = st2.executeQuery(
-                    "SELECT column_name AS Entries " +
-                    "FROM information_schema.columns " +
-                    "WHERE table_schema = '" + databaseName_CT + "' " +
-                    "AND table_name = '" + Next_CT_Table + "';"
-                );
-                String IndexString4 = makeIndexQuery(rs45, "Entries", ", ");
-                st3.execute(
-                    "ALTER TABLE `" + Next_CT_Table + "` " +
-                    "ADD INDEX `" + Next_CT_Table + "` (" + IndexString4 + ");"
+                // Add covering index.
+                addCoveringIndex(
+                    con_CT,
+                    databaseName_CT,
+                    Next_CT_Table
                 );
 
                 fc++;   
@@ -545,13 +529,17 @@ public class BayesBaseCT_SortMerge {
                 }
             }
 
-            logger.fine("Create String : " + "create table "+pvid+"_counts"+" as "+queryString );
-            st3.execute("create table "+pvid+"_counts"+" as "+queryString);
-            //adding  covering index May 21
-            //create index string
-            ResultSet rs4 = st2.executeQuery("select column_name as Entries from information_schema.columns where table_schema = '"+databaseName_CT+"' and table_name = '"+pvid+"_counts';");
-            String IndexString = makeIndexQuery(rs4, "Entries", ", ");
-            st3.execute("alter table "+pvid+"_counts"+" add  index "+pvid+"_Index   ( "+IndexString+" );");
+            String countsTableName = pvid + "_counts";
+            String createString = "CREATE TABLE " + countsTableName + " AS " + queryString;
+            logger.fine("Create String: " + createString);
+            st3.execute(createString);
+
+            // Add covering index.
+            addCoveringIndex(
+                con_CT,
+                databaseName_CT,
+                countsTableName
+            );
 
             //  close statements
             st2.close();
@@ -729,19 +717,11 @@ public class BayesBaseCT_SortMerge {
         st3.executeQuery("SET max_heap_table_size = " + dbTemporaryTableSize + ";");
         st3.execute(createString);
 
-        // Adding covering index May 21.
-        // Create index string.
-        ResultSet rs5 = st2.executeQuery(
-            "SELECT column_name AS Entries " +
-            "FROM information_schema.columns " +
-            "WHERE table_schema = '" + databaseName_CT + "' " +
-            "AND table_name = '" + shortRchain + "_counts';"
-        );
-
-        String IndexString = makeIndexQuery(rs5, "Entries", ", ");
-        st3.execute(
-            "ALTER TABLE `" + shortRchain + "_counts` " +
-            "ADD INDEX `" + shortRchain + "_Index` (" + IndexString + ");"
+        // Add covering index.
+        addCoveringIndex(
+            con_CT,
+            databaseName_CT,
+            countsTableName
         );
 
         // Close statements.
@@ -797,24 +777,17 @@ public class BayesBaseCT_SortMerge {
                 logger.fine("Query String : " + queryString );
             }
 
-            String createString = "CREATE TABLE `" + shortRchain + "_flat`" + " AS " + queryString;
+            String flatTableName = shortRchain + "_flat";
+            String createString = "CREATE TABLE `" + flatTableName + "` AS " + queryString;
             logger.fine("\n create String : " + createString );
             st3.execute(createString);
 
-            //adding  covering index May 21
-            //create index string
-            ResultSet rs5 = st2.executeQuery(
-                "SELECT column_name AS Entries " +
-                "FROM information_schema.columns " +
-                "WHERE table_schema = '" + databaseName_CT + "' " +
-                "AND table_name = '" + shortRchain + "_flat';"
+            // Add covering index.
+            addCoveringIndex(
+                con_CT,
+                databaseName_CT,
+                flatTableName
             );
-            String IndexString = makeIndexQuery(rs5, "Entries", ", ");
-            st3.execute(
-                "ALTER TABLE `" + shortRchain + "_flat` " +
-                "ADD INDEX `" + shortRchain + "_flat` (" + IndexString + ");"
-            );
-
 
             //  close statements
             st2.close();
@@ -878,29 +851,21 @@ public class BayesBaseCT_SortMerge {
                 queryString = "Select " +  MultString+ " as `MULT`  from " + fromString ;
             }
 
-            String createString = "CREATE TABLE `" + shortRchain + "_star`" + " as " + queryString;
+            String starTableName = shortRchain + "_star";
+            String createString = "CREATE TABLE `" + starTableName + "` AS " + queryString;
             logger.fine("\n create String : " + createString );
             st3.execute(createString);
 
-            //adding  covering index May 21
-            //create index string
-            ResultSet rs5 = st2.executeQuery(
-                "SELECT column_name AS Entries " +
-                "FROM information_schema.columns " +
-                "WHERE table_schema = '" + databaseName_CT + "' " +
-                "AND table_name = '" + shortRchain + "_star';"
-            );
-            String IndexString = makeIndexQuery(rs5, "Entries", ", ");
-            st3.execute(
-                "ALTER TABLE `" + shortRchain + "_star` " +
-                "ADD INDEX `" + shortRchain + "_star` (" + IndexString + ");"
+            // Add covering index.
+            addCoveringIndex(
+                con_CT,
+                databaseName_CT,
+                starTableName
             );
 
             //  close statements
             st2.close();
             st3.close();
-
-
         }
 
         rs.close();
@@ -935,27 +900,25 @@ public class BayesBaseCT_SortMerge {
             Statement st2 = con_BN.createStatement();
             Statement st3 = con_CT.createStatement();
             /**********starting to create _flase table***using sort_merge*******************************/
+            String falseTableName = shortRchain + "_false";
+
+            // Computing the false table as the MULT difference between the matching rows of the star and flat tables.
+            // This is a big join!
             Sort_merge3.sort_merge(
                 shortRchain + "_star",
                 shortRchain + "_flat",
-                shortRchain + "_false",
+                falseTableName,
                 con_CT
             );
-            // computing false table as mult difference between star and false. Separate procedure for optimizing this big join.
 
-            //adding  covering index May 21
-            //create index string
-            ResultSet rs15 = st2.executeQuery(
-                "SELECT column_name AS Entries " +
-                "FROM information_schema.columns " +
-                "WHERE table_schema = '" + databaseName_CT + "' " +
-                "AND table_name = '" + shortRchain + "_false';"
+            // Add covering index.
+            addCoveringIndex(
+                con_CT,
+                databaseName_CT,
+                falseTableName
             );
-            String IndexString = makeIndexQuery(rs15, "Entries", ", ");
-            st3.execute(
-                "ALTER TABLE `" + shortRchain + "_false` " +
-                "ADD INDEX `" + shortRchain + "_false` (" + IndexString + ");"
-            );
+
+            String countsTableName = shortRchain + "_counts";
 
             //building the _CT table        //expanding the columns // May 16
             // must specify the columns, or there's will a mistake in the table that mismatch the columns
@@ -963,33 +926,33 @@ public class BayesBaseCT_SortMerge {
                 "SELECT column_name AS Entries " +
                 "FROM information_schema.columns " +
                 "WHERE table_schema = '" + databaseName_CT + "' " +
-                "AND table_name = '" + shortRchain + "_counts';"
+                "AND table_name = '" + countsTableName + "';"
             );
             // reading the column names from information_schema.columns, and the output will remove the "`" automatically,
             // however some columns contain "()" and MySQL does not support "()" well, so we have to add the "`" back.
             String UnionColumnString = makeUnionSepQuery(rs5, "Entries", ", ");
 
+            String ctTableName = shortRchain + "_CT";
+
             //join false table with join table to introduce rnid (=F) and 2nids (= n/a). Then union result with counts table.
-            String createCTString = "CREATE TABLE `" + shortRchain + "_CT` AS SELECT " + UnionColumnString +
-                " FROM `" + shortRchain + "_counts`" +
-                " UNION" +
-                " SELECT " + UnionColumnString +
-                " FROM `" + shortRchain + "_false`, `" + shortRchain + "_join`;";
+            String createCTString =
+                "CREATE TABLE `" + ctTableName + "` AS " +
+                    "SELECT " + UnionColumnString + " " +
+                    "FROM `" + countsTableName + "` " +
+
+                    "UNION " +
+
+                    "SELECT " + UnionColumnString + " " +
+                    "FROM `" + falseTableName + "`, `" + shortRchain + "_join`;";
+
             logger.fine("\n create CT table String : " + createCTString );
             st3.execute(createCTString);
 
-            //adding  covering index May 21
-            //create index string
-            ResultSet rs25 = st2.executeQuery(
-                "SELECT column_name AS Entries " +
-                "FROM information_schema.columns " +
-                "WHERE table_schema = '" + databaseName_CT + "' " +
-                "AND table_name = '" + shortRchain + "_CT';"
-            );
-            String IndexString2 = makeIndexQuery(rs25, "Entries", ", ");
-            st3.execute(
-                "ALTER TABLE `" + shortRchain + "_CT` " +
-                "ADD INDEX `" + shortRchain + "_CT` (" + IndexString2 + ");"
+            // Add covering index.
+            addCoveringIndex(
+                con_CT,
+                databaseName_CT,
+                ctTableName
             );
 
             //  close statements
@@ -1105,6 +1068,41 @@ public class BayesBaseCT_SortMerge {
 
         return String.join(del, parts);
     }
+
+
+    /**
+     * Add a covering index to the specified table.
+     * <p>
+     * Note: All columns will be part of the index except for the "MULT" column.  If there is only a "MULT" column in
+     *       the table, no index will be created.
+     * </p>
+     *
+     * @param dbConnection - connection to the database containing the table to create the covering index for.
+     * @param databaseName - the name of the database that the specified table is located in.
+     * @param tableName - the name of the table to add a covering index to.
+     * @throws SQLException if an error occurs when executing the queries.
+     */
+    private static void addCoveringIndex(Connection dbConnection, String databaseName, String tableName) throws SQLException {
+        String allColumnsQuery =
+            "SELECT column_name " +
+            "FROM information_schema.columns " +
+            "WHERE table_schema = '" + databaseName + "' " +
+            "AND table_name = '" + tableName + "';";
+
+        try (
+            Statement dbStatement = dbConnection.createStatement();
+            ResultSet columnsResults = dbStatement.executeQuery(allColumnsQuery)
+        ) {
+            String columnsCSV = makeIndexQuery(columnsResults, "column_name", ", ");
+            if (!columnsCSV.isEmpty()) {
+                dbStatement.execute(
+                    "ALTER TABLE `" + tableName + "` " +
+                    "ADD INDEX CoveringIndex (" + columnsCSV + ");"
+                );
+            }
+        }
+    }
+
 
     /**
      * Making Index Query by adding "`" and appending ASC
