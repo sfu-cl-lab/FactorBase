@@ -399,8 +399,18 @@ public class MySQLFactorBaseDataBase implements FactorBaseDataBase {
             // TODO: Figure out best way to reuse substituted file instead of recreating a new one each time.
             BayesBaseCT_SortMerge.buildCT();
 
+            String tableName = null;
+            String shortID = functorInfos.getShortID();
+            if (shortID != null) {
+                tableName = shortID + "_CT";
+            } else {
+                tableName = functorInfos.getID() + "_counts";
+            }
+
             PreparedStatement query = this.dbConnection.prepareStatement(
-                "SELECT * FROM " + dbInfo.getCTDatabaseName() + ".`" + functorInfos.getID() + "_counts` WHERE MULT > 0;"
+                "SELECT * " +
+                "FROM " + dbInfo.getCTDatabaseName() + ".`" + tableName + "` " +
+                "WHERE MULT > 0;"
             );
 
             DataExtractor dataextractor = new MySQLDataExtractor(query, dbInfo.getCountColumnName(), dbInfo.isDiscrete());
