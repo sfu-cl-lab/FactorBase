@@ -93,7 +93,9 @@ public class LatticeGenerator {
             Statement statement = dbConnection.createStatement();
             ResultSet results = statement.executeQuery(
                 "SELECT * " +
-                "FROM lattice_set;"
+                "FROM lattice_set " +
+                "JOIN lattice_mapping " +
+                "ON lattice_set.name = lattice_mapping.orig_rnid;"
             )
         ) {
             RelationshipLattice lattice = new RelationshipLattice();
@@ -101,6 +103,7 @@ public class LatticeGenerator {
             while(results.next()) {
                 FunctorNodesInfo rchainInfo = extractRChainFunctorNodeInfo(
                     results.getString("name"),
+                    results.getString("short_rnid"),
                     functorNodesInfos
                 );
 
@@ -119,16 +122,18 @@ public class LatticeGenerator {
      * Retrieve all the functor node information for the given RChain.
      *
      * @param rchain - the name of the RChain.
+     * @param shortRChain - the name of the RChain using short RNode IDs.
      * @param functorNodesInfos - {@code FunctorNodesInfo}s with the functor node information for all the RNodes in the
      *                            database that the RChain is from.
      * @return all the functor node information for the given RChain.
      */
     private static FunctorNodesInfo extractRChainFunctorNodeInfo(
         String rchain,
+        String shortRChain,
         Map<String, FunctorNodesInfo> functorNodesInfos
     ) {
         String[] rnodeIDs = rchain.replace("),", ") ").split(" ");
-        FunctorNodesInfo rchainFunctorNodeInfo = new FunctorNodesInfo(rchain, true, true);
+        FunctorNodesInfo rchainFunctorNodeInfo = new FunctorNodesInfo(rchain, shortRChain, true, true);
 
         // for loop to merge all the functor node information into a single FunctorNodesInfo for the RChain.
         for (String rnodeID : rnodeIDs) {
