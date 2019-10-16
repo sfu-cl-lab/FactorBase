@@ -5,10 +5,11 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 /**
- * Class to hold all the relevant FunctorNode information for a given ID (PVar/RNode).
+ * Class to hold all the relevant FunctorNode information for a given ID (PVar/RNode/RChain).
  */
 public class FunctorNodesInfo {
     private String id;
+    private boolean isRChainID;
     private Map<String, FunctorNode> functorNodes;
     private boolean valuesAreDiscrete;
 
@@ -18,9 +19,11 @@ public class FunctorNodesInfo {
      *
      * @param id - the ID associated with the functor node information being stored.
      * @param valuesAreDiscrete - true if all the functor node states are discrete; otherwise false.
+     * @param isRChainID - true if the ID provided is for an RChain; otherwise false.
      */
-    public FunctorNodesInfo(String id, boolean valuesAreDiscrete) {
+    public FunctorNodesInfo(String id, boolean valuesAreDiscrete, boolean isRChainID) {
         this.id = id;
+        this.isRChainID = isRChainID;
         this.valuesAreDiscrete = valuesAreDiscrete;
         this.functorNodes = new LinkedHashMap<String, FunctorNode>();
     }
@@ -74,6 +77,16 @@ public class FunctorNodesInfo {
      */
     public boolean isDiscrete() {
         return this.valuesAreDiscrete;
+    }
+
+
+    /**
+     * Determine if the ID for the {@code FunctorNodesInfo} is for an RChain.
+     *
+     * @return true if the ID is for an RChain; otherwise false.
+     */
+    public boolean isRChainID() {
+        return this.isRChainID;
     }
 
 
