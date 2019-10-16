@@ -4,6 +4,7 @@
  */
 TRUNCATE lattice_membership;
 INSERT INTO lattice_membership
+    -- Get the "name"s and "member"s where the "name"s are unique to the local lattice.
     SELECT
         name,
         member
@@ -11,7 +12,25 @@ INSERT INTO lattice_membership
         @database@_setup.lattice_membership LMEM,
         LatticeRNodes LR
     WHERE
-        LMEM.member = LR.orig_rnid;
+        LMEM.member = LR.orig_rnid
+    AND
+        name
+    NOT IN (
+        -- Get the "name"s that belong to RNodes that are not in the local lattice.
+        SELECT
+            name
+        FROM
+            @database@_setup.lattice_membership
+        WHERE
+            member
+        NOT IN (
+            -- Get the RNodes for the local lattice.
+            SELECT
+                orig_rnid
+            FROM
+                LatticeRNodes
+        )
+    );
 
 
 TRUNCATE lattice_rel;
