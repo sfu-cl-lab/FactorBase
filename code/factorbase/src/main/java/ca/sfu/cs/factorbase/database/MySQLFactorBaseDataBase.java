@@ -241,7 +241,7 @@ public class MySQLFactorBaseDataBase implements FactorBaseDataBase {
             "AND N.COLUMN_NAME = A.COLUMN_NAME";
 
         List<FunctorNodesInfo> functorNodesInfos = new ArrayList<FunctorNodesInfo>();
-        String previousID = null;
+        String previousPVarID = null;
         String previousFunctorNodeID = null;
         try (
             Statement statement = this.dbConnection.createStatement();
@@ -250,12 +250,12 @@ public class MySQLFactorBaseDataBase implements FactorBaseDataBase {
             FunctorNodesInfo info = null;
             FunctorNode functorNode = null;
             while (results.next()) {
-                String currentID = results.getString("pvid");
+                String currentPVarID = results.getString("pvid");
                 String currentFunctorNodeID = results.getString("Fid");
-                if (!currentID.equals(previousID)) {
-                    info = new FunctorNodesInfo(currentID, this.dbInfo.isDiscrete());
+                if (!currentPVarID.equals(previousPVarID)) {
+                    info = new FunctorNodesInfo(currentPVarID, this.dbInfo.isDiscrete());
                     functorNodesInfos.add(info);
-                    previousID = currentID;
+                    previousPVarID = currentPVarID;
                 }
 
                 if (!currentFunctorNodeID.equals(previousFunctorNodeID)) {
@@ -302,7 +302,7 @@ public class MySQLFactorBaseDataBase implements FactorBaseDataBase {
             "ORDER BY rnid, Fid;";
 
         Map<String, FunctorNodesInfo> functorNodesInfos = new HashMap<String, FunctorNodesInfo>();
-        String previousID = null;
+        String previousRNodeID = null;
         String previousFunctorNodeID = null;
         try (
             Statement statement = this.dbConnection.createStatement();
@@ -311,19 +311,19 @@ public class MySQLFactorBaseDataBase implements FactorBaseDataBase {
             FunctorNodesInfo info = null;
             FunctorNode functorNode = null;
             while (results.next()) {
-                String currentID = results.getString("rnid");
+                String currentRNodeID = results.getString("rnid");
                 String currentFunctorNodeID = results.getString("Fid");
-                if (!currentID.equals(previousID)) {
-                    info = new FunctorNodesInfo(currentID, this.dbInfo.isDiscrete());
+                if (!currentRNodeID.equals(previousRNodeID)) {
+                    info = new FunctorNodesInfo(currentRNodeID, this.dbInfo.isDiscrete());
 
                     // The SELECT statement above doesn't retrieve the RNode as a functor node so we add it here.
-                    FunctorNode fnode = new FunctorNode(currentID);
+                    FunctorNode fnode = new FunctorNode(currentRNodeID);
                     fnode.addState("T");
                     fnode.addState("F");
                     info.addFunctorNode(fnode);
 
-                    functorNodesInfos.put(currentID, info);
-                    previousID = currentID;
+                    functorNodesInfos.put(currentRNodeID, info);
+                    previousRNodeID = currentRNodeID;
                 }
 
                 if (!currentFunctorNodeID.equals(previousFunctorNodeID)) {
