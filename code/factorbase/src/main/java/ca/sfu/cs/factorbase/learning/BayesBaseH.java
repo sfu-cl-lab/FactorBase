@@ -108,16 +108,6 @@ public class BayesBaseH {
         initProgram(FirstRunning);
         connectDB();
 
-        // Build tables for structure learning.
-        // Set up the bayes net models O.S. Sep 12, 2017.
-        if (ctTablesGenerated) {
-            MySQLScriptRunner.runScript(
-                con2,
-                Config.SCRIPTS_DIRECTORY + "modelmanager_populate.sql",
-                databaseName
-            );
-        }
-
         // Get the height of the lattice (max length of RChain).
         int latticeHeight = globalLattice.getHeight();
 
@@ -212,6 +202,14 @@ public class BayesBaseH {
         } else {
             learnStructurePVarsOnDemand(database);
         }
+
+        // Set up Bayesian Network structure information, which comes from the database schema and entity Bayesian
+        // Networks learned up to now, to propagate to the structure learning for RChains.
+        MySQLScriptRunner.runScript(
+            conn,
+            Config.SCRIPTS_DIRECTORY + "modelmanager_populate.sql",
+            databaseName
+        );
 
         Statement st = conn.createStatement();
         st.execute(
