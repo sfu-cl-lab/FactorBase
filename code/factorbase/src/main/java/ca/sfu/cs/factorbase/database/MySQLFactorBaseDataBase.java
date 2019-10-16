@@ -8,7 +8,9 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.text.MessageFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -253,7 +255,7 @@ public class MySQLFactorBaseDataBase implements FactorBaseDataBase {
                 String currentPVarID = results.getString("pvid");
                 String currentFunctorNodeID = results.getString("Fid");
                 if (!currentPVarID.equals(previousPVarID)) {
-                    info = new FunctorNodesInfo(currentPVarID, this.dbInfo.isDiscrete());
+                    info = new FunctorNodesInfo(currentPVarID, this.dbInfo.isDiscrete(), false);
                     functorNodesInfos.add(info);
                     previousPVarID = currentPVarID;
                 }
@@ -314,7 +316,7 @@ public class MySQLFactorBaseDataBase implements FactorBaseDataBase {
                 String currentRNodeID = results.getString("rnid");
                 String currentFunctorNodeID = results.getString("Fid");
                 if (!currentRNodeID.equals(previousRNodeID)) {
-                    info = new FunctorNodesInfo(currentRNodeID, this.dbInfo.isDiscrete());
+                    info = new FunctorNodesInfo(currentRNodeID, this.dbInfo.isDiscrete(), false);
 
                     // The SELECT statement above doesn't retrieve the RNode as a functor node so we add it here.
                     FunctorNode fnode = new FunctorNode(currentRNodeID);
@@ -356,11 +358,41 @@ public class MySQLFactorBaseDataBase implements FactorBaseDataBase {
         int totalNumberOfStates
     ) throws DataBaseException {
         try {
+            Set<String> allFunctorNodesExceptChild = parents;
+
+            // If we're learning at an RChain point in the relationship lattice, add the RNodes of the RChain to the
+            // FunctorSet.
+            if (functorInfos.isRChainID()) {
+                String[] rnodes = functorInfos.getID().replace("),", ") ").split(" ");
+                allFunctorNodesExceptChild = new HashSet<String>(Arrays.asList(rnodes));
+
+                // Attempt to remove the child variable from the set so that we don't run into a duplicate issue when
+                // inserting into the FunctorSet table.
+                allFunctorNodesExceptChild.remove(child);
+
+                // Combine RNodes of the RChain with the parents to get our final set that has all the FunctorNodes
+                // except the child.
+                allFunctorNodesExceptChild.addAll(parents);
+
+                for (String rnode : rnodes) {
+                    // Update the total number of combination of states possible only if the RNode is not already in
+                    // the FunctorSet.
+                    if (!rnode.equals(child) && !parents.contains(rnode)) {
+                        totalNumberOfStates *= functorInfos.getNumberOfStates(rnode);
+                    }
+                }
+            }
             this.dbConnection.setCatalog(this.dbInfo.getSetupDatabaseName());
             try (Statement statement = this.dbConnection.createStatement()) {
                 // Initialize FunctorSet table.
                 statement.executeUpdate(QueryGenerator.createTruncateQuery("FunctorSet"));
-                statement.executeUpdate(QueryGenerator.createSimpleExtendedInsertQuery("FunctorSet", child, parents));
+                statement.executeUpdate(
+                    QueryGenerator.createSimpleExtendedInsertQuery(
+                        "FunctorSet",
+                        child,
+                        allFunctorNodesExceptChild
+                    )
+                );
             }
 
             // Generate CT tables.

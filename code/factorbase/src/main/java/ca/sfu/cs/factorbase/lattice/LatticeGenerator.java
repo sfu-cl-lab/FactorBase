@@ -128,7 +128,7 @@ public class LatticeGenerator {
         Map<String, FunctorNodesInfo> functorNodesInfos
     ) {
         String[] rnodeIDs = rchain.replace("),", ") ").split(" ");
-        FunctorNodesInfo rchainFunctorNodeInfo = new FunctorNodesInfo(rchain, true);
+        FunctorNodesInfo rchainFunctorNodeInfo = new FunctorNodesInfo(rchain, true, true);
 
         // for loop to merge all the functor node information into a single FunctorNodesInfo for the RChain.
         for (String rnodeID : rnodeIDs) {
