@@ -6,13 +6,13 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.StringJoiner;
-import java.util.logging.Logger;
-
 import com.mysql.jdbc.Connection;
 
 import ca.sfu.cs.common.Configuration.Config;
@@ -26,7 +26,6 @@ import ca.sfu.cs.factorbase.util.MySQLScriptRunner;
 public class LatticeGenerator {
     private static final int MAX_NUM_OF_PVARS = 10;
     private static final String delimiter = ",";
-    private static Logger logger = Logger.getLogger(LatticeGenerator.class.getName());
 
 
     /**
@@ -82,7 +81,7 @@ public class LatticeGenerator {
         String tableName,
         String columnName
     ) throws SQLException {
-        List<String> rnodeIDs = retrieveRNodeIDs(dbConnection, tableName, columnName);
+        Set<String> rnodeIDs = functorNodesInfos.keySet();
 
         init(dbConnection, rnodeIDs);
         generateTree(dbConnection, rnodeIDs, rnodeIDs.size());
@@ -141,41 +140,7 @@ public class LatticeGenerator {
     }
 
 
-    /**
-     * Retrieve the RNode IDs.
-     *
-     * @param dbConnection - connection to the database that had the
-     *                       latticegenerator_initialize.sql script executed on it.
-     * @param rnodeTable - the table containing all the RNode IDs for the entire database.
-     * @param rnodeColumnName - the column name of the specified table containing the RNode IDs.
-     * @return the RNode IDs in the specified table and column.
-     * @throws SQLException if an issue occurs when attempting to retrieve the information.
-     */
-    private static List<String> retrieveRNodeIDs(
-        Connection dbConnection,
-        String rnodeTable,
-        String rnodeColumnName
-    ) throws SQLException {
-        ArrayList<String> rnodeIDs = new ArrayList<String>();
-        Statement st = dbConnection.createStatement();
-        ResultSet rs = st.executeQuery(
-            "SELECT " + rnodeColumnName + " " +
-            "FROM " + rnodeTable + ";"
-        );
-
-        while(rs.next()) {
-            String rnodeID = rs.getString(rnodeColumnName);
-            rnodeIDs.add(rnodeID);
-            logger.fine("The rnid is: " + rnodeID);
-        }
-
-        st.close();
-
-        return rnodeIDs;
-    }
-
-
-    private static int init(Connection dbConnection, List<String> firstSets) throws SQLException {
+    private static int init(Connection dbConnection, Collection<String> firstSets) throws SQLException {
         int maxNumberOfMembers = firstSets.size();
         Statement st = dbConnection.createStatement();
         st.execute("TRUNCATE lattice_rel;");
@@ -194,7 +159,7 @@ public class LatticeGenerator {
     }
 
 
-    private static void generateTree(Connection dbConnection, List<String> firstSets, int maxNumberOfMembers) throws SQLException {
+    private static void generateTree(Connection dbConnection, Collection<String> firstSets, int maxNumberOfMembers) throws SQLException {
         Statement st = dbConnection.createStatement();
         for(int setLength = 1; setLength < maxNumberOfMembers; setLength++) {
             ArrayList<String> sets = new ArrayList<String>();
@@ -211,7 +176,7 @@ public class LatticeGenerator {
     }
 
 
-    private static void createNewSets(Connection dbConnection, List<String> firstSets, ArrayList<String> sets) throws SQLException {
+    private static void createNewSets(Connection dbConnection, Collection<String> firstSets, ArrayList<String> sets) throws SQLException {
         for(String firstSet : firstSets) {
             for(String secondSet : sets) {
                 HashSet<String> newSet = new HashSet<String>();
