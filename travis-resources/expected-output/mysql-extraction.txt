@@ -93,14 +93,6 @@ course	course_id
 prof	prof_id
 student	student_id
 TABLE_NAME	COLUMN_NAME
-Table: Entity_BN_Nodes
-course0	diff(course0)
-course0	rating(course0)
-prof0	popularity(prof0)
-prof0	teachingability(prof0)
-pvid	node
-student0	intelligence(student0)
-student0	ranking(student0)
 Table: Entity_BN_nodes
 course0	diff(course0)
 course0	rating(course0)

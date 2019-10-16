@@ -219,24 +219,6 @@ public class BayesBaseH {
             "WHERE (RNodes_pvars.pvid = Entity_BayesNets.pvid " +
             "AND Entity_BayesNets.parent <> '');"
         );
-        st.execute("DROP TABLE IF EXISTS Entity_BN_Nodes;");
-        st.execute(
-            "CREATE TABLE Entity_BN_Nodes AS " +
-            "SELECT Entity_BayesNets.pvid AS pvid, Entity_BayesNets.child AS node " +
-            "FROM Entity_BayesNets " +
-            "ORDER BY pvid;"
-        );
-        st.execute(
-            "INSERT IGNORE INTO Entity_Complement_Edges " +
-            "SELECT DISTINCT BN_nodes1.pvid AS pvid, BN_nodes1.node AS child, BN_nodes2.node AS parent " +
-            "FROM Entity_BN_Nodes AS BN_nodes1, Entity_BN_Nodes AS BN_nodes2 " +
-            "WHERE BN_nodes1.pvid = BN_nodes2.pvid " +
-            "AND (NOT (EXISTS(" +
-                "SELECT * FROM Entity_BayesNets " +
-                "WHERE (Entity_BayesNets.pvid = BN_nodes1.pvid) " +
-                "AND (Entity_BayesNets.child = BN_nodes1.node) " +
-                "AND (Entity_BayesNets.parent = BN_nodes2.node))));"
-        );
         st.execute(
             "INSERT IGNORE INTO Path_Forbidden_Edges " +
             "SELECT DISTINCT RNodes_pvars.rnid AS Rchain, Entity_Complement_Edges.child AS child, Entity_Complement_Edges.parent AS parent " +
