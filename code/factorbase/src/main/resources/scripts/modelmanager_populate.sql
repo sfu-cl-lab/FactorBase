@@ -125,6 +125,20 @@ INSERT INTO Path_Required_Edges
         SchemaEdges;
 
 
+INSERT IGNORE INTO Path_Required_Edges
+    SELECT DISTINCT
+        RNodes_pvars.rnid AS Rchain,
+        Entity_BayesNets.child AS child,
+        Entity_BayesNets.parent AS parent
+    FROM
+        RNodes_pvars,
+        Entity_BayesNets
+    WHERE
+        RNodes_pvars.pvid = Entity_BayesNets.pvid
+    AND
+        Entity_BayesNets.parent <> '';
+
+
 TRUNCATE Path_Forbidden_Edges;
 INSERT INTO Path_Forbidden_Edges
     SELECT DISTINCT
@@ -169,6 +183,18 @@ INSERT INTO Entity_Complement_Edges
                 Entity_BayesNets.parent = BN_nodes2.node
         ))
     );
+
+
+INSERT IGNORE INTO Path_Forbidden_Edges
+    SELECT DISTINCT
+        RNodes_pvars.rnid AS Rchain,
+        Entity_Complement_Edges.child AS child,
+        Entity_Complement_Edges.parent AS parent
+    FROM
+        RNodes_pvars,
+        Entity_Complement_Edges
+    WHERE
+        RNodes_pvars.pvid = Entity_Complement_Edges.pvid;
 
 
 /**

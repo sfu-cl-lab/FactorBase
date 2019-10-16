@@ -211,22 +211,6 @@ public class BayesBaseH {
             databaseName
         );
 
-        Statement st = conn.createStatement();
-        st.execute(
-            "INSERT IGNORE INTO Path_Required_Edges " +
-            "SELECT DISTINCT RNodes_pvars.rnid AS Rchain, Entity_BayesNets.child AS child, Entity_BayesNets.parent AS parent " +
-            "FROM (RNodes_pvars, Entity_BayesNets) " +
-            "WHERE (RNodes_pvars.pvid = Entity_BayesNets.pvid " +
-            "AND Entity_BayesNets.parent <> '');"
-        );
-        st.execute(
-            "INSERT IGNORE INTO Path_Forbidden_Edges " +
-            "SELECT DISTINCT RNodes_pvars.rnid AS Rchain, Entity_Complement_Edges.child AS child, Entity_Complement_Edges.parent AS parent " +
-            "FROM (RNodes_pvars, Entity_Complement_Edges) " +
-            "WHERE (RNodes_pvars.pvid = Entity_Complement_Edges.pvid);"
-        );
-        st.close();
-
         // Handle rnodes in a bottom-up way following the lattice.
         if (ctTablesGenerated) {
             learnStructureRChains(database, lattice);
