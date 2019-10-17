@@ -9,6 +9,7 @@ import java.util.Map;
  */
 public class FunctorNodesInfo {
     private String id;
+    private String shortID;
     private boolean isRChainID;
     private Map<String, FunctorNode> functorNodes;
     private boolean valuesAreDiscrete;
@@ -23,6 +24,25 @@ public class FunctorNodesInfo {
      */
     public FunctorNodesInfo(String id, boolean valuesAreDiscrete, boolean isRChainID) {
         this.id = id;
+        this.shortID = null;
+        this.isRChainID = isRChainID;
+        this.valuesAreDiscrete = valuesAreDiscrete;
+        this.functorNodes = new LinkedHashMap<String, FunctorNode>();
+    }
+
+
+    /**
+     * Create a FunctorNodesInfo to store the functor node information for the given ID that has a short version of
+     * the ID.
+     *
+     * @param id - the ID associated with the functor node information being stored.
+     * @param shortID - the short version of the ID associated with the functor node information being stored.
+     * @param valuesAreDiscrete - true if all the functor node states are discrete; otherwise false.
+     * @param isRChainID - true if the ID provided is for an RChain; otherwise false.
+     */
+    public FunctorNodesInfo(String id, String shortID, boolean valuesAreDiscrete, boolean isRChainID) {
+        this.id = id;
+        this.shortID = shortID;
         this.isRChainID = isRChainID;
         this.valuesAreDiscrete = valuesAreDiscrete;
         this.functorNodes = new LinkedHashMap<String, FunctorNode>();
@@ -47,6 +67,17 @@ public class FunctorNodesInfo {
      */
     public String getID() {
         return this.id;
+    }
+
+
+    /**
+     * The short version of the ID associated with the stored functor nodes.
+     *
+     * @return the short version of the ID associated with the stored functor nodes or {@code null} if there is no
+     *         short version of the ID associated with the stored functor nodes.
+     */
+    public String getShortID() {
+        return this.shortID;
     }
 
 
