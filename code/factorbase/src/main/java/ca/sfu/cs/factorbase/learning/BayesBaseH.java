@@ -383,7 +383,8 @@ public class BayesBaseH {
                     database.getAndRemoveCTDataExtractor(id),
                     !cont.equals("1")
                 );
-
+//O.S. Oct 16, 2019. should allow background knowledge specified by user. Cf. with tetradLearner in handleRchains
+                
                 insertLearnedEdges(id, graphEdges, "Entity_BayesNets", false);
             } else {
                 Statement st2 = con2.createStatement();
