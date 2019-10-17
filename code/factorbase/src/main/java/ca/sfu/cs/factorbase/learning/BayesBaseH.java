@@ -108,16 +108,6 @@ public class BayesBaseH {
         initProgram(FirstRunning);
         connectDB();
 
-        // Build tables for structure learning.
-        // Set up the bayes net models O.S. Sep 12, 2017.
-        if (ctTablesGenerated) {
-            MySQLScriptRunner.runScript(
-                con2,
-                Config.SCRIPTS_DIRECTORY + "modelmanager_populate.sql",
-                databaseName
-            );
-        }
-
         // Get the height of the lattice (max length of RChain).
         int latticeHeight = globalLattice.getHeight();
 
@@ -213,39 +203,13 @@ public class BayesBaseH {
             learnStructurePVarsOnDemand(database);
         }
 
-        Statement st = conn.createStatement();
-        st.execute(
-            "INSERT IGNORE INTO Path_Required_Edges " +
-            "SELECT DISTINCT RNodes_pvars.rnid AS Rchain, Entity_BayesNets.child AS child, Entity_BayesNets.parent AS parent " +
-            "FROM (RNodes_pvars, Entity_BayesNets) " +
-            "WHERE (RNodes_pvars.pvid = Entity_BayesNets.pvid " +
-            "AND Entity_BayesNets.parent <> '');"
+        // Set up Bayesian Network structure information, which comes from the database schema and entity Bayesian
+        // Networks learned up to now, to propagate to the structure learning for RChains.
+        MySQLScriptRunner.runScript(
+            conn,
+            Config.SCRIPTS_DIRECTORY + "modelmanager_populate.sql",
+            databaseName
         );
-        st.execute("DROP TABLE IF EXISTS Entity_BN_Nodes;");
-        st.execute(
-            "CREATE TABLE Entity_BN_Nodes AS " +
-            "SELECT Entity_BayesNets.pvid AS pvid, Entity_BayesNets.child AS node " +
-            "FROM Entity_BayesNets " +
-            "ORDER BY pvid;"
-        );
-        st.execute(
-            "INSERT IGNORE INTO Entity_Complement_Edges " +
-            "SELECT DISTINCT BN_nodes1.pvid AS pvid, BN_nodes1.node AS child, BN_nodes2.node AS parent " +
-            "FROM Entity_BN_Nodes AS BN_nodes1, Entity_BN_Nodes AS BN_nodes2 " +
-            "WHERE BN_nodes1.pvid = BN_nodes2.pvid " +
-            "AND (NOT (EXISTS(" +
-                "SELECT * FROM Entity_BayesNets " +
-                "WHERE (Entity_BayesNets.pvid = BN_nodes1.pvid) " +
-                "AND (Entity_BayesNets.child = BN_nodes1.node) " +
-                "AND (Entity_BayesNets.parent = BN_nodes2.node))));"
-        );
-        st.execute(
-            "INSERT IGNORE INTO Path_Forbidden_Edges " +
-            "SELECT DISTINCT RNodes_pvars.rnid AS Rchain, Entity_Complement_Edges.child AS child, Entity_Complement_Edges.parent AS parent " +
-            "FROM (RNodes_pvars, Entity_Complement_Edges) " +
-            "WHERE (RNodes_pvars.pvid = Entity_Complement_Edges.pvid);"
-        );
-        st.close();
 
         // Handle rnodes in a bottom-up way following the lattice.
         if (ctTablesGenerated) {
