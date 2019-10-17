@@ -233,7 +233,6 @@ Table: LatticeRNodes
 orig_rnid	short_rnid
 RA(prof0,student0)	a
 registration(course0,student0)	b
-Table: LearnedEdges
 Table: MetaQueries
 course0	Counts	FROM	table	unielwin.course AS course0
 course0	Counts	GROUPBY	1node	`diff(course0)`

@@ -543,19 +543,6 @@ public class BayesBaseH {
         );
 
         if (!linkAnalysis) {
-            // Find new edges learned for this rchain, that were not already required before learning.
-            st.execute(
-                "INSERT IGNORE INTO LearnedEdges " +
-                "SELECT DISTINCT Path_BayesNets.Rchain, Path_BayesNets.child, Path_BayesNets.parent " +
-                "FROM Path_BayesNets, lattice_set, lattice_rel " +
-                "WHERE Path_BayesNets.parent <> '' " +
-                "AND lattice_set.name = lattice_rel.parent " +
-                "AND lattice_set.length = " + len + " " +
-                "AND (Path_BayesNets.Rchain, Path_BayesNets.child, Path_BayesNets.parent) NOT IN (" +
-                    "SELECT * FROM Path_Required_Edges" +
-                ");"
-            );
-
             // Propagate all edges to the next level.
             st.execute(
                 "INSERT IGNORE INTO InheritedEdges " +

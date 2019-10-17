@@ -116,7 +116,6 @@ ALTER TABLE SchemaEdges ADD INDEX HashIn (Rchain, child, parent);
 
 CREATE TABLE Path_Required_Edges LIKE Path_BayesNets;
 CREATE TABLE Path_Forbidden_Edges LIKE Path_BayesNets;
-CREATE TABLE LearnedEdges LIKE Path_BayesNets;
 CREATE TABLE ContextEdges LIKE Path_BayesNets;
 CREATE TABLE InheritedEdges LIKE Path_BayesNets;
 
