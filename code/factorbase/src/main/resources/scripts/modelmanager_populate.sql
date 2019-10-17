@@ -12,9 +12,9 @@ INSERT INTO RNodes_BN_Nodes
         1nid AS Fid,
         N.main
     FROM
-        RNodes_pvars R,
-        PVariables P,
-        1Nodes N
+        @database@_setup.RNodes_pvars R,
+        @database@_setup.PVariables P,
+        @database@_setup.1Nodes N
     WHERE
         R.pvid = P.pvid
     AND
@@ -27,7 +27,7 @@ INSERT INTO RNodes_BN_Nodes
         2nid AS Fid,
         main
     FROM
-        RNodes_2Nodes
+        @database@_setup.RNodes_2Nodes
 
     UNION DISTINCT
 
@@ -36,7 +36,7 @@ INSERT INTO RNodes_BN_Nodes
         rnid AS Fid,
         main
     FROM
-        RNodes;
+        @database@_setup.RNodes;
 
 
 /**
@@ -45,15 +45,15 @@ INSERT INTO RNodes_BN_Nodes
 TRUNCATE Path_BN_nodes;
 INSERT INTO Path_BN_nodes
     SELECT DISTINCT
-        lattice_membership.name AS Rchain,
+        LM.name AS Rchain,
         Fid AS node
     FROM
-        lattice_membership,
+        @database@_setup.lattice_membership LM,
         RNodes_BN_Nodes
     WHERE
-        RNodes_BN_Nodes.rnid = lattice_membership.member
+        RNodes_BN_Nodes.rnid = LM.member
     ORDER BY
-        lattice_membership.name;
+        LM.name;
 
 
 
@@ -66,45 +66,45 @@ INSERT INTO Path_Aux_Edges
     FROM
         Path_BN_nodes AS BN_nodes1,
         Path_BN_nodes AS BN_nodes2,
-        FNodes
+        @database@_setup.FNodes F
     WHERE
         BN_nodes1.Rchain = BN_nodes2.Rchain
     AND
-        FNodes.Fid = BN_nodes1.node
+        F.Fid = BN_nodes1.node
     AND
-        FNodes.main = 0;
+        F.main = 0;
 
 
 TRUNCATE SchemaEdges;
 INSERT INTO SchemaEdges
     SELECT DISTINCT
-        lattice_membership.name AS Rchain,
-        2Nodes.2nid AS child,
-        RNodes.rnid AS parent
+        LM.name AS Rchain,
+        2N.2nid AS child,
+        R.rnid AS parent
     FROM
-        RNodes,
-        2Nodes,
-        lattice_membership
+        @database@_setup.RNodes R,
+        @database@_setup.2Nodes 2N,
+        @database@_setup.lattice_membership LM
     WHERE
-        lattice_membership.member = RNodes.rnid
+        LM.member = R.rnid
     AND
-        RNodes.pvid1 = 2Nodes.pvid1
+        R.pvid1 = 2N.pvid1
     AND
-        RNodes.pvid2 = 2Nodes.pvid2
+        R.pvid2 = 2N.pvid2
     AND
-        RNodes.TABLE_NAME = 2Nodes.TABLE_NAME
+        R.TABLE_NAME = 2N.TABLE_NAME
     AND
-        lattice_membership.name IN (
+        LM.name IN (
             SELECT
-                lattice_set.name
+                LS.name
             FROM
-                lattice_set
+                @database@_setup.lattice_set LS
             WHERE
                 length = (
                     SELECT
                         MAX(length)
                     FROM
-                        lattice_set
+                        @database@_setup.lattice_set
                 )
         );
 
@@ -127,14 +127,14 @@ INSERT INTO Path_Required_Edges
 
 INSERT IGNORE INTO Path_Required_Edges
     SELECT DISTINCT
-        RNodes_pvars.rnid AS Rchain,
+        RP.rnid AS Rchain,
         Entity_BayesNets.child AS child,
         Entity_BayesNets.parent AS parent
     FROM
-        RNodes_pvars,
+        @database@_setup.RNodes_pvars RP,
         Entity_BayesNets
     WHERE
-        RNodes_pvars.pvid = Entity_BayesNets.pvid
+        RP.pvid = Entity_BayesNets.pvid
     AND
         Entity_BayesNets.parent <> '';
 
@@ -187,14 +187,14 @@ INSERT INTO Entity_Complement_Edges
 
 INSERT IGNORE INTO Path_Forbidden_Edges
     SELECT DISTINCT
-        RNodes_pvars.rnid AS Rchain,
+        RP.rnid AS Rchain,
         Entity_Complement_Edges.child AS child,
         Entity_Complement_Edges.parent AS parent
     FROM
-        RNodes_pvars,
+        @database@_setup.RNodes_pvars RP,
         Entity_Complement_Edges
     WHERE
-        RNodes_pvars.pvid = Entity_Complement_Edges.pvid;
+        RP.pvid = Entity_Complement_Edges.pvid;
 
 
 /**
