@@ -114,4 +114,15 @@ public interface FactorBaseDataBase {
      * @throws DataBaseException if an error occurs when trying to insert/remove the information.
      */
     void insertLearnedEdges(String id, List<Edge> graphEdges, String destTableName, boolean removeForbiddenEdges) throws DataBaseException;
+
+
+    /**
+     * Propagate the edge information to the next level in the relationship lattice.
+     *
+     * @param height - the lattice level to propagate edges from, i.e. edges will be propagated from level {@code height} to
+     *                 {@code height + 1}.
+     * @param linkAnalysisOn - True if the LinkCorrelations setting is enabled; otherwise false.
+     * @throws DataBaseException if an error occurs when propagating the information.
+     */
+    void propagateEdgeInformation(int height, boolean linkAnalysisOn) throws DataBaseException;
 }

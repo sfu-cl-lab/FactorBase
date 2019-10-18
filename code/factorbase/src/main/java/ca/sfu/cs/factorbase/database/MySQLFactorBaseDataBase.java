@@ -482,4 +482,220 @@ public class MySQLFactorBaseDataBase implements FactorBaseDataBase {
             throw new DataBaseException("Failed to insert/remove edges from the specified table.", e);
         }
     }
+
+
+    @Override
+    public void propagateEdgeInformation(int height, boolean linkAnalysisOn) throws DataBaseException {
+        // Import edge information to the database.
+        try {
+            this.dbConnection.setCatalog(this.dbInfo.getBNDatabaseName());
+            try(Statement statement = this.dbConnection.createStatement()) {
+                // Propagate all edges to the next level.
+                statement.execute(
+                    "INSERT IGNORE INTO InheritedEdges " +
+                        "SELECT DISTINCT " +
+                            "lattice_rel.child AS Rchain, " +
+                            "Path_BayesNets.child AS child, " +
+                            "Path_BayesNets.parent AS parent " +
+                        "FROM " +
+                            "Path_BayesNets, " +
+                            "lattice_rel, " +
+                            "lattice_set " +
+                        "WHERE " +
+                            "lattice_rel.parent = Path_BayesNets.Rchain " +
+                        "AND " +
+                            "Path_BayesNets.parent <> '' " +
+                        "AND " +
+                            "lattice_set.name = lattice_rel.parent " +
+                        "AND " +
+                            "lattice_set.length = " + height + " " +
+                        "ORDER BY " +
+                            "Rchain;"
+                );
+
+                if (!linkAnalysisOn) {
+                    // Propagate all edges to the next level.
+                    statement.execute(
+                        "INSERT IGNORE INTO InheritedEdges " +
+                            "SELECT DISTINCT " +
+                                "lattice_rel.child AS Rchain, " +
+                                "Path_BayesNets.child AS child, " +
+                                "Path_BayesNets.parent AS parent " +
+                            "FROM " +
+                                "Path_BayesNets, " +
+                                "lattice_rel, " +
+                                "lattice_set " +
+                            "WHERE " +
+                                "lattice_rel.parent = Path_BayesNets.Rchain " +
+                            "AND " +
+                                "Path_BayesNets.parent <> '' " +
+                            "AND " +
+                                "lattice_set.name = lattice_rel.parent " +
+                            "AND " +
+                                "lattice_set.length = " + (len) + " " +
+                            "ORDER BY " +
+                                "Rchain;"
+                    );
+
+                    // Kurt: Alternate LearnedEdges.
+                    statement.execute(
+                        "INSERT IGNORE INTO NewLearnedEdges " +
+                            "SELECT " +
+                                "Path_BayesNets.Rchain, " +
+                                "Path_BayesNets.child, " +
+                                "Path_BayesNets.parent " +
+                            "FROM " +
+                                "Path_BayesNets, " +
+                                "lattice_set " +
+                            "WHERE " +
+                                "Path_BayesNets.parent <> '' " +
+                            "AND " +
+                                "Path_BayesNets.Rchain = lattice_set.name " +
+                            "AND " +
+                                "lattice_set.length = " + len + " " +
+                            "AND (" +
+                                "Path_BayesNets.Rchain, " +
+                                "Path_BayesNets.child, " +
+                                "Path_BayesNets.parent" +
+                            ") NOT IN (" +
+                                "SELECT " +
+                                    "* " +
+                                "FROM " +
+                                    "Path_Required_Edges" +
+                            ");"
+                    );
+
+                    statement.execute(
+                        "INSERT IGNORE INTO InheritedEdges " +
+                            "SELECT DISTINCT " +
+                                "NewLearnedEdges.Rchain AS Rchain, " +
+                                "NewLearnedEdges.child AS child, " +
+                                "lattice_membership.member AS parent " +
+                            "FROM " +
+                                "NewLearnedEdges, " +
+                                "lattice_membership " +
+                            "WHERE " +
+                                "NewLearnedEdges.Rchain = lattice_membership.name;"
+                    );
+
+                    statement.execute(
+                        "INSERT IGNORE INTO Path_BayesNets " +
+                            "SELECT " +
+                                "* " +
+                            "FROM " +
+                                "InheritedEdges;"
+                    );
+                }
+
+                // Make inherited edges as required edges, while avoiding conflict edges.
+                // Design Three Required Edges: propagate edges from/to 1Nodes/2Nodes + SchemaEdges + RNodes to 1Nodes/2Nodes (same as Design Two).
+                statement.execute(
+                    "INSERT IGNORE INTO Path_Required_Edges " +
+                        "SELECT DISTINCT " +
+                            "Rchain, " +
+                            "child, " +
+                            "parent " +
+                        "FROM " +
+                            "InheritedEdges, " +
+                            "lattice_set " +
+                        "WHERE " +
+                            "Rchain = lattice_set.name " +
+                        "AND " +
+                            "lattice_set.length = " + (height + 1) + " " +
+                        "AND (" +
+                            "Rchain, " +
+                            "parent, " +
+                            "child" +
+                        ") NOT IN (" +
+                            "SELECT " +
+                                "* " +
+                            "FROM " +
+                                "InheritedEdges" +
+                        ") AND " +
+                                "child " +
+                        "NOT IN (" +
+                            "SELECT " +
+                                "rnid " +
+                            "FROM " +
+                                "RNodes" +
+                        ");"
+                );
+
+                // For path_complemtment edges, rchain should be at current level (len).
+                statement.execute(
+                    "INSERT IGNORE INTO Path_Complement_Edges " +
+                        "SELECT DISTINCT " +
+                            "BN_nodes1.Rchain AS Rchain, " +
+                            "BN_nodes1.node AS child, " +
+                            "BN_nodes2.node AS parent " +
+                        "FROM " +
+                            "Path_BN_nodes AS BN_nodes1, " +
+                            "Path_BN_nodes AS BN_nodes2, " +
+                            "lattice_set " +
+                        "WHERE " +
+                            "lattice_set.name = BN_nodes1.Rchain " +
+                        "AND " +
+                            "lattice_set.length = " + height + " " +
+                        "AND " +
+                            "BN_nodes1.Rchain = BN_nodes2.Rchain " +
+                        "AND NOT EXISTS (" +
+                            "SELECT " +
+                                "* " +
+                            "FROM " +
+                                "Path_BayesNets " +
+                            "WHERE " +
+                                "Path_BayesNets.Rchain = BN_nodes1.Rchain " +
+                            "AND " +
+                                "Path_BayesNets.child = BN_nodes1.node " +
+                            "AND " +
+                                "Path_BayesNets.parent = BN_nodes2.node" +
+                        ");"
+                );
+
+                // For path forbidden edges, rchain should be at higher level (len+1), so its parent should be at current level (len).
+                // Make absent edges as forbidden edges, and give higher priority of required edges in case of conflict edges.
+                // Design Three Forbidden Edges: propagate edges from/to 1Nodes/2Nodes + 1Nodes/2Nodes to RNodes.
+                statement.execute(
+                    "INSERT IGNORE INTO Path_Forbidden_Edges " +
+                        "SELECT DISTINCT " +
+                            "lattice_rel.child AS Rchain, " +
+                            "Path_Complement_Edges.child AS child, " +
+                            "Path_Complement_Edges.parent AS parent " +
+                        "FROM " +
+                            "Path_Complement_Edges, " +
+                            "lattice_rel, " +
+                            "lattice_set " +
+                        "WHERE " +
+                            "lattice_set.name = lattice_rel.parent " +
+                        "AND " +
+                            "lattice_set.length = " + height + " " +
+                        "AND " +
+                            "lattice_rel.parent = Path_Complement_Edges.Rchain " +
+                        "AND " +
+                            "Path_Complement_Edges.parent <> '' " +
+                        "AND (" +
+                            "lattice_rel.child, " +
+                            "Path_Complement_Edges.child, " +
+                            "Path_Complement_Edges.parent" +
+                        ") NOT IN (" +
+                            "SELECT " +
+                                "Rchain, " +
+                                "child, " +
+                                "parent " +
+                            "FROM " +
+                                "Path_Required_Edges" +
+                        ") AND " +
+                            "Path_Complement_Edges.parent " +
+                        "NOT IN (" +
+                            "SELECT " +
+                                "rnid " +
+                            "FROM " +
+                                "RNodes" +
+                        ");"
+                );
+            }
+        } catch (SQLException e) {
+            throw new DataBaseException("Failed to propagate the edge information to the next level.", e);
+        }
+    }
 }
