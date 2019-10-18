@@ -349,7 +349,7 @@ public class BayesBaseH {
                 );
 //O.S. Oct 16, 2019. should allow background knowledge specified by user. Cf. with tetradLearner in handleRchains
                 
-                insertLearnedEdges(id, graphEdges, "Entity_BayesNets", false);
+                database.insertLearnedEdges(id, graphEdges, "Entity_BayesNets", false);
             } else {
                 Statement st2 = con2.createStatement();
                 // Insert the BN nodes into Entity_BayesNet.
@@ -401,7 +401,7 @@ public class BayesBaseH {
                 !cont.equals("1")
             );
 
-            insertLearnedEdges(id, graphEdges, "Entity_BayesNets", false);
+            database.insertLearnedEdges(id, graphEdges, "Entity_BayesNets", false);
 
             logger.fine("\nEnd for " + id + "\n");
         }
@@ -456,7 +456,7 @@ public class BayesBaseH {
                     );
 
                     logger.fine("The BN Structure Learning for rnode_id:" + id + "is done."); //@zqian Test
-                    insertLearnedEdges(id, graphEdges, "Path_BayesNets", true);
+                    database.insertLearnedEdges(id, graphEdges, "Path_BayesNets", true);
                 }
             }
 
@@ -509,7 +509,7 @@ public class BayesBaseH {
                 );
 
                 logger.fine("The BN Structure Learning for RChain:" + rchainID + "is done.");
-                insertLearnedEdges(rchainID, graphEdges, "Path_BayesNets", true);
+                database.insertLearnedEdges(rchainID, graphEdges, "Path_BayesNets", true);
             }
 
             propagateEdgeInformation(height);
@@ -721,55 +721,6 @@ public class BayesBaseH {
         st.close();
 
         return rnode_ids;
-    }
-
-
-    /**
-     * Insert the given edges into the specified table.
-     *
-     * @param id - the ID of the RChain or pvid.
-     * @param graphEdges - the graph edges to insert into the specified table.
-     * @param destTableName - the table to insert the edge information into.
-     * @param isRchainEdges - True if the edges are generated during the search through RChains; otherwise false.
-     * @throws SQLException if an error occurs when trying to insert the information into the database.
-     */
-    private static void insertLearnedEdges(
-        String id,
-        List<Edge> graphEdges,
-        String destTableName,
-        boolean isRchainEdges
-    ) throws SQLException {
-        logger.fine("Starting to Import the learned edges into MySQL::**" + destTableName + "**");
-
-        try (Statement st = con2.createStatement()) {
-            for (Edge graphEdge : graphEdges) {
-                st.execute(
-                    "INSERT IGNORE INTO " + destTableName + " " +
-                    "VALUES (" +
-                        "'" + id + "', " +
-                        "'" + graphEdge.getChild() + "', " +
-                        "'" + graphEdge.getParent() + "'" +
-                    ");"
-                );
-            }
-
-            // Delete the edges which are already forbidden in a lower level.
-            // TODO: Figure out if this is actually necessary.
-            if (isRchainEdges) {
-                st.execute(
-                    "DELETE FROM Path_BayesNets " +
-                    "WHERE Rchain = '" + id + "' " +
-                    "AND (child, parent) IN (" +
-                        "SELECT child, parent " +
-                        "FROM Path_Forbidden_Edges " +
-                        "WHERE Rchain = '" + id + "'" +
-                    ");"
-                );
-            }
-        }
-
-        logger.fine("*** Imported " + destTableName + ": " + id + " into the database.");
-        logger.fine("*** Import is done for **" + destTableName + "** \n");
     }
 
 

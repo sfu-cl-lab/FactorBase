@@ -440,4 +440,46 @@ public class MySQLFactorBaseDataBase implements FactorBaseDataBase {
             throw new DataBaseException("Failed to retrieve the relationship lattice for the database.", e);
         }
     }
+
+
+    @Override
+    public void insertLearnedEdges(
+        String id,
+        List<Edge> graphEdges,
+        String destTableName,
+        boolean removeForbiddenEdges
+    ) throws DataBaseException {
+        try {
+            this.dbConnection.setCatalog(this.dbInfo.getBNDatabaseName());
+
+            try(Statement statement = this.dbConnection.createStatement()) {
+                for (Edge graphEdge : graphEdges) {
+                    statement.execute(
+                        "INSERT IGNORE INTO " + destTableName + " " +
+                        "VALUES (" +
+                            "'" + id + "', " +
+                            "'" + graphEdge.getChild() + "', " +
+                            "'" + graphEdge.getParent() + "'" +
+                        ");"
+                    );
+                }
+
+                // Delete the edges which are already forbidden in a lower level.
+                // TODO: Figure out if this is actually necessary.
+                if (removeForbiddenEdges) {
+                    statement.execute(
+                        "DELETE FROM " + destTableName + " " +
+                        "WHERE Rchain = '" + id + "' " +
+                        "AND (child, parent) IN (" +
+                            "SELECT child, parent " +
+                            "FROM Path_Forbidden_Edges " +
+                            "WHERE Rchain = '" + id + "'" +
+                        ");"
+                    );
+                }
+            }
+        } catch (SQLException e) {
+            throw new DataBaseException("Failed to insert/remove edges from the specified table.", e);
+        }
+    }
 }
