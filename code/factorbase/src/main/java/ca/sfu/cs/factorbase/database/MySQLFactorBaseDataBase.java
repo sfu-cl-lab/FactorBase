@@ -499,8 +499,8 @@ public class MySQLFactorBaseDataBase implements FactorBaseDataBase {
                             "Path_BayesNets.parent AS parent " +
                         "FROM " +
                             "Path_BayesNets, " +
-                            "lattice_rel, " +
-                            "lattice_set " +
+                            this.dbInfo.getSetupDatabaseName() + ".lattice_rel, " +
+                            this.dbInfo.getSetupDatabaseName() + ".lattice_set " +
                         "WHERE " +
                             "lattice_rel.parent = Path_BayesNets.Rchain " +
                         "AND " +
@@ -527,7 +527,7 @@ public class MySQLFactorBaseDataBase implements FactorBaseDataBase {
                             "parent " +
                         "FROM " +
                             "InheritedEdges, " +
-                            "lattice_set " +
+                            this.dbInfo.getSetupDatabaseName() + ".lattice_set " +
                         "WHERE " +
                             "Rchain = lattice_set.name " +
                         "AND " +
@@ -547,7 +547,7 @@ public class MySQLFactorBaseDataBase implements FactorBaseDataBase {
                             "SELECT " +
                                 "rnid " +
                             "FROM " +
-                                "RNodes" +
+                                this.dbInfo.getSetupDatabaseName() + ".RNodes" +
                         ");"
                 );
 
@@ -561,7 +561,7 @@ public class MySQLFactorBaseDataBase implements FactorBaseDataBase {
                         "FROM " +
                             "Path_BN_nodes AS BN_nodes1, " +
                             "Path_BN_nodes AS BN_nodes2, " +
-                            "lattice_set " +
+                            this.dbInfo.getSetupDatabaseName() + ".lattice_set " +
                         "WHERE " +
                             "lattice_set.name = BN_nodes1.Rchain " +
                         "AND " +
@@ -593,8 +593,8 @@ public class MySQLFactorBaseDataBase implements FactorBaseDataBase {
                             "Path_Complement_Edges.parent AS parent " +
                         "FROM " +
                             "Path_Complement_Edges, " +
-                            "lattice_rel, " +
-                            "lattice_set " +
+                            this.dbInfo.getSetupDatabaseName() + ".lattice_rel, " +
+                            this.dbInfo.getSetupDatabaseName() + ".lattice_set " +
                         "WHERE " +
                             "lattice_set.name = lattice_rel.parent " +
                         "AND " +
@@ -620,7 +620,7 @@ public class MySQLFactorBaseDataBase implements FactorBaseDataBase {
                             "SELECT " +
                                 "rnid " +
                             "FROM " +
-                                "RNodes" +
+                                this.dbInfo.getSetupDatabaseName() + ".RNodes" +
                         ");"
                 );
             }
