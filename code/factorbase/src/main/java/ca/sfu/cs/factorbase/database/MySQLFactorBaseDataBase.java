@@ -514,77 +514,7 @@ public class MySQLFactorBaseDataBase implements FactorBaseDataBase {
                 );
 
                 if (!linkAnalysisOn) {
-                    // Propagate all edges to the next level.
-                    statement.execute(
-                        "INSERT IGNORE INTO InheritedEdges " +
-                            "SELECT DISTINCT " +
-                                "lattice_rel.child AS Rchain, " +
-                                "Path_BayesNets.child AS child, " +
-                                "Path_BayesNets.parent AS parent " +
-                            "FROM " +
-                                "Path_BayesNets, " +
-                                "lattice_rel, " +
-                                "lattice_set " +
-                            "WHERE " +
-                                "lattice_rel.parent = Path_BayesNets.Rchain " +
-                            "AND " +
-                                "Path_BayesNets.parent <> '' " +
-                            "AND " +
-                                "lattice_set.name = lattice_rel.parent " +
-                            "AND " +
-                                "lattice_set.length = " + (len) + " " +
-                            "ORDER BY " +
-                                "Rchain;"
-                    );
-
-                    // Kurt: Alternate LearnedEdges.
-                    statement.execute(
-                        "INSERT IGNORE INTO NewLearnedEdges " +
-                            "SELECT " +
-                                "Path_BayesNets.Rchain, " +
-                                "Path_BayesNets.child, " +
-                                "Path_BayesNets.parent " +
-                            "FROM " +
-                                "Path_BayesNets, " +
-                                "lattice_set " +
-                            "WHERE " +
-                                "Path_BayesNets.parent <> '' " +
-                            "AND " +
-                                "Path_BayesNets.Rchain = lattice_set.name " +
-                            "AND " +
-                                "lattice_set.length = " + len + " " +
-                            "AND (" +
-                                "Path_BayesNets.Rchain, " +
-                                "Path_BayesNets.child, " +
-                                "Path_BayesNets.parent" +
-                            ") NOT IN (" +
-                                "SELECT " +
-                                    "* " +
-                                "FROM " +
-                                    "Path_Required_Edges" +
-                            ");"
-                    );
-
-                    statement.execute(
-                        "INSERT IGNORE INTO InheritedEdges " +
-                            "SELECT DISTINCT " +
-                                "NewLearnedEdges.Rchain AS Rchain, " +
-                                "NewLearnedEdges.child AS child, " +
-                                "lattice_membership.member AS parent " +
-                            "FROM " +
-                                "NewLearnedEdges, " +
-                                "lattice_membership " +
-                            "WHERE " +
-                                "NewLearnedEdges.Rchain = lattice_membership.name;"
-                    );
-
-                    statement.execute(
-                        "INSERT IGNORE INTO Path_BayesNets " +
-                            "SELECT " +
-                                "* " +
-                            "FROM " +
-                                "InheritedEdges;"
-                    );
+                    linkAnalysisOffSpecificEdgePropagation(statement, height);
                 }
 
                 // Make inherited edges as required edges, while avoiding conflict edges.
@@ -697,5 +627,89 @@ public class MySQLFactorBaseDataBase implements FactorBaseDataBase {
         } catch (SQLException e) {
             throw new DataBaseException("Failed to propagate the edge information to the next level.", e);
         }
+    }
+
+
+    /**
+     * Helper method for {@link #propagateEdgeInformation(int, boolean)} to make it more clear what queries are
+     * specific for the LinkAnalysis off case.
+     *
+     * @param statement - statement object to execute the queries with.
+     * @param height - the lattice level to propagate edges from, i.e. edges will be propagated from level
+     *                 {@code height} to {@code height + 1}.
+     * @throws SQLException if there are issues executing the queries.
+     */
+    private void linkAnalysisOffSpecificEdgePropagation(Statement statement, int height) throws SQLException {
+        // Propagate all edges to the next level.
+        statement.execute(
+            "INSERT IGNORE INTO InheritedEdges " +
+                "SELECT DISTINCT " +
+                    "lattice_rel.child AS Rchain, " +
+                    "Path_BayesNets.child AS child, " +
+                    "Path_BayesNets.parent AS parent " +
+                "FROM " +
+                    "Path_BayesNets, " +
+                    "lattice_rel, " +
+                    "lattice_set " +
+                "WHERE " +
+                    "lattice_rel.parent = Path_BayesNets.Rchain " +
+                "AND " +
+                    "Path_BayesNets.parent <> '' " +
+                "AND " +
+                    "lattice_set.name = lattice_rel.parent " +
+                "AND " +
+                    "lattice_set.length = " + height + " " +
+                "ORDER BY " +
+                    "Rchain;"
+        );
+
+        // Kurt: Alternate LearnedEdges.
+        statement.execute(
+            "INSERT IGNORE INTO NewLearnedEdges " +
+                "SELECT " +
+                    "Path_BayesNets.Rchain, " +
+                    "Path_BayesNets.child, " +
+                    "Path_BayesNets.parent " +
+                "FROM " +
+                    "Path_BayesNets, " +
+                    "lattice_set " +
+                "WHERE " +
+                    "Path_BayesNets.parent <> '' " +
+                "AND " +
+                    "Path_BayesNets.Rchain = lattice_set.name " +
+                "AND " +
+                    "lattice_set.length = " + height + " " +
+                "AND (" +
+                    "Path_BayesNets.Rchain, " +
+                    "Path_BayesNets.child, " +
+                    "Path_BayesNets.parent" +
+                ") NOT IN (" +
+                    "SELECT " +
+                        "* " +
+                    "FROM " +
+                        "Path_Required_Edges" +
+                ");"
+        );
+
+        statement.execute(
+            "INSERT IGNORE INTO InheritedEdges " +
+                "SELECT DISTINCT " +
+                    "NewLearnedEdges.Rchain AS Rchain, " +
+                    "NewLearnedEdges.child AS child, " +
+                    "lattice_membership.member AS parent " +
+                "FROM " +
+                    "NewLearnedEdges, " +
+                    "lattice_membership " +
+                "WHERE " +
+                    "NewLearnedEdges.Rchain = lattice_membership.name;"
+        );
+
+        statement.execute(
+            "INSERT IGNORE INTO Path_BayesNets " +
+                "SELECT " +
+                    "* " +
+                "FROM " +
+                    "InheritedEdges;"
+        );
     }
 }
