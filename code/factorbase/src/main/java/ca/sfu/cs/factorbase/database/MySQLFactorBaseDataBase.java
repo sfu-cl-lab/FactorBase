@@ -649,8 +649,8 @@ public class MySQLFactorBaseDataBase implements FactorBaseDataBase {
                     "Path_BayesNets.parent AS parent " +
                 "FROM " +
                     "Path_BayesNets, " +
-                    "lattice_rel, " +
-                    "lattice_set " +
+                    this.dbInfo.getSetupDatabaseName() + ".lattice_rel, " +
+                    this.dbInfo.getSetupDatabaseName() + ".lattice_set " +
                 "WHERE " +
                     "lattice_rel.parent = Path_BayesNets.Rchain " +
                 "AND " +
@@ -672,7 +672,7 @@ public class MySQLFactorBaseDataBase implements FactorBaseDataBase {
                     "Path_BayesNets.parent " +
                 "FROM " +
                     "Path_BayesNets, " +
-                    "lattice_set " +
+                    this.dbInfo.getSetupDatabaseName() + ".lattice_set " +
                 "WHERE " +
                     "Path_BayesNets.parent <> '' " +
                 "AND " +
@@ -699,7 +699,7 @@ public class MySQLFactorBaseDataBase implements FactorBaseDataBase {
                     "lattice_membership.member AS parent " +
                 "FROM " +
                     "NewLearnedEdges, " +
-                    "lattice_membership " +
+                    this.dbInfo.getSetupDatabaseName() + ".lattice_membership " +
                 "WHERE " +
                     "NewLearnedEdges.Rchain = lattice_membership.name;"
         );
