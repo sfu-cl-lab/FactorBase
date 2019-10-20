@@ -72,10 +72,9 @@ public class BayesBaseCT_SortMerge {
         con_CT = connectDB(databaseName_CT);
 
         //build _BN copy from _setup Nov 1st, 2013 Zqiancompute the subset given fid and it's parents
-        MySQLScriptRunner.runScript(
+        MySQLScriptRunner.callSP(
             con_BN,
-            Config.SCRIPTS_DIRECTORY + "transfer_cascade.sql",
-            databaseName_std
+            "cascadeFS"
         );
 
         //generate lattice tree

@@ -1,5 +1,8 @@
 /* Cascade the information (based on the FunctorSet table) into the tables created by the transfer_initialize.sql script. */
 
+CREATE PROCEDURE cascadeFS()
+BEGIN
+
 TRUNCATE 1Nodes;
 INSERT INTO 1Nodes
     SELECT
@@ -203,3 +206,5 @@ INSERT INTO LatticeRNodes
         RNodes R
     WHERE
         LR.orig_rnid = R.rnid;
+
+END//
