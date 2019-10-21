@@ -88,10 +88,9 @@ public class BayesBaseCT_SortMerge {
         if (cont.equals("1")) {
             throw new UnsupportedOperationException("Not Implemented Yet!");
         } else {
-            MySQLScriptRunner.runScript(
+            MySQLScriptRunner.callSP(
                 con_BN,
-                Config.SCRIPTS_DIRECTORY + "metaqueries_populate.sql",
-                databaseName_std
+                "populateMQ"
             );
         }
 
