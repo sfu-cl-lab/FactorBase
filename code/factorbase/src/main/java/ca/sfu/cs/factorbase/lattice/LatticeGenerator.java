@@ -13,9 +13,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.StringJoiner;
+
 import com.mysql.jdbc.Connection;
 
-import ca.sfu.cs.common.Configuration.Config;
 import ca.sfu.cs.factorbase.data.FunctorNodesInfo;
 import ca.sfu.cs.factorbase.util.MySQLScriptRunner;
 
@@ -43,10 +43,9 @@ public class LatticeGenerator {
         String databaseName
     ) throws SQLException, IOException {
         // Transfer all the local relationship lattice information from the global relationship lattice.
-        MySQLScriptRunner.runScript(
+        MySQLScriptRunner.callSP(
             dbConnection,
-            Config.SCRIPTS_DIRECTORY + "latticegenerator_populate.sql",
-            databaseName
+            "populateLattice"
         );
 
         try (

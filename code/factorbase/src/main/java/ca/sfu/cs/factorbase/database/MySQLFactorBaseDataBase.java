@@ -116,6 +116,12 @@ public class MySQLFactorBaseDataBase implements FactorBaseDataBase {
             );
             MySQLScriptRunner.runScript(
                 this.dbConnection,
+                Config.SCRIPTS_DIRECTORY + "latticegenerator_populate.sql",
+                this.baseDatabaseName,
+                "//"
+            );
+            MySQLScriptRunner.runScript(
+                this.dbConnection,
                 Config.SCRIPTS_DIRECTORY + "transfer_initialize.sql",
                 this.baseDatabaseName
             );
@@ -414,7 +420,6 @@ public class MySQLFactorBaseDataBase implements FactorBaseDataBase {
             }
 
             // Generate CT tables.
-            // TODO: Figure out best way to reuse substituted file instead of recreating a new one each time.
             BayesBaseCT_SortMerge.buildCT();
 
             String tableName = null;
