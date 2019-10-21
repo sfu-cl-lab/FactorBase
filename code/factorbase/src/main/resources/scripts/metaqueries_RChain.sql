@@ -1,7 +1,8 @@
-SET storage_engine=INNODB;
-
 /* May 16th, last step for _CT tables, preparing the colunmname_list */
 /* set up the join tables that represent the case where a relationship is false and its attributes are undefined */
+
+CREATE PROCEDURE populateMQRChain()
+BEGIN
 
 INSERT into MetaQueries
 SELECT DISTINCT
@@ -331,3 +332,5 @@ SELECT DISTINCT
     M.Entries 
 FROM lattice_rel, MetaQueries M
 WHERE lattice_rel.parent = 'EmptySet' AND M.Lattice_Point = lattice_rel.removed AND M.TableType = 'STAR' and M.ClauseType = 'SELECT';
+
+END//

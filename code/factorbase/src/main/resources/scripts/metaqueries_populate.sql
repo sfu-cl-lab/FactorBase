@@ -7,8 +7,8 @@
  * RNodes_2Nodes
  * RNodes_pvars
  */
-
-SET storage_engine=INNODB;
+CREATE PROCEDURE populateMQ()
+BEGIN
 
 TRUNCATE MetaQueries;
 
@@ -333,3 +333,5 @@ INSERT INTO MetaQueries
         Lattice_Point = L.`member`
     AND
         M.TableType = 'COUNTS';
+
+END//

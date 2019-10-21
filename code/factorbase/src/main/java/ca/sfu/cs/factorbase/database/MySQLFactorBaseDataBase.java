@@ -116,8 +116,20 @@ public class MySQLFactorBaseDataBase implements FactorBaseDataBase {
             );
             MySQLScriptRunner.runScript(
                 this.dbConnection,
+                Config.SCRIPTS_DIRECTORY + "latticegenerator_populate.sql",
+                this.baseDatabaseName,
+                "//"
+            );
+            MySQLScriptRunner.runScript(
+                this.dbConnection,
                 Config.SCRIPTS_DIRECTORY + "transfer_initialize.sql",
                 this.baseDatabaseName
+            );
+            MySQLScriptRunner.runScript(
+                this.dbConnection,
+                Config.SCRIPTS_DIRECTORY + "transfer_cascade.sql",
+                this.baseDatabaseName,
+                "//"
             );
             MySQLScriptRunner.runScript(
                 this.dbConnection,
@@ -128,6 +140,18 @@ public class MySQLFactorBaseDataBase implements FactorBaseDataBase {
                 this.dbConnection,
                 Config.SCRIPTS_DIRECTORY + "metaqueries_initialize.sql",
                 this.baseDatabaseName
+            );
+            MySQLScriptRunner.runScript(
+                this.dbConnection,
+                Config.SCRIPTS_DIRECTORY + "metaqueries_populate.sql",
+                this.baseDatabaseName,
+                "//"
+            );
+            MySQLScriptRunner.runScript(
+                this.dbConnection,
+                Config.SCRIPTS_DIRECTORY + "metaqueries_RChain.sql",
+                this.baseDatabaseName,
+                "//"
             );
         } catch (SQLException | IOException e) {
             throw new DataBaseException("An error occurred when attempting to setup the database for FactorBase.", e);
@@ -396,7 +420,6 @@ public class MySQLFactorBaseDataBase implements FactorBaseDataBase {
             }
 
             // Generate CT tables.
-            // TODO: Figure out best way to reuse substituted file instead of recreating a new one each time.
             BayesBaseCT_SortMerge.buildCT();
 
             String tableName = null;

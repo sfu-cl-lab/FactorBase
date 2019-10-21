@@ -2,6 +2,9 @@
  * Populate the local relationship lattice tables by extracting information from the global relationship lattice
  * tables.
  */
+CREATE PROCEDURE populateLattice()
+BEGIN
+
 TRUNCATE lattice_membership;
 INSERT INTO lattice_membership
     -- Get the "name"s and "member"s where the "name"s are unique to the local lattice.
@@ -74,3 +77,5 @@ INSERT IGNORE INTO lattice_mapping
         LMEM.member = LR.orig_rnid
     AND
         LMAP.orig_rnid = LMEM.name;
+
+END//
