@@ -94,10 +94,9 @@ public class BayesBaseCT_SortMerge {
             );
         }
 
-        MySQLScriptRunner.runScript(
+        MySQLScriptRunner.callSP(
             con_BN,
-            Config.SCRIPTS_DIRECTORY + "metaqueries_RChain.sql",
-            databaseName_std
+            "populateMQRChain"
         );
 
         // building CT tables for Rchain
