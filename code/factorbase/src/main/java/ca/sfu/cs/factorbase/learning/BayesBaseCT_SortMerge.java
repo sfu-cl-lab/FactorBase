@@ -149,12 +149,10 @@ public class BayesBaseCT_SortMerge {
             logger.fine("Building Time(ms) for Rnodes_counts: "+(l2-l_1)+" ms.\n");
         }
         else {
-            logger.warning("link off !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
             for(int len = 1; len <= latticeHeight; len++)
                 BuildCT_Rnodes_counts2(len);
             //count2 simply copies the counts to the CT tables
             //copying the code seems very inelegant OS August 22
-
         }
 
         if (linkCorrelation.equals("1")) {

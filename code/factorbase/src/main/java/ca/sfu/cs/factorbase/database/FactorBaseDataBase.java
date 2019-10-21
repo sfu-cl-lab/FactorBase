@@ -12,7 +12,8 @@ import ca.sfu.cs.factorbase.graph.Edge;
 import ca.sfu.cs.factorbase.lattice.RelationshipLattice;
 
 /**
- * Methods expected to be implemented to enable the extraction of data from a database for FactorBase.
+ * Methods expected to be implemented to enable the extraction of data from a database, insertion of data into a
+ * database, and modification of data in a database for FactorBase.
  */
 public interface FactorBaseDataBase {
     /**
@@ -100,4 +101,28 @@ public interface FactorBaseDataBase {
      * @throws DataBaseException if an error occurs when attempting to retrieve the information.
      */
     RelationshipLattice getGlobalLattice() throws DataBaseException;
+
+
+    /**
+     * Insert the given edges into the specified table of the database.
+     *
+     * @param id - the ID of the RChain or PVariable.
+     * @param graphEdges - the graph edges to insert into the specified table.
+     * @param destTableName - the table to insert the edge information into.
+     * @param removeForbiddenEdges - True if we should try to remove the forbidden edges from the specified table after
+     *                               inserting the new data; otherwise false.
+     * @throws DataBaseException if an error occurs when trying to insert/remove the information.
+     */
+    void insertLearnedEdges(String id, List<Edge> graphEdges, String destTableName, boolean removeForbiddenEdges) throws DataBaseException;
+
+
+    /**
+     * Propagate the edge information to the next level in the relationship lattice.
+     *
+     * @param height - the lattice level to propagate edges from, i.e. edges will be propagated from level {@code height} to
+     *                 {@code height + 1}.
+     * @param linkAnalysisOn - True if the LinkCorrelations setting is enabled; otherwise false.
+     * @throws DataBaseException if an error occurs when propagating the information.
+     */
+    void propagateEdgeInformation(int height, boolean linkAnalysisOn) throws DataBaseException;
 }

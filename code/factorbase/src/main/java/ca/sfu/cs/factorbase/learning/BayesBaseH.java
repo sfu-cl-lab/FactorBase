@@ -349,7 +349,7 @@ public class BayesBaseH {
                 );
 //O.S. Oct 16, 2019. should allow background knowledge specified by user. Cf. with tetradLearner in handleRchains
                 
-                insertLearnedEdges(id, graphEdges, "Entity_BayesNets", false);
+                database.insertLearnedEdges(id, graphEdges, "Entity_BayesNets", false);
             } else {
                 Statement st2 = con2.createStatement();
                 // Insert the BN nodes into Entity_BayesNet.
@@ -401,7 +401,7 @@ public class BayesBaseH {
                 !cont.equals("1")
             );
 
-            insertLearnedEdges(id, graphEdges, "Entity_BayesNets", false);
+            database.insertLearnedEdges(id, graphEdges, "Entity_BayesNets", false);
 
             logger.fine("\nEnd for " + id + "\n");
         }
@@ -456,11 +456,11 @@ public class BayesBaseH {
                     );
 
                     logger.fine("The BN Structure Learning for rnode_id:" + id + "is done."); //@zqian Test
-                    insertLearnedEdges(id, graphEdges, "Path_BayesNets", true);
+                    database.insertLearnedEdges(id, graphEdges, "Path_BayesNets", true);
                 }
             }
 
-            propagateEdgeInformation(len);
+            database.propagateEdgeInformation(len, linkAnalysis);
 
             logger.fine(" Import is done for length = " + len + "."); // @zqian Test
         }
@@ -509,150 +509,13 @@ public class BayesBaseH {
                 );
 
                 logger.fine("The BN Structure Learning for RChain:" + rchainID + "is done.");
-                insertLearnedEdges(rchainID, graphEdges, "Path_BayesNets", true);
+                database.insertLearnedEdges(rchainID, graphEdges, "Path_BayesNets", true);
             }
 
-            propagateEdgeInformation(height);
+            database.propagateEdgeInformation(height, linkAnalysis);
 
             logger.fine(" Import is done for length = " + height + ".");
         }
-    }
-
-
-    /**
-     * Propagate the edge information to the next level in the relationship lattice.
-     *
-     * @param len - the lattice level to propagate edges from, i.e. edges will be propagated from level {@code len} to
-     *              {@code len + 1}.
-     * @throws SQLException - if an error occurs when executing the queries.
-     */
-    private static void propagateEdgeInformation(int len) throws SQLException {
-        // Import edge information to the database.
-        Statement st = con2.createStatement();
-
-        // Propagate all edges to the next level.
-        st.execute(
-            "INSERT IGNORE INTO InheritedEdges " +
-            "SELECT DISTINCT lattice_rel.child AS Rchain, Path_BayesNets.child AS child, Path_BayesNets.parent AS parent " +
-            "FROM Path_BayesNets, lattice_rel, lattice_set " +
-            "WHERE lattice_rel.parent = Path_BayesNets.Rchain " +
-            "AND Path_BayesNets.parent <> '' " +
-            "AND lattice_set.name = lattice_rel.parent " +
-            "AND lattice_set.length = " + (len) + " " +
-            "ORDER BY Rchain;"
-        );
-
-        if (!linkAnalysis) {
-            // Find new edges learned for this rchain, that were not already required before learning.
-            st.execute(
-                "INSERT IGNORE INTO LearnedEdges " +
-                "SELECT DISTINCT Path_BayesNets.Rchain, Path_BayesNets.child, Path_BayesNets.parent " +
-                "FROM Path_BayesNets, lattice_set, lattice_rel " +
-                "WHERE Path_BayesNets.parent <> '' " +
-                "AND lattice_set.name = lattice_rel.parent " +
-                "AND lattice_set.length = " + len + " " +
-                "AND (Path_BayesNets.Rchain, Path_BayesNets.child, Path_BayesNets.parent) NOT IN (" +
-                    "SELECT * FROM Path_Required_Edges" +
-                ");"
-            );
-
-            // Propagate all edges to the next level.
-            st.execute(
-                "INSERT IGNORE INTO InheritedEdges " +
-                "SELECT DISTINCT lattice_rel.child AS Rchain, Path_BayesNets.child AS child, Path_BayesNets.parent AS parent " +
-                "FROM Path_BayesNets, lattice_rel, lattice_set " +
-                "WHERE lattice_rel.parent = Path_BayesNets.Rchain " +
-                "AND Path_BayesNets.parent <> '' " +
-                "AND lattice_set.name = lattice_rel.parent " +
-                "AND lattice_set.length = " + (len) + " " +
-                "ORDER BY Rchain;"
-            );
-
-            // KURT: Alternate LearnedEdges.
-            st.execute(
-                "INSERT IGNORE INTO NewLearnedEdges " +
-                "SELECT Path_BayesNets.Rchain, Path_BayesNets.child, Path_BayesNets.parent " +
-                "FROM Path_BayesNets, lattice_set " +
-                "WHERE Path_BayesNets.parent <> '' " +
-                "AND Path_BayesNets.Rchain = lattice_set.name " +
-                "AND lattice_set.length = " + len + " " +
-                "AND (Path_BayesNets.Rchain, Path_BayesNets.child, Path_BayesNets.parent) NOT IN (" +
-                    "SELECT * " +
-                    "FROM Path_Required_Edges" +
-                ");"
-            );
-
-            st.execute(
-                "INSERT IGNORE INTO InheritedEdges " +
-                "SELECT DISTINCT NewLearnedEdges.Rchain AS Rchain, NewLearnedEdges.child AS child, lattice_membership.member AS parent " +
-                "FROM NewLearnedEdges, lattice_membership " +
-                "WHERE NewLearnedEdges.Rchain = lattice_membership.name;"
-            );
-
-            st.execute(
-                "INSERT IGNORE INTO Path_BayesNets " +
-                "SELECT * " +
-                "FROM InheritedEdges;"
-            );
-        }
-
-        // Make inherited edges as required edges, while avoiding conflict edges.
-        // Design Three Required Edges: propagate edges from/to 1Nodes/2Nodes + SchemaEdges + RNodes to 1Nodes/2Nodes (same as Design Two).
-        st.execute(
-            "INSERT IGNORE INTO Path_Required_Edges " +
-            "SELECT DISTINCT Rchain, child, parent " +
-            "FROM InheritedEdges, lattice_set " +
-            "WHERE Rchain = lattice_set.name " +
-            "AND lattice_set.length = " + (len + 1) + " " +
-            "AND (Rchain, parent, child) NOT IN (" +
-                "SELECT * " +
-                "FROM InheritedEdges" +
-            ") AND child NOT IN (" +
-                "SELECT rnid " +
-                "FROM RNodes" +
-            ")"
-        );
-
-        // For path_complemtment edges, rchain should be at current level (len).
-        st.execute(
-            "INSERT IGNORE INTO Path_Complement_Edges " +
-            "SELECT DISTINCT BN_nodes1.Rchain AS Rchain, BN_nodes1.node AS child, BN_nodes2.node AS parent " +
-            "FROM Path_BN_nodes AS BN_nodes1, Path_BN_nodes AS BN_nodes2, lattice_set " +
-            "WHERE lattice_set.name = BN_nodes1.Rchain AND lattice_set.length = " + len + " " +
-            "AND (" +
-                "(BN_nodes1.Rchain = BN_nodes2.Rchain)" +
-                "AND (NOT (EXISTS(" +
-                    "SELECT * " +
-                    "FROM Path_BayesNets " +
-                    "WHERE (" +
-                        "(Path_BayesNets.Rchain = BN_nodes1.Rchain) " +
-                        "AND (Path_BayesNets.child = BN_nodes1.node) " +
-                        "AND (Path_BayesNets.parent = BN_nodes2.node)" +
-                   ")" +
-                ")))" +
-            ");"
-        );
-
-        // For path forbidden edges, rchain should be at higher level (len+1), so its parent should be at current level (len).
-        // Make absent edges as forbidden edges, and give higher priority of required edges in case of conflict edges.
-        // Design Three Forbidden Edges: propagate edges from/to 1Nodes/2Nodes + 1Nodes/2Nodes to RNodes.
-        st.execute(
-            "INSERT IGNORE INTO Path_Forbidden_Edges " +
-            "SELECT DISTINCT lattice_rel.child AS Rchain, Path_Complement_Edges.child AS child, Path_Complement_Edges.parent AS parent " +
-            "FROM Path_Complement_Edges, lattice_rel, lattice_set " +
-            "WHERE lattice_set.name = lattice_rel.parent " +
-            "AND lattice_set.length = " + len + " " +
-            "AND lattice_rel.parent = Path_Complement_Edges.Rchain " +
-            "AND Path_Complement_Edges.parent <> '' " +
-            "AND (lattice_rel.child, Path_Complement_Edges.child, Path_Complement_Edges.parent) NOT IN (" +
-                "SELECT  Rchain, child, parent " +
-                "FROM Path_Required_Edges" +
-            ") AND Path_Complement_Edges.parent NOT IN (" +
-                "SELECT rnid FROM RNodes" +
-            ");"
-        );
-
-        st.close();
     }
 
 
@@ -734,55 +597,6 @@ public class BayesBaseH {
         st.close();
 
         return rnode_ids;
-    }
-
-
-    /**
-     * Insert the given edges into the specified table.
-     *
-     * @param id - the ID of the RChain or pvid.
-     * @param graphEdges - the graph edges to insert into the specified table.
-     * @param destTableName - the table to insert the edge information into.
-     * @param isRchainEdges - True if the edges are generated during the search through RChains; otherwise false.
-     * @throws SQLException if an error occurs when trying to insert the information into the database.
-     */
-    private static void insertLearnedEdges(
-        String id,
-        List<Edge> graphEdges,
-        String destTableName,
-        boolean isRchainEdges
-    ) throws SQLException {
-        logger.fine("Starting to Import the learned edges into MySQL::**" + destTableName + "**");
-
-        try (Statement st = con2.createStatement()) {
-            for (Edge graphEdge : graphEdges) {
-                st.execute(
-                    "INSERT IGNORE INTO " + destTableName + " " +
-                    "VALUES (" +
-                        "'" + id + "', " +
-                        "'" + graphEdge.getChild() + "', " +
-                        "'" + graphEdge.getParent() + "'" +
-                    ");"
-                );
-            }
-
-            // Delete the edges which are already forbidden in a lower level.
-            // TODO: Figure out if this is actually necessary.
-            if (isRchainEdges) {
-                st.execute(
-                    "DELETE FROM Path_BayesNets " +
-                    "WHERE Rchain = '" + id + "' " +
-                    "AND (child, parent) IN (" +
-                        "SELECT child, parent " +
-                        "FROM Path_Forbidden_Edges " +
-                        "WHERE Rchain = '" + id + "'" +
-                    ");"
-                );
-            }
-        }
-
-        logger.fine("*** Imported " + destTableName + ": " + id + " into the database.");
-        logger.fine("*** Import is done for **" + destTableName + "** \n");
     }
 
 
