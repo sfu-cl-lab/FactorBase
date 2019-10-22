@@ -697,7 +697,12 @@ public class CP {
             st.execute("ALTER IGNORE TABLE `PVariables` ADD COLUMN `Tuples` BIGINT(20) NULL AFTER `index_number`;");
         }
         // Updating PVariables
-        ResultSet rs = st.executeQuery("SELECT table_name FROM EntityTables;");
+        ResultSet rs = st.executeQuery(
+            "SELECT " +
+                "table_name " +
+            "FROM " +
+                real_database + "_setup.EntityTables;"
+        );
         java.sql.Statement st1 = con1.createStatement();
         while(rs.next()) {
             String entity_table = rs.getString("table_name");

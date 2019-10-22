@@ -51,11 +51,6 @@ Table: ChildPars
 4	ranking(student0)
 NumPars	ChildNode
 Table: ContextEdges
-Table: EntityTables
-course	course_id
-prof	prof_id
-student	student_id
-TABLE_NAME	COLUMN_NAME
 Table: Entity_BN_nodes
 course0	diff(course0)
 course0	rating(course0)

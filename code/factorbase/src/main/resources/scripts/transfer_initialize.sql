@@ -119,15 +119,6 @@ CREATE TABLE PVariables AS
         0;
 
 
-CREATE TABLE EntityTables AS
-    SELECT
-        *
-    FROM
-        @database@_setup.EntityTables
-    LIMIT
-        0;
-
-
 CREATE TABLE Expansions AS
     SELECT
         *

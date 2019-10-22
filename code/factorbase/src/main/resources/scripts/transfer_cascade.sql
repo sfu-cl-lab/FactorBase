@@ -160,14 +160,6 @@ INSERT INTO PVariables
 /**
  * Transfer the rest.
  */
-TRUNCATE EntityTables;
-INSERT INTO EntityTables
-    SELECT
-        *
-    FROM
-        @database@_setup.EntityTables;
-
-
 TRUNCATE Expansions;
 INSERT INTO Expansions
     SELECT
