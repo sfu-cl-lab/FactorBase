@@ -128,15 +128,6 @@ CREATE TABLE EntityTables AS
         0;
 
 
-CREATE TABLE Attribute_Value AS
-    SELECT
-        *
-    FROM
-        @database@_setup.Attribute_Value
-    LIMIT
-        0;
-
-
 CREATE TABLE Expansions AS
     SELECT
         *

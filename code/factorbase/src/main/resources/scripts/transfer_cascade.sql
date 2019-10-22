@@ -168,14 +168,6 @@ INSERT INTO EntityTables
         @database@_setup.EntityTables;
 
 
-TRUNCATE Attribute_Value;
-INSERT INTO Attribute_Value
-    SELECT
-        *
-    FROM
-        @database@_setup.Attribute_Value;
-
-
 TRUNCATE Expansions;
 INSERT INTO Expansions
     SELECT

@@ -167,7 +167,16 @@ public class CP {
         );
 
         st.execute("drop table if exists NumAttributes;");
-        st.execute("create table NumAttributes as SELECT count(VALUE) as NumAtts, COLUMN_NAME FROM Attribute_Value group by COLUMN_NAME;");
+        st.execute(
+            "CREATE TABLE NumAttributes AS " +
+                "SELECT " +
+                    "COUNT(VALUE) AS NumAtts, " +
+                    "COLUMN_NAME " +
+                "FROM " +
+                    real_database + "_setup.Attribute_Value " +
+                "GROUP BY " +
+                    "COLUMN_NAME;"
+        );
 
         st.execute("drop table if exists RNodes_inFamily;");
         st.execute(

@@ -16,20 +16,37 @@ import java.sql.SQLException;
 import java.sql.Statement;
 
 public class CPGenerator {
-    public static void  Generator(String databaseName2, Connection con2) throws SQLException, IOException {
-        Statement st1 = con2.createStatement();
+    public static void  Generator(
+        String databaseName,
+        Connection con
+    ) throws SQLException, IOException {
+        try (
+            Statement rnodeStatement = con.createStatement();
+            Statement statement = con.createStatement();
+            ResultSet results = rnodeStatement.executeQuery("SELECT rnid FROM RNodes;")
+        ) {
+            // Adding possible values of Rnodes into Attribute_Value. // Jun 6.
+            while(results.next()) {
+                String rnid = results.getString("rnid");
+                statement.execute("SET SQL_SAFE_UPDATES = 0;");
 
-        // Adding possible values of Rnodes into Attribute_Value. // Jun 6.
-        ResultSet rs1 = st1.executeQuery("SELECT rnid FROM RNodes;");
-        while(rs1.next()) {
-            String rnid = rs1.getString("rnid");
-            Statement st2 = con2.createStatement();
-            st2.execute("SET SQL_SAFE_UPDATES = 0;");
-
-            // Adding boolean values for rnodes.
-            st2.execute("DELETE FROM  Attribute_Value WHERE column_name = '" + rnid + "';");
-            st2.execute("INSERT INTO Attribute_Value VALUES('" + rnid + "', 'T');"); // April 28, 2014, zqian.
-            st2.execute("INSERT INTO Attribute_Value VALUES('" + rnid + "', 'F');"); // Keep consistency with CT table.
+                // Adding boolean values for rnodes.
+                // TODO: Figure out if this DELETE query is actually necessary.
+                statement.execute(
+                    "DELETE FROM " +
+                        databaseName + "_setup.Attribute_Value " +
+                    "WHERE " +
+                        "column_name = '" + rnid + "';"
+                );
+                statement.execute(
+                    "INSERT INTO " + databaseName + "_setup.Attribute_Value " +
+                    "VALUES('" + rnid + "', 'T');"
+                );
+                statement.execute(
+                    "INSERT INTO " + databaseName + "_setup.Attribute_Value " +
+                    "VALUES('" + rnid + "', 'F');"
+                );
+            }
         }
     }
 }

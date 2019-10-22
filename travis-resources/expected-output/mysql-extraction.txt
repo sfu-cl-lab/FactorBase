@@ -36,43 +36,6 @@ capability(prof0,student0)	salary(prof0,student0)	3
 ChildNode	2node	NumAtts
 diff(course0)	grade(course0,student0)	4
 sat(course0,student0)	grade(course0,student0)	4
-Table: Attribute_Value
-capability	1
-capability	2
-capability	3
-capability	4
-capability	5
-COLUMN_NAME	VALUE
-diff	1
-diff	2
-grade	1
-grade	2
-grade	3
-grade	4
-intelligence	1
-intelligence	2
-intelligence	3
-popularity	1
-popularity	2
-ranking	1
-ranking	2
-ranking	3
-ranking	4
-ranking	5
-RA(prof0,student0)	F
-RA(prof0,student0)	T
-rating	1
-rating	2
-registration(course0,student0)	F
-registration(course0,student0)	T
-salary	high
-salary	low
-salary	med
-sat	1
-sat	2
-sat	3
-teachingability	2
-teachingability	3
 Table: ChildPars
 1	diff(course0)
 1	popularity(prof0)
@@ -1919,8 +1882,12 @@ ranking	2
 ranking	3
 ranking	4
 ranking	5
+RA(prof0,student0)	F
+RA(prof0,student0)	T
 rating	1
 rating	2
+registration(course0,student0)	F
+registration(course0,student0)	T
 salary	high
 salary	low
 salary	med
