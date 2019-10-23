@@ -63,16 +63,6 @@ CREATE TABLE FNodes (
 );
 
 
-CREATE TABLE FNodes_pvars AS
-    SELECT
-        N.Fid,
-        N.pvid
-    FROM
-        @database@_setup.FNodes_pvars N
-    LIMIT
-        0;
-
-
 CREATE TABLE RNodes_pvars AS
     SELECT
         N.rnid,

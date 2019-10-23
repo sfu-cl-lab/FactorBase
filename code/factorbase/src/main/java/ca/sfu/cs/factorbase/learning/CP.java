@@ -139,7 +139,12 @@ public class CP {
      * number of effective parameters is less than just the standard number of CP-table rows.
      */
     public static void prepare(String rchain, Connection con1) throws SQLException {
-        lcoal_mult_update(rchain,con1); //zqian @ Dec 4th
+        String setupDatabase = real_database + "_setup";
+        lcoal_mult_update(
+            rchain,
+            setupDatabase,
+            con1
+        );
 
         Statement st = con1.createStatement();
         st.execute("drop table if exists Scores;");
@@ -650,14 +655,29 @@ public class CP {
     /**
      * Prepare for the computing of local_mult, Dec 3rd, zqian.
      */
-    public static void lcoal_mult_update(String rchain, Connection con1) throws SQLException {
-        java.sql.Statement st = con1.createStatement();
+    public static void lcoal_mult_update(
+        String rchain,
+        String setupDatabase,
+        Connection con
+    ) throws SQLException {
+        java.sql.Statement st = con.createStatement();
         // For each node find its associated population variables
         // (e.g:RA(prof0,student0) as Fid, then it should have two pvid : prof0 and student0)
         st.execute("drop table if exists FNodes_pvars_UNION_RNodes_pvars;");
         st.execute(
-            "create table FNodes_pvars_UNION_RNodes_pvars as " +
-            " SELECT rnid as Fid , pvid FROM RNodes_pvars union distinct SELECT * FROM FNodes_pvars;"
+            "CREATE TABLE FNodes_pvars_UNION_RNodes_pvars AS " +
+                "SELECT " +
+                    "rnid AS Fid, " +
+                    "pvid " +
+                "FROM " +
+                    "RNodes_pvars " +
+
+                "UNION DISTINCT " +
+
+                "SELECT " +
+                    "* " +
+                "FROM " +
+                    setupDatabase + ".FNodes_pvars;"
         );
         /**
          * for each configuration(i.e. each node with all its parents ), find its associated population variables
@@ -703,7 +723,7 @@ public class CP {
             "FROM " +
                 real_database + "_setup.EntityTables;"
         );
-        java.sql.Statement st1 = con1.createStatement();
+        java.sql.Statement st1 = con.createStatement();
         while(rs.next()) {
             String entity_table = rs.getString("table_name");
             String sql = "update PVariables set Tuples = (select count(*) from " + real_database + "." + entity_table + ") where PVariables.table_name = '" + entity_table + "';";

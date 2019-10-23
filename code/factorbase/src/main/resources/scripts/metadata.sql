@@ -620,7 +620,7 @@ create or replace view RNodes_2Nodes as select RNodes.rnid, 2Nodes.2nid, 2Nodes.
 
 /*** for each functor node, record which population variables appear in it ***/
 
-create or replace VIEW FNodes_pvars as 
+CREATE TABLE FNodes_pvars AS
 SELECT FNodes.Fid, PVariables.pvid FROM
     FNodes,
     2Nodes,
@@ -669,9 +669,12 @@ FROM
 WHERE
     pvid2 = pvid;
     
-    
-    
-    
+
+
+ALTER TABLE FNodes_pvars
+    ADD INDEX (Fid);
+
+
  /*** for each relationship node, record which population variables appear in it. 
 Plus metadata about those variable, e.g. the name of the id column associated with them.  (August 17, 2017) This seems inelegant.
 */

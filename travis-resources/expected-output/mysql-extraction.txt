@@ -94,26 +94,6 @@ registration(course0,student0)	registration(course0,student0)	Rnode	1
 salary(prof0,student0)	salary	2Node	1
 sat(course0,student0)	sat	2Node	1
 teachingability(prof0)	teachingability	1Node	1
-Table: FNodes_pvars
-capability(prof0,student0)	prof0
-capability(prof0,student0)	student0
-diff(course0)	course0
-Fid	pvid
-grade(course0,student0)	course0
-grade(course0,student0)	student0
-intelligence(student0)	student0
-popularity(prof0)	prof0
-ranking(student0)	student0
-RA(prof0,student0)	prof0
-RA(prof0,student0)	student0
-rating(course0)	course0
-registration(course0,student0)	course0
-registration(course0,student0)	student0
-salary(prof0,student0)	prof0
-salary(prof0,student0)	student0
-sat(course0,student0)	course0
-sat(course0,student0)	student0
-teachingability(prof0)	prof0
 Table: FNodes_pvars_UNION_RNodes_pvars
 capability(prof0,student0)	prof0
 capability(prof0,student0)	student0
