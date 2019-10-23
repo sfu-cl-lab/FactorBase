@@ -46,7 +46,6 @@ WHERE
 /* WISHLIST: write trigger that warns when something is inserted here.
 Row-based as proposed by Tim */
 
-/*CREATE OR REPLACE VIEW NumEntityColumns AS */
 CREATE table NumEntityColumns AS
     SELECT 
         TABLE_NAME, COUNT(DISTINCT COLUMN_NAME) num
@@ -319,7 +318,6 @@ ALTER TABLE ForeignKeys_pvars ADD PRIMARY KEY (TABLE_NAME,pvid,ARGUMENT_POSITION
 this view is just a temporary table for creating the relationship nodes. We could drop it after use. 
 Materializing it speeds up processing. */
 
-/*CREATE OR REPLACE VIEW RNodes_MM_NotSelf AS*/
 CREATE table RNodes_MM_NotSelf AS
     SELECT 
         CONCAT(
@@ -351,7 +349,6 @@ CREATE table RNodes_MM_NotSelf AS
 /* second case: many-many relationship, and self-relationship. One difference is that we have a main variable if and only if the first argument is a main population variable, and the second is the second variable. Also, we consider only
 functor nodes whose first argument has a lower index than the second. */
 
-/*CREATE OR REPLACE VIEW RNodes_MM_Self AS*/
 CREATE table RNodes_MM_Self AS
     SELECT 
         CONCAT(
@@ -383,9 +380,7 @@ CREATE table RNodes_MM_Self AS
 
 /* third case: many-one, not a self-relationship. Now we need to include the primary key as an argument. 
 Also, we switch to functional notation for legibility. */
-/*CREATE OR REPLACE VIEW RNodes_MO_NotSelf AS*/
 /* OS August 15. Why does this refer to Referenced_Table_Name, n ot Table_Name? */
-
 CREATE table RNodes_MO_NotSelf AS
     SELECT 
         CONCAT(
@@ -416,7 +411,6 @@ CREATE table RNodes_MO_NotSelf AS
 
 /*fourth case: many-one, self-relationship */
 
-/*CREATE OR REPLACE VIEW RNodes_MO_Self AS*/
 CREATE table RNodes_MO_Self AS
     SELECT 
         CONCAT(
