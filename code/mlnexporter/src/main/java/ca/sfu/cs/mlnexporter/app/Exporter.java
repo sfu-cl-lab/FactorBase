@@ -217,7 +217,12 @@ public class Exporter {
      * Build the body part of MLN file based on the relationship between parent and child nodes.
      * @ param con  connect to the database
      */
-    public static void bodyBuilder(Connection con, String Schema, PrintWriter writer) {
+    public static void bodyBuilder(
+        Connection con,
+        String schemaSetup,
+        String schemaBN,
+        PrintWriter writer
+    ) {
         try {
             System.out.println("Writing Rules..");
             ResultSet temp = null;
@@ -231,9 +236,21 @@ public class Exporter {
             int counter = 0;
             int complement = 0;
             Statement stmt = con.createStatement();
-            stmt.execute("SELECT * FROM " + Schema + ".NumAttributes"); // Determine the number of nodes.
+            // Determine the number of nodes.
+            stmt.execute(
+                "SELECT " +
+                    "* " +
+                "FROM " +
+                    schemaBN + ".NumAttributes;"
+            );
             nodes = new BNNode[GetSize(stmt.getResultSet())];
-            stmt.execute("SELECT * FROM " + Schema + ".RNodes"); // Get all relationship nodes.
+            // Get all relationship nodes.
+            stmt.execute(
+                "SELECT " +
+                    "* " +
+                "FROM " +
+                    schemaBN + ".RNodes;"
+            );
             temp = stmt.getResultSet();
             while(temp.next()) {
                 ID = "";
@@ -256,14 +273,23 @@ public class Exporter {
             }
 
             for(int i = 1; nodes[nodes.length - 1] == null; i++) { // Get the rest of the nodes in table 1Nodes, 2Nodes, 3Nodes...
-                counter = getNNode(new Integer(i).toString(), con, nodes, counter, Schema);
+                counter = getNNode(new Integer(i).toString(), con, nodes, counter, schemaBN);
             }
 
             for (int i = 0; i < nodes.length; i++) {
                 String CP_tablename = nodes[i].getID() + "_CP";
 //                stmt.execute("SELECT * FROM " + BNSchema + "." + CP_tablename);
 //                temp = stmt.getResultSet();
-                stmt.execute("SELECT column_name FROM information_schema.COLUMNS WHERE table_name = '" + CP_tablename + "' AND table_schema = '" + Schema + "'");
+                stmt.execute(
+                    "SELECT " +
+                        "column_name " +
+                    "FROM " +
+                        "information_schema.COLUMNS " +
+                    "WHERE " +
+                        "table_name = '" + CP_tablename + "' " +
+                    "AND " +
+                        "table_schema = '" + schemaBN + "';"
+                );
                 temp = stmt.getResultSet();
                 counter = 0;
                 complement = 0;
@@ -289,7 +315,12 @@ public class Exporter {
                     }
                     counter--;
                 }
-                stmt.execute("SELECT * FROM " + Schema + ".`"+ CP_tablename +"`");
+                stmt.execute(
+                    "SELECT " +
+                        "* " +
+                    "FROM " +
+                        schemaBN + ".`" + CP_tablename + "`;"
+                );
                 temp = stmt.getResultSet();
                 while(temp.next()) {
                     double lnCP = Math.log(Double.parseDouble(temp.getString("CP")));
@@ -327,7 +358,12 @@ public class Exporter {
 
             System.out.println("Writing Unit Clause...");
             // Write the unit clause of the MLN.
-            stmt.execute("SELECT * FROM " + Schema + ".Attribute_Value");
+            stmt.execute(
+                "SELECT " +
+                    "* " +
+                "FROM " +
+                    schemaSetup + ".Attribute_Value;"
+            );
             temp = stmt.getResultSet();
             line = "";
             table = "";
@@ -370,7 +406,13 @@ public class Exporter {
             file.delete();
             PrintWriter writer = new PrintWriter(new FileOutputStream( new File(Schema + ".mln"), true));
             headerBuilder(con1, Schema, writer); // Type declaration.
-            bodyBuilder(con2, Schema + "_BN", writer); // Builds the formulas with weights.
+            // Build the formulas with weights.
+            bodyBuilder(
+                con2,
+                Schema + "_setup",
+                Schema + "_BN",
+                writer
+            );
             writer.close();
             System.out.println("Finished Writing MLN...");
         } catch (FileNotFoundException e) {

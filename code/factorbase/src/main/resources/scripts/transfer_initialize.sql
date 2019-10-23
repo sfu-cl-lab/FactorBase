@@ -8,10 +8,7 @@ CREATE TABLE 1Nodes AS
         N.pvid,
         N.main
     FROM
-        @database@_setup.1Nodes N,
-        @database@_setup.FunctorSet F
-    WHERE
-        N.1nid = F.fid
+        @database@_setup.1Nodes N
     LIMIT
         0;
 
@@ -25,10 +22,7 @@ CREATE TABLE 2Nodes AS
         N.TABLE_NAME,
         N.main
     FROM
-        @database@_setup.2Nodes N,
-        @database@_setup.FunctorSet F
-    WHERE
-        N.2nid = F.Fid
+        @database@_setup.2Nodes N
     LIMIT
         0;
 
@@ -39,10 +33,7 @@ CREATE TABLE RNodes_2Nodes AS
         N.2nid,
         N.main
     FROM
-        @database@_setup.RNodes_2Nodes N,
-        2Nodes F
-    WHERE
-        N.2nid = F.2nid
+        @database@_setup.RNodes_2Nodes N
     LIMIT
         0;
 
@@ -57,10 +48,7 @@ CREATE TABLE RNodes AS
         N.COLUMN_NAME2,
         N.main
     FROM
-        @database@_setup.RNodes N,
-        @database@_setup.FunctorSet F
-    WHERE
-        N.rnid = F.Fid
+        @database@_setup.RNodes N
     LIMIT
         0;
 
@@ -80,10 +68,7 @@ CREATE TABLE FNodes_pvars AS
         N.Fid,
         N.pvid
     FROM
-        @database@_setup.FNodes_pvars N,
-        FNodes F
-    WHERE
-        N.Fid = F.Fid
+        @database@_setup.FNodes_pvars N
     LIMIT
         0;
 
@@ -96,43 +81,19 @@ CREATE TABLE RNodes_pvars AS
         N.COLUMN_NAME,
         N.REFERENCED_COLUMN_NAME
     FROM
-        @database@_setup.RNodes_pvars N,
-        RNodes F
-    WHERE
-        N.rnid = F.rnid
+        @database@_setup.RNodes_pvars N
     LIMIT
         0;
 
 
 CREATE TABLE PVariables AS
-    SELECT DISTINCT
+    SELECT
         N.pvid,
         N.ID_COLUMN_NAME,
         N.TABLE_NAME,
         N.index_number
     FROM
-        @database@_setup.PVariables N,
-        FNodes_pvars F
-    WHERE
-        F.pvid = N.pvid
-    LIMIT
-        0;
-
-
-CREATE TABLE EntityTables AS
-    SELECT
-        *
-    FROM
-        @database@_setup.EntityTables
-    LIMIT
-        0;
-
-
-CREATE TABLE Attribute_Value AS
-    SELECT
-        *
-    FROM
-        @database@_setup.Attribute_Value
+        @database@_setup.PVariables N
     LIMIT
         0;
 

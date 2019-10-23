@@ -167,7 +167,16 @@ public class CP {
         );
 
         st.execute("drop table if exists NumAttributes;");
-        st.execute("create table NumAttributes as SELECT count(VALUE) as NumAtts, COLUMN_NAME FROM Attribute_Value group by COLUMN_NAME;");
+        st.execute(
+            "CREATE TABLE NumAttributes AS " +
+                "SELECT " +
+                    "COUNT(VALUE) AS NumAtts, " +
+                    "COLUMN_NAME " +
+                "FROM " +
+                    real_database + "_setup.Attribute_Value " +
+                "GROUP BY " +
+                    "COLUMN_NAME;"
+        );
 
         st.execute("drop table if exists RNodes_inFamily;");
         st.execute(
@@ -688,7 +697,12 @@ public class CP {
             st.execute("ALTER IGNORE TABLE `PVariables` ADD COLUMN `Tuples` BIGINT(20) NULL AFTER `index_number`;");
         }
         // Updating PVariables
-        ResultSet rs = st.executeQuery("SELECT table_name FROM EntityTables;");
+        ResultSet rs = st.executeQuery(
+            "SELECT " +
+                "table_name " +
+            "FROM " +
+                real_database + "_setup.EntityTables;"
+        );
         java.sql.Statement st1 = con1.createStatement();
         while(rs.next()) {
             String entity_table = rs.getString("table_name");
