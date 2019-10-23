@@ -79,7 +79,6 @@ pvid	child	parent
 student0	intelligence(student0)	intelligence(student0)
 student0	intelligence(student0)	ranking(student0)
 student0	ranking(student0)	ranking(student0)
-Table: Expansions
 Table: FNodes
 capability(prof0,student0)	capability	2Node	1
 diff(course0)	diff	1Node	1
@@ -151,7 +150,6 @@ RA(prof0,student0),registration(course0,student0)	sat(course0,student0)	grade(co
 RA(prof0,student0),registration(course0,student0)	sat(course0,student0)	registration(course0,student0)
 RA(prof0,student0),registration(course0,student0)	teachingability(prof0)	RA(prof0,student0)
 Rchain	child	parent
-Table: Groundings
 Table: InheritedEdges
 RA(prof0,student0),registration(course0,student0)	capability(prof0,student0)	RA(prof0,student0)
 RA(prof0,student0),registration(course0,student0)	capability(prof0,student0)	salary(prof0,student0)

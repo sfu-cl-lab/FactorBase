@@ -88,24 +88,6 @@ CREATE TABLE PVariables AS
         0;
 
 
-CREATE TABLE Expansions AS
-    SELECT
-        *
-    FROM
-        @database@_setup.Expansions
-    LIMIT
-        0;
-
-
-CREATE TABLE Groundings AS
-    SELECT
-        *
-    FROM
-        @database@_setup.Groundings
-    LIMIT
-        0;
-
-
 CREATE TABLE LatticeRNodes AS
     SELECT
         orig_rnid,

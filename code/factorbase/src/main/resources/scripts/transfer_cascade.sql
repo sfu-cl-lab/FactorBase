@@ -148,25 +148,6 @@ INSERT INTO PVariables
 
 
 /**
- * Transfer the rest.
- */
-TRUNCATE Expansions;
-INSERT INTO Expansions
-    SELECT
-        *
-    FROM
-        @database@_setup.Expansions;
-
-
-TRUNCATE Groundings;
-INSERT INTO Groundings
-    SELECT
-        *
-    FROM
-        @database@_setup.Groundings;
-
-
-/**
  * Prepare lattice generator by copying information from LatticeRNodes in the "_setup" database, restricted to the
  * FunctorSet.
  */
