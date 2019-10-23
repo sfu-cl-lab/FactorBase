@@ -610,7 +610,17 @@ CREATE TABLE TargetNode (
 /*********************************************************************/
 
 /** now link each rnode 2node, i.e. each attribute of the relationship to the associated 2nodes **/
-create or replace view RNodes_2Nodes as select RNodes.rnid, 2Nodes.2nid, 2Nodes.main from 2Nodes, RNodes where 2Nodes.TABLE_NAME = RNodes.TABLE_NAME; 
+CREATE TABLE RNodes_2Nodes AS
+    SELECT
+        RNodes.rnid,
+        2Nodes.2nid,
+        2Nodes.main
+    FROM
+        2Nodes,
+        RNodes
+    WHERE
+        2Nodes.TABLE_NAME = RNodes.TABLE_NAME;
+
 
 /*** for each functor node, record which population variables appear in it ***/
 
@@ -673,7 +683,7 @@ ALTER TABLE FNodes_pvars
 Plus metadata about those variable, e.g. the name of the id column associated with them.  (August 17, 2017) This seems inelegant.
 */
 
-CREATE or replace VIEW RNodes_pvars AS
+CREATE TABLE RNodes_pvars AS
 SELECT DISTINCT rnid,
     pvid,
     PVariables.TABLE_NAME,
