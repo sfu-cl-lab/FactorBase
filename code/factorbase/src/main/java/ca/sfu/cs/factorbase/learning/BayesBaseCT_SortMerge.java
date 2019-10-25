@@ -155,7 +155,7 @@ public class BayesBaseCT_SortMerge {
         }
         else {
             for(int len = 1; len <= latticeHeight; len++)
-                BuildCT_Rnodes_counts2(len);
+                BuildCT_Rnodes_counts2(relationshipLattice.getRChainsInfo(len));
             //count2 simply copies the counts to the CT tables
             //copying the code seems very inelegant OS August 22
         }
@@ -591,20 +591,12 @@ public class BayesBaseCT_SortMerge {
     /**
      * building the RNodes_counts tables,count2 simply copies the counts to the CT tables
      */
-    private static void BuildCT_Rnodes_counts2(int len) throws SQLException {
-        Statement st = con_BN.createStatement();
-        ResultSet rs = st.executeQuery(
-            "SELECT short_rnid AS shortRChain, orig_rnid AS RChain " +
-            "FROM lattice_set " +
-            "JOIN lattice_mapping " +
-            "ON lattice_set.name = lattice_mapping.orig_rnid " +
-            "WHERE lattice_set.length = " + len + ";"
-        );
-        while(rs.next()) {
+    private static void BuildCT_Rnodes_counts2(List<FunctorNodesInfo> rchainInfos) throws SQLException {
+        for (FunctorNodesInfo rchainInfo : rchainInfos) {
             // Get the short and full form rnids for further use.
-            String rchain = rs.getString("RChain");
+            String rchain = rchainInfo.getID();
             logger.fine("\n RChain: " + rchain);
-            String shortRchain = rs.getString("shortRChain");
+            String shortRchain = rchainInfo.getShortID();
             logger.fine(" Short RChain: " + shortRchain);
 
             String countsTableName = generateCountsTable(rchain, shortRchain);
@@ -622,9 +614,6 @@ public class BayesBaseCT_SortMerge {
             // Close statement.
             st3.close();
         }
-
-        rs.close();
-        st.close();
 
         logger.fine("\n Rnodes_counts are DONE \n");
     }
