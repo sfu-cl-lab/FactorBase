@@ -16,6 +16,18 @@ public class FunctorNodesInfo {
 
 
     /**
+     * Create a very basic FunctorNodesInfo that only stores the ID information.
+     *
+     * @param id - the ID associated with the functor node information being stored.
+     * @param shortID - the short version of the ID associated with the functor node information being stored.
+     */
+    public FunctorNodesInfo(String id, String shortID) {
+        this.id = id;
+        this.shortID = shortID;
+    }
+
+
+    /**
      * Create a FunctorNodesInfo to store the functor node information for the given ID.
      *
      * @param id - the ID associated with the functor node information being stored.

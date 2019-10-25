@@ -29,6 +29,7 @@ import java.util.logging.Logger;
 
 import ca.sfu.cs.common.Configuration.Config;
 import ca.sfu.cs.factorbase.lattice.LatticeGenerator;
+import ca.sfu.cs.factorbase.lattice.RelationshipLattice;
 import ca.sfu.cs.factorbase.util.MySQLScriptRunner;
 import ca.sfu.cs.factorbase.util.Sort_merge3;
 
@@ -78,7 +79,7 @@ public class BayesBaseCT_SortMerge {
         );
 
         //generate lattice tree
-        int latticeHeight = LatticeGenerator.generate(
+        RelationshipLattice relationshipLattice = LatticeGenerator.generate(
             con_BN,
             databaseName_std
         );
@@ -100,7 +101,7 @@ public class BayesBaseCT_SortMerge {
         );
 
         // building CT tables for Rchain
-        CTGenerator(latticeHeight);
+        CTGenerator(relationshipLattice);
         disconnectDB();
     }
  
@@ -128,10 +129,12 @@ public class BayesBaseCT_SortMerge {
      *
      *  BuildCT_Rnodes_CT(len);
      *
+     * @param relationshipLattice - the relationship lattice used to determine which contingency tables to generate.
      * @throws SQLException if there are issues executing the SQL queries.
      */
-    private static void CTGenerator(int latticeHeight) throws SQLException {
-        
+    private static void CTGenerator(RelationshipLattice relationshipLattice) throws SQLException {
+        int latticeHeight = relationshipLattice.getHeight();
+
         long l = System.currentTimeMillis(); //@zqian : CT table generating time
            // handling Pvars, generating pvars_counts       
         BuildCT_Pvars();
