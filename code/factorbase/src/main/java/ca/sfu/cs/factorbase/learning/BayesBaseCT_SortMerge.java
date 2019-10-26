@@ -503,24 +503,7 @@ public class BayesBaseCT_SortMerge {
                 "AND " +
                     "ClauseType = 'SELECT' " +
                 "AND " +
-                    "TableType = 'Counts' " +
-                "AND " +
-                    "EntryType = 'aggregate' " +
-
-                "UNION " +
-
-                "SELECT DISTINCT " +
-                    "Entries " +
-                "FROM " +
-                    "MetaQueries " +
-                "WHERE " +
-                    "Lattice_Point = '" + pvid + "' " +
-                "AND " +
-                    "ClauseType = 'SELECT' " +
-                "AND " +
-                    "TableType = 'Counts' " +
-                "AND " +
-                    "EntryType <> 'aggregate';"
+                    "TableType = 'Counts';"
             );
 
             String selectString = makeCommaSepQuery(rs2, "Entries", ", ");
@@ -686,17 +669,7 @@ public class BayesBaseCT_SortMerge {
             "FROM MetaQueries " +
             "WHERE Lattice_Point = '" + rchain + "' " +
             "AND ClauseType = 'SELECT' " +
-            "AND TableType = 'Counts' " +
-            "AND EntryType = 'aggregate' " +
-
-            "UNION " +
-
-            "SELECT DISTINCT Entries " +
-            "FROM MetaQueries " +
-            "WHERE Lattice_Point = '" + rchain + "' " +
-            "AND ClauseType = 'SELECT' " +
-            "AND TableType = 'Counts' " +
-            "AND EntryType <> 'aggregate';"
+            "AND TableType = 'Counts';"
         );
 
         String selectString = makeCommaSepQuery(rs2, "Entries", ", ");
