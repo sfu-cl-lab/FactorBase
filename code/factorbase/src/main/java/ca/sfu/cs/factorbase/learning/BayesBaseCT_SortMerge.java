@@ -177,9 +177,10 @@ public class BayesBaseCT_SortMerge {
             //building the _CT tables. Going up the Rchain lattice
             for(int len = 2; len <= latticeHeight; len++)
             { 
+                rchainInfos = relationshipLattice.getRChainsInfo(len);
                 logger.fine("now we're here for Rchain!");
                 logger.fine("Building Time(ms) for Rchain >=2 \n");
-                BuildCT_RChain_flat(len);
+                BuildCT_RChain_flat(rchainInfos, len);
                 logger.fine(" Rchain! are done");
             }
         }
@@ -253,28 +254,20 @@ public class BayesBaseCT_SortMerge {
 
     /**
      * Building the _CT tables. Going up the Rchain lattice ( When rchain.length >=2)
+     * @param rchainInfos: FunctorNodesInfos for the RChains to build the "_CT" tables for.
      * @param int : length of the RChain
      * @throws SQLException if there are issues executing the SQL queries.
      */
-    private static void BuildCT_RChain_flat(int len) throws SQLException {
+    private static void BuildCT_RChain_flat(List<FunctorNodesInfo> rchainInfos, int len) throws SQLException {
         logger.fine("\n ****************** \n" +
                 "Building the _CT tables for Length = "+len +"\n" );
-
-        Statement st = con_BN.createStatement();
-        ResultSet rs = st.executeQuery(
-            "SELECT short_rnid AS short_RChain, orig_rnid AS RChain " +
-            "FROM lattice_set " +
-            "JOIN lattice_mapping " +
-            "ON lattice_set.name = lattice_mapping.orig_rnid " +
-            "WHERE lattice_set.length = " + len + ";"
-        );
         int fc=0;
-        while(rs.next())
+        for (FunctorNodesInfo rchainInfo : rchainInfos)
         {
             // Get the short and full form rnids for further use.
-            String rchain = rs.getString("RChain");
+            String rchain = rchainInfo.getID();
             logger.fine("\n RChain : " + rchain);
-            String shortRchain = rs.getString("short_RChain");
+            String shortRchain = rchainInfo.getShortID();
             logger.fine(" Short RChain : " + shortRchain);
             // Oct 16 2013
             // initialize the cur_CT_Table, at very beginning we will use _counts table to create the _flat table
@@ -477,8 +470,6 @@ public class BayesBaseCT_SortMerge {
             st1.close();
             rs1.close();
         }
-        rs.close();
-        st.close();
         logger.fine("\n Build CT_RChain_TABLES for length = "+len+" are DONE \n" );
     }
 
