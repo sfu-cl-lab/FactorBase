@@ -158,16 +158,14 @@ public class BayesBaseCT_SortMerge {
         if (linkCorrelation.equals("1")) {
             // handling Rnodes with Lattice Moebius Transform
             //initialize first level of rchain lattice
-            for(int len = 1; len <= 1; len++) {
-                //building the _flat tables
-                BuildCT_Rnodes_flat(len);
+            //building the _flat tables
+            BuildCT_Rnodes_flat(1);
 
-                //building the _star tables
-                BuildCT_Rnodes_star(len);
+            //building the _star tables
+            BuildCT_Rnodes_star(1);
 
-                //building the _false tables first and then the _CT tables
-                BuildCT_Rnodes_CT(len);
-            }
+            //building the _false tables first and then the _CT tables
+            BuildCT_Rnodes_CT(1);
             
             //building the _CT tables. Going up the Rchain lattice
             for(int len = 2; len <= latticeHeight; len++)
