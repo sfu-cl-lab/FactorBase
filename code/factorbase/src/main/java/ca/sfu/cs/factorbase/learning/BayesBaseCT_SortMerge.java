@@ -168,8 +168,8 @@ public class BayesBaseCT_SortMerge {
             // Building the _flat tables.
             BuildCT_Rnodes_flat(rchainInfos);
 
-            //building the _star tables
-            BuildCT_Rnodes_star(1);
+            // Building the _star tables.
+            BuildCT_Rnodes_star(rchainInfos);
 
             //building the _false tables first and then the _CT tables
             BuildCT_Rnodes_CT(1);
@@ -789,22 +789,13 @@ public class BayesBaseCT_SortMerge {
     /**
      * building the _star tables
      */
-    private static void BuildCT_Rnodes_star(int len) throws SQLException {
+    private static void BuildCT_Rnodes_star(List<FunctorNodesInfo> rchainInfos) throws SQLException {
         long l = System.currentTimeMillis(); //@zqian : measure structure learning time
-        Statement st = con_BN.createStatement();
-        ResultSet rs = st.executeQuery(
-            "SELECT short_rnid AS short_RChain, orig_rnid AS RChain " +
-            "FROM lattice_set " +
-            "JOIN lattice_mapping " +
-            "ON lattice_set.name = lattice_mapping.orig_rnid " +
-            "WHERE lattice_set.length = " + len + ";"
-        );
-        while(rs.next()){
-
+        for (FunctorNodesInfo rchainInfo : rchainInfos) {
             // Get the short and full form rnids for further use.
-            String rchain = rs.getString("RChain");
+            String rchain = rchainInfo.getID();
             logger.fine("\n RChain : " + rchain);
-            String shortRchain = rs.getString("short_RChain");
+            String shortRchain = rchainInfo.getShortID();
             logger.fine(" Short RChain : " + shortRchain);
 
             //  create new statement
@@ -852,8 +843,6 @@ public class BayesBaseCT_SortMerge {
             st3.close();
         }
 
-        rs.close();
-        st.close();
         long l2 = System.currentTimeMillis(); //@zqian : measure structure learning time
         logger.fine("Building Time(ms) for Rnodes_star: "+(l2-l)+" ms.\n");
         logger.fine("\n Rnodes_star are DONE \n" );
