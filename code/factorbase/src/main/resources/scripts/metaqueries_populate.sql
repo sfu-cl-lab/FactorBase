@@ -286,10 +286,7 @@ INSERT INTO MetaQueries
     WHERE
         RN.rnid = L.orig_rnid
     AND
-        N.2nid = RN.2nid
-    ORDER BY
-        RN.rnid,
-        COLUMN_NAME;
+        N.2nid = RN.2nid;
 
 
 /**
