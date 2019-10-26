@@ -187,28 +187,10 @@ public class BayesBaseCT_SortMerge {
         
 
         //delete the tuples with MULT=0 in the biggest CT table
-        String BiggestRchain="";
-        Statement st_BN= con_BN.createStatement();
-        ResultSet rs = st_BN.executeQuery(
-            "SELECT LM.short_rnid AS RChain " +
-            "FROM lattice_set LS, lattice_mapping LM " +
-            "WHERE LS.length = (" +
-                "SELECT MAX(length) " +
-                "FROM lattice_set" +
-            ") AND LS.name = LM.orig_rnid;"
-        );
+        String BiggestRchain = relationshipLattice.getLongestRChainShortID();
+        logger.fine("\n BiggestRchain: " + BiggestRchain);
 
-        boolean RChainCreated = false;
-        while(rs.next())
-        {
-            RChainCreated = true;
-            BiggestRchain = rs.getString("RChain");
-            logger.fine("\n BiggestRchain : " + BiggestRchain);
-        }
-        
-        st_BN.close();
-        
-        if ( RChainCreated )
+        if (BiggestRchain != null)
         {
             try (Statement st_CT = con_CT.createStatement()) {
                 String deleteQuery = "DELETE FROM `" + BiggestRchain + "_CT` WHERE MULT = '0';";
