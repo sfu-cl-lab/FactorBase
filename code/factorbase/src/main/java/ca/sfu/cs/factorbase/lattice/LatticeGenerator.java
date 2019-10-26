@@ -34,11 +34,11 @@ public class LatticeGenerator {
      * @param dbConnection - connection to the database to copy the local relationship lattice to from the global
      *                       relationship lattice in the "_setup" database.
      * @param databaseName - name of the input database we are trying to learn the Bayesian Network for.
-     * @return the height of the local relationship lattice.
+     * @return the local relationship lattice.
      * @throws SQLException if an issue occurs when attempting to copy the information.
      * @throws IOException if an issue occurs when attempting to create or read the SQL script.
      */
-    public static int generate(
+    public static RelationshipLattice generate(
         Connection dbConnection,
         String databaseName
     ) throws SQLException, IOException {
@@ -50,14 +50,34 @@ public class LatticeGenerator {
 
         try (
             Statement statement = dbConnection.createStatement();
-            ResultSet result = statement.executeQuery(
-                "SELECT MAX(length) AS latticeHeight " +
-                "FROM lattice_set;"
-            )) {
+            ResultSet results = statement.executeQuery(
+                "SELECT " +
+                    "name, " +
+                    "short_rnid, " +
+                    "length " +
+                "FROM " +
+                    "lattice_set " +
+                "JOIN " +
+                    "lattice_mapping " +
+                "ON " +
+                    "lattice_set.name = lattice_mapping.orig_rnid;"
+            )
+        ) {
+            RelationshipLattice lattice = new RelationshipLattice();
 
-            result.next();
+            while(results.next()) {
+                FunctorNodesInfo rchainInfo = new FunctorNodesInfo(
+                    results.getString("name"),
+                    results.getString("short_rnid")
+                );
 
-            return result.getInt("latticeHeight");
+                lattice.addRChainInfo(
+                    rchainInfo,
+                    results.getInt("length")
+                );
+            }
+
+            return lattice;
         }
     }
 

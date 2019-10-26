@@ -25,10 +25,13 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.logging.Logger;
 
 import ca.sfu.cs.common.Configuration.Config;
+import ca.sfu.cs.factorbase.data.FunctorNodesInfo;
 import ca.sfu.cs.factorbase.lattice.LatticeGenerator;
+import ca.sfu.cs.factorbase.lattice.RelationshipLattice;
 import ca.sfu.cs.factorbase.util.MySQLScriptRunner;
 import ca.sfu.cs.factorbase.util.Sort_merge3;
 
@@ -78,7 +81,7 @@ public class BayesBaseCT_SortMerge {
         );
 
         //generate lattice tree
-        int latticeHeight = LatticeGenerator.generate(
+        RelationshipLattice relationshipLattice = LatticeGenerator.generate(
             con_BN,
             databaseName_std
         );
@@ -100,7 +103,7 @@ public class BayesBaseCT_SortMerge {
         );
 
         // building CT tables for Rchain
-        CTGenerator(latticeHeight);
+        CTGenerator(relationshipLattice);
         disconnectDB();
     }
  
@@ -128,10 +131,12 @@ public class BayesBaseCT_SortMerge {
      *
      *  BuildCT_Rnodes_CT(len);
      *
+     * @param relationshipLattice - the relationship lattice used to determine which contingency tables to generate.
      * @throws SQLException if there are issues executing the SQL queries.
      */
-    private static void CTGenerator(int latticeHeight) throws SQLException {
-        
+    private static void CTGenerator(RelationshipLattice relationshipLattice) throws SQLException {
+        int latticeHeight = relationshipLattice.getHeight();
+
         long l = System.currentTimeMillis(); //@zqian : CT table generating time
            // handling Pvars, generating pvars_counts       
         BuildCT_Pvars();
@@ -143,66 +148,49 @@ public class BayesBaseCT_SortMerge {
         if(linkCorrelation.equals("1")) {
             long l_1 = System.currentTimeMillis(); //@zqian : measure structure learning time
             for(int len = 1; len <= latticeHeight; len++){
-                BuildCT_Rnodes_counts(len);
+                BuildCT_Rnodes_counts(relationshipLattice.getRChainsInfo(len));
             }
             long l2 = System.currentTimeMillis(); //@zqian : measure structure learning time
             logger.fine("Building Time(ms) for Rnodes_counts: "+(l2-l_1)+" ms.\n");
         }
         else {
             for(int len = 1; len <= latticeHeight; len++)
-                BuildCT_Rnodes_counts2(len);
+                BuildCT_Rnodes_counts2(relationshipLattice.getRChainsInfo(len));
             //count2 simply copies the counts to the CT tables
             //copying the code seems very inelegant OS August 22
         }
 
-        if (linkCorrelation.equals("1")) {
+        if (linkCorrelation.equals("1") && relationshipLattice.getHeight() != 0) {
             // handling Rnodes with Lattice Moebius Transform
-            //initialize first level of rchain lattice
-            for(int len = 1; len <= 1; len++) {
-                //building the _flat tables
-                BuildCT_Rnodes_flat(len);
+            // Retrieve the first level of the lattice.
+            List<FunctorNodesInfo> rchainInfos = relationshipLattice.getRChainsInfo(1);
 
-                //building the _star tables
-                BuildCT_Rnodes_star(len);
+            // Building the _flat tables.
+            BuildCT_Rnodes_flat(rchainInfos);
 
-                //building the _false tables first and then the _CT tables
-                BuildCT_Rnodes_CT(len);
-            }
+            // Building the _star tables.
+            BuildCT_Rnodes_star(rchainInfos);
+
+            // Building the _false tables first and then the _CT tables.
+            BuildCT_Rnodes_CT(rchainInfos);
             
             //building the _CT tables. Going up the Rchain lattice
             for(int len = 2; len <= latticeHeight; len++)
             { 
+                rchainInfos = relationshipLattice.getRChainsInfo(len);
                 logger.fine("now we're here for Rchain!");
                 logger.fine("Building Time(ms) for Rchain >=2 \n");
-                BuildCT_RChain_flat(len);
+                BuildCT_RChain_flat(rchainInfos, len);
                 logger.fine(" Rchain! are done");
             }
         }
         
 
         //delete the tuples with MULT=0 in the biggest CT table
-        String BiggestRchain="";
-        Statement st_BN= con_BN.createStatement();
-        ResultSet rs = st_BN.executeQuery(
-            "SELECT LM.short_rnid AS RChain " +
-            "FROM lattice_set LS, lattice_mapping LM " +
-            "WHERE LS.length = (" +
-                "SELECT MAX(length) " +
-                "FROM lattice_set" +
-            ") AND LS.name = LM.orig_rnid;"
-        );
+        String BiggestRchain = relationshipLattice.getLongestRChainShortID();
+        logger.fine("\n BiggestRchain: " + BiggestRchain);
 
-        boolean RChainCreated = false;
-        while(rs.next())
-        {
-            RChainCreated = true;
-            BiggestRchain = rs.getString("RChain");
-            logger.fine("\n BiggestRchain : " + BiggestRchain);
-        }
-        
-        st_BN.close();
-        
-        if ( RChainCreated )
+        if (BiggestRchain != null)
         {
             try (Statement st_CT = con_CT.createStatement()) {
                 String deleteQuery = "DELETE FROM `" + BiggestRchain + "_CT` WHERE MULT = '0';";
@@ -248,28 +236,20 @@ public class BayesBaseCT_SortMerge {
 
     /**
      * Building the _CT tables. Going up the Rchain lattice ( When rchain.length >=2)
+     * @param rchainInfos: FunctorNodesInfos for the RChains to build the "_CT" tables for.
      * @param int : length of the RChain
      * @throws SQLException if there are issues executing the SQL queries.
      */
-    private static void BuildCT_RChain_flat(int len) throws SQLException {
+    private static void BuildCT_RChain_flat(List<FunctorNodesInfo> rchainInfos, int len) throws SQLException {
         logger.fine("\n ****************** \n" +
                 "Building the _CT tables for Length = "+len +"\n" );
-
-        Statement st = con_BN.createStatement();
-        ResultSet rs = st.executeQuery(
-            "SELECT short_rnid AS short_RChain, orig_rnid AS RChain " +
-            "FROM lattice_set " +
-            "JOIN lattice_mapping " +
-            "ON lattice_set.name = lattice_mapping.orig_rnid " +
-            "WHERE lattice_set.length = " + len + ";"
-        );
         int fc=0;
-        while(rs.next())
+        for (FunctorNodesInfo rchainInfo : rchainInfos)
         {
             // Get the short and full form rnids for further use.
-            String rchain = rs.getString("RChain");
+            String rchain = rchainInfo.getID();
             logger.fine("\n RChain : " + rchain);
-            String shortRchain = rs.getString("short_RChain");
+            String shortRchain = rchainInfo.getShortID();
             logger.fine(" Short RChain : " + shortRchain);
             // Oct 16 2013
             // initialize the cur_CT_Table, at very beginning we will use _counts table to create the _flat table
@@ -472,8 +452,6 @@ public class BayesBaseCT_SortMerge {
             st1.close();
             rs1.close();
         }
-        rs.close();
-        st.close();
         logger.fine("\n Build CT_RChain_TABLES for length = "+len+" are DONE \n" );
     }
 
@@ -582,27 +560,16 @@ public class BayesBaseCT_SortMerge {
      * building the RNodes_counts tables
      *
      */
-    private static void BuildCT_Rnodes_counts(int len) throws SQLException {
-        Statement st = con_BN.createStatement();
-        ResultSet rs = st.executeQuery(
-            "SELECT short_rnid AS shortRChain, orig_rnid AS RChain " +
-            "FROM lattice_set " +
-            "JOIN lattice_mapping " +
-            "ON lattice_set.name = lattice_mapping.orig_rnid " +
-            "WHERE lattice_set.length = " + len + ";"
-        );
-        while(rs.next()) {
+    private static void BuildCT_Rnodes_counts(List<FunctorNodesInfo> rchainInfos) throws SQLException {
+        for (FunctorNodesInfo rchainInfo : rchainInfos) {
             // Get the short and full form rnids for further use.
-            String rchain = rs.getString("RChain");
+            String rchain = rchainInfo.getID();
             logger.fine("\n RChain: " + rchain);
-            String shortRchain = rs.getString("shortRChain");
+            String shortRchain = rchainInfo.getShortID();
             logger.fine(" Short RChain: " + shortRchain);
 
             generateCountsTable(rchain, shortRchain);
         }
-
-        rs.close();
-        st.close();
 
         logger.fine("\n Rnodes_counts are DONE \n");
     }
@@ -611,20 +578,12 @@ public class BayesBaseCT_SortMerge {
     /**
      * building the RNodes_counts tables,count2 simply copies the counts to the CT tables
      */
-    private static void BuildCT_Rnodes_counts2(int len) throws SQLException {
-        Statement st = con_BN.createStatement();
-        ResultSet rs = st.executeQuery(
-            "SELECT short_rnid AS shortRChain, orig_rnid AS RChain " +
-            "FROM lattice_set " +
-            "JOIN lattice_mapping " +
-            "ON lattice_set.name = lattice_mapping.orig_rnid " +
-            "WHERE lattice_set.length = " + len + ";"
-        );
-        while(rs.next()) {
+    private static void BuildCT_Rnodes_counts2(List<FunctorNodesInfo> rchainInfos) throws SQLException {
+        for (FunctorNodesInfo rchainInfo : rchainInfos) {
             // Get the short and full form rnids for further use.
-            String rchain = rs.getString("RChain");
+            String rchain = rchainInfo.getID();
             logger.fine("\n RChain: " + rchain);
-            String shortRchain = rs.getString("shortRChain");
+            String shortRchain = rchainInfo.getShortID();
             logger.fine(" Short RChain: " + shortRchain);
 
             String countsTableName = generateCountsTable(rchain, shortRchain);
@@ -642,9 +601,6 @@ public class BayesBaseCT_SortMerge {
             // Close statement.
             st3.close();
         }
-
-        rs.close();
-        st.close();
 
         logger.fine("\n Rnodes_counts are DONE \n");
     }
@@ -749,22 +705,13 @@ public class BayesBaseCT_SortMerge {
     /**
      * building the _flat tables
      */
-    private static void BuildCT_Rnodes_flat(int len) throws SQLException {
+    private static void BuildCT_Rnodes_flat(List<FunctorNodesInfo> rchainInfos) throws SQLException {
         long l = System.currentTimeMillis(); //@zqian : measure structure learning time
-        Statement st = con_BN.createStatement();
-        ResultSet rs = st.executeQuery(
-            "SELECT short_rnid AS short_RChain, orig_rnid AS RChain " +
-            "FROM lattice_set " +
-            "JOIN lattice_mapping " +
-            "ON lattice_set.name = lattice_mapping.orig_rnid " +
-            "WHERE lattice_set.length = " + len + ";"
-        );
-        while(rs.next()){
-
+        for (FunctorNodesInfo rchainInfo : rchainInfos) {
             // Get the short and full form rnids for further use.
-            String rchain = rs.getString("RChain");
+            String rchain = rchainInfo.getID();
             logger.fine("\n RChain : " + rchain);
-            String shortRchain = rs.getString("short_RChain");
+            String shortRchain = rchainInfo.getShortID();
             logger.fine(" Short RChain : " + shortRchain);
 
             //  create new statement
@@ -807,11 +754,8 @@ public class BayesBaseCT_SortMerge {
             //  close statements
             st2.close();
             st3.close();
-
         }
 
-        rs.close();
-        st.close();
         long l2 = System.currentTimeMillis(); //@zqian : measure structure learning time
         logger.fine("Building Time(ms) for Rnodes_flat: "+(l2-l)+" ms.\n");
         logger.fine("\n Rnodes_flat are DONE \n" );
@@ -820,22 +764,13 @@ public class BayesBaseCT_SortMerge {
     /**
      * building the _star tables
      */
-    private static void BuildCT_Rnodes_star(int len) throws SQLException {
+    private static void BuildCT_Rnodes_star(List<FunctorNodesInfo> rchainInfos) throws SQLException {
         long l = System.currentTimeMillis(); //@zqian : measure structure learning time
-        Statement st = con_BN.createStatement();
-        ResultSet rs = st.executeQuery(
-            "SELECT short_rnid AS short_RChain, orig_rnid AS RChain " +
-            "FROM lattice_set " +
-            "JOIN lattice_mapping " +
-            "ON lattice_set.name = lattice_mapping.orig_rnid " +
-            "WHERE lattice_set.length = " + len + ";"
-        );
-        while(rs.next()){
-
+        for (FunctorNodesInfo rchainInfo : rchainInfos) {
             // Get the short and full form rnids for further use.
-            String rchain = rs.getString("RChain");
+            String rchain = rchainInfo.getID();
             logger.fine("\n RChain : " + rchain);
-            String shortRchain = rs.getString("short_RChain");
+            String shortRchain = rchainInfo.getShortID();
             logger.fine(" Short RChain : " + shortRchain);
 
             //  create new statement
@@ -883,8 +818,6 @@ public class BayesBaseCT_SortMerge {
             st3.close();
         }
 
-        rs.close();
-        st.close();
         long l2 = System.currentTimeMillis(); //@zqian : measure structure learning time
         logger.fine("Building Time(ms) for Rnodes_star: "+(l2-l)+" ms.\n");
         logger.fine("\n Rnodes_star are DONE \n" );
@@ -893,22 +826,13 @@ public class BayesBaseCT_SortMerge {
     /**
      * building the _false tables first and then the _CT tables
      */
-    private static void BuildCT_Rnodes_CT(int len) throws SQLException {
+    private static void BuildCT_Rnodes_CT(List<FunctorNodesInfo> rchainInfos) throws SQLException {
         long l = System.currentTimeMillis(); //@zqian : measure structure learning time
-        Statement st = con_BN.createStatement();
-        ResultSet rs = st.executeQuery(
-            "SELECT short_rnid AS short_RChain, orig_rnid AS RChain " +
-            "FROM lattice_set " +
-            "JOIN lattice_mapping " +
-            "ON lattice_set.name = lattice_mapping.orig_rnid " +
-            "WHERE lattice_set.length = " + len + ";"
-        );
-
-        while(rs.next()) {
+        for (FunctorNodesInfo rchainInfo : rchainInfos) {
             // Get the short and full form rnids for further use.
-            String rchain = rs.getString("RChain");
+            String rchain = rchainInfo.getID();
             logger.fine("\n RChain : " + rchain);
-            String shortRchain = rs.getString("short_RChain");
+            String shortRchain = rchainInfo.getShortID();
             logger.fine(" Short RChain : " + shortRchain);
 
             //  create new statement
@@ -975,8 +899,6 @@ public class BayesBaseCT_SortMerge {
             st3.close();
         }
 
-        rs.close();
-        st.close();
         long l2 = System.currentTimeMillis(); //@zqian : measure structure learning time
         logger.fine("Building Time(ms) for Rnodes_false and Rnodes_CT: "+(l2-l)+" ms.\n");
         logger.fine("\n Rnodes_false and Rnodes_CT  are DONE \n" );
