@@ -46,7 +46,6 @@ WHERE
 /* WISHLIST: write trigger that warns when something is inserted here.
 Row-based as proposed by Tim */
 
-/*CREATE OR REPLACE VIEW NumEntityColumns AS */
 CREATE table NumEntityColumns AS
     SELECT 
         TABLE_NAME, COUNT(DISTINCT COLUMN_NAME) num
@@ -319,7 +318,6 @@ ALTER TABLE ForeignKeys_pvars ADD PRIMARY KEY (TABLE_NAME,pvid,ARGUMENT_POSITION
 this view is just a temporary table for creating the relationship nodes. We could drop it after use. 
 Materializing it speeds up processing. */
 
-/*CREATE OR REPLACE VIEW RNodes_MM_NotSelf AS*/
 CREATE table RNodes_MM_NotSelf AS
     SELECT 
         CONCAT(
@@ -351,7 +349,6 @@ CREATE table RNodes_MM_NotSelf AS
 /* second case: many-many relationship, and self-relationship. One difference is that we have a main variable if and only if the first argument is a main population variable, and the second is the second variable. Also, we consider only
 functor nodes whose first argument has a lower index than the second. */
 
-/*CREATE OR REPLACE VIEW RNodes_MM_Self AS*/
 CREATE table RNodes_MM_Self AS
     SELECT 
         CONCAT(
@@ -383,9 +380,7 @@ CREATE table RNodes_MM_Self AS
 
 /* third case: many-one, not a self-relationship. Now we need to include the primary key as an argument. 
 Also, we switch to functional notation for legibility. */
-/*CREATE OR REPLACE VIEW RNodes_MO_NotSelf AS*/
 /* OS August 15. Why does this refer to Referenced_Table_Name, n ot Table_Name? */
-
 CREATE table RNodes_MO_NotSelf AS
     SELECT 
         CONCAT(
@@ -416,7 +411,6 @@ CREATE table RNodes_MO_NotSelf AS
 
 /*fourth case: many-one, self-relationship */
 
-/*CREATE OR REPLACE VIEW RNodes_MO_Self AS*/
 CREATE table RNodes_MO_Self AS
     SELECT 
         CONCAT(
@@ -616,11 +610,21 @@ CREATE TABLE TargetNode (
 /*********************************************************************/
 
 /** now link each rnode 2node, i.e. each attribute of the relationship to the associated 2nodes **/
-create or replace view RNodes_2Nodes as select RNodes.rnid, 2Nodes.2nid, 2Nodes.main from 2Nodes, RNodes where 2Nodes.TABLE_NAME = RNodes.TABLE_NAME; 
+CREATE TABLE RNodes_2Nodes AS
+    SELECT
+        RNodes.rnid,
+        2Nodes.2nid,
+        2Nodes.main
+    FROM
+        2Nodes,
+        RNodes
+    WHERE
+        2Nodes.TABLE_NAME = RNodes.TABLE_NAME;
+
 
 /*** for each functor node, record which population variables appear in it ***/
 
-create or replace VIEW FNodes_pvars as 
+CREATE TABLE FNodes_pvars AS
 SELECT FNodes.Fid, PVariables.pvid FROM
     FNodes,
     2Nodes,
@@ -669,14 +673,17 @@ FROM
 WHERE
     pvid2 = pvid;
     
-    
-    
-    
+
+
+ALTER TABLE FNodes_pvars
+    ADD INDEX (Fid);
+
+
  /*** for each relationship node, record which population variables appear in it. 
 Plus metadata about those variable, e.g. the name of the id column associated with them.  (August 17, 2017) This seems inelegant.
 */
 
-CREATE or replace VIEW RNodes_pvars AS
+CREATE TABLE RNodes_pvars AS
 SELECT DISTINCT rnid,
     pvid,
     PVariables.TABLE_NAME,

@@ -79,7 +79,7 @@ INSERT INTO MetaQueries
         CONCAT(E.pvid, '.', P.ID_COLUMN_NAME, ' AS `ID(', E.pvid, ')`') AS Entries
     FROM
         PVariables P,
-        Expansions E
+        @database@_setup.Expansions E
     WHERE
         E.pvid = P.pvid;
 
@@ -114,7 +114,7 @@ INSERT INTO MetaQueries
         CONCAT('`ID(', E.pvid, ')`') AS Entries
     FROM
         PVariables P,
-        Expansions E
+        @database@_setup.Expansions E
     WHERE
         E.pvid = P.pvid;
 
@@ -129,7 +129,7 @@ INSERT INTO MetaQueries
         'id' AS EntryType,
         CONCAT('`ID(', G.pvid, ')` = ', G.id) AS Entries
     FROM
-        Groundings G;
+        @database@_setup.Groundings G;
 
 
 /* Now we make data join tables for each relationship functor node. */

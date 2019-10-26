@@ -63,16 +63,6 @@ CREATE TABLE FNodes (
 );
 
 
-CREATE TABLE FNodes_pvars AS
-    SELECT
-        N.Fid,
-        N.pvid
-    FROM
-        @database@_setup.FNodes_pvars N
-    LIMIT
-        0;
-
-
 CREATE TABLE RNodes_pvars AS
     SELECT
         N.rnid,
@@ -94,24 +84,6 @@ CREATE TABLE PVariables AS
         N.index_number
     FROM
         @database@_setup.PVariables N
-    LIMIT
-        0;
-
-
-CREATE TABLE Expansions AS
-    SELECT
-        *
-    FROM
-        @database@_setup.Expansions
-    LIMIT
-        0;
-
-
-CREATE TABLE Groundings AS
-    SELECT
-        *
-    FROM
-        @database@_setup.Groundings
     LIMIT
         0;
 

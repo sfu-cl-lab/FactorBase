@@ -114,19 +114,6 @@ INSERT INTO FNodes
         RNodes;
 
 
-/* Transfer links to pvariables.  Restrict only to functor nodes in the functor set, now known as FNodes. */
-TRUNCATE FNodes_pvars;
-INSERT INTO FNodes_pvars
-    SELECT
-        N.Fid,
-        N.pvid
-    FROM
-        @database@_setup.FNodes_pvars N,
-        FNodes F
-    WHERE
-        N.Fid = F.Fid;
-
-
 TRUNCATE RNodes_pvars;
 INSERT INTO RNodes_pvars
     SELECT
@@ -146,34 +133,18 @@ INSERT INTO RNodes_pvars
 TRUNCATE PVariables;
 INSERT INTO PVariables
     SELECT DISTINCT
-        N.pvid,
-        N.ID_COLUMN_NAME,
-        N.TABLE_NAME,
-        N.index_number
+        P.pvid,
+        P.ID_COLUMN_NAME,
+        P.TABLE_NAME,
+        P.index_number
     FROM
-        @database@_setup.PVariables N,
-        FNodes_pvars F
+        @database@_setup.PVariables P,
+        @database@_setup.FNodes_pvars FP,
+        FNodes F
     WHERE
-        F.pvid = N.pvid;
-
-
-/**
- * Transfer the rest.
- */
-TRUNCATE Expansions;
-INSERT INTO Expansions
-    SELECT
-        *
-    FROM
-        @database@_setup.Expansions;
-
-
-TRUNCATE Groundings;
-INSERT INTO Groundings
-    SELECT
-        *
-    FROM
-        @database@_setup.Groundings;
+        P.pvid = FP.pvid
+    AND
+        FP.Fid = F.Fid;
 
 
 /**
