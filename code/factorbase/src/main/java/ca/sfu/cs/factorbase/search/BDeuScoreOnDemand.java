@@ -2,10 +2,7 @@ package ca.sfu.cs.factorbase.search;
 
 import java.math.BigDecimal;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.Objects;
 import java.util.Set;
 
 import ca.sfu.cs.factorbase.data.ContingencyTable;
@@ -26,7 +23,6 @@ public class BDeuScoreOnDemand implements DiscreteLocalScore {
     private FunctorNodesInfo functorInfos;
     private double samplePrior;
     private double structurePrior;
-    private Map<Integer, Double> cache = new HashMap<Integer, Double>();
 
 
     /**
@@ -52,12 +48,6 @@ public class BDeuScoreOnDemand implements DiscreteLocalScore {
 
     @Override
     public double localScore(String child, Set<String> parents) throws ScoringException {
-        int cacheKey = Objects.hash(child, parents);
-
-        if (this.cache.containsKey(cacheKey)) {
-            return this.cache.get(cacheKey);
-        }
-
         // Number of child states.
         int r = this.functorInfos.getNumberOfStates(child);
 
@@ -89,8 +79,6 @@ public class BDeuScoreOnDemand implements DiscreteLocalScore {
 
             score = score.add(new BigDecimal(q * ProbUtils.lngamma(this.samplePrior / q)));
             score = score.subtract(new BigDecimal((r * q) * ProbUtils.lngamma(this.samplePrior / (r * q))));
-
-            this.cache.put(cacheKey, score.doubleValue());
 
             return score.doubleValue();
         } catch (DataBaseException e) {
