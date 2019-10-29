@@ -122,11 +122,6 @@ public class MySQLFactorBaseDataBase implements FactorBaseDataBase {
             );
             MySQLScriptRunner.runScript(
                 this.dbConnection,
-                Config.SCRIPTS_DIRECTORY + "transfer_initialize.sql",
-                this.baseDatabaseName
-            );
-            MySQLScriptRunner.runScript(
-                this.dbConnection,
                 Config.SCRIPTS_DIRECTORY + "transfer_cascade.sql",
                 this.baseDatabaseName,
                 "//"

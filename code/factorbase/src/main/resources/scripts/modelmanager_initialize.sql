@@ -10,7 +10,7 @@ CREATE TABLE RNodes_BN_Nodes AS
         2nid AS Fid,
         main
     FROM
-        RNodes_2Nodes
+        @database@_setup.RNodes_2Nodes
     LIMIT
         0;
 
@@ -88,7 +88,7 @@ CREATE TABLE Path_Aux_Edges AS
     FROM
         Path_BN_nodes AS BN_nodes1,
         Path_BN_nodes AS BN_nodes2,
-        FNodes
+        @database@_setup.FNodes
     LIMIT
         0;
 
@@ -105,8 +105,8 @@ CREATE TABLE SchemaEdges AS
         2Nodes.2nid AS child,
         RNodes.rnid AS parent
     FROM
-        RNodes,
-        2Nodes,
+        @database@_setup.RNodes,
+        @database@_setup.2Nodes,
         lattice_membership
     LIMIT
         0;

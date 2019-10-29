@@ -3,8 +3,8 @@
 CREATE PROCEDURE cascadeFS()
 BEGIN
 
-TRUNCATE 1Nodes;
-INSERT INTO 1Nodes
+DROP TABLE IF EXISTS 1Nodes;
+CREATE TABLE 1Nodes AS
     SELECT
         N.1nid,
         N.COLUMN_NAME,
@@ -17,8 +17,8 @@ INSERT INTO 1Nodes
         N.1nid = F.fid;
 
 
-TRUNCATE 2Nodes;
-INSERT INTO 2Nodes
+DROP TABLE IF EXISTS 2Nodes;
+CREATE TABLE 2Nodes AS
     SELECT
         N.2nid,
         N.COLUMN_NAME,
@@ -34,8 +34,8 @@ INSERT INTO 2Nodes
 
 
 /* Map the 2nodes to rnodes for the given 2Nodes in the functor set. */
-TRUNCATE RNodes_2Nodes;
-INSERT INTO RNodes_2Nodes
+DROP TABLE IF EXISTS RNodes_2Nodes;
+CREATE TABLE RNodes_2Nodes AS
     SELECT
         N.rnid,
         N.2nid,
@@ -48,8 +48,8 @@ INSERT INTO RNodes_2Nodes
 
 
 /* Copy the rnodes for the functor set. */
-TRUNCATE RNodes;
-INSERT INTO RNodes
+DROP TABLE IF EXISTS RNodes;
+CREATE TABLE RNodes AS
     SELECT
         N.rnid,
         N.TABLE_NAME,
@@ -83,8 +83,8 @@ INSERT INTO RNodes
 
 
 /* Make comprehensive table for all functor nodes but restricted to the functor set. */
-TRUNCATE FNodes;
-INSERT INTO FNodes
+DROP TABLE IF EXISTS FNodes;
+CREATE TABLE FNodes AS
     SELECT
         1nid AS Fid,
         COLUMN_NAME AS FunctorName,
@@ -114,8 +114,8 @@ INSERT INTO FNodes
         RNodes;
 
 
-TRUNCATE RNodes_pvars;
-INSERT INTO RNodes_pvars
+DROP TABLE IF EXISTS RNodes_pvars;
+CREATE TABLE RNodes_pvars AS
     SELECT
         N.rnid,
         N.pvid,
@@ -130,8 +130,8 @@ INSERT INTO RNodes_pvars
 
 
 /* Transfer pvariables.  Only those that occur in the functor set. */
-TRUNCATE PVariables;
-INSERT INTO PVariables
+DROP TABLE IF EXISTS PVariables;
+CREATE TABLE PVariables AS
     SELECT DISTINCT
         P.pvid,
         P.ID_COLUMN_NAME,
@@ -151,8 +151,8 @@ INSERT INTO PVariables
  * Prepare lattice generator by copying information from LatticeRNodes in the "_setup" database, restricted to the
  * FunctorSet.
  */
-TRUNCATE LatticeRNodes;
-INSERT INTO LatticeRNodes
+DROP TABLE IF EXISTS LatticeRNodes;
+CREATE TABLE LatticeRNodes AS
     SELECT
         LR.orig_rnid,
         LR.short_rnid
@@ -161,5 +161,9 @@ INSERT INTO LatticeRNodes
         RNodes R
     WHERE
         LR.orig_rnid = R.rnid;
+
+
+ALTER TABLE LatticeRNodes
+    ADD UNIQUE INDEX rnid_UNIQUE (short_rnid ASC);
 
 END//
