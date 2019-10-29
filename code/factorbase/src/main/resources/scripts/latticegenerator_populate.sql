@@ -5,8 +5,8 @@
 CREATE PROCEDURE populateLattice()
 BEGIN
 
-TRUNCATE lattice_membership;
-INSERT INTO lattice_membership
+DROP TABLE IF EXISTS lattice_membership;
+CREATE TABLE lattice_membership AS
     -- Get the "name"s and "member"s where the "name"s are unique to the local lattice.
     SELECT
         name,
@@ -36,8 +36,8 @@ INSERT INTO lattice_membership
     );
 
 
-TRUNCATE lattice_rel;
-INSERT INTO lattice_rel
+DROP TABLE IF EXISTS lattice_rel;
+CREATE TABLE lattice_rel AS
     SELECT
         parent,
         child,
@@ -49,8 +49,8 @@ INSERT INTO lattice_rel
         LREL.removed = LR.orig_rnid;
 
 
-TRUNCATE lattice_set;
-INSERT IGNORE INTO lattice_set
+DROP TABLE IF EXISTS lattice_set;
+CREATE TABLE lattice_set AS
     SELECT
         LS.name,
         length
@@ -61,11 +61,13 @@ INSERT IGNORE INTO lattice_set
     WHERE
         LMEM.member = LR.orig_rnid
     AND
-        LS.name = LMEM.name;
+        LS.name = LMEM.name
+    GROUP BY
+        LS.name;
 
 
-TRUNCATE lattice_mapping;
-INSERT IGNORE INTO lattice_mapping
+DROP TABLE IF EXISTS lattice_mapping;
+CREATE TABLE lattice_mapping AS
     SELECT
         LMAP.orig_rnid,
         LMAP.short_rnid
@@ -76,6 +78,8 @@ INSERT IGNORE INTO lattice_mapping
     WHERE
         LMEM.member = LR.orig_rnid
     AND
-        LMAP.orig_rnid = LMEM.name;
+        LMAP.orig_rnid = LMEM.name
+    GROUP BY
+       LMAP.orig_rnid;
 
 END//

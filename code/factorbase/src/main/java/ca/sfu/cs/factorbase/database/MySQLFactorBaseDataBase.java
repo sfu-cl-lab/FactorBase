@@ -108,12 +108,6 @@ public class MySQLFactorBaseDataBase implements FactorBaseDataBase {
             // Switch to start using the BN database.
             this.dbConnection.setCatalog(this.dbInfo.getBNDatabaseName());
 
-            // Initialize tables for the local relationship lattice.
-            MySQLScriptRunner.runScript(
-                this.dbConnection,
-                Config.SCRIPTS_DIRECTORY + "latticegenerator_initialize.sql",
-                this.baseDatabaseName
-            );
             MySQLScriptRunner.runScript(
                 this.dbConnection,
                 Config.SCRIPTS_DIRECTORY + "latticegenerator_populate.sql",

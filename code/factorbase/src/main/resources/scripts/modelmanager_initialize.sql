@@ -65,7 +65,7 @@ CREATE TABLE Path_BN_nodes AS
         lattice_membership.name AS Rchain,
         Fid AS node
     FROM
-        lattice_membership,
+        @database@_setup.lattice_membership,
         RNodes_BN_Nodes
     LIMIT
         0;
@@ -107,7 +107,7 @@ CREATE TABLE SchemaEdges AS
     FROM
         @database@_setup.RNodes,
         @database@_setup.2Nodes,
-        lattice_membership
+        @database@_setup.lattice_membership
     LIMIT
         0;
 
