@@ -964,12 +964,15 @@ public class GesCT {
         Graph dag = SearchGraphUtils.dagFromPattern(graph);
         double score = 0.;
 
-        for (Node y : dag.getNodes()) {
-            Set<Node> parents = new HashSet<Node>(dag.getParents(y));
+        for (Node child : dag.getNodes()) {
+            Set<Node> parents = new HashSet<Node>(dag.getParents(child));
             Set<String> parentNames = parents.stream().map(node -> node.getName()).collect(Collectors.toSet());
+            String childName = child.getName();
 
             if (this.isDiscrete()) {
-                score += localDiscreteScore(y.getName(), parentNames);
+                double cachedScore = localDiscreteScore(childName, parentNames);
+                scoreHash.get(child).put(parents, cachedScore);
+                score += cachedScore;
             } else {
                 throw new UnsupportedOperationException("Not Implemented Yet!");
             }
@@ -986,7 +989,8 @@ public class GesCT {
     }
 
     private Double computeScore(Node child, Set<Node> parents) throws ScoringException {
-        Double score = scoreHash.get(child).get(parents);
+        Map<Set<Node>, Double> childScoreHash = scoreHash.get(child);
+        Double score = childScoreHash.get(parents);
 
         if (score == null) {
             Set<String> parentNames = parents.stream().map(node -> node.getName()).collect(Collectors.toSet());
@@ -997,7 +1001,7 @@ public class GesCT {
                 throw new UnsupportedOperationException("Not Implemented Yet!");
             }
 
-            scoreHash.get(child).put(parents, score);
+            childScoreHash.put(parents, score);
         }
 
         return score;
