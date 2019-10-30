@@ -5,12 +5,12 @@ SET storage_engine=INNODB;
  */
 
 CREATE TABLE RNodes_BN_Nodes AS
-    SELECT DISTINCT
+    SELECT
         rnid,
         2nid AS Fid,
         main
     FROM
-        RNodes_2Nodes
+        @database@_setup.RNodes_2Nodes
     LIMIT
         0;
 
@@ -61,11 +61,11 @@ CREATE TABLE NewLearnedEdges LIKE Path_BayesNets;
 
 
 CREATE TABLE Path_BN_nodes AS
-    SELECT DISTINCT
+    SELECT
         lattice_membership.name AS Rchain,
         Fid AS node
     FROM
-        lattice_membership,
+        @database@_setup.lattice_membership,
         RNodes_BN_Nodes
     LIMIT
         0;
@@ -88,7 +88,7 @@ CREATE TABLE Path_Aux_Edges AS
     FROM
         Path_BN_nodes AS BN_nodes1,
         Path_BN_nodes AS BN_nodes2,
-        FNodes
+        @database@_setup.FNodes
     LIMIT
         0;
 
@@ -100,14 +100,14 @@ CREATE TABLE Path_Aux_Edges AS
 
 
 CREATE TABLE SchemaEdges AS
-    SELECT DISTINCT
+    SELECT
         lattice_membership.name AS Rchain,
         2Nodes.2nid AS child,
         RNodes.rnid AS parent
     FROM
-        RNodes,
-        2Nodes,
-        lattice_membership
+        @database@_setup.RNodes,
+        @database@_setup.2Nodes,
+        @database@_setup.lattice_membership
     LIMIT
         0;
 
@@ -133,7 +133,7 @@ CREATE VIEW Entity_BN_nodes AS
 
 
 CREATE TABLE Entity_Complement_Edges AS
-    SELECT DISTINCT
+    SELECT
         BN_nodes1.pvid AS pvid,
         BN_nodes1.node AS child,
         BN_nodes2.node AS parent
