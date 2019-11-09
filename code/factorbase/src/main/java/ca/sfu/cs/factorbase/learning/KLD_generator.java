@@ -236,11 +236,9 @@ public class KLD_generator {
         }
 
         ArrayList<String> indexlist2 = new ArrayList<String>(indexlist1);
-        // Delete MULT, FID.
+        // Delete MULT and child.
         indexlist2.remove(0);
-        if (indexlist2.get(0).equalsIgnoreCase("FID")) {
-            indexlist2.remove(0);
-        }
+        indexlist2.remove(0);
 
         // Create clauses to add those indexes.
         // index1: MULT, current node and its parents.
