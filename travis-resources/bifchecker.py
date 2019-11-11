@@ -10,6 +10,45 @@ GOOD = 0
 ERROR = 1
 
 
+def extractNamespaceMapping(rootElement, key):
+    """
+    Generate a mapping between the provided key and the namespace in the given BIF element.
+
+    Args:
+        rootElement (Element): The Element for the BIF tag.
+        key (str): The key to associate with the namespace in the given BIF element.
+
+    Returns:
+       dict: Dictionary containing the key:value pair key:namespace.
+
+    """
+    nameSpace, _rightBrace, _bifTagName = rootElement.tag[1:].partition('}')
+    return {
+        key: nameSpace
+    }
+
+
+def extractGraphname(file):
+    """
+    Retrieve the name of the graph in the given BIF file.
+
+    Args:
+        file (str): Path to the BIF file to retrieve the name of the graph from.
+
+    Returns:
+        str: The name of the graph in the given BIF file.
+
+    """
+    # Extract the namespace information from the BIF file.
+    bifElement = ElementTree.parse(file).getroot()
+    mapping = extractNamespaceMapping(bifElement, 'bifns')
+
+    # Extract the 'NETWORK' tag element.
+    networkElement = bifElement.find('bifns:NETWORK', mapping)
+
+    return networkElement.find('bifns:NAME', mapping).text
+
+
 def extractStructureInformation(file):
     """
     Extract the node and edge information in the given BIF file.
@@ -24,10 +63,7 @@ def extractStructureInformation(file):
     """
     # Extract the namespace information from the BIF file.
     bifElement = ElementTree.parse(file).getroot()
-    nameSpace, _rightBrace, _bifTagName = bifElement.tag[1:].partition('}')
-    mapping = {
-        'bifns': nameSpace
-    }
+    mapping = extractNamespaceMapping(bifElement, 'bifns')
 
     nodeValues = defaultdict(list)
     nodeParents = defaultdict(list)
@@ -50,10 +86,45 @@ def extractStructureInformation(file):
         childName = definitionElement.find('bifns:FOR', mapping).text
 
         # Extract the parents for the node.
-        for givenElement in definitionElement.findall('bifns:GIVEN', mapping):
-            nodeParents[childName].append(givenElement.text)
+        givenElements = definitionElement.findall('bifns:GIVEN', mapping)
+        if not givenElements:
+            # If there are no parents, add an empty list.
+            nodeParents[childName] = []
+        else:
+            # Add all the parents for the given child.
+            for givenElement in givenElements:
+                nodeParents[childName].append(givenElement.text)
 
     return nodeValues, nodeParents
+
+
+def countEdges(adjacencyList):
+    """
+    Generate basic statistics for the given edges.
+
+    Args:
+        adjacencyList (dict): Dictionary containing key:value pairs nodeID:parentNodeIDs.
+
+    Returns:
+        int: The total number of edges.
+        int: The smallest in-degree value.
+        int: The largest in-degree value.
+        int: The average in-degree value.
+
+    """
+    maxInDegree = 0
+    minInDegree = float('inf')
+
+    totalNumberOfEdges = 0
+    for parentGroup in adjacencyList.values():
+        numberOfEdges = len(parentGroup)
+        totalNumberOfEdges += numberOfEdges
+        maxInDegree = max(maxInDegree, numberOfEdges)
+        minInDegree = min(minInDegree, numberOfEdges)
+
+    averageInDegree = totalNumberOfEdges / len(adjacencyList)
+
+    return totalNumberOfEdges, minInDegree, maxInDegree, averageInDegree
 
 
 def compareNodes(nodeValues1, nodeValues2):
@@ -123,6 +194,31 @@ def compareFiles(file1, file2):
     return returnCode
 
 
+def displayGraphInformation(file):
+    """
+    Print out metadata for the structure of the given BIF file.
+
+    Args:
+        file (str): Path to the BIF file to display metadata for.
+
+    Returns:
+        None
+
+    """
+    # Extract the information from the graph.
+    graphName = extractGraphname(file)
+    nodes, adjacencyList = extractStructureInformation(file)
+    totalEdges, minInDegree, maxInDegree, averageInDegree = countEdges(adjacencyList)
+
+    # Print the graph information.
+    print("Graph: {}\n".format(graphName))
+    print("Total Number of Nodes: {}".format(len(nodes)))
+    print("Total Number of Edges: {}".format(totalEdges))
+    print("Max Number of Parents: {}".format(maxInDegree))
+    print("Min Number of Parents: {}".format(minInDegree))
+    print("Avg Number of Parents: {}".format(averageInDegree))
+
+
 def parseCommandLineArguments():
     """
     Parse the parameters from the commandline.
@@ -134,6 +230,12 @@ def parseCommandLineArguments():
     )
 
     mutually_exclusive_group = argument_parser.add_mutually_exclusive_group()
+    mutually_exclusive_group.add_argument(
+        '-a',
+        '--analyze',
+        metavar='BIF',
+        help="Display metadata for the specified BIF file."
+    )
     mutually_exclusive_group.add_argument(
         '-c',
         '--compare',
@@ -154,10 +256,12 @@ def parseCommandLineArguments():
 def main():
     arguments = parseCommandLineArguments()
 
+    returnCode = GOOD
+
     if arguments.compare:
         returnCode = compareFiles(arguments.compare[0], arguments.compare[1])
-    else:
-        returnCode = GOOD
+    elif arguments.analyze:
+        displayGraphInformation(arguments.analyze)
 
     exit(returnCode)
 
