@@ -1,7 +1,6 @@
 
 package ca.sfu.cs.factorbase.lattice;
 
-import java.io.IOException;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -36,12 +35,11 @@ public class LatticeGenerator {
      * @param databaseName - name of the input database we are trying to learn the Bayesian Network for.
      * @return the local relationship lattice.
      * @throws SQLException if an issue occurs when attempting to copy the information.
-     * @throws IOException if an issue occurs when attempting to create or read the SQL script.
      */
     public static RelationshipLattice generate(
         Connection dbConnection,
         String databaseName
-    ) throws SQLException, IOException {
+    ) throws SQLException {
         // Transfer all the local relationship lattice information from the global relationship lattice.
         MySQLScriptRunner.callSP(
             dbConnection,
