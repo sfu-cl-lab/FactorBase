@@ -40,7 +40,6 @@ import com.mysql.jdbc.exceptions.jdbc4.MySQLSyntaxErrorException;
 
 public class CountsManager {
 
-    private static Connection con_std;
     private static Connection con_BN;
     private static Connection con_CT;
     private static String databaseName_std;
@@ -72,7 +71,6 @@ public class CountsManager {
      */
     public static void buildCT() throws SQLException, IOException {
         //connect to db using jdbc
-        con_std = connectDB(databaseName_std);
         con_BN = connectDB(databaseName_BN);
         con_CT = connectDB(databaseName_CT);
 
@@ -1077,7 +1075,6 @@ public class CountsManager {
      * @throws SQLException
      */
     private static void disconnectDB() throws SQLException {
-        con_std.close();
         con_BN.close();
         con_CT.close();
     }
