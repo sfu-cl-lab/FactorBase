@@ -19,7 +19,6 @@ package ca.sfu.cs.factorbase.learning;
  *  
  * */
 
-import java.io.IOException;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -67,46 +66,60 @@ public class CountsManager {
      * buildCT
      *
      * @throws SQLException if there are issues executing the SQL queries.
-     * @throws IOException if there are issues reading from the SQL scripts.
      */
-    public static void buildCT() throws SQLException, IOException {
+    public static void buildCT() throws SQLException {
         //connect to db using jdbc
         con_BN = connectDB(databaseName_BN);
         con_CT = connectDB(databaseName_CT);
 
-        //build _BN copy from _setup Nov 1st, 2013 Zqiancompute the subset given fid and it's parents
-        MySQLScriptRunner.callSP(
-            con_BN,
-            "cascadeFS"
-        );
-
-        //generate lattice tree
-        RelationshipLattice relationshipLattice = LatticeGenerator.generate(
-            con_BN,
-            databaseName_std
-        );
-
-        // empty query error,fixed by removing one duplicated semicolon. Oct 30, 2013
-        //ToDo: No support for executing LinkCorrelation=0;
-        if (cont.equals("1")) {
-            throw new UnsupportedOperationException("Not Implemented Yet!");
-        } else {
-            MySQLScriptRunner.callSP(
-                con_BN,
-                "populateMQ"
-            );
-        }
-
-        MySQLScriptRunner.callSP(
-            con_BN,
-            "populateMQRChain"
-        );
+        // Propagate metadata based on the FunctorSet.
+        RelationshipLattice relationshipLattice = propagateFunctorSetInfo(con_BN);
 
         // building CT tables for Rchain
         CTGenerator(relationshipLattice);
         disconnectDB();
     }
- 
+
+
+    /**
+     * Use the FunctorSet to generate the necessary metadata for constructing CT tables.
+     *
+     * @param dbConnection - connection to the "_BN" database.
+     * @return the relationship lattice created based on the FunctorSet.
+     * @throws SQLException if there are issues executing the SQL queries.
+     */
+    private static RelationshipLattice propagateFunctorSetInfo(Connection dbConnection) throws SQLException {
+        // Transfer metadata from the "_setup" database to the "_BN" database based on the FunctorSet.
+        MySQLScriptRunner.callSP(
+            dbConnection,
+            "cascadeFS"
+        );
+
+        // Generate the relationship lattice based on the FunctorSet.
+        RelationshipLattice relationshipLattice = LatticeGenerator.generate(
+            dbConnection,
+            databaseName_std
+        );
+
+        // TODO: Add support for Continuous = 1.
+        if (cont.equals("1")) {
+            throw new UnsupportedOperationException("Not Implemented Yet!");
+        } else {
+            MySQLScriptRunner.callSP(
+                dbConnection,
+                "populateMQ"
+            );
+        }
+
+        MySQLScriptRunner.callSP(
+            dbConnection,
+            "populateMQRChain"
+        );
+
+        return relationshipLattice;
+    }
+
+
     /*** this part we do need O.s. May 16, 2018 ***/
     /**
      *  Building the _CT tables for length >=2

@@ -425,7 +425,7 @@ public class MySQLFactorBaseDataBase implements FactorBaseDataBase {
             int childColumnIndex = ctGenerator.getColumnIndex(child);
             int[] parentColumnIndices = ctGenerator.getColumnIndices(parents);
             return ctGenerator.generateCT(childColumnIndex, parentColumnIndices, totalNumberOfStates);
-        } catch (DataExtractionException | IOException | SQLException e) {
+        } catch (DataExtractionException | SQLException e) {
             throw new DataBaseException("Failed to generate the CT table.", e);
         }
     }
