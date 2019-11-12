@@ -58,6 +58,10 @@ public class CountsManager {
     private static String cont;
     private static Logger logger = Logger.getLogger(CountsManager.class.getName());
 
+    static {
+        setVarsFromConfig();
+    }
+
 
     /**
      * @Overload
@@ -67,8 +71,6 @@ public class CountsManager {
      * @throws IOException if there are issues reading from the SQL scripts.
      */
     public static void buildCT() throws SQLException, IOException {
-
-        setVarsFromConfig();
         //connect to db using jdbc
         con_std = connectDB(databaseName_std);
         con_BN = connectDB(databaseName_BN);
