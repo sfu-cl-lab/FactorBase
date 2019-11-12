@@ -28,7 +28,7 @@ import ca.sfu.cs.factorbase.exception.DataExtractionException;
 import ca.sfu.cs.factorbase.graph.Edge;
 import ca.sfu.cs.factorbase.lattice.LatticeGenerator;
 import ca.sfu.cs.factorbase.lattice.RelationshipLattice;
-import ca.sfu.cs.factorbase.learning.BayesBaseCT_SortMerge;
+import ca.sfu.cs.factorbase.learning.CountsManager;
 import ca.sfu.cs.factorbase.util.KeepTablesOnly;
 import ca.sfu.cs.factorbase.util.MySQLScriptRunner;
 import ca.sfu.cs.factorbase.util.QueryGenerator;
@@ -404,7 +404,7 @@ public class MySQLFactorBaseDataBase implements FactorBaseDataBase {
             }
 
             // Generate CT tables.
-            BayesBaseCT_SortMerge.buildCT();
+            CountsManager.buildCT();
 
             String tableName = null;
             String shortID = functorInfos.getShortID();

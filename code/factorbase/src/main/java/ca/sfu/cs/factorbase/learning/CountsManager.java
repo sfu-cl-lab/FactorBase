@@ -38,7 +38,7 @@ import ca.sfu.cs.factorbase.util.Sort_merge3;
 import com.mysql.jdbc.Connection;
 import com.mysql.jdbc.exceptions.jdbc4.MySQLSyntaxErrorException;
 
-public class BayesBaseCT_SortMerge {
+public class CountsManager {
 
     private static Connection con_std;
     private static Connection con_BN;
@@ -56,7 +56,7 @@ public class BayesBaseCT_SortMerge {
      * ToDo: Refactor
      */
     private static String cont;
-    private static Logger logger = Logger.getLogger(BayesBaseCT_SortMerge.class.getName());
+    private static Logger logger = Logger.getLogger(CountsManager.class.getName());
 
 
     /**

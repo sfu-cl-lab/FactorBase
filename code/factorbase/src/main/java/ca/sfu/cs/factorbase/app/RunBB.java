@@ -12,8 +12,8 @@ import ca.sfu.cs.factorbase.exception.DataBaseException;
 import ca.sfu.cs.factorbase.exception.DataExtractionException;
 import ca.sfu.cs.factorbase.exception.ScoringException;
 import ca.sfu.cs.factorbase.lattice.RelationshipLattice;
-import ca.sfu.cs.factorbase.learning.BayesBaseCT_SortMerge;
 import ca.sfu.cs.factorbase.learning.BayesBaseH;
+import ca.sfu.cs.factorbase.learning.CountsManager;
 import ca.sfu.cs.factorbase.util.LoggerConfig;
 import nu.xom.ParsingException;
 
@@ -69,7 +69,7 @@ public class RunBB {
         boolean usePreCounting = config.getProperty("PreCounting").equals("1");
         if (usePreCounting) {
             long buildCTStart = System.currentTimeMillis();
-            BayesBaseCT_SortMerge.buildCT();
+            CountsManager.buildCT();
             logRunTime(logger, "Creating CT Tables", buildCTStart, System.currentTimeMillis());
         }
 
