@@ -72,8 +72,16 @@ public class CountsManager {
         con_BN = connectDB(databaseName_BN);
         con_CT = connectDB(databaseName_CT);
 
+        try (Statement statement = con_BN.createStatement()) {
+            statement.execute("DROP SCHEMA IF EXISTS " + databaseName_CT + ";");
+            statement.execute("CREATE SCHEMA IF NOT EXISTS " + databaseName_CT + ";");
+        }
+
         // Propagate metadata based on the FunctorSet.
         RelationshipLattice relationshipLattice = propagateFunctorSetInfo(con_BN);
+
+        // Build the counts tables for the RChains.
+        buildRChainCounts(relationshipLattice);
 
         // building CT tables for Rchain
         CTGenerator(relationshipLattice);
@@ -156,22 +164,6 @@ public class CountsManager {
         
         // preparing the _join part for _CT tables
         BuildCT_Rnodes_join();
-        
-        //building the RNodes_counts tables. should be called Rchains since it goes up the lattice.
-        if(linkCorrelation.equals("1")) {
-            long l_1 = System.currentTimeMillis(); //@zqian : measure structure learning time
-            for(int len = 1; len <= latticeHeight; len++){
-                BuildCT_Rnodes_counts(relationshipLattice.getRChainsInfo(len));
-            }
-            long l2 = System.currentTimeMillis(); //@zqian : measure structure learning time
-            logger.fine("Building Time(ms) for Rnodes_counts: "+(l2-l_1)+" ms.\n");
-        }
-        else {
-            for(int len = 1; len <= latticeHeight; len++)
-                BuildCT_Rnodes_counts2(relationshipLattice.getRChainsInfo(len));
-            //count2 simply copies the counts to the CT tables
-            //copying the code seems very inelegant OS August 22
-        }
 
         if (linkCorrelation.equals("1") && relationshipLattice.getHeight() != 0) {
             // handling Rnodes with Lattice Moebius Transform
@@ -215,6 +207,33 @@ public class CountsManager {
         long l2 = System.currentTimeMillis();  //@zqian
         logger.fine("Building Time(ms) for ALL CT tables:  "+(l2-l)+" ms.\n");
     }
+
+
+    /**
+     * Build the "_counts" tables for the RChains in the given relationship lattice.
+     *
+     * @param relationshipLattice - the relationship lattice containing the RChains to build the "_counts" tables for.
+     * @throws SQLException if there are issues executing the SQL queries.
+     */
+    private static void buildRChainCounts(
+        RelationshipLattice relationshipLattice
+    ) throws SQLException {
+        int latticeHeight = relationshipLattice.getHeight();
+
+        // Building the <RChain>_counts tables.
+        if(linkCorrelation.equals("1")) {
+            for(int len = 1; len <= latticeHeight; len++){
+                BuildCT_Rnodes_counts(relationshipLattice.getRChainsInfo(len));
+            }
+        } else {
+            // Count2 simply copies the counts to the CT tables.
+            // Copying the code seems very inelegant OS August 22.
+            for(int len = 1; len <= latticeHeight; len++) {
+                BuildCT_Rnodes_counts2(relationshipLattice.getRChainsInfo(len));
+            }
+        }
+    }
+
 
     /**
      * setVarsFromConfig
@@ -472,8 +491,6 @@ public class CountsManager {
     private static void BuildCT_Pvars() throws SQLException {
         long l = System.currentTimeMillis(); //@zqian : measure structure learning time
         Statement st = con_BN.createStatement();
-        st.execute("Drop schema if exists " + databaseName_CT + ";");
-        st.execute("Create schema if not exists " + databaseName_CT + ";");
         ResultSet rs = st.executeQuery("select * from PVariables;");
 
         while(rs.next()){
