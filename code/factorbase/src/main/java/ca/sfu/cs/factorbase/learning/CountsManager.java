@@ -19,7 +19,6 @@ package ca.sfu.cs.factorbase.learning;
  *  
  * */
 
-import java.io.IOException;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -38,14 +37,14 @@ import ca.sfu.cs.factorbase.util.Sort_merge3;
 import com.mysql.jdbc.Connection;
 import com.mysql.jdbc.exceptions.jdbc4.MySQLSyntaxErrorException;
 
-public class BayesBaseCT_SortMerge {
+public class CountsManager {
 
-    private static Connection con_std;
     private static Connection con_BN;
     private static Connection con_CT;
     private static String databaseName_std;
     private static String databaseName_BN;
     private static String databaseName_CT;
+    private static String databaseName_global_counts;
     private static String dbUsername;
     private static String dbPassword;
     private static String dbaddress;
@@ -56,7 +55,11 @@ public class BayesBaseCT_SortMerge {
      * ToDo: Refactor
      */
     private static String cont;
-    private static Logger logger = Logger.getLogger(BayesBaseCT_SortMerge.class.getName());
+    private static Logger logger = Logger.getLogger(CountsManager.class.getName());
+
+    static {
+        setVarsFromConfig();
+    }
 
 
     /**
@@ -64,49 +67,68 @@ public class BayesBaseCT_SortMerge {
      * buildCT
      *
      * @throws SQLException if there are issues executing the SQL queries.
-     * @throws IOException if there are issues reading from the SQL scripts.
      */
-    public static void buildCT() throws SQLException, IOException {
-
-        setVarsFromConfig();
+    public static void buildCT() throws SQLException {
         //connect to db using jdbc
-        con_std = connectDB(databaseName_std);
         con_BN = connectDB(databaseName_BN);
         con_CT = connectDB(databaseName_CT);
 
-        //build _BN copy from _setup Nov 1st, 2013 Zqiancompute the subset given fid and it's parents
-        MySQLScriptRunner.callSP(
-            con_BN,
-            "cascadeFS"
-        );
-
-        //generate lattice tree
-        RelationshipLattice relationshipLattice = LatticeGenerator.generate(
-            con_BN,
-            databaseName_std
-        );
-
-        // empty query error,fixed by removing one duplicated semicolon. Oct 30, 2013
-        //ToDo: No support for executing LinkCorrelation=0;
-        if (cont.equals("1")) {
-            throw new UnsupportedOperationException("Not Implemented Yet!");
-        } else {
-            MySQLScriptRunner.callSP(
-                con_BN,
-                "populateMQ"
-            );
+        try (Statement statement = con_BN.createStatement()) {
+            statement.execute("DROP SCHEMA IF EXISTS " + databaseName_CT + ";");
+            statement.execute("CREATE SCHEMA IF NOT EXISTS " + databaseName_CT + ";");
         }
 
-        MySQLScriptRunner.callSP(
-            con_BN,
-            "populateMQRChain"
-        );
+        // Propagate metadata based on the FunctorSet.
+        RelationshipLattice relationshipLattice = propagateFunctorSetInfo(con_BN);
+
+        // Build the counts tables for the RChains.
+        buildRChainCounts(con_CT, relationshipLattice);
 
         // building CT tables for Rchain
         CTGenerator(relationshipLattice);
         disconnectDB();
     }
- 
+
+
+    /**
+     * Use the FunctorSet to generate the necessary metadata for constructing CT tables.
+     *
+     * @param dbConnection - connection to the "_BN" database.
+     * @return the relationship lattice created based on the FunctorSet.
+     * @throws SQLException if there are issues executing the SQL queries.
+     */
+    private static RelationshipLattice propagateFunctorSetInfo(Connection dbConnection) throws SQLException {
+        // Transfer metadata from the "_setup" database to the "_BN" database based on the FunctorSet.
+        MySQLScriptRunner.callSP(
+            dbConnection,
+            "cascadeFS"
+        );
+
+        // Generate the relationship lattice based on the FunctorSet.
+        RelationshipLattice relationshipLattice = LatticeGenerator.generate(
+            dbConnection,
+            databaseName_std
+        );
+
+        // TODO: Add support for Continuous = 1.
+        if (cont.equals("1")) {
+            throw new UnsupportedOperationException("Not Implemented Yet!");
+        } else {
+            MySQLScriptRunner.callSP(
+                dbConnection,
+                "populateMQ"
+            );
+        }
+
+        MySQLScriptRunner.callSP(
+            dbConnection,
+            "populateMQRChain"
+        );
+
+        return relationshipLattice;
+    }
+
+
     /*** this part we do need O.s. May 16, 2018 ***/
     /**
      *  Building the _CT tables for length >=2
@@ -143,22 +165,6 @@ public class BayesBaseCT_SortMerge {
         
         // preparing the _join part for _CT tables
         BuildCT_Rnodes_join();
-        
-        //building the RNodes_counts tables. should be called Rchains since it goes up the lattice.
-        if(linkCorrelation.equals("1")) {
-            long l_1 = System.currentTimeMillis(); //@zqian : measure structure learning time
-            for(int len = 1; len <= latticeHeight; len++){
-                BuildCT_Rnodes_counts(relationshipLattice.getRChainsInfo(len));
-            }
-            long l2 = System.currentTimeMillis(); //@zqian : measure structure learning time
-            logger.fine("Building Time(ms) for Rnodes_counts: "+(l2-l_1)+" ms.\n");
-        }
-        else {
-            for(int len = 1; len <= latticeHeight; len++)
-                BuildCT_Rnodes_counts2(relationshipLattice.getRChainsInfo(len));
-            //count2 simply copies the counts to the CT tables
-            //copying the code seems very inelegant OS August 22
-        }
 
         if (linkCorrelation.equals("1") && relationshipLattice.getHeight() != 0) {
             // handling Rnodes with Lattice Moebius Transform
@@ -203,6 +209,63 @@ public class BayesBaseCT_SortMerge {
         logger.fine("Building Time(ms) for ALL CT tables:  "+(l2-l)+" ms.\n");
     }
 
+
+    /**
+     * Generate the global counts tables.
+     */
+    public static void buildRChainsGlobalCounts() throws SQLException {
+        con_BN = connectDB(databaseName_BN);
+        try(
+            Connection conGlobalCounts = connectDB(databaseName_global_counts)
+        ) {
+
+            // Propagate metadata based on the FunctorSet.
+            RelationshipLattice relationshipLattice = propagateFunctorSetInfo(con_BN);
+
+            // Generate the global counts in the "_global_counts" database.
+            buildRChainCounts(conGlobalCounts, relationshipLattice);
+        }
+
+        con_BN.close();
+    }
+
+
+    /**
+     * Build the "_counts" tables for the RChains in the given relationship lattice.
+     *
+     * @param dbConnection - connection to the database to create the "_counts" tables in.
+     * @param relationshipLattice - the relationship lattice containing the RChains to build the "_counts" tables for.
+     * @throws SQLException if there are issues executing the SQL queries.
+     */
+    private static void buildRChainCounts(
+        Connection dbConnection,
+        RelationshipLattice relationshipLattice
+    ) throws SQLException {
+        int latticeHeight = relationshipLattice.getHeight();
+
+        // Building the <RChain>_counts tables.
+        if(linkCorrelation.equals("1")) {
+            // Generate the counts tables.
+            for(int len = 1; len <= latticeHeight; len++){
+                generateCountsTables(
+                    dbConnection,
+                    relationshipLattice.getRChainsInfo(len),
+                    false
+                );
+            }
+        } else {
+            // Generate the counts tables and copy their values to the CT tables.
+            for(int len = 1; len <= latticeHeight; len++) {
+                generateCountsTables(
+                    dbConnection,
+                    relationshipLattice.getRChainsInfo(len),
+                    true
+                );
+            }
+        }
+    }
+
+
     /**
      * setVarsFromConfig
      * ToDo : Remove Duplicate definitions across java files
@@ -211,6 +274,7 @@ public class BayesBaseCT_SortMerge {
         Config conf = new Config();
         databaseName_std = conf.getProperty("dbname");
         databaseName_BN = databaseName_std + "_BN";
+        databaseName_global_counts = databaseName_std + "_global_counts";
         databaseName_CT = databaseName_std + "_CT";
         dbUsername = conf.getProperty("dbusername");
         dbPassword = conf.getProperty("dbpassword");
@@ -459,8 +523,6 @@ public class BayesBaseCT_SortMerge {
     private static void BuildCT_Pvars() throws SQLException {
         long l = System.currentTimeMillis(); //@zqian : measure structure learning time
         Statement st = con_BN.createStatement();
-        st.execute("Drop schema if exists " + databaseName_CT + ";");
-        st.execute("Create schema if not exists " + databaseName_CT + ";");
         ResultSet rs = st.executeQuery("select * from PVariables;");
 
         while(rs.next()){
@@ -556,11 +618,22 @@ public class BayesBaseCT_SortMerge {
         logger.fine("\n Pvariables are DONE \n" );
     }
 
+
     /**
-     * building the RNodes_counts tables
+     * Create the "_counts" tables for the given RChains and copy the counts to the associated CT table if specified
+     * to.
      *
+     * @param dbConnection - connection to the database to create the "_counts" tables in.
+     * @param rchainInfos - FunctorNodesInfos for the RChains to build the "_counts" tables for.
+     * @param copyToCT - True if the values in the generated "_counts" table should be copied to the associated "_CT"
+     *                   table; otherwise false.
+     * @throws SQLException if there are issues executing the SQL queries.
      */
-    private static void BuildCT_Rnodes_counts(List<FunctorNodesInfo> rchainInfos) throws SQLException {
+    private static void generateCountsTables(
+        Connection dbConnection,
+        List<FunctorNodesInfo> rchainInfos,
+        boolean copyToCT
+    ) throws SQLException {
         for (FunctorNodesInfo rchainInfo : rchainInfos) {
             // Get the short and full form rnids for further use.
             String rchain = rchainInfo.getID();
@@ -568,56 +641,45 @@ public class BayesBaseCT_SortMerge {
             String shortRchain = rchainInfo.getShortID();
             logger.fine(" Short RChain: " + shortRchain);
 
-            generateCountsTable(rchain, shortRchain);
+            String countsTableName = generateCountsTable(
+                dbConnection,
+                rchain,
+                shortRchain
+            );
+
+            if (copyToCT) {
+                try (Statement statement = con_CT.createStatement()) {
+                    String createString_CT =
+                        "CREATE TABLE `" + shortRchain + "_CT`" + " AS " +
+                            "SELECT * " +
+                            "FROM `" + countsTableName + "`";
+                    logger.fine("CREATE String: " + createString_CT);
+                    statement.execute(createString_CT);
+                }
+            }
         }
 
-        logger.fine("\n Rnodes_counts are DONE \n");
-    }
-
-
-    /**
-     * building the RNodes_counts tables,count2 simply copies the counts to the CT tables
-     */
-    private static void BuildCT_Rnodes_counts2(List<FunctorNodesInfo> rchainInfos) throws SQLException {
-        for (FunctorNodesInfo rchainInfo : rchainInfos) {
-            // Get the short and full form rnids for further use.
-            String rchain = rchainInfo.getID();
-            logger.fine("\n RChain: " + rchain);
-            String shortRchain = rchainInfo.getShortID();
-            logger.fine(" Short RChain: " + shortRchain);
-
-            String countsTableName = generateCountsTable(rchain, shortRchain);
-
-            // Create new statement.
-            Statement st3 = con_CT.createStatement();
-
-            String createString_CT =
-                "CREATE TABLE `" + shortRchain + "_CT`" + " AS " +
-                "SELECT * " +
-                "FROM `" + countsTableName + "`";
-            logger.fine("CREATE String: " + createString_CT);
-            st3.execute(createString_CT);
-
-            // Close statement.
-            st3.close();
-        }
-
-        logger.fine("\n Rnodes_counts are DONE \n");
+        logger.fine("\n RChain_counts are DONE \n");
     }
 
 
     /**
      * Generate the "_counts" table for the given RChain.
      *
+     * @param dbConnection - connection to the database to create the "_counts" table in.
      * @param rchain - the full form name of the RChain.
      * @param shortRchain - the short form name of the RChain.
      * @return the name of the "_counts" table generated.
      * @throws SQLException if an error occurs when executing the queries.
      */
-    private static String generateCountsTable(String rchain, String shortRchain) throws SQLException {
+    private static String generateCountsTable(
+        Connection dbConnection,
+        String rchain,
+        String shortRchain
+    ) throws SQLException {
         // Create new statements.
         Statement st2 = con_BN.createStatement();
-        Statement st3 = con_CT.createStatement();
+        Statement st3 = dbConnection.createStatement();
 
         // Create SELECT query string.
         ResultSet rs2 = st2.executeQuery(
@@ -690,7 +752,7 @@ public class BayesBaseCT_SortMerge {
 
         // Add covering index.
         addCoveringIndex(
-            con_CT,
+            dbConnection,
             databaseName_CT,
             countsTableName
         );
@@ -1075,7 +1137,6 @@ public class BayesBaseCT_SortMerge {
      * @throws SQLException
      */
     private static void disconnectDB() throws SQLException {
-        con_std.close();
         con_BN.close();
         con_CT.close();
     }

@@ -8,3 +8,6 @@ CREATE SCHEMA @database@_BN;
 
 DROP SCHEMA IF EXISTS @database@_CT;
 CREATE SCHEMA @database@_CT;
+
+DROP SCHEMA IF EXISTS @database@_global_counts;
+CREATE SCHEMA @database@_global_counts;
