@@ -222,14 +222,20 @@ public class CountsManager {
 
         // Building the <RChain>_counts tables.
         if(linkCorrelation.equals("1")) {
+            // Generate the counts tables.
             for(int len = 1; len <= latticeHeight; len++){
-                BuildCT_Rnodes_counts(relationshipLattice.getRChainsInfo(len));
+                generateCountsTables(
+                    relationshipLattice.getRChainsInfo(len),
+                    false
+                );
             }
         } else {
-            // Count2 simply copies the counts to the CT tables.
-            // Copying the code seems very inelegant OS August 22.
+            // Generate the counts tables and copy their values to the CT tables.
             for(int len = 1; len <= latticeHeight; len++) {
-                BuildCT_Rnodes_counts2(relationshipLattice.getRChainsInfo(len));
+                generateCountsTables(
+                    relationshipLattice.getRChainsInfo(len),
+                    true
+                );
             }
         }
     }
@@ -586,29 +592,20 @@ public class CountsManager {
         logger.fine("\n Pvariables are DONE \n" );
     }
 
+
     /**
-     * building the RNodes_counts tables
+     * Create the "_counts" tables for the given RChains and copy the counts to the associated CT table if specified
+     * to.
      *
+     * @param rchainInfos - FunctorNodesInfos for the RChains to build the "_counts" tables for.
+     * @param copyToCT - True if the values in the generated "_counts" table should be copied to the associated "_CT"
+     *                   table; otherwise false.
+     * @throws SQLException if there are issues executing the SQL queries.
      */
-    private static void BuildCT_Rnodes_counts(List<FunctorNodesInfo> rchainInfos) throws SQLException {
-        for (FunctorNodesInfo rchainInfo : rchainInfos) {
-            // Get the short and full form rnids for further use.
-            String rchain = rchainInfo.getID();
-            logger.fine("\n RChain: " + rchain);
-            String shortRchain = rchainInfo.getShortID();
-            logger.fine(" Short RChain: " + shortRchain);
-
-            generateCountsTable(rchain, shortRchain);
-        }
-
-        logger.fine("\n Rnodes_counts are DONE \n");
-    }
-
-
-    /**
-     * building the RNodes_counts tables,count2 simply copies the counts to the CT tables
-     */
-    private static void BuildCT_Rnodes_counts2(List<FunctorNodesInfo> rchainInfos) throws SQLException {
+    private static void generateCountsTables(
+        List<FunctorNodesInfo> rchainInfos,
+        boolean copyToCT
+    ) throws SQLException {
         for (FunctorNodesInfo rchainInfo : rchainInfos) {
             // Get the short and full form rnids for further use.
             String rchain = rchainInfo.getID();
@@ -618,21 +615,19 @@ public class CountsManager {
 
             String countsTableName = generateCountsTable(rchain, shortRchain);
 
-            // Create new statement.
-            Statement st3 = con_CT.createStatement();
-
-            String createString_CT =
-                "CREATE TABLE `" + shortRchain + "_CT`" + " AS " +
-                "SELECT * " +
-                "FROM `" + countsTableName + "`";
-            logger.fine("CREATE String: " + createString_CT);
-            st3.execute(createString_CT);
-
-            // Close statement.
-            st3.close();
+            if (copyToCT) {
+                try (Statement statement = con_CT.createStatement()) {
+                    String createString_CT =
+                        "CREATE TABLE `" + shortRchain + "_CT`" + " AS " +
+                            "SELECT * " +
+                            "FROM `" + countsTableName + "`";
+                    logger.fine("CREATE String: " + createString_CT);
+                    statement.execute(createString_CT);
+                }
+            }
         }
 
-        logger.fine("\n Rnodes_counts are DONE \n");
+        logger.fine("\n RChain_counts are DONE \n");
     }
 
 
