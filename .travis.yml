@@ -18,6 +18,9 @@ script:
   - java -Dconfig=../travis-resources/config.cfg -jar factorbase/target/factorbase*SNAPSHOT.jar
   - ls -lh
   - tail dag_.txt
+  # Compare the structure of the graphs in the BIF files.
+  - python3 ../travis-resources/bifchecker.py --compare Bif_unielwin.xml ../travis-resources/expected-output/Bif_unielwin.xml
+  # Check for any differences in the BIF files.
   - diff Bif_unielwin.xml ../travis-resources/expected-output/Bif_unielwin.xml
   - bash ../travis-resources/dbdump.sh -n unielwin -p 123456
   - diff mysql-extraction.txt ../travis-resources/expected-output/mysql-extraction.txt
