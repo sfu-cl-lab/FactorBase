@@ -71,6 +71,10 @@ public class RunBB {
             long buildCTStart = System.currentTimeMillis();
             CountsManager.buildCT();
             logRunTime(logger, "Creating CT Tables", buildCTStart, System.currentTimeMillis());
+        } else {
+            long buildGlobalCountsStart = System.currentTimeMillis();
+            CountsManager.buildRChainsGlobalCounts();
+            logRunTime(logger, "Creating Global Counts Tables", buildGlobalCountsStart, System.currentTimeMillis());
         }
 
         long bayesBaseHStart = System.currentTimeMillis();

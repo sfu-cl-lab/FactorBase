@@ -44,6 +44,7 @@ public class CountsManager {
     private static String databaseName_std;
     private static String databaseName_BN;
     private static String databaseName_CT;
+    private static String databaseName_global_counts;
     private static String dbUsername;
     private static String dbPassword;
     private static String dbaddress;
@@ -81,7 +82,7 @@ public class CountsManager {
         RelationshipLattice relationshipLattice = propagateFunctorSetInfo(con_BN);
 
         // Build the counts tables for the RChains.
-        buildRChainCounts(relationshipLattice);
+        buildRChainCounts(con_CT, relationshipLattice);
 
         // building CT tables for Rchain
         CTGenerator(relationshipLattice);
@@ -210,12 +211,34 @@ public class CountsManager {
 
 
     /**
+     * Generate the global counts tables.
+     */
+    public static void buildRChainsGlobalCounts() throws SQLException {
+        con_BN = connectDB(databaseName_BN);
+        try(
+            Connection conGlobalCounts = connectDB(databaseName_global_counts)
+        ) {
+
+            // Propagate metadata based on the FunctorSet.
+            RelationshipLattice relationshipLattice = propagateFunctorSetInfo(con_BN);
+
+            // Generate the global counts in the "_global_counts" database.
+            buildRChainCounts(conGlobalCounts, relationshipLattice);
+        }
+
+        con_BN.close();
+    }
+
+
+    /**
      * Build the "_counts" tables for the RChains in the given relationship lattice.
      *
+     * @param dbConnection - connection to the database to create the "_counts" tables in.
      * @param relationshipLattice - the relationship lattice containing the RChains to build the "_counts" tables for.
      * @throws SQLException if there are issues executing the SQL queries.
      */
     private static void buildRChainCounts(
+        Connection dbConnection,
         RelationshipLattice relationshipLattice
     ) throws SQLException {
         int latticeHeight = relationshipLattice.getHeight();
@@ -225,6 +248,7 @@ public class CountsManager {
             // Generate the counts tables.
             for(int len = 1; len <= latticeHeight; len++){
                 generateCountsTables(
+                    dbConnection,
                     relationshipLattice.getRChainsInfo(len),
                     false
                 );
@@ -233,6 +257,7 @@ public class CountsManager {
             // Generate the counts tables and copy their values to the CT tables.
             for(int len = 1; len <= latticeHeight; len++) {
                 generateCountsTables(
+                    dbConnection,
                     relationshipLattice.getRChainsInfo(len),
                     true
                 );
@@ -249,6 +274,7 @@ public class CountsManager {
         Config conf = new Config();
         databaseName_std = conf.getProperty("dbname");
         databaseName_BN = databaseName_std + "_BN";
+        databaseName_global_counts = databaseName_std + "_global_counts";
         databaseName_CT = databaseName_std + "_CT";
         dbUsername = conf.getProperty("dbusername");
         dbPassword = conf.getProperty("dbpassword");
@@ -597,12 +623,14 @@ public class CountsManager {
      * Create the "_counts" tables for the given RChains and copy the counts to the associated CT table if specified
      * to.
      *
+     * @param dbConnection - connection to the database to create the "_counts" tables in.
      * @param rchainInfos - FunctorNodesInfos for the RChains to build the "_counts" tables for.
      * @param copyToCT - True if the values in the generated "_counts" table should be copied to the associated "_CT"
      *                   table; otherwise false.
      * @throws SQLException if there are issues executing the SQL queries.
      */
     private static void generateCountsTables(
+        Connection dbConnection,
         List<FunctorNodesInfo> rchainInfos,
         boolean copyToCT
     ) throws SQLException {
@@ -613,7 +641,11 @@ public class CountsManager {
             String shortRchain = rchainInfo.getShortID();
             logger.fine(" Short RChain: " + shortRchain);
 
-            String countsTableName = generateCountsTable(rchain, shortRchain);
+            String countsTableName = generateCountsTable(
+                dbConnection,
+                rchain,
+                shortRchain
+            );
 
             if (copyToCT) {
                 try (Statement statement = con_CT.createStatement()) {
@@ -634,15 +666,20 @@ public class CountsManager {
     /**
      * Generate the "_counts" table for the given RChain.
      *
+     * @param dbConnection - connection to the database to create the "_counts" table in.
      * @param rchain - the full form name of the RChain.
      * @param shortRchain - the short form name of the RChain.
      * @return the name of the "_counts" table generated.
      * @throws SQLException if an error occurs when executing the queries.
      */
-    private static String generateCountsTable(String rchain, String shortRchain) throws SQLException {
+    private static String generateCountsTable(
+        Connection dbConnection,
+        String rchain,
+        String shortRchain
+    ) throws SQLException {
         // Create new statements.
         Statement st2 = con_BN.createStatement();
-        Statement st3 = con_CT.createStatement();
+        Statement st3 = dbConnection.createStatement();
 
         // Create SELECT query string.
         ResultSet rs2 = st2.executeQuery(
@@ -715,7 +752,7 @@ public class CountsManager {
 
         // Add covering index.
         addCoveringIndex(
-            con_CT,
+            dbConnection,
             databaseName_CT,
             countsTableName
         );
