@@ -248,7 +248,9 @@ public class MySQLFactorBaseDataBase implements FactorBaseDataBase {
                 setupDatabaseName + ".1Nodes N, " +
                 setupDatabaseName + ".Attribute_Value A " +
             "WHERE P.pvid = N.pvid " +
-            "AND N.COLUMN_NAME = A.COLUMN_NAME";
+            "AND N.COLUMN_NAME = A.COLUMN_NAME " +
+            "AND index_number = 0 " +
+            "ORDER BY pvid, 1nid";
 
         List<FunctorNodesInfo> functorNodesInfos = new ArrayList<FunctorNodesInfo>();
         String previousPVarID = null;

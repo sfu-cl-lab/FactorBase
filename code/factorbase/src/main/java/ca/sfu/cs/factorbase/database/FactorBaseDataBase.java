@@ -73,9 +73,9 @@ public interface FactorBaseDataBase {
 
 
     /**
-     * Retrieve the functor node information for all the PVariables.
+     * Retrieve the functor node information for all the main PVariables.
      *
-     * @return Information for all the functor nodes of each PVariable in the database.
+     * @return Information for all the functor nodes of each main PVariable in the database.
      * @throws DataBaseException if an error occurs when attempting to retrieve the information.
      */
     List<FunctorNodesInfo> getPVariablesFunctorNodeInfo() throws DataBaseException;
