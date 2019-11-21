@@ -396,13 +396,6 @@ public class CountsManager {
                 logger.fine("\n create star String : " + createStarString );
                 st3.execute(createStarString);      //create star table     
 
-                // Add covering index.
-                addCoveringIndex(
-                    con_CT,
-                    databaseName_CT,
-                    cur_star_Table
-                );
-
                 long l3 = System.currentTimeMillis(); 
                 logger.fine("Building Time(ms) for "+cur_star_Table+ " : "+(l3-l2)+" ms.\n");
                 //staring to create the _flat table
@@ -867,13 +860,6 @@ public class CountsManager {
             String createString = "CREATE TABLE `" + starTableName + "` AS " + queryString;
             logger.fine("\n create String : " + createString );
             st3.execute(createString);
-
-            // Add covering index.
-            addCoveringIndex(
-                con_CT,
-                databaseName_CT,
-                starTableName
-            );
 
             //  close statements
             st2.close();
