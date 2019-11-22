@@ -434,22 +434,13 @@ public class CountsManager {
                 // starting to create _flase table : part1
                 String cur_false_Table = removedShort + len + "_" + fc + "_false";
 
-                // Create false table.
+                // Computing the false table as the MULT difference between the matching rows of the star and flat tables.
+                // This is a big join!
                 Sort_merge3.sort_merge(
                     cur_star_Table,
                     cur_flat_Table,
                     cur_false_Table,
                     con_CT
-                );
-
-                 // a separate procedure for computing the false table as the mult difference between star and flat
-                 // trying to optimize this big join
-
-                // Add covering index.
-                addCoveringIndex(
-                    con_CT,
-                    databaseName_CT,
-                    cur_false_Table
                 );
 
                 long l5 = System.currentTimeMillis(); 
@@ -896,13 +887,6 @@ public class CountsManager {
                 shortRchain + "_flat",
                 falseTableName,
                 con_CT
-            );
-
-            // Add covering index.
-            addCoveringIndex(
-                con_CT,
-                databaseName_CT,
-                falseTableName
             );
 
             String countsTableName = shortRchain + "_counts";
