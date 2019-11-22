@@ -482,13 +482,6 @@ public class CountsManager {
                 st3.execute("CREATE TABLE `" + Next_CT_Table + "` AS " + QueryStringCT);
                 rs1.previous();
 
-                // Add covering index.
-                addCoveringIndex(
-                    con_CT,
-                    databaseName_CT,
-                    Next_CT_Table
-                );
-
                 fc++;   
 
                 //  close statements
@@ -918,13 +911,6 @@ public class CountsManager {
 
             logger.fine("\n create CT table String : " + createCTString );
             st3.execute(createCTString);
-
-            // Add covering index.
-            addCoveringIndex(
-                con_CT,
-                databaseName_CT,
-                ctTableName
-            );
 
             //  close statements
             st2.close();
