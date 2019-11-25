@@ -576,13 +576,6 @@ public class CountsManager {
             logger.fine("Create String: " + createString);
             st3.execute(createString);
 
-            // Add covering index.
-            addCoveringIndex(
-                con_CT,
-                databaseName_CT,
-                countsTableName
-            );
-
             //  close statements
             st2.close();
             st3.close();
@@ -726,13 +719,6 @@ public class CountsManager {
         st3.execute("SET tmp_table_size = " + dbTemporaryTableSize + ";");
         st3.executeQuery("SET max_heap_table_size = " + dbTemporaryTableSize + ";");
         st3.execute(createString);
-
-        // Add covering index.
-        addCoveringIndex(
-            dbConnection,
-            databaseName_CT,
-            countsTableName
-        );
 
         // Close statements.
         st2.close();
