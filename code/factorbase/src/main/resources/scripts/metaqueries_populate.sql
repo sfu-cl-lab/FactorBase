@@ -281,7 +281,7 @@ INSERT INTO MetaQueries
  * proper rchains only.
  */
 INSERT INTO MetaQueries
-    SELECT
+    SELECT DISTINCT
         L.name AS Lattice_Point,
         'Counts' AS TableType,
         M.ClauseType,
