@@ -24,7 +24,7 @@ CREATE TABLE MetaQueries (
 --- map Pvariables to entity tables ---
 
 INSERT INTO MetaQueries
-    SELECT DISTINCT
+    SELECT
         pvid AS Lattice_Point,
         'Counts' AS TableType,
         'FROM' AS ClauseType,
@@ -43,7 +43,7 @@ INSERT INTO MetaQueries
 /* Pvariable SELECT list */
 /* Contains 1nodes with renaming, and mult for aggregating, and id columns in case these are selected in the Expansions table. */
 INSERT INTO MetaQueries
-    SELECT DISTINCT
+    SELECT
         pvid AS Lattice_Point,
         'Counts' AS TableType,
         'SELECT' AS ClauseType,
@@ -55,13 +55,13 @@ INSERT INTO MetaQueries
 
 /* For each pvariable, find the SELECT list for the associated attributes = 1Nodes. */
 INSERT INTO MetaQueries
-    SELECT DISTINCT
-        P.pvid AS Lattice_Point,
+    SELECT
+        N.pvid AS Lattice_Point,
         'Counts' AS TableType,
         'SELECT' AS ClauseType,
         '1node' AS EntryType,
         CONCAT(
-            P.pvid,
+            N.pvid,
             '.',
             N.COLUMN_NAME,
             ' AS `',
@@ -69,10 +69,7 @@ INSERT INTO MetaQueries
             '`'
         ) AS Entries
     FROM
-        1Nodes N,
-        PVariables P
-    WHERE
-        N.pvid = P.pvid;
+        1Nodes N;
 
 
 /* For each pvariable in expansion, find the primary column and add it to the SELECT list. */
@@ -94,8 +91,8 @@ INSERT INTO MetaQueries
 /* Pvariable GROUPBY list. */
 /* Contains 1nodes without renaming. */
 INSERT INTO MetaQueries
-   SELECT DISTINCT
-       P.pvid AS Lattice_Point,
+   SELECT
+       N.pvid AS Lattice_Point,
        'Counts' AS TableType,
        'GROUPBY' AS ClauseType,
        '1node' AS EntryType,
@@ -105,10 +102,7 @@ INSERT INTO MetaQueries
             '`'
         ) AS Entries
     FROM
-        1Nodes N,
-        PVariables P
-    WHERE
-        N.pvid = P.pvid;
+        1Nodes N;
 
 
 /* Add id columns for expansions without renaming. */
@@ -142,8 +136,8 @@ INSERT INTO MetaQueries
 /* Now we make data join tables for each relationship functor node. */
 /* The FROM list for the relationship functor contains the relationship table. */
 INSERT INTO MetaQueries
-    SELECT DISTINCT
-        orig_rnid AS Lattice_Point,
+    SELECT
+        rnid AS Lattice_Point,
         'Counts' AS TableType,
         'FROM' AS ClauseType,
         'rtable' AS EntryType,
@@ -155,9 +149,7 @@ INSERT INTO MetaQueries
             '`'
         ) AS Entries
     FROM
-        RNodes R, LatticeRNodes L
-    WHERE
-        R.rnid = L.orig_rnid;
+        RNodes R;
 
 
 /**
@@ -165,8 +157,8 @@ INSERT INTO MetaQueries
  * the rnid.  This simulates the case where all the relationships are true.
  */
 INSERT INTO MetaQueries
-    SELECT DISTINCT
-        orig_rnid AS Lattice_Point,
+    SELECT
+        rnid AS Lattice_Point,
         'Counts' AS TableType,
         'SELECT' AS ClauseType,
         'rtable' AS EntryType,
@@ -176,10 +168,7 @@ INSERT INTO MetaQueries
             '`'
         ) AS Entries
     FROM
-        RNodes R,
-        LatticeRNodes L
-    WHERE
-        R.rnid = L.orig_rnid;
+        RNodes R;
 
 
 /**
@@ -187,8 +176,8 @@ INSERT INTO MetaQueries
  * table to the ids in the population entity tables.
  */
 INSERT INTO MetaQueries
-    SELECT DISTINCT
-        orig_rnid AS Lattice_Point,
+    SELECT
+        rnid AS Lattice_Point,
         'Counts' AS TableType,
         'WHERE' AS ClauseType,
         'rtable' AS EntryType,
@@ -203,10 +192,7 @@ INSERT INTO MetaQueries
             REFERENCED_COLUMN_NAME
         ) AS Entries
     FROM
-        RNodes_pvars R,
-        LatticeRNodes L
-    WHERE
-        R.rnid = L.orig_rnid;
+        RNodes_pvars R;
 
 
 /**
@@ -215,14 +201,14 @@ INSERT INTO MetaQueries
  * 2) The 2nodes of the relationship variable.
  */
 INSERT INTO MetaQueries
-    SELECT DISTINCT
-        orig_rnid AS Lattice_Point,
+    SELECT
+        rnid AS Lattice_Point,
         'Counts' AS TableType,
         'SELECT' AS ClauseType,
         '2nid' AS EntryType,
         CONCAT(
             '`',
-            L.orig_rnid,
+            rnid,
             '`.',
             COLUMN_NAME,
             ' AS `',
@@ -230,12 +216,9 @@ INSERT INTO MetaQueries
             '`'
         ) AS Entries
     FROM
-        LatticeRNodes L,
         RNodes_2Nodes RN,
         2Nodes N
     WHERE
-        RN.rnid = L.orig_rnid
-    AND
         N.2nid = RN.2nid;
 
 
@@ -258,8 +241,8 @@ INSERT INTO MetaQueries
 
 
 INSERT INTO MetaQueries
-    SELECT DISTINCT
-        orig_rnid AS Lattice_Point,
+    SELECT
+        rnid AS Lattice_Point,
         'Counts' AS TableType,
         'GROUPBY' AS ClauseType,
         '2nid' AS EntryType,
@@ -269,12 +252,9 @@ INSERT INTO MetaQueries
             '`'
         ) AS Entries
     FROM
-        LatticeRNodes L,
         RNodes_2Nodes RN,
         2Nodes N
     WHERE
-        RN.rnid = L.orig_rnid
-    AND
         N.2nid = RN.2nid;
 
 
@@ -284,18 +264,15 @@ INSERT INTO MetaQueries
  */
 INSERT INTO MetaQueries
     SELECT DISTINCT
-        orig_rnid AS Lattice_Point,
+        rnid AS Lattice_Point,
         TableType,
         ClauseType,
         EntryType,
         Entries
     FROM
-        LatticeRNodes L,
         RNodes_pvars R,
         MetaQueries M
     WHERE
-        L.orig_rnid = R.rnid
-    AND
         M.Lattice_Point = R.pvid;
 
 
