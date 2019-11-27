@@ -165,9 +165,6 @@ public class LatticeGenerator {
     private static int init(Connection dbConnection, Collection<String> firstSets) throws SQLException {
         int maxNumberOfMembers = firstSets.size();
         Statement st = dbConnection.createStatement();
-        st.execute("TRUNCATE lattice_rel;");
-        st.execute("TRUNCATE lattice_membership;");
-        st.execute("TRUNCATE lattice_set;");
 
         for(String set : firstSets) {
             st.execute("INSERT INTO lattice_set (name, length) VALUES ('" + set + "', 1);");

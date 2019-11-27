@@ -93,7 +93,7 @@ CREATE TABLE FNodes AS
     FROM
         1Nodes
 
-    UNION DISTINCT
+    UNION ALL
 
     SELECT
         2nid AS Fid,
@@ -103,7 +103,7 @@ CREATE TABLE FNodes AS
     FROM
         2Nodes
 
-    UNION DISTINCT
+    UNION ALL
 
     SELECT
         rnid AS Fid,

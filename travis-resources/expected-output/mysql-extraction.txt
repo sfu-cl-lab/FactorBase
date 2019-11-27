@@ -220,12 +220,9 @@ RA(prof0,student0),registration(course0,student0)	Counts	FROM	rtable	unielwin.re
 RA(prof0,student0),registration(course0,student0)	Counts	FROM	table	unielwin.course AS course0
 RA(prof0,student0),registration(course0,student0)	Counts	FROM	table	unielwin.prof AS prof0
 RA(prof0,student0),registration(course0,student0)	Counts	FROM	table	unielwin.student AS student0
-RA(prof0,student0),registration(course0,student0)	Counts	FROM	table	unielwin.student AS student0
 RA(prof0,student0),registration(course0,student0)	Counts	GROUPBY	1node	`diff(course0)`
 RA(prof0,student0),registration(course0,student0)	Counts	GROUPBY	1node	`intelligence(student0)`
-RA(prof0,student0),registration(course0,student0)	Counts	GROUPBY	1node	`intelligence(student0)`
 RA(prof0,student0),registration(course0,student0)	Counts	GROUPBY	1node	`popularity(prof0)`
-RA(prof0,student0),registration(course0,student0)	Counts	GROUPBY	1node	`ranking(student0)`
 RA(prof0,student0),registration(course0,student0)	Counts	GROUPBY	1node	`ranking(student0)`
 RA(prof0,student0),registration(course0,student0)	Counts	GROUPBY	1node	`rating(course0)`
 RA(prof0,student0),registration(course0,student0)	Counts	GROUPBY	1node	`teachingability(prof0)`
@@ -240,14 +237,11 @@ RA(prof0,student0),registration(course0,student0)	Counts	SELECT	1node	course0.ra
 RA(prof0,student0),registration(course0,student0)	Counts	SELECT	1node	prof0.popularity AS `popularity(prof0)`
 RA(prof0,student0),registration(course0,student0)	Counts	SELECT	1node	prof0.teachingability AS `teachingability(prof0)`
 RA(prof0,student0),registration(course0,student0)	Counts	SELECT	1node	student0.intelligence AS `intelligence(student0)`
-RA(prof0,student0),registration(course0,student0)	Counts	SELECT	1node	student0.intelligence AS `intelligence(student0)`
-RA(prof0,student0),registration(course0,student0)	Counts	SELECT	1node	student0.ranking AS `ranking(student0)`
 RA(prof0,student0),registration(course0,student0)	Counts	SELECT	1node	student0.ranking AS `ranking(student0)`
 RA(prof0,student0),registration(course0,student0)	Counts	SELECT	2nid	`RA(prof0,student0)`.capability AS `capability(prof0,student0)`
 RA(prof0,student0),registration(course0,student0)	Counts	SELECT	2nid	`RA(prof0,student0)`.salary AS `salary(prof0,student0)`
 RA(prof0,student0),registration(course0,student0)	Counts	SELECT	2nid	`registration(course0,student0)`.grade AS `grade(course0,student0)`
 RA(prof0,student0),registration(course0,student0)	Counts	SELECT	2nid	`registration(course0,student0)`.sat AS `sat(course0,student0)`
-RA(prof0,student0),registration(course0,student0)	Counts	SELECT	aggregate	COUNT(*) AS "MULT"
 RA(prof0,student0),registration(course0,student0)	Counts	SELECT	aggregate	COUNT(*) AS "MULT"
 RA(prof0,student0),registration(course0,student0)	Counts	SELECT	rtable	"T" AS `RA(prof0,student0)`
 RA(prof0,student0),registration(course0,student0)	Counts	SELECT	rtable	"T" AS `registration(course0,student0)`
