@@ -482,13 +482,6 @@ public class CountsManager {
                 st3.execute("CREATE TABLE `" + Next_CT_Table + "` AS " + QueryStringCT);
                 rs1.previous();
 
-                // Add covering index.
-                addCoveringIndex(
-                    con_CT,
-                    databaseName_CT,
-                    Next_CT_Table
-                );
-
                 fc++;   
 
                 //  close statements
@@ -582,13 +575,6 @@ public class CountsManager {
             String createString = "CREATE TABLE " + countsTableName + " AS " + queryString;
             logger.fine("Create String: " + createString);
             st3.execute(createString);
-
-            // Add covering index.
-            addCoveringIndex(
-                con_CT,
-                databaseName_CT,
-                countsTableName
-            );
 
             //  close statements
             st2.close();
@@ -733,13 +719,6 @@ public class CountsManager {
         st3.execute("SET tmp_table_size = " + dbTemporaryTableSize + ";");
         st3.executeQuery("SET max_heap_table_size = " + dbTemporaryTableSize + ";");
         st3.execute(createString);
-
-        // Add covering index.
-        addCoveringIndex(
-            dbConnection,
-            databaseName_CT,
-            countsTableName
-        );
 
         // Close statements.
         st2.close();
@@ -918,13 +897,6 @@ public class CountsManager {
 
             logger.fine("\n create CT table String : " + createCTString );
             st3.execute(createCTString);
-
-            // Add covering index.
-            addCoveringIndex(
-                con_CT,
-                databaseName_CT,
-                ctTableName
-            );
 
             //  close statements
             st2.close();
