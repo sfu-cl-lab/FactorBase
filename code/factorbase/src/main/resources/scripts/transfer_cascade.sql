@@ -4,7 +4,7 @@ CREATE PROCEDURE cascadeFS()
 BEGIN
 
 DROP TABLE IF EXISTS 1Nodes;
-CREATE TABLE 1Nodes AS
+CREATE TABLE 1Nodes ENGINE = MEMORY AS
     SELECT
         N.1nid,
         N.COLUMN_NAME,
@@ -18,7 +18,7 @@ CREATE TABLE 1Nodes AS
 
 
 DROP TABLE IF EXISTS 2Nodes;
-CREATE TABLE 2Nodes AS
+CREATE TABLE 2Nodes ENGINE = MEMORY AS
     SELECT
         N.2nid,
         N.COLUMN_NAME,
@@ -35,7 +35,7 @@ CREATE TABLE 2Nodes AS
 
 /* Map the 2nodes to rnodes for the given 2Nodes in the functor set. */
 DROP TABLE IF EXISTS RNodes_2Nodes;
-CREATE TABLE RNodes_2Nodes AS
+CREATE TABLE RNodes_2Nodes ENGINE = MEMORY AS
     SELECT
         N.rnid,
         N.2nid,
@@ -49,7 +49,7 @@ CREATE TABLE RNodes_2Nodes AS
 
 /* Copy the rnodes for the functor set. */
 DROP TABLE IF EXISTS RNodes;
-CREATE TABLE RNodes AS
+CREATE TABLE RNodes ENGINE = MEMORY AS
     SELECT
         N.rnid,
         N.TABLE_NAME,
@@ -84,7 +84,7 @@ CREATE TABLE RNodes AS
 
 /* Make comprehensive table for all functor nodes but restricted to the functor set. */
 DROP TABLE IF EXISTS FNodes;
-CREATE TABLE FNodes AS
+CREATE TABLE FNodes ENGINE = MEMORY AS
     SELECT
         1nid AS Fid,
         COLUMN_NAME AS FunctorName,
@@ -115,7 +115,7 @@ CREATE TABLE FNodes AS
 
 
 DROP TABLE IF EXISTS RNodes_pvars;
-CREATE TABLE RNodes_pvars AS
+CREATE TABLE RNodes_pvars ENGINE = MEMORY AS
     SELECT
         N.rnid,
         N.pvid,
@@ -131,7 +131,7 @@ CREATE TABLE RNodes_pvars AS
 
 /* Transfer pvariables.  Only those that occur in the functor set. */
 DROP TABLE IF EXISTS PVariables;
-CREATE TABLE PVariables AS
+CREATE TABLE PVariables ENGINE = MEMORY AS
     SELECT DISTINCT
         P.pvid,
         P.ID_COLUMN_NAME,
@@ -152,7 +152,7 @@ CREATE TABLE PVariables AS
  * FunctorSet.
  */
 DROP TABLE IF EXISTS LatticeRNodes;
-CREATE TABLE LatticeRNodes AS
+CREATE TABLE LatticeRNodes ENGINE = MEMORY AS
     SELECT
         LR.orig_rnid,
         LR.short_rnid

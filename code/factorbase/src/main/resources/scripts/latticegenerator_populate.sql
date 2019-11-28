@@ -6,7 +6,7 @@ CREATE PROCEDURE populateLattice()
 BEGIN
 
 DROP TABLE IF EXISTS lattice_membership;
-CREATE TABLE lattice_membership AS
+CREATE TABLE lattice_membership ENGINE = MEMORY AS
     -- Get the "name"s and "member"s where the "name"s are unique to the local lattice.
     SELECT
         name,
@@ -37,7 +37,7 @@ CREATE TABLE lattice_membership AS
 
 
 DROP TABLE IF EXISTS lattice_rel;
-CREATE TABLE lattice_rel AS
+CREATE TABLE lattice_rel ENGINE = MEMORY AS
     SELECT
         parent,
         child,
@@ -50,7 +50,7 @@ CREATE TABLE lattice_rel AS
 
 
 DROP TABLE IF EXISTS lattice_set;
-CREATE TABLE lattice_set AS
+CREATE TABLE lattice_set ENGINE = MEMORY AS
     SELECT
         LS.name,
         length
@@ -67,7 +67,7 @@ CREATE TABLE lattice_set AS
 
 
 DROP TABLE IF EXISTS lattice_mapping;
-CREATE TABLE lattice_mapping AS
+CREATE TABLE lattice_mapping ENGINE = MEMORY AS
     SELECT
         LMAP.orig_rnid,
         LMAP.short_rnid
