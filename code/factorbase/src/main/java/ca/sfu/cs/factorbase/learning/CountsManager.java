@@ -461,7 +461,7 @@ public class CountsManager {
                     "SELECT " + CTJoinString + " " +
                     "FROM `" + cur_CT_Table + "` " +
 
-                    "UNION " +
+                    "UNION ALL " +
 
                     "SELECT " + CTJoinString + " " +
                     "FROM `" + cur_false_Table + "`, `" + rnid_or + "_join`";
@@ -890,7 +890,7 @@ public class CountsManager {
                     "SELECT " + UnionColumnString + " " +
                     "FROM `" + countsTableName + "` " +
 
-                    "UNION " +
+                    "UNION ALL " +
 
                     "SELECT " + UnionColumnString + " " +
                     "FROM `" + falseTableName + "`, `" + shortRchain + "_join`;";
