@@ -137,6 +137,11 @@ public class MySQLFactorBaseDataBase implements FactorBaseDataBase {
             );
             MySQLScriptRunner.runScript(
                 this.dbConnection,
+                Config.SCRIPTS_DIRECTORY + "metaqueries_initialize.sql",
+                this.baseDatabaseName
+            );
+            MySQLScriptRunner.runScript(
+                this.dbConnection,
                 Config.SCRIPTS_DIRECTORY + "metaqueries_populate.sql",
                 this.baseDatabaseName,
                 "//"
