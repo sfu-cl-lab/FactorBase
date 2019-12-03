@@ -3,8 +3,8 @@
 CREATE PROCEDURE cascadeFS()
 BEGIN
 
-DROP TABLE IF EXISTS 1Nodes;
-CREATE TABLE 1Nodes ENGINE = MEMORY AS
+TRUNCATE 1Nodes;
+INSERT INTO 1Nodes
     SELECT
         N.1nid,
         N.COLUMN_NAME,
@@ -17,8 +17,8 @@ CREATE TABLE 1Nodes ENGINE = MEMORY AS
         N.1nid = F.fid;
 
 
-DROP TABLE IF EXISTS 2Nodes;
-CREATE TABLE 2Nodes ENGINE = MEMORY AS
+TRUNCATE 2Nodes;
+INSERT INTO 2Nodes
     SELECT
         N.2nid,
         N.COLUMN_NAME,
@@ -34,8 +34,8 @@ CREATE TABLE 2Nodes ENGINE = MEMORY AS
 
 
 /* Map the 2nodes to rnodes for the given 2Nodes in the functor set. */
-DROP TABLE IF EXISTS RNodes_2Nodes;
-CREATE TABLE RNodes_2Nodes ENGINE = MEMORY AS
+TRUNCATE RNodes_2Nodes;
+INSERT INTO RNodes_2Nodes
     SELECT
         N.rnid,
         N.2nid,
@@ -48,8 +48,8 @@ CREATE TABLE RNodes_2Nodes ENGINE = MEMORY AS
 
 
 /* Copy the rnodes for the functor set. */
-DROP TABLE IF EXISTS RNodes;
-CREATE TABLE RNodes ENGINE = MEMORY AS
+TRUNCATE RNodes;
+INSERT INTO RNodes
     SELECT
         N.rnid,
         N.TABLE_NAME,
@@ -83,8 +83,8 @@ CREATE TABLE RNodes ENGINE = MEMORY AS
 
 
 /* Make comprehensive table for all functor nodes but restricted to the functor set. */
-DROP TABLE IF EXISTS FNodes;
-CREATE TABLE FNodes ENGINE = MEMORY AS
+TRUNCATE FNodes;
+INSERT INTO FNodes
     SELECT
         1nid AS Fid,
         COLUMN_NAME AS FunctorName,
@@ -114,8 +114,8 @@ CREATE TABLE FNodes ENGINE = MEMORY AS
         RNodes;
 
 
-DROP TABLE IF EXISTS RNodes_pvars;
-CREATE TABLE RNodes_pvars ENGINE = MEMORY AS
+TRUNCATE RNodes_pvars;
+INSERT INTO RNodes_pvars
     SELECT
         N.rnid,
         N.pvid,
@@ -130,8 +130,8 @@ CREATE TABLE RNodes_pvars ENGINE = MEMORY AS
 
 
 /* Transfer pvariables.  Only those that occur in the functor set. */
-DROP TABLE IF EXISTS PVariables;
-CREATE TABLE PVariables ENGINE = MEMORY AS
+TRUNCATE PVariables;
+INSERT INTO PVariables
     SELECT DISTINCT
         P.pvid,
         P.ID_COLUMN_NAME,
@@ -151,8 +151,8 @@ CREATE TABLE PVariables ENGINE = MEMORY AS
  * Prepare lattice generator by copying information from LatticeRNodes in the "_setup" database, restricted to the
  * FunctorSet.
  */
-DROP TABLE IF EXISTS LatticeRNodes;
-CREATE TABLE LatticeRNodes ENGINE = MEMORY AS
+TRUNCATE LatticeRNodes;
+INSERT INTO LatticeRNodes
     SELECT
         LR.orig_rnid,
         LR.short_rnid
@@ -161,9 +161,5 @@ CREATE TABLE LatticeRNodes ENGINE = MEMORY AS
         RNodes R
     WHERE
         LR.orig_rnid = R.rnid;
-
-
-ALTER TABLE LatticeRNodes
-    ADD UNIQUE INDEX rnid_UNIQUE (short_rnid ASC);
 
 END//

@@ -110,9 +110,19 @@ public class MySQLFactorBaseDataBase implements FactorBaseDataBase {
 
             MySQLScriptRunner.runScript(
                 this.dbConnection,
+                Config.SCRIPTS_DIRECTORY + "latticegenerator_initialize_local.sql",
+                this.baseDatabaseName
+            );
+            MySQLScriptRunner.runScript(
+                this.dbConnection,
                 Config.SCRIPTS_DIRECTORY + "latticegenerator_populate.sql",
                 this.baseDatabaseName,
                 "//"
+            );
+            MySQLScriptRunner.runScript(
+                this.dbConnection,
+                Config.SCRIPTS_DIRECTORY + "transfer_initialize.sql",
+                this.baseDatabaseName
             );
             MySQLScriptRunner.runScript(
                 this.dbConnection,
@@ -123,6 +133,11 @@ public class MySQLFactorBaseDataBase implements FactorBaseDataBase {
             MySQLScriptRunner.runScript(
                 this.dbConnection,
                 Config.SCRIPTS_DIRECTORY + "modelmanager_initialize.sql",
+                this.baseDatabaseName
+            );
+            MySQLScriptRunner.runScript(
+                this.dbConnection,
+                Config.SCRIPTS_DIRECTORY + "metaqueries_initialize.sql",
                 this.baseDatabaseName
             );
             MySQLScriptRunner.runScript(
