@@ -1,7 +1,7 @@
 language: java
 dist: trusty
 addons:
-  mariadb: '10.0'
+  mariadb: '10.3'
 jdk:
   - oraclejdk8
 before_script:

@@ -75,7 +75,7 @@ public class CountsManager {
 
         try (Statement statement = con_BN.createStatement()) {
             statement.execute("DROP SCHEMA IF EXISTS " + databaseName_CT + ";");
-            statement.execute("CREATE SCHEMA IF NOT EXISTS " + databaseName_CT + ";");
+            statement.execute("CREATE SCHEMA " + databaseName_CT + " COLLATE utf8_general_ci;");
         }
 
         // Propagate metadata based on the FunctorSet.
