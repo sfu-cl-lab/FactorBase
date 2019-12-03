@@ -570,13 +570,13 @@ public class BayesBaseH {
 
         Statement st1 = con2.createStatement();
 
-        // TODO: Revisit how the orig_rnids are retrieved.
         ResultSet rs = st1.executeQuery(
-            "select orig_rnid as RChain " +
-            "from lattice_set " +
-            "join lattice_mapping " +
-            "on lattice_set.name = lattice_mapping.orig_rnid " +
-            "where lattice_set.length = 1;"
+            "SELECT " +
+                "name AS RChain " +
+            "FROM " +
+                "lattice_set " +
+            "WHERE " +
+                "lattice_set.length = 1;"
         );
 
         ArrayList<String> rnode_ids = new ArrayList<String>();
