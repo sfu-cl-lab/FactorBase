@@ -60,6 +60,7 @@ import ca.sfu.cs.factorbase.graph.Edge;
 import ca.sfu.cs.factorbase.jbn.BayesNet_Learning_main;
 import ca.sfu.cs.factorbase.lattice.RelationshipLattice;
 import ca.sfu.cs.factorbase.util.MySQLScriptRunner;
+import ca.sfu.cs.factorbase.util.RuntimeLogger;
 
 import com.mysql.jdbc.Connection;
 
@@ -115,7 +116,9 @@ public class BayesBaseH {
         String rchain = globalLattice.getLongestRChain();
 
         // Structure learning.
+        long start = System.currentTimeMillis();
         StructureLearning(database, con2, ctTablesGenerated, globalLattice);
+        RuntimeLogger.logRunTime(logger, "Structure Learning", start, System.currentTimeMillis());
 
         /**
          * OS: Nov 17, 2016. It can happen that Tetrad learns a forbidden edge. Argh. To catch this, we delete forbidden edges from any insertion. But then
@@ -152,33 +155,29 @@ public class BayesBaseH {
             if (Flag_UseLocal_CT) {
                 logger.fine("\n For BN_ScoreComputation.  use local_CT to compute the local_CP.");
             } else {
+                start = System.currentTimeMillis();
                 // For FunctorWrapper, do NOT have to use the local_CT, or HAVE TO change the weight learning part. June 18 2014.
                 CPGenerator.Generator(databaseName, con2); // May 22, 2014 zqian, computing the score for link analysis off.
                 CP mycp = new CP(databaseName2, databaseName3);
                 mycp.cp();
-                logger.fine("\n Parameter learning is done.");
-                //  For FunctorWrapper
+                RuntimeLogger.logRunTime(logger, "Parameter Learning", start, System.currentTimeMillis());
             }
 
             // Score Bayes net: compute KL divergence, and log-likelihood (average probability of node value given its Markov blanket, compared to database frequencies)
             // May 7th, zqian, For RDN do not need to do the smoothing
             // COMPUTE KLD
-            long l = System.currentTimeMillis(); // @zqian: measure structure learning time
-
+            start = System.currentTimeMillis();
             if (opt3.equals("1")) {
-                logger.fine("\n KLD_generator.KLDGenerator.");
                 KLD_generator.KLDGenerator(databaseName, con2);
+                RuntimeLogger.logRunTime(logger, "KLD Generator (KLDGenerator)", start, System.currentTimeMillis());
             } else {
-                logger.fine("\n KLD_generator.smoothed_CP.");
                 KLD_generator.smoothed_CP(rchain, con2);
+                RuntimeLogger.logRunTime(logger, "KLD Generator (Smoothed CP)", start, System.currentTimeMillis());
             }
 
             // Generating the bif file, in order to feed into UBC tool (bayes.jar). Based on the largest relationship chain.
             // Need CP tables.
             BIF_Generator.generate_bif(databaseName, "Bif_" + databaseName + ".xml", con2);
-
-            long l2 = System.currentTimeMillis(); // @zqian: measure structure learning time.
-            logger.fine("smoothed_CP Time(ms): " + (l2 - l) + " ms.\n");
         } else {
             logger.fine("\n Structure Learning is DONE. \n NO parameter learning for Continuous data."); // @zqian
         }
@@ -570,13 +569,13 @@ public class BayesBaseH {
 
         Statement st1 = con2.createStatement();
 
-        // TODO: Revisit how the orig_rnids are retrieved.
         ResultSet rs = st1.executeQuery(
-            "select orig_rnid as RChain " +
-            "from lattice_set " +
-            "join lattice_mapping " +
-            "on lattice_set.name = lattice_mapping.orig_rnid " +
-            "where lattice_set.length = 1;"
+            "SELECT " +
+                "name AS RChain " +
+            "FROM " +
+                "lattice_set " +
+            "WHERE " +
+                "lattice_set.length = 1;"
         );
 
         ArrayList<String> rnode_ids = new ArrayList<String>();
