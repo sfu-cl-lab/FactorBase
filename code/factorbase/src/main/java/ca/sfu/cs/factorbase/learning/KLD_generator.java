@@ -31,6 +31,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
+import java.math.BigDecimal;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -500,9 +501,13 @@ public class KLD_generator {
                     "WHERE " + whereclause + " " + escapedNodeName + " <> '" + CV1 + "';"
                 );
                 rst_temp2.absolute(1);
-                float SubTot = rst_temp2.getFloat(1);
+                BigDecimal subTotal = rst_temp2.getBigDecimal(1);
+                float cp = new BigDecimal(1).subtract(subTotal).floatValue();
 
-                String query_temp1 = "UPDATE `" + table_final_smoothed + "` SET CP = 1 - " + SubTot + " WHERE " + whereclause + " " + escapedNodeName + " = '" + CV1 + "';";
+                String query_temp1 =
+                    "UPDATE `" + table_final_smoothed + "` " +
+                    "SET CP = " + cp + " " +
+                    "WHERE " + whereclause + " " + escapedNodeName + " = '" + CV1 + "';";
                 st1.execute(query_temp1);
             }
 
