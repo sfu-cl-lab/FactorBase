@@ -417,7 +417,7 @@ public class CountsManager {
                         "FROM `" + cur_CT_Table + "`;";
                 }
 
-                String createStringflat = "create table "+cur_flat_Table+" as "+queryStringflat;
+                String createStringflat = "CREATE TABLE " + cur_flat_Table + " ENGINE = MEMORY AS " + queryStringflat;
                 logger.fine("\n create flat String : " + createStringflat );         
                 st3.execute(createStringflat);      //create flat table
 
@@ -765,7 +765,7 @@ public class CountsManager {
             }
 
             String flatTableName = shortRchain + "_flat";
-            String createString = "CREATE TABLE `" + flatTableName + "` AS " + queryString;
+            String createString = "CREATE TABLE `" + flatTableName + "` ENGINE = MEMORY AS " + queryString;
             logger.fine("\n create String : " + createString );
             st3.execute(createString);
 
