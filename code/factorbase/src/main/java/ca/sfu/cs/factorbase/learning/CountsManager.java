@@ -25,6 +25,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.StringJoiner;
 import java.util.logging.Logger;
 
 import ca.sfu.cs.common.Configuration.Config;
@@ -351,22 +352,23 @@ public class CountsManager {
 
 
                 ResultSet rs2 = st2.executeQuery("SELECT DISTINCT Entries FROM MetaQueries WHERE Lattice_Point = '" + rchain + "' and '"+removed+"' = EntryType and ClauseType = 'SELECT' and TableType = 'Star';");
-                String selectString = makeCommaSepQuery(rs2, "Entries", ", ");
+                List<String> columns = extractEntries(rs2, "Entries");
+                String selectString = makeDelimitedString(columns, ", ");
                 logger.fine("Select String : " + selectString);
                 rs2.close();
                 //  create mult query string
                 ResultSet rs3 = st2.executeQuery("SELECT DISTINCT Entries FROM MetaQueries WHERE Lattice_Point = '" + rchain + "' and '"+removed+"' = EntryType and ClauseType = 'FROM' and TableType = 'Star';");
-                String MultString = makeStarSepQuery(rs3, "Entries", " * ");
+                columns = extractEntries(rs3, "Entries");
+                String MultString = makeStarSepQuery(columns);
                 logger.fine("Mult String : " + MultString+ " as `MULT`");
                 rs3.close();
                 //  create from query string
-                ResultSet rs4 = st2.executeQuery("SELECT DISTINCT Entries FROM MetaQueries WHERE Lattice_Point = '" + rchain + "' and '"+removed+"' = EntryType and ClauseType = 'FROM' and TableType = 'Star';");
-                String fromString = makeCommaSepQuery(rs4, "Entries", ", ");
+                String fromString = makeDelimitedString(columns, ", ");
                 logger.fine("From String : " + fromString);          
-                rs4.close();
                 //  create where query string
                 ResultSet rs5 = st2.executeQuery("SELECT DISTINCT Entries FROM MetaQueries WHERE Lattice_Point = '" + rchain + "' and '"+removed+"' = EntryType and ClauseType = 'WHERE' and TableType = 'Star';");
-                String whereString = makeCommaSepQuery(rs5, "Entries", " AND ");
+                columns = extractEntries(rs5, "Entries");
+                String whereString = makeDelimitedString(columns, " AND ");
                logger.fine("Where String : " + whereString);
                 rs5.close();
                 //  create the final query
@@ -453,7 +455,8 @@ public class CountsManager {
                     "WHERE table_schema = '" + databaseName_CT + "' " +
                     "AND table_name = '" + cur_CT_Table + "';"
                 );
-                String CTJoinString = makeUnionSepQuery(rs_45, "Entries", ", ");
+                columns = extractEntries(rs_45, "Entries");
+                String CTJoinString = makeEscapedCommaSepQuery(columns);
                 logger.fine("CT Join String : " + CTJoinString);
 
                 //join false table with join table to add in rnid (= F) and 2nid (= n/a). then can union with CT table
@@ -496,6 +499,7 @@ public class CountsManager {
         logger.fine("\n Build CT_RChain_TABLES for length = "+len+" are DONE \n" );
     }
 
+
     /* building pvars_counts*/
     private static void BuildCT_Pvars() throws SQLException {
         long l = System.currentTimeMillis(); //@zqian : measure structure learning time
@@ -523,14 +527,17 @@ public class CountsManager {
                     "TableType = 'Counts';"
             );
 
-            String selectString = makeCommaSepQuery(rs2, "Entries", ", ");
+            List<String> columns = extractEntries(rs2, "Entries");
+            String selectString = makeDelimitedString(columns, ", ");
             logger.fine("Select String : " + selectString);
             //  create from query string
             ResultSet rs3 = st2.executeQuery("select distinct Entries from MetaQueries where Lattice_Point = '" + pvid + "' and ClauseType = 'FROM' and TableType = 'Counts' ;");
-            String fromString = makeCommaSepQuery(rs3, "Entries", ", ");
+            columns = extractEntries(rs3, "Entries");
+            String fromString = makeDelimitedString(columns, ", ");
 
             ResultSet rs_6 = st2.executeQuery("select distinct Entries from MetaQueries where Lattice_Point = '" + pvid + "' and ClauseType = 'GROUPBY' and TableType = 'Counts' ;");
-            String GroupByString = makeCommaSepQuery(rs_6, "Entries", ", ");
+            columns = extractEntries(rs_6, "Entries");
+            String GroupByString = makeDelimitedString(columns, ", ");
 
             /*
              *  Check for groundings on pvid
@@ -550,11 +557,9 @@ public class CountsManager {
                 logger.severe( "No WHERE clause for groundings" );
             }
 
-            if ( null != rsGrounding )
-            {
-
-                whereString = makeCommaSepQuery(rsGrounding, "Entries", " AND ");
-
+            if (null != rsGrounding) {
+                columns = extractEntries(rsGrounding, "Entries");
+                whereString = makeDelimitedString(columns, " AND ");
             }
 
             logger.fine( "whereString:" + whereString );
@@ -660,7 +665,8 @@ public class CountsManager {
             "AND TableType = 'Counts';"
         );
 
-        String selectString = makeCommaSepQuery(rs2, "Entries", ", ");
+        List<String> columns = extractEntries(rs2, "Entries");
+        String selectString = makeDelimitedString(columns, ", ");
         logger.fine("SELECT String: " + selectString);
 
         // Create FROM query string.
@@ -672,7 +678,8 @@ public class CountsManager {
             "AND TableType = 'Counts';"
         );
 
-        String fromString = makeCommaSepQuery(rs3, "Entries", ", ");
+        columns = extractEntries(rs3, "Entries");
+        String fromString = makeDelimitedString(columns, ", ");
         logger.fine("FROM String: " + fromString);
 
         // Create WHERE query string.
@@ -684,7 +691,8 @@ public class CountsManager {
             "AND TableType = 'Counts';"
         );
 
-        String whereString = makeCommaSepQuery(rs4, "Entries", " AND ");
+        columns = extractEntries(rs4, "Entries");
+        String whereString = makeDelimitedString(columns, " AND ");
 
         // Create the final query.
         String queryString =
@@ -705,7 +713,8 @@ public class CountsManager {
                 "AND TableType = 'Counts';"
             );
 
-            String GroupByString = makeCommaSepQuery(rs_6, "Entries", ", ");
+            columns = extractEntries(rs_6, "Entries");
+            String GroupByString = makeDelimitedString(columns, ", ");
 
             if (!GroupByString.isEmpty()) {
                 queryString = queryString + " GROUP BY "  + GroupByString;
@@ -746,11 +755,13 @@ public class CountsManager {
 
             //  create select query string
             ResultSet rs2 = st2.executeQuery("select distinct Entries from MetaQueries where Lattice_Point = '" + rchain + "' and TableType = 'Flat' and ClauseType = 'SELECT';");
-            String selectString = makeCommaSepQuery(rs2, "Entries", ", ");
+            List<String> columns = extractEntries(rs2, "Entries");
+            String selectString = makeDelimitedString(columns, ", ");
 
             //  create from query string
             ResultSet rs3 = st2.executeQuery("select distinct Entries from MetaQueries where Lattice_Point = '" + rchain + "' and TableType = 'Flat' and ClauseType = 'FROM';" );
-            String fromString = makeCommaSepQuery(rs3, "Entries", ", ");
+            columns = extractEntries(rs3, "Entries");
+            String fromString = makeDelimitedString(columns, ", ");
 
             //  create the final query
             String queryString = "Select " + selectString + " from " + fromString ;
@@ -758,7 +769,8 @@ public class CountsManager {
             //  create group by query string
             if (!cont.equals("1")) {
                 ResultSet rs_6 = st2.executeQuery("select distinct Entries from MetaQueries where Lattice_Point = '" + rchain + "' and TableType = 'Flat' and ClauseType = 'GROUPBY';");
-                String GroupByString = makeCommaSepQuery(rs_6, "Entries", ", ");
+                columns = extractEntries(rs_6, "Entries");
+                String GroupByString = makeDelimitedString(columns, ", ");
 
                 if (!GroupByString.isEmpty()) queryString = queryString + " group by"  + GroupByString;
                 logger.fine("Query String : " + queryString );
@@ -805,18 +817,19 @@ public class CountsManager {
             //  create select query string
             
             ResultSet rs2 = st2.executeQuery("select distinct Entries from MetaQueries where Lattice_Point = '" + rchain + "' and TableType = 'Star' and ClauseType = 'SELECT';");
-            String selectString = makeCommaSepQuery(rs2, "Entries", ", ");
+            List<String> columns = extractEntries(rs2, "Entries");
+            String selectString = makeDelimitedString(columns, ", ");
 
 
             //  create from MULT string
             ResultSet rs3 = st2.executeQuery("select distinct Entries from MetaQueries where Lattice_Point = '" + rchain + "' and TableType = 'Star' and ClauseType = 'FROM';");
-            String MultString = makeStarSepQuery(rs3, "Entries", " * ");
+            columns = extractEntries(rs3, "Entries");
+            String MultString = makeStarSepQuery(columns);
             //makes the aggregate function to be used in the select clause //
             // looks like rs3 and rs4 contain the same data. Ugly! OS August 24, 2017
 
             //  create from query string
-            ResultSet rs4 = st2.executeQuery("select distinct Entries from MetaQueries where Lattice_Point = '" + rchain + "' and TableType = 'Star' and ClauseType = 'FROM';");
-            String fromString = makeCommaSepQuery(rs4, "Entries", ", ");
+            String fromString = makeDelimitedString(columns, ", ");
 
             //  create the final query
             String queryString = "";
@@ -880,7 +893,8 @@ public class CountsManager {
             );
             // reading the column names from information_schema.columns, and the output will remove the "`" automatically,
             // however some columns contain "()" and MySQL does not support "()" well, so we have to add the "`" back.
-            String UnionColumnString = makeUnionSepQuery(rs5, "Entries", ", ");
+            List<String> columns = extractEntries(rs5, "Entries");
+            String UnionColumnString = makeEscapedCommaSepQuery(columns);
 
             String ctTableName = shortRchain + "_CT";
 
@@ -937,8 +951,9 @@ public class CountsManager {
                 "AND TableType = 'Join';"
             );
 
-            String additionalColumns = makeCommaSepQuery(rs2, "Entries", ", ");
             String ColumnString = "`" + orig_rnid + "` VARCHAR(5)";
+            List<String> columns = extractEntries(rs2, "Entries");
+            String additionalColumns = makeDelimitedString(columns, ", ");
             if (!additionalColumns.isEmpty()) {
                 ColumnString += ", " + additionalColumns;
             }
@@ -958,59 +973,76 @@ public class CountsManager {
         logger.fine("\n Rnodes_joins are DONE \n" );
     }
 
-    /**
-     * for _star  adding "`"
-     * @param rs
-     * @param colName
-     * @param del
-     * @return
-     * @throws SQLException
-     */
-    private static String makeStarSepQuery(ResultSet rs, String colName, String del) throws SQLException {
-        ArrayList<String> parts = new ArrayList<String>();
 
-        while(rs.next()){
-            String part = rs.getString(colName) + ".MULT";
-            parts.add(part);
+    /**
+     * Extract the values from the specified column of the given {@code ResultSet}.
+     *
+     * @param results - the ResultSet to extract the values from the specified column.
+     * @param column - the column to extract the values from.
+     * @return the list of values in the specified column of the given {@code ResultSet}.
+     * @throws SQLException if an error occurs when trying to extract the column values.
+     */
+    private static List<String> extractEntries(ResultSet results, String column) throws SQLException {
+        ArrayList<String> values = new ArrayList<String>();
+        while (results.next()) {
+            values.add(results.getString(column));
         }
 
-        return String.join(del, parts);
+        return values;
     }
 
 
     /**
-     * for _CT part, adding "`"
-     * @param rs
-     * @param colName
-     * @param del
-     * @return
-     * @throws SQLException
+     * Generate the multiplication string between the columns necessary to generate an _star table.
+     *
+     * @param columns - the columns to multiply together.
+     * @return the multiplication string between the columns necessary to generate an _star table.
      */
-    private static String makeUnionSepQuery(ResultSet rs, String colName, String del) throws SQLException {
-    
-        ArrayList<String> parts = new ArrayList<String>();
-
-        while(rs.next()){
-            parts.add("`"+rs.getString(colName)+"`");
+    private static String makeStarSepQuery(List<String> columns) {
+        String[] parts = new String[columns.size()];
+        int index = 0;
+        for (String column : columns) {
+            parts[index] = column + ".MULT";
+            index++;
         }
-        return String.join(del, parts);
+
+        return String.join(" * ", parts);
     }
 
+
     /**
-     * separate the entries by ","
-     * @param rs
-     * @param colName
-     * @param del
-     * @return
-     * @throws SQLException
+     * Generate an escaped, comma delimited list of columns to generate an _CT table.
+     *
+     * @param columns - the columns to escape using backticks "`" and make a CSV with.
+     * @return an escaped, comma delimited list of columns to generate an _CT table.
      */
-    private static String makeCommaSepQuery(ResultSet rs, String colName, String del) throws SQLException {
-        ArrayList<String> parts = new ArrayList<String>();
-        while(rs.next()){
-            parts.add(rs.getString(colName));
+    private static String makeEscapedCommaSepQuery(List<String> columns) {
+        StringJoiner escapedCSV = new StringJoiner("`, `", "`", "`");
+
+        for (String column : columns) {
+            escapedCSV.add(column);
         }
 
-        return String.join(del, parts);
+        return escapedCSV.toString();
+    }
+
+
+    /**
+     * Generate a delimited string of columns.
+     *
+     * @param columns - the columns to make a delimited string with.
+     * @param delimiter - the delimiter to use for the delimited string.
+     * @return a delimited string of columns.
+     */
+    private static String makeDelimitedString(List<String> columns, String delimiter) {
+        String[] parts = new String[columns.size()];
+        int index = 0;
+        for (String column : columns) {
+            parts[index] = column;
+            index++;
+        }
+
+        return String.join(delimiter, parts);
     }
 
 
