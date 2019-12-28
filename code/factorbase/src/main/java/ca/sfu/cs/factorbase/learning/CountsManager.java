@@ -951,9 +951,9 @@ public class CountsManager {
                 "AND TableType = 'Join';"
             );
 
-            String ColumnString = "`" + orig_rnid + "` VARCHAR(5)";
             List<String> columns = extractEntries(rs2, "Entries");
             String additionalColumns = makeDelimitedString(columns, ", ");
+            String ColumnString = "`" + orig_rnid + "` CHAR(1)";
             if (!additionalColumns.isEmpty()) {
                 ColumnString += ", " + additionalColumns;
             }
