@@ -24,7 +24,9 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.StringJoiner;
 import java.util.logging.Logger;
 
@@ -33,6 +35,7 @@ import ca.sfu.cs.factorbase.data.FunctorNodesInfo;
 import ca.sfu.cs.factorbase.lattice.LatticeGenerator;
 import ca.sfu.cs.factorbase.lattice.RelationshipLattice;
 import ca.sfu.cs.factorbase.util.MySQLScriptRunner;
+import ca.sfu.cs.factorbase.util.QueryGenerator;
 import ca.sfu.cs.factorbase.util.Sort_merge3;
 
 import com.mysql.jdbc.Connection;
@@ -665,8 +668,8 @@ public class CountsManager {
             "AND TableType = 'Counts';"
         );
 
-        List<String> columns = extractEntries(rs2, "Entries");
-        String selectString = makeDelimitedString(columns, ", ");
+        List<String> selectAliases = extractEntries(rs2, "Entries");
+        String selectString = makeDelimitedString(selectAliases, ", ");
         logger.fine("SELECT String: " + selectString);
 
         // Create FROM query string.
@@ -678,8 +681,8 @@ public class CountsManager {
             "AND TableType = 'Counts';"
         );
 
-        columns = extractEntries(rs3, "Entries");
-        String fromString = makeDelimitedString(columns, ", ");
+        List<String> fromAliases = extractEntries(rs3, "Entries");
+        String fromString = makeDelimitedString(fromAliases, ", ");
         logger.fine("FROM String: " + fromString);
 
         // Create WHERE query string.
@@ -691,7 +694,7 @@ public class CountsManager {
             "AND TableType = 'Counts';"
         );
 
-        columns = extractEntries(rs4, "Entries");
+        List<String> columns = extractEntries(rs4, "Entries");
         String whereString = makeDelimitedString(columns, " AND ");
 
         // Create the final query.
@@ -722,12 +725,13 @@ public class CountsManager {
         }
 
         String countsTableName = shortRchain + "_counts";
-        String createString = "CREATE TABLE `" + countsTableName + "`" + " AS " + queryString;
-        logger.fine("CREATE string: " + createString);
+        String createString = makeCountsTableQuery(countsTableName, selectAliases, fromAliases);
+        st3.execute(createString);
 
+        String insertString = "INSERT INTO `" + countsTableName + "` " + queryString;
         st3.execute("SET tmp_table_size = " + dbTemporaryTableSize + ";");
         st3.executeQuery("SET max_heap_table_size = " + dbTemporaryTableSize + ";");
-        st3.execute(createString);
+        st3.execute(insertString);
 
         // Close statements.
         st2.close();
@@ -735,6 +739,7 @@ public class CountsManager {
 
         return countsTableName;
     }
+
 
     /**
      * building the _flat tables
@@ -1043,6 +1048,64 @@ public class CountsManager {
         }
 
         return String.join(delimiter, parts);
+    }
+
+
+    /**
+     * Create a query to generate an "_counts" table.
+     *
+     * @param countsTableName - the name of the "_counts" table that the query returned will generate when executed.
+     * @param columnAliases - list of column aliases of the form "&lt;column&gt; AS &lt;alias&gt;".
+     * @param tableAliases - list of table aliases of the form "&lt;table&gt; AS &lt;alias&gt;".
+     * @return a query to generate an "_counts" table.
+     * @throws SQLException if there are issues trying to retrieve the column data type information for the tables in
+     *                      the given table aliases list.
+     */
+    private static String makeCountsTableQuery(
+        String countsTableName,
+        List<String> columnAliases,
+        List<String> tableAliases
+    ) throws SQLException {
+        String[] tableNames = new String[tableAliases.size()];
+        int index = 0;
+
+        // for loop to extract the table names from the alias Strings.
+        for (String tableAlias : tableAliases) {
+            String fullyQualifiedTableName = tableAlias.split(" AS ")[0];
+            String tableName = fullyQualifiedTableName.split("\\.")[1];
+            tableNames[index] = tableName;
+            index++;
+        }
+
+        // Retrieve the data type information for the columns of the tables extracted in the for loop above.
+        ResultSet columnInfo = MySQLScriptRunner.callSP(con_BN, "getColumnsInfo", String.join(",", tableNames));
+
+        Map<String, String> columnDataTypes = new HashMap<String, String>();
+        columnDataTypes.put("\"T\"", "CHAR(1)");
+        columnDataTypes.put("COUNT(*)", "BIGINT(21)");
+
+        // while loop to store the data type information.
+        while(columnInfo.next()) {
+            columnDataTypes.put(
+                columnInfo.getString("column_name"),
+                columnInfo.getString("DataType")
+            );
+        }
+
+        String[] columns = new String[columnAliases.size()];
+        index = 0;
+
+        for (String columnAlias : columnAliases) {
+            String[] columnComponents = columnAlias.split(" AS ");
+            String fullyQualifiedColumnName = columnComponents[0];
+            String[] columnNameComponents = fullyQualifiedColumnName.split("\\.");
+            String columnName = columnNameComponents[columnNameComponents.length - 1];
+            String columnNameAlias = columnComponents[1].replace("\"", "");
+            columns[index] = columnNameAlias + " " + columnDataTypes.get(columnName);
+            index++;
+        }
+
+        return QueryGenerator.createTableQuery(countsTableName, columns);
     }
 
 
