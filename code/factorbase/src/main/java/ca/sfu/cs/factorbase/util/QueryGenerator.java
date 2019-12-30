@@ -140,7 +140,7 @@ public final class QueryGenerator {
      * @param table - the name of the table to insert the data into.
      * @param child - the child variable to insert into the table.
      * @param parents - the parent variables to insert into the table.
-     * @return String that will insert the given variables into the specified table.
+     * @return a String that will insert the given variables into the specified table.
      */
     public static String createSimpleExtendedInsertQuery(String table, String child, Set<String> parents) {
         StringBuilder builder = new StringBuilder("INSERT INTO ");
@@ -169,7 +169,7 @@ public final class QueryGenerator {
      * Generates a MySQL TRUNCATE String that removes all the data from the specified table.
      *
      * @param table - the name of the table to truncate.
-     * @return String that will remove all the data from the specified table.
+     * @return a String that will remove all the data from the specified table.
      */
     public static String createTruncateQuery(String table) {
         StringBuilder builder = new StringBuilder("TRUNCATE ");
