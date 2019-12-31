@@ -507,7 +507,12 @@ public class CountsManager {
     private static void BuildCT_Pvars() throws SQLException {
         long l = System.currentTimeMillis(); //@zqian : measure structure learning time
         Statement st = con_BN.createStatement();
-        ResultSet rs = st.executeQuery("select * from PVariables;");
+        ResultSet rs = st.executeQuery(
+            "SELECT " +
+                "pvid " +
+            "FROM " +
+                "PVariables;"
+        );
 
         while(rs.next()){
             //  get pvid for further use
