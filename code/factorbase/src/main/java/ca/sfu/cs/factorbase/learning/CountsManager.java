@@ -168,7 +168,7 @@ public class CountsManager {
         BuildCT_Pvars();
         
         // preparing the _join part for _CT tables
-        BuildCT_Rnodes_join();
+        Map<String, String> joinTableQueries = createJoinTableQueries();
 
         if (linkCorrelation.equals("1") && relationshipLattice.getHeight() != 0) {
             // handling Rnodes with Lattice Moebius Transform
@@ -182,7 +182,7 @@ public class CountsManager {
             BuildCT_Rnodes_star(rchainInfos);
 
             // Building the _false tables first and then the _CT tables.
-            BuildCT_Rnodes_CT(rchainInfos);
+            BuildCT_Rnodes_CT(rchainInfos, joinTableQueries);
             
             //building the _CT tables. Going up the Rchain lattice
             for(int len = 2; len <= latticeHeight; len++)
@@ -190,7 +190,7 @@ public class CountsManager {
                 rchainInfos = relationshipLattice.getRChainsInfo(len);
                 logger.fine("now we're here for Rchain!");
                 logger.fine("Building Time(ms) for Rchain >=2 \n");
-                BuildCT_RChain_flat(rchainInfos, len);
+                BuildCT_RChain_flat(rchainInfos, len, joinTableQueries);
                 logger.fine(" Rchain! are done");
             }
         }
@@ -304,11 +304,16 @@ public class CountsManager {
 
     /**
      * Building the _CT tables. Going up the Rchain lattice ( When rchain.length >=2)
-     * @param rchainInfos: FunctorNodesInfos for the RChains to build the "_CT" tables for.
-     * @param int : length of the RChain
+     * @param rchainInfos - FunctorNodesInfos for the RChains to build the "_CT" tables for.
+     * @param len - length of the RChains to consider.
+     * @param joinTableQueries - {@code Map} to retrieve the associated query to create a derived JOIN table.
      * @throws SQLException if there are issues executing the SQL queries.
      */
-    private static void BuildCT_RChain_flat(List<FunctorNodesInfo> rchainInfos, int len) throws SQLException {
+    private static void BuildCT_RChain_flat(
+        List<FunctorNodesInfo> rchainInfos,
+        int len,
+        Map<String, String> joinTableQueries
+    ) throws SQLException {
         logger.fine("\n ****************** \n" +
                 "Building the _CT tables for Length = "+len +"\n" );
         int fc=0;
@@ -470,7 +475,9 @@ public class CountsManager {
                     "UNION ALL " +
 
                     "SELECT " + CTJoinString + " " +
-                    "FROM `" + cur_false_Table + "`, `" + rnid_or + "_join`";
+                    "FROM " +
+                        "`" + cur_false_Table + "`, " +
+                        "(" + joinTableQueries.get(rnid_or) + ") AS JOIN_TABLE;";
 
                 String Next_CT_Table = "";
 
@@ -860,9 +867,18 @@ public class CountsManager {
     }
 
     /**
-     * building the _false tables first and then the _CT tables
+     * Create the CT table for the given RChains.  This is done by building the "_false" tables first, then cross
+     * joining it with the associated JOIN (derived) table, and then have the result UNIONed with the proper
+     * "_counts" table.
+     *
+     * @param rchainInfos - FunctorNodesInfos for the RChains to build the "_CT" tables for.
+     * @param joinTableQueries - {@code Map} to retrieve the associated query to create a derived JOIN table.
+     * @throws SQLException if there are issues executing the SQL queries.
      */
-    private static void BuildCT_Rnodes_CT(List<FunctorNodesInfo> rchainInfos) throws SQLException {
+    private static void BuildCT_Rnodes_CT(
+        List<FunctorNodesInfo> rchainInfos,
+        Map<String, String> joinTableQueries
+    ) throws SQLException {
         long l = System.currentTimeMillis(); //@zqian : measure structure learning time
         for (FunctorNodesInfo rchainInfo : rchainInfos) {
             // Get the short and full form rnids for further use.
@@ -912,8 +928,9 @@ public class CountsManager {
                     "UNION ALL " +
 
                     "SELECT " + UnionColumnString + " " +
-                    "FROM `" + falseTableName + "`, `" + shortRchain + "_join`;";
-
+                    "FROM " +
+                        "`" + falseTableName + "`, " +
+                        "(" + joinTableQueries.get(shortRchain) + ") AS JOIN_TABLE;";
             logger.fine("\n create CT table String : " + createCTString );
             st3.execute(createCTString);
 
@@ -927,13 +944,19 @@ public class CountsManager {
         logger.fine("\n Rnodes_false and Rnodes_CT  are DONE \n" );
     }
 
+
     /**
-     * preparing the _join part for _CT tables
-     *
+     * Create queries that can be used to create JOIN tables as derived tables in "FROM" clauses.
+     * <p>
+     * JOIN tables are used to help represent the case where a relationship is false and its attributes are undefined.
+     * JOIN tables are cross joined with "_false" tables to help generate the "_CT" tables.
+     * </p>
+     * @return a {@code Map} object containing queries that can be used to create JOIN tables as derived tables.  The
+     *         entries in the {@code Map} object have the form of &lt;short_rnid&gt;:&lt;joinTableQuery&gt;.
      * @throws SQLException if there are issues executing the SQL queries.
      */
-    private static void BuildCT_Rnodes_join() throws SQLException {
-        //set up the join tables that represent the case where a relationship is false and its attributes are undefined //
+    private static Map<String, String> createJoinTableQueries() throws SQLException {
+        Map<String, String> joinTableQueries = new HashMap<String, String>();
 
         Statement st = con_BN.createStatement();
         ResultSet rs = st.executeQuery("select orig_rnid, short_rnid from LatticeRNodes ;");
@@ -946,7 +969,6 @@ public class CountsManager {
             logger.fine("\n orig_rnid : " + orig_rnid);
 
             Statement st2 = con_BN.createStatement();
-            Statement st3 = con_CT.createStatement();
 
             //  create ColumnString
             ResultSet rs2 = st2.executeQuery(
@@ -958,24 +980,20 @@ public class CountsManager {
 
             List<String> columns = extractEntries(rs2, "Entries");
             String additionalColumns = makeDelimitedString(columns, ", ");
-            String ColumnString = "`" + orig_rnid + "` CHAR(1)";
+            StringBuilder joinTableQuerybuilder = new StringBuilder("SELECT \"F\" AS `" + orig_rnid + "`");
             if (!additionalColumns.isEmpty()) {
-                ColumnString += ", " + additionalColumns;
+                joinTableQuerybuilder.append(", " + additionalColumns);
             }
-            //if there's no relational attribute, then should remove the "," in the ColumnString
-            String createString = "CREATE TABLE `" + short_rnid + "_join` (" + ColumnString + ");";
-                logger.fine("create String : " + createString);
 
-            st3.execute(createString);
-            st3.execute("INSERT INTO `" + short_rnid + "_join` (`" + orig_rnid + "`) VALUES ('F');");
-// should probably make this an insertion in the script: add a column for rnid with default value 'F' OS August 24, 2017
+            joinTableQueries.put(short_rnid, joinTableQuerybuilder.toString());
             st2.close();
-            st3.close();
-
         }
+
         rs.close();
         st.close();
         logger.fine("\n Rnodes_joins are DONE \n" );
+
+        return joinTableQueries;
     }
 
 

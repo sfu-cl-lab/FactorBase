@@ -11,9 +11,9 @@ SELECT
     'COLUMN' as ClauseType,
     '2nid' as EntryType,
     CONCAT(
-        '`',
+        '"N/A" AS `',
         2nid,
-        '` VARCHAR(5) DEFAULT "N/A"'
+        '`'
     ) AS Entries
 FROM
     RNodes_2Nodes N;
