@@ -523,7 +523,7 @@ public class CountsManager {
             Statement st3 = con_CT.createStatement();
             //  create select query string
             ResultSet rs2 = st2.executeQuery(
-                "SELECT DISTINCT " +
+                "SELECT " +
                     "Entries " +
                 "FROM " +
                     "MetaQueries " +
@@ -539,11 +539,33 @@ public class CountsManager {
             String selectString = makeDelimitedString(columns, ", ");
             logger.fine("Select String : " + selectString);
             //  create from query string
-            ResultSet rs3 = st2.executeQuery("select distinct Entries from MetaQueries where Lattice_Point = '" + pvid + "' and ClauseType = 'FROM' and TableType = 'Counts' ;");
+            ResultSet rs3 = st2.executeQuery(
+                "SELECT " +
+                    "Entries " +
+                "FROM " +
+                    "MetaQueries " +
+                "WHERE " +
+                    "Lattice_Point = '" + pvid + "' " +
+                "AND " +
+                    "ClauseType = 'FROM' " +
+                "AND " +
+                    "TableType = 'Counts';"
+            );
             columns = extractEntries(rs3, "Entries");
             String fromString = makeDelimitedString(columns, ", ");
 
-            ResultSet rs_6 = st2.executeQuery("select distinct Entries from MetaQueries where Lattice_Point = '" + pvid + "' and ClauseType = 'GROUPBY' and TableType = 'Counts' ;");
+            ResultSet rs_6 = st2.executeQuery(
+                "SELECT " +
+                    "Entries " +
+                "FROM " +
+                    "MetaQueries " +
+                "WHERE " +
+                    "Lattice_Point = '" + pvid + "' " +
+                "AND " +
+                    "ClauseType = 'GROUPBY' " +
+                "AND " +
+                    "TableType = 'Counts';"
+            );
             columns = extractEntries(rs_6, "Entries");
             String GroupByString = makeDelimitedString(columns, ", ");
 
@@ -556,12 +578,20 @@ public class CountsManager {
             ResultSet rsGrounding = null;
             String whereString = "";
 
-            try
-            {
-                rsGrounding = st2.executeQuery("select distinct Entries from MetaQueries where Lattice_Point = '" + pvid + "' and ClauseType = 'WHERE' and TableType = 'Counts' ;");
-            }
-            catch( MySQLSyntaxErrorException e )
-            {
+            try {
+                rsGrounding = st2.executeQuery(
+                    "SELECT " +
+                        "Entries " +
+                    "FROM " +
+                        "MetaQueries " +
+                    "WHERE " +
+                        "Lattice_Point = '" + pvid + "' " +
+                    "AND " +
+                        "ClauseType = 'WHERE' " +
+                    "AND " +
+                        "TableType = 'Counts';"
+                );
+            } catch(MySQLSyntaxErrorException e) {
                 logger.severe( "No WHERE clause for groundings" );
             }
 
