@@ -2,12 +2,13 @@ CREATE PROCEDURE `getColumnsInfo`(tableNames TEXT)
 BEGIN
     SELECT
         column_name,
-        CONCAT(
-            data_type,
-            '(',
-            IFNULL(numeric_precision, character_maximum_length),
-            ')'
-        ) AS DataType
+        CASE WHEN
+            data_type = 'enum'
+        THEN
+            CONCAT("VARCHAR(", CHARACTER_MAXIMUM_LENGTH, ")")
+        ELSE
+            column_type
+        END AS DataType
     FROM
         information_schema.columns
     WHERE
