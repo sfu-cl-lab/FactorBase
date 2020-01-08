@@ -9,6 +9,7 @@ import java.sql.Statement;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -37,6 +38,7 @@ import com.mysql.jdbc.Connection;
 
 public class MySQLFactorBaseDataBase implements FactorBaseDataBase {
 
+    private Map<String, ContingencyTableGenerator> ctGeneratorCache = new HashMap<String, ContingencyTableGenerator>();
     private static final String CONNECTION_STRING = "jdbc:{0}/{1}";
     private String baseDatabaseName;
     private Connection dbConnection;
@@ -426,6 +428,22 @@ public class MySQLFactorBaseDataBase implements FactorBaseDataBase {
                 );
             }
 
+            // Compute a ContingencyTableGenerator cache key and check to see if we have already produced the
+            // ContingencyTableGenerator before.
+            Set<String> familySet = new HashSet<String>(allFunctorNodesExceptChild);
+            familySet.add(child);
+            List<String> familyList = new ArrayList<String>(familySet);
+            Collections.sort(familyList);
+            String familyCSV = String.join(",", familyList);
+            String familyKey = functorInfos.getID() + familyCSV;
+
+            if (ctGeneratorCache.containsKey(familyKey)) {
+                ContingencyTableGenerator ctGenerator = ctGeneratorCache.get(familyKey);
+                int childColumnIndex = ctGenerator.getColumnIndex(child);
+                int[] parentColumnIndices = ctGenerator.getColumnIndices(parents);
+                return ctGenerator.generateCT(childColumnIndex, parentColumnIndices, totalNumberOfStates);
+            }
+
             // Generate CT tables.
             CountsManager.buildCT();
 
@@ -445,6 +463,7 @@ public class MySQLFactorBaseDataBase implements FactorBaseDataBase {
 
             DataExtractor dataextractor = new MySQLDataExtractor(query, dbInfo.getCountColumnName(), dbInfo.isDiscrete());
             ContingencyTableGenerator ctGenerator = new ContingencyTableGenerator(dataextractor);
+            ctGeneratorCache.put(familyKey, ctGenerator);
             int childColumnIndex = ctGenerator.getColumnIndex(child);
             int[] parentColumnIndices = ctGenerator.getColumnIndices(parents);
             return ctGenerator.generateCT(childColumnIndex, parentColumnIndices, totalNumberOfStates);
