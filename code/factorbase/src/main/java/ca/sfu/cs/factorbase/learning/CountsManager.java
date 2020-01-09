@@ -401,7 +401,7 @@ public class CountsManager {
                 String rnid_or=removedShort;
             
                 String cur_star_Table = removedShort + len + "_" + fc + "_star";
-                String createStarString = "create table "+cur_star_Table +" as "+queryString;
+                String createStarString = "create table "+cur_star_Table +" ENGINE = MEMORY as "+queryString;
 
                 logger.fine("\n create star String : " + createStarString );
                 st3.execute(createStarString);      //create star table     
@@ -492,7 +492,7 @@ public class CountsManager {
                 cur_CT_Table = Next_CT_Table;
 
                 // Create CT table.
-                st3.execute("CREATE TABLE `" + Next_CT_Table + "` AS " + QueryStringCT);
+                st3.execute("CREATE TABLE `" + Next_CT_Table + "` ENGINE = MEMORY AS " + QueryStringCT);
                 rs1.previous();
 
                 fc++;   
@@ -622,7 +622,7 @@ public class CountsManager {
             }
 
             String countsTableName = pvid + "_counts";
-            String createString = "CREATE TABLE " + countsTableName + " AS " + queryString;
+            String createString = "CREATE TABLE " + countsTableName + " ENGINE = MEMORY AS " + queryString;
             logger.fine("Create String: " + createString);
             st3.execute(createString);
 
@@ -887,7 +887,7 @@ public class CountsManager {
             }
 
             String starTableName = shortRchain + "_star";
-            String createString = "CREATE TABLE `" + starTableName + "` AS " + queryString;
+            String createString = "CREATE TABLE `" + starTableName + "` ENGINE = MEMORY AS " + queryString;
             logger.fine("\n create String : " + createString );
             st3.execute(createString);
 
@@ -956,7 +956,7 @@ public class CountsManager {
 
             //join false table with join table to introduce rnid (=F) and 2nids (= n/a). Then union result with counts table.
             String createCTString =
-                "CREATE TABLE `" + ctTableName + "` AS " +
+                "CREATE TABLE `" + ctTableName + "` ENGINE = MEMORY AS " +
                     "SELECT " + UnionColumnString + " " +
                     "FROM `" + countsTableName + "` " +
 

@@ -64,7 +64,7 @@ public class Sort_merge3 {
             long time1 = System.currentTimeMillis();
 
             st2.execute("DROP TABLE IF EXISTS " + table3 + ";");
-            st2.execute("CREATE TABLE " + table3 + " SELECT * FROM " + table1 + " LIMIT 0;");
+            st2.execute("CREATE TABLE " + table3 + " ENGINE = MEMORY AS SELECT * FROM " + table1 + " LIMIT 0;");
             String query = "INSERT INTO " + table3 + " " + QueryGenerator.createSubtractionQuery(table1, table2, "MULT", orderList);
             st2.execute(query);
 
@@ -77,7 +77,7 @@ public class Sort_merge3 {
         } else { // Aug 18, 2014 zqian: Handle the extreme case when there's only `mult` column.
             logger.fine("\n \t Handle the extreme case when there's only `mult` column \n");
             st2.execute("DROP TABLE IF EXISTS " + table3 + ";");
-            st2.execute("CREATE TABLE " + table3 + " SELECT * FROM " + table1 + " LIMIT 0;");
+            st2.execute("CREATE TABLE " + table3 + " ENGINE = MEMORY AS SELECT * FROM " + table1 + " LIMIT 0;");
             logger.fine("INSERT INTO " + table3 + " SELECT (" + table1 + ".mult - " + table2 + ".mult) AS mult FROM " + table1 + ", " + table2 + ";");
             st2.execute("INSERT INTO " + table3 + " SELECT (" + table1 + ".mult - " + table2 + ".mult) AS mult FROM " + table1 + ", " + table2 + ";");
         }
