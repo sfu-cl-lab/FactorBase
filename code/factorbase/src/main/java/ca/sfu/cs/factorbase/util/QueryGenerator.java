@@ -191,7 +191,7 @@ public final class QueryGenerator {
         StringBuilder builder = new StringBuilder("CREATE TABLE ");
         builder.append("`" + tableName + "` (");
         builder.append(String.join(",", columns));
-        builder.append(");");
+        builder.append(") ENGINE = MEMORY;");
 
         return builder.toString();
     }
