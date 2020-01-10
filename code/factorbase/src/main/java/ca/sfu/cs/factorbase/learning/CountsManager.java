@@ -73,10 +73,6 @@ public class CountsManager {
      * @throws SQLException if there are issues executing the SQL queries.
      */
     public static void buildCT() throws SQLException {
-        //connect to db using jdbc
-        con_BN = connectDB(databaseName_BN);
-        con_CT = connectDB(databaseName_CT);
-
         try (Statement statement = con_BN.createStatement()) {
             statement.execute("DROP SCHEMA IF EXISTS " + databaseName_CT + ";");
             statement.execute("CREATE SCHEMA " + databaseName_CT + " COLLATE utf8_general_ci;");
@@ -90,7 +86,6 @@ public class CountsManager {
 
         // building CT tables for Rchain
         CTGenerator(relationshipLattice);
-        disconnectDB();
     }
 
 
@@ -218,7 +213,6 @@ public class CountsManager {
      * Generate the global counts tables.
      */
     public static void buildRChainsGlobalCounts() throws SQLException {
-        con_BN = connectDB(databaseName_BN);
         try(
             Connection conGlobalCounts = connectDB(databaseName_global_counts)
         ) {
@@ -229,8 +223,6 @@ public class CountsManager {
             // Generate the global counts in the "_global_counts" database.
             buildRChainCounts(conGlobalCounts, relationshipLattice);
         }
-
-        con_BN.close();
     }
 
 
@@ -1222,11 +1214,24 @@ public class CountsManager {
         return String.join(del, parts);
     }
 
+
     /**
-     * Disconnect all the databases
-     * @throws SQLException
+     * Connect to all the relevant databases.
+     *
+     * @throws SQLException if there are issues connecting to the databases.
      */
-    private static void disconnectDB() throws SQLException {
+    public static void connectDB() throws SQLException {
+        con_BN = connectDB(databaseName_BN);
+        con_CT = connectDB(databaseName_CT);
+    }
+
+
+    /**
+     * Disconnect from all the relevant databases.
+     *
+     * @throws SQLException if there are issues disconnecting from the databases.
+     */
+    public static void disconnectDB() throws SQLException {
         con_BN.close();
         con_CT.close();
     }
