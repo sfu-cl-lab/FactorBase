@@ -38,7 +38,7 @@ import com.mysql.jdbc.Connection;
 
 public class MySQLFactorBaseDataBase implements FactorBaseDataBase {
 
-    private Map<String, ContingencyTableGenerator> ctGeneratorCache = new HashMap<String, ContingencyTableGenerator>();
+    private ContingencyTableGeneratorCache ctGeneratorCache = new ContingencyTableGeneratorCache();
     private static final String CONNECTION_STRING = "jdbc:{0}/{1}";
     private String baseDatabaseName;
     private Connection dbConnection;
@@ -432,13 +432,8 @@ public class MySQLFactorBaseDataBase implements FactorBaseDataBase {
             // ContingencyTableGenerator before.
             Set<String> familySet = new HashSet<String>(allFunctorNodesExceptChild);
             familySet.add(child);
-            List<String> familyList = new ArrayList<String>(familySet);
-            Collections.sort(familyList);
-            String familyCSV = String.join(",", familyList);
-            String familyKey = functorInfos.getID() + familyCSV;
-
-            if (ctGeneratorCache.containsKey(familyKey)) {
-                ContingencyTableGenerator ctGenerator = ctGeneratorCache.get(familyKey);
+            ContingencyTableGenerator ctGenerator = ctGeneratorCache.get(functorInfos.getID(), familySet);
+            if (ctGenerator != null) {
                 int childColumnIndex = ctGenerator.getColumnIndex(child);
                 int[] parentColumnIndices = ctGenerator.getColumnIndices(parents);
                 return ctGenerator.generateCT(childColumnIndex, parentColumnIndices, totalNumberOfStates);
@@ -462,8 +457,8 @@ public class MySQLFactorBaseDataBase implements FactorBaseDataBase {
             );
 
             DataExtractor dataextractor = new MySQLDataExtractor(query, dbInfo.getCountColumnName(), dbInfo.isDiscrete());
-            ContingencyTableGenerator ctGenerator = new ContingencyTableGenerator(dataextractor);
-            ctGeneratorCache.put(familyKey, ctGenerator);
+            ctGenerator = new ContingencyTableGenerator(dataextractor);
+            ctGeneratorCache.put(ctGenerator);
             int childColumnIndex = ctGenerator.getColumnIndex(child);
             int[] parentColumnIndices = ctGenerator.getColumnIndices(parents);
             return ctGenerator.generateCT(childColumnIndex, parentColumnIndices, totalNumberOfStates);
@@ -760,5 +755,56 @@ public class MySQLFactorBaseDataBase implements FactorBaseDataBase {
                 "FROM " +
                     "InheritedEdges;"
         );
+    }
+
+
+    /**
+     * Static inner Class containing the caching logic for {@code ContingencyTableGenerator}s.
+     */
+    private static class ContingencyTableGeneratorCache {
+        private Map<String, ContingencyTableGenerator> cache = new HashMap<String, ContingencyTableGenerator>();
+        private String previousGeneratedKey = null;
+
+
+        /**
+         * Store the given {@code ContingencyTableGenerator} into the cache.
+         * <p>
+         * This method will store the given {@code ContingencyTableGenerator} into the cache using the key that was
+         * generated in the last call to {@link ContingencyTableGeneratorCache#get(String, Set)}.
+         * </p>
+         *
+         * @param ctGenerator - the {@code ContingencyTableGenerator} to store into the cache.
+         */
+        public void put(ContingencyTableGenerator ctGenerator) {
+            this.cache.put(previousGeneratedKey, ctGenerator);
+        }
+
+
+        /**
+         * Attempt to retrieve the {@code ContingencyTableGenerator} from the cache.
+         *
+         * @param context - the lattice point that we are currently at in the relationship lattice.
+         * @param familySet - the names of the nodes in the family.
+         * @return the {@code ContingencyTableGenerator} found in the cache or null if a match isn't found.
+         */
+        public ContingencyTableGenerator get(String context, Set<String> familySet) {
+            this.previousGeneratedKey = generateCacheKey(context, familySet);
+            return this.cache.get(this.previousGeneratedKey);
+        }
+
+
+        /**
+         * Generate the cache key based on the given information.
+         *
+         * @param context - the lattice point that we are currently at in the relationship lattice.
+         * @param familySet - the names of the nodes in the family.
+         * @return the cache key based on the given context and family set.
+         */
+        private static String generateCacheKey(String context, Set<String> familySet) {
+            List<String> familyList = new ArrayList<String>(familySet);
+            Collections.sort(familyList);
+            String familyCSV = String.join(",", familyList);
+            return context + familyCSV;
+        }
     }
 }
