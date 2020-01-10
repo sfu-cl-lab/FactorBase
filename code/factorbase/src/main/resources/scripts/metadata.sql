@@ -594,7 +594,7 @@ CREATE TABLE Groundings (pvid varchar(40), id varchar(256), primary key (pvid, i
 CREATE TABLE FunctorSet (
     Fid VARCHAR(199),
     PRIMARY KEY (Fid), FOREIGN KEY (Fid) REFERENCES FNodes(Fid)
-);
+) ENGINE = MEMORY;
 
 /* By default, FunctorSet contains all Fnodes */
 INSERT  INTO FunctorSet 
