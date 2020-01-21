@@ -764,6 +764,7 @@ public class MySQLFactorBaseDataBase implements FactorBaseDataBase {
     private static class ContingencyTableGeneratorCache {
         private Map<String, ContingencyTableGenerator> cache = new HashMap<String, ContingencyTableGenerator>();
         private String previousGeneratedKey = null;
+        private String cacheContext = null;
 
 
         /**
@@ -789,6 +790,12 @@ public class MySQLFactorBaseDataBase implements FactorBaseDataBase {
          */
         public ContingencyTableGenerator get(String context, Set<String> familySet) {
             this.previousGeneratedKey = generateCacheKey(context, familySet);
+
+            if (this.cacheContext == null || !this.cacheContext.equals(context)) {
+                this.cacheContext = context;
+                this.cache.clear();
+            }
+
             return this.cache.get(this.previousGeneratedKey);
         }
 
