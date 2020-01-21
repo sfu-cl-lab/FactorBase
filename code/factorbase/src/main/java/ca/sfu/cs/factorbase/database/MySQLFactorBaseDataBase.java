@@ -762,8 +762,8 @@ public class MySQLFactorBaseDataBase implements FactorBaseDataBase {
      * Static inner Class containing the caching logic for {@code ContingencyTableGenerator}s.
      */
     private static class ContingencyTableGeneratorCache {
-        private Map<String, ContingencyTableGenerator> cache = new HashMap<String, ContingencyTableGenerator>();
-        private String previousGeneratedKey = null;
+        private Map<Integer, Map<Set<String>, ContingencyTableGenerator>> cache = new HashMap<Integer, Map<Set<String>, ContingencyTableGenerator>>();
+        private Set<String> currentFamilySet = null;
         private String cacheContext = null;
 
 
@@ -777,7 +777,12 @@ public class MySQLFactorBaseDataBase implements FactorBaseDataBase {
          * @param ctGenerator - the {@code ContingencyTableGenerator} to store into the cache.
          */
         public void put(ContingencyTableGenerator ctGenerator) {
-            this.cache.put(previousGeneratedKey, ctGenerator);
+            Map<Set<String>, ContingencyTableGenerator> cachedValue = this.cache.computeIfAbsent(
+                this.currentFamilySet.size(),
+                (key) -> new HashMap<Set<String>, ContingencyTableGenerator>()
+            );
+
+            cachedValue.put(this.currentFamilySet, ctGenerator);
         }
 
 
@@ -789,28 +794,19 @@ public class MySQLFactorBaseDataBase implements FactorBaseDataBase {
          * @return the {@code ContingencyTableGenerator} found in the cache or null if a match isn't found.
          */
         public ContingencyTableGenerator get(String context, Set<String> familySet) {
-            this.previousGeneratedKey = generateCacheKey(familySet);
+            this.currentFamilySet = familySet;
 
             if (this.cacheContext == null || !this.cacheContext.equals(context)) {
                 this.cacheContext = context;
                 this.cache.clear();
             }
 
-            return this.cache.get(this.previousGeneratedKey);
-        }
+            Map<Set<String>, ContingencyTableGenerator> cachedGenerators = this.cache.computeIfAbsent(
+                familySet.size(),
+                (key) -> new HashMap<Set<String>, ContingencyTableGenerator>()
+            );
 
-
-        /**
-         * Generate the cache key based on the given information.
-         *
-         * @param familySet - the names of the nodes in the family.
-         * @return the cache key based on the given family set.
-         */
-        private static String generateCacheKey(Set<String> familySet) {
-            List<String> familyList = new ArrayList<String>(familySet);
-            Collections.sort(familyList);
-            String familyCSV = String.join(",", familyList);
-            return familyCSV;
+            return cachedGenerators.get(this.previousFamilySet);
         }
     }
 }
