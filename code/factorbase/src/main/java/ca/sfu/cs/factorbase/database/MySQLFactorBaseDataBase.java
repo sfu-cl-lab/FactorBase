@@ -789,7 +789,7 @@ public class MySQLFactorBaseDataBase implements FactorBaseDataBase {
          * @return the {@code ContingencyTableGenerator} found in the cache or null if a match isn't found.
          */
         public ContingencyTableGenerator get(String context, Set<String> familySet) {
-            this.previousGeneratedKey = generateCacheKey(context, familySet);
+            this.previousGeneratedKey = generateCacheKey(familySet);
 
             if (this.cacheContext == null || !this.cacheContext.equals(context)) {
                 this.cacheContext = context;
@@ -803,15 +803,14 @@ public class MySQLFactorBaseDataBase implements FactorBaseDataBase {
         /**
          * Generate the cache key based on the given information.
          *
-         * @param context - the lattice point that we are currently at in the relationship lattice.
          * @param familySet - the names of the nodes in the family.
-         * @return the cache key based on the given context and family set.
+         * @return the cache key based on the given family set.
          */
-        private static String generateCacheKey(String context, Set<String> familySet) {
+        private static String generateCacheKey(Set<String> familySet) {
             List<String> familyList = new ArrayList<String>(familySet);
             Collections.sort(familyList);
             String familyCSV = String.join(",", familyList);
-            return context + familyCSV;
+            return familyCSV;
         }
     }
 }
