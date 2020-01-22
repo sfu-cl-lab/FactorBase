@@ -14,7 +14,6 @@ public class RelationshipLattice {
     private Map<Integer, List<FunctorNodesInfo>> rchainInfosPerLevel = new HashMap<Integer, List<FunctorNodesInfo>>();
     private int latticeHeight = 0;
     private String longestRChain;
-    private String longestRChainShortID;
 
 
     /**
@@ -45,16 +44,6 @@ public class RelationshipLattice {
 
 
     /**
-     * Retrieve the short version of the name of the longest RChain in the lattice.
-     *
-     * @return the short version of the name of the longest RChain in the lattice.
-     */
-    public String getLongestRChainShortID() {
-        return this.longestRChainShortID;
-    }
-
-
-    /**
      * Add the given functor node information of an RChain to the specified lattice level.
      *
      * @param rchainInfo - the functor node information of the RChain to add.
@@ -65,7 +54,6 @@ public class RelationshipLattice {
         if (level > this.latticeHeight) {
             this.latticeHeight = level;
             this.longestRChain = rchainInfo.getID();
-            this.longestRChainShortID = rchainInfo.getShortID();
         }
 
         this.rchainInfosPerLevel.computeIfAbsent(

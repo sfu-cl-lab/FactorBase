@@ -189,21 +189,7 @@ public class CountsManager {
                 logger.fine(" Rchain! are done");
             }
         }
-        
 
-        //delete the tuples with MULT=0 in the biggest CT table
-        String BiggestRchain = relationshipLattice.getLongestRChainShortID();
-        logger.fine("\n BiggestRchain: " + BiggestRchain);
-
-        if (BiggestRchain != null)
-        {
-            try (Statement st_CT = con_CT.createStatement()) {
-                String deleteQuery = "DELETE FROM `" + BiggestRchain + "_CT` WHERE MULT = '0';";
-                logger.fine(deleteQuery);
-                st_CT.execute(deleteQuery);
-            }
-        }
-        
         long l2 = System.currentTimeMillis();  //@zqian
         logger.fine("Building Time(ms) for ALL CT tables:  "+(l2-l)+" ms.\n");
     }
@@ -463,13 +449,15 @@ public class CountsManager {
                 String QueryStringCT =
                     "SELECT " + CTJoinString + " " +
                     "FROM `" + cur_CT_Table + "` " +
+                    "WHERE MULT > 0 " +
 
                     "UNION ALL " +
 
                     "SELECT " + CTJoinString + " " +
                     "FROM " +
                         "`" + cur_false_Table + "`, " +
-                        "(" + joinTableQueries.get(rnid_or) + ") AS JOIN_TABLE;";
+                        "(" + joinTableQueries.get(rnid_or) + ") AS JOIN_TABLE " +
+                    "WHERE MULT > 0;";
 
                 String Next_CT_Table = "";
 
@@ -612,6 +600,8 @@ public class CountsManager {
                     queryString = queryString + " GROUP BY " + GroupByString;
                 }
             }
+
+            queryString += " HAVING MULT > 0";
 
             String countsTableName = pvid + "_counts";
             String createString = "CREATE TABLE " + countsTableName + " ENGINE = MEMORY AS " + queryString;
@@ -951,13 +941,15 @@ public class CountsManager {
                 "CREATE TABLE `" + ctTableName + "` ENGINE = MEMORY AS " +
                     "SELECT " + UnionColumnString + " " +
                     "FROM `" + countsTableName + "` " +
+                    "WHERE MULT > 0 " +
 
                     "UNION ALL " +
 
                     "SELECT " + UnionColumnString + " " +
                     "FROM " +
                         "`" + falseTableName + "`, " +
-                        "(" + joinTableQueries.get(shortRchain) + ") AS JOIN_TABLE;";
+                        "(" + joinTableQueries.get(shortRchain) + ") AS JOIN_TABLE " +
+                    "WHERE MULT > 0";
             logger.fine("\n create CT table String : " + createCTString );
             st3.execute(createCTString);
 
