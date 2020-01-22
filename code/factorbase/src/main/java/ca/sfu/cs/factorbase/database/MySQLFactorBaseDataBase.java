@@ -14,6 +14,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 
 import ca.sfu.cs.common.Configuration.Config;
@@ -765,6 +766,7 @@ public class MySQLFactorBaseDataBase implements FactorBaseDataBase {
         private Map<Integer, Map<Set<String>, ContingencyTableGenerator>> cache = new HashMap<Integer, Map<Set<String>, ContingencyTableGenerator>>();
         private Set<String> currentFamilySet = null;
         private String cacheContext = null;
+        private int maxFamilySize = 0;
 
 
         /**
@@ -782,12 +784,16 @@ public class MySQLFactorBaseDataBase implements FactorBaseDataBase {
                 (key) -> new HashMap<Set<String>, ContingencyTableGenerator>()
             );
 
+            this.maxFamilySize = Math.max(this.maxFamilySize, this.currentFamilySet.size());
             cachedValue.put(this.currentFamilySet, ctGenerator);
         }
 
 
         /**
-         * Attempt to retrieve the {@code ContingencyTableGenerator} from the cache.
+         * Attempt to retrieve the {@code ContingencyTableGenerator} from the cache for the given family set.
+         * <p>
+         * This method can return a {@code ContingencyTableGenerator} that is a superset for the given family set.
+         * </p>
          *
          * @param context - the lattice point that we are currently at in the relationship lattice.
          * @param familySet - the names of the nodes in the family.
@@ -796,17 +802,34 @@ public class MySQLFactorBaseDataBase implements FactorBaseDataBase {
         public ContingencyTableGenerator get(String context, Set<String> familySet) {
             this.currentFamilySet = familySet;
 
+            // Reset the cache information when the lattice point (context) changes.
             if (this.cacheContext == null || !this.cacheContext.equals(context)) {
                 this.cacheContext = context;
                 this.cache.clear();
+                this.maxFamilySize = 0;
             }
 
-            Map<Set<String>, ContingencyTableGenerator> cachedGenerators = this.cache.computeIfAbsent(
-                familySet.size(),
-                (key) -> new HashMap<Set<String>, ContingencyTableGenerator>()
-            );
+            // Try to find a ContingencyTableGenerator that exactly matches the given family set.
+            Map<Set<String>, ContingencyTableGenerator> cachedGenerators = this.cache.get(familySet.size());
 
-            return cachedGenerators.get(this.previousFamilySet);
+            if (cachedGenerators != null) {
+                ContingencyTableGenerator ctGenerator = cachedGenerators.get(this.currentFamilySet);
+                if (ctGenerator != null) {
+                    return ctGenerator;
+                }
+            }
+
+            // Try to find a ContingencyTableGenerator that is a superset of the given family set.
+            if (this.maxFamilySize > familySet.size()) {
+                cachedGenerators = this.cache.get(this.maxFamilySize);
+                for (Entry<Set<String>, ContingencyTableGenerator> entry : cachedGenerators.entrySet()) {
+                    if (entry.getKey().containsAll(familySet)) {
+                        return entry.getValue();
+                    }
+                }
+            }
+
+            return null;
         }
     }
 }
