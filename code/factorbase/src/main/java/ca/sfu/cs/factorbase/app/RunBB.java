@@ -60,6 +60,7 @@ public class RunBB {
         } else {
             logger.info("Databases are assumed to be setup!");
         }
+        CountsManager.connectDB();
         RuntimeLogger.logRunTime(logger, "Creating Setup Database", setupStart, System.currentTimeMillis());
 
         // Generate the relationship lattice to guide the structure learning search.
@@ -91,6 +92,10 @@ public class RunBB {
         long cleanupStart = System.currentTimeMillis();
         factorBaseDatabase.cleanupDatabase();
         RuntimeLogger.logRunTime(logger, "Cleanup Database", cleanupStart, System.currentTimeMillis());
+
+        // Disconnect from the database.
+        CountsManager.disconnectDB();
+        factorBaseDatabase.disconnect();
 
         RuntimeLogger.logRunTime(logger, "Total", start, System.currentTimeMillis());
 

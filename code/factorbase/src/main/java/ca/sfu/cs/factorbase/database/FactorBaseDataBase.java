@@ -35,6 +35,14 @@ public interface FactorBaseDataBase {
 
 
     /**
+     * This method should disconnect from any outstanding database connections.
+     *
+     * @throws DataBaseException if an error occurs when attempting to disconnect from the database.
+     */
+    void disconnect() throws DataBaseException;
+
+
+    /**
      * Retrieve all the edges that are not allowed for the given rnode IDs.
      *
      * @param rnodeIDs - a list of the rnode IDs to get the forbidden edges for.

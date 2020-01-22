@@ -180,6 +180,19 @@ public class MySQLFactorBaseDataBase implements FactorBaseDataBase {
     }
 
 
+    @Override
+    public void disconnect() throws DataBaseException {
+        try {
+            this.dbConnection.close();
+        } catch (SQLException e) {
+            throw new DataBaseException(
+                "An error occurred when attempting to disconnect from the database for FactorBase.",
+                e
+            );
+        }
+    }
+
+
     /**
      * Helper method to extract the edges from the given PreparedStatement.
      * @param statement - the PreparedStatement to extract the edge information from.
