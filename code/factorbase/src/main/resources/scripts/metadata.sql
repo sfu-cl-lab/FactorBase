@@ -409,7 +409,8 @@ CREATE table RNodes_MO_NotSelf AS
             AND RelationTables.TABLE_NAME = PVariables.TABLE_NAME
             AND RelationTables.TABLE_NAME = KeyColumns.TABLE_NAME
             AND RelationTables.SelfRelationship = 0
-            AND RelationTables.Many_OneRelationship = 1;
+            AND RelationTables.Many_OneRelationship = 1
+            AND KeyColumns.CONSTRAINT_NAME = 'PRIMARY';
 
 /*fourth case: many-one, self-relationship */
 
