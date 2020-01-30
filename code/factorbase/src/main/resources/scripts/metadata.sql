@@ -156,6 +156,8 @@ We begin with the populations or entities. These have only one primary key.
 CREATE TABLE EntityTables AS SELECT distinct TABLE_NAME, COLUMN_NAME FROM
     KeyColumns T
 WHERE
+    CONSTRAINT_NAME = 'PRIMARY'
+AND
     1 = (SELECT 
             COUNT(COLUMN_NAME)
         FROM
