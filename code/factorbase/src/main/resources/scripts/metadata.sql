@@ -389,7 +389,7 @@ CREATE table RNodes_MO_NotSelf AS
             ForeignKeys_pvars.REFERENCED_TABLE_NAME,
             '(',
             PVariables.pvid,
-            ') = ',
+            ')=',
             ForeignKeys_pvars.pvid
         ) AS rnid,
         ForeignKeys_pvars.TABLE_NAME,
@@ -420,7 +420,7 @@ CREATE table RNodes_MO_Self AS
             ForeignKeys_pvars.REFERENCED_TABLE_NAME,
             '(',
             PVariables.pvid,
-            ') = ',
+            ')=',
             ForeignKeys_pvars.pvid
         ) AS rnid,
         ForeignKeys_pvars.TABLE_NAME,
