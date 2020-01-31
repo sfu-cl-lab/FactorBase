@@ -139,6 +139,7 @@
                     <include>META-INF/services/java.sql.Driver</include>
                     <include>com/mysql/jdbc/authentication/*</include>
                     <include>com/mysql/jdbc/exceptions/jdbc4/CommunicationsException.class</include>
+                    <include>com/mysql/jdbc/exceptions/jdbc4/MySQLIntegrityConstraintViolationException.class</include>
                     <include>com/mysql/jdbc/exceptions/jdbc4/MySQLNonTransientConnectionException.class</include>
                     <include>com/mysql/jdbc/exceptions/jdbc4/MySQLSyntaxErrorException.class</include>
                     <include>com/mysql/jdbc/exceptions/*</include>
