@@ -420,14 +420,6 @@ public class MySQLFactorBaseDataBase implements FactorBaseDataBase {
                 // Combine RNodes of the RChain with the parents to get our final set that has all the FunctorNodes
                 // except the child.
                 allFunctorNodesExceptChild.addAll(parents);
-
-                for (String rnode : rnodes) {
-                    // Update the total number of combination of states possible only if the RNode is not already in
-                    // the FunctorSet.
-                    if (!rnode.equals(child) && !parents.contains(rnode)) {
-                        totalNumberOfStates *= functorInfos.getNumberOfStates(rnode);
-                    }
-                }
             }
             this.dbConnection.setCatalog(this.dbInfo.getSetupDatabaseName());
             try (Statement statement = this.dbConnection.createStatement()) {
