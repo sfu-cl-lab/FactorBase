@@ -155,7 +155,10 @@ public class LatticeGenerator {
         // for loop to merge all the functor node information into a single FunctorNodesInfo for the RChain.
         for (String rnodeID : rnodeIDs) {
             FunctorNodesInfo rnodeFunctorInfo = functorNodesInfos.get(rnodeID);
-            rchainFunctorNodeInfo.merge(rnodeFunctorInfo);
+            // Some RNodes don't have any 1Nodes or 2Nodes so there isn't anything to merge for these cases.
+            if (rnodeFunctorInfo != null) {
+                rchainFunctorNodeInfo.merge(rnodeFunctorInfo);
+            }
         }
 
         return rchainFunctorNodeInfo;

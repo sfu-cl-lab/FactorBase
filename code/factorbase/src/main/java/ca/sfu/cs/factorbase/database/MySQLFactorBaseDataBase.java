@@ -324,6 +324,36 @@ public class MySQLFactorBaseDataBase implements FactorBaseDataBase {
 
 
     /**
+     * Create mappings for all the RNodes of the input database to their FunctorNodeInfo object, which are set to null.
+     *
+     * @return a {@code Map} containing key:value pairs of RNodeID:FunctorNodeInfo.
+     * @throws DataBaseException if an error occurs when attempting to retrieve the information.
+     */
+    private Map<String, FunctorNodesInfo> createNullRNodeFunctorInfoMappings() throws DataBaseException {
+        Map<String, FunctorNodesInfo> rnodeFunctorInfoMappings = new HashMap<String, FunctorNodesInfo>();
+
+        String query =
+            "SELECT " +
+                "rnid " +
+            "FROM " +
+                this.dbInfo.getSetupDatabaseName() + ".RNodes;";
+
+        try (
+            Statement statement = this.dbConnection.createStatement();
+            ResultSet results = statement.executeQuery(query)
+        ) {
+            while (results.next()) {
+                rnodeFunctorInfoMappings.put(results.getString("rnid"), null);
+            }
+        } catch (SQLException e) {
+            throw new DataBaseException("Failed to retrieve all the RNodes of the input database.", e);
+        }
+
+        return rnodeFunctorInfoMappings;
+    }
+
+
+    /**
      * Retrieve the functor node information for all the RNodes.
      *
      * @return Information for all the functor nodes of each RNode in the database.
@@ -393,7 +423,10 @@ public class MySQLFactorBaseDataBase implements FactorBaseDataBase {
             throw new DataBaseException("Failed to retrieve the functor nodes information for the RNodes.", e);
         }
 
-        return functorNodesInfos;
+        Map<String, FunctorNodesInfo> rnodeFunctorInfoMappings = createNullRNodeFunctorInfoMappings();
+        rnodeFunctorInfoMappings.putAll(functorNodesInfos);
+
+        return rnodeFunctorInfoMappings;
     }
 
 
