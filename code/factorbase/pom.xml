@@ -110,6 +110,7 @@
                   <includes>
                     <include>com/google/common/base/Preconditions.class</include>
                     <include>com/google/common/collect/AbstractIndexedListIterator.class</include>
+                    <include>com/google/common/collect/AbstractIterator.class</include>
                     <include>com/google/common/collect/CartesianList*</include>
                     <include>com/google/common/collect/EmptyImmutableSet.class</include>
                     <include>com/google/common/collect/ForwardingCollection.class</include>
@@ -120,7 +121,9 @@
                     <include>com/google/common/collect/ImmutableList*</include>
                     <include>com/google/common/collect/ImmutableSet.class</include>
                     <include>com/google/common/collect/ImmutableAsList.class</include>
+                    <include>com/google/common/collect/Iterators*</include>
                     <include>com/google/common/collect/ObjectArrays.class</include>
+                    <include>com/google/common/collect/PeekingIterator.class</include>
                     <include>com/google/common/collect/RegularImmutableAsList.class</include>
                     <include>com/google/common/collect/RegularImmutableList.class</include>
                     <include>com/google/common/collect/RegularImmutableSet.class</include>
@@ -139,6 +142,7 @@
                     <include>META-INF/services/java.sql.Driver</include>
                     <include>com/mysql/jdbc/authentication/*</include>
                     <include>com/mysql/jdbc/exceptions/jdbc4/CommunicationsException.class</include>
+                    <include>com/mysql/jdbc/exceptions/jdbc4/MySQLDataException.class</include>
                     <include>com/mysql/jdbc/exceptions/jdbc4/MySQLIntegrityConstraintViolationException.class</include>
                     <include>com/mysql/jdbc/exceptions/jdbc4/MySQLNonTransientConnectionException.class</include>
                     <include>com/mysql/jdbc/exceptions/jdbc4/MySQLSyntaxErrorException.class</include>
