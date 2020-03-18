@@ -3,6 +3,7 @@ package ca.sfu.cs.factorbase.exporter.csvexporter;
 import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;
+import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
@@ -16,9 +17,6 @@ import java.util.logging.Logger;
 import ca.sfu.cs.common.Configuration.Config;
 import ca.sfu.cs.factorbase.data.DataExtractor;
 import ca.sfu.cs.factorbase.data.TSVDataExtractor;
-
-import com.mysql.jdbc.Connection;
-import com.mysql.jdbc.exceptions.MySQLSyntaxErrorException;
 
 /**
  * zqian@Nov 21, fixed on bug for loading data into csv files (have to close the file)
@@ -208,7 +206,7 @@ public class CSVPrecomputor {
             ResultSet rs5 = null;
             try {
                 rs5 = st3.executeQuery(queryString);
-            } catch ( MySQLSyntaxErrorException e ) {
+            } catch (SQLException e) {
                 // Table doesn't exist.
                 st3.close();
                 break;

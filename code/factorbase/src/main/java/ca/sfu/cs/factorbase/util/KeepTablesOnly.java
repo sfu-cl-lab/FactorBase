@@ -1,13 +1,12 @@
 package ca.sfu.cs.factorbase.util;
 
+import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.logging.Logger;
-
-import com.mysql.jdbc.Connection;
 
 public class KeepTablesOnly {
     private static Logger logger = Logger.getLogger(KeepTablesOnly.class.getName());

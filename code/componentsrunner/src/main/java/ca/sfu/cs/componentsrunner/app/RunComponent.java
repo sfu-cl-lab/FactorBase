@@ -1,12 +1,11 @@
 package ca.sfu.cs.componentsrunner.app;
 
 import java.io.IOException;
+import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.text.MessageFormat;
-
-import com.mysql.jdbc.Connection;
 
 import ca.sfu.cs.common.Configuration.Config;
 import ca.sfu.cs.factorbase.data.DataExtractor;

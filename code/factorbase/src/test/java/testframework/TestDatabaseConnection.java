@@ -1,9 +1,8 @@
 package testframework;
 
+import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
-
-import com.mysql.jdbc.Connection;
 
 /**
  * Class to connect to a MySQL database so that queries can be tested.

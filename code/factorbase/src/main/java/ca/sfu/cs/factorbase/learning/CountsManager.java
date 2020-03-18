@@ -1,5 +1,7 @@
 package ca.sfu.cs.factorbase.learning;
 
+import java.sql.Connection;
+
 /*zqian, April 1st, 2014 fixed the bug of too many connections by adding con4.close()*/
 
 
@@ -37,9 +39,6 @@ import ca.sfu.cs.factorbase.lattice.RelationshipLattice;
 import ca.sfu.cs.factorbase.util.MySQLScriptRunner;
 import ca.sfu.cs.factorbase.util.QueryGenerator;
 import ca.sfu.cs.factorbase.util.Sort_merge3;
-
-import com.mysql.jdbc.Connection;
-import com.mysql.jdbc.exceptions.jdbc4.MySQLSyntaxErrorException;
 
 public class CountsManager {
 
@@ -578,7 +577,7 @@ public class CountsManager {
                     "AND " +
                         "TableType = 'Counts';"
                 );
-            } catch(MySQLSyntaxErrorException e) {
+            } catch(SQLException e) {
                 logger.severe( "No WHERE clause for groundings" );
             }
 

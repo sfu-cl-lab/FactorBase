@@ -1,18 +1,17 @@
 package ca.sfu.cs.factorbase.data;
 
 import java.io.IOException;
+import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.HashMap;
 import java.util.Map;
-import ca.sfu.cs.factorbase.data.DataExtractor;
+
 import ca.sfu.cs.factorbase.database.FactorBaseDataBaseInfo;
 import ca.sfu.cs.factorbase.exception.DataExtractionException;
 import ca.sfu.cs.factorbase.exporter.csvexporter.CSVPrecomputor;
-
-import com.mysql.jdbc.Connection;
 
 /**
  * Class to generate CT table DataExtractor implementations.

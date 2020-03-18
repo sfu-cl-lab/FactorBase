@@ -38,6 +38,7 @@ package ca.sfu.cs.factorbase.learning;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -62,7 +63,6 @@ import ca.sfu.cs.factorbase.lattice.RelationshipLattice;
 import ca.sfu.cs.factorbase.util.MySQLScriptRunner;
 import ca.sfu.cs.factorbase.util.RuntimeLogger;
 
-import com.mysql.jdbc.Connection;
 
 public class BayesBaseH {
 

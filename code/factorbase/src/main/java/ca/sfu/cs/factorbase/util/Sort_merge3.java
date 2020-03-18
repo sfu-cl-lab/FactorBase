@@ -14,13 +14,12 @@ package ca.sfu.cs.factorbase.util;
  * false: mult1-mult2 ?
  * try: Financial_std_Training1_db.`operation(trans0)_a_star`
  */
+import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.logging.Logger;
-
-import com.mysql.jdbc.Connection;
-import com.mysql.jdbc.Statement;
 
 /**
  * Sort merge version3

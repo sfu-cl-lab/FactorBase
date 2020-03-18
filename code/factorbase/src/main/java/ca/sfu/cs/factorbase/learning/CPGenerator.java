@@ -1,8 +1,7 @@
 package ca.sfu.cs.factorbase.learning;
 
-import com.mysql.jdbc.Connection;
-
 import java.io.IOException;
+import java.sql.Connection;
 
 /**
  * @Jun 6, zqian
