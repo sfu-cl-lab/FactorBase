@@ -378,6 +378,7 @@
                     <include>com/mysql/cj/util/TimeUtil.class</include>
                     <include>com/mysql/cj/util/TimeZoneMapping.properties</include>
                     <include>com/mysql/cj/util/Util.class</include>
+                    <include>com/mysql/jdbc/Driver.class</include>
                   </includes>
                 </filter>
               </filters>

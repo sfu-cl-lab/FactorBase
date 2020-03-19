@@ -271,7 +271,7 @@ public class CountsManager {
     private static Connection connectDB(String databaseName) throws SQLException {
         String CONN_STR = "jdbc:" + dbaddress + "/" + databaseName;
         try {
-            java.lang.Class.forName("com.mysql.jdbc.Driver");
+            java.lang.Class.forName("com.mysql.cj.jdbc.Driver");
         } catch (Exception ex) {
             logger.severe("Unable to load MySQL JDBC driver");
         }
