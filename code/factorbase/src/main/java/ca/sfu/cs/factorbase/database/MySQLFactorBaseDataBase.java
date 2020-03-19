@@ -15,6 +15,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Properties;
 import java.util.Set;
 
 import ca.sfu.cs.common.Configuration.Config;
@@ -65,9 +66,10 @@ public class MySQLFactorBaseDataBase implements FactorBaseDataBase {
         this.dbInfo = dbInfo;
         this.baseDatabaseName = dbname;
         String baseConnectionString = MessageFormat.format(CONNECTION_STRING, dbaddress, dbname);
+        Properties connectionProperties = getConnectionStringProperties(username, password);
 
         try {
-            this.dbConnection = (Connection) DriverManager.getConnection(baseConnectionString, username, password);
+            this.dbConnection = DriverManager.getConnection(baseConnectionString, connectionProperties);
         } catch (SQLException e) {
             throw new DataBaseException("Unable to connect to the provided database.", e);
         }
@@ -792,6 +794,23 @@ public class MySQLFactorBaseDataBase implements FactorBaseDataBase {
                 "FROM " +
                     "InheritedEdges;"
         );
+    }
+
+
+    /**
+     * Generate a {@code Properties} object containing the connection string properties.
+     *
+     * @param username - the username to use when accessing the database.
+     * @param password - the password to use when accessing the database.
+     * @return a {@code Properties} object containing the connection string properties.
+     */
+    public static Properties getConnectionStringProperties (String username, String password) {
+        Properties connectionProperties = new Properties();
+        connectionProperties.put("user", username);
+        connectionProperties.put("password", password);
+        connectionProperties.put("allowLoadLocalInfile", "true");
+
+        return connectionProperties;
     }
 
 

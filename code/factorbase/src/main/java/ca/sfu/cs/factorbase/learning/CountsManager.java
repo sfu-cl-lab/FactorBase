@@ -29,11 +29,13 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 import java.util.StringJoiner;
 import java.util.logging.Logger;
 
 import ca.sfu.cs.common.Configuration.Config;
 import ca.sfu.cs.factorbase.data.FunctorNodesInfo;
+import ca.sfu.cs.factorbase.database.MySQLFactorBaseDataBase;
 import ca.sfu.cs.factorbase.lattice.LatticeGenerator;
 import ca.sfu.cs.factorbase.lattice.RelationshipLattice;
 import ca.sfu.cs.factorbase.util.MySQLScriptRunner;
@@ -269,13 +271,18 @@ public class CountsManager {
      * Connect to database via MySQL JDBC driver
      */
     private static Connection connectDB(String databaseName) throws SQLException {
+        Properties connectionProperties = MySQLFactorBaseDataBase.getConnectionStringProperties(
+            dbUsername,
+            dbPassword
+        );
+
         String CONN_STR = "jdbc:" + dbaddress + "/" + databaseName;
         try {
             java.lang.Class.forName("com.mysql.cj.jdbc.Driver");
         } catch (Exception ex) {
             logger.severe("Unable to load MySQL JDBC driver");
         }
-        return (Connection) DriverManager.getConnection(CONN_STR, dbUsername, dbPassword);
+        return DriverManager.getConnection(CONN_STR, connectionProperties);
     }
 
 

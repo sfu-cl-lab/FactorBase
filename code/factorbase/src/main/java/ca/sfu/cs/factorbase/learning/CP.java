@@ -70,10 +70,12 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.Properties;
 import java.util.StringJoiner;
 import java.util.logging.Logger;
 
 import ca.sfu.cs.common.Configuration.Config;
+import ca.sfu.cs.factorbase.database.MySQLFactorBaseDataBase;
 
 /**
  * Finds conditional probabilities for the Bayes net parameters. Also computes log-likelihood and other scores for each node.
@@ -747,6 +749,11 @@ public class CP {
     }
 
     public static void connectDB() throws SQLException {
+        Properties connectionProperties = MySQLFactorBaseDataBase.getConnectionStringProperties(
+            dbUsername,
+            dbPassword
+        );
+
         String CONN_STR1 = "jdbc:" + dbaddress + "/" + databaseName;
 
         try {
@@ -754,7 +761,7 @@ public class CP {
         } catch (Exception ex) {
             logger.severe("Unable to load MySQL JDBC driver");
         }
-        con1 = DriverManager.getConnection(CONN_STR1, dbUsername, dbPassword);
+        con1 = DriverManager.getConnection(CONN_STR1, connectionProperties);
         java.sql.Statement st = con1.createStatement();
         // TODO: Check to see if other queries are more efficient.
         ResultSet myrchain = st.executeQuery(
