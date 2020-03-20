@@ -156,6 +156,8 @@ We begin with the populations or entities. These have only one primary key.
 CREATE TABLE EntityTables AS SELECT distinct TABLE_NAME, COLUMN_NAME FROM
     KeyColumns T
 WHERE
+    CONSTRAINT_NAME = 'PRIMARY'
+AND
     1 = (SELECT 
             COUNT(COLUMN_NAME)
         FROM
@@ -387,7 +389,7 @@ CREATE table RNodes_MO_NotSelf AS
             ForeignKeys_pvars.REFERENCED_TABLE_NAME,
             '(',
             PVariables.pvid,
-            ') = ',
+            ')=',
             ForeignKeys_pvars.pvid
         ) AS rnid,
         ForeignKeys_pvars.TABLE_NAME,
@@ -407,7 +409,8 @@ CREATE table RNodes_MO_NotSelf AS
             AND RelationTables.TABLE_NAME = PVariables.TABLE_NAME
             AND RelationTables.TABLE_NAME = KeyColumns.TABLE_NAME
             AND RelationTables.SelfRelationship = 0
-            AND RelationTables.Many_OneRelationship = 1;
+            AND RelationTables.Many_OneRelationship = 1
+            AND KeyColumns.CONSTRAINT_NAME = 'PRIMARY';
 
 /*fourth case: many-one, self-relationship */
 
@@ -417,7 +420,7 @@ CREATE table RNodes_MO_Self AS
             ForeignKeys_pvars.REFERENCED_TABLE_NAME,
             '(',
             PVariables.pvid,
-            ') = ',
+            ')=',
             ForeignKeys_pvars.pvid
         ) AS rnid,
         ForeignKeys_pvars.TABLE_NAME,
