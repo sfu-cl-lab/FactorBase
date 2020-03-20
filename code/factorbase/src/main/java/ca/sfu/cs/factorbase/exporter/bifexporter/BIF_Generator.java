@@ -165,7 +165,7 @@ public class BIF_Generator {
                 for (int l = 1; l <= n; l++) {
                     for (int j = 1; j <= (outcomes.get(i)); j++) {
                         rst2.next();
-                        probabilities = probabilities + " " + rst2.getString(1);
+                        probabilities = probabilities + " " + rst2.getBigDecimal(1);
                     }
                 }
             }
@@ -177,7 +177,7 @@ public class BIF_Generator {
                 rst2 = st.executeQuery("SELECT CP FROM " + table_name + " ORDER BY `" + variables.get(i) + "`");
 
                 while (rst2.next()) {
-                    probabilities = probabilities + " " + rst2.getString(1);
+                    probabilities = probabilities + " " + rst2.getBigDecimal(1);
                 }
             }
 
