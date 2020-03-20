@@ -64,7 +64,7 @@
                     <include>nu/xom/characters.dat</include>
                   </includes>
                   <excludes>
-                    <include>nu/xom/IllegalTargetException.class</include>
+                    <exclude>nu/xom/IllegalTargetException.class</exclude>
                     <exclude>nu/xom/Nodes.class</exclude>
                   </excludes>
                 </filter>
