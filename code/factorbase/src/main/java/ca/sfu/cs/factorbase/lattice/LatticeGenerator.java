@@ -1,6 +1,7 @@
 
 package ca.sfu.cs.factorbase.lattice;
 
+import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -12,8 +13,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.StringJoiner;
-
-import com.mysql.jdbc.Connection;
 
 import ca.sfu.cs.factorbase.data.FunctorNodesInfo;
 import ca.sfu.cs.factorbase.util.MySQLScriptRunner;

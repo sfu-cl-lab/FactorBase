@@ -38,12 +38,14 @@ package ca.sfu.cs.factorbase.learning;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Properties;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
@@ -51,6 +53,7 @@ import nu.xom.ParsingException;
 import ca.sfu.cs.common.Configuration.Config;
 import ca.sfu.cs.factorbase.data.FunctorNodesInfo;
 import ca.sfu.cs.factorbase.database.FactorBaseDataBase;
+import ca.sfu.cs.factorbase.database.MySQLFactorBaseDataBase;
 import ca.sfu.cs.factorbase.exception.DataBaseException;
 import ca.sfu.cs.factorbase.exception.DataExtractionException;
 import ca.sfu.cs.factorbase.exception.ScoringException;
@@ -62,7 +65,6 @@ import ca.sfu.cs.factorbase.lattice.RelationshipLattice;
 import ca.sfu.cs.factorbase.util.MySQLScriptRunner;
 import ca.sfu.cs.factorbase.util.RuntimeLogger;
 
-import com.mysql.jdbc.Connection;
 
 public class BayesBaseH {
 
@@ -293,23 +295,28 @@ public class BayesBaseH {
 
 
     private static void connectDB() throws SQLException {
+        Properties connectionProperties = MySQLFactorBaseDataBase.getConnectionStringProperties(
+            dbUsername,
+            dbPassword
+        );
+
         String CONN_STR2 = "jdbc:" + dbaddress + "/" + databaseName2;
         try {
-            java.lang.Class.forName("com.mysql.jdbc.Driver");
+            java.lang.Class.forName("com.mysql.cj.jdbc.Driver");
         } catch (Exception ex) {
             logger.severe("Unable to load MySQL JDBC driver");
         }
 
-        con2 = (Connection) DriverManager.getConnection(CONN_STR2, dbUsername, dbPassword);
+        con2 = DriverManager.getConnection(CONN_STR2, connectionProperties);
 
         String CONN_STR3 = "jdbc:" + dbaddress + "/" + databaseName3;
         try {
-            java.lang.Class.forName("com.mysql.jdbc.Driver");
+            java.lang.Class.forName("com.mysql.cj.jdbc.Driver");
         } catch (Exception ex) {
             logger.severe("Unable to load MySQL JDBC driver");
         }
 
-        con3 = (Connection) DriverManager.getConnection(CONN_STR3, dbUsername, dbPassword);
+        con3 = DriverManager.getConnection(CONN_STR3, connectionProperties);
     }
 
     /** Jun 14
