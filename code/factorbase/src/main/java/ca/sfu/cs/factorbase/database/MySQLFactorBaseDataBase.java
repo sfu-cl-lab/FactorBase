@@ -31,6 +31,7 @@ import ca.sfu.cs.factorbase.exception.DataExtractionException;
 import ca.sfu.cs.factorbase.graph.Edge;
 import ca.sfu.cs.factorbase.lattice.LatticeGenerator;
 import ca.sfu.cs.factorbase.lattice.RelationshipLattice;
+import ca.sfu.cs.factorbase.learning.CountingStrategy;
 import ca.sfu.cs.factorbase.learning.CountsManager;
 import ca.sfu.cs.factorbase.util.KeepTablesOnly;
 import ca.sfu.cs.factorbase.util.MySQLScriptRunner;
@@ -44,6 +45,7 @@ public class MySQLFactorBaseDataBase implements FactorBaseDataBase {
     private Connection dbConnection;
     private FactorBaseDataBaseInfo dbInfo;
     private Map<String, DataExtractor> dataExtractors;
+    private CountingStrategy countingStrategy;
 
 
     /**
@@ -54,6 +56,7 @@ public class MySQLFactorBaseDataBase implements FactorBaseDataBase {
      * @param dbname - the name of the database with the original data. e.g. unielwin
      * @param username - the username to use when accessing the database.
      * @param password - the password to use when accessing the database.
+     * @param countingStrategy - the counting strategy to use during structure learning.
      * @throws SQLException if there is a problem connecting to the required database.
      */
     public MySQLFactorBaseDataBase(
@@ -61,10 +64,12 @@ public class MySQLFactorBaseDataBase implements FactorBaseDataBase {
         String dbaddress,
         String dbname,
         String username,
-        String password
+        String password,
+        CountingStrategy countingStrategy
     ) throws DataBaseException {
         this.dbInfo = dbInfo;
         this.baseDatabaseName = dbname;
+        this.countingStrategy = countingStrategy;
         String baseConnectionString = MessageFormat.format(CONNECTION_STRING, dbaddress, dbname);
         Properties connectionProperties = getConnectionStringProperties(username, password);
 
@@ -479,7 +484,7 @@ public class MySQLFactorBaseDataBase implements FactorBaseDataBase {
             }
 
             // Generate CT tables.
-            CountsManager.buildCT();
+            CountsManager.buildCT(this.countingStrategy.useProjection());
 
             String tableName = null;
             String shortID = functorInfos.getShortID();

@@ -13,6 +13,7 @@ import ca.sfu.cs.factorbase.exception.DataExtractionException;
 import ca.sfu.cs.factorbase.exception.ScoringException;
 import ca.sfu.cs.factorbase.lattice.RelationshipLattice;
 import ca.sfu.cs.factorbase.learning.BayesBaseH;
+import ca.sfu.cs.factorbase.learning.CountingStrategy;
 import ca.sfu.cs.factorbase.learning.CountsManager;
 import ca.sfu.cs.factorbase.util.LoggerConfig;
 import ca.sfu.cs.factorbase.util.RuntimeLogger;
@@ -41,6 +42,12 @@ public class RunBB {
         Config config = new Config();
         long configEnd = System.currentTimeMillis();
         logger.info("Start Program...");
+
+        CountingStrategy countingStrategy = CountingStrategy.determineStrategy(
+            config.getProperty("CountingStrategy")
+        );
+        logger.info("Counting strategy: " + countingStrategy);
+
         RuntimeLogger.logRunTime(logger, "Logger + Config Initialization", start, configEnd);
 
         long databaseStart = System.currentTimeMillis();
@@ -49,7 +56,8 @@ public class RunBB {
             config.getProperty("dbaddress"),
             config.getProperty("dbname"),
             config.getProperty("dbusername"),
-            config.getProperty("dbpassword")
+            config.getProperty("dbpassword"),
+            countingStrategy
         );
         RuntimeLogger.logRunTime(logger, "Creating Database Connection", databaseStart, System.currentTimeMillis());
 
@@ -69,10 +77,9 @@ public class RunBB {
         RuntimeLogger.logRunTime(logger, "Creating Global Lattice", globalLatticeStart, System.currentTimeMillis());
 
         // Learn a Bayesian Network.
-        boolean usePreCounting = config.getProperty("PreCounting").equals("1");
-        if (usePreCounting) {
+        if (countingStrategy.isPrecount()) {
             long buildCTStart = System.currentTimeMillis();
-            CountsManager.buildCT();
+            CountsManager.buildCT(false);
             RuntimeLogger.logRunTime(logger, "Creating CT Tables", buildCTStart, System.currentTimeMillis());
         } else {
             long buildGlobalCountsStart = System.currentTimeMillis();
@@ -84,7 +91,7 @@ public class RunBB {
         BayesBaseH.runBBH(
             factorBaseDatabase,
             globalLattice,
-            usePreCounting
+            countingStrategy
         );
         RuntimeLogger.logRunTime(logger, "Running BayesBaseH", bayesBaseHStart, System.currentTimeMillis());
 
