@@ -95,7 +95,7 @@ public class BayesBaseH {
      *
      * @param database - {@code FactorBaseDataBase} to help extract the necessary information required to learn a
      *                   Bayesian network for the input database.
-     * @param ctTablesGenerated - True if CT tables have already been generated via precounting; otherwise false.
+     * @param countingStrategy - the counting strategy to use during structure learning.
      * @throws IOException if there are issues reading and writing various files.
      * @throws SQLException if there are issues executing the SQL queries.
      * @throws ParsingException if there are issues reading the BIF file.
@@ -106,7 +106,7 @@ public class BayesBaseH {
     public static void runBBH(
         FactorBaseDataBase database,
         RelationshipLattice globalLattice,
-        boolean ctTablesGenerated
+        CountingStrategy countingStrategy
     ) throws SQLException, IOException, DataBaseException, DataExtractionException, ParsingException, ScoringException {
         initProgram(FirstRunning);
         connectDB();
@@ -119,7 +119,13 @@ public class BayesBaseH {
 
         // Structure learning.
         long start = System.currentTimeMillis();
-        StructureLearning(database, con2, ctTablesGenerated, globalLattice);
+        StructureLearning(
+            database,
+            con2,
+            countingStrategy,
+            globalLattice
+        );
+
         RuntimeLogger.logRunTime(logger, "Structure Learning", start, System.currentTimeMillis());
 
         /**
@@ -192,13 +198,13 @@ public class BayesBaseH {
     private static void StructureLearning(
         FactorBaseDataBase database,
         Connection conn,
-        boolean ctTablesGenerated,
+        CountingStrategy countingStrategy,
         RelationshipLattice lattice
     ) throws SQLException, IOException, DataBaseException, DataExtractionException, ParsingException, ScoringException {
         long l = System.currentTimeMillis(); // @zqian: measure structure learning time.
 
         // Handle pvars.
-        if (ctTablesGenerated) {
+        if (countingStrategy.isPrecount()) {
             learnStructurePVars(database); // import @zqian
         } else {
             learnStructurePVarsOnDemand(database);
@@ -213,7 +219,7 @@ public class BayesBaseH {
         );
 
         // Handle rnodes in a bottom-up way following the lattice.
-        if (ctTablesGenerated) {
+        if (countingStrategy.isPrecount()) {
             learnStructureRChains(database, lattice);
         } else {
             learnStructureRChainsOnDemand(database, lattice);
