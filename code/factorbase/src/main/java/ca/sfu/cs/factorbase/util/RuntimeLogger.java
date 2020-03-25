@@ -5,7 +5,14 @@ import java.util.logging.Logger;
 /**
  * Class to help log information for a FactorBase run.
  */
-public class RuntimeLogger {
+public final class RuntimeLogger {
+
+    /**
+     * Private constructor to prevent instantiation of the utility class.
+     */
+    private RuntimeLogger() {
+    }
+
 
     /**
      * Helper method to write out the run times in a consistent format.

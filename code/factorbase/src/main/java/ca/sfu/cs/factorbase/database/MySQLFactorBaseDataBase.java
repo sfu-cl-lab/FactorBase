@@ -809,6 +809,7 @@ public class MySQLFactorBaseDataBase implements FactorBaseDataBase {
         connectionProperties.put("user", username);
         connectionProperties.put("password", password);
         connectionProperties.put("allowLoadLocalInfile", "true");
+        connectionProperties.put("serverTimezone", "PST");
 
         return connectionProperties;
     }
