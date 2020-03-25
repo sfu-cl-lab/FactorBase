@@ -36,6 +36,7 @@ import ca.sfu.cs.factorbase.learning.CountsManager;
 import ca.sfu.cs.factorbase.util.KeepTablesOnly;
 import ca.sfu.cs.factorbase.util.MySQLScriptRunner;
 import ca.sfu.cs.factorbase.util.QueryGenerator;
+import ca.sfu.cs.factorbase.util.RuntimeLogger;
 
 public class MySQLFactorBaseDataBase implements FactorBaseDataBase {
 
@@ -116,6 +117,11 @@ public class MySQLFactorBaseDataBase implements FactorBaseDataBase {
             // Switch to start using the BN database.
             this.dbConnection.setCatalog(this.dbInfo.getBNDatabaseName());
 
+            RuntimeLogger.setupLoggingTable(
+                this.dbConnection,
+                this.baseDatabaseName,
+                this.dbInfo.getBNDatabaseName()
+            );
             MySQLScriptRunner.runScript(
                 this.dbConnection,
                 Config.SCRIPTS_DIRECTORY + "latticegenerator_initialize_local.sql",

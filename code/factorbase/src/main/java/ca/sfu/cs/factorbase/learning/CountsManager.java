@@ -40,6 +40,7 @@ import ca.sfu.cs.factorbase.lattice.LatticeGenerator;
 import ca.sfu.cs.factorbase.lattice.RelationshipLattice;
 import ca.sfu.cs.factorbase.util.MySQLScriptRunner;
 import ca.sfu.cs.factorbase.util.QueryGenerator;
+import ca.sfu.cs.factorbase.util.RuntimeLogger;
 import ca.sfu.cs.factorbase.util.Sort_merge3;
 
 public class CountsManager {
@@ -74,6 +75,7 @@ public class CountsManager {
      * @throws SQLException if there are issues executing the SQL queries.
      */
     public static void buildCT(boolean projectCounts) throws SQLException {
+        RuntimeLogger.addLogEntry(dbConnection);
         try (Statement statement = dbConnection.createStatement()) {
             statement.execute("DROP SCHEMA IF EXISTS " + databaseName_CT + ";");
             statement.execute("CREATE SCHEMA " + databaseName_CT + " COLLATE utf8_general_ci;");
@@ -84,7 +86,9 @@ public class CountsManager {
         RelationshipLattice relationshipLattice = propagateFunctorSetInfo(dbConnection);
 
         // Build the counts tables for the RChains.
+        long start = System.currentTimeMillis();
         buildRChainCounts(databaseName_CT, relationshipLattice, projectCounts);
+        RuntimeLogger.updateLogEntry(con_BN, "buildRChainCounts", System.currentTimeMillis() - start);
 
         // building CT tables for Rchain
         CTGenerator(relationshipLattice);
@@ -100,31 +104,39 @@ public class CountsManager {
      */
     private static RelationshipLattice propagateFunctorSetInfo(Connection dbConnection) throws SQLException {
         // Transfer metadata from the "_setup" database to the "_BN" database based on the FunctorSet.
+        long start = System.currentTimeMillis();
         MySQLScriptRunner.callSP(
             dbConnection,
             "cascadeFS"
         );
+        RuntimeLogger.updateLogEntry(con_BN, "cascadeFS", System.currentTimeMillis() - start);
 
         // Generate the relationship lattice based on the FunctorSet.
+        start = System.currentTimeMillis();
         RelationshipLattice relationshipLattice = LatticeGenerator.generate(
             dbConnection,
             databaseName_std
         );
+        RuntimeLogger.updateLogEntry(con_BN, "lattice", System.currentTimeMillis() - start);
 
         // TODO: Add support for Continuous = 1.
         if (cont.equals("1")) {
             throw new UnsupportedOperationException("Not Implemented Yet!");
         } else {
+            start = System.currentTimeMillis();
             MySQLScriptRunner.callSP(
                 dbConnection,
                 "populateMQ"
             );
+            RuntimeLogger.updateLogEntry(con_BN, "populateMQ", System.currentTimeMillis() - start);
         }
 
+        start = System.currentTimeMillis();
         MySQLScriptRunner.callSP(
             dbConnection,
             "populateMQRChain"
         );
+        RuntimeLogger.updateLogEntry(con_BN, "populateMQRChain", System.currentTimeMillis() - start);
 
         return relationshipLattice;
     }
@@ -162,7 +174,8 @@ public class CountsManager {
 
         long l = System.currentTimeMillis(); //@zqian : CT table generating time
            // handling Pvars, generating pvars_counts       
-        BuildCT_Pvars();
+        buildPVarsCounts();
+        RuntimeLogger.updateLogEntry(con_BN, "buildPVarsCounts", System.currentTimeMillis() - l);
         
         // preparing the _join part for _CT tables
         Map<String, String> joinTableQueries = createJoinTableQueries();
@@ -172,6 +185,7 @@ public class CountsManager {
             // Retrieve the first level of the lattice.
             List<FunctorNodesInfo> rchainInfos = relationshipLattice.getRChainsInfo(1);
 
+            long start = System.currentTimeMillis();
             // Building the _flat tables.
             BuildCT_Rnodes_flat(rchainInfos);
 
@@ -190,6 +204,7 @@ public class CountsManager {
                 BuildCT_RChain_flat(rchainInfos, len, joinTableQueries);
                 logger.fine(" Rchain! are done");
             }
+            RuntimeLogger.updateLogEntry(con_BN, "buildFlatStarCT", System.currentTimeMillis() - start);
         }
 
         long l2 = System.currentTimeMillis();  //@zqian
@@ -501,7 +516,7 @@ public class CountsManager {
 
 
     /* building pvars_counts*/
-    private static void BuildCT_Pvars() throws SQLException {
+    private static void buildPVarsCounts() throws SQLException {
         long l = System.currentTimeMillis(); //@zqian : measure structure learning time
         dbConnection.setCatalog(databaseName_BN);
         Statement st = dbConnection.createStatement();
