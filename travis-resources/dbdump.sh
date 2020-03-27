@@ -49,6 +49,11 @@ do
 
   for table in $tables
   do
+    if [[ $table == "CallLogs" ]]
+    then
+      continue
+    fi
+
     echo "  Extracting table: $table"
     echo "Table: $table" >> $output
     $mysqlCommand "use $database; select * from \`$table\`;" | sort >> $output
