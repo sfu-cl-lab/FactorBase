@@ -17,14 +17,14 @@ CREATE TABLE lattice_rel (
 
 
 CREATE TABLE lattice_set (
-    name VARCHAR(199),
+    name VARCHAR(398),
     length INT(11),
     PRIMARY KEY(name, length)
 );
 
 
 CREATE TABLE lattice_mapping (
-    orig_rnid VARCHAR(200),
+    orig_rnid VARCHAR(300),
     short_rnid VARCHAR(20),
     PRIMARY KEY(orig_rnid, short_rnid)
 );

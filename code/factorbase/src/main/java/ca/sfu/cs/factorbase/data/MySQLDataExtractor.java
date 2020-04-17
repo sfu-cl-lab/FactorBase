@@ -67,7 +67,7 @@ public class MySQLDataExtractor implements DataExtractor {
         String countsColumn,
         boolean isDiscrete
     ) throws SQLException {
-        long[][] convertedData;
+        double[][] convertedData;
         int numberOfRows;
         String[] header;
         int countsColumnIndex;
@@ -79,7 +79,7 @@ public class MySQLDataExtractor implements DataExtractor {
             header = this.getHeader(results);
             int numberOfColumns = header.length;
             countsColumnIndex = this.getCountColumnIndex(header, countsColumn);
-            convertedData = new long[numberOfRows][numberOfColumns];
+            convertedData = new double[numberOfRows][numberOfColumns];
 
             // for loop to create a HashSet to store the unique states for each column except the counts column.
             for (int columnIndex = 0; columnIndex < numberOfColumns; columnIndex++) {
@@ -98,7 +98,7 @@ public class MySQLDataExtractor implements DataExtractor {
                 // for loop to process the column data for each row.
                 for (int columnIndex = 0; columnIndex < numberOfColumns; columnIndex++) {
                     if (columnIndex == countsColumnIndex) {
-                        convertedData[rowIndex][columnIndex] = results.getLong(countsColumnIndex + 1);
+                        convertedData[rowIndex][columnIndex] = results.getDouble(countsColumnIndex + 1);
                     } else {
                         String state = results.getString(columnIndex + 1);
                         variableStates.get(columnIndex).add(state);

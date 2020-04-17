@@ -160,7 +160,7 @@ public class CP {
             "`AIC` float(20,2) default NULL, " +
             "`Pseudo_BIC` float(20,2) default NULL, " +
             "`Pseudo_AIC` float(20,2) default NULL, " +
-            "`Big_SampleSize` bigint(20) default NULL, " +
+            "`Big_SampleSize` DECIMAL(65) default NULL, " +
 //            "`BICNormal` float(20,2) default NULL, " +
 //            "`AICNormal` float(20,2) default NULL, " +
             " PRIMARY KEY (`Fid`))"
@@ -294,7 +294,7 @@ public class CP {
         logger.fine(sql2 + "\n");
         ResultSet deno = st2.executeQuery(sql2);
         deno.absolute(1);
-        long mydeno = Long.parseLong(deno.getString(1)); // convert string to integer
+        double mydeno = deno.getDouble(1);
         logger.fine("SUM(mult) in bigCTTable : "+mydeno + "\n");
         for(int i = 0; i < noparent_tables.size(); i++) {
             nopar_update(rchain, bigTable, noparent_tables.get(i), con1, mydeno);
@@ -307,7 +307,7 @@ public class CP {
     /**
      * Similar simpler computation for nodes without parents.
      */
-    public static void nopar_update(String rchain, String bigTable, String nodeName, Connection con1, long mydeno) throws SQLException {
+    public static void nopar_update(String rchain, String bigTable, String nodeName, Connection con1, double mydeno) throws SQLException {
         java.sql.Statement st = con1.createStatement();
         java.sql.Statement st2 = con1.createStatement();
         String tableName = nodeName + "_CP";
@@ -318,8 +318,8 @@ public class CP {
             "CREATE TABLE `" + tableName + "` (" +
                 "`" + nodeName + "` VARCHAR(200) NOT NULL, " +
                 "CP FLOAT, " +
-                "MULT BIGINT(20), " +
-                "local_mult BIGINT(20)" +
+                "MULT DECIMAL(65), " +
+                "local_mult DECIMAL(65)" +
             ");"
         );
         st.execute(
@@ -348,7 +348,7 @@ public class CP {
             ResultSet nume = st2.executeQuery(sql);
             // nume is the sum over all contingency table rows for a specific value.
             nume.absolute(1);
-            long mynume = Long.parseLong(nume.getString(1));
+            double mynume = nume.getDouble(1);
             // converts string to integer.
             logger.fine(mynume + "\n");
 
@@ -427,7 +427,7 @@ public class CP {
         );
 
         big_samplesize.absolute(1);
-        long big_mysize = Long.parseLong(big_samplesize.getString(1));
+        double big_mysize = big_samplesize.getDouble(1);
         st2.execute("update Scores set Big_SampleSize = " + big_mysize + " where Scores.Fid = '" + nodeName + "';");
 
         // compute the prior June 23, 2014, zqian

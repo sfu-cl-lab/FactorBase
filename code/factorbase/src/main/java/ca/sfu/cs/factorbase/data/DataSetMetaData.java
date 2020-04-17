@@ -92,7 +92,7 @@ public class DataSetMetaData {
      * @return Integer value index for the given list of number of states per variable and the list of Integer
      *         encoded values for the given row.
      */
-    public int generateIndex(int[] statesPerVariable, long[] rowValues) {
+    public int generateIndex(int[] statesPerVariable, double[] rowValues) {
         int index = 0;
 
         for (int variableIndex = 0; variableIndex < statesPerVariable.length; variableIndex++) {

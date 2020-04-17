@@ -12,7 +12,7 @@ import ca.sfu.cs.factorbase.util.Mapper;
 public class ContingencyTableGenerator {
 
     private boolean isDiscrete;
-    private long[][] data;
+    private double[][] data;
     private DataSetMetaData metadata;
 
 
@@ -69,7 +69,7 @@ public class ContingencyTableGenerator {
         int[] numberOfStatesPerVariable = this.getNumberOfStates(childColumnIndex, parentColumnIndices);
         long[] countsArray = new long[totalNumberOfStates];
         int totalNumberOfVariables = parentColumnIndices.length + 1;
-        long[] rowValues = new long[totalNumberOfVariables];
+        double[] rowValues = new double[totalNumberOfVariables];
 
         // for loop to process each row in the dataset.
         for (int rowIndex = 0; rowIndex < this.data.length; rowIndex++) {

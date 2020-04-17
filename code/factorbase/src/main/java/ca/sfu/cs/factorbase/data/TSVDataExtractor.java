@@ -64,7 +64,7 @@ public class TSVDataExtractor implements DataExtractor {
         String countsColumn,
         boolean isDiscrete
     ) throws IOException {
-        long[][] convertedData;
+        double[][] convertedData;
         int numberOfRows;
         String[] header;
         int countsColumnIndex;
@@ -76,7 +76,7 @@ public class TSVDataExtractor implements DataExtractor {
             header = reader.readLine().split("\t");
             int numberOfColumns = header.length;
             countsColumnIndex = this.getCountColumnIndex(header, countsColumn);
-            convertedData = new long[numberOfRows][numberOfColumns];
+            convertedData = new double[numberOfRows][numberOfColumns];
 
             // for loop to create a HashSet to store the unique states for each column except the counts column.
             for (int columnIndex = 0; columnIndex < numberOfColumns; columnIndex++) {
