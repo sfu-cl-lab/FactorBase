@@ -72,6 +72,7 @@ public class BayesBaseH {
 
     // To be read from config.
     static String databaseName, databaseName2, databaseName3;
+    static String setupDatabaseName;
     static String dbUsername;
     static String dbPassword;
     static String dbaddress;
@@ -277,6 +278,7 @@ public class BayesBaseH {
         databaseName = conf.getProperty("dbname");
         databaseName2 = databaseName + "_BN";
         databaseName3 = databaseName + "_CT";
+        setupDatabaseName = databaseName + "_setup";
         dbUsername = conf.getProperty("dbusername");
         dbPassword = conf.getProperty("dbpassword");
         dbaddress = conf.getProperty("dbaddress");
@@ -363,10 +365,16 @@ public class BayesBaseH {
                 
                 database.insertLearnedEdges(id, graphEdges, "Entity_BayesNets", false);
             } else {
+                String selectQuery =
+                    "SELECT 1nid " +
+                    "FROM 1Nodes, " + setupDatabaseName + ".EntityTables " +
+                    "WHERE 1Nodes.pvid = CONCAT(" + setupDatabaseName + ".EntityTables.Table_name,'0') " +
+                    "AND 1Nodes.pvid = '" + id + "';";
+
                 Statement st2 = con2.createStatement();
                 // Insert the BN nodes into Entity_BayesNet.
-                logger.fine("SELECT 1nid FROM 1Nodes, EntityTables WHERE 1Nodes.pvid = CONCAT(EntityTables.Table_name,'0') AND 1Nodes.pvid = '" + id + "';");
-                ResultSet rs2 = st2.executeQuery("SELECT 1nid FROM 1Nodes, EntityTables WHERE 1Nodes.pvid = CONCAT(EntityTables.Table_name,'0') AND 1Nodes.pvid = '" + id + "';");
+                logger.fine(selectQuery);
+                ResultSet rs2 = st2.executeQuery(selectQuery);
                 String child = "";
 
                 while(rs2.next()) {

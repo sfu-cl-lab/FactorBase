@@ -22,7 +22,7 @@ import ca.sfu.cs.factorbase.util.MySQLScriptRunner;
  * Assumes that a table LatticeRnodes has been generated. See transfer.sql.
  */
 public class LatticeGenerator {
-    private static final int MAX_NUM_OF_PVARS = 10;
+    private static final int MAX_NUM_OF_PVARS = 5;
     private static final String delimiter = ",";
 
 
