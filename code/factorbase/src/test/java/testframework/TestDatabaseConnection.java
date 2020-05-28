@@ -3,6 +3,9 @@ package testframework;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
+import java.util.Properties;
+
+import ca.sfu.cs.factorbase.database.MySQLFactorBaseDataBase;
 
 /**
  * Class to connect to a MySQL database so that queries can be tested.
@@ -28,8 +31,9 @@ public class TestDatabaseConnection {
             password = testPassword;
         }
 
+        Properties connectionProperties = MySQLFactorBaseDataBase.getConnectionStringProperties(userName, password);
         try {
-            con = (Connection) DriverManager.getConnection(MYSQL_URL, userName, password);
+            con = DriverManager.getConnection(MYSQL_URL, connectionProperties);
         } catch (SQLException e) {
             e.printStackTrace();
         }
