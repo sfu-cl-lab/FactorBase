@@ -81,7 +81,7 @@ public class CountsManager {
         RuntimeLogger.addLogEntry(dbConnection);
         try (Statement statement = dbConnection.createStatement()) {
             statement.execute("DROP SCHEMA IF EXISTS " + databaseName_CT + ";");
-            statement.execute("CREATE SCHEMA " + databaseName_CT + " COLLATE utf8_general_ci;");
+            statement.execute("CREATE SCHEMA " + databaseName_CT + " /*M!100316 COLLATE utf8_general_ci*/;");
         }
 
         // Propagate metadata based on the FunctorSet.
