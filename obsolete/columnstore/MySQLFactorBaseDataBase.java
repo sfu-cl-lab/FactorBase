@@ -166,6 +166,12 @@ public class MySQLFactorBaseDataBase implements FactorBaseDataBase {
                 this.baseDatabaseName,
                 "//"
             );
+            MySQLScriptRunner.runScript(
+                this.dbConnection,
+                Config.SCRIPTS_DIRECTORY + "counts_storedprocedures.sql",
+                this.baseDatabaseName,
+                "//"
+            );
         } catch (SQLException | IOException e) {
             throw new DataBaseException("An error occurred when attempting to setup the database for FactorBase.", e);
         }

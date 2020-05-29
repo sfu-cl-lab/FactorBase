@@ -12,6 +12,7 @@ import java.io.InputStreamReader;
 import java.io.RandomAccessFile;
 import java.sql.CallableStatement;
 import java.sql.Connection;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.regex.Pattern;
 
@@ -85,6 +86,21 @@ public class MySQLScriptRunner {
         CallableStatement callableStatement = dbConnection.prepareCall("CALL " + spName + ";");
         callableStatement.executeUpdate();
         callableStatement.close();
+    }
+
+
+    /**
+     * Execute the stored procedure with the given name and CSV passed to it.
+     *
+     * @param dbConnection - connection to the database to call the stored procedure on.
+     * @param spName - the name of the stored procedure to call that returns results.
+     * @param csv - a comma separated list of parameters to pass to the called stored procedure.
+     * @return the results of calling the stored procedure.
+     * @throws SQLException if there is an issue executing the stored procedure.
+     */
+    public static ResultSet callSP(Connection dbConnection, String spName, String csv) throws SQLException {
+        CallableStatement callableStatement = dbConnection.prepareCall("CALL " + spName + "('" + csv + "');");
+        return callableStatement.executeQuery();
     }
 
 
