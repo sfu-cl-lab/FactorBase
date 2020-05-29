@@ -86,9 +86,7 @@ public class CountsManager {
         RelationshipLattice relationshipLattice = propagateFunctorSetInfo(dbConnection);
 
         // Build the counts tables for the RChains.
-        long start = System.currentTimeMillis();
         buildRChainCounts(databaseName_CT, relationshipLattice, projectCounts);
-        RuntimeLogger.updateLogEntry(dbConnection, "buildRChainCounts", System.currentTimeMillis() - start);
 
         // building CT tables for Rchain
         CTGenerator(relationshipLattice);
@@ -216,6 +214,8 @@ public class CountsManager {
      * Generate the global counts tables.
      */
     public static void buildRChainsGlobalCounts() throws SQLException {
+        RuntimeLogger.addLogEntry(dbConnection);
+
         // Propagate metadata based on the FunctorSet.
         dbConnection.setCatalog(databaseName_BN);
         RelationshipLattice relationshipLattice = propagateFunctorSetInfo(dbConnection);
@@ -239,6 +239,7 @@ public class CountsManager {
         RelationshipLattice relationshipLattice,
         boolean buildByProjection
     ) throws SQLException {
+        long start = System.currentTimeMillis();
         int latticeHeight = relationshipLattice.getHeight();
 
         // Building the <RChain>_counts tables.
@@ -263,6 +264,8 @@ public class CountsManager {
                 );
             }
         }
+
+        RuntimeLogger.updateLogEntry(dbConnection, "buildRChainCounts", System.currentTimeMillis() - start);
     }
 
 
