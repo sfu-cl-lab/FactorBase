@@ -29,16 +29,33 @@ public class Sort_merge3 {
     private static Logger logger = Logger.getLogger(Sort_merge3.class.getName());
 
 
-    public static void sort_merge(String table1, String table2, String table3, Connection conn) throws SQLException {
-        logger.fine("\nGenerating false table by Subtraction using Sort_merge, cur_false_Table is: " + table3);
+    /**
+     * Subtract the MULT column of the rows in {@code table1} by the MULT column of the matching row in
+     * {@code table2}.
+     *
+     * @param conn - connection to the database containing {@code table1} and {@code table2}.
+     * @param table1 - the table to have its values in the MULT column subtracted by the MULT column in
+     *                 {@code table2}.
+     * @param table2 - the table to match rows with in {@code table1} and subtract by the values found in the
+     *                 MULT column.
+     * @param outputTableName - the table to generate containing the results of the sort merge.
+     * @throws SQLException if there are issues executing the queries.
+     */
+    public static void sort_merge(
+        Connection conn,
+        String table1,
+        String table2,
+        String outputTableName
+    ) throws SQLException {
+        logger.fine("\nGenerating false table by Subtraction using Sort_merge, cur_false_Table is: " + outputTableName);
 
         // Ensure that all the table names are escaped before attempting to execute any queries with them.
         table1 = "`" + table1 + "`";
         table2 = "`" + table2 + "`";
-        table3 = "`" + table3 + "`";
+        outputTableName = "`" + outputTableName + "`";
 
-        Statement st1 = (Statement) conn.createStatement();
-        Statement st2 = (Statement) conn.createStatement();
+        Statement st1 = conn.createStatement();
+        Statement st2 = conn.createStatement();
 
         ArrayList<String> orderList = new ArrayList<String>();
 
@@ -54,31 +71,24 @@ public class Sort_merge3 {
             orderList.add(rst.getString(1));
         }
         rst.close();
+        st1.close();
 
         if (orderList.size() > 0) {
             // Code for merging the two tables.
-            // BottleNeck, MOST expensive query for large table, more than 16 columns, zqian.
-            // SELECT * INTO OUTFILE '/tmp/result.txt'; // Here the files are stored on the Server Side
-            // and then load these files into memory?
             long time1 = System.currentTimeMillis();
-
-            st2.execute("DROP TABLE IF EXISTS " + table3 + ";");
-            st2.execute("CREATE TABLE " + table3 + " ENGINE = MEMORY AS SELECT * FROM " + table1 + " LIMIT 0;");
-            String query = "INSERT INTO " + table3 + " " + QueryGenerator.createSubtractionQuery(table1, table2, "MULT", orderList);
-            st2.execute(query);
-
-            st1.close();
+            st2.execute("DROP TABLE IF EXISTS " + outputTableName + ";");
+            st2.execute(
+                "CREATE TABLE " + outputTableName + " ENGINE = MEMORY AS " +
+                QueryGenerator.createSubtractionQuery(table1, table2, "MULT", orderList)
+            );
             st2.close();
-
-            long time5 = System.currentTimeMillis();
-//            System.out.print("\t export csv file to sql: " + (time5 - time4));
-            logger.fine("\ntotal time: " + (time5 - time1) + "\n");
+            logger.fine("\ntotal time: " + (System.currentTimeMillis() - time1) + "\n");
         } else { // Aug 18, 2014 zqian: Handle the extreme case when there's only `mult` column.
             logger.fine("\n \t Handle the extreme case when there's only `mult` column \n");
-            st2.execute("DROP TABLE IF EXISTS " + table3 + ";");
-            st2.execute("CREATE TABLE " + table3 + " ENGINE = MEMORY AS SELECT * FROM " + table1 + " LIMIT 0;");
-            logger.fine("INSERT INTO " + table3 + " SELECT (" + table1 + ".mult - " + table2 + ".mult) AS mult FROM " + table1 + ", " + table2 + ";");
-            st2.execute("INSERT INTO " + table3 + " SELECT (" + table1 + ".mult - " + table2 + ".mult) AS mult FROM " + table1 + ", " + table2 + ";");
+            st2.execute("DROP TABLE IF EXISTS " + outputTableName + ";");
+            st2.execute("CREATE TABLE " + outputTableName + " ENGINE = MEMORY AS SELECT * FROM " + table1 + " LIMIT 0;");
+            logger.fine("INSERT INTO " + outputTableName + " SELECT (" + table1 + ".mult - " + table2 + ".mult) AS mult FROM " + table1 + ", " + table2 + ";");
+            st2.execute("INSERT INTO " + outputTableName + " SELECT (" + table1 + ".mult - " + table2 + ".mult) AS mult FROM " + table1 + ", " + table2 + ";");
         }
     }
 }

@@ -47,10 +47,10 @@ public class RunComponent {
         if (component.equals("SortMerge")) {
             System.out.println("Starting Sort Merge!");
             Sort_merge3.sort_merge(
+                dbConnection,
                 config.getProperty("SortMergeCartesianTable"),
                 config.getProperty("SortMergeSubsetTable"),
-                config.getProperty("SortMergeOutputTable"),
-                dbConnection
+                config.getProperty("SortMergeOutputTable")
             );
         } else if (component.equals("DataExtraction")) {
             System.out.println("Starting Data Extraction");

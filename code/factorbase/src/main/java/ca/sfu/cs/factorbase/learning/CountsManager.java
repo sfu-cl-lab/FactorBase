@@ -452,10 +452,10 @@ public class CountsManager {
                 // Computing the false table as the MULT difference between the matching rows of the star and flat tables.
                 // This is a big join!
                 Sort_merge3.sort_merge(
+                    dbConnection,
                     cur_star_Table,
                     cur_flat_Table,
-                    cur_false_Table,
-                    dbConnection
+                    cur_false_Table
                 );
 
                 long l5 = System.currentTimeMillis(); 
@@ -989,10 +989,10 @@ public class CountsManager {
             // Computing the false table as the MULT difference between the matching rows of the star and flat tables.
             // This is a big join!
             Sort_merge3.sort_merge(
+                dbConnection,
                 shortRchain + "_star",
                 shortRchain + "_flat",
-                falseTableName,
-                dbConnection
+                falseTableName
             );
 
             String countsTableName = shortRchain + "_counts";

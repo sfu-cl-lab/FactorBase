@@ -11,7 +11,6 @@ import java.text.MessageFormat;
 
 import org.junit.Test;
 
-import ca.sfu.cs.factorbase.util.Sort_merge3;
 import testframework.TestDatabaseConnection;
 
 public class Sort_merge3Test {
@@ -22,10 +21,10 @@ public class Sort_merge3Test {
         TestDatabaseConnection db = new TestDatabaseConnection();
 
         Sort_merge3.sort_merge(
+            db.con,
             "sort-merge-t1",
             "sort-merge-t2",
-            SORT_MERGE_TABLE,
-            db.con
+            SORT_MERGE_TABLE
         );
 
         Statement st = db.con.createStatement();
