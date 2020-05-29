@@ -39,6 +39,7 @@ import ca.sfu.cs.factorbase.database.MySQLFactorBaseDataBase;
 import ca.sfu.cs.factorbase.lattice.LatticeGenerator;
 import ca.sfu.cs.factorbase.lattice.RelationshipLattice;
 import ca.sfu.cs.factorbase.util.MySQLScriptRunner;
+import ca.sfu.cs.factorbase.util.QueryGenerator;
 import ca.sfu.cs.factorbase.util.RuntimeLogger;
 import ca.sfu.cs.factorbase.util.Sort_merge3;
 
@@ -85,7 +86,9 @@ public class CountsManager {
         RelationshipLattice relationshipLattice = propagateFunctorSetInfo(dbConnection);
 
         // Build the counts tables for the RChains.
+        long start = System.currentTimeMillis();
         buildRChainCounts(databaseName_CT, relationshipLattice, projectCounts);
+        RuntimeLogger.updateLogEntry(dbConnection, "buildRChainCounts", System.currentTimeMillis() - start);
 
         // building CT tables for Rchain
         CTGenerator(relationshipLattice);
@@ -213,8 +216,6 @@ public class CountsManager {
      * Generate the global counts tables.
      */
     public static void buildRChainsGlobalCounts() throws SQLException {
-        RuntimeLogger.addLogEntry(dbConnection);
-
         // Propagate metadata based on the FunctorSet.
         dbConnection.setCatalog(databaseName_BN);
         RelationshipLattice relationshipLattice = propagateFunctorSetInfo(dbConnection);
@@ -238,7 +239,6 @@ public class CountsManager {
         RelationshipLattice relationshipLattice,
         boolean buildByProjection
     ) throws SQLException {
-        long start = System.currentTimeMillis();
         int latticeHeight = relationshipLattice.getHeight();
 
         // Building the <RChain>_counts tables.
@@ -263,8 +263,6 @@ public class CountsManager {
                 );
             }
         }
-
-        RuntimeLogger.updateLogEntry(dbConnection, "buildRChainCounts", System.currentTimeMillis() - start);
     }
 
 
@@ -825,10 +823,20 @@ public class CountsManager {
 
         dbConnection.setCatalog(dbTargetName);
         Statement st3 = dbConnection.createStatement();
-        String createString = "CREATE TABLE `" + countsTableName + "` ENGINE = MEMORY AS " + queryString;
-        st3.execute("SET tmp_table_size = " + dbTemporaryTableSize + ";");
-        st3.executeQuery("SET max_heap_table_size = " + dbTemporaryTableSize + ";");
-        st3.execute(createString);
+        if (!buildByProjection) {
+            String createString = makeCountsTableQuery(countsTableName, selectAliases, fromAliases);
+            st3.execute(createString);
+            String insertString = "INSERT INTO `" + countsTableName + "` " + queryString;
+            st3.execute("SET tmp_table_size = " + dbTemporaryTableSize + ";");
+            st3.executeQuery("SET max_heap_table_size = " + dbTemporaryTableSize + ";");
+            st3.execute(insertString);
+        } else {
+            String createString = "CREATE TABLE `" + countsTableName + "` AS " + queryString;
+            st3.execute("SET tmp_table_size = " + dbTemporaryTableSize + ";");
+            st3.executeQuery("SET max_heap_table_size = " + dbTemporaryTableSize + ";");
+            st3.execute(createString);
+        }
+
 
         // Close statements.
         st2.close();
@@ -1187,6 +1195,65 @@ public class CountsManager {
         }
 
         return String.join(delimiter, parts);
+    }
+
+
+    /**
+     * Create a query to generate an "_counts" table.
+     *
+     * @param countsTableName - the name of the "_counts" table that the query returned will generate when executed.
+     * @param columnAliases - list of column aliases of the form "&lt;column&gt; AS &lt;alias&gt;".
+     * @param tableAliases - list of table aliases of the form "&lt;table&gt; AS &lt;alias&gt;".
+     * @return a query to generate an "_counts" table.
+     * @throws SQLException if there are issues trying to retrieve the column data type information for the tables in
+     *                      the given table aliases list.
+     */
+    private static String makeCountsTableQuery(
+        String countsTableName,
+        List<String> columnAliases,
+        List<String> tableAliases
+    ) throws SQLException {
+        String[] tableNames = new String[tableAliases.size()];
+        int index = 0;
+
+        // for loop to extract the table names from the alias Strings.
+        for (String tableAlias : tableAliases) {
+            String fullyQualifiedTableName = tableAlias.split(" AS ")[0];
+            String tableName = fullyQualifiedTableName.split("\\.")[1];
+            tableNames[index] = tableName;
+            index++;
+        }
+
+        // Retrieve the data type information for the columns of the tables extracted in the for loop above.
+        dbConnection.setCatalog(databaseName_BN);
+        ResultSet columnInfo = MySQLScriptRunner.callSP(dbConnection, "getColumnsInfo", String.join(",", tableNames));
+
+        Map<String, String> columnDataTypes = new HashMap<String, String>();
+        columnDataTypes.put("\"T\"", "CHAR(1)");
+        columnDataTypes.put("COUNT(*)", "BIGINT(21)");
+
+        // while loop to store the data type information.
+        while(columnInfo.next()) {
+            columnDataTypes.put(
+                columnInfo.getString("column_name"),
+                columnInfo.getString("DataType")
+            );
+        }
+
+        String[] columns = new String[columnAliases.size()];
+        index = 0;
+
+        for (String columnAlias : columnAliases) {
+            String[] columnComponents = columnAlias.split(" AS ");
+            String fullyQualifiedColumnName = columnComponents[0];
+            String[] columnNameComponents = fullyQualifiedColumnName.split("\\.");
+            String columnName = columnNameComponents[columnNameComponents.length - 1];
+            String columnNameAlias = columnComponents[1].replace("\"", "");
+            columns[index] = columnNameAlias + " " + columnDataTypes.get(columnName);
+            index++;
+        }
+
+        return QueryGenerator.createTableQuery(countsTableName, columns);
     }
 
 
