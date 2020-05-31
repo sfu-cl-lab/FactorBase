@@ -39,13 +39,15 @@ public class Sort_merge3 {
      * @param table2 - the table to match rows with in {@code table1} and subtract by the values found in the
      *                 MULT column.
      * @param outputTableName - the table to generate containing the results of the sort merge.
+     * @param storageEngine - the storage engine to use for the tables created when executing this method.
      * @throws SQLException if there are issues executing the queries.
      */
     public static void sort_merge(
         Connection conn,
         String table1,
         String table2,
-        String outputTableName
+        String outputTableName,
+        String storageEngine
     ) throws SQLException {
         logger.fine("\nGenerating false table by Subtraction using Sort_merge, cur_false_Table is: " + outputTableName);
 
@@ -78,7 +80,7 @@ public class Sort_merge3 {
             long time1 = System.currentTimeMillis();
             st2.execute("DROP TABLE IF EXISTS " + outputTableName + ";");
             st2.execute(
-                "CREATE TABLE " + outputTableName + " ENGINE = MEMORY AS " +
+                "CREATE TABLE " + outputTableName + " ENGINE = " + storageEngine + " AS " +
                 QueryGenerator.createSubtractionQuery(table1, table2, "MULT", orderList)
             );
             st2.close();

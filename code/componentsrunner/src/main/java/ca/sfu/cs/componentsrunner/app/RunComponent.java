@@ -50,7 +50,8 @@ public class RunComponent {
                 dbConnection,
                 config.getProperty("SortMergeCartesianTable"),
                 config.getProperty("SortMergeSubsetTable"),
-                config.getProperty("SortMergeOutputTable")
+                config.getProperty("SortMergeOutputTable"),
+                "InnoDB"
             );
         } else if (component.equals("DataExtraction")) {
             System.out.println("Starting Data Extraction");

@@ -24,7 +24,8 @@ public class Sort_merge3Test {
             db.con,
             "sort-merge-t1",
             "sort-merge-t2",
-            SORT_MERGE_TABLE
+            SORT_MERGE_TABLE,
+            "InnoDB"
         );
 
         Statement st = db.con.createStatement();

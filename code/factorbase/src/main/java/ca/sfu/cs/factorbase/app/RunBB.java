@@ -79,7 +79,7 @@ public class RunBB {
         // Learn a Bayesian Network.
         if (countingStrategy.isPrecount()) {
             long buildCTStart = System.currentTimeMillis();
-            CountsManager.buildCT(false);
+            CountsManager.buildCT(false, "InnoDB");
             RuntimeLogger.logRunTime(logger, "Creating CT Tables", buildCTStart, System.currentTimeMillis());
         } else {
             long buildGlobalCountsStart = System.currentTimeMillis();
