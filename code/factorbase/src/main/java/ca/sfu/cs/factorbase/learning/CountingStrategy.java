@@ -16,6 +16,12 @@ public enum CountingStrategy {
         public boolean isOndemand() {
             return true;
         }
+
+
+        @Override
+        public String getStorageEngine() {
+            return "MEMORY";
+        }
     },
     Hybrid {
         @Override
@@ -27,6 +33,12 @@ public enum CountingStrategy {
         @Override
         public boolean useProjection() {
             return true;
+        }
+
+
+        @Override
+        public String getStorageEngine() {
+            return "MEMORY";
         }
     };
 
@@ -68,6 +80,18 @@ public enum CountingStrategy {
      */
     public boolean useProjection() {
         return false;
+    }
+
+
+    /**
+     * Retrieve the storage engine that should be used for the "_star", "_flat", "_false", "_counts", and
+     * "_CT" tables.
+     *
+     * @return the storage engine that should be used for the "_star", "_flat", "_false", "_counts", and
+     *         "_CT" tables.
+     */
+    public String getStorageEngine() {
+        return "InnoDB";
     }
 
     private static final String PRECOUNT = "0";

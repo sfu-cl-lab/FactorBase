@@ -114,7 +114,8 @@ public final class QueryGenerator {
      */
     public static String createSubtractionQuery(String table1, String table2, String subtractionColumn, List<String> joinOnColumns) {
         StringBuilder builder = new StringBuilder("SELECT ");
-        builder.append(table1 + "." + subtractionColumn + " - IFNULL(" + table2 + "." + subtractionColumn + ", 0) ");
+        builder.append(table1 + "." + subtractionColumn + " - ");
+        builder.append("IFNULL(" + table2 + "." + subtractionColumn + ", 0) AS " + subtractionColumn);
         StringJoiner csv = new StringJoiner(", ");
 
         for (String column : joinOnColumns) {

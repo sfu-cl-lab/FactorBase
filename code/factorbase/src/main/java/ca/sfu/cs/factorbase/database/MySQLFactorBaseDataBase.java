@@ -484,7 +484,10 @@ public class MySQLFactorBaseDataBase implements FactorBaseDataBase {
             }
 
             // Generate CT tables.
-            CountsManager.buildCT(this.countingStrategy.useProjection());
+            CountsManager.buildCT(
+                this.countingStrategy.useProjection(),
+                this.countingStrategy.getStorageEngine()
+            );
 
             String tableName = null;
             String shortID = functorInfos.getShortID();
