@@ -81,7 +81,7 @@ public class CountsManager {
         RuntimeLogger.addLogEntry(dbConnection);
         try (Statement statement = dbConnection.createStatement()) {
             statement.execute("DROP SCHEMA IF EXISTS " + databaseName_CT + ";");
-            statement.execute("CREATE SCHEMA " + databaseName_CT + " COLLATE utf8_general_ci;");
+            statement.execute("CREATE SCHEMA " + databaseName_CT + " /*M!100316 COLLATE utf8_general_ci*/;");
         }
 
         // Propagate metadata based on the FunctorSet.
@@ -790,8 +790,6 @@ public class CountsManager {
 
         // Create FROM query string.
         String fromString = databaseName_global_counts + ".`" + countsTableName + "`";
-        List<String> fromAliases = new ArrayList<String>();
-        fromAliases.add(fromString);
 
         // If we aren't projecting from the global counts table, we need to retrieve the tables that need to be joined
         // in order to generate the counts table.
@@ -804,7 +802,7 @@ public class CountsManager {
                 "AND TableType = 'Counts';"
             );
 
-            fromAliases = extractEntries(rs3, "Entries");
+            List<String> fromAliases = extractEntries(rs3, "Entries");
             fromString = makeDelimitedString(fromAliases, ", ");
         }
 
