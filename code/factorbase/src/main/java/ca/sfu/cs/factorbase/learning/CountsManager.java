@@ -45,9 +45,12 @@ import ca.sfu.cs.factorbase.util.Sort_merge3;
 public class CountsManager {
 
     private static Connection dbConnection;
+    private static int tableID;
+    private static Map<String, String> pvarsCountsTableCache = new HashMap<String, String>();
     private static String databaseName_std;
     private static String databaseName_BN;
     private static String databaseName_CT;
+    private static String databaseName_counts_cache;
     private static String databaseName_global_counts;
     private static String dbUsername;
     private static String dbPassword;
@@ -92,7 +95,7 @@ public class CountsManager {
         buildRChainCounts(databaseName_CT, relationshipLattice, projectCounts, storageEngine);
 
         // building CT tables for Rchain
-        CTGenerator(relationshipLattice, storageEngine);
+        CTGenerator(relationshipLattice, storageEngine, projectCounts);
     }
 
 
@@ -169,17 +172,19 @@ public class CountsManager {
      *
      * @param relationshipLattice - the relationship lattice used to determine which contingency tables to generate.
      * @param storageEngine - the storage engine to use for the tables created when executing this method.
+     * @param useCountsCache - true if the counts should be read from the counts table cache database; otherwise false.
      * @throws SQLException if there are issues executing the SQL queries.
      */
     private static void CTGenerator(
         RelationshipLattice relationshipLattice,
-        String storageEngine
+        String storageEngine,
+        boolean useCountsCache
     ) throws SQLException {
         int latticeHeight = relationshipLattice.getHeight();
 
         long l = System.currentTimeMillis(); //@zqian : CT table generating time
            // handling Pvars, generating pvars_counts       
-        buildPVarsCounts(storageEngine);
+        buildPVarsCounts(storageEngine, useCountsCache);
         RuntimeLogger.updateLogEntry(dbConnection, "buildPVarsCounts", System.currentTimeMillis() - l);
         
         // preparing the _join part for _CT tables
@@ -288,6 +293,7 @@ public class CountsManager {
         Config conf = new Config();
         databaseName_std = conf.getProperty("dbname");
         databaseName_BN = databaseName_std + "_BN";
+        databaseName_counts_cache = databaseName_std + "_counts_cache";
         databaseName_global_counts = databaseName_std + "_global_counts";
         databaseName_CT = databaseName_std + "_CT";
         dbUsername = conf.getProperty("dbusername");
@@ -539,14 +545,14 @@ public class CountsManager {
     }
 
 
-    /* building pvars_counts*/
     /**
      * Build the "_counts" tables for the population variables.
      *
      * @param storageEngine - the storage engine to use for the tables created when executing this method.
-     * @throws SQLException if there are isues executing the SQL queries.
+     * @param useCountsCache - true if the counts should be read from the counts table cache database; otherwise false.
+     * @throws SQLException if there are issues executing the SQL queries.
      */
-    private static void buildPVarsCounts(String storageEngine) throws SQLException {
+    private static void buildPVarsCounts(String storageEngine, boolean useCountsCache) throws SQLException {
         long l = System.currentTimeMillis(); //@zqian : measure structure learning time
         dbConnection.setCatalog(databaseName_BN);
         Statement st = dbConnection.createStatement();
@@ -557,15 +563,25 @@ public class CountsManager {
                 "PVariables;"
         );
 
+        GeneratePVarsCountsMethod<
+            String,
+            String,
+            List<String>,
+            String,
+            String,
+            SQLException
+        > generateCountsMethod = CountsManager::generatePVarsCountsTable;
+
+        // Use the generatePVarsCountsTableFromCache method if we have been specified to read the counts from the cache.
+        if (useCountsCache) {
+            generateCountsMethod = CountsManager::generatePVarsCountsTableFromCache;
+        }
+
         while(rs.next()){
-            //  get pvid for further use
             String pvid = rs.getString("pvid");
             logger.fine("pvid : " + pvid);
-            //  create new statement
-            dbConnection.setCatalog(databaseName_BN);
-            Statement st2 = dbConnection.createStatement();
-            //  create select query string
-            ResultSet rs2 = st2.executeQuery(
+            String countsTableName = pvid + "_counts";
+            String selectQuery =
                 "SELECT " +
                     "Entries " +
                 "FROM " +
@@ -575,103 +591,25 @@ public class CountsManager {
                 "AND " +
                     "ClauseType = 'SELECT' " +
                 "AND " +
-                    "TableType = 'Counts';"
-            );
+                    "TableType = 'Counts';";
 
-            List<String> columns = extractEntries(rs2, "Entries");
-            String selectString = makeDelimitedString(columns, ", ");
-            logger.fine("Select String : " + selectString);
-            //  create from query string
-            ResultSet rs3 = st2.executeQuery(
-                "SELECT " +
-                    "Entries " +
-                "FROM " +
-                    "MetaQueries " +
-                "WHERE " +
-                    "Lattice_Point = '" + pvid + "' " +
-                "AND " +
-                    "ClauseType = 'FROM' " +
-                "AND " +
-                    "TableType = 'Counts';"
-            );
-            columns = extractEntries(rs3, "Entries");
-            String fromString = makeDelimitedString(columns, ", ");
-
-            ResultSet rs_6 = st2.executeQuery(
-                "SELECT " +
-                    "Entries " +
-                "FROM " +
-                    "MetaQueries " +
-                "WHERE " +
-                    "Lattice_Point = '" + pvid + "' " +
-                "AND " +
-                    "ClauseType = 'GROUPBY' " +
-                "AND " +
-                    "TableType = 'Counts';"
-            );
-            columns = extractEntries(rs_6, "Entries");
-            String GroupByString = makeDelimitedString(columns, ", ");
-
-            /*
-             *  Check for groundings on pvid
-             *  If exist, add as where clause
-             */
-            logger.fine( "con_BN:SELECT id FROM Groundings WHERE pvid = '"+pvid+"';" );
-
-            ResultSet rsGrounding = null;
-            String whereString = "";
-
-            try {
-                rsGrounding = st2.executeQuery(
-                    "SELECT " +
-                        "Entries " +
-                    "FROM " +
-                        "MetaQueries " +
-                    "WHERE " +
-                        "Lattice_Point = '" + pvid + "' " +
-                    "AND " +
-                        "ClauseType = 'WHERE' " +
-                    "AND " +
-                        "TableType = 'Counts';"
-                );
-            } catch(SQLException e) {
-                logger.severe( "No WHERE clause for groundings" );
+            // Extract column aliases.
+            List<String> columnAliases;
+            dbConnection.setCatalog(databaseName_BN);
+            try (
+                Statement selectStatement = dbConnection.createStatement();
+                ResultSet selectResultSet = selectStatement.executeQuery(selectQuery)
+            ) {
+                columnAliases = extractEntries(selectResultSet, "Entries");
             }
 
-            if (null != rsGrounding) {
-                columns = extractEntries(rsGrounding, "Entries");
-                whereString = makeDelimitedString(columns, " AND ");
-            }
-
-            logger.fine( "whereString:" + whereString );
-
-            //  create the final query
-            String queryString = "Select " + selectString + " from " +
-                                 fromString + whereString;
-                                 
-//this seems unnecessarily complicated even to deal with continuos variables. OS August 22, 2017
-
-            if (!cont.equals("1")) {
-                if (!GroupByString.isEmpty()) {
-                    queryString = queryString + " GROUP BY " + GroupByString;
-                }
-            }
-
-            queryString += " HAVING MULT > 0";
-
-            dbConnection.setCatalog(databaseName_CT);
-            Statement st3 = dbConnection.createStatement();
-
-            String countsTableName = pvid + "_counts";
-            String createString =
-                "CREATE TABLE " + countsTableName + " ENGINE = " + storageEngine + " AS " +
-                queryString;
-            logger.fine("Create String: " + createString);
-            st3.execute(createString);
-
-            //  close statements
-            st2.close();
-            st3.close();
+            generateCountsMethod.apply(
+                databaseName_CT,
+                countsTableName,
+                columnAliases,
+                storageEngine,
+                pvid
+            );
         }
 
         rs.close();
@@ -679,6 +617,170 @@ public class CountsManager {
         long l2 = System.currentTimeMillis(); //@zqian : measure structure learning time
         logger.fine("Building Time(ms) for Pvariables counts: "+(l2-l)+" ms.\n");
         logger.fine("\n Pvariables are DONE \n" );
+    }
+
+
+    /**
+     * Generate the "_counts" table for the given population variable.
+     *
+     * @param targetDatabaseName - the name of the database to generate the "_counts" table in.
+     * @param countsTableName - the name of the "_counts" table to generate.
+     * @param columnAliases - the alias statements used for the SELECT clause for the "_counts" table to generate.
+     * @param storageEngine - the storage engine to use for the "_counts" table to generate.
+     * @param pvid - the ID of the population variable that the "_counts" table is for.
+     * @throws SQLException if there are issues executing the SQL queries.
+     */
+    private static void generatePVarsCountsTable(
+        String targetDatabaseName,
+        String countsTableName,
+        List<String> columnAliases,
+        String storageEngine,
+        String pvid
+    ) throws SQLException {
+        dbConnection.setCatalog(databaseName_BN);
+        Statement st = dbConnection.createStatement();
+        String selectString = makeDelimitedString(columnAliases, ", ");
+        logger.fine("SELECT String: " + selectString);
+
+        // Create FROM query.
+        String fromQuery =
+            "SELECT " +
+                "Entries " +
+            "FROM " +
+                "MetaQueries " +
+            "WHERE " +
+                "Lattice_Point = '" + pvid + "' " +
+            "AND " +
+                "ClauseType = 'FROM' " +
+            "AND " +
+                "TableType = 'Counts';";
+
+        String fromString;
+        try(ResultSet rs = st.executeQuery(fromQuery)) {
+            List<String> tables = extractEntries(rs, "Entries");
+            fromString = makeDelimitedString(tables, ", ");
+        }
+
+        // Create GROUP BY query.
+        String groupbyQuery =
+            "SELECT " +
+                "Entries " +
+            "FROM " +
+                "MetaQueries " +
+            "WHERE " +
+                "Lattice_Point = '" + pvid + "' " +
+            "AND " +
+                "ClauseType = 'GROUPBY' " +
+            "AND " +
+                "TableType = 'Counts';";
+
+        String groupbyString;
+        try(ResultSet rs = st.executeQuery(groupbyQuery)) {
+            List<String> columns = extractEntries(rs, "Entries");
+            groupbyString = makeDelimitedString(columns, ", ");
+        }
+
+        // Create WHERE query (groundings) if applicable.
+        String whereQuery =
+            "SELECT " +
+                "Entries " +
+            "FROM " +
+                "MetaQueries " +
+            "WHERE " +
+                "Lattice_Point = '" + pvid + "' " +
+            "AND " +
+                "ClauseType = 'WHERE' " +
+            "AND " +
+                "TableType = 'Counts';";
+
+        String whereString = "";
+        try (ResultSet rsGrounding = st.executeQuery(whereQuery)) {
+            List<String> predicates = extractEntries(rsGrounding, "Entries");
+            if (!predicates.isEmpty()) {
+                whereString = " WHERE " + makeDelimitedString(predicates, " AND ");
+            }
+        }
+
+        st.close();
+
+        logger.fine("WHERE String:" + whereString);
+
+        // Create the final query.
+        String queryString =
+            "SELECT " + selectString + " " +
+            "FROM " + fromString +
+            whereString;
+
+// This seems unnecessarily complicated even to deal with continuous variables. OS August 22, 2017
+
+        if (!cont.equals("1") && !groupbyString.isEmpty()) {
+            queryString = queryString + " GROUP BY " + groupbyString;
+        }
+
+        queryString += " HAVING MULT > 0";
+
+        String createString =
+            "CREATE TABLE " + countsTableName + " ENGINE = " + storageEngine + " AS " +
+            queryString;
+        logger.fine("CREATE String: " + createString);
+
+        dbConnection.setCatalog(targetDatabaseName);
+        try (Statement st2 = dbConnection.createStatement()) {
+            st2.execute(createString);
+        }
+    }
+
+
+    /**
+     * Generate the "_counts" table for the given population variable using the counts cache database.
+     * <p>
+     * Note: If the "_counts" table can't be found in the counts cache database it will be generated there.
+     * </p>
+     *
+     * @param targetDatabaseName - the name of the database to generate the "_counts" table in.
+     * @param countsTableName - the name of the "_counts" table to generate.
+     * @param columnAliases - the alias statements used for the SELECT clause for the "_counts" table to generate.
+     * @param storageEngine - the storage engine to use for the "_counts" table to generate.
+     * @param pvid - the ID of the population variable that the "_counts" table is for.
+     * @throws SQLException if there are issues executing the SQL queries.
+     */
+    private static void generatePVarsCountsTableFromCache(
+        String targetDatabaseName,
+        String countsTableName,
+        List<String> columnAliases,
+        String storageEngine,
+        String pvid
+    ) throws SQLException {
+        StringJoiner csvJoiner = new StringJoiner(",");
+        csvJoiner.add(countsTableName);
+        String columnNames = makeDelimitedString(columnAliases, ",", " AS ");
+        csvJoiner.add(String.join(",", columnNames));
+
+        String countsTableCacheKey = csvJoiner.toString();
+
+        String cacheTableName = pvarsCountsTableCache.get(countsTableCacheKey);
+        if (cacheTableName == null) {
+            cacheTableName = countsTableName + "_" + tableID;
+            tableID++;
+            generatePVarsCountsTable(
+                databaseName_counts_cache,
+                cacheTableName,
+                columnAliases,
+                storageEngine,
+                pvid
+            );
+
+            pvarsCountsTableCache.put(countsTableCacheKey, cacheTableName);
+        }
+
+        dbConnection.setCatalog(targetDatabaseName);
+        try (Statement createViewStatement = dbConnection.createStatement()) {
+            String viewQuery =
+                "CREATE VIEW " + countsTableName + " AS " +
+                "SELECT * " +
+                "FROM " + databaseName_counts_cache + "." + cacheTableName;
+            createViewStatement.executeUpdate(viewQuery);
+        }
     }
 
 
@@ -1296,6 +1398,32 @@ public class CountsManager {
         }
 
         return String.join(del, parts);
+    }
+
+
+    /**
+     * Interface to enable the ability to switch between using the
+     * {@link CountsManager#generatePVarsCountsTable(String, String, List, String, String)}
+     * method and the
+     * {@link CountsManager#generatePVarsCountsTableFromCache(String, String, List, String, String)}
+     * method.
+     *
+     * @param <A> (String) the name of the output database.
+     * @param <B> (String) the name of the "_counts" table to generate.
+     * @param <C> (List&lt;String&gt;) the alias statements for the columns.
+     * @param <D> (String) the storage engine to use for the "_counts" table generated.
+     * @param <E> (String) the population variable of the "_counts" table generated.
+     * @param <F> (SQLException) the SQLException that should be thrown if there are issues executing the SQL queries.
+     */
+    @FunctionalInterface
+    private interface GeneratePVarsCountsMethod<A, B, C extends List<String>, D, E, F extends SQLException> {
+        public void apply(
+            A outputDatabaseName,
+            B outputTableName,
+            C columnAliases,
+            D storageEngine,
+            E pvariable
+        ) throws F;
     }
 
 
