@@ -12,3 +12,6 @@ CREATE SCHEMA @database@_CT;
 
 DROP SCHEMA IF EXISTS @database@_global_counts;
 CREATE SCHEMA @database@_global_counts;
+
+DROP SCHEMA IF EXISTS @database@_counts_cache;
+CREATE SCHEMA @database@_counts_cache;
