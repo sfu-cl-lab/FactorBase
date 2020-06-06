@@ -186,7 +186,7 @@ public class CountsManager {
            // handling Pvars, generating pvars_counts       
         buildPVarsCounts(storageEngine, useCountsCache);
         RuntimeLogger.updateLogEntry(dbConnection, "buildPVarsCounts", System.currentTimeMillis() - l);
-        
+
         // preparing the _join part for _CT tables
         Map<String, String> joinTableQueries = createJoinTableQueries();
 
