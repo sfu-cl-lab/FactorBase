@@ -479,8 +479,7 @@ public class CountsManager {
                     dbConnection,
                     cur_star_Table,
                     cur_flat_Table,
-                    cur_false_Table,
-                    storageEngine
+                    cur_false_Table
                 );
 
                 long l5 = System.currentTimeMillis(); 
@@ -1140,8 +1139,7 @@ public class CountsManager {
                 dbConnection,
                 shortRchain + "_star",
                 shortRchain + "_flat",
-                falseTableName,
-                storageEngine
+                falseTableName
             );
 
             String countsTableName = shortRchain + "_counts";
