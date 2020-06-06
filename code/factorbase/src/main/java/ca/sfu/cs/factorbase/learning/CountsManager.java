@@ -200,7 +200,7 @@ public class CountsManager {
             BuildCT_Rnodes_flat(rchainInfos, storageEngine);
 
             // Building the _star tables.
-            BuildCT_Rnodes_star(rchainInfos, storageEngine);
+            BuildCT_Rnodes_star(rchainInfos);
 
             // Building the _false tables first and then the _CT tables.
             BuildCT_Rnodes_CT(rchainInfos, joinTableQueries, storageEngine);
@@ -427,7 +427,7 @@ public class CountsManager {
             
                 String cur_star_Table = removedShort + len + "_" + fc + "_star";
                 String createStarString =
-                    "CREATE TABLE " + cur_star_Table + " ENGINE = " + storageEngine + " AS " +
+                    "CREATE VIEW " + cur_star_Table + " AS " +
                     queryString;
 
                 logger.fine("\n create star String : " + createStarString );
@@ -1047,8 +1047,7 @@ public class CountsManager {
      * building the _star tables
      */
     private static void BuildCT_Rnodes_star(
-        List<FunctorNodesInfo> rchainInfos,
-        String storageEngine
+        List<FunctorNodesInfo> rchainInfos
     ) throws SQLException {
         long l = System.currentTimeMillis(); //@zqian : measure structure learning time
         for (FunctorNodesInfo rchainInfo : rchainInfos) {
@@ -1091,7 +1090,7 @@ public class CountsManager {
             Statement st3 = dbConnection.createStatement();
             String starTableName = shortRchain + "_star";
             String createString =
-                "CREATE TABLE `" + starTableName + "` ENGINE = " + storageEngine + " AS " +
+                "CREATE VIEW `" + starTableName + "` AS " +
                 queryString;
             logger.fine("\n create String : " + createString );
             st3.execute(createString);
