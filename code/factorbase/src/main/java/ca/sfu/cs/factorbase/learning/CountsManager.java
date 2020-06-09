@@ -203,14 +203,16 @@ public class CountsManager {
         Map<String, String> joinTableQueries,
         String storageEngine
     ) throws SQLException {
-        // Building the _flat tables.
-        BuildCT_Rnodes_flat(rnodeInfos, storageEngine);
+        for (FunctorNodesInfo rnodeInfo : rnodeInfos) {
+            // Build the _flat table.
+            buildRNodeFlat(rnodeInfo, storageEngine);
 
-        // Building the _star tables.
-        BuildCT_Rnodes_star(rnodeInfos);
+            // Build the _star table.
+            buildRNodeStar(rnodeInfo);
 
-        // Building the _false tables first and then the _CT tables.
-        BuildCT_Rnodes_CT(rnodeInfos, joinTableQueries, storageEngine);
+            // Build the _false table first and then the _CT table.
+            buildRNodeCT(rnodeInfo, joinTableQueries, storageEngine);
+        }
     }
 
 
@@ -985,7 +987,7 @@ public class CountsManager {
     /**
      * building the _flat tables
      */
-    private static void BuildCT_Rnodes_flat(
+    private static void buildRNodeFlat(
         List<FunctorNodesInfo> rchainInfos,
         String storageEngine
     ) throws SQLException {
@@ -1053,7 +1055,7 @@ public class CountsManager {
     /**
      * building the _star tables
      */
-    private static void BuildCT_Rnodes_star(
+    private static void buildRNodeStar(
         List<FunctorNodesInfo> rchainInfos
     ) throws SQLException {
         long l = System.currentTimeMillis(); //@zqian : measure structure learning time
@@ -1113,84 +1115,78 @@ public class CountsManager {
     }
 
     /**
-     * Create the CT table for the given RChains.  This is done by building the "_false" tables first, then cross
+     * Create the CT table for the given RNode.  This is done by building the "_false" table first, then cross
      * joining it with the associated JOIN (derived) table, and then have the result UNIONed with the proper
      * "_counts" table.
      *
-     * @param rchainInfos - FunctorNodesInfos for the RChains to build the "_CT" tables for.
+     * @param rnodeInfo - {@code FunctorNodesInfo} for the RNode to build the "_CT" table for.
      * @param joinTableQueries - {@code Map} to retrieve the associated query to create a derived JOIN table.
-     * @param storageEngine - the storage engine to use for the tables created when executing this method.
+     * @param storageEngine - the storage engine to use for the table created when executing this method.
      * @throws SQLException if there are issues executing the SQL queries.
      */
-    private static void BuildCT_Rnodes_CT(
-        List<FunctorNodesInfo> rchainInfos,
+    private static void buildRNodeCT(
+        FunctorNodesInfo rnodeInfo,
         Map<String, String> joinTableQueries,
         String storageEngine
     ) throws SQLException {
-        long l = System.currentTimeMillis(); //@zqian : measure structure learning time
-        for (FunctorNodesInfo rchainInfo : rchainInfos) {
-            // Get the short and full form rnids for further use.
-            String rchain = rchainInfo.getID();
-            logger.fine("\n RChain : " + rchain);
-            String shortRchain = rchainInfo.getShortID();
-            logger.fine(" Short RChain : " + shortRchain);
+        long start = System.currentTimeMillis(); // @zqian: measure structure learning time.
+        String rnode = rnodeInfo.getID();
+        logger.fine("\nRNode: " + rnode);
+        String shortRNode = rnodeInfo.getShortID();
+        logger.fine("Short RNode: " + shortRNode);
 
-            //  create new statement
-            dbConnection.setCatalog(databaseName_CT);
-            Statement st3 = dbConnection.createStatement();
-            /**********starting to create _flase table***using sort_merge*******************************/
-            String falseTableName = shortRchain + "_false";
+        dbConnection.setCatalog(databaseName_CT);
+        Statement statement = dbConnection.createStatement();
+        String falseTableName = shortRNode + "_false";
 
-            // Computing the false table as the MULT difference between the matching rows of the star and flat tables.
-            // This is a big join!
-            Sort_merge3.sort_merge(
-                dbConnection,
-                shortRchain + "_star",
-                shortRchain + "_flat",
-                falseTableName
-            );
+        // Computing the false table as the MULT difference between the matching rows of the star and flat tables.
+        Sort_merge3.sort_merge(
+            dbConnection,
+            shortRNode + "_star",
+            shortRNode + "_flat",
+            falseTableName
+        );
 
-            String countsTableName = shortRchain + "_counts";
+        String countsTableName = shortRNode + "_counts";
 
-            //building the _CT table        //expanding the columns // May 16
-            // must specify the columns, or there's will a mistake in the table that mismatch the columns
-            ResultSet rs5 = st3.executeQuery(
-                "SELECT column_name AS Entries " +
-                "FROM information_schema.columns " +
-                "WHERE table_schema = '" + databaseName_CT + "' " +
-                "AND table_name = '" + countsTableName + "';"
-            );
-            // reading the column names from information_schema.columns, and the output will remove the "`" automatically,
-            // however some columns contain "()" and MySQL does not support "()" well, so we have to add the "`" back.
-            List<String> columns = extractEntries(rs5, "Entries");
-            String UnionColumnString = makeEscapedCommaSepQuery(columns);
+        // Must specify the columns or there will be column mismatches when taking the UNION of the counts and false
+        // tables.
+        String columnQuery =
+            "SELECT column_name AS Entries " +
+            "FROM information_schema.columns " +
+            "WHERE table_schema = '" + databaseName_CT + "' " +
+            "AND table_name = '" + countsTableName + "';";
 
-            String ctTableName = shortRchain + "_CT";
-
-            //join false table with join table to introduce rnid (=F) and 2nids (= n/a). Then union result with counts table.
-            String createCTString =
-                "CREATE TABLE `" + ctTableName + "` ENGINE = " + storageEngine + " AS " +
-                    "SELECT " + UnionColumnString + " " +
-                    "FROM `" + countsTableName + "` " +
-                    "WHERE MULT > 0 " +
-
-                    "UNION ALL " +
-
-                    "SELECT " + UnionColumnString + " " +
-                    "FROM " +
-                        "`" + falseTableName + "`, " +
-                        "(" + joinTableQueries.get(shortRchain) + ") AS JOIN_TABLE " +
-                    "WHERE MULT > 0";
-            logger.fine("\n create CT table String : " + createCTString );
-            st3.execute(createCTString);
-
-            //  close statements
-            st3.close();
+        // Extract and escape the column names since they look like function calls to MySQL.
+        List<String> columns;
+        try (ResultSet result = statement.executeQuery(columnQuery)) {
+            columns = extractEntries(result, "Entries");
         }
+        String UnionColumnString = makeEscapedCommaSepQuery(columns);
 
-        long l2 = System.currentTimeMillis(); //@zqian : measure structure learning time
-        logger.fine("Building Time(ms) for Rnodes_false and Rnodes_CT: "+(l2-l)+" ms.\n");
-        logger.fine("\n Rnodes_false and Rnodes_CT  are DONE \n" );
+        String ctTableName = shortRNode + "_CT";
+
+        // Join the false table with the join table to introduce rnid (= F) and 2nids (= N/A).  Then union the result
+        // with the counts table.
+        String createCTString =
+            "CREATE TABLE `" + ctTableName + "` ENGINE = " + storageEngine + " AS " +
+                "SELECT " + UnionColumnString + " " +
+                "FROM `" + countsTableName + "` " +
+                "WHERE MULT > 0 " +
+
+                "UNION ALL " +
+
+                "SELECT " + UnionColumnString + " " +
+                "FROM " +
+                    "`" + falseTableName + "`, " +
+                    "(" + joinTableQueries.get(shortRNode) + ") AS JOIN_TABLE " +
+                "WHERE MULT > 0";
+        logger.fine("\nCREATE CT table String: " + createCTString);
+        statement.executeUpdate(createCTString);
+        statement.close();
+
+        long end = System.currentTimeMillis(); // @zqian: measure structure learning time.
+        logger.fine("Build Time(ms) for Rnodes_false and Rnodes_CT: " + (end - start) + " ms.\n");
     }
 
 
