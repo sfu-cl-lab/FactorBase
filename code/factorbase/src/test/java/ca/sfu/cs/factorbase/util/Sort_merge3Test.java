@@ -24,8 +24,7 @@ public class Sort_merge3Test {
             db.con,
             "sort-merge-t1",
             "sort-merge-t2",
-            SORT_MERGE_TABLE,
-            "InnoDB"
+            SORT_MERGE_TABLE
         );
 
         Statement st = db.con.createStatement();
@@ -80,7 +79,7 @@ public class Sort_merge3Test {
         // Clean up the output sort merge table.
         st.executeUpdate(
             MessageFormat.format(
-                "DROP TABLE {0}",
+                "DROP VIEW {0}",
                 "`" + SORT_MERGE_TABLE + "`"
             )
         );

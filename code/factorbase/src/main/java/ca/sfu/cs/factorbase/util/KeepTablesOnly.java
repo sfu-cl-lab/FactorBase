@@ -60,12 +60,57 @@ public class KeepTablesOnly {
      * @throws SQLException if an error occurs when removing the temporary tables.
      */
     private static void Drop_tmpTables(Connection con, String dbname, ArrayList<String> tablenames) throws SQLException {
-        Statement st = con.createStatement();
+        try (Statement statement = con.createStatement()) {
+            ArrayList<String> dropQueries = new ArrayList<String>();
+
+            String dropTableGeneratorQuery = generateDropQuery(dbname, tablenames, false);
+            logger.fine(dropTableGeneratorQuery);
+            try (ResultSet queries = statement.executeQuery(dropTableGeneratorQuery)) {
+                while(queries.next()) {
+                    dropQueries.add(queries.getString("dropTableQuery"));
+                }
+            }
+
+            String dropViewGeneratorQuery = generateDropQuery(dbname, tablenames, true);
+            logger.fine(dropViewGeneratorQuery);
+            try (ResultSet queries = statement.executeQuery(dropViewGeneratorQuery)) {
+                while(queries.next()) {
+                    dropQueries.add(queries.getString("dropTableQuery"));
+                }
+            }
+
+            for(String query : dropQueries) {
+                statement.executeUpdate(query);
+                logger.fine(query + " OK!");
+            }
+        }
+    }
+
+
+    /**
+     * Generate an SQL String for generating drop table/view queries.
+     *
+     * @param dbname - the database containing the tables/views to drop.
+     * @param tablenames - the tables that shouldn't be dropped.
+     * @param droppingViews - true if views are being dropped; otherwise false.
+     * @return an SQL String for generating drop table/view queries.
+     */
+    private static String generateDropQuery(String dbname, ArrayList<String> tablenames, boolean droppingViews) {
+        String operator = "<>";
+        String tableType = "TABLE";
+        if (droppingViews) {
+            operator = "=";
+            tableType = "VIEW";
+        }
+
         String NewSQL = MessageFormat.format(
-            "SELECT CONCAT(''DROP TABLE {0}.`'', table_name, ''`;'') AS result " +
+            "SELECT CONCAT(''DROP {1} {0}.`'', table_name, ''`;'') AS dropTableQuery " +
             "FROM information_schema.tables " +
-            "WHERE table_schema = ''{0}",
-            dbname
+            "WHERE TABLE_TYPE {2} ''VIEW'' " +
+            "AND table_schema = ''{0}",
+            dbname,
+            tableType,
+            operator
         );
 
         for(int i = 0; i < tablenames.size(); i++) {
@@ -74,17 +119,7 @@ public class KeepTablesOnly {
 
         NewSQL += "';";
 
-        logger.fine(NewSQL);
-        ArrayList<String> sets = new ArrayList<String>();
-        ResultSet res = st.executeQuery(NewSQL);
-        while(res.next()) {
-            sets.add(res.getString("result"));
-        }
-
-        for(String set : sets) {
-            st.execute(set);
-            logger.fine(set + " OK!");
-        }
+        return NewSQL;
     }
 
 

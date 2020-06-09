@@ -146,29 +146,8 @@ public class CountsManager {
     }
 
 
-    /*** this part we do need O.s. May 16, 2018 ***/
     /**
-     *  Building the _CT tables for length >=2
-     *  For each length
-     *  1. find rchain, find list of members of rc-hain. Suppose first member is rnid1.
-     *  2. initialize current_ct = rchain_counts after summing out the relational attributes of rnid1.
-     *  3. Current list = all members of rchain minus rndi1. find ct(table) for current list = . Select rows where all members of current list are true. Add 1nodes of rnid1.
-     *  4. Compute false table using the results of 2 and 3 (basically 2 - 3).
-     *  5. Union false table with current_ct to get new ct where all members of current list are true.
-     *  6. Repeat with current list as initial list until list is empty.
-     *  Example:
-     *  1. Rchain = R3,R2,R1. first rnid1 = R3.
-     *  2. Find `R3,R2,R1_counts`. Sum out fields from R3 to get `R2,R1-R3_flat1`.
-     *  3. Current list = R2,R1. Find `R2,R1_ct` where R1 = T, R2 = T. Add 1nodes of R3 (multiplying) to get `R2,R1-R3_star`.
-     *  4. Compute `R2,R1-R3_false` = `R2,R1-R3_star - `R2,R1-R3_flat1` union (as before)
-     *  5. Compute `R2,R1-R3_ct` = `R2,R1-R3_false` cross product `R3_join` union `R3,R2,R1_counts`.
-     *  6. Current list = R1. Current rnid = R2. Current ct_table = `R2,R1-R3_ct`.
-     *
-     *  BuildCT_Rnodes_flat(len);
-     *
-     *  BuildCT_Rnodes_star(len);
-     *
-     *  BuildCT_Rnodes_CT(len);
+     * Generate the contingency tables for the given relationship lattice.
      *
      * @param relationshipLattice - the relationship lattice used to determine which contingency tables to generate.
      * @param storageEngine - the storage engine to use for the tables created when executing this method.
@@ -186,39 +165,52 @@ public class CountsManager {
            // handling Pvars, generating pvars_counts       
         buildPVarsCounts(storageEngine, useCountsCache);
         RuntimeLogger.updateLogEntry(dbConnection, "buildPVarsCounts", System.currentTimeMillis() - l);
-        
+
         // preparing the _join part for _CT tables
         Map<String, String> joinTableQueries = createJoinTableQueries();
 
         if (linkCorrelation.equals("1") && relationshipLattice.getHeight() != 0) {
-            // handling Rnodes with Lattice Moebius Transform
             // Retrieve the first level of the lattice.
             List<FunctorNodesInfo> rchainInfos = relationshipLattice.getRChainsInfo(1);
 
             long start = System.currentTimeMillis();
-            // Building the _flat tables.
-            BuildCT_Rnodes_flat(rchainInfos, storageEngine);
+            // Build the CT tables for the first level of the relationship lattice.
+            buildRNodesCT(rchainInfos, joinTableQueries, storageEngine);
 
-            // Building the _star tables.
-            BuildCT_Rnodes_star(rchainInfos, storageEngine);
-
-            // Building the _false tables first and then the _CT tables.
-            BuildCT_Rnodes_CT(rchainInfos, joinTableQueries, storageEngine);
-            
             //building the _CT tables. Going up the Rchain lattice
-            for(int len = 2; len <= latticeHeight; len++)
-            { 
+            for(int len = 2; len <= latticeHeight; len++) {
                 rchainInfos = relationshipLattice.getRChainsInfo(len);
-                logger.fine("now we're here for Rchain!");
-                logger.fine("Building Time(ms) for Rchain >=2 \n");
-                BuildCT_RChain_flat(rchainInfos, len, joinTableQueries, storageEngine);
-                logger.fine(" Rchain! are done");
+                buildRChainsCT(rchainInfos, len, joinTableQueries, storageEngine);
             }
             RuntimeLogger.updateLogEntry(dbConnection, "buildFlatStarCT", System.currentTimeMillis() - start);
         }
 
         long l2 = System.currentTimeMillis();  //@zqian
         logger.fine("Building Time(ms) for ALL CT tables:  "+(l2-l)+" ms.\n");
+    }
+
+
+    /**
+     * Build the CT tables for the RNodes (relationship lattice length = 1).
+     *
+     * @param rnodeInfos - the {@code FunctorNodesInfo}s containing the Functor node information for the RNodes.
+     * @param joinTableQueries - {@code Map} to retrieve the associated query to create a derived JOIN table.
+     * @param storageEngine - the storage engine to use for the tables created when executing this method.
+     * @throws SQLException if there are issues executing the SQL queries.
+     */
+    private static void buildRNodesCT(
+        List<FunctorNodesInfo> rnodeInfos,
+        Map<String, String> joinTableQueries,
+        String storageEngine
+    ) throws SQLException {
+        // Building the _flat tables.
+        BuildCT_Rnodes_flat(rnodeInfos, storageEngine);
+
+        // Building the _star tables.
+        BuildCT_Rnodes_star(rnodeInfos);
+
+        // Building the _false tables first and then the _CT tables.
+        BuildCT_Rnodes_CT(rnodeInfos, joinTableQueries, storageEngine);
     }
 
 
@@ -324,14 +316,32 @@ public class CountsManager {
 
 
     /**
-     * Building the _CT tables. Going up the Rchain lattice ( When rchain.length >=2)
+     * Building the _CT tables. Going up the relationship lattice (When RChain.length >=2).
+     * <p>
+     * For each RChain of the specified length:<br>
+     * 1. Find the list of members for the RChain.  Suppose first member is rnid1.<br>
+     * 2. Initialize current_ct = rchain_counts after summing out the relational attributes of rnid1.<br>
+     * 3. Current list = all members of RChain minus rnid1.  Find CT table for current list =
+     *    Select rows where all members of current list are true.  Add 1nodes of rnid1.<br>
+     * 4. Compute false table using the results of 2 and 3 (basically 2 - 3).<br>
+     * 5. Union false table with current_ct to get new ct where all members of current list are true.<br>
+     * 6. Repeat with current list as initial list until list is empty.<br><br>
+     * Example:<br>
+     * 1. RChain = R3,R2,R1.  rnid1 = R3.<br>
+     * 2. Find `R3,R2,R1_counts`.  Sum out fields from R3 to get `R2,R1-R3_flat1`.<br>
+     * 3. Current list = R2,R1.  Find `R2,R1_ct` where R1 = T, R2 = T.  Add 1nodes of R3 (multiplying) to get
+     *    `R2,R1-R3_star`.<br>
+     * 4. Compute `R2,R1-R3_false` = `R2,R1-R3_star - `R2,R1-R3_flat1`.<br>
+     * 5. Compute `R2,R1-R3_ct` = `R2,R1-R3_false` Cartesian Product `R3_join` union `R3,R2,R1_counts`.<br>
+     * 6. Current list = R1.  Current rnid1 = R2.  Current ct_table = `R2,R1-R3_ct`.
+     * </p>
      * @param rchainInfos - FunctorNodesInfos for the RChains to build the "_CT" tables for.
      * @param len - length of the RChains to consider.
      * @param joinTableQueries - {@code Map} to retrieve the associated query to create a derived JOIN table.
      * @param storageEngine - the storage engine to use for the tables created when executing this method.
      * @throws SQLException if there are issues executing the SQL queries.
      */
-    private static void BuildCT_RChain_flat(
+    private static void buildRChainsCT(
         List<FunctorNodesInfo> rchainInfos,
         int len,
         Map<String, String> joinTableQueries,
@@ -357,7 +367,7 @@ public class CountsManager {
             dbConnection.setCatalog(databaseName_BN);
             Statement st1 = dbConnection.createStatement();
             ResultSet rs1 = st1.executeQuery(
-                "SELECT DISTINCT parent, removed, short_rnid " +
+                "SELECT removed, short_rnid " +
                 "FROM lattice_rel " +
                 "JOIN lattice_mapping " +
                 "ON lattice_rel.removed = lattice_mapping.orig_rnid " +
@@ -368,8 +378,6 @@ public class CountsManager {
             while(rs1.next())
             {       
                 long l2 = System.currentTimeMillis(); 
-                String parent = rs1.getString("parent");
-                logger.fine("\n parent : " + parent);
                 String removed = rs1.getString("removed");
                 logger.fine("\n removed : " + removed);  
                 String removedShort = rs1.getString("short_rnid");
@@ -427,7 +435,7 @@ public class CountsManager {
             
                 String cur_star_Table = removedShort + len + "_" + fc + "_star";
                 String createStarString =
-                    "CREATE TABLE " + cur_star_Table + " ENGINE = " + storageEngine + " AS " +
+                    "CREATE VIEW " + cur_star_Table + " AS " +
                     queryString;
 
                 logger.fine("\n create star String : " + createStarString );
@@ -479,8 +487,7 @@ public class CountsManager {
                     dbConnection,
                     cur_star_Table,
                     cur_flat_Table,
-                    cur_false_Table,
-                    storageEngine
+                    cur_false_Table
                 );
 
                 long l5 = System.currentTimeMillis(); 
@@ -1047,8 +1054,7 @@ public class CountsManager {
      * building the _star tables
      */
     private static void BuildCT_Rnodes_star(
-        List<FunctorNodesInfo> rchainInfos,
-        String storageEngine
+        List<FunctorNodesInfo> rchainInfos
     ) throws SQLException {
         long l = System.currentTimeMillis(); //@zqian : measure structure learning time
         for (FunctorNodesInfo rchainInfo : rchainInfos) {
@@ -1091,7 +1097,7 @@ public class CountsManager {
             Statement st3 = dbConnection.createStatement();
             String starTableName = shortRchain + "_star";
             String createString =
-                "CREATE TABLE `" + starTableName + "` ENGINE = " + storageEngine + " AS " +
+                "CREATE VIEW `" + starTableName + "` AS " +
                 queryString;
             logger.fine("\n create String : " + createString );
             st3.execute(createString);
@@ -1141,8 +1147,7 @@ public class CountsManager {
                 dbConnection,
                 shortRchain + "_star",
                 shortRchain + "_flat",
-                falseTableName,
-                storageEngine
+                falseTableName
             );
 
             String countsTableName = shortRchain + "_counts";
