@@ -367,7 +367,7 @@ public class CountsManager {
             dbConnection.setCatalog(databaseName_BN);
             Statement st1 = dbConnection.createStatement();
             ResultSet rs1 = st1.executeQuery(
-                "SELECT DISTINCT parent, removed, short_rnid " +
+                "SELECT removed, short_rnid " +
                 "FROM lattice_rel " +
                 "JOIN lattice_mapping " +
                 "ON lattice_rel.removed = lattice_mapping.orig_rnid " +
@@ -378,8 +378,6 @@ public class CountsManager {
             while(rs1.next())
             {       
                 long l2 = System.currentTimeMillis(); 
-                String parent = rs1.getString("parent");
-                logger.fine("\n parent : " + parent);
                 String removed = rs1.getString("removed");
                 logger.fine("\n removed : " + removed);  
                 String removedShort = rs1.getString("short_rnid");
