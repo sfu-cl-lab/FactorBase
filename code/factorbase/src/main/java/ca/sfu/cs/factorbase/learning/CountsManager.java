@@ -1066,72 +1066,108 @@ public class CountsManager {
 
 
     /**
-     * building the _flat tables
+     * Create the flat table for the given RNode.
+     *
+     * @param rnodeInfo - {@code FunctorNodesInfo} for the RNode to build the "_flat" table for.
+     * @param storageEngine - the storage engine to use for the table created when executing this method.
+     * @throws SQLException if there are issues executing the SQL queries.
      */
     private static void buildRNodeFlat(
-        List<FunctorNodesInfo> rchainInfos,
+        FunctorNodesInfo rnodeInfo,
         String storageEngine
     ) throws SQLException {
-        long l = System.currentTimeMillis(); //@zqian : measure structure learning time
-        for (FunctorNodesInfo rchainInfo : rchainInfos) {
-            // Get the short and full form rnids for further use.
-            String rchain = rchainInfo.getID();
-            logger.fine("\n RChain : " + rchain);
-            String shortRchain = rchainInfo.getShortID();
-            logger.fine(" Short RChain : " + shortRchain);
+        long start = System.currentTimeMillis(); // @zqian: measure structure learning time.
+        String rnode = rnodeInfo.getID();
+        logger.fine("\nRNode: " + rnode);
+        String shortRNode = rnodeInfo.getShortID();
+        logger.fine("Short RNode: " + shortRNode);
 
-            //  create new statement
-            dbConnection.setCatalog(databaseName_BN);
-            Statement st2 = dbConnection.createStatement();
+        dbConnection.setCatalog(databaseName_BN);
+        Statement statement = dbConnection.createStatement();
 
-            //  create select query string
-            ResultSet rs2 = st2.executeQuery("select distinct Entries from MetaQueries where Lattice_Point = '" + rchain + "' and TableType = 'Flat' and ClauseType = 'SELECT';");
-            List<String> columns = extractEntries(rs2, "Entries");
-            String selectString = makeDelimitedString(columns, ", ");
+        // Create SELECT query string.
+        String selectQuery =
+            "SELECT DISTINCT " +
+                "Entries " +
+            "FROM " +
+                "MetaQueries " +
+            "WHERE " +
+                "Lattice_Point = '" + rnode + "' " +
+            "AND " +
+                "TableType = 'Flat' " +
+            "AND " +
+                "ClauseType = 'SELECT';";
 
-            //  create from query string
-            ResultSet rs3 = st2.executeQuery("select distinct Entries from MetaQueries where Lattice_Point = '" + rchain + "' and TableType = 'Flat' and ClauseType = 'FROM';" );
-            columns = extractEntries(rs3, "Entries");
-            String fromString = makeDelimitedString(columns, ", ");
+        List<String> columns;
+        try (ResultSet rs2 = statement.executeQuery(selectQuery)) {
+            columns = extractEntries(rs2, "Entries");
+        }
+        String selectString = makeDelimitedString(columns, ", ");
 
-            //  create the final query
-            String queryString = "Select " + selectString + " from " + fromString ;
+        // Create FROM query string.
+        String fromQuery =
+            "SELECT DISTINCT " +
+                "Entries " +
+            "FROM " +
+                "MetaQueries " +
+            "WHERE " +
+                "Lattice_Point = '" + rnode + "' " +
+            "AND " +
+                "TableType = 'Flat' " +
+            "AND " +
+                "ClauseType = 'FROM';";
+        try (ResultSet result = statement.executeQuery(fromQuery)) {
+            columns = extractEntries(result, "Entries");
+        }
+        String fromString = makeDelimitedString(columns, ", ");
 
-            //  create group by query string
-            if (!cont.equals("1")) {
-                ResultSet rs_6 = st2.executeQuery("select distinct Entries from MetaQueries where Lattice_Point = '" + rchain + "' and TableType = 'Flat' and ClauseType = 'GROUPBY';");
-                columns = extractEntries(rs_6, "Entries");
-                String GroupByString = makeDelimitedString(columns, ", ");
+        // Create the final query string.
+        String queryString = "SELECT " + selectString + " FROM " + fromString;
 
-                if (!GroupByString.isEmpty()) queryString = queryString + " group by"  + GroupByString;
-                logger.fine("Query String : " + queryString );
+        // Create GROUP BY query string.
+        if (!cont.equals("1")) {
+            String groupByQuery =
+                "SELECT DISTINCT " +
+                    "Entries " +
+                "FROM " +
+                    "MetaQueries " +
+                "WHERE " +
+                    "Lattice_Point = '" + rnode + "' " +
+                "AND " +
+                    "TableType = 'Flat' " +
+                "AND " +
+                    "ClauseType = 'GROUPBY';";
+            try (ResultSet result = statement.executeQuery(groupByQuery)) {
+                columns = extractEntries(result, "Entries");
             }
+            String groupByString = makeDelimitedString(columns, ", ");
+            if (!groupByString.isEmpty()) {
+                queryString += " GROUP BY "  + groupByString;
+            }
+        }
+        statement.close();
 
-            dbConnection.setCatalog(databaseName_CT);
-            Statement st3 = dbConnection.createStatement();
-            String flatTableName = shortRchain + "_flat";
-            String createString =
-                "CREATE TABLE `" + flatTableName + "` ENGINE = " + storageEngine + " AS " +
-                queryString;
-            logger.fine("\n create String : " + createString );
-            st3.execute(createString);
-
-            // Add covering index.
-            addCoveringIndex(
-                dbConnection,
-                databaseName_CT,
-                flatTableName
-            );
-
-            //  close statements
-            st2.close();
-            st3.close();
+        String flatTableName = shortRNode + "_flat";
+        String createString =
+            "CREATE TABLE `" + flatTableName + "` ENGINE = " + storageEngine + " AS " +
+            queryString;
+        logger.fine("\nCREATE String: " + createString);
+        dbConnection.setCatalog(databaseName_CT);
+        try (Statement createStatement = dbConnection.createStatement()) {
+            createStatement.executeUpdate(createString);
         }
 
-        long l2 = System.currentTimeMillis(); //@zqian : measure structure learning time
-        logger.fine("Building Time(ms) for Rnodes_flat: "+(l2-l)+" ms.\n");
-        logger.fine("\n Rnodes_flat are DONE \n" );
+        // Add covering index.
+        addCoveringIndex(
+            dbConnection,
+            databaseName_CT,
+            flatTableName
+        );
+
+        long end = System.currentTimeMillis(); // @zqian: measure structure learning time.
+        logger.fine("Build Time(ms) for RNode Flat: " + (end - start) + " ms.\n");
     }
+
 
 
     /**
