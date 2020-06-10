@@ -396,7 +396,7 @@ public class CountsManager {
                 //  create select query string  
                 ResultSet rs2 = st2.executeQuery("SELECT DISTINCT Entries FROM MetaQueries WHERE Lattice_Point = '" + rchain + "' and '"+removed+"' = EntryType and ClauseType = 'SELECT' and TableType = 'Star';");
                 List<String> columns = extractEntries(rs2, "Entries");
-                String selectString = makeDelimitedString(columns, ", ");
+                String selectString = String.join(", ", columns);
                 logger.fine("Select String : " + selectString);
                 rs2.close();
                 //  create mult query string
@@ -406,12 +406,12 @@ public class CountsManager {
                 logger.fine("Mult String : " + MultString+ " as `MULT`");
                 rs3.close();
                 //  create from query string
-                String fromString = makeDelimitedString(columns, ", ");
+                String fromString = String.join(", ", columns);
                 logger.fine("From String : " + fromString);          
                 //  create where query string
                 ResultSet rs5 = st2.executeQuery("SELECT DISTINCT Entries FROM MetaQueries WHERE Lattice_Point = '" + rchain + "' and '"+removed+"' = EntryType and ClauseType = 'WHERE' and TableType = 'Star';");
                 columns = extractEntries(rs5, "Entries");
-                String whereString = makeDelimitedString(columns, " AND ");
+                String whereString = String.join(" AND ", columns);
                logger.fine("Where String : " + whereString);
                 rs5.close();
                 //  create the final query
@@ -651,7 +651,7 @@ public class CountsManager {
     ) throws SQLException {
         dbConnection.setCatalog(databaseName_BN);
         Statement st = dbConnection.createStatement();
-        String selectString = makeDelimitedString(columnAliases, ", ");
+        String selectString = String.join(", ", columnAliases);
         logger.fine("SELECT String: " + selectString);
 
         // Create FROM query.
@@ -670,7 +670,7 @@ public class CountsManager {
         String fromString;
         try(ResultSet rs = st.executeQuery(fromQuery)) {
             List<String> tables = extractEntries(rs, "Entries");
-            fromString = makeDelimitedString(tables, ", ");
+            fromString = String.join(", ", tables);
         }
 
         // Create GROUP BY query.
@@ -689,7 +689,7 @@ public class CountsManager {
         String groupbyString;
         try(ResultSet rs = st.executeQuery(groupbyQuery)) {
             List<String> columns = extractEntries(rs, "Entries");
-            groupbyString = makeDelimitedString(columns, ", ");
+            groupbyString = String.join(", ", columns);
         }
 
         // Create WHERE query (groundings) if applicable.
@@ -709,7 +709,7 @@ public class CountsManager {
         try (ResultSet rsGrounding = st.executeQuery(whereQuery)) {
             List<String> predicates = extractEntries(rsGrounding, "Entries");
             if (!predicates.isEmpty()) {
-                whereString = " WHERE " + makeDelimitedString(predicates, " AND ");
+                whereString = " WHERE " + String.join(" AND ", predicates);
             }
         }
 
@@ -897,7 +897,7 @@ public class CountsManager {
             selectString = makeDelimitedString(selectAliases, ", ", "AS ");
             selectString = "SUM(MULT) AS MULT, " + selectString;
         } else {
-            selectString = makeDelimitedString(selectAliases, ", ");
+            selectString = String.join(", ", selectAliases);
         }
 
         logger.fine("SELECT String: " + selectString);
@@ -917,7 +917,7 @@ public class CountsManager {
             );
 
             List<String> fromAliases = extractEntries(rs3, "Entries");
-            fromString = makeDelimitedString(fromAliases, ", ");
+            fromString = String.join(", ", fromAliases);
         }
 
         logger.fine("FROM String: " + fromString);
@@ -937,7 +937,7 @@ public class CountsManager {
             );
 
             List<String> columns = extractEntries(rs4, "Entries");
-            whereString = makeDelimitedString(columns, " AND ");
+            whereString = String.join(" AND ", columns);
         }
 
         // Create the final query.
@@ -963,7 +963,7 @@ public class CountsManager {
             );
 
             List<String> columns = extractEntries(rs_6, "Entries");
-            String GroupByString = makeDelimitedString(columns, ", ");
+            String GroupByString = String.join(", ", columns);
 
             if (!GroupByString.isEmpty()) {
                 queryString = queryString + " GROUP BY "  + GroupByString;
@@ -1022,7 +1022,7 @@ public class CountsManager {
         try (ResultSet result = statement.executeQuery(selectQuery)) {
             columns = extractEntries(result, "Entries");
         }
-        String selectString = makeDelimitedString(columns, ", ");
+        String selectString = String.join(", ", columns);
 
         // Create * query string, which will be used for the "SELECT AS MULT".
         String multiplicationQuery =
@@ -1044,7 +1044,7 @@ public class CountsManager {
         String multiplicationString = makeStarSepQuery(columns);
 
         // Create FROM query string.
-        String fromString = makeDelimitedString(columns, ", ");
+        String fromString = String.join(", ", columns);
 
         // Create the final query string.
         String queryString = "SELECT " + multiplicationString + " AS MULT";
@@ -1105,7 +1105,7 @@ public class CountsManager {
         try (ResultSet rs2 = statement.executeQuery(selectQuery)) {
             columns = extractEntries(rs2, "Entries");
         }
-        String selectString = makeDelimitedString(columns, ", ");
+        String selectString = String.join(", ", columns);
 
         // Create FROM query string.
         String fromQuery =
@@ -1122,7 +1122,7 @@ public class CountsManager {
         try (ResultSet result = statement.executeQuery(fromQuery)) {
             columns = extractEntries(result, "Entries");
         }
-        String fromString = makeDelimitedString(columns, ", ");
+        String fromString = String.join(", ", columns);
 
         // Create the final query string.
         String queryString = "SELECT " + selectString + " FROM " + fromString;
@@ -1143,7 +1143,7 @@ public class CountsManager {
             try (ResultSet result = statement.executeQuery(groupByQuery)) {
                 columns = extractEntries(result, "Entries");
             }
-            String groupByString = makeDelimitedString(columns, ", ");
+            String groupByString = String.join(", ", columns);
             if (!groupByString.isEmpty()) {
                 queryString += " GROUP BY "  + groupByString;
             }
@@ -1292,7 +1292,7 @@ public class CountsManager {
             );
 
             List<String> columns = extractEntries(rs2, "Entries");
-            String additionalColumns = makeDelimitedString(columns, ", ");
+            String additionalColumns = String.join(", ", columns);
             StringBuilder joinTableQuerybuilder = new StringBuilder("SELECT \"F\" AS `" + orig_rnid + "`");
             if (!additionalColumns.isEmpty()) {
                 joinTableQuerybuilder.append(", " + additionalColumns);
@@ -1360,25 +1360,6 @@ public class CountsManager {
         }
 
         return escapedCSV.toString();
-    }
-
-
-    /**
-     * Generate a delimited string of columns.
-     *
-     * @param columns - the columns to make a delimited string with.
-     * @param delimiter - the delimiter to use for the delimited string.
-     * @return a delimited string of columns.
-     */
-    private static String makeDelimitedString(List<String> columns, String delimiter) {
-        String[] parts = new String[columns.size()];
-        int index = 0;
-        for (String column : columns) {
-            parts[index] = column;
-            index++;
-        }
-
-        return String.join(delimiter, parts);
     }
 
 
