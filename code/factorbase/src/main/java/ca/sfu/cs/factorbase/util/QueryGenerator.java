@@ -1,7 +1,6 @@
 package ca.sfu.cs.factorbase.util;
 
 import java.text.MessageFormat;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.StringJoiner;
@@ -13,6 +12,8 @@ public final class QueryGenerator {
 
     private static final String JOIN_ON_STRING_INCLUDE_NULL = "({0}.{2} = {1}.{2} OR {0}.{2} IS NULL AND {1}.{2} IS NULL)";
     private static final String JOIN_ON_STRING_NO_NULL = "{0}.{2} = {1}.{2}";
+    private static final StringBuilder builder = new StringBuilder();
+    private static final StringBuilder escapedBuilder = new StringBuilder();
 
     /**
      * Private constructor to prevent instantiation of the utility class.
@@ -30,7 +31,7 @@ public final class QueryGenerator {
      * @return a String that joins tableA and tableB on the given attributes plus NULL.
      */
     private static String constructWhereClauseJoin(List<String> columns, String tableA, String tableB, Boolean joinOnNull) {
-        ArrayList<String> conditions = new ArrayList<String>();
+        StringJoiner conditions = new StringJoiner(" AND ");
         String joinString = JOIN_ON_STRING_NO_NULL;
 
         if (joinOnNull) {
@@ -38,10 +39,19 @@ public final class QueryGenerator {
         }
 
         for (String column : columns) {
-            conditions.add(MessageFormat.format(joinString, tableA, tableB, "`" + column + "`"));
+            escapedBuilder.setLength(0);
+            escapedBuilder.append("`").append(column).append("`");
+            conditions.add(
+                MessageFormat.format(
+                    joinString,
+                    tableA,
+                    tableB,
+                    escapedBuilder.toString()
+                )
+            );
         }
 
-        return String.join(" AND ", conditions);
+        return conditions.toString();
     }
 
 
@@ -56,14 +66,16 @@ public final class QueryGenerator {
      */
     public static String createDifferenceQuery(String columnsA, List<String> columnsB, String tableA, String tableB) {
         String whereClauseJoin = constructWhereClauseJoin(columnsB, tableA, tableB, true);
-        return
-            "SELECT " + columnsA + " " +
-            "FROM " + tableA + " " +
-            "WHERE NOT EXISTS (" +
-                "SELECT NULL " +
-                "FROM " + tableB + " " +
-                "WHERE " + whereClauseJoin +
-            ")";
+        builder.setLength(0);
+        builder.append("SELECT ").append(columnsA).append(" ");
+        builder.append("FROM ").append(tableA).append(" ");
+        builder.append("WHERE NOT EXISTS (");
+        builder.append("SELECT NULL ");
+        builder.append("FROM ").append(tableB).append(" ");
+        builder.append("WHERE ").append(whereClauseJoin);
+        builder.append(")");
+
+        return builder.toString();
     }
 
     /**
@@ -77,7 +89,8 @@ public final class QueryGenerator {
      *         match any of the values in {@code inItems}.
      */
     public static String createSimpleInQuery(String tableName, String columnName, List<String> inItems) {
-        StringBuilder builder = new StringBuilder("SELECT * ");
+        builder.setLength(0);
+        builder.append("SELECT * ");
         builder.append("FROM ").append(tableName).append(" ");
         builder.append("WHERE ").append(columnName).append(" IN (");
         StringJoiner quotedCSV = new StringJoiner("\",\"", "\"", "\"");
@@ -113,22 +126,29 @@ public final class QueryGenerator {
      *
      */
     public static String createSubtractionQuery(String table1, String table2, String subtractionColumn, List<String> joinOnColumns) {
-        StringBuilder builder = new StringBuilder("SELECT ");
-        builder.append(table1 + "." + subtractionColumn + " - ");
-        builder.append("IFNULL(" + table2 + "." + subtractionColumn + ", 0) AS " + subtractionColumn);
+        builder.setLength(0);
+        builder.append("SELECT ");
+        builder.append(table1).append(".").append(subtractionColumn);
+        builder.append(" - ");
+        builder.append("IFNULL(");
+        builder.append(table2).append(".").append(subtractionColumn).append(", ");
+        builder.append("0");
+        builder.append(") AS ").append(subtractionColumn);
         StringJoiner csv = new StringJoiner(", ");
 
         for (String column : joinOnColumns) {
-            csv.add(table1 + ".`" + column + "`");
+            escapedBuilder.setLength(0);
+            escapedBuilder.append(table1).append(".`").append(column).append("`");
+            csv.add(escapedBuilder.toString());
         }
 
         if (csv.length() != 0) {
-            builder.append(", " + csv.toString() + " ");
+            builder.append(", ").append(csv.toString()).append(" ");
         }
 
-        builder.append("FROM " + table1 + " ");
-        builder.append("LEFT JOIN " + table2 + " ");
-        builder.append("ON " + constructWhereClauseJoin(joinOnColumns, table1, table2, false));
+        builder.append("FROM ").append(table1).append(" ");
+        builder.append("LEFT JOIN ").append(table2).append(" ");
+        builder.append("ON ").append(constructWhereClauseJoin(joinOnColumns, table1, table2, false));
 
         return builder.toString();
     }
@@ -144,7 +164,8 @@ public final class QueryGenerator {
      * @return a String that will insert the given variables into the specified table.
      */
     public static String createSimpleExtendedInsertQuery(String table, String child, Set<String> parents) {
-        StringBuilder builder = new StringBuilder("INSERT INTO ");
+        builder.setLength(0);
+        builder.append("INSERT INTO ");
         builder.append(table);
         builder.append(" VALUES ('");
         builder.append(child);
@@ -173,7 +194,8 @@ public final class QueryGenerator {
      * @return a String that will remove all the data from the specified table.
      */
     public static String createTruncateQuery(String table) {
-        StringBuilder builder = new StringBuilder("TRUNCATE ");
+        builder.setLength(0);
+        builder.append("TRUNCATE ");
         builder.append(table);
         builder.append(";");
 
