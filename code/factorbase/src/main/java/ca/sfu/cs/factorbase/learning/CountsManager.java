@@ -210,6 +210,9 @@ public class CountsManager {
             // Build the _flat table.
             buildRNodeFlat(rnodeInfo, storageEngine);
 
+            // Build the _false table.
+            buildRNodeFalse(rnodeInfo);
+
             // Build the _false table first and then the _CT table.
             buildRNodeCT(rnodeInfo, joinTableQueries, storageEngine);
         }
@@ -1169,11 +1172,29 @@ public class CountsManager {
     }
 
 
+    /**
+     * Create the false table for the given RNode using the sort merge algorithm.
+     *
+     * @param rnodeInfo - {@code FunctorNodesInfo} for the RNode to build the "_false" table for.
+     * @throws SQLException if there are issues executing the SQL queries.
+     */
+    private static void buildRNodeFalse(FunctorNodesInfo rnodeInfo) throws SQLException {
+        String shortRNode = rnodeInfo.getShortID();
+        String falseTableName = shortRNode + "_false";
+
+        // Computing the false table as the MULT difference between the matching rows of the star and flat tables.
+        Sort_merge3.sort_merge(
+            dbConnection,
+            shortRNode + "_star",
+            shortRNode + "_flat",
+            falseTableName
+        );
+    }
+
 
     /**
-     * Create the CT table for the given RNode.  This is done by building the "_false" table first, then cross
-     * joining it with the associated JOIN (derived) table, and then have the result UNIONed with the proper
-     * "_counts" table.
+     * Create the CT table for the given RNode.  This is done by cross joining the "_false" table with the associated
+     * JOIN (derived) table, and then having the result UNIONed with the proper "_counts" table.
      *
      * @param rnodeInfo - {@code FunctorNodesInfo} for the RNode to build the "_CT" table for.
      * @param joinTableQueries - {@code Map} to retrieve the associated query to create a derived JOIN table.
@@ -1186,23 +1207,13 @@ public class CountsManager {
         String storageEngine
     ) throws SQLException {
         long start = System.currentTimeMillis(); // @zqian: measure structure learning time.
-        String rnode = rnodeInfo.getID();
-        logger.fine("\nRNode: " + rnode);
+        logger.fine("\nRNode: " + rnodeInfo.getID());
         String shortRNode = rnodeInfo.getShortID();
         logger.fine("Short RNode: " + shortRNode);
 
         dbConnection.setCatalog(databaseName_CT);
         Statement statement = dbConnection.createStatement();
         String falseTableName = shortRNode + "_false";
-
-        // Computing the false table as the MULT difference between the matching rows of the star and flat tables.
-        Sort_merge3.sort_merge(
-            dbConnection,
-            shortRNode + "_star",
-            shortRNode + "_flat",
-            falseTableName
-        );
-
         String countsTableName = shortRNode + "_counts";
 
         // Must specify the columns or there will be column mismatches when taking the UNION of the counts and false
@@ -1242,7 +1253,7 @@ public class CountsManager {
         statement.close();
 
         long end = System.currentTimeMillis(); // @zqian: measure structure learning time.
-        logger.fine("Build Time(ms) for Rnodes_false and Rnodes_CT: " + (end - start) + " ms.\n");
+        logger.fine("Build Time(ms) for RNode CT: " + (end - start) + " ms.\n");
     }
 
 
