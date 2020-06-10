@@ -204,11 +204,11 @@ public class CountsManager {
         String storageEngine
     ) throws SQLException {
         for (FunctorNodesInfo rnodeInfo : rnodeInfos) {
-            // Build the _flat table.
-            buildRNodeFlat(rnodeInfo, storageEngine);
-
             // Build the _star table.
             buildRNodeStar(rnodeInfo);
+
+            // Build the _flat table.
+            buildRNodeFlat(rnodeInfo, storageEngine);
 
             // Build the _false table first and then the _CT table.
             buildRNodeCT(rnodeInfo, joinTableQueries, storageEngine);
@@ -985,6 +985,87 @@ public class CountsManager {
 
 
     /**
+     * Create the star table for the given RNode.
+     *
+     * @param rnodeInfo - {@code FunctorNodesInfo} for the RNode to build the "_star" table for.
+     * @throws SQLException if there are issues executing the SQL queries.
+     */
+    private static void buildRNodeStar(
+        FunctorNodesInfo rnodeInfo
+    ) throws SQLException {
+        long start = System.currentTimeMillis(); // @zqian: measure structure learning time.
+        String rnode = rnodeInfo.getID();
+        logger.fine("\nRNode: " + rnode);
+        String shortRNode = rnodeInfo.getShortID();
+        logger.fine("Short RNode: " + shortRNode);
+
+        dbConnection.setCatalog(databaseName_BN);
+        Statement statement = dbConnection.createStatement();
+
+        // Create SELECT query string.
+        String selectQuery =
+            "SELECT DISTINCT " +
+                "Entries " +
+            "FROM " +
+                "MetaQueries " +
+            "WHERE " +
+                "Lattice_Point = '" + rnode + "' " +
+            "AND " +
+                "TableType = 'STAR' " +
+            "AND " +
+                "ClauseType = 'SELECT';";
+
+        List<String> columns;
+        try (ResultSet result = statement.executeQuery(selectQuery)) {
+            columns = extractEntries(result, "Entries");
+        }
+        String selectString = makeDelimitedString(columns, ", ");
+
+        // Create * query string, which will be used for the "SELECT AS MULT".
+        String multiplicationQuery =
+            "SELECT DISTINCT " +
+                "Entries " +
+            "FROM " +
+                "MetaQueries " +
+            "WHERE " +
+                "Lattice_Point = '" + rnode + "' " +
+            "AND " +
+                "TableType = 'STAR' " +
+            "AND " +
+                "ClauseType = 'FROM';";
+
+        try (ResultSet result = statement.executeQuery(multiplicationQuery)) {
+            columns = extractEntries(result, "Entries");
+        }
+        statement.close();
+        String multiplicationString = makeStarSepQuery(columns);
+
+        // Create FROM query string.
+        String fromString = makeDelimitedString(columns, ", ");
+
+        // Create the final query string.
+        String queryString = "SELECT " + multiplicationString + " AS MULT";
+        if (!selectString.isEmpty()) {
+            queryString += ", " + selectString;
+        }
+        queryString += " FROM " + fromString;
+
+        dbConnection.setCatalog(databaseName_CT);
+        try(Statement viewStatement = dbConnection.createStatement()) {
+            String starTableName = shortRNode + "_star";
+            String createString =
+                "CREATE VIEW `" + starTableName + "` AS " +
+                queryString;
+            logger.fine("\nCREATE String: " + createString);
+            viewStatement.executeUpdate(createString);
+        }
+
+        long end = System.currentTimeMillis(); // @zqian: measure structure learning time.
+        logger.fine("Build Time(ms) for RNode Star: " + (end - start) + " ms.\n");
+    }
+
+
+    /**
      * building the _flat tables
      */
     private static void buildRNodeFlat(
@@ -1052,67 +1133,6 @@ public class CountsManager {
         logger.fine("\n Rnodes_flat are DONE \n" );
     }
 
-    /**
-     * building the _star tables
-     */
-    private static void buildRNodeStar(
-        List<FunctorNodesInfo> rchainInfos
-    ) throws SQLException {
-        long l = System.currentTimeMillis(); //@zqian : measure structure learning time
-        for (FunctorNodesInfo rchainInfo : rchainInfos) {
-            // Get the short and full form rnids for further use.
-            String rchain = rchainInfo.getID();
-            logger.fine("\n RChain : " + rchain);
-            String shortRchain = rchainInfo.getShortID();
-            logger.fine(" Short RChain : " + shortRchain);
-
-            //  create new statement
-            dbConnection.setCatalog(databaseName_BN);
-            Statement st2 = dbConnection.createStatement();
-
-            //  create select query string
-            
-            ResultSet rs2 = st2.executeQuery("select distinct Entries from MetaQueries where Lattice_Point = '" + rchain + "' and TableType = 'Star' and ClauseType = 'SELECT';");
-            List<String> columns = extractEntries(rs2, "Entries");
-            String selectString = makeDelimitedString(columns, ", ");
-
-
-            //  create from MULT string
-            ResultSet rs3 = st2.executeQuery("select distinct Entries from MetaQueries where Lattice_Point = '" + rchain + "' and TableType = 'Star' and ClauseType = 'FROM';");
-            columns = extractEntries(rs3, "Entries");
-            String MultString = makeStarSepQuery(columns);
-            //makes the aggregate function to be used in the select clause //
-            // looks like rs3 and rs4 contain the same data. Ugly! OS August 24, 2017
-
-            //  create from query string
-            String fromString = makeDelimitedString(columns, ", ");
-
-            //  create the final query
-            String queryString = "";
-            if (!selectString.isEmpty()) {
-                queryString = "Select " +  MultString+ " as `MULT` ,"+selectString + " from " + fromString ;
-            } else {
-                queryString = "Select " +  MultString+ " as `MULT`  from " + fromString ;
-            }
-
-            dbConnection.setCatalog(databaseName_CT);
-            Statement st3 = dbConnection.createStatement();
-            String starTableName = shortRchain + "_star";
-            String createString =
-                "CREATE VIEW `" + starTableName + "` AS " +
-                queryString;
-            logger.fine("\n create String : " + createString );
-            st3.execute(createString);
-
-            //  close statements
-            st2.close();
-            st3.close();
-        }
-
-        long l2 = System.currentTimeMillis(); //@zqian : measure structure learning time
-        logger.fine("Building Time(ms) for Rnodes_star: "+(l2-l)+" ms.\n");
-        logger.fine("\n Rnodes_star are DONE \n" );
-    }
 
     /**
      * Create the CT table for the given RNode.  This is done by building the "_false" table first, then cross
