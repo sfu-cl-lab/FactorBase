@@ -203,14 +203,19 @@ public class CountsManager {
         Map<String, String> joinTableQueries,
         String storageEngine
     ) throws SQLException {
-        // Building the _flat tables.
-        BuildCT_Rnodes_flat(rnodeInfos, storageEngine);
+        for (FunctorNodesInfo rnodeInfo : rnodeInfos) {
+            // Build the _star table.
+            buildRNodeStar(rnodeInfo);
 
-        // Building the _star tables.
-        BuildCT_Rnodes_star(rnodeInfos);
+            // Build the _flat table.
+            buildRNodeFlat(rnodeInfo, storageEngine);
 
-        // Building the _false tables first and then the _CT tables.
-        BuildCT_Rnodes_CT(rnodeInfos, joinTableQueries, storageEngine);
+            // Build the _false table.
+            buildRNodeFalse(rnodeInfo);
+
+            // Build the _false table first and then the _CT table.
+            buildRNodeCT(rnodeInfo, joinTableQueries, storageEngine);
+        }
     }
 
 
@@ -983,214 +988,272 @@ public class CountsManager {
 
 
     /**
-     * building the _flat tables
+     * Create the star table for the given RNode.
+     *
+     * @param rnodeInfo - {@code FunctorNodesInfo} for the RNode to build the "_star" table for.
+     * @throws SQLException if there are issues executing the SQL queries.
      */
-    private static void BuildCT_Rnodes_flat(
-        List<FunctorNodesInfo> rchainInfos,
-        String storageEngine
+    private static void buildRNodeStar(
+        FunctorNodesInfo rnodeInfo
     ) throws SQLException {
-        long l = System.currentTimeMillis(); //@zqian : measure structure learning time
-        for (FunctorNodesInfo rchainInfo : rchainInfos) {
-            // Get the short and full form rnids for further use.
-            String rchain = rchainInfo.getID();
-            logger.fine("\n RChain : " + rchain);
-            String shortRchain = rchainInfo.getShortID();
-            logger.fine(" Short RChain : " + shortRchain);
+        long start = System.currentTimeMillis(); // @zqian: measure structure learning time.
+        String rnode = rnodeInfo.getID();
+        logger.fine("\nRNode: " + rnode);
+        String shortRNode = rnodeInfo.getShortID();
+        logger.fine("Short RNode: " + shortRNode);
 
-            //  create new statement
-            dbConnection.setCatalog(databaseName_BN);
-            Statement st2 = dbConnection.createStatement();
+        dbConnection.setCatalog(databaseName_BN);
+        Statement statement = dbConnection.createStatement();
 
-            //  create select query string
-            ResultSet rs2 = st2.executeQuery("select distinct Entries from MetaQueries where Lattice_Point = '" + rchain + "' and TableType = 'Flat' and ClauseType = 'SELECT';");
-            List<String> columns = extractEntries(rs2, "Entries");
-            String selectString = makeDelimitedString(columns, ", ");
+        // Create SELECT query string.
+        String selectQuery =
+            "SELECT DISTINCT " +
+                "Entries " +
+            "FROM " +
+                "MetaQueries " +
+            "WHERE " +
+                "Lattice_Point = '" + rnode + "' " +
+            "AND " +
+                "TableType = 'STAR' " +
+            "AND " +
+                "ClauseType = 'SELECT';";
 
-            //  create from query string
-            ResultSet rs3 = st2.executeQuery("select distinct Entries from MetaQueries where Lattice_Point = '" + rchain + "' and TableType = 'Flat' and ClauseType = 'FROM';" );
-            columns = extractEntries(rs3, "Entries");
-            String fromString = makeDelimitedString(columns, ", ");
-
-            //  create the final query
-            String queryString = "Select " + selectString + " from " + fromString ;
-
-            //  create group by query string
-            if (!cont.equals("1")) {
-                ResultSet rs_6 = st2.executeQuery("select distinct Entries from MetaQueries where Lattice_Point = '" + rchain + "' and TableType = 'Flat' and ClauseType = 'GROUPBY';");
-                columns = extractEntries(rs_6, "Entries");
-                String GroupByString = makeDelimitedString(columns, ", ");
-
-                if (!GroupByString.isEmpty()) queryString = queryString + " group by"  + GroupByString;
-                logger.fine("Query String : " + queryString );
-            }
-
-            dbConnection.setCatalog(databaseName_CT);
-            Statement st3 = dbConnection.createStatement();
-            String flatTableName = shortRchain + "_flat";
-            String createString =
-                "CREATE TABLE `" + flatTableName + "` ENGINE = " + storageEngine + " AS " +
-                queryString;
-            logger.fine("\n create String : " + createString );
-            st3.execute(createString);
-
-            // Add covering index.
-            addCoveringIndex(
-                dbConnection,
-                databaseName_CT,
-                flatTableName
-            );
-
-            //  close statements
-            st2.close();
-            st3.close();
+        List<String> columns;
+        try (ResultSet result = statement.executeQuery(selectQuery)) {
+            columns = extractEntries(result, "Entries");
         }
+        String selectString = makeDelimitedString(columns, ", ");
 
-        long l2 = System.currentTimeMillis(); //@zqian : measure structure learning time
-        logger.fine("Building Time(ms) for Rnodes_flat: "+(l2-l)+" ms.\n");
-        logger.fine("\n Rnodes_flat are DONE \n" );
-    }
+        // Create * query string, which will be used for the "SELECT AS MULT".
+        String multiplicationQuery =
+            "SELECT DISTINCT " +
+                "Entries " +
+            "FROM " +
+                "MetaQueries " +
+            "WHERE " +
+                "Lattice_Point = '" + rnode + "' " +
+            "AND " +
+                "TableType = 'STAR' " +
+            "AND " +
+                "ClauseType = 'FROM';";
 
-    /**
-     * building the _star tables
-     */
-    private static void BuildCT_Rnodes_star(
-        List<FunctorNodesInfo> rchainInfos
-    ) throws SQLException {
-        long l = System.currentTimeMillis(); //@zqian : measure structure learning time
-        for (FunctorNodesInfo rchainInfo : rchainInfos) {
-            // Get the short and full form rnids for further use.
-            String rchain = rchainInfo.getID();
-            logger.fine("\n RChain : " + rchain);
-            String shortRchain = rchainInfo.getShortID();
-            logger.fine(" Short RChain : " + shortRchain);
+        try (ResultSet result = statement.executeQuery(multiplicationQuery)) {
+            columns = extractEntries(result, "Entries");
+        }
+        statement.close();
+        String multiplicationString = makeStarSepQuery(columns);
 
-            //  create new statement
-            dbConnection.setCatalog(databaseName_BN);
-            Statement st2 = dbConnection.createStatement();
+        // Create FROM query string.
+        String fromString = makeDelimitedString(columns, ", ");
 
-            //  create select query string
-            
-            ResultSet rs2 = st2.executeQuery("select distinct Entries from MetaQueries where Lattice_Point = '" + rchain + "' and TableType = 'Star' and ClauseType = 'SELECT';");
-            List<String> columns = extractEntries(rs2, "Entries");
-            String selectString = makeDelimitedString(columns, ", ");
+        // Create the final query string.
+        String queryString = "SELECT " + multiplicationString + " AS MULT";
+        if (!selectString.isEmpty()) {
+            queryString += ", " + selectString;
+        }
+        queryString += " FROM " + fromString;
 
-
-            //  create from MULT string
-            ResultSet rs3 = st2.executeQuery("select distinct Entries from MetaQueries where Lattice_Point = '" + rchain + "' and TableType = 'Star' and ClauseType = 'FROM';");
-            columns = extractEntries(rs3, "Entries");
-            String MultString = makeStarSepQuery(columns);
-            //makes the aggregate function to be used in the select clause //
-            // looks like rs3 and rs4 contain the same data. Ugly! OS August 24, 2017
-
-            //  create from query string
-            String fromString = makeDelimitedString(columns, ", ");
-
-            //  create the final query
-            String queryString = "";
-            if (!selectString.isEmpty()) {
-                queryString = "Select " +  MultString+ " as `MULT` ,"+selectString + " from " + fromString ;
-            } else {
-                queryString = "Select " +  MultString+ " as `MULT`  from " + fromString ;
-            }
-
-            dbConnection.setCatalog(databaseName_CT);
-            Statement st3 = dbConnection.createStatement();
-            String starTableName = shortRchain + "_star";
+        dbConnection.setCatalog(databaseName_CT);
+        try(Statement viewStatement = dbConnection.createStatement()) {
+            String starTableName = shortRNode + "_star";
             String createString =
                 "CREATE VIEW `" + starTableName + "` AS " +
                 queryString;
-            logger.fine("\n create String : " + createString );
-            st3.execute(createString);
-
-            //  close statements
-            st2.close();
-            st3.close();
+            logger.fine("\nCREATE String: " + createString);
+            viewStatement.executeUpdate(createString);
         }
 
-        long l2 = System.currentTimeMillis(); //@zqian : measure structure learning time
-        logger.fine("Building Time(ms) for Rnodes_star: "+(l2-l)+" ms.\n");
-        logger.fine("\n Rnodes_star are DONE \n" );
+        long end = System.currentTimeMillis(); // @zqian: measure structure learning time.
+        logger.fine("Build Time(ms) for RNode Star: " + (end - start) + " ms.\n");
     }
 
+
     /**
-     * Create the CT table for the given RChains.  This is done by building the "_false" tables first, then cross
-     * joining it with the associated JOIN (derived) table, and then have the result UNIONed with the proper
-     * "_counts" table.
+     * Create the flat table for the given RNode.
      *
-     * @param rchainInfos - FunctorNodesInfos for the RChains to build the "_CT" tables for.
-     * @param joinTableQueries - {@code Map} to retrieve the associated query to create a derived JOIN table.
-     * @param storageEngine - the storage engine to use for the tables created when executing this method.
+     * @param rnodeInfo - {@code FunctorNodesInfo} for the RNode to build the "_flat" table for.
+     * @param storageEngine - the storage engine to use for the table created when executing this method.
      * @throws SQLException if there are issues executing the SQL queries.
      */
-    private static void BuildCT_Rnodes_CT(
-        List<FunctorNodesInfo> rchainInfos,
+    private static void buildRNodeFlat(
+        FunctorNodesInfo rnodeInfo,
+        String storageEngine
+    ) throws SQLException {
+        long start = System.currentTimeMillis(); // @zqian: measure structure learning time.
+        String rnode = rnodeInfo.getID();
+        logger.fine("\nRNode: " + rnode);
+        String shortRNode = rnodeInfo.getShortID();
+        logger.fine("Short RNode: " + shortRNode);
+
+        dbConnection.setCatalog(databaseName_BN);
+        Statement statement = dbConnection.createStatement();
+
+        // Create SELECT query string.
+        String selectQuery =
+            "SELECT DISTINCT " +
+                "Entries " +
+            "FROM " +
+                "MetaQueries " +
+            "WHERE " +
+                "Lattice_Point = '" + rnode + "' " +
+            "AND " +
+                "TableType = 'Flat' " +
+            "AND " +
+                "ClauseType = 'SELECT';";
+
+        List<String> columns;
+        try (ResultSet rs2 = statement.executeQuery(selectQuery)) {
+            columns = extractEntries(rs2, "Entries");
+        }
+        String selectString = makeDelimitedString(columns, ", ");
+
+        // Create FROM query string.
+        String fromQuery =
+            "SELECT DISTINCT " +
+                "Entries " +
+            "FROM " +
+                "MetaQueries " +
+            "WHERE " +
+                "Lattice_Point = '" + rnode + "' " +
+            "AND " +
+                "TableType = 'Flat' " +
+            "AND " +
+                "ClauseType = 'FROM';";
+        try (ResultSet result = statement.executeQuery(fromQuery)) {
+            columns = extractEntries(result, "Entries");
+        }
+        String fromString = makeDelimitedString(columns, ", ");
+
+        // Create the final query string.
+        String queryString = "SELECT " + selectString + " FROM " + fromString;
+
+        // Create GROUP BY query string.
+        if (!cont.equals("1")) {
+            String groupByQuery =
+                "SELECT DISTINCT " +
+                    "Entries " +
+                "FROM " +
+                    "MetaQueries " +
+                "WHERE " +
+                    "Lattice_Point = '" + rnode + "' " +
+                "AND " +
+                    "TableType = 'Flat' " +
+                "AND " +
+                    "ClauseType = 'GROUPBY';";
+            try (ResultSet result = statement.executeQuery(groupByQuery)) {
+                columns = extractEntries(result, "Entries");
+            }
+            String groupByString = makeDelimitedString(columns, ", ");
+            if (!groupByString.isEmpty()) {
+                queryString += " GROUP BY "  + groupByString;
+            }
+        }
+        statement.close();
+
+        String flatTableName = shortRNode + "_flat";
+        String createString =
+            "CREATE TABLE `" + flatTableName + "` ENGINE = " + storageEngine + " AS " +
+            queryString;
+        logger.fine("\nCREATE String: " + createString);
+        dbConnection.setCatalog(databaseName_CT);
+        try (Statement createStatement = dbConnection.createStatement()) {
+            createStatement.executeUpdate(createString);
+        }
+
+        // Add covering index.
+        addCoveringIndex(
+            dbConnection,
+            databaseName_CT,
+            flatTableName
+        );
+
+        long end = System.currentTimeMillis(); // @zqian: measure structure learning time.
+        logger.fine("Build Time(ms) for RNode Flat: " + (end - start) + " ms.\n");
+    }
+
+
+    /**
+     * Create the false table for the given RNode using the sort merge algorithm.
+     *
+     * @param rnodeInfo - {@code FunctorNodesInfo} for the RNode to build the "_false" table for.
+     * @throws SQLException if there are issues executing the SQL queries.
+     */
+    private static void buildRNodeFalse(FunctorNodesInfo rnodeInfo) throws SQLException {
+        String shortRNode = rnodeInfo.getShortID();
+        String falseTableName = shortRNode + "_false";
+
+        // Computing the false table as the MULT difference between the matching rows of the star and flat tables.
+        Sort_merge3.sort_merge(
+            dbConnection,
+            shortRNode + "_star",
+            shortRNode + "_flat",
+            falseTableName
+        );
+    }
+
+
+    /**
+     * Create the CT table for the given RNode.  This is done by cross joining the "_false" table with the associated
+     * JOIN (derived) table, and then having the result UNIONed with the proper "_counts" table.
+     *
+     * @param rnodeInfo - {@code FunctorNodesInfo} for the RNode to build the "_CT" table for.
+     * @param joinTableQueries - {@code Map} to retrieve the associated query to create a derived JOIN table.
+     * @param storageEngine - the storage engine to use for the table created when executing this method.
+     * @throws SQLException if there are issues executing the SQL queries.
+     */
+    private static void buildRNodeCT(
+        FunctorNodesInfo rnodeInfo,
         Map<String, String> joinTableQueries,
         String storageEngine
     ) throws SQLException {
-        long l = System.currentTimeMillis(); //@zqian : measure structure learning time
-        for (FunctorNodesInfo rchainInfo : rchainInfos) {
-            // Get the short and full form rnids for further use.
-            String rchain = rchainInfo.getID();
-            logger.fine("\n RChain : " + rchain);
-            String shortRchain = rchainInfo.getShortID();
-            logger.fine(" Short RChain : " + shortRchain);
+        long start = System.currentTimeMillis(); // @zqian: measure structure learning time.
+        logger.fine("\nRNode: " + rnodeInfo.getID());
+        String shortRNode = rnodeInfo.getShortID();
+        logger.fine("Short RNode: " + shortRNode);
 
-            //  create new statement
-            dbConnection.setCatalog(databaseName_CT);
-            Statement st3 = dbConnection.createStatement();
-            /**********starting to create _flase table***using sort_merge*******************************/
-            String falseTableName = shortRchain + "_false";
+        dbConnection.setCatalog(databaseName_CT);
+        Statement statement = dbConnection.createStatement();
+        String falseTableName = shortRNode + "_false";
+        String countsTableName = shortRNode + "_counts";
 
-            // Computing the false table as the MULT difference between the matching rows of the star and flat tables.
-            // This is a big join!
-            Sort_merge3.sort_merge(
-                dbConnection,
-                shortRchain + "_star",
-                shortRchain + "_flat",
-                falseTableName
-            );
+        // Must specify the columns or there will be column mismatches when taking the UNION of the counts and false
+        // tables.
+        String columnQuery =
+            "SELECT column_name AS Entries " +
+            "FROM information_schema.columns " +
+            "WHERE table_schema = '" + databaseName_CT + "' " +
+            "AND table_name = '" + countsTableName + "';";
 
-            String countsTableName = shortRchain + "_counts";
-
-            //building the _CT table        //expanding the columns // May 16
-            // must specify the columns, or there's will a mistake in the table that mismatch the columns
-            ResultSet rs5 = st3.executeQuery(
-                "SELECT column_name AS Entries " +
-                "FROM information_schema.columns " +
-                "WHERE table_schema = '" + databaseName_CT + "' " +
-                "AND table_name = '" + countsTableName + "';"
-            );
-            // reading the column names from information_schema.columns, and the output will remove the "`" automatically,
-            // however some columns contain "()" and MySQL does not support "()" well, so we have to add the "`" back.
-            List<String> columns = extractEntries(rs5, "Entries");
-            String UnionColumnString = makeEscapedCommaSepQuery(columns);
-
-            String ctTableName = shortRchain + "_CT";
-
-            //join false table with join table to introduce rnid (=F) and 2nids (= n/a). Then union result with counts table.
-            String createCTString =
-                "CREATE TABLE `" + ctTableName + "` ENGINE = " + storageEngine + " AS " +
-                    "SELECT " + UnionColumnString + " " +
-                    "FROM `" + countsTableName + "` " +
-                    "WHERE MULT > 0 " +
-
-                    "UNION ALL " +
-
-                    "SELECT " + UnionColumnString + " " +
-                    "FROM " +
-                        "`" + falseTableName + "`, " +
-                        "(" + joinTableQueries.get(shortRchain) + ") AS JOIN_TABLE " +
-                    "WHERE MULT > 0";
-            logger.fine("\n create CT table String : " + createCTString );
-            st3.execute(createCTString);
-
-            //  close statements
-            st3.close();
+        // Extract and escape the column names since they look like function calls to MySQL.
+        List<String> columns;
+        try (ResultSet result = statement.executeQuery(columnQuery)) {
+            columns = extractEntries(result, "Entries");
         }
+        String UnionColumnString = makeEscapedCommaSepQuery(columns);
 
-        long l2 = System.currentTimeMillis(); //@zqian : measure structure learning time
-        logger.fine("Building Time(ms) for Rnodes_false and Rnodes_CT: "+(l2-l)+" ms.\n");
-        logger.fine("\n Rnodes_false and Rnodes_CT  are DONE \n" );
+        String ctTableName = shortRNode + "_CT";
+
+        // Join the false table with the join table to introduce rnid (= F) and 2nids (= N/A).  Then union the result
+        // with the counts table.
+        String createCTString =
+            "CREATE TABLE `" + ctTableName + "` ENGINE = " + storageEngine + " AS " +
+                "SELECT " + UnionColumnString + " " +
+                "FROM `" + countsTableName + "` " +
+                "WHERE MULT > 0 " +
+
+                "UNION ALL " +
+
+                "SELECT " + UnionColumnString + " " +
+                "FROM " +
+                    "`" + falseTableName + "`, " +
+                    "(" + joinTableQueries.get(shortRNode) + ") AS JOIN_TABLE " +
+                "WHERE MULT > 0";
+        logger.fine("\nCREATE CT table String: " + createCTString);
+        statement.executeUpdate(createCTString);
+        statement.close();
+
+        long end = System.currentTimeMillis(); // @zqian: measure structure learning time.
+        logger.fine("Build Time(ms) for RNode CT: " + (end - start) + " ms.\n");
     }
 
 
