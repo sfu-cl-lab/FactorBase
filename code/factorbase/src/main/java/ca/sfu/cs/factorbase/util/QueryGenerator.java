@@ -201,4 +201,35 @@ public final class QueryGenerator {
 
         return builder.toString();
     }
+
+
+    /**
+     * Generates a MySQL SELECT String that extracts "Entries" from the MetaQueries table based on the provided
+     * criteria.
+     *
+     * @param latticePoint - the point in the lattice that the "Entries" value belongs to.
+     * @param tableType - the type of table the query we are trying to extract generates, e.g. STAR.
+     * @param clause - the type of query we are trying to extract the "Entries" for, e.g. SELECT.
+     * @param selectDistinct - true if the DISTINCT keyword should be used; otherwise false.
+     * @return a String that extracts "Entries" from the MetaQueries table based on the provided criteria.
+     */
+    public static String createMetaQueriesExtractionQuery(
+        String latticePoint,
+        String tableType,
+        String clause,
+        boolean selectDistinct
+    ) {
+        builder.setLength(0);
+        if (selectDistinct) {
+            builder.append("SELECT DISTINCT Entries ");
+        } else {
+            builder.append("SELECT Entries ");
+        }
+        builder.append("FROM ").append("MetaQueries ");
+        builder.append("WHERE ").append("Lattice_Point = '").append(latticePoint).append("' ");
+        builder.append("AND ").append("TableType = '").append(tableType).append("' ");
+        builder.append("AND ").append("ClauseType = '").append(clause).append("';");
+
+        return builder.toString();
+    }
 }

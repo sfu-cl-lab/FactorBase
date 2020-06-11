@@ -39,6 +39,7 @@ import ca.sfu.cs.factorbase.database.MySQLFactorBaseDataBase;
 import ca.sfu.cs.factorbase.lattice.LatticeGenerator;
 import ca.sfu.cs.factorbase.lattice.RelationshipLattice;
 import ca.sfu.cs.factorbase.util.MySQLScriptRunner;
+import ca.sfu.cs.factorbase.util.QueryGenerator;
 import ca.sfu.cs.factorbase.util.RuntimeLogger;
 import ca.sfu.cs.factorbase.util.Sort_merge3;
 
@@ -593,17 +594,12 @@ public class CountsManager {
             String pvid = rs.getString("pvid");
             logger.fine("pvid : " + pvid);
             String countsTableName = pvid + "_counts";
-            String selectQuery =
-                "SELECT " +
-                    "Entries " +
-                "FROM " +
-                    "MetaQueries " +
-                "WHERE " +
-                    "Lattice_Point = '" + pvid + "' " +
-                "AND " +
-                    "ClauseType = 'SELECT' " +
-                "AND " +
-                    "TableType = 'Counts';";
+            String selectQuery = QueryGenerator.createMetaQueriesExtractionQuery(
+                pvid,
+                "Counts",
+                "SELECT",
+                false
+            );
 
             // Extract column aliases.
             List<String> columnAliases;
@@ -655,17 +651,12 @@ public class CountsManager {
         logger.fine("SELECT String: " + selectString);
 
         // Create FROM query.
-        String fromQuery =
-            "SELECT " +
-                "Entries " +
-            "FROM " +
-                "MetaQueries " +
-            "WHERE " +
-                "Lattice_Point = '" + pvid + "' " +
-            "AND " +
-                "ClauseType = 'FROM' " +
-            "AND " +
-                "TableType = 'Counts';";
+        String fromQuery = QueryGenerator.createMetaQueriesExtractionQuery(
+            pvid,
+            "Counts",
+            "FROM",
+            false
+        );
 
         String fromString;
         try(ResultSet rs = st.executeQuery(fromQuery)) {
@@ -674,17 +665,12 @@ public class CountsManager {
         }
 
         // Create GROUP BY query.
-        String groupbyQuery =
-            "SELECT " +
-                "Entries " +
-            "FROM " +
-                "MetaQueries " +
-            "WHERE " +
-                "Lattice_Point = '" + pvid + "' " +
-            "AND " +
-                "ClauseType = 'GROUPBY' " +
-            "AND " +
-                "TableType = 'Counts';";
+        String groupbyQuery = QueryGenerator.createMetaQueriesExtractionQuery(
+            pvid,
+            "Counts",
+            "GROUPBY",
+            false
+        );
 
         String groupbyString;
         try(ResultSet rs = st.executeQuery(groupbyQuery)) {
@@ -693,17 +679,12 @@ public class CountsManager {
         }
 
         // Create WHERE query (groundings) if applicable.
-        String whereQuery =
-            "SELECT " +
-                "Entries " +
-            "FROM " +
-                "MetaQueries " +
-            "WHERE " +
-                "Lattice_Point = '" + pvid + "' " +
-            "AND " +
-                "ClauseType = 'WHERE' " +
-            "AND " +
-                "TableType = 'Counts';";
+        String whereQuery = QueryGenerator.createMetaQueriesExtractionQuery(
+            pvid,
+            "Counts",
+            "WHERE",
+            false
+        );
 
         String whereString = "";
         try (ResultSet rsGrounding = st.executeQuery(whereQuery)) {
@@ -909,11 +890,12 @@ public class CountsManager {
         // in order to generate the counts table.
         if (!buildByProjection) {
             ResultSet rs3 = st2.executeQuery(
-                "SELECT DISTINCT Entries " +
-                "FROM MetaQueries " +
-                "WHERE Lattice_Point = '" + rchain + "' " +
-                "AND ClauseType = 'FROM' " +
-                "AND TableType = 'Counts';"
+                QueryGenerator.createMetaQueriesExtractionQuery(
+                    rchain,
+                    "Counts",
+                    "FROM",
+                    false
+                )
             );
 
             List<String> fromAliases = extractEntries(rs3, "Entries");
@@ -929,11 +911,12 @@ public class CountsManager {
         // from the global counts table.
         if (!buildByProjection) {
             ResultSet rs4 = st2.executeQuery(
-                "SELECT DISTINCT Entries " +
-                "FROM MetaQueries " +
-                "WHERE Lattice_Point = '" + rchain + "' " +
-                "AND ClauseType = 'WHERE' " +
-                "AND TableType = 'Counts';"
+                QueryGenerator.createMetaQueriesExtractionQuery(
+                    rchain,
+                    "Counts",
+                    "WHERE",
+                    false
+                )
             );
 
             List<String> columns = extractEntries(rs4, "Entries");
@@ -955,11 +938,12 @@ public class CountsManager {
         // Continuous probably requires a different approach.  OS August 22.
         if (!cont.equals("1")) {
             ResultSet rs_6 = st2.executeQuery(
-                "SELECT DISTINCT Entries " +
-                "FROM MetaQueries " +
-                "WHERE Lattice_Point = '" + rchain + "' " +
-                "AND ClauseType = 'GROUPBY' " +
-                "AND TableType = 'Counts';"
+                QueryGenerator.createMetaQueriesExtractionQuery(
+                    rchain,
+                    "Counts",
+                    "GROUPBY",
+                    false
+                )
             );
 
             List<String> columns = extractEntries(rs_6, "Entries");
@@ -1006,17 +990,12 @@ public class CountsManager {
         Statement statement = dbConnection.createStatement();
 
         // Create SELECT query string.
-        String selectQuery =
-            "SELECT DISTINCT " +
-                "Entries " +
-            "FROM " +
-                "MetaQueries " +
-            "WHERE " +
-                "Lattice_Point = '" + rnode + "' " +
-            "AND " +
-                "TableType = 'STAR' " +
-            "AND " +
-                "ClauseType = 'SELECT';";
+        String selectQuery = QueryGenerator.createMetaQueriesExtractionQuery(
+            rnode,
+            "Star",
+            "SELECT",
+            true
+        );
 
         List<String> columns;
         try (ResultSet result = statement.executeQuery(selectQuery)) {
@@ -1025,17 +1004,12 @@ public class CountsManager {
         String selectString = String.join(", ", columns);
 
         // Create * query string, which will be used for the "SELECT AS MULT".
-        String multiplicationQuery =
-            "SELECT DISTINCT " +
-                "Entries " +
-            "FROM " +
-                "MetaQueries " +
-            "WHERE " +
-                "Lattice_Point = '" + rnode + "' " +
-            "AND " +
-                "TableType = 'STAR' " +
-            "AND " +
-                "ClauseType = 'FROM';";
+        String multiplicationQuery = QueryGenerator.createMetaQueriesExtractionQuery(
+            rnode,
+            "Star",
+            "FROM",
+            false
+        );
 
         try (ResultSet result = statement.executeQuery(multiplicationQuery)) {
             columns = extractEntries(result, "Entries");
@@ -1089,17 +1063,12 @@ public class CountsManager {
         Statement statement = dbConnection.createStatement();
 
         // Create SELECT query string.
-        String selectQuery =
-            "SELECT DISTINCT " +
-                "Entries " +
-            "FROM " +
-                "MetaQueries " +
-            "WHERE " +
-                "Lattice_Point = '" + rnode + "' " +
-            "AND " +
-                "TableType = 'Flat' " +
-            "AND " +
-                "ClauseType = 'SELECT';";
+        String selectQuery = QueryGenerator.createMetaQueriesExtractionQuery(
+            rnode,
+            "Flat",
+            "SELECT",
+            false
+        );
 
         List<String> columns;
         try (ResultSet rs2 = statement.executeQuery(selectQuery)) {
@@ -1108,17 +1077,12 @@ public class CountsManager {
         String selectString = String.join(", ", columns);
 
         // Create FROM query string.
-        String fromQuery =
-            "SELECT DISTINCT " +
-                "Entries " +
-            "FROM " +
-                "MetaQueries " +
-            "WHERE " +
-                "Lattice_Point = '" + rnode + "' " +
-            "AND " +
-                "TableType = 'Flat' " +
-            "AND " +
-                "ClauseType = 'FROM';";
+        String fromQuery = QueryGenerator.createMetaQueriesExtractionQuery(
+            rnode,
+            "Flat",
+            "FROM",
+            false
+        );
         try (ResultSet result = statement.executeQuery(fromQuery)) {
             columns = extractEntries(result, "Entries");
         }
@@ -1129,17 +1093,12 @@ public class CountsManager {
 
         // Create GROUP BY query string.
         if (!cont.equals("1")) {
-            String groupByQuery =
-                "SELECT DISTINCT " +
-                    "Entries " +
-                "FROM " +
-                    "MetaQueries " +
-                "WHERE " +
-                    "Lattice_Point = '" + rnode + "' " +
-                "AND " +
-                    "TableType = 'Flat' " +
-                "AND " +
-                    "ClauseType = 'GROUPBY';";
+            String groupByQuery = QueryGenerator.createMetaQueriesExtractionQuery(
+                rnode,
+                "Flat",
+                "GROUPBY",
+                false
+            );
             try (ResultSet result = statement.executeQuery(groupByQuery)) {
                 columns = extractEntries(result, "Entries");
             }
@@ -1285,10 +1244,12 @@ public class CountsManager {
 
             //  create ColumnString
             ResultSet rs2 = st2.executeQuery(
-                "SELECT DISTINCT Entries " +
-                "FROM MetaQueries " +
-                "WHERE Lattice_Point = '" + orig_rnid + "' " +
-                "AND TableType = 'Join';"
+                QueryGenerator.createMetaQueriesExtractionQuery(
+                    orig_rnid,
+                    "Join",
+                    "COLUMN",
+                    false
+                )
             );
 
             List<String> columns = extractEntries(rs2, "Entries");
