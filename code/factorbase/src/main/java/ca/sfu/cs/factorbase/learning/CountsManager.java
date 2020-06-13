@@ -395,13 +395,29 @@ public class CountsManager {
                 Statement st2 = dbConnection.createStatement();
 
                 //  create select query string  
-                ResultSet rs2 = st2.executeQuery("SELECT DISTINCT Entries FROM MetaQueries WHERE Lattice_Point = '" + rchain + "' and '"+removed+"' = EntryType and ClauseType = 'SELECT' and TableType = 'Star';");
+                ResultSet rs2 = st2.executeQuery(
+                    QueryGenerator.createMetaQueriesExtractionQuery(
+                        rchain,
+                        "Star",
+                        "SELECT",
+                        removed,
+                        false
+                    )
+                );
                 List<String> columns = extractEntries(rs2, "Entries");
                 String selectString = String.join(", ", columns);
                 logger.fine("Select String : " + selectString);
                 rs2.close();
                 //  create mult query string
-                ResultSet rs3 = st2.executeQuery("SELECT DISTINCT Entries FROM MetaQueries WHERE Lattice_Point = '" + rchain + "' and '"+removed+"' = EntryType and ClauseType = 'FROM' and TableType = 'Star';");
+                ResultSet rs3 = st2.executeQuery(
+                    QueryGenerator.createMetaQueriesExtractionQuery(
+                        rchain,
+                        "Star",
+                        "FROM",
+                        removed,
+                        false
+                    )
+                );
                 columns = extractEntries(rs3, "Entries");
                 String MultString = makeStarSepQuery(columns);
                 logger.fine("Mult String : " + MultString+ " as `MULT`");
@@ -410,7 +426,15 @@ public class CountsManager {
                 String fromString = String.join(", ", columns);
                 logger.fine("From String : " + fromString);          
                 //  create where query string
-                ResultSet rs5 = st2.executeQuery("SELECT DISTINCT Entries FROM MetaQueries WHERE Lattice_Point = '" + rchain + "' and '"+removed+"' = EntryType and ClauseType = 'WHERE' and TableType = 'Star';");
+                ResultSet rs5 = st2.executeQuery(
+                    QueryGenerator.createMetaQueriesExtractionQuery(
+                        rchain,
+                        "Star",
+                        "WHERE",
+                        removed,
+                        false
+                    )
+                );
                 columns = extractEntries(rs5, "Entries");
                 String whereString = String.join(" AND ", columns);
                logger.fine("Where String : " + whereString);
@@ -598,6 +622,7 @@ public class CountsManager {
                 pvid,
                 "Counts",
                 "SELECT",
+                null,
                 false
             );
 
@@ -655,6 +680,7 @@ public class CountsManager {
             pvid,
             "Counts",
             "FROM",
+            null,
             false
         );
 
@@ -669,6 +695,7 @@ public class CountsManager {
             pvid,
             "Counts",
             "GROUPBY",
+            null,
             false
         );
 
@@ -683,6 +710,7 @@ public class CountsManager {
             pvid,
             "Counts",
             "WHERE",
+            null,
             false
         );
 
@@ -894,6 +922,7 @@ public class CountsManager {
                     rchain,
                     "Counts",
                     "FROM",
+                    null,
                     false
                 )
             );
@@ -915,6 +944,7 @@ public class CountsManager {
                     rchain,
                     "Counts",
                     "WHERE",
+                    null,
                     false
                 )
             );
@@ -942,6 +972,7 @@ public class CountsManager {
                     rchain,
                     "Counts",
                     "GROUPBY",
+                    null,
                     false
                 )
             );
@@ -994,6 +1025,7 @@ public class CountsManager {
             rnode,
             "Star",
             "SELECT",
+            null,
             true
         );
 
@@ -1008,6 +1040,7 @@ public class CountsManager {
             rnode,
             "Star",
             "FROM",
+            null,
             false
         );
 
@@ -1067,6 +1100,7 @@ public class CountsManager {
             rnode,
             "Flat",
             "SELECT",
+            null,
             false
         );
 
@@ -1081,6 +1115,7 @@ public class CountsManager {
             rnode,
             "Flat",
             "FROM",
+            null,
             false
         );
         try (ResultSet result = statement.executeQuery(fromQuery)) {
@@ -1097,6 +1132,7 @@ public class CountsManager {
                 rnode,
                 "Flat",
                 "GROUPBY",
+                null,
                 false
             );
             try (ResultSet result = statement.executeQuery(groupByQuery)) {
@@ -1248,6 +1284,7 @@ public class CountsManager {
                     orig_rnid,
                     "Join",
                     "COLUMN",
+                    null,
                     false
                 )
             );

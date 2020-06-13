@@ -210,6 +210,8 @@ public final class QueryGenerator {
      * @param latticePoint - the point in the lattice that the "Entries" value belongs to.
      * @param tableType - the type of table the query we are trying to extract generates, e.g. STAR.
      * @param clause - the type of query we are trying to extract the "Entries" for, e.g. SELECT.
+     * @param entryType - the type of the "Entries" to extract, e.g. 1nid; if set to null will not be specified in the
+     *                    query.
      * @param selectDistinct - true if the DISTINCT keyword should be used; otherwise false.
      * @return a String that extracts "Entries" from the MetaQueries table based on the provided criteria.
      */
@@ -217,6 +219,7 @@ public final class QueryGenerator {
         String latticePoint,
         String tableType,
         String clause,
+        String entryType,
         boolean selectDistinct
     ) {
         builder.setLength(0);
@@ -228,7 +231,11 @@ public final class QueryGenerator {
         builder.append("FROM ").append("MetaQueries ");
         builder.append("WHERE ").append("Lattice_Point = '").append(latticePoint).append("' ");
         builder.append("AND ").append("TableType = '").append(tableType).append("' ");
-        builder.append("AND ").append("ClauseType = '").append(clause).append("';");
+        builder.append("AND ").append("ClauseType = '").append(clause);
+        if (entryType != null) {
+            builder.append("' AND ").append("EntryType = '").append(entryType);
+        }
+        builder.append("';");
 
         return builder.toString();
     }
