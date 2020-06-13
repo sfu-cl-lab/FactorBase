@@ -885,7 +885,7 @@ public class CountsManager {
 
         // Create SELECT query string.
         String selectQuery =
-            "SELECT DISTINCT Entries " +
+            "SELECT Entries " +
             "FROM MetaQueries " +
             "WHERE Lattice_Point = '" + rchain + "' " +
             "AND ClauseType = 'SELECT' ";
