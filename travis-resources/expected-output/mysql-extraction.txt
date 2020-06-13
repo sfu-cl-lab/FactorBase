@@ -249,39 +249,39 @@ RA(prof0,student0),registration(course0,student0)	Counts	WHERE	rtable	`RA(prof0,
 RA(prof0,student0),registration(course0,student0)	Counts	WHERE	rtable	`RA(prof0,student0)`.student_id = student0.student_id
 RA(prof0,student0),registration(course0,student0)	Counts	WHERE	rtable	`registration(course0,student0)`.course_id = course0.course_id
 RA(prof0,student0),registration(course0,student0)	Counts	WHERE	rtable	`registration(course0,student0)`.student_id = student0.student_id
-RA(prof0,student0),registration(course0,student0)	STAR	FROM	RA(prof0,student0)	`b_CT`
-RA(prof0,student0),registration(course0,student0)	STAR	FROM	RA(prof0,student0)	prof0_counts
-RA(prof0,student0),registration(course0,student0)	STAR	FROM	registration(course0,student0)	`a_CT`
-RA(prof0,student0),registration(course0,student0)	STAR	FROM	registration(course0,student0)	course0_counts
-RA(prof0,student0),registration(course0,student0)	STAR	SELECT	RA(prof0,student0)	`diff(course0)`
-RA(prof0,student0),registration(course0,student0)	STAR	SELECT	RA(prof0,student0)	`grade(course0,student0)`
-RA(prof0,student0),registration(course0,student0)	STAR	SELECT	RA(prof0,student0)	`intelligence(student0)`
-RA(prof0,student0),registration(course0,student0)	STAR	SELECT	RA(prof0,student0)	`popularity(prof0)`
-RA(prof0,student0),registration(course0,student0)	STAR	SELECT	RA(prof0,student0)	`ranking(student0)`
-RA(prof0,student0),registration(course0,student0)	STAR	SELECT	RA(prof0,student0)	`rating(course0)`
-RA(prof0,student0),registration(course0,student0)	STAR	SELECT	RA(prof0,student0)	`registration(course0,student0)`
-RA(prof0,student0),registration(course0,student0)	STAR	SELECT	RA(prof0,student0)	`sat(course0,student0)`
-RA(prof0,student0),registration(course0,student0)	STAR	SELECT	RA(prof0,student0)	`teachingability(prof0)`
-RA(prof0,student0),registration(course0,student0)	STAR	SELECT	registration(course0,student0)	`capability(prof0,student0)`
-RA(prof0,student0),registration(course0,student0)	STAR	SELECT	registration(course0,student0)	`diff(course0)`
-RA(prof0,student0),registration(course0,student0)	STAR	SELECT	registration(course0,student0)	`intelligence(student0)`
-RA(prof0,student0),registration(course0,student0)	STAR	SELECT	registration(course0,student0)	`popularity(prof0)`
-RA(prof0,student0),registration(course0,student0)	STAR	SELECT	registration(course0,student0)	`ranking(student0)`
-RA(prof0,student0),registration(course0,student0)	STAR	SELECT	registration(course0,student0)	`RA(prof0,student0)`
-RA(prof0,student0),registration(course0,student0)	STAR	SELECT	registration(course0,student0)	`rating(course0)`
-RA(prof0,student0),registration(course0,student0)	STAR	SELECT	registration(course0,student0)	`salary(prof0,student0)`
-RA(prof0,student0),registration(course0,student0)	STAR	SELECT	registration(course0,student0)	`teachingability(prof0)`
-RA(prof0,student0),registration(course0,student0)	STAR	WHERE	RA(prof0,student0)	`registration(course0,student0)` = "T"
+RA(prof0,student0),registration(course0,student0)	Star	FROM	RA(prof0,student0)	`b_CT`
+RA(prof0,student0),registration(course0,student0)	Star	FROM	RA(prof0,student0)	prof0_counts
+RA(prof0,student0),registration(course0,student0)	Star	FROM	registration(course0,student0)	`a_CT`
+RA(prof0,student0),registration(course0,student0)	Star	FROM	registration(course0,student0)	course0_counts
+RA(prof0,student0),registration(course0,student0)	Star	SELECT	RA(prof0,student0)	`diff(course0)`
+RA(prof0,student0),registration(course0,student0)	Star	SELECT	RA(prof0,student0)	`grade(course0,student0)`
+RA(prof0,student0),registration(course0,student0)	Star	SELECT	RA(prof0,student0)	`intelligence(student0)`
+RA(prof0,student0),registration(course0,student0)	Star	SELECT	RA(prof0,student0)	`popularity(prof0)`
+RA(prof0,student0),registration(course0,student0)	Star	SELECT	RA(prof0,student0)	`ranking(student0)`
+RA(prof0,student0),registration(course0,student0)	Star	SELECT	RA(prof0,student0)	`rating(course0)`
+RA(prof0,student0),registration(course0,student0)	Star	SELECT	RA(prof0,student0)	`registration(course0,student0)`
+RA(prof0,student0),registration(course0,student0)	Star	SELECT	RA(prof0,student0)	`sat(course0,student0)`
+RA(prof0,student0),registration(course0,student0)	Star	SELECT	RA(prof0,student0)	`teachingability(prof0)`
+RA(prof0,student0),registration(course0,student0)	Star	SELECT	registration(course0,student0)	`capability(prof0,student0)`
+RA(prof0,student0),registration(course0,student0)	Star	SELECT	registration(course0,student0)	`diff(course0)`
+RA(prof0,student0),registration(course0,student0)	Star	SELECT	registration(course0,student0)	`intelligence(student0)`
+RA(prof0,student0),registration(course0,student0)	Star	SELECT	registration(course0,student0)	`popularity(prof0)`
+RA(prof0,student0),registration(course0,student0)	Star	SELECT	registration(course0,student0)	`ranking(student0)`
+RA(prof0,student0),registration(course0,student0)	Star	SELECT	registration(course0,student0)	`RA(prof0,student0)`
+RA(prof0,student0),registration(course0,student0)	Star	SELECT	registration(course0,student0)	`rating(course0)`
+RA(prof0,student0),registration(course0,student0)	Star	SELECT	registration(course0,student0)	`salary(prof0,student0)`
+RA(prof0,student0),registration(course0,student0)	Star	SELECT	registration(course0,student0)	`teachingability(prof0)`
+RA(prof0,student0),registration(course0,student0)	Star	WHERE	RA(prof0,student0)	`registration(course0,student0)` = "T"
 RA(prof0,student0)	Star	FROM	table	prof0_counts
 RA(prof0,student0)	Star	FROM	table	student0_counts
 RA(prof0,student0)	Star	SELECT	1nid	`intelligence(student0)`
 RA(prof0,student0)	Star	SELECT	1nid	`popularity(prof0)`
 RA(prof0,student0)	Star	SELECT	1nid	`ranking(student0)`
 RA(prof0,student0)	Star	SELECT	1nid	`teachingability(prof0)`
-RA(prof0,student0)	STAR	SELECT	RA(prof0,student0)	`intelligence(student0)`
-RA(prof0,student0)	STAR	SELECT	RA(prof0,student0)	`popularity(prof0)`
-RA(prof0,student0)	STAR	SELECT	RA(prof0,student0)	`ranking(student0)`
-RA(prof0,student0)	STAR	SELECT	RA(prof0,student0)	`teachingability(prof0)`
+RA(prof0,student0)	Star	SELECT	RA(prof0,student0)	`intelligence(student0)`
+RA(prof0,student0)	Star	SELECT	RA(prof0,student0)	`popularity(prof0)`
+RA(prof0,student0)	Star	SELECT	RA(prof0,student0)	`ranking(student0)`
+RA(prof0,student0)	Star	SELECT	RA(prof0,student0)	`teachingability(prof0)`
 registration(course0,student0)	Counts	FROM	rtable	unielwin.registration AS `registration(course0,student0)`
 registration(course0,student0)	Counts	FROM	table	unielwin.course AS course0
 registration(course0,student0)	Counts	FROM	table	unielwin.student AS student0
@@ -320,10 +320,10 @@ registration(course0,student0)	Star	SELECT	1nid	`diff(course0)`
 registration(course0,student0)	Star	SELECT	1nid	`intelligence(student0)`
 registration(course0,student0)	Star	SELECT	1nid	`ranking(student0)`
 registration(course0,student0)	Star	SELECT	1nid	`rating(course0)`
-registration(course0,student0)	STAR	SELECT	registration(course0,student0)	`diff(course0)`
-registration(course0,student0)	STAR	SELECT	registration(course0,student0)	`intelligence(student0)`
-registration(course0,student0)	STAR	SELECT	registration(course0,student0)	`ranking(student0)`
-registration(course0,student0)	STAR	SELECT	registration(course0,student0)	`rating(course0)`
+registration(course0,student0)	Star	SELECT	registration(course0,student0)	`diff(course0)`
+registration(course0,student0)	Star	SELECT	registration(course0,student0)	`intelligence(student0)`
+registration(course0,student0)	Star	SELECT	registration(course0,student0)	`ranking(student0)`
+registration(course0,student0)	Star	SELECT	registration(course0,student0)	`rating(course0)`
 student0	Counts	FROM	table	unielwin.student AS student0
 student0	Counts	GROUPBY	1node	`intelligence(student0)`
 student0	Counts	GROUPBY	1node	`ranking(student0)`

@@ -288,6 +288,6 @@ INSERT INTO MetaQueries
     AND
         Lattice_Point = L.`member`
     AND
-        M.TableType = 'COUNTS';
+        M.TableType = 'Counts';
 
 END//

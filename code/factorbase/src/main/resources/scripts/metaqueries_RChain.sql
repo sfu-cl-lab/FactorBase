@@ -209,7 +209,7 @@ where
 insert into MetaQueries
 SELECT
     lattice_rel.child as Lattice_Point, 
-    'STAR' as TableType, 
+    'Star' as TableType,
     'FROM' as ClauseType,
     lattice_rel.removed as EntryType, 
     /** rnid = lattice_rel.removed should now point to the R_i of our paper **/
@@ -235,7 +235,7 @@ where
 insert into MetaQueries
 SELECT DISTINCT 
     LR.child as Lattice_Point, 
-    'STAR' as TableType, 
+    'Star' as TableType,
     'FROM' as ClauseType,
     LR.removed as EntryType,
     CONCAT(
@@ -263,7 +263,7 @@ R.pvid not in (select pvid from RChain_pvars where RChain_pvars.rchain = LR.pare
 insert into MetaQueries
 SELECT DISTINCT 
      lattice_rel.child as Lattice_Point, 
-    'STAR' as TableType, 
+    'Star' as TableType,
     'WHERE' as ClauseType,
     lattice_rel.removed as EntryType, 
     CONCAT(
@@ -289,7 +289,7 @@ where
 insert into MetaQueries
 SELECT DISTINCT 
     lattice_rel.child AS Lattice_Point, 
-    'STAR' as TableType, 
+    'Star' as TableType,
     'SELECT' as ClauseType,
     lattice_rel.removed AS EntryType,
     M.Entries 
@@ -302,14 +302,14 @@ WHERE
         AND lattice_membership.name = lattice_rel.parent
         AND M.Lattice_Point = lattice_membership.`member`
         AND M.ClauseType = 'GROUPBY'
-        AND M.TableType = 'COUNTS';
+        AND M.TableType = 'Counts';
 
 
 /* find all elements in the groupBy List for the shortened parent rchain */
 insert into MetaQueries
 SELECT DISTINCT 
     LR.child as Lattice_Point, 
-    'STAR' as TableType, 
+    'Star' as TableType,
     'SELECT' as ClauseType,
     LR.removed as EntryType,
     M.Entries 
@@ -325,7 +325,7 @@ AND
 R.pvid not in (select pvid from RChain_pvars where RChain_pvars.rchain = LR.parent)
 AND M.Lattice_Point = R.pvid
 AND M.ClauseType = 'GROUPBY'
-AND M.TableType = 'COUNTS';
+AND M.TableType = 'Counts';
 /* The case where the parent is empty.*
  * In this case the rchain child contains just one rnid.
  * in this case we just insert the select entries from the star table for the rnide.
@@ -336,11 +336,18 @@ AND M.TableType = 'COUNTS';
 insert into MetaQueries
 SELECT DISTINCT 
     lattice_rel.removed AS Lattice_Point, 
-    'STAR' as TableType, 
+    'Star' as TableType,
     'SELECT' as ClauseType,
     lattice_rel.removed AS EntryType,
     M.Entries 
 FROM lattice_rel, MetaQueries M
-WHERE lattice_rel.parent = 'EmptySet' AND M.Lattice_Point = lattice_rel.removed AND M.TableType = 'STAR' and M.ClauseType = 'SELECT';
+WHERE
+    lattice_rel.parent = 'EmptySet'
+AND
+    M.Lattice_Point = lattice_rel.removed
+AND
+    M.TableType = 'Star'
+AND
+    M.ClauseType = 'SELECT';
 
 END//
