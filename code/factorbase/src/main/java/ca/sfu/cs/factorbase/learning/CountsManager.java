@@ -51,7 +51,7 @@ public class CountsManager {
     private static String databaseName_std;
     private static String databaseName_BN;
     private static String databaseName_CT;
-    private static String databaseName_counts_cache;
+    private static String databaseName_CT_cache;
     private static String databaseName_global_counts;
     private static String dbUsername;
     private static String dbPassword;
@@ -152,19 +152,19 @@ public class CountsManager {
      *
      * @param relationshipLattice - the relationship lattice used to determine which contingency tables to generate.
      * @param storageEngine - the storage engine to use for the tables created when executing this method.
-     * @param useCountsCache - true if the counts should be read from the counts table cache database; otherwise false.
+     * @param useCTCache - true if the counts should be read from the CT table cache database; otherwise false.
      * @throws SQLException if there are issues executing the SQL queries.
      */
     private static void CTGenerator(
         RelationshipLattice relationshipLattice,
         String storageEngine,
-        boolean useCountsCache
+        boolean useCTCache
     ) throws SQLException {
         int latticeHeight = relationshipLattice.getHeight();
 
         long l = System.currentTimeMillis(); //@zqian : CT table generating time
            // handling Pvars, generating pvars_counts       
-        buildPVarsCounts(storageEngine, useCountsCache);
+        buildPVarsCounts(storageEngine, useCTCache);
         RuntimeLogger.updateLogEntry(dbConnection, "buildPVarsCounts", System.currentTimeMillis() - l);
 
         // preparing the _join part for _CT tables
@@ -304,7 +304,7 @@ public class CountsManager {
         Config conf = new Config();
         databaseName_std = conf.getProperty("dbname");
         databaseName_BN = databaseName_std + "_BN";
-        databaseName_counts_cache = databaseName_std + "_CT_cache";
+        databaseName_CT_cache = databaseName_std + "_CT_cache";
         databaseName_global_counts = databaseName_std + "_global_counts";
         databaseName_CT = databaseName_std + "_CT";
         dbUsername = conf.getProperty("dbusername");
@@ -599,10 +599,10 @@ public class CountsManager {
      * Build the "_counts" tables for the population variables.
      *
      * @param storageEngine - the storage engine to use for the tables created when executing this method.
-     * @param useCountsCache - true if the counts should be read from the counts table cache database; otherwise false.
+     * @param useCTCache - true if the counts should be read from the CT cache database; otherwise false.
      * @throws SQLException if there are issues executing the SQL queries.
      */
-    private static void buildPVarsCounts(String storageEngine, boolean useCountsCache) throws SQLException {
+    private static void buildPVarsCounts(String storageEngine, boolean useCTCache) throws SQLException {
         long l = System.currentTimeMillis(); //@zqian : measure structure learning time
         dbConnection.setCatalog(databaseName_BN);
         Statement st = dbConnection.createStatement();
@@ -623,7 +623,7 @@ public class CountsManager {
         > generateCountsMethod = CountsManager::generatePVarsCountsTable;
 
         // Use the generatePVarsCountsTableFromCache method if we have been specified to read the counts from the cache.
-        if (useCountsCache) {
+        if (useCTCache) {
             generateCountsMethod = CountsManager::generatePVarsCountsTableFromCache;
         }
 
@@ -766,9 +766,9 @@ public class CountsManager {
 
 
     /**
-     * Generate the "_counts" table for the given population variable using the counts cache database.
+     * Generate the "_counts" table for the given population variable using the CT cache database.
      * <p>
-     * Note: If the "_counts" table can't be found in the counts cache database it will be generated there.
+     * Note: If the "_counts" table can't be found in the CT cache database it will be generated there.
      * </p>
      *
      * @param targetDatabaseName - the name of the database to generate the "_counts" table in.
@@ -790,21 +790,21 @@ public class CountsManager {
         String columnNames = makeDelimitedString(columnAliases, ",", " AS ");
         csvJoiner.add(String.join(",", columnNames));
 
-        String countsTableCacheKey = csvJoiner.toString();
+        String ctTablesCacheKey = csvJoiner.toString();
 
-        String cacheTableName = ctTablesCache.get(countsTableCacheKey);
+        String cacheTableName = ctTablesCache.get(ctTablesCacheKey);
         if (cacheTableName == null) {
             cacheTableName = countsTableName + "_" + tableID;
             tableID++;
             generatePVarsCountsTable(
-                databaseName_counts_cache,
+                databaseName_CT_cache,
                 cacheTableName,
                 columnAliases,
                 storageEngine,
                 pvid
             );
 
-            ctTablesCache.put(countsTableCacheKey, cacheTableName);
+            ctTablesCache.put(ctTablesCacheKey, cacheTableName);
         }
 
         dbConnection.setCatalog(targetDatabaseName);
@@ -812,7 +812,7 @@ public class CountsManager {
             String viewQuery =
                 "CREATE VIEW " + countsTableName + " AS " +
                 "SELECT * " +
-                "FROM " + databaseName_counts_cache + "." + cacheTableName;
+                "FROM " + databaseName_CT_cache + "." + cacheTableName;
             createViewStatement.executeUpdate(viewQuery);
         }
     }
