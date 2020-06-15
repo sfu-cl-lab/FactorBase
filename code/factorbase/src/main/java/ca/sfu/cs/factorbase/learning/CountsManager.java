@@ -220,7 +220,15 @@ public class CountsManager {
             buildRNodeFalse(shortRNode);
 
             // Build the _CT table.
-            buildRNodeCT(shortRNode, joinTableQueries, storageEngine);
+            String createCTQuery = buildRNodeCTCreateQuery(shortRNode, joinTableQueries, storageEngine);
+            long start = System.currentTimeMillis();
+            dbConnection.setCatalog(databaseName_CT);
+            logger.fine("\nCREATE CT table String: " + createCTQuery);
+            try (Statement statement = dbConnection.createStatement()) {
+                statement.executeUpdate(createCTQuery);
+            }
+
+            logger.fine("Build Time for RNode CT: " + (System.currentTimeMillis() - start) + "ms.\n");
         }
     }
 
@@ -1187,23 +1195,20 @@ public class CountsManager {
 
 
     /**
-     * Create the CT table for the given RNode.  This is done by cross joining the "_false" table with the associated
-     * JOIN (derived) table, and then having the result UNIONed with the proper "_counts" table.
+     * Create the CREATE query for the CT table of the given RNode.  This is done by cross joining the "_false" table
+     * with the associated JOIN (derived) table, and then having the result UNIONed with the proper "_counts" table.
      *
      * @param shortRNode - the short name of the RNode to build the "_CT" table for.
      * @param joinTableQueries - {@code Map} to retrieve the associated query to create a derived JOIN table.
      * @param storageEngine - the storage engine to use for the table created when executing this method.
+     * @return CREATE query to generate the CT table for the given RNode.
      * @throws SQLException if there are issues executing the SQL queries.
      */
-    private static void buildRNodeCT(
+    private static String buildRNodeCTCreateQuery(
         String shortRNode,
         Map<String, String> joinTableQueries,
         String storageEngine
     ) throws SQLException {
-        long start = System.currentTimeMillis(); // @zqian: measure structure learning time.
-
-        dbConnection.setCatalog(databaseName_CT);
-        Statement statement = dbConnection.createStatement();
         String falseTableName = shortRNode + "_false";
         String countsTableName = shortRNode + "_counts";
 
@@ -1217,7 +1222,10 @@ public class CountsManager {
 
         // Extract and escape the column names since they look like function calls to MySQL.
         List<String> columns;
-        try (ResultSet result = statement.executeQuery(columnQuery)) {
+        try (
+            Statement statement = dbConnection.createStatement();
+            ResultSet result = statement.executeQuery(columnQuery)
+        ) {
             columns = extractEntries(result, "Entries");
         }
         String UnionColumnString = makeEscapedCommaSepQuery(columns);
@@ -1239,12 +1247,7 @@ public class CountsManager {
                     "`" + falseTableName + "`, " +
                     "(" + joinTableQueries.get(shortRNode) + ") AS JOIN_TABLE " +
                 "WHERE MULT > 0";
-        logger.fine("\nCREATE CT table String: " + createCTString);
-        statement.executeUpdate(createCTString);
-        statement.close();
-
-        long end = System.currentTimeMillis(); // @zqian: measure structure learning time.
-        logger.fine("Build Time(ms) for RNode CT: " + (end - start) + " ms.\n");
+        return createCTString;
     }
 
 
