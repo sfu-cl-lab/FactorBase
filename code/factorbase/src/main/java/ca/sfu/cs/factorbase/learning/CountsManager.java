@@ -205,17 +205,22 @@ public class CountsManager {
         String storageEngine
     ) throws SQLException {
         for (FunctorNodesInfo rnodeInfo : rnodeInfos) {
+            String rnode = rnodeInfo.getID();
+            String shortRNode = rnodeInfo.getShortID();
+            logger.fine("RNode: " + rnode);
+            logger.fine("Short RNode: " + shortRNode);
+
             // Build the _star table.
-            buildRNodeStar(rnodeInfo);
+            buildRNodeStar(rnode, shortRNode);
 
             // Build the _flat table.
-            buildRNodeFlat(rnodeInfo, storageEngine);
+            buildRNodeFlat(rnode, shortRNode, storageEngine);
 
             // Build the _false table.
-            buildRNodeFalse(rnodeInfo);
+            buildRNodeFalse(shortRNode);
 
-            // Build the _false table first and then the _CT table.
-            buildRNodeCT(rnodeInfo, joinTableQueries, storageEngine);
+            // Build the _CT table.
+            buildRNodeCT(shortRNode, joinTableQueries, storageEngine);
         }
     }
 
@@ -1005,18 +1010,15 @@ public class CountsManager {
     /**
      * Create the star table for the given RNode.
      *
-     * @param rnodeInfo - {@code FunctorNodesInfo} for the RNode to build the "_star" table for.
+     * @param rnode - the name of the RNode to build the "_star" table for.
+     * @param shortRNode - the short name of the RNode to build the "_star" table for.
      * @throws SQLException if there are issues executing the SQL queries.
      */
     private static void buildRNodeStar(
-        FunctorNodesInfo rnodeInfo
+        String rnode,
+        String shortRNode
     ) throws SQLException {
         long start = System.currentTimeMillis(); // @zqian: measure structure learning time.
-        String rnode = rnodeInfo.getID();
-        logger.fine("\nRNode: " + rnode);
-        String shortRNode = rnodeInfo.getShortID();
-        logger.fine("Short RNode: " + shortRNode);
-
         dbConnection.setCatalog(databaseName_BN);
         Statement statement = dbConnection.createStatement();
 
@@ -1078,19 +1080,17 @@ public class CountsManager {
     /**
      * Create the flat table for the given RNode.
      *
-     * @param rnodeInfo - {@code FunctorNodesInfo} for the RNode to build the "_flat" table for.
+     * @param rnode - the name of the RNode to build the "_flat" table for.
+     * @param shortRNode - the short name of the RNode to build the "_flat" table for.
      * @param storageEngine - the storage engine to use for the table created when executing this method.
      * @throws SQLException if there are issues executing the SQL queries.
      */
     private static void buildRNodeFlat(
-        FunctorNodesInfo rnodeInfo,
+        String rnode,
+        String shortRNode,
         String storageEngine
     ) throws SQLException {
         long start = System.currentTimeMillis(); // @zqian: measure structure learning time.
-        String rnode = rnodeInfo.getID();
-        logger.fine("\nRNode: " + rnode);
-        String shortRNode = rnodeInfo.getShortID();
-        logger.fine("Short RNode: " + shortRNode);
 
         dbConnection.setCatalog(databaseName_BN);
         Statement statement = dbConnection.createStatement();
@@ -1170,11 +1170,10 @@ public class CountsManager {
     /**
      * Create the false table for the given RNode using the sort merge algorithm.
      *
-     * @param rnodeInfo - {@code FunctorNodesInfo} for the RNode to build the "_false" table for.
+     * @param shortRNode - the short name of the RNode to build the "_false" table for.
      * @throws SQLException if there are issues executing the SQL queries.
      */
-    private static void buildRNodeFalse(FunctorNodesInfo rnodeInfo) throws SQLException {
-        String shortRNode = rnodeInfo.getShortID();
+    private static void buildRNodeFalse(String shortRNode) throws SQLException {
         String falseTableName = shortRNode + "_false";
 
         // Computing the false table as the MULT difference between the matching rows of the star and flat tables.
@@ -1191,20 +1190,17 @@ public class CountsManager {
      * Create the CT table for the given RNode.  This is done by cross joining the "_false" table with the associated
      * JOIN (derived) table, and then having the result UNIONed with the proper "_counts" table.
      *
-     * @param rnodeInfo - {@code FunctorNodesInfo} for the RNode to build the "_CT" table for.
+     * @param shortRNode - the short name of the RNode to build the "_CT" table for.
      * @param joinTableQueries - {@code Map} to retrieve the associated query to create a derived JOIN table.
      * @param storageEngine - the storage engine to use for the table created when executing this method.
      * @throws SQLException if there are issues executing the SQL queries.
      */
     private static void buildRNodeCT(
-        FunctorNodesInfo rnodeInfo,
+        String shortRNode,
         Map<String, String> joinTableQueries,
         String storageEngine
     ) throws SQLException {
         long start = System.currentTimeMillis(); // @zqian: measure structure learning time.
-        logger.fine("\nRNode: " + rnodeInfo.getID());
-        String shortRNode = rnodeInfo.getShortID();
-        logger.fine("Short RNode: " + shortRNode);
 
         dbConnection.setCatalog(databaseName_CT);
         Statement statement = dbConnection.createStatement();
