@@ -47,7 +47,7 @@ public class CountsManager {
 
     private static Connection dbConnection;
     private static int tableID;
-    private static Map<String, String> pvarsCountsTableCache = new HashMap<String, String>();
+    private static Map<String, String> ctTablesCache = new HashMap<String, String>();
     private static String databaseName_std;
     private static String databaseName_BN;
     private static String databaseName_CT;
@@ -296,7 +296,7 @@ public class CountsManager {
         Config conf = new Config();
         databaseName_std = conf.getProperty("dbname");
         databaseName_BN = databaseName_std + "_BN";
-        databaseName_counts_cache = databaseName_std + "_counts_cache";
+        databaseName_counts_cache = databaseName_std + "_CT_cache";
         databaseName_global_counts = databaseName_std + "_global_counts";
         databaseName_CT = databaseName_std + "_CT";
         dbUsername = conf.getProperty("dbusername");
@@ -784,7 +784,7 @@ public class CountsManager {
 
         String countsTableCacheKey = csvJoiner.toString();
 
-        String cacheTableName = pvarsCountsTableCache.get(countsTableCacheKey);
+        String cacheTableName = ctTablesCache.get(countsTableCacheKey);
         if (cacheTableName == null) {
             cacheTableName = countsTableName + "_" + tableID;
             tableID++;
@@ -796,7 +796,7 @@ public class CountsManager {
                 pvid
             );
 
-            pvarsCountsTableCache.put(countsTableCacheKey, cacheTableName);
+            ctTablesCache.put(countsTableCacheKey, cacheTableName);
         }
 
         dbConnection.setCatalog(targetDatabaseName);
