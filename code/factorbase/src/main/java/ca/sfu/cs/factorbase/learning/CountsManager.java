@@ -39,6 +39,7 @@ import ca.sfu.cs.factorbase.database.MySQLFactorBaseDataBase;
 import ca.sfu.cs.factorbase.lattice.LatticeGenerator;
 import ca.sfu.cs.factorbase.lattice.RelationshipLattice;
 import ca.sfu.cs.factorbase.util.MySQLScriptRunner;
+import ca.sfu.cs.factorbase.util.QueryGenerator;
 import ca.sfu.cs.factorbase.util.RuntimeLogger;
 import ca.sfu.cs.factorbase.util.Sort_merge3;
 
@@ -46,7 +47,7 @@ public class CountsManager {
 
     private static Connection dbConnection;
     private static int tableID;
-    private static Map<String, String> pvarsCountsTableCache = new HashMap<String, String>();
+    private static Map<String, String> ctTablesCache = new HashMap<String, String>();
     private static String databaseName_std;
     private static String databaseName_BN;
     private static String databaseName_CT;
@@ -204,17 +205,30 @@ public class CountsManager {
         String storageEngine
     ) throws SQLException {
         for (FunctorNodesInfo rnodeInfo : rnodeInfos) {
+            String rnode = rnodeInfo.getID();
+            String shortRNode = rnodeInfo.getShortID();
+            logger.fine("RNode: " + rnode);
+            logger.fine("Short RNode: " + shortRNode);
+
             // Build the _star table.
-            buildRNodeStar(rnodeInfo);
+            buildRNodeStar(rnode, shortRNode);
 
             // Build the _flat table.
-            buildRNodeFlat(rnodeInfo, storageEngine);
+            buildRNodeFlat(rnode, shortRNode, storageEngine);
 
             // Build the _false table.
-            buildRNodeFalse(rnodeInfo);
+            buildRNodeFalse(shortRNode);
 
-            // Build the _false table first and then the _CT table.
-            buildRNodeCT(rnodeInfo, joinTableQueries, storageEngine);
+            // Build the _CT table.
+            String createCTQuery = buildRNodeCTCreateQuery(shortRNode, joinTableQueries, storageEngine);
+            long start = System.currentTimeMillis();
+            dbConnection.setCatalog(databaseName_CT);
+            logger.fine("\nCREATE CT table String: " + createCTQuery);
+            try (Statement statement = dbConnection.createStatement()) {
+                statement.executeUpdate(createCTQuery);
+            }
+
+            logger.fine("Build Time for RNode CT: " + (System.currentTimeMillis() - start) + "ms.\n");
         }
     }
 
@@ -290,7 +304,7 @@ public class CountsManager {
         Config conf = new Config();
         databaseName_std = conf.getProperty("dbname");
         databaseName_BN = databaseName_std + "_BN";
-        databaseName_counts_cache = databaseName_std + "_counts_cache";
+        databaseName_counts_cache = databaseName_std + "_CT_cache";
         databaseName_global_counts = databaseName_std + "_global_counts";
         databaseName_CT = databaseName_std + "_CT";
         dbUsername = conf.getProperty("dbusername");
@@ -394,24 +408,48 @@ public class CountsManager {
                 Statement st2 = dbConnection.createStatement();
 
                 //  create select query string  
-                ResultSet rs2 = st2.executeQuery("SELECT DISTINCT Entries FROM MetaQueries WHERE Lattice_Point = '" + rchain + "' and '"+removed+"' = EntryType and ClauseType = 'SELECT' and TableType = 'Star';");
+                ResultSet rs2 = st2.executeQuery(
+                    QueryGenerator.createMetaQueriesExtractionQuery(
+                        rchain,
+                        "Star",
+                        "SELECT",
+                        removed,
+                        false
+                    )
+                );
                 List<String> columns = extractEntries(rs2, "Entries");
-                String selectString = makeDelimitedString(columns, ", ");
+                String selectString = String.join(", ", columns);
                 logger.fine("Select String : " + selectString);
                 rs2.close();
                 //  create mult query string
-                ResultSet rs3 = st2.executeQuery("SELECT DISTINCT Entries FROM MetaQueries WHERE Lattice_Point = '" + rchain + "' and '"+removed+"' = EntryType and ClauseType = 'FROM' and TableType = 'Star';");
+                ResultSet rs3 = st2.executeQuery(
+                    QueryGenerator.createMetaQueriesExtractionQuery(
+                        rchain,
+                        "Star",
+                        "FROM",
+                        removed,
+                        false
+                    )
+                );
                 columns = extractEntries(rs3, "Entries");
                 String MultString = makeStarSepQuery(columns);
                 logger.fine("Mult String : " + MultString+ " as `MULT`");
                 rs3.close();
                 //  create from query string
-                String fromString = makeDelimitedString(columns, ", ");
+                String fromString = String.join(", ", columns);
                 logger.fine("From String : " + fromString);          
                 //  create where query string
-                ResultSet rs5 = st2.executeQuery("SELECT DISTINCT Entries FROM MetaQueries WHERE Lattice_Point = '" + rchain + "' and '"+removed+"' = EntryType and ClauseType = 'WHERE' and TableType = 'Star';");
+                ResultSet rs5 = st2.executeQuery(
+                    QueryGenerator.createMetaQueriesExtractionQuery(
+                        rchain,
+                        "Star",
+                        "WHERE",
+                        removed,
+                        false
+                    )
+                );
                 columns = extractEntries(rs5, "Entries");
-                String whereString = makeDelimitedString(columns, " AND ");
+                String whereString = String.join(" AND ", columns);
                logger.fine("Where String : " + whereString);
                 rs5.close();
                 //  create the final query
@@ -593,17 +631,13 @@ public class CountsManager {
             String pvid = rs.getString("pvid");
             logger.fine("pvid : " + pvid);
             String countsTableName = pvid + "_counts";
-            String selectQuery =
-                "SELECT " +
-                    "Entries " +
-                "FROM " +
-                    "MetaQueries " +
-                "WHERE " +
-                    "Lattice_Point = '" + pvid + "' " +
-                "AND " +
-                    "ClauseType = 'SELECT' " +
-                "AND " +
-                    "TableType = 'Counts';";
+            String selectQuery = QueryGenerator.createMetaQueriesExtractionQuery(
+                pvid,
+                "Counts",
+                "SELECT",
+                null,
+                false
+            );
 
             // Extract column aliases.
             List<String> columnAliases;
@@ -651,65 +685,53 @@ public class CountsManager {
     ) throws SQLException {
         dbConnection.setCatalog(databaseName_BN);
         Statement st = dbConnection.createStatement();
-        String selectString = makeDelimitedString(columnAliases, ", ");
+        String selectString = String.join(", ", columnAliases);
         logger.fine("SELECT String: " + selectString);
 
         // Create FROM query.
-        String fromQuery =
-            "SELECT " +
-                "Entries " +
-            "FROM " +
-                "MetaQueries " +
-            "WHERE " +
-                "Lattice_Point = '" + pvid + "' " +
-            "AND " +
-                "ClauseType = 'FROM' " +
-            "AND " +
-                "TableType = 'Counts';";
+        String fromQuery = QueryGenerator.createMetaQueriesExtractionQuery(
+            pvid,
+            "Counts",
+            "FROM",
+            null,
+            false
+        );
 
         String fromString;
         try(ResultSet rs = st.executeQuery(fromQuery)) {
             List<String> tables = extractEntries(rs, "Entries");
-            fromString = makeDelimitedString(tables, ", ");
+            fromString = String.join(", ", tables);
         }
 
         // Create GROUP BY query.
-        String groupbyQuery =
-            "SELECT " +
-                "Entries " +
-            "FROM " +
-                "MetaQueries " +
-            "WHERE " +
-                "Lattice_Point = '" + pvid + "' " +
-            "AND " +
-                "ClauseType = 'GROUPBY' " +
-            "AND " +
-                "TableType = 'Counts';";
+        String groupbyQuery = QueryGenerator.createMetaQueriesExtractionQuery(
+            pvid,
+            "Counts",
+            "GROUPBY",
+            null,
+            false
+        );
 
         String groupbyString;
         try(ResultSet rs = st.executeQuery(groupbyQuery)) {
             List<String> columns = extractEntries(rs, "Entries");
-            groupbyString = makeDelimitedString(columns, ", ");
+            groupbyString = String.join(", ", columns);
         }
 
         // Create WHERE query (groundings) if applicable.
-        String whereQuery =
-            "SELECT " +
-                "Entries " +
-            "FROM " +
-                "MetaQueries " +
-            "WHERE " +
-                "Lattice_Point = '" + pvid + "' " +
-            "AND " +
-                "ClauseType = 'WHERE' " +
-            "AND " +
-                "TableType = 'Counts';";
+        String whereQuery = QueryGenerator.createMetaQueriesExtractionQuery(
+            pvid,
+            "Counts",
+            "WHERE",
+            null,
+            false
+        );
 
         String whereString = "";
         try (ResultSet rsGrounding = st.executeQuery(whereQuery)) {
             List<String> predicates = extractEntries(rsGrounding, "Entries");
             if (!predicates.isEmpty()) {
-                whereString = " WHERE " + makeDelimitedString(predicates, " AND ");
+                whereString = " WHERE " + String.join(" AND ", predicates);
             }
         }
 
@@ -770,7 +792,7 @@ public class CountsManager {
 
         String countsTableCacheKey = csvJoiner.toString();
 
-        String cacheTableName = pvarsCountsTableCache.get(countsTableCacheKey);
+        String cacheTableName = ctTablesCache.get(countsTableCacheKey);
         if (cacheTableName == null) {
             cacheTableName = countsTableName + "_" + tableID;
             tableID++;
@@ -782,7 +804,7 @@ public class CountsManager {
                 pvid
             );
 
-            pvarsCountsTableCache.put(countsTableCacheKey, cacheTableName);
+            ctTablesCache.put(countsTableCacheKey, cacheTableName);
         }
 
         dbConnection.setCatalog(targetDatabaseName);
@@ -876,7 +898,7 @@ public class CountsManager {
 
         // Create SELECT query string.
         String selectQuery =
-            "SELECT DISTINCT Entries " +
+            "SELECT Entries " +
             "FROM MetaQueries " +
             "WHERE Lattice_Point = '" + rchain + "' " +
             "AND ClauseType = 'SELECT' ";
@@ -897,7 +919,7 @@ public class CountsManager {
             selectString = makeDelimitedString(selectAliases, ", ", "AS ");
             selectString = "SUM(MULT) AS MULT, " + selectString;
         } else {
-            selectString = makeDelimitedString(selectAliases, ", ");
+            selectString = String.join(", ", selectAliases);
         }
 
         logger.fine("SELECT String: " + selectString);
@@ -909,15 +931,17 @@ public class CountsManager {
         // in order to generate the counts table.
         if (!buildByProjection) {
             ResultSet rs3 = st2.executeQuery(
-                "SELECT DISTINCT Entries " +
-                "FROM MetaQueries " +
-                "WHERE Lattice_Point = '" + rchain + "' " +
-                "AND ClauseType = 'FROM' " +
-                "AND TableType = 'Counts';"
+                QueryGenerator.createMetaQueriesExtractionQuery(
+                    rchain,
+                    "Counts",
+                    "FROM",
+                    null,
+                    false
+                )
             );
 
             List<String> fromAliases = extractEntries(rs3, "Entries");
-            fromString = makeDelimitedString(fromAliases, ", ");
+            fromString = String.join(", ", fromAliases);
         }
 
         logger.fine("FROM String: " + fromString);
@@ -929,15 +953,17 @@ public class CountsManager {
         // from the global counts table.
         if (!buildByProjection) {
             ResultSet rs4 = st2.executeQuery(
-                "SELECT DISTINCT Entries " +
-                "FROM MetaQueries " +
-                "WHERE Lattice_Point = '" + rchain + "' " +
-                "AND ClauseType = 'WHERE' " +
-                "AND TableType = 'Counts';"
+                QueryGenerator.createMetaQueriesExtractionQuery(
+                    rchain,
+                    "Counts",
+                    "WHERE",
+                    null,
+                    false
+                )
             );
 
             List<String> columns = extractEntries(rs4, "Entries");
-            whereString = makeDelimitedString(columns, " AND ");
+            whereString = String.join(" AND ", columns);
         }
 
         // Create the final query.
@@ -955,15 +981,17 @@ public class CountsManager {
         // Continuous probably requires a different approach.  OS August 22.
         if (!cont.equals("1")) {
             ResultSet rs_6 = st2.executeQuery(
-                "SELECT DISTINCT Entries " +
-                "FROM MetaQueries " +
-                "WHERE Lattice_Point = '" + rchain + "' " +
-                "AND ClauseType = 'GROUPBY' " +
-                "AND TableType = 'Counts';"
+                QueryGenerator.createMetaQueriesExtractionQuery(
+                    rchain,
+                    "Counts",
+                    "GROUPBY",
+                    null,
+                    false
+                )
             );
 
             List<String> columns = extractEntries(rs_6, "Entries");
-            String GroupByString = makeDelimitedString(columns, ", ");
+            String GroupByString = String.join(", ", columns);
 
             if (!GroupByString.isEmpty()) {
                 queryString = queryString + " GROUP BY "  + GroupByString;
@@ -990,52 +1018,41 @@ public class CountsManager {
     /**
      * Create the star table for the given RNode.
      *
-     * @param rnodeInfo - {@code FunctorNodesInfo} for the RNode to build the "_star" table for.
+     * @param rnode - the name of the RNode to build the "_star" table for.
+     * @param shortRNode - the short name of the RNode to build the "_star" table for.
      * @throws SQLException if there are issues executing the SQL queries.
      */
     private static void buildRNodeStar(
-        FunctorNodesInfo rnodeInfo
+        String rnode,
+        String shortRNode
     ) throws SQLException {
         long start = System.currentTimeMillis(); // @zqian: measure structure learning time.
-        String rnode = rnodeInfo.getID();
-        logger.fine("\nRNode: " + rnode);
-        String shortRNode = rnodeInfo.getShortID();
-        logger.fine("Short RNode: " + shortRNode);
-
         dbConnection.setCatalog(databaseName_BN);
         Statement statement = dbConnection.createStatement();
 
         // Create SELECT query string.
-        String selectQuery =
-            "SELECT DISTINCT " +
-                "Entries " +
-            "FROM " +
-                "MetaQueries " +
-            "WHERE " +
-                "Lattice_Point = '" + rnode + "' " +
-            "AND " +
-                "TableType = 'STAR' " +
-            "AND " +
-                "ClauseType = 'SELECT';";
+        String selectQuery = QueryGenerator.createMetaQueriesExtractionQuery(
+            rnode,
+            "Star",
+            "SELECT",
+            null,
+            true
+        );
 
         List<String> columns;
         try (ResultSet result = statement.executeQuery(selectQuery)) {
             columns = extractEntries(result, "Entries");
         }
-        String selectString = makeDelimitedString(columns, ", ");
+        String selectString = String.join(", ", columns);
 
         // Create * query string, which will be used for the "SELECT AS MULT".
-        String multiplicationQuery =
-            "SELECT DISTINCT " +
-                "Entries " +
-            "FROM " +
-                "MetaQueries " +
-            "WHERE " +
-                "Lattice_Point = '" + rnode + "' " +
-            "AND " +
-                "TableType = 'STAR' " +
-            "AND " +
-                "ClauseType = 'FROM';";
+        String multiplicationQuery = QueryGenerator.createMetaQueriesExtractionQuery(
+            rnode,
+            "Star",
+            "FROM",
+            null,
+            false
+        );
 
         try (ResultSet result = statement.executeQuery(multiplicationQuery)) {
             columns = extractEntries(result, "Entries");
@@ -1044,7 +1061,7 @@ public class CountsManager {
         String multiplicationString = makeStarSepQuery(columns);
 
         // Create FROM query string.
-        String fromString = makeDelimitedString(columns, ", ");
+        String fromString = String.join(", ", columns);
 
         // Create the final query string.
         String queryString = "SELECT " + multiplicationString + " AS MULT";
@@ -1071,79 +1088,65 @@ public class CountsManager {
     /**
      * Create the flat table for the given RNode.
      *
-     * @param rnodeInfo - {@code FunctorNodesInfo} for the RNode to build the "_flat" table for.
+     * @param rnode - the name of the RNode to build the "_flat" table for.
+     * @param shortRNode - the short name of the RNode to build the "_flat" table for.
      * @param storageEngine - the storage engine to use for the table created when executing this method.
      * @throws SQLException if there are issues executing the SQL queries.
      */
     private static void buildRNodeFlat(
-        FunctorNodesInfo rnodeInfo,
+        String rnode,
+        String shortRNode,
         String storageEngine
     ) throws SQLException {
         long start = System.currentTimeMillis(); // @zqian: measure structure learning time.
-        String rnode = rnodeInfo.getID();
-        logger.fine("\nRNode: " + rnode);
-        String shortRNode = rnodeInfo.getShortID();
-        logger.fine("Short RNode: " + shortRNode);
 
         dbConnection.setCatalog(databaseName_BN);
         Statement statement = dbConnection.createStatement();
 
         // Create SELECT query string.
-        String selectQuery =
-            "SELECT DISTINCT " +
-                "Entries " +
-            "FROM " +
-                "MetaQueries " +
-            "WHERE " +
-                "Lattice_Point = '" + rnode + "' " +
-            "AND " +
-                "TableType = 'Flat' " +
-            "AND " +
-                "ClauseType = 'SELECT';";
+        String selectQuery = QueryGenerator.createMetaQueriesExtractionQuery(
+            rnode,
+            "Flat",
+            "SELECT",
+            null,
+            false
+        );
 
         List<String> columns;
         try (ResultSet rs2 = statement.executeQuery(selectQuery)) {
             columns = extractEntries(rs2, "Entries");
         }
-        String selectString = makeDelimitedString(columns, ", ");
+        String selectString = String.join(", ", columns);
 
         // Create FROM query string.
-        String fromQuery =
-            "SELECT DISTINCT " +
-                "Entries " +
-            "FROM " +
-                "MetaQueries " +
-            "WHERE " +
-                "Lattice_Point = '" + rnode + "' " +
-            "AND " +
-                "TableType = 'Flat' " +
-            "AND " +
-                "ClauseType = 'FROM';";
+        String fromQuery = QueryGenerator.createMetaQueriesExtractionQuery(
+            rnode,
+            "Flat",
+            "FROM",
+            null,
+            false
+        );
         try (ResultSet result = statement.executeQuery(fromQuery)) {
             columns = extractEntries(result, "Entries");
         }
-        String fromString = makeDelimitedString(columns, ", ");
+        String fromString = String.join(", ", columns);
 
         // Create the final query string.
         String queryString = "SELECT " + selectString + " FROM " + fromString;
 
         // Create GROUP BY query string.
         if (!cont.equals("1")) {
-            String groupByQuery =
-                "SELECT DISTINCT " +
-                    "Entries " +
-                "FROM " +
-                    "MetaQueries " +
-                "WHERE " +
-                    "Lattice_Point = '" + rnode + "' " +
-                "AND " +
-                    "TableType = 'Flat' " +
-                "AND " +
-                    "ClauseType = 'GROUPBY';";
+            String groupByQuery = QueryGenerator.createMetaQueriesExtractionQuery(
+                rnode,
+                "Flat",
+                "GROUPBY",
+                null,
+                false
+            );
             try (ResultSet result = statement.executeQuery(groupByQuery)) {
                 columns = extractEntries(result, "Entries");
             }
-            String groupByString = makeDelimitedString(columns, ", ");
+            String groupByString = String.join(", ", columns);
             if (!groupByString.isEmpty()) {
                 queryString += " GROUP BY "  + groupByString;
             }
@@ -1175,11 +1178,10 @@ public class CountsManager {
     /**
      * Create the false table for the given RNode using the sort merge algorithm.
      *
-     * @param rnodeInfo - {@code FunctorNodesInfo} for the RNode to build the "_false" table for.
+     * @param shortRNode - the short name of the RNode to build the "_false" table for.
      * @throws SQLException if there are issues executing the SQL queries.
      */
-    private static void buildRNodeFalse(FunctorNodesInfo rnodeInfo) throws SQLException {
-        String shortRNode = rnodeInfo.getShortID();
+    private static void buildRNodeFalse(String shortRNode) throws SQLException {
         String falseTableName = shortRNode + "_false";
 
         // Computing the false table as the MULT difference between the matching rows of the star and flat tables.
@@ -1193,26 +1195,20 @@ public class CountsManager {
 
 
     /**
-     * Create the CT table for the given RNode.  This is done by cross joining the "_false" table with the associated
-     * JOIN (derived) table, and then having the result UNIONed with the proper "_counts" table.
+     * Create the CREATE query for the CT table of the given RNode.  This is done by cross joining the "_false" table
+     * with the associated JOIN (derived) table, and then having the result UNIONed with the proper "_counts" table.
      *
-     * @param rnodeInfo - {@code FunctorNodesInfo} for the RNode to build the "_CT" table for.
+     * @param shortRNode - the short name of the RNode to build the "_CT" table for.
      * @param joinTableQueries - {@code Map} to retrieve the associated query to create a derived JOIN table.
      * @param storageEngine - the storage engine to use for the table created when executing this method.
+     * @return CREATE query to generate the CT table for the given RNode.
      * @throws SQLException if there are issues executing the SQL queries.
      */
-    private static void buildRNodeCT(
-        FunctorNodesInfo rnodeInfo,
+    private static String buildRNodeCTCreateQuery(
+        String shortRNode,
         Map<String, String> joinTableQueries,
         String storageEngine
     ) throws SQLException {
-        long start = System.currentTimeMillis(); // @zqian: measure structure learning time.
-        logger.fine("\nRNode: " + rnodeInfo.getID());
-        String shortRNode = rnodeInfo.getShortID();
-        logger.fine("Short RNode: " + shortRNode);
-
-        dbConnection.setCatalog(databaseName_CT);
-        Statement statement = dbConnection.createStatement();
         String falseTableName = shortRNode + "_false";
         String countsTableName = shortRNode + "_counts";
 
@@ -1226,7 +1222,10 @@ public class CountsManager {
 
         // Extract and escape the column names since they look like function calls to MySQL.
         List<String> columns;
-        try (ResultSet result = statement.executeQuery(columnQuery)) {
+        try (
+            Statement statement = dbConnection.createStatement();
+            ResultSet result = statement.executeQuery(columnQuery)
+        ) {
             columns = extractEntries(result, "Entries");
         }
         String UnionColumnString = makeEscapedCommaSepQuery(columns);
@@ -1248,12 +1247,7 @@ public class CountsManager {
                     "`" + falseTableName + "`, " +
                     "(" + joinTableQueries.get(shortRNode) + ") AS JOIN_TABLE " +
                 "WHERE MULT > 0";
-        logger.fine("\nCREATE CT table String: " + createCTString);
-        statement.executeUpdate(createCTString);
-        statement.close();
-
-        long end = System.currentTimeMillis(); // @zqian: measure structure learning time.
-        logger.fine("Build Time(ms) for RNode CT: " + (end - start) + " ms.\n");
+        return createCTString;
     }
 
 
@@ -1285,14 +1279,17 @@ public class CountsManager {
 
             //  create ColumnString
             ResultSet rs2 = st2.executeQuery(
-                "SELECT DISTINCT Entries " +
-                "FROM MetaQueries " +
-                "WHERE Lattice_Point = '" + orig_rnid + "' " +
-                "AND TableType = 'Join';"
+                QueryGenerator.createMetaQueriesExtractionQuery(
+                    orig_rnid,
+                    "Join",
+                    "COLUMN",
+                    null,
+                    false
+                )
             );
 
             List<String> columns = extractEntries(rs2, "Entries");
-            String additionalColumns = makeDelimitedString(columns, ", ");
+            String additionalColumns = String.join(", ", columns);
             StringBuilder joinTableQuerybuilder = new StringBuilder("SELECT \"F\" AS `" + orig_rnid + "`");
             if (!additionalColumns.isEmpty()) {
                 joinTableQuerybuilder.append(", " + additionalColumns);
@@ -1360,25 +1357,6 @@ public class CountsManager {
         }
 
         return escapedCSV.toString();
-    }
-
-
-    /**
-     * Generate a delimited string of columns.
-     *
-     * @param columns - the columns to make a delimited string with.
-     * @param delimiter - the delimiter to use for the delimited string.
-     * @return a delimited string of columns.
-     */
-    private static String makeDelimitedString(List<String> columns, String delimiter) {
-        String[] parts = new String[columns.size()];
-        int index = 0;
-        for (String column : columns) {
-            parts[index] = column;
-            index++;
-        }
-
-        return String.join(delimiter, parts);
     }
 
 

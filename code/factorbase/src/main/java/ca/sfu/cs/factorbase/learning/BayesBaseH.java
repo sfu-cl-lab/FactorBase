@@ -285,20 +285,11 @@ public class BayesBaseH {
         opt3 = conf.getProperty("ComputeKLD");
         cont = conf.getProperty("Continuous");
         String strLinkAnalysis = conf.getProperty("LinkCorrelations");
-
-        if (strLinkAnalysis.equalsIgnoreCase("1")) {
-            linkAnalysis = true;
-        } else {
-            linkAnalysis = false;
-        }
+        linkAnalysis = strLinkAnalysis.equalsIgnoreCase("1");
 
         //zqian June 18, 2014
         String UseLocal_CT = conf.getProperty( "UseLocal_CT" );
-        if (UseLocal_CT.equalsIgnoreCase("1")) {
-            Flag_UseLocal_CT = true;
-        } else {
-            Flag_UseLocal_CT = false;
-        }
+        Flag_UseLocal_CT = UseLocal_CT.equalsIgnoreCase("1");
     }
 
 
