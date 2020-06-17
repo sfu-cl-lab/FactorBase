@@ -171,12 +171,43 @@ public class CountsManager {
         Map<String, String> joinTableQueries = createJoinTableQueries();
 
         if (linkCorrelation.equals("1") && relationshipLattice.getHeight() != 0) {
+            long start = System.currentTimeMillis();
+
             // Retrieve the first level of the lattice.
             List<FunctorNodesInfo> rchainInfos = relationshipLattice.getRChainsInfo(1);
 
-            long start = System.currentTimeMillis();
+            BuildRNodesCTMethod<
+                String,
+                String,
+                Map<String, String>,
+                String,
+                String,
+                String,
+                SQLException
+            > buildCTMethod = CountsManager::buildRNodesCT;
+
+            // Use the buildRNodesCTFromCache method if we have been specified to read the counts from the cache.
+            if (useCTCache) {
+                buildCTMethod = CountsManager::buildRNodesCTFromCache;
+            }
+
             // Build the CT tables for the first level of the relationship lattice.
-            buildRNodesCT(rchainInfos, joinTableQueries, storageEngine);
+            for (FunctorNodesInfo rnodeInfo : rchainInfos) {
+                String rnode = rnodeInfo.getID();
+                String shortRNode = rnodeInfo.getShortID();
+                logger.fine("RNode: " + rnode);
+                logger.fine("Short RNode: " + shortRNode);
+                String ctTableName = shortRNode + "_CT";
+
+                buildCTMethod.apply(
+                    databaseName_CT,
+                    ctTableName,
+                    joinTableQueries,
+                    storageEngine,
+                    rnode,
+                    shortRNode
+                );
+            }
 
             //building the _CT tables. Going up the Rchain lattice
             for(int len = 2; len <= latticeHeight; len++) {
@@ -192,44 +223,100 @@ public class CountsManager {
 
 
     /**
-     * Build the CT tables for the RNodes (relationship lattice length = 1).
+     * Build the CT table for the given RNode (relationship lattice length = 1).
      *
-     * @param rnodeInfos - the {@code FunctorNodesInfo}s containing the Functor node information for the RNodes.
+     * @param targetDatabaseName - the name of the database to generate the table in.
+     * @param ctTableName - the name of the  table to generate.
      * @param joinTableQueries - {@code Map} to retrieve the associated query to create a derived JOIN table.
-     * @param storageEngine - the storage engine to use for the tables created when executing this method.
+     * @param storageEngine - the storage engine to use for the tables generated in general.
+     * @param rnode - the name of the RNode to generate the CT table for.
+     * @param shortRNode - the short name of the RNode to generate the CT table for.
      * @throws SQLException if there are issues executing the SQL queries.
      */
     private static void buildRNodesCT(
-        List<FunctorNodesInfo> rnodeInfos,
+        String targetDatabaseName,
+        String ctTableName,
         Map<String, String> joinTableQueries,
-        String storageEngine
+        String storageEngine,
+        String rnode,
+        String shortRNode
     ) throws SQLException {
-        for (FunctorNodesInfo rnodeInfo : rnodeInfos) {
-            String rnode = rnodeInfo.getID();
-            String shortRNode = rnodeInfo.getShortID();
-            logger.fine("RNode: " + rnode);
-            logger.fine("Short RNode: " + shortRNode);
+        // Build the _star table.
+        buildRNodeStar(rnode, shortRNode);
 
-            // Build the _star table.
-            buildRNodeStar(rnode, shortRNode);
+        // Build the _flat table.
+        buildRNodeFlat(rnode, shortRNode, storageEngine);
 
-            // Build the _flat table.
-            buildRNodeFlat(rnode, shortRNode, storageEngine);
+        // Build the _false table.
+        buildRNodeFalse(shortRNode);
 
-            // Build the _false table.
-            buildRNodeFalse(shortRNode);
-
-            // Build the _CT table.
-            String createCTQuery = buildRNodeCTCreateQuery(shortRNode, joinTableQueries, storageEngine);
-            long start = System.currentTimeMillis();
-            dbConnection.setCatalog(databaseName_CT);
-            logger.fine("\nCREATE CT table String: " + createCTQuery);
-            try (Statement statement = dbConnection.createStatement()) {
-                statement.executeUpdate(createCTQuery);
-            }
-
-            logger.fine("Build Time for RNode CT: " + (System.currentTimeMillis() - start) + "ms.\n");
+        // Build the _CT table.
+        String ctCreationQuery = buildRNodeCTCreationQuery(shortRNode, joinTableQueries);
+        String createCTQuery =
+            "CREATE TABLE `" +
+                ctTableName + "` ENGINE = " + storageEngine + " " +
+            "AS " +
+                ctCreationQuery;
+        long start = System.currentTimeMillis();
+        dbConnection.setCatalog(targetDatabaseName);
+        logger.fine("\nCREATE CT table String: " + createCTQuery);
+        try (Statement statement = dbConnection.createStatement()) {
+            statement.executeUpdate(createCTQuery);
         }
+
+        logger.fine("Build Time for RNode CT: " + (System.currentTimeMillis() - start) + "ms.\n");
+    }
+
+
+    /**
+     * Build the CT table for the given RNode (relationship lattice length = 1) using the CT cache database.
+     *
+     * @param targetDatabaseName - the name of the database to generate the table in.
+     * @param ctTableName - the name of the  table to generate.
+     * @param joinTableQueries - {@code Map} to retrieve the associated query to create a derived JOIN table.
+     * @param storageEngine - the storage engine to use for the tables generated in general.
+     * @param rnode - the name of the RNode to generate the CT table for.
+     * @param shortRNode - the short name of the RNode to generate the CT table for.
+     * @throws SQLException if there are issues executing the SQL queries.
+     */
+    private static void buildRNodesCTFromCache(
+        String targetDatabaseName,
+        String ctTableName,
+        Map<String, String> joinTableQueries,
+        String storageEngine,
+        String rnode,
+        String shortRNode
+    ) throws SQLException {
+        String ctCreationQuery = buildRNodeCTCreationQuery(shortRNode, joinTableQueries);
+        String ctTablesCacheKey = ctTableName + ctCreationQuery;
+        String cacheTableName = ctTablesCache.get(ctTablesCacheKey);
+        long start = System.currentTimeMillis();
+        if (cacheTableName == null) {
+            // Create the table in the CT cache database.
+            cacheTableName = ctTableName + "_" + tableID;
+            tableID++;
+            buildRNodesCT(
+                databaseName_CT_cache,
+                cacheTableName,
+                joinTableQueries,
+                storageEngine,
+                rnode,
+                shortRNode
+            );
+
+            ctTablesCache.put(ctTablesCacheKey, cacheTableName);
+        }
+
+        dbConnection.setCatalog(databaseName_CT);
+        try (Statement createViewStatement = dbConnection.createStatement()) {
+            String viewQuery =
+                "CREATE VIEW " + ctTableName + " AS " +
+                "SELECT * " +
+                "FROM " + databaseName_CT_cache + "." + cacheTableName;
+            createViewStatement.executeUpdate(viewQuery);
+        }
+
+        logger.fine("Build Time for RNode CT: " + (System.currentTimeMillis() - start) + "ms.\n");
     }
 
 
@@ -794,6 +881,7 @@ public class CountsManager {
 
         String cacheTableName = ctTablesCache.get(ctTablesCacheKey);
         if (cacheTableName == null) {
+            // Create the table in the CT cache database.
             cacheTableName = countsTableName + "_" + tableID;
             tableID++;
             generatePVarsCountsTable(
@@ -1195,19 +1283,18 @@ public class CountsManager {
 
 
     /**
-     * Create the CREATE query for the CT table of the given RNode.  This is done by cross joining the "_false" table
-     * with the associated JOIN (derived) table, and then having the result UNIONed with the proper "_counts" table.
+     * Create the query for generating the CT table of the given RNode.  This is done by cross joining the "_false"
+     * table with the associated JOIN (derived) table, and then having the result UNIONed with the proper "_counts"
+     * table.
      *
      * @param shortRNode - the short name of the RNode to build the "_CT" table for.
      * @param joinTableQueries - {@code Map} to retrieve the associated query to create a derived JOIN table.
-     * @param storageEngine - the storage engine to use for the table created when executing this method.
-     * @return CREATE query to generate the CT table for the given RNode.
+     * @return query that can be used to generate the CT table for the given RNode.
      * @throws SQLException if there are issues executing the SQL queries.
      */
-    private static String buildRNodeCTCreateQuery(
+    private static String buildRNodeCTCreationQuery(
         String shortRNode,
-        Map<String, String> joinTableQueries,
-        String storageEngine
+        Map<String, String> joinTableQueries
     ) throws SQLException {
         String falseTableName = shortRNode + "_false";
         String countsTableName = shortRNode + "_counts";
@@ -1230,23 +1317,20 @@ public class CountsManager {
         }
         String UnionColumnString = makeEscapedCommaSepQuery(columns);
 
-        String ctTableName = shortRNode + "_CT";
-
         // Join the false table with the join table to introduce rnid (= F) and 2nids (= N/A).  Then union the result
         // with the counts table.
         String createCTString =
-            "CREATE TABLE `" + ctTableName + "` ENGINE = " + storageEngine + " AS " +
-                "SELECT " + UnionColumnString + " " +
-                "FROM `" + countsTableName + "` " +
-                "WHERE MULT > 0 " +
+            "SELECT " + UnionColumnString + " " +
+            "FROM " + databaseName_CT + ".`" + countsTableName + "` " +
+            "WHERE MULT > 0 " +
 
-                "UNION ALL " +
+            "UNION ALL " +
 
-                "SELECT " + UnionColumnString + " " +
-                "FROM " +
-                    "`" + falseTableName + "`, " +
-                    "(" + joinTableQueries.get(shortRNode) + ") AS JOIN_TABLE " +
-                "WHERE MULT > 0";
+            "SELECT " + UnionColumnString + " " +
+            "FROM " +
+                databaseName_CT + ".`" + falseTableName + "`, " +
+                "(" + joinTableQueries.get(shortRNode) + ") AS JOIN_TABLE " +
+            "WHERE MULT > 0";
         return createCTString;
     }
 
@@ -1470,6 +1554,34 @@ public class CountsManager {
             D storageEngine,
             E pvariable
         ) throws F;
+    }
+
+
+    /**
+     * Interface to enable the ability to switch between using the
+     * {@link CountsManager#buildRNodesCT(String, String, Map, String, String, String)
+     * method and the
+     * {@link CountsManager#buildRNodesCTFromCache(String, String, Map, String, String, String)
+     * method.
+     *
+     * @param <A> (String) the name of the output database.
+     * @param <B> (String) the name of the output table.
+     * @param <C> (Map&lt;String, String&gt;) {@code Map} to retrieve the associated query to create a derived JOIN table.
+     * @param <D> (String) the storage engine to use for the tables generated in general.
+     * @param <E> (String) the name of the RNode to generate the CT table for.
+     * @param <F> (String) the short name of the RNode to generate the CT table for.
+     * @param <G> (SQLException) the SQLException that should be thrown if there are issues executing the SQL queries.
+     */
+    @FunctionalInterface
+    private interface BuildRNodesCTMethod<A, B, C, D, E, F, G extends SQLException> {
+        public void apply(
+            A targetDatabaseName,
+            B ctTableName,
+            C joinTableQueries,
+            D storageEngine,
+            E rnode,
+            F shortRNode
+        ) throws G;
     }
 
 
