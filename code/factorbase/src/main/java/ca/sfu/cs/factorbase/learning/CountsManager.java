@@ -168,10 +168,12 @@ public class CountsManager {
         RuntimeLogger.updateLogEntry(dbConnection, "buildPVarsCounts", System.currentTimeMillis() - l);
 
         // preparing the _join part for _CT tables
+        long start = System.currentTimeMillis();
         Map<String, String> joinTableQueries = createJoinTableQueries();
+        RuntimeLogger.updateLogEntry(dbConnection, "createJoinTableQueries", System.currentTimeMillis() - start);
 
         if (linkCorrelation.equals("1") && relationshipLattice.getHeight() != 0) {
-            long start = System.currentTimeMillis();
+            start = System.currentTimeMillis();
 
             // Retrieve the first level of the lattice.
             List<FunctorNodesInfo> rchainInfos = relationshipLattice.getRChainsInfo(1);
