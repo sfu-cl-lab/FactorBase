@@ -252,11 +252,11 @@ public class CountsManager {
 
         // Build the _CT table.
         String ctCreationQuery = buildRNodeCTCreationQuery(shortRNode, joinTableQueries);
-        String createCTQuery =
-            "CREATE TABLE `" +
-                ctTableName + "` ENGINE = " + storageEngine + " " +
-            "AS " +
-                ctCreationQuery;
+        String createCTQuery = QueryGenerator.createSimpleCreateTableQuery(
+            ctTableName,
+            storageEngine,
+            ctCreationQuery
+        );
         long start = System.currentTimeMillis();
         dbConnection.setCatalog(targetDatabaseName);
         logger.fine("\nCREATE CT table String: " + createCTQuery);
@@ -592,9 +592,11 @@ public class CountsManager {
                         "FROM `" + cur_CT_Table + "`;";
                 }
 
-                String createStringflat =
-                    "CREATE TABLE " + cur_flat_Table + " ENGINE = " + storageEngine + " AS " +
-                    queryStringflat;
+                String createStringflat = QueryGenerator.createSimpleCreateTableQuery(
+                    cur_flat_Table,
+                    storageEngine,
+                    queryStringflat
+                );
                 logger.fine("\n create flat String : " + createStringflat );         
                 st3.execute(createStringflat);      //create flat table
 
@@ -662,8 +664,11 @@ public class CountsManager {
 
                 // Create CT table.
                 st3.execute(
-                    "CREATE TABLE `" + Next_CT_Table + "` ENGINE = " + storageEngine + " AS " +
-                    QueryStringCT
+                    QueryGenerator.createSimpleCreateTableQuery(
+                        Next_CT_Table,
+                        storageEngine,
+                        QueryStringCT
+                    )
                 );
                 rs1.previous();
 
@@ -840,9 +845,11 @@ public class CountsManager {
 
         queryString += " HAVING MULT > 0";
 
-        String createString =
-            "CREATE TABLE " + countsTableName + " ENGINE = " + storageEngine + " AS " +
-            queryString;
+        String createString = QueryGenerator.createSimpleCreateTableQuery(
+            countsTableName,
+            storageEngine,
+            queryString
+        );
         logger.fine("CREATE String: " + createString);
 
         dbConnection.setCatalog(targetDatabaseName);
@@ -1088,9 +1095,11 @@ public class CountsManager {
 
         dbConnection.setCatalog(dbTargetName);
         Statement st3 = dbConnection.createStatement();
-        String createString =
-            "CREATE TABLE `" + countsTableName + "` ENGINE = " + storageEngine + " AS " +
-            queryString;
+        String createString = QueryGenerator.createSimpleCreateTableQuery(
+            countsTableName,
+            storageEngine,
+            queryString
+        );
         st3.execute("SET tmp_table_size = " + dbTemporaryTableSize + ";");
         st3.executeQuery("SET max_heap_table_size = " + dbTemporaryTableSize + ";");
         st3.execute(createString);
@@ -1242,9 +1251,11 @@ public class CountsManager {
         statement.close();
 
         String flatTableName = shortRNode + "_flat";
-        String createString =
-            "CREATE TABLE `" + flatTableName + "` ENGINE = " + storageEngine + " AS " +
-            queryString;
+        String createString = QueryGenerator.createSimpleCreateTableQuery(
+            flatTableName,
+            storageEngine,
+            queryString
+        );
         logger.fine("\nCREATE String: " + createString);
         dbConnection.setCatalog(databaseName_CT);
         try (Statement createStatement = dbConnection.createStatement()) {
