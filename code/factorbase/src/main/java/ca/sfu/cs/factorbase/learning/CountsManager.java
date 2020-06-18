@@ -564,9 +564,10 @@ public class CountsManager {
                 String rnid_or=removedShort;
             
                 String cur_star_Table = removedShort + len + "_" + fc + "_star";
-                String createStarString =
-                    "CREATE VIEW " + cur_star_Table + " AS " +
-                    queryString;
+                String createStarString = QueryGenerator.createSimpleCreateViewQuery(
+                    cur_star_Table,
+                    queryString
+                );
 
                 logger.fine("\n create star String : " + createStarString );
                 st3.execute(createStarString);      //create star table     
@@ -1170,9 +1171,10 @@ public class CountsManager {
         dbConnection.setCatalog(databaseName_CT);
         try(Statement viewStatement = dbConnection.createStatement()) {
             String starTableName = shortRNode + "_star";
-            String createString =
-                "CREATE VIEW `" + starTableName + "` AS " +
-                queryString;
+            String createString = QueryGenerator.createSimpleCreateViewQuery(
+                starTableName,
+                queryString
+            );
             logger.fine("\nCREATE String: " + createString);
             viewStatement.executeUpdate(createString);
         }

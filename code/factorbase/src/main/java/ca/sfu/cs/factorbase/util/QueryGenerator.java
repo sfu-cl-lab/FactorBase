@@ -258,4 +258,22 @@ public final class QueryGenerator {
         builder.append(selectQuery);
         return builder.toString();
     }
+
+
+    /**
+     * Generates a MySQL CREATE VIEW String that generates a view where the format of the CREATE VIEW query looks like
+     * the following:
+     * <p>
+     * CREATE VIEW &lt;viewName&gt; AS &lt;selectQuery&gt;
+     * </p>
+     * @param viewName - the name of the view to create.
+     * @param selectQuery - a SELECT query used to create the view.
+     * @return a MySQL CREATE VIEW String that generates a view using the provided SELECT query.
+     */
+    public static String createSimpleCreateViewQuery(String viewName, String selectQuery) {
+        builder.setLength(0);
+        builder.append("CREATE VIEW ").append(viewName).append(" AS ");
+        builder.append(selectQuery);
+        return builder.toString();
+    }
 }
