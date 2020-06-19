@@ -181,7 +181,7 @@ public class CountsManager {
             BuildRNodesCTMethod<
                 String,
                 String,
-                Map<String, String>,
+                String,
                 String,
                 String,
                 String,
@@ -200,12 +200,13 @@ public class CountsManager {
                 logger.fine("RNode: " + rnode);
                 logger.fine("Short RNode: " + shortRNode);
                 String ctTableName = shortRNode + "_CT";
+                String ctCreationQuery = buildRNodeCTCreationQuery(shortRNode, joinTableQueries);
 
                 buildCTMethod.apply(
                     databaseName_CT,
                     ctTableName,
-                    joinTableQueries,
                     storageEngine,
+                    ctCreationQuery,
                     rnode,
                     shortRNode
                 );
@@ -229,8 +230,8 @@ public class CountsManager {
      *
      * @param targetDatabaseName - the name of the database to generate the table in.
      * @param ctTableName - the name of the  table to generate.
-     * @param joinTableQueries - {@code Map} to retrieve the associated query to create a derived JOIN table.
      * @param storageEngine - the storage engine to use for the tables generated in general.
+     * @param ctCreationQuery - SELECT query used to create the CT table.
      * @param rnode - the name of the RNode to generate the CT table for.
      * @param shortRNode - the short name of the RNode to generate the CT table for.
      * @throws SQLException if there are issues executing the SQL queries.
@@ -238,8 +239,8 @@ public class CountsManager {
     private static void buildRNodesCT(
         String targetDatabaseName,
         String ctTableName,
-        Map<String, String> joinTableQueries,
         String storageEngine,
+        String ctCreationQuery,
         String rnode,
         String shortRNode
     ) throws SQLException {
@@ -253,7 +254,6 @@ public class CountsManager {
         buildRNodeFalse(shortRNode);
 
         // Build the _CT table.
-        String ctCreationQuery = buildRNodeCTCreationQuery(shortRNode, joinTableQueries);
         String createCTQuery = QueryGenerator.createSimpleCreateTableQuery(
             ctTableName,
             storageEngine,
@@ -275,8 +275,8 @@ public class CountsManager {
      *
      * @param targetDatabaseName - the name of the database to generate the table in.
      * @param ctTableName - the name of the  table to generate.
-     * @param joinTableQueries - {@code Map} to retrieve the associated query to create a derived JOIN table.
      * @param storageEngine - the storage engine to use for the tables generated in general.
+     * @param ctCreationQuery - SELECT query used to create the CT table.
      * @param rnode - the name of the RNode to generate the CT table for.
      * @param shortRNode - the short name of the RNode to generate the CT table for.
      * @throws SQLException if there are issues executing the SQL queries.
@@ -284,12 +284,11 @@ public class CountsManager {
     private static void buildRNodesCTFromCache(
         String targetDatabaseName,
         String ctTableName,
-        Map<String, String> joinTableQueries,
         String storageEngine,
+        String ctCreationQuery,
         String rnode,
         String shortRNode
     ) throws SQLException {
-        String ctCreationQuery = buildRNodeCTCreationQuery(shortRNode, joinTableQueries);
         String ctTablesCacheKey = ctTableName + ctCreationQuery;
         String cacheTableName = ctTablesCache.get(ctTablesCacheKey);
         long start = System.currentTimeMillis();
@@ -300,8 +299,8 @@ public class CountsManager {
             buildRNodesCT(
                 databaseName_CT_cache,
                 cacheTableName,
-                joinTableQueries,
                 storageEngine,
+                ctCreationQuery,
                 rnode,
                 shortRNode
             );
@@ -1574,15 +1573,15 @@ public class CountsManager {
 
     /**
      * Interface to enable the ability to switch between using the
-     * {@link CountsManager#buildRNodesCT(String, String, Map, String, String, String)
+     * {@link CountsManager#buildRNodesCT(String, String, String, String, String, String)
      * method and the
-     * {@link CountsManager#buildRNodesCTFromCache(String, String, Map, String, String, String)
+     * {@link CountsManager#buildRNodesCTFromCache(String, String, String, String, String, String)
      * method.
      *
      * @param <A> (String) the name of the output database.
      * @param <B> (String) the name of the output table.
-     * @param <C> (Map&lt;String, String&gt;) {@code Map} to retrieve the associated query to create a derived JOIN table.
-     * @param <D> (String) the storage engine to use for the tables generated in general.
+     * @param <C> (String) the storage engine to use for the tables generated in general.
+     * @param <D> (String) the SELECT query used to create the CT table.
      * @param <E> (String) the name of the RNode to generate the CT table for.
      * @param <F> (String) the short name of the RNode to generate the CT table for.
      * @param <G> (SQLException) the SQLException that should be thrown if there are issues executing the SQL queries.
@@ -1592,8 +1591,8 @@ public class CountsManager {
         public void apply(
             A targetDatabaseName,
             B ctTableName,
-            C joinTableQueries,
-            D storageEngine,
+            C storageEngine,
+            D ctCreationQuery,
             E rnode,
             F shortRNode
         ) throws G;
