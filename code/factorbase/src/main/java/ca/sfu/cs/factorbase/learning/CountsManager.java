@@ -356,28 +356,20 @@ public class CountsManager {
         int latticeHeight = relationshipLattice.getHeight();
 
         // Building the <RChain>_counts tables.
+        boolean copyToCT = true;
         if(linkCorrelation.equals("1")) {
-            // Generate the counts tables.
-            for(int len = 1; len <= latticeHeight; len++){
-                generateCountsTables(
-                    dbTargetName,
-                    relationshipLattice.getRChainsInfo(len),
-                    false,
-                    buildByProjection,
-                    storageEngine
-                );
-            }
-        } else {
-            // Generate the counts tables and copy their values to the CT tables.
-            for(int len = 1; len <= latticeHeight; len++) {
-                generateCountsTables(
-                    dbTargetName,
-                    relationshipLattice.getRChainsInfo(len),
-                    true,
-                    buildByProjection,
-                    storageEngine
-                );
-            }
+            copyToCT = false;
+        }
+
+        // Generate the counts tables and copy their values to the CT tables if specified to.
+        for(int len = 1; len <= latticeHeight; len++) {
+            generateCountsTables(
+                dbTargetName,
+                relationshipLattice.getRChainsInfo(len),
+                copyToCT,
+                buildByProjection,
+                storageEngine
+            );
         }
 
         RuntimeLogger.updateLogEntry(dbConnection, "buildRChainCounts", System.currentTimeMillis() - start);
