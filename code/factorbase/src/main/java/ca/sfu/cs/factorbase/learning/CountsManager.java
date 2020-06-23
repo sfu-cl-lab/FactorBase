@@ -217,7 +217,7 @@ public class CountsManager {
                 rchainInfos = relationshipLattice.getRChainsInfo(len);
                 buildRChainsCT(rchainInfos, len, joinTableQueries, storageEngine);
             }
-            RuntimeLogger.updateLogEntry(dbConnection, "buildFlatStarCT", System.currentTimeMillis() - start);
+            RuntimeLogger.adjustLogEntryValue(dbConnection, "buildFlatStarCT", System.currentTimeMillis() - start);
         }
 
         long l2 = System.currentTimeMillis();  //@zqian

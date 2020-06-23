@@ -98,4 +98,31 @@ public final class RuntimeLogger {
             );
         }
     }
+
+
+    /**
+     * Add the given runtime to the column specified for the log entry that was created from the last call to
+     * {@link RuntimeLogger#addLogEntry(Connection)}.
+     *
+     * @param dbConnection - connection to the database server containing the "CallLogs" table.
+     * @param columnname - the name of the column to adjust in the "CallLogs" table.
+     * @param runtime - the runtime to add (positive value) in the specified column or to subtract (negative value) in
+     *                  the specified column.
+     * @throws SQLException if there is an issue adjusting the log entry.
+     */
+    public static void adjustLogEntryValue(
+        Connection dbConnection,
+        String columnName,
+        long runtime
+    ) throws SQLException {
+        try (Statement st = dbConnection.createStatement()) {
+            st.executeUpdate(
+                "UPDATE " + dbName + "." + CALL_LOGS + " " +
+                "SET " +
+                    columnName + " = IFNULL(" + columnName + ", 0) + " + runtime + " " +
+                "WHERE " +
+                    "CallNumber = " + callCount
+            );
+        }
+    }
 }
