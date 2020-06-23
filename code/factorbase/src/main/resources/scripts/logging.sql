@@ -8,4 +8,4 @@ CREATE TABLE CallLogs (
     buildRChainCounts INT, -- Counts
     createJoinTableQueries INT, -- Mobius Join
     buildFlatStarCT INT -- Mobius Join
-);
+) ENGINE = MEMORY;

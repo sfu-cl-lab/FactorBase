@@ -92,11 +92,8 @@ public class CountsManager {
         dbConnection.setCatalog(databaseName_BN);
         RelationshipLattice relationshipLattice = propagateFunctorSetInfo(dbConnection);
 
-        // Build the counts tables for the RChains.
-        buildRChainCounts(databaseName_CT, relationshipLattice, projectCounts, storageEngine);
-
         // building CT tables for Rchain
-        CTGenerator(relationshipLattice, storageEngine, projectCounts);
+        CTGenerator(relationshipLattice, storageEngine, projectCounts, projectCounts);
     }
 
 
@@ -158,9 +155,13 @@ public class CountsManager {
     private static void CTGenerator(
         RelationshipLattice relationshipLattice,
         String storageEngine,
+        boolean projectCounts,
         boolean useCTCache
     ) throws SQLException {
         int latticeHeight = relationshipLattice.getHeight();
+
+        // Build the counts tables for the RChains.
+        buildRChainCounts(databaseName_CT, relationshipLattice, projectCounts, storageEngine);
 
         long l = System.currentTimeMillis(); //@zqian : CT table generating time
            // handling Pvars, generating pvars_counts       
@@ -200,7 +201,7 @@ public class CountsManager {
                 logger.fine("RNode: " + rnode);
                 logger.fine("Short RNode: " + shortRNode);
                 String ctTableName = shortRNode + "_CT";
-                String ctCreationQuery = buildRNodeCTCreationQuery(shortRNode, joinTableQueries);
+                String ctCreationQuery = buildRNodeCTCreationQuery(rnode, shortRNode, joinTableQueries);
 
                 buildCTMethod.apply(
                     databaseName_CT,
@@ -244,6 +245,21 @@ public class CountsManager {
         String rnode,
         String shortRNode
     ) throws SQLException {
+        long start = System.currentTimeMillis();
+        generateCountsTable(
+            databaseName_CT,
+            rnode,
+            shortRNode,
+            true,
+            storageEngine
+        );
+        long rcountsRuntime = System.currentTimeMillis() - start;
+
+        // Add the runtime to the buildRChainCounts portion since that is where the runtime belongs to.
+        RuntimeLogger.adjustLogEntryValue(dbConnection, "buildRChainCounts", rcountsRuntime);
+        // Subtract this time from the buildFlatStarCT to make sure the times are correct.
+        RuntimeLogger.adjustLogEntryValue(dbConnection, "buildFlatStarCT", -1 * rcountsRuntime);
+
         // Build the _star table.
         buildRNodeStar(rnode, shortRNode);
 
@@ -259,7 +275,7 @@ public class CountsManager {
             storageEngine,
             ctCreationQuery
         );
-        long start = System.currentTimeMillis();
+        start = System.currentTimeMillis();
         dbConnection.setCatalog(targetDatabaseName);
         logger.fine("\nCREATE CT table String: " + createCTQuery);
         try (Statement statement = dbConnection.createStatement()) {
@@ -361,8 +377,18 @@ public class CountsManager {
             copyToCT = false;
         }
 
+        /**
+         *  Skip building the first level (RNodes) if we aren't building the global counts tables since the CT table
+         *  might already exist in the "_CT_cache" database, in which case the "_counts" tables for a given RNode does
+         *  not need to be created.
+         */
+        int startingHeight = 2;
+        if (dbTargetName.equals(databaseName_global_counts)) {
+            startingHeight = 1;
+        }
+
         // Generate the counts tables and copy their values to the CT tables if specified to.
-        for(int len = 1; len <= latticeHeight; len++) {
+        for(int len = startingHeight; len <= latticeHeight; len++) {
             generateCountsTables(
                 dbTargetName,
                 relationshipLattice.getRChainsInfo(len),
@@ -1299,6 +1325,7 @@ public class CountsManager {
      * @throws SQLException if there are issues executing the SQL queries.
      */
     private static String buildRNodeCTCreationQuery(
+        String rnode,
         String shortRNode,
         Map<String, String> joinTableQueries
     ) throws SQLException {
@@ -1308,20 +1335,28 @@ public class CountsManager {
         // Must specify the columns or there will be column mismatches when taking the UNION of the counts and false
         // tables.
         String columnQuery =
-            "SELECT column_name AS Entries " +
-            "FROM information_schema.columns " +
-            "WHERE table_schema = '" + databaseName_CT + "' " +
-            "AND table_name = '" + countsTableName + "';";
+            "SELECT Entries " +
+            "FROM MetaQueries " +
+            "WHERE Lattice_Point = '" + rnode + "' " +
+            "AND ClauseType = 'SELECT' " +
+            "AND EntryType <> 'aggregate' " +
+            "AND TableType = 'Counts';";
 
         // Extract and escape the column names since they look like function calls to MySQL.
         List<String> columns;
+        dbConnection.setCatalog(databaseName_BN);
         try (
             Statement statement = dbConnection.createStatement();
             ResultSet result = statement.executeQuery(columnQuery)
         ) {
             columns = extractEntries(result, "Entries");
         }
-        String UnionColumnString = makeEscapedCommaSepQuery(columns);
+        String UnionColumnString;
+        if (columns.size() > 0) {
+            UnionColumnString = "MULT, " + makeDelimitedString(columns, ", ", " AS ");
+        } else {
+            UnionColumnString = "MULT";
+        }
 
         // Join the false table with the join table to introduce rnid (= F) and 2nids (= N/A).  Then union the result
         // with the counts table.
