@@ -181,7 +181,7 @@ public class CountsManager {
             BuildRNodesCTMethod<
                 String,
                 String,
-                String,
+                CountingStrategy,
                 String,
                 String,
                 String,
@@ -205,7 +205,7 @@ public class CountsManager {
                 buildCTMethod.apply(
                     databaseName_CT,
                     ctTableName,
-                    countingStrategy.getStorageEngine(),
+                    countingStrategy,
                     ctCreationQuery,
                     rnode,
                     shortRNode
@@ -230,7 +230,7 @@ public class CountsManager {
      *
      * @param targetDatabaseName - the name of the database to generate the table in.
      * @param ctTableName - the name of the  table to generate.
-     * @param storageEngine - the storage engine to use for the tables generated in general.
+     * @param countingStrategy - {@link CountingStrategy} to indicate how counts related tables should be generated.
      * @param ctCreationQuery - SELECT query used to create the CT table.
      * @param rnode - the name of the RNode to generate the CT table for.
      * @param shortRNode - the short name of the RNode to generate the CT table for.
@@ -239,7 +239,7 @@ public class CountsManager {
     private static void buildRNodesCT(
         String targetDatabaseName,
         String ctTableName,
-        String storageEngine,
+        CountingStrategy countingStrategy,
         String ctCreationQuery,
         String rnode,
         String shortRNode
@@ -249,8 +249,8 @@ public class CountsManager {
             databaseName_CT,
             rnode,
             shortRNode,
-            true,
-            storageEngine
+            countingStrategy.useProjection(),
+            countingStrategy.getStorageEngine()
         );
         long rcountsRuntime = System.currentTimeMillis() - start;
 
@@ -263,7 +263,7 @@ public class CountsManager {
         buildRNodeStar(rnode, shortRNode);
 
         // Build the _flat table.
-        buildRNodeFlat(rnode, shortRNode, storageEngine);
+        buildRNodeFlat(rnode, shortRNode, countingStrategy.getStorageEngine());
 
         // Build the _false table.
         buildRNodeFalse(shortRNode);
@@ -271,7 +271,7 @@ public class CountsManager {
         // Build the _CT table.
         String createCTQuery = QueryGenerator.createSimpleCreateTableQuery(
             ctTableName,
-            storageEngine,
+            countingStrategy.getStorageEngine(),
             ctCreationQuery
         );
         start = System.currentTimeMillis();
@@ -290,7 +290,7 @@ public class CountsManager {
      *
      * @param targetDatabaseName - the name of the database to generate the table in.
      * @param ctTableName - the name of the  table to generate.
-     * @param storageEngine - the storage engine to use for the tables generated in general.
+     * @param countingStrategy - {@link CountingStrategy} to indicate how counts related tables should be generated.
      * @param ctCreationQuery - SELECT query used to create the CT table.
      * @param rnode - the name of the RNode to generate the CT table for.
      * @param shortRNode - the short name of the RNode to generate the CT table for.
@@ -299,7 +299,7 @@ public class CountsManager {
     private static void buildRNodesCTFromCache(
         String targetDatabaseName,
         String ctTableName,
-        String storageEngine,
+        CountingStrategy countingStrategy,
         String ctCreationQuery,
         String rnode,
         String shortRNode
@@ -314,7 +314,7 @@ public class CountsManager {
             buildRNodesCT(
                 databaseName_CT_cache,
                 cacheTableName,
-                storageEngine,
+                countingStrategy,
                 ctCreationQuery,
                 rnode,
                 shortRNode
@@ -1605,7 +1605,8 @@ public class CountsManager {
      *
      * @param <A> (String) the name of the output database.
      * @param <B> (String) the name of the output table.
-     * @param <C> (String) the storage engine to use for the tables generated in general.
+     * @param <C> (CountingStrategy) {@link CountingStrategy} to indicate how counts related tables should be
+     *                               generated.
      * @param <D> (String) the SELECT query used to create the CT table.
      * @param <E> (String) the name of the RNode to generate the CT table for.
      * @param <F> (String) the short name of the RNode to generate the CT table for.
@@ -1616,7 +1617,7 @@ public class CountsManager {
         public void apply(
             A targetDatabaseName,
             B ctTableName,
-            C storageEngine,
+            C countingStrategy,
             D ctCreationQuery,
             E rnode,
             F shortRNode
