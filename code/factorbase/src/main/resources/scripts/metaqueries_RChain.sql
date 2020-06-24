@@ -196,16 +196,8 @@ SELECT DISTINCT rnid, concat('`',replace(rnid, '`', ''),'_star`.',1nid,'=','`',r
 /*****************
  * start with from list
  */
-    
-CREATE or REPLACE VIEW RChain_pvars AS
-select  distinct 
-    M.name as rchain, 
-    pvid 
-from 
-    lattice_membership M, RNodes_pvars R
-where 
-    R.rnid = M.member;
-    
+
+
 insert into MetaQueries
 SELECT
     lattice_rel.child as Lattice_Point, 

@@ -1,4 +1,4 @@
-/* Create the table necessary for storing metaquery information. */
+/* Create the table and view necessary for storing metaquery information. */
 
 SET storage_engine=MEMORY;
 
@@ -9,3 +9,14 @@ CREATE TABLE MetaQueries (
     EntryType varchar(100), /* e.g. 1node, aggregate like count */
     Entries varchar(150)
 );
+
+
+CREATE VIEW RChain_pvars AS
+    SELECT DISTINCT
+        M.name AS rchain,
+        pvid
+    FROM
+        lattice_membership M,
+        RNodes_pvars R
+    WHERE
+        R.rnid = M.member;
