@@ -19,6 +19,12 @@ public enum CountingStrategy {
 
 
         @Override
+        public boolean useCTCache() {
+            return true;
+        }
+
+
+        @Override
         public String getStorageEngine() {
             return "MEMORY";
         }
@@ -26,6 +32,12 @@ public enum CountingStrategy {
     Hybrid {
         @Override
         public boolean isHybrid() {
+            return true;
+        }
+
+
+        @Override
+        public boolean useCTCache() {
             return true;
         }
 
@@ -68,6 +80,16 @@ public enum CountingStrategy {
      * @return true if the counting strategy is hybrid; otherwise false.
      */
     public boolean isHybrid() {
+        return false;
+    }
+
+
+    /**
+     * Determine if the _CT_cache database should be used to cache counts and CT tables.
+     *
+     * @return true if the _CT_cache database should be used; otherwise false.
+     */
+    public boolean useCTCache() {
         return false;
     }
 

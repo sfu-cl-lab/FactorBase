@@ -485,8 +485,7 @@ public class MySQLFactorBaseDataBase implements FactorBaseDataBase {
 
             // Generate CT tables.
             CountsManager.buildCT(
-                this.countingStrategy.useProjection(),
-                this.countingStrategy.getStorageEngine()
+                countingStrategy
             );
 
             String tableName = null;
