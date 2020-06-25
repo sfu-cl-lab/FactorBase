@@ -129,6 +129,12 @@ public class BayesBaseH {
 
         RuntimeLogger.logRunTime(logger, "Structure Learning", start, System.currentTimeMillis());
 
+        // Change the CallLogs table to use the InnoDB storage engine so that we retain the data even if the server is
+        // turned off.
+        try (Statement st = con2.createStatement()) {
+            st.execute("ALTER TABLE CallLogs ENGINE = InnoDB;");
+        }
+
         /**
          * OS: Nov 17, 2016. It can happen that Tetrad learns a forbidden edge. Argh. To catch this, we delete forbidden edges from any insertion. But then
          * it can happen that a node has no edge at all, not even with an empty parent. In that case the Bif generator gets messed up. So we catch such

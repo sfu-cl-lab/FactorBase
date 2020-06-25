@@ -239,4 +239,41 @@ public final class QueryGenerator {
 
         return builder.toString();
     }
+
+
+    /**
+     * Generates a MySQL CREATE TABLE String that generates a table where the format of the CREATE TABLE query looks
+     * like the following:
+     * <p>
+     * CREATE TABLE &lt;tableName&gt; ENGINE = &lt;storageEngine&gt; AS &lt;selectQuery&gt;
+     * </p>
+     * @param tableName - the name of the table to create.
+     * @param storageEngine - the storage engine to use for the table to create.
+     * @param selectQuery - a SELECT query used to create the table.
+     * @return a MySQL CREATE TABLE String that generates a table using the provided SELECT query.
+     */
+    public static String createSimpleCreateTableQuery(String tableName, String storageEngine, String selectQuery) {
+        builder.setLength(0);
+        builder.append("CREATE TABLE `").append(tableName).append("` ENGINE = ").append(storageEngine).append(" AS ");
+        builder.append(selectQuery);
+        return builder.toString();
+    }
+
+
+    /**
+     * Generates a MySQL CREATE VIEW String that generates a view where the format of the CREATE VIEW query looks like
+     * the following:
+     * <p>
+     * CREATE VIEW &lt;viewName&gt; AS &lt;selectQuery&gt;
+     * </p>
+     * @param viewName - the name of the view to create.
+     * @param selectQuery - a SELECT query used to create the view.
+     * @return a MySQL CREATE VIEW String that generates a view using the provided SELECT query.
+     */
+    public static String createSimpleCreateViewQuery(String viewName, String selectQuery) {
+        builder.setLength(0);
+        builder.append("CREATE VIEW ").append(viewName).append(" AS ");
+        builder.append(selectQuery);
+        return builder.toString();
+    }
 }

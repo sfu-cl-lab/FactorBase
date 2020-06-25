@@ -75,9 +75,10 @@ public class Sort_merge3 {
         // Code for merging the two tables.
         String createQuery;
         if (orderList.size() > 0) {
-            createQuery =
-                "CREATE VIEW " + outputTableName + " AS " +
-                QueryGenerator.createSubtractionQuery(table1, table2, "MULT", orderList);
+            createQuery = QueryGenerator.createSimpleCreateViewQuery(
+                outputTableName,
+                QueryGenerator.createSubtractionQuery(table1, table2, "MULT", orderList)
+            );
         } else {
             // Aug 18, 2014 zqian: Handle the extreme case when there's only the `MULT` column.
             logger.fine("\n\tHandle the extreme case when there's only the `MULT` column.\n");

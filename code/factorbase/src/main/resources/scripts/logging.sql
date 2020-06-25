@@ -6,5 +6,6 @@ CREATE TABLE CallLogs (
     populateMQRChain INT, -- MetaData
     buildPVarsCounts INT, -- Counts
     buildRChainCounts INT, -- Counts
+    createJoinTableQueries INT, -- Mobius Join
     buildFlatStarCT INT -- Mobius Join
-);
+) ENGINE = MEMORY;
