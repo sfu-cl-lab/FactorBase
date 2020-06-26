@@ -217,7 +217,7 @@ public class CountsManager {
                 rchainInfos = relationshipLattice.getRChainsInfo(len);
                 buildRChainsCT(rchainInfos, len, joinTableQueries, countingStrategy.getStorageEngine());
             }
-            RuntimeLogger.adjustLogEntryValue(dbConnection, "buildFlatStarCT", System.currentTimeMillis() - start);
+            RuntimeLogger.updateLogEntry(dbConnection, "buildFlatStarCT", System.currentTimeMillis() - start);
         }
 
         long l2 = System.currentTimeMillis();  //@zqian
@@ -254,10 +254,8 @@ public class CountsManager {
         );
         long rcountsRuntime = System.currentTimeMillis() - start;
 
-        // Add the runtime to the buildRChainCounts portion since that is where the runtime belongs to.
-        RuntimeLogger.adjustLogEntryValue(dbConnection, "buildRChainCounts", rcountsRuntime);
-        // Subtract this time from the buildFlatStarCT to make sure the times are correct.
-        RuntimeLogger.adjustLogEntryValue(dbConnection, "buildFlatStarCT", -1 * rcountsRuntime);
+        // Add runtime to a column used to add to the "Counts" portion and subtract from the "Moebius Join" portion.
+        RuntimeLogger.updateLogEntry(dbConnection, "buildRNodeCounts", rcountsRuntime);
 
         // Build the _star table.
         buildRNodeStar(rnode, shortRNode);
