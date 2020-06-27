@@ -34,25 +34,23 @@ public class Sort_merge3 {
      * {@code table2}.
      *
      * @param conn - connection to the database containing {@code table1} and {@code table2}.
+     * @param sourceDatabaseName - the name of the database containing {@code table1} and {@code table2}.
      * @param table1 - the table to have its values in the MULT column subtracted by the MULT column in
      *                 {@code table2}.
      * @param table2 - the table to match rows with in {@code table1} and subtract by the values found in the
      *                 MULT column.
-     * @param outputTableName - the table to generate containing the results of the sort merge.
+     * @return an SQL query that applies the sort merge algorithm to the two specified tables.
      * @throws SQLException if there are issues executing the queries.
      */
-    public static void sort_merge(
+    public static String sort_merge(
         Connection conn,
+        String sourceDatabaseName,
         String table1,
-        String table2,
-        String outputTableName
+        String table2
     ) throws SQLException {
-        logger.fine("\nGenerating false table by Subtraction using Sort_merge, cur_false_Table is: " + outputTableName);
-
         // Ensure that all the table names are escaped before attempting to execute any queries with them.
-        table1 = "`" + table1 + "`";
-        table2 = "`" + table2 + "`";
-        outputTableName = "`" + outputTableName + "`";
+        table1 = sourceDatabaseName + ".`" + table1 + "`";
+        table2 = sourceDatabaseName + ".`" + table2 + "`";
 
         Statement st1 = conn.createStatement();
 
@@ -72,30 +70,18 @@ public class Sort_merge3 {
         rst.close();
         st1.close();
 
-        // Code for merging the two tables.
-        String createQuery;
+        String selectQuery;
         if (orderList.size() > 0) {
-            createQuery = QueryGenerator.createSimpleCreateViewQuery(
-                outputTableName,
-                QueryGenerator.createSubtractionQuery(table1, table2, "MULT", orderList)
-            );
+            selectQuery = QueryGenerator.createSubtractionQuery(table1, table2, "MULT", orderList);
         } else {
             // Aug 18, 2014 zqian: Handle the extreme case when there's only the `MULT` column.
             logger.fine("\n\tHandle the extreme case when there's only the `MULT` column.\n");
-            createQuery =
-                "CREATE VIEW " + outputTableName + " AS " +
+            selectQuery =
                 "SELECT (" + table1 + ".MULT - " + table2 + ".MULT) AS MULT " +
-                "FROM " + table1 + ", " + table2 + ";";
+                "FROM " + table1 + ", " + table2;
         }
 
-        logger.fine(createQuery);
-
-        long time1 = System.currentTimeMillis();
-        try (Statement st2 = conn.createStatement()) {
-            st2.execute("DROP VIEW IF EXISTS " + outputTableName + ";");
-            st2.execute(createQuery);
-        }
-
-        logger.fine("\ntotal time: " + (System.currentTimeMillis() - time1) + "\n");
+        logger.fine(selectQuery);
+        return selectQuery;
     }
 }

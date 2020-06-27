@@ -5,6 +5,7 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.text.MessageFormat;
 
 import ca.sfu.cs.common.Configuration.Config;
@@ -46,12 +47,18 @@ public class RunComponent {
         long startTime = System.currentTimeMillis();
         if (component.equals("SortMerge")) {
             System.out.println("Starting Sort Merge!");
-            Sort_merge3.sort_merge(
+            String falseTableSubQuery = Sort_merge3.sort_merge(
                 dbConnection,
+                config.getProperty("dbname"),
                 config.getProperty("SortMergeCartesianTable"),
-                config.getProperty("SortMergeSubsetTable"),
-                config.getProperty("SortMergeOutputTable")
+                config.getProperty("SortMergeSubsetTable")
             );
+            try (Statement statement = dbConnection.createStatement()) {
+                statement.executeUpdate(
+                    "CREATE VIEW " + config.getProperty("SortMergeOutputTable") + " AS " +
+                    falseTableSubQuery
+                );
+            }
         } else if (component.equals("DataExtraction")) {
             System.out.println("Starting Data Extraction");
             DataExtractor dataextractor = null;

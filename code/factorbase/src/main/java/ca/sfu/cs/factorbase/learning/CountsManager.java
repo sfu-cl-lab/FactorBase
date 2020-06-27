@@ -46,6 +46,7 @@ import ca.sfu.cs.factorbase.util.Sort_merge3;
 public class CountsManager {
 
     private static Connection dbConnection;
+    private static final String SUBQUERY_PLACEHOLDER = "@@SUBQUERY@@";
     private static int tableID;
     private static Map<String, String> ctTablesCache = new HashMap<String, String>();
     private static String databaseName_std;
@@ -263,8 +264,9 @@ public class CountsManager {
         // Build the _flat table.
         buildRNodeFlat(rnode, shortRNode, countingStrategy.getStorageEngine());
 
-        // Build the _false table.
-        buildRNodeFalse(shortRNode);
+        // Build the _false table subquery.
+        String falseTableSubQuery = buildRNodeFalseQuery(shortRNode);
+        ctCreationQuery = ctCreationQuery.replace(SUBQUERY_PLACEHOLDER, falseTableSubQuery);
 
         // Build the _CT table.
         String createCTQuery = QueryGenerator.createSimpleCreateTableQuery(
@@ -627,20 +629,17 @@ public class CountsManager {
                 long l4 = System.currentTimeMillis(); 
                 logger.fine("Building Time(ms) for "+cur_flat_Table+ " : "+(l4-l3)+" ms.\n");
                 /**********starting to create _flase table***using sort_merge*******************************/
-                // starting to create _flase table : part1
-                String cur_false_Table = removedShort + len + "_" + fc + "_false";
 
                 // Computing the false table as the MULT difference between the matching rows of the star and flat tables.
                 // This is a big join!
-                Sort_merge3.sort_merge(
+                String falseTableSubQuery = Sort_merge3.sort_merge(
                     dbConnection,
+                    databaseName_CT,
                     cur_star_Table,
-                    cur_flat_Table,
-                    cur_false_Table
+                    cur_flat_Table
                 );
 
                 long l5 = System.currentTimeMillis(); 
-                logger.fine("Building Time(ms) for "+cur_false_Table+ " : "+(l5-l4)+" ms.\n");
 
                 // staring to create the CT table
                 ResultSet rs_45 = st2.executeQuery(
@@ -663,7 +662,7 @@ public class CountsManager {
 
                     "SELECT " + CTJoinString + " " +
                     "FROM " +
-                        "`" + cur_false_Table + "`, " +
+                        "(" + falseTableSubQuery + ") AS FALSE_TABLE, " +
                         "(" + joinTableQueries.get(rnid_or) + ") AS JOIN_TABLE " +
                     "WHERE MULT > 0;";
 
@@ -1292,20 +1291,19 @@ public class CountsManager {
 
 
     /**
-     * Create the false table for the given RNode using the sort merge algorithm.
+     * Create an SQL query to generate the false table for the given RNode using the sort merge algorithm.
      *
      * @param shortRNode - the short name of the RNode to build the "_false" table for.
+     * @return an SQL query to generate the false table for the given RNode using the sort merge algorithm.
      * @throws SQLException if there are issues executing the SQL queries.
      */
-    private static void buildRNodeFalse(String shortRNode) throws SQLException {
-        String falseTableName = shortRNode + "_false";
-
+    private static String buildRNodeFalseQuery(String shortRNode) throws SQLException {
         // Computing the false table as the MULT difference between the matching rows of the star and flat tables.
-        Sort_merge3.sort_merge(
+        return Sort_merge3.sort_merge(
             dbConnection,
+            databaseName_CT,
             shortRNode + "_star",
-            shortRNode + "_flat",
-            falseTableName
+            shortRNode + "_flat"
         );
     }
 
@@ -1325,7 +1323,6 @@ public class CountsManager {
         String shortRNode,
         Map<String, String> joinTableQueries
     ) throws SQLException {
-        String falseTableName = shortRNode + "_false";
         String countsTableName = shortRNode + "_counts";
 
         // Must specify the columns or there will be column mismatches when taking the UNION of the counts and false
@@ -1365,7 +1362,7 @@ public class CountsManager {
 
             "SELECT " + UnionColumnString + " " +
             "FROM " +
-                databaseName_CT + ".`" + falseTableName + "`, " +
+                "(" + SUBQUERY_PLACEHOLDER + ") AS FALSE_TABLE, " +
                 "(" + joinTableQueries.get(shortRNode) + ") AS JOIN_TABLE " +
             "WHERE MULT > 0";
         return createCTString;

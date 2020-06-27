@@ -20,12 +20,19 @@ public class Sort_merge3Test {
         String SORT_MERGE_TABLE = "sort-merge-output";
         TestDatabaseConnection db = new TestDatabaseConnection();
 
-        Sort_merge3.sort_merge(
+        String falseTableSubQuery = Sort_merge3.sort_merge(
             db.con,
+            "`" + TestDatabaseConnection.DATABASE_NAME + "`",
             "sort-merge-t1",
-            "sort-merge-t2",
-            SORT_MERGE_TABLE
+            "sort-merge-t2"
         );
+
+        try (Statement statement = db.con.createStatement()) {
+            statement.executeUpdate(
+                "CREATE VIEW `" + SORT_MERGE_TABLE + "` AS " +
+                falseTableSubQuery
+            );
+        }
 
         Statement st = db.con.createStatement();
         ResultSet rs = st.executeQuery(
