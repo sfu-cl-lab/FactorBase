@@ -17,7 +17,7 @@ import ca.sfu.cs.factorbase.util.Sort_merge3;
 
 
 public class RunComponent {
-    private static final String CONNECTION_STRING = "jdbc:{0}/{1}";
+    private static final String CONNECTION_STRING = "jdbc:{0}/{1}?{2}";
 
     /**
      * Helper method to wrap the given string with backticks so that the SQL queries are valid.
@@ -33,7 +33,8 @@ public class RunComponent {
         String connectionString = MessageFormat.format(
             CONNECTION_STRING,
             config.getProperty("dbaddress"),
-            config.getProperty("dbname")
+            config.getProperty("dbname"),
+            "serverTimezone=PST"
         );
 
         Connection dbConnection = (Connection) DriverManager.getConnection(
