@@ -51,12 +51,12 @@ public class RunComponent {
             String falseTableSubQuery = Sort_merge3.sort_merge(
                 dbConnection,
                 config.getProperty("dbname"),
-                config.getProperty("SortMergeCartesianTable"),
+                config.getProperty("SortMergeCartesianTableSubQuery"),
                 config.getProperty("SortMergeSubsetTable")
             );
             try (Statement statement = dbConnection.createStatement()) {
                 statement.executeUpdate(
-                    "CREATE VIEW " + config.getProperty("SortMergeOutputTable") + " AS " +
+                    "CREATE TABLE " + config.getProperty("SortMergeOutputTable") + " AS " +
                     falseTableSubQuery
                 );
             }

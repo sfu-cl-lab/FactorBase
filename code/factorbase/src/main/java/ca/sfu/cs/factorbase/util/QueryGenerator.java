@@ -114,8 +114,9 @@ public final class QueryGenerator {
      *       {@code joinOnColumns}) that are a subset of the ones found in the table {@code table1}.  Any value unique
      *       to {@code table1} will be subtracted by 0.
      *
-     * @param table1 - The table to have its values in the column {@code subtractionColumn} subtracted by the column
-     *                 {@code subtractionColumn} in the table {@code table2}.
+     * @param table1Subquery - The subquery that generates a table to have its values in the column
+     *                         {@code subtractionColumn} subtracted by the column {@code subtractionColumn} in the
+     *                         table {@code table2}.
      * @Param table2 - The table to match rows with in table {@code table1} and subtract by the values found in the
      *                 column {@code subtractionColumn}.
      * @param subtractionColumn - The common column found in {@code table1} and {@code table2} that should be subtracted
@@ -125,10 +126,15 @@ public final class QueryGenerator {
      *         {@code table2} for any rows that match based on the columns {@code joinOnColumns}.
      *
      */
-    public static String createSubtractionQuery(String table1, String table2, String subtractionColumn, List<String> joinOnColumns) {
+    public static String createSubtractionQuery(
+        String table1Subquery,
+        String table2,
+        String subtractionColumn,
+        List<String> joinOnColumns
+    ) {
         builder.setLength(0);
         builder.append("SELECT ");
-        builder.append(table1).append(".").append(subtractionColumn);
+        builder.append("SUBQUERY").append(".").append(subtractionColumn);
         builder.append(" - ");
         builder.append("IFNULL(");
         builder.append(table2).append(".").append(subtractionColumn).append(", ");
@@ -138,7 +144,7 @@ public final class QueryGenerator {
 
         for (String column : joinOnColumns) {
             escapedBuilder.setLength(0);
-            escapedBuilder.append(table1).append(".`").append(column).append("`");
+            escapedBuilder.append("SUBQUERY").append(".`").append(column).append("`");
             csv.add(escapedBuilder.toString());
         }
 
@@ -146,9 +152,9 @@ public final class QueryGenerator {
             builder.append(", ").append(csv.toString()).append(" ");
         }
 
-        builder.append("FROM ").append(table1).append(" ");
+        builder.append("FROM (").append(table1Subquery).append(") AS SUBQUERY ");
         builder.append("LEFT JOIN ").append(table2).append(" ");
-        builder.append("ON ").append(constructWhereClauseJoin(joinOnColumns, table1, table2, false));
+        builder.append("ON ").append(constructWhereClauseJoin(joinOnColumns, "SUBQUERY", table2, false));
 
         return builder.toString();
     }

@@ -258,14 +258,14 @@ public class CountsManager {
         // Add runtime to a column used to add to the "Counts" portion and subtract from the "Moebius Join" portion.
         RuntimeLogger.updateLogEntry(dbConnection, "buildRNodeCounts", rcountsRuntime);
 
-        // Build the _star table.
-        buildRNodeStar(rnode, shortRNode);
+        // Build the _star table subquery.
+        String starTableSubQuery = buildRNodeStarQuery(rnode, shortRNode);
 
         // Build the _flat table.
         buildRNodeFlat(rnode, shortRNode, countingStrategy.getStorageEngine());
 
         // Build the _false table subquery.
-        String falseTableSubQuery = buildRNodeFalseQuery(shortRNode);
+        String falseTableSubQuery = buildRNodeFalseQuery(starTableSubQuery, shortRNode);
         ctCreationQuery = ctCreationQuery.replace(SUBQUERY_PLACEHOLDER, falseTableSubQuery);
 
         // Build the _CT table.
@@ -501,7 +501,6 @@ public class CountsManager {
 
             while(rs1.next())
             {       
-                long l2 = System.currentTimeMillis(); 
                 String removed = rs1.getString("removed");
                 logger.fine("\n removed : " + removed);  
                 String removedShort = rs1.getString("short_rnid");
@@ -580,18 +579,10 @@ public class CountsManager {
 
                 //make the rnid shorter 
                 String rnid_or=removedShort;
-            
-                String cur_star_Table = removedShort + len + "_" + fc + "_star";
-                String createStarString = QueryGenerator.createSimpleCreateViewQuery(
-                    cur_star_Table,
-                    queryString
-                );
 
-                logger.fine("\n create star String : " + createStarString );
-                st3.execute(createStarString);      //create star table     
+                logger.fine(queryString);
 
                 long l3 = System.currentTimeMillis(); 
-                logger.fine("Building Time(ms) for "+cur_star_Table+ " : "+(l3-l2)+" ms.\n");
                 //staring to create the _flat table
                 // Oct 16 2013
                 // cur_CT_Table should be the one generated in the previous iteration
@@ -635,7 +626,7 @@ public class CountsManager {
                 String falseTableSubQuery = Sort_merge3.sort_merge(
                     dbConnection,
                     databaseName_CT,
-                    cur_star_Table,
+                    queryString,
                     cur_flat_Table
                 );
 
@@ -1128,17 +1119,17 @@ public class CountsManager {
 
 
     /**
-     * Create the star table for the given RNode.
+     * Create an SQL query to generate the star table for the given RNode.
      *
      * @param rnode - the name of the RNode to build the "_star" table for.
      * @param shortRNode - the short name of the RNode to build the "_star" table for.
+     * @return an SQL query to generate the star table for the given RNode.
      * @throws SQLException if there are issues executing the SQL queries.
      */
-    private static void buildRNodeStar(
+    private static String buildRNodeStarQuery(
         String rnode,
         String shortRNode
     ) throws SQLException {
-        long start = System.currentTimeMillis(); // @zqian: measure structure learning time.
         dbConnection.setCatalog(databaseName_BN);
         Statement statement = dbConnection.createStatement();
 
@@ -1173,7 +1164,7 @@ public class CountsManager {
         String multiplicationString = makeStarSepQuery(columns);
 
         // Create FROM query string.
-        String fromString = String.join(", ", columns);
+        String fromString = databaseName_CT + "." + String.join(", " + databaseName_CT + ".", columns);
 
         // Create the final query string.
         String queryString = "SELECT " + multiplicationString + " AS MULT";
@@ -1182,19 +1173,8 @@ public class CountsManager {
         }
         queryString += " FROM " + fromString;
 
-        dbConnection.setCatalog(databaseName_CT);
-        try(Statement viewStatement = dbConnection.createStatement()) {
-            String starTableName = shortRNode + "_star";
-            String createString = QueryGenerator.createSimpleCreateViewQuery(
-                starTableName,
-                queryString
-            );
-            logger.fine("\nCREATE String: " + createString);
-            viewStatement.executeUpdate(createString);
-        }
-
-        long end = System.currentTimeMillis(); // @zqian: measure structure learning time.
-        logger.fine("Build Time(ms) for RNode Star: " + (end - start) + " ms.\n");
+        logger.fine(queryString);
+        return queryString;
     }
 
 
@@ -1293,16 +1273,17 @@ public class CountsManager {
     /**
      * Create an SQL query to generate the false table for the given RNode using the sort merge algorithm.
      *
+     * @param starTableSubQuery - a subquery that generates the "_star" table used to create the "_false" table.
      * @param shortRNode - the short name of the RNode to build the "_false" table for.
      * @return an SQL query to generate the false table for the given RNode using the sort merge algorithm.
      * @throws SQLException if there are issues executing the SQL queries.
      */
-    private static String buildRNodeFalseQuery(String shortRNode) throws SQLException {
+    private static String buildRNodeFalseQuery(String starTableSubQuery, String shortRNode) throws SQLException {
         // Computing the false table as the MULT difference between the matching rows of the star and flat tables.
         return Sort_merge3.sort_merge(
             dbConnection,
             databaseName_CT,
-            shortRNode + "_star",
+            starTableSubQuery,
             shortRNode + "_flat"
         );
     }
