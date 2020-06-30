@@ -46,7 +46,8 @@ import ca.sfu.cs.factorbase.util.Sort_merge3;
 public class CountsManager {
 
     private static Connection dbConnection;
-    private static final String SUBQUERY_PLACEHOLDER = "@@SUBQUERY@@";
+    private static final String COUNTS_SUBQUERY_PLACEHOLDER = "@@C_SUBQUERY@@";
+    private static final String FALSE_SUBQUERY_PLACEHOLDER = "@@F_SUBQUERY@@";
     private static int tableID;
     private static Map<String, String> ctTablesCache = new HashMap<String, String>();
     private static String databaseName_std;
@@ -246,12 +247,11 @@ public class CountsManager {
         String shortRNode
     ) throws SQLException {
         long start = System.currentTimeMillis();
-        generateCountsTable(
+        String countsTableSubQuery = generateCountsTableQuery(
             databaseName_CT,
             rnode,
             shortRNode,
-            countingStrategy.useProjection(),
-            countingStrategy.getStorageEngine()
+            countingStrategy.useProjection()
         );
         long rcountsRuntime = System.currentTimeMillis() - start;
 
@@ -262,11 +262,12 @@ public class CountsManager {
         String starTableSubQuery = buildRNodeStarQuery(rnode, shortRNode);
 
         // Build the _flat table.
-        buildRNodeFlat(rnode, shortRNode, countingStrategy.getStorageEngine());
+        buildRNodeFlat(rnode, shortRNode, countingStrategy.getStorageEngine(), countsTableSubQuery);
 
         // Build the _false table subquery.
         String falseTableSubQuery = buildRNodeFalseQuery(starTableSubQuery, shortRNode);
-        ctCreationQuery = ctCreationQuery.replace(SUBQUERY_PLACEHOLDER, falseTableSubQuery);
+        ctCreationQuery = ctCreationQuery.replaceFirst(COUNTS_SUBQUERY_PLACEHOLDER, countsTableSubQuery);
+        ctCreationQuery = ctCreationQuery.replaceFirst(FALSE_SUBQUERY_PLACEHOLDER, falseTableSubQuery);
 
         // Build the _CT table.
         String createCTQuery = QueryGenerator.createSimpleCreateTableQuery(
@@ -946,21 +947,32 @@ public class CountsManager {
             String shortRchain = rchainInfo.getShortID();
             logger.fine(" Short RChain: " + shortRchain);
 
-            String countsTableName = generateCountsTable(
+            String countsTableSubQuery = generateCountsTableQuery(
                 dbTargetName,
                 rchain,
                 shortRchain,
-                buildByProjection,
-                storageEngine
+                buildByProjection
             );
+
+            dbConnection.setCatalog(dbTargetName);
+            try (Statement statement = dbConnection.createStatement()) {
+                String createString = QueryGenerator.createSimpleCreateTableQuery(
+                    shortRchain + "_counts",
+                    storageEngine,
+                    countsTableSubQuery
+                );
+
+                statement.executeUpdate("SET tmp_table_size = " + dbTemporaryTableSize + ";");
+                statement.executeUpdate("SET max_heap_table_size = " + dbTemporaryTableSize + ";");
+                statement.executeUpdate(createString);
+            }
 
             if (copyToCT) {
                 dbConnection.setCatalog(dbTargetName);
                 try (Statement statement = dbConnection.createStatement()) {
                     String createString_CT =
                         "CREATE TABLE `" + shortRchain + "_CT`" + " AS " +
-                            "SELECT * " +
-                            "FROM `" + countsTableName + "`";
+                            countsTableSubQuery;
                     logger.fine("CREATE String: " + createString_CT);
                     statement.execute(createString_CT);
                 }
@@ -983,12 +995,11 @@ public class CountsManager {
      * @return the name of the "_counts" table generated.
      * @throws SQLException if an error occurs when executing the queries.
      */
-    private static String generateCountsTable(
+    private static String generateCountsTableQuery(
         String dbTargetName,
         String rchain,
         String shortRchain,
-        boolean buildByProjection,
-        String storageEngine
+        boolean buildByProjection
     ) throws SQLException {
         // Name of the counts table to generate.
         String countsTableName = shortRchain + "_counts";
@@ -1099,22 +1110,10 @@ public class CountsManager {
             }
         }
 
-        dbConnection.setCatalog(dbTargetName);
-        Statement st3 = dbConnection.createStatement();
-        String createString = QueryGenerator.createSimpleCreateTableQuery(
-            countsTableName,
-            storageEngine,
-            queryString
-        );
-        st3.execute("SET tmp_table_size = " + dbTemporaryTableSize + ";");
-        st3.executeQuery("SET max_heap_table_size = " + dbTemporaryTableSize + ";");
-        st3.execute(createString);
-
         // Close statements.
         st2.close();
-        st3.close();
 
-        return countsTableName;
+        return queryString;
     }
 
 
@@ -1189,7 +1188,8 @@ public class CountsManager {
     private static void buildRNodeFlat(
         String rnode,
         String shortRNode,
-        String storageEngine
+        String storageEngine,
+        String countsTableSubQuery
     ) throws SQLException {
         long start = System.currentTimeMillis(); // @zqian: measure structure learning time.
 
@@ -1223,6 +1223,10 @@ public class CountsManager {
             columns = extractEntries(result, "Entries");
         }
         String fromString = String.join(", ", columns);
+        fromString = fromString.replaceFirst(
+            "`" + shortRNode + "_counts`",
+            "(" + countsTableSubQuery + ") AS " + shortRNode + "_counts"
+        );
 
         // Create the final query string.
         String queryString = "SELECT " + selectString + " FROM " + fromString;
@@ -1304,8 +1308,6 @@ public class CountsManager {
         String shortRNode,
         Map<String, String> joinTableQueries
     ) throws SQLException {
-        String countsTableName = shortRNode + "_counts";
-
         // Must specify the columns or there will be column mismatches when taking the UNION of the counts and false
         // tables.
         String columnQuery =
@@ -1336,14 +1338,14 @@ public class CountsManager {
         // with the counts table.
         String createCTString =
             "SELECT " + UnionColumnString + " " +
-            "FROM " + databaseName_CT + ".`" + countsTableName + "` " +
+            "FROM (" + COUNTS_SUBQUERY_PLACEHOLDER + ") AS " + shortRNode + "_counts " +
             "WHERE MULT > 0 " +
 
             "UNION ALL " +
 
             "SELECT " + UnionColumnString + " " +
             "FROM " +
-                "(" + SUBQUERY_PLACEHOLDER + ") AS FALSE_TABLE, " +
+                "(" + FALSE_SUBQUERY_PLACEHOLDER + ") AS FALSE_TABLE, " +
                 "(" + joinTableQueries.get(shortRNode) + ") AS JOIN_TABLE " +
             "WHERE MULT > 0";
         return createCTString;
