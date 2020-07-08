@@ -81,7 +81,7 @@ public class RunBB {
             long buildCTStart = System.currentTimeMillis();
             CountsManager.buildCT(countingStrategy);
             RuntimeLogger.logRunTime(logger, "Creating CT Tables", buildCTStart, System.currentTimeMillis());
-        } else {
+        } else if (countingStrategy.isHybrid()) {
             long buildGlobalCountsStart = System.currentTimeMillis();
             CountsManager.buildRChainsGlobalCounts();
             RuntimeLogger.logRunTime(logger, "Creating Global Counts Tables", buildGlobalCountsStart, System.currentTimeMillis());
