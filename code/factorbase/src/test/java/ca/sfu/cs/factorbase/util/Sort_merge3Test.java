@@ -20,12 +20,19 @@ public class Sort_merge3Test {
         String SORT_MERGE_TABLE = "sort-merge-output";
         TestDatabaseConnection db = new TestDatabaseConnection();
 
-        Sort_merge3.sort_merge(
+        String falseTableSubQuery = Sort_merge3.sort_merge(
             db.con,
-            "sort-merge-t1",
-            "sort-merge-t2",
-            SORT_MERGE_TABLE
+            "`" + TestDatabaseConnection.DATABASE_NAME + "`",
+            "SELECT * FROM `sort-merge-t1`",
+            "sort-merge-t2"
         );
+
+        try (Statement statement = db.con.createStatement()) {
+            statement.executeUpdate(
+                "CREATE TABLE `" + SORT_MERGE_TABLE + "` AS " +
+                falseTableSubQuery
+            );
+        }
 
         Statement st = db.con.createStatement();
         ResultSet rs = st.executeQuery(
@@ -79,7 +86,7 @@ public class Sort_merge3Test {
         // Clean up the output sort merge table.
         st.executeUpdate(
             MessageFormat.format(
-                "DROP VIEW {0}",
+                "DROP TABLE {0}",
                 "`" + SORT_MERGE_TABLE + "`"
             )
         );

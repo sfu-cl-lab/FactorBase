@@ -46,6 +46,8 @@ import ca.sfu.cs.factorbase.util.Sort_merge3;
 public class CountsManager {
 
     private static Connection dbConnection;
+    private static final String COUNTS_SUBQUERY_PLACEHOLDER = "@@C_SUBQUERY@@";
+    private static final String FALSE_SUBQUERY_PLACEHOLDER = "@@F_SUBQUERY@@";
     private static int tableID;
     private static Map<String, String> ctTablesCache = new HashMap<String, String>();
     private static String databaseName_std;
@@ -217,7 +219,7 @@ public class CountsManager {
                 rchainInfos = relationshipLattice.getRChainsInfo(len);
                 buildRChainsCT(rchainInfos, len, joinTableQueries, countingStrategy.getStorageEngine());
             }
-            RuntimeLogger.adjustLogEntryValue(dbConnection, "buildFlatStarCT", System.currentTimeMillis() - start);
+            RuntimeLogger.updateLogEntry(dbConnection, "buildFlatStarCT", System.currentTimeMillis() - start);
         }
 
         long l2 = System.currentTimeMillis();  //@zqian
@@ -245,28 +247,27 @@ public class CountsManager {
         String shortRNode
     ) throws SQLException {
         long start = System.currentTimeMillis();
-        generateCountsTable(
+        String countsTableSubQuery = generateCountsTableQuery(
             databaseName_CT,
             rnode,
             shortRNode,
-            countingStrategy.useProjection(),
-            countingStrategy.getStorageEngine()
+            countingStrategy.useProjection()
         );
         long rcountsRuntime = System.currentTimeMillis() - start;
 
-        // Add the runtime to the buildRChainCounts portion since that is where the runtime belongs to.
-        RuntimeLogger.adjustLogEntryValue(dbConnection, "buildRChainCounts", rcountsRuntime);
-        // Subtract this time from the buildFlatStarCT to make sure the times are correct.
-        RuntimeLogger.adjustLogEntryValue(dbConnection, "buildFlatStarCT", -1 * rcountsRuntime);
+        // Add runtime to a column used to add to the "Counts" portion and subtract from the "Moebius Join" portion.
+        RuntimeLogger.updateLogEntry(dbConnection, "buildRNodeCounts", rcountsRuntime);
 
-        // Build the _star table.
-        buildRNodeStar(rnode, shortRNode);
+        // Build the _star table subquery.
+        String starTableSubQuery = buildRNodeStarQuery(rnode, shortRNode);
 
         // Build the _flat table.
-        buildRNodeFlat(rnode, shortRNode, countingStrategy.getStorageEngine());
+        buildRNodeFlat(rnode, shortRNode, countingStrategy.getStorageEngine(), countsTableSubQuery);
 
-        // Build the _false table.
-        buildRNodeFalse(shortRNode);
+        // Build the _false table subquery.
+        String falseTableSubQuery = buildRNodeFalseQuery(starTableSubQuery, shortRNode);
+        ctCreationQuery = ctCreationQuery.replaceFirst(COUNTS_SUBQUERY_PLACEHOLDER, countsTableSubQuery);
+        ctCreationQuery = ctCreationQuery.replaceFirst(FALSE_SUBQUERY_PLACEHOLDER, falseTableSubQuery);
 
         // Build the _CT table.
         String createCTQuery = QueryGenerator.createSimpleCreateTableQuery(
@@ -501,7 +502,6 @@ public class CountsManager {
 
             while(rs1.next())
             {       
-                long l2 = System.currentTimeMillis(); 
                 String removed = rs1.getString("removed");
                 logger.fine("\n removed : " + removed);  
                 String removedShort = rs1.getString("short_rnid");
@@ -580,18 +580,10 @@ public class CountsManager {
 
                 //make the rnid shorter 
                 String rnid_or=removedShort;
-            
-                String cur_star_Table = removedShort + len + "_" + fc + "_star";
-                String createStarString = QueryGenerator.createSimpleCreateViewQuery(
-                    cur_star_Table,
-                    queryString
-                );
 
-                logger.fine("\n create star String : " + createStarString );
-                st3.execute(createStarString);      //create star table     
+                logger.fine(queryString);
 
                 long l3 = System.currentTimeMillis(); 
-                logger.fine("Building Time(ms) for "+cur_star_Table+ " : "+(l3-l2)+" ms.\n");
                 //staring to create the _flat table
                 // Oct 16 2013
                 // cur_CT_Table should be the one generated in the previous iteration
@@ -629,20 +621,17 @@ public class CountsManager {
                 long l4 = System.currentTimeMillis(); 
                 logger.fine("Building Time(ms) for "+cur_flat_Table+ " : "+(l4-l3)+" ms.\n");
                 /**********starting to create _flase table***using sort_merge*******************************/
-                // starting to create _flase table : part1
-                String cur_false_Table = removedShort + len + "_" + fc + "_false";
 
                 // Computing the false table as the MULT difference between the matching rows of the star and flat tables.
                 // This is a big join!
-                Sort_merge3.sort_merge(
+                String falseTableSubQuery = Sort_merge3.sort_merge(
                     dbConnection,
-                    cur_star_Table,
-                    cur_flat_Table,
-                    cur_false_Table
+                    databaseName_CT,
+                    queryString,
+                    cur_flat_Table
                 );
 
                 long l5 = System.currentTimeMillis(); 
-                logger.fine("Building Time(ms) for "+cur_false_Table+ " : "+(l5-l4)+" ms.\n");
 
                 // staring to create the CT table
                 ResultSet rs_45 = st2.executeQuery(
@@ -665,7 +654,7 @@ public class CountsManager {
 
                     "SELECT " + CTJoinString + " " +
                     "FROM " +
-                        "`" + cur_false_Table + "`, " +
+                        "(" + falseTableSubQuery + ") AS FALSE_TABLE, " +
                         "(" + joinTableQueries.get(rnid_or) + ") AS JOIN_TABLE " +
                     "WHERE MULT > 0;";
 
@@ -958,21 +947,32 @@ public class CountsManager {
             String shortRchain = rchainInfo.getShortID();
             logger.fine(" Short RChain: " + shortRchain);
 
-            String countsTableName = generateCountsTable(
+            String countsTableSubQuery = generateCountsTableQuery(
                 dbTargetName,
                 rchain,
                 shortRchain,
-                buildByProjection,
-                storageEngine
+                buildByProjection
             );
+
+            dbConnection.setCatalog(dbTargetName);
+            try (Statement statement = dbConnection.createStatement()) {
+                String createString = QueryGenerator.createSimpleCreateTableQuery(
+                    shortRchain + "_counts",
+                    storageEngine,
+                    countsTableSubQuery
+                );
+
+                statement.executeUpdate("SET tmp_table_size = " + dbTemporaryTableSize + ";");
+                statement.executeUpdate("SET max_heap_table_size = " + dbTemporaryTableSize + ";");
+                statement.executeUpdate(createString);
+            }
 
             if (copyToCT) {
                 dbConnection.setCatalog(dbTargetName);
                 try (Statement statement = dbConnection.createStatement()) {
                     String createString_CT =
                         "CREATE TABLE `" + shortRchain + "_CT`" + " AS " +
-                            "SELECT * " +
-                            "FROM `" + countsTableName + "`";
+                            countsTableSubQuery;
                     logger.fine("CREATE String: " + createString_CT);
                     statement.execute(createString_CT);
                 }
@@ -995,12 +995,11 @@ public class CountsManager {
      * @return the name of the "_counts" table generated.
      * @throws SQLException if an error occurs when executing the queries.
      */
-    private static String generateCountsTable(
+    private static String generateCountsTableQuery(
         String dbTargetName,
         String rchain,
         String shortRchain,
-        boolean buildByProjection,
-        String storageEngine
+        boolean buildByProjection
     ) throws SQLException {
         // Name of the counts table to generate.
         String countsTableName = shortRchain + "_counts";
@@ -1111,37 +1110,25 @@ public class CountsManager {
             }
         }
 
-        dbConnection.setCatalog(dbTargetName);
-        Statement st3 = dbConnection.createStatement();
-        String createString = QueryGenerator.createSimpleCreateTableQuery(
-            countsTableName,
-            storageEngine,
-            queryString
-        );
-        st3.execute("SET tmp_table_size = " + dbTemporaryTableSize + ";");
-        st3.executeQuery("SET max_heap_table_size = " + dbTemporaryTableSize + ";");
-        st3.execute(createString);
-
         // Close statements.
         st2.close();
-        st3.close();
 
-        return countsTableName;
+        return queryString;
     }
 
 
     /**
-     * Create the star table for the given RNode.
+     * Create an SQL query to generate the star table for the given RNode.
      *
      * @param rnode - the name of the RNode to build the "_star" table for.
      * @param shortRNode - the short name of the RNode to build the "_star" table for.
+     * @return an SQL query to generate the star table for the given RNode.
      * @throws SQLException if there are issues executing the SQL queries.
      */
-    private static void buildRNodeStar(
+    private static String buildRNodeStarQuery(
         String rnode,
         String shortRNode
     ) throws SQLException {
-        long start = System.currentTimeMillis(); // @zqian: measure structure learning time.
         dbConnection.setCatalog(databaseName_BN);
         Statement statement = dbConnection.createStatement();
 
@@ -1176,7 +1163,7 @@ public class CountsManager {
         String multiplicationString = makeStarSepQuery(columns);
 
         // Create FROM query string.
-        String fromString = String.join(", ", columns);
+        String fromString = databaseName_CT + "." + String.join(", " + databaseName_CT + ".", columns);
 
         // Create the final query string.
         String queryString = "SELECT " + multiplicationString + " AS MULT";
@@ -1185,19 +1172,8 @@ public class CountsManager {
         }
         queryString += " FROM " + fromString;
 
-        dbConnection.setCatalog(databaseName_CT);
-        try(Statement viewStatement = dbConnection.createStatement()) {
-            String starTableName = shortRNode + "_star";
-            String createString = QueryGenerator.createSimpleCreateViewQuery(
-                starTableName,
-                queryString
-            );
-            logger.fine("\nCREATE String: " + createString);
-            viewStatement.executeUpdate(createString);
-        }
-
-        long end = System.currentTimeMillis(); // @zqian: measure structure learning time.
-        logger.fine("Build Time(ms) for RNode Star: " + (end - start) + " ms.\n");
+        logger.fine(queryString);
+        return queryString;
     }
 
 
@@ -1212,7 +1188,8 @@ public class CountsManager {
     private static void buildRNodeFlat(
         String rnode,
         String shortRNode,
-        String storageEngine
+        String storageEngine,
+        String countsTableSubQuery
     ) throws SQLException {
         long start = System.currentTimeMillis(); // @zqian: measure structure learning time.
 
@@ -1246,6 +1223,10 @@ public class CountsManager {
             columns = extractEntries(result, "Entries");
         }
         String fromString = String.join(", ", columns);
+        fromString = fromString.replaceFirst(
+            "`" + shortRNode + "_counts`",
+            "(" + countsTableSubQuery + ") AS " + shortRNode + "_counts"
+        );
 
         // Create the final query string.
         String queryString = "SELECT " + selectString + " FROM " + fromString;
@@ -1294,20 +1275,20 @@ public class CountsManager {
 
 
     /**
-     * Create the false table for the given RNode using the sort merge algorithm.
+     * Create an SQL query to generate the false table for the given RNode using the sort merge algorithm.
      *
+     * @param starTableSubQuery - a subquery that generates the "_star" table used to create the "_false" table.
      * @param shortRNode - the short name of the RNode to build the "_false" table for.
+     * @return an SQL query to generate the false table for the given RNode using the sort merge algorithm.
      * @throws SQLException if there are issues executing the SQL queries.
      */
-    private static void buildRNodeFalse(String shortRNode) throws SQLException {
-        String falseTableName = shortRNode + "_false";
-
+    private static String buildRNodeFalseQuery(String starTableSubQuery, String shortRNode) throws SQLException {
         // Computing the false table as the MULT difference between the matching rows of the star and flat tables.
-        Sort_merge3.sort_merge(
+        return Sort_merge3.sort_merge(
             dbConnection,
-            shortRNode + "_star",
-            shortRNode + "_flat",
-            falseTableName
+            databaseName_CT,
+            starTableSubQuery,
+            shortRNode + "_flat"
         );
     }
 
@@ -1327,9 +1308,6 @@ public class CountsManager {
         String shortRNode,
         Map<String, String> joinTableQueries
     ) throws SQLException {
-        String falseTableName = shortRNode + "_false";
-        String countsTableName = shortRNode + "_counts";
-
         // Must specify the columns or there will be column mismatches when taking the UNION of the counts and false
         // tables.
         String columnQuery =
@@ -1360,14 +1338,14 @@ public class CountsManager {
         // with the counts table.
         String createCTString =
             "SELECT " + UnionColumnString + " " +
-            "FROM " + databaseName_CT + ".`" + countsTableName + "` " +
+            "FROM (" + COUNTS_SUBQUERY_PLACEHOLDER + ") AS " + shortRNode + "_counts " +
             "WHERE MULT > 0 " +
 
             "UNION ALL " +
 
             "SELECT " + UnionColumnString + " " +
             "FROM " +
-                databaseName_CT + ".`" + falseTableName + "`, " +
+                "(" + FALSE_SUBQUERY_PLACEHOLDER + ") AS FALSE_TABLE, " +
                 "(" + joinTableQueries.get(shortRNode) + ") AS JOIN_TABLE " +
             "WHERE MULT > 0";
         return createCTString;

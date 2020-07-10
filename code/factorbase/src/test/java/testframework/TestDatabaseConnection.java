@@ -11,9 +11,10 @@ import ca.sfu.cs.factorbase.database.MySQLFactorBaseDataBase;
  * Class to connect to a MySQL database so that queries can be tested.
  */
 public class TestDatabaseConnection {
+    public static final String DATABASE_NAME = "tests-database";
     private static final String DEFAULT_USERNAME = "root";
     private static final String DEFAULT_PASSWORD = "";
-    private static final String MYSQL_URL = "jdbc:mysql://127.0.0.1/tests-database";
+    private static final String MYSQL_URL = "jdbc:mysql://127.0.0.1/" + DATABASE_NAME;
 
     public Connection con;
 
