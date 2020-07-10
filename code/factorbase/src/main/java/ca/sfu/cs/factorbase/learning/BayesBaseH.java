@@ -80,6 +80,7 @@ public class BayesBaseH {
     static String opt3, cont;
     static boolean linkAnalysis;
     static boolean Flag_UseLocal_CT; //zqian June 18, 2014
+    static boolean SkipParameterLearning;
 
 
     /**
@@ -152,19 +153,19 @@ public class BayesBaseH {
                 "WHERE Rchain = '" + rchain + "'" +
             ")");
 
-        // Mapping the orig_rnid back and create a new table: Final_Path_BayesNets. //Sep 19, zqian
+        // Create final version of the BayesNet table without entries where the parent is ''.
         BIF_Generator.Final_Path_BayesNets(con2, rchain);
+
+        // Export the final result to xml.  We assume that there is a single largest relationship chain and write the Bayes net for that relationship chain to xml.
+        // Only export the structure, prepare for the pruning phase, Oct 23, 2013.
+        exportResults(latticeHeight);
 
         // Parameter learning.
         // Add setup options Yan Sept. 10th
         // Continuous
-        if (!cont.equals("1")) {
+        if (!cont.equals("1") && !SkipParameterLearning) {
             // Now compute conditional probability estimates and write them to @database@_BN.
             logger.fine("\n Structure Learning is DONE.  ready for parameter learning."); //@zqian
-
-            // Export the final result to xml.  We assume that there is a single largest relationship chain and write the Bayes net for that relationship chain to xml.
-            // Only export the structure, prepare for the pruning phase, Oct 23, 2013.
-            exportResults(latticeHeight);
 
             //      @zqian  for TestScoreComputation, use local ct to compute local CP.
             if (Flag_UseLocal_CT) {
@@ -194,7 +195,7 @@ public class BayesBaseH {
             // Need CP tables.
             BIF_Generator.generate_bif(databaseName, "Bif_" + databaseName + ".xml", con2);
         } else {
-            logger.fine("\n Structure Learning is DONE. \n NO parameter learning for Continuous data."); // @zqian
+            logger.fine("\n Structure Learning is DONE. \n No parameter learning done."); // @zqian
         }
 
         // Disconnect from db.
@@ -292,6 +293,7 @@ public class BayesBaseH {
         cont = conf.getProperty("Continuous");
         String strLinkAnalysis = conf.getProperty("LinkCorrelations");
         linkAnalysis = strLinkAnalysis.equalsIgnoreCase("1");
+        SkipParameterLearning = conf.getProperty("SkipParameterLearning").equalsIgnoreCase("1");
 
         //zqian June 18, 2014
         String UseLocal_CT = conf.getProperty( "UseLocal_CT" );

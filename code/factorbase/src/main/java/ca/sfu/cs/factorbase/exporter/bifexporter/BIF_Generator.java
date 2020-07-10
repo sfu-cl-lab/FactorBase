@@ -218,8 +218,6 @@ public class BIF_Generator {
 
     public static void Final_Path_BayesNets(Connection conn, String rchain) throws SQLException, IOException {
         // OS Sep 13, 2017. This should be unncessary since we can make a view instead.
-        ArrayList<String>orig_rnid = new ArrayList<String>();
-        ArrayList<String>rnid = new ArrayList<String>();
         Statement st1 = (Statement) conn.createStatement();
 
         // Creating table Final_Path_BayesNets.
@@ -229,23 +227,6 @@ public class BIF_Generator {
 
         // Adding primary key to Final_Path_BayesNets.
         st1.execute("ALTER TABLE `Final_Path_BayesNets` ADD PRIMARY KEY (`Rchain`, `child`, `parent`);");
-        ResultSet rst = st1.executeQuery("SELECT * FROM lattice_mapping;");
-
-        while (rst.next()) {
-            orig_rnid.add(rst.getString("orig_rnid"));
-            rnid.add(rst.getString("short_rnid"));
-        }
-
-        for (int i = 0; i < rnid.size(); i++) {
-            String query2 = "UPDATE `Final_Path_BayesNets` SET Rchain = '" + orig_rnid.get(i) + "' WHERE Rchain = '" + rnid.get(i) + "';";
-            String query3 = "UPDATE `Final_Path_BayesNets` SET child = '" + orig_rnid.get(i) + "' WHERE child = '" + rnid.get(i) + "';";
-            String query4 = "UPDATE `Final_Path_BayesNets` SET parent = '" + orig_rnid.get(i) + "' WHERE parent = '" + rnid.get(i) + "';";
-
-            st1.execute(query2);
-            st1.execute(query3);
-            st1.execute(query4);
-        }
-
         st1.close();
     }
 
