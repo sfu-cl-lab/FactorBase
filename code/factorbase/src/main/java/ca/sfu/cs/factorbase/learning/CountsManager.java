@@ -253,10 +253,22 @@ public class CountsManager {
             shortRNode,
             countingStrategy.useProjection()
         );
-        long rcountsRuntime = System.currentTimeMillis() - start;
+
+        // If we are doing Ondemand counting, it is more efficient to create the table once and read from it to avoid
+        // executing the expensive joins twice.
+        if (countingStrategy.isOndemand()) {
+            String tableName = generateCountsTable(
+                databaseName_CT,
+                shortRNode,
+                countingStrategy.getStorageEngine(),
+                countsTableSubQuery
+            );
+
+            countsTableSubQuery = "SELECT * FROM " + databaseName_CT + "." + tableName;
+        }
 
         // Add runtime to a column used to add to the "Counts" portion and subtract from the "Moebius Join" portion.
-        RuntimeLogger.updateLogEntry(dbConnection, "buildRNodeCounts", rcountsRuntime);
+        RuntimeLogger.updateLogEntry(dbConnection, "buildRNodeCounts", System.currentTimeMillis() - start);
 
         // Build the _star table subquery.
         String starTableSubQuery = buildRNodeStarQuery(rnode, shortRNode);
@@ -954,18 +966,12 @@ public class CountsManager {
                 buildByProjection
             );
 
-            dbConnection.setCatalog(dbTargetName);
-            try (Statement statement = dbConnection.createStatement()) {
-                String createString = QueryGenerator.createSimpleCreateTableQuery(
-                    shortRchain + "_counts",
-                    storageEngine,
-                    countsTableSubQuery
-                );
-
-                statement.executeUpdate("SET tmp_table_size = " + dbTemporaryTableSize + ";");
-                statement.executeUpdate("SET max_heap_table_size = " + dbTemporaryTableSize + ";");
-                statement.executeUpdate(createString);
-            }
+            generateCountsTable(
+                dbTargetName,
+                shortRchain,
+                storageEngine,
+                countsTableSubQuery
+            );
 
             if (copyToCT) {
                 dbConnection.setCatalog(dbTargetName);
@@ -984,7 +990,7 @@ public class CountsManager {
 
 
     /**
-     * Generate the "_counts" table for the given RChain.
+     * Generate the query for creating the "_counts" table for the given RChain.
      *
      * @param dbTargetName - name of the database to create the "_counts" table in.
      * @param rchain - the full form name of the RChain.
@@ -992,7 +998,7 @@ public class CountsManager {
      * @param buildByProjection - True if the counts table should be built by projecting the necessary information from
                                   the global counts table; otherwise false.
      * @param storageEngine - the storage engine to use for the tables created when executing this method.
-     * @return the name of the "_counts" table generated.
+     * @return the query for creating the "_counts" table.
      * @throws SQLException if an error occurs when executing the queries.
      */
     private static String generateCountsTableQuery(
@@ -1118,6 +1124,40 @@ public class CountsManager {
 
 
     /**
+     * Generate the "_counts" table for the given RChain.
+     *
+     * @param dbTargetName - name of the database to create the "_counts" table in.
+     * @param shortRchain - the short form name of the RChain.
+     * @param storageEngine - the storage engine to use for the tables created when executing this method.
+     * @param countsTableSubQuery - subquery that retrieves the counts information.
+     * @return the name of the "_counts" table generated.
+     * @throws SQLException if an error occurs when executing the queries.
+     */
+    public static String generateCountsTable(
+        String dbTargetName,
+        String shortRchain,
+        String storageEngine,
+        String countsTableSubQuery
+    ) throws SQLException {
+        String tableName = shortRchain + "_counts";
+        dbConnection.setCatalog(dbTargetName);
+        try (Statement statement = dbConnection.createStatement()) {
+            String createString = QueryGenerator.createSimpleCreateTableQuery(
+                tableName,
+                storageEngine,
+                countsTableSubQuery
+            );
+
+            statement.executeUpdate("SET tmp_table_size = " + dbTemporaryTableSize + ";");
+            statement.executeUpdate("SET max_heap_table_size = " + dbTemporaryTableSize + ";");
+            statement.executeUpdate(createString);
+        }
+
+        return tableName;
+    }
+
+
+    /**
      * Create an SQL query to generate the star table for the given RNode.
      *
      * @param rnode - the name of the RNode to build the "_star" table for.
@@ -1183,6 +1223,7 @@ public class CountsManager {
      * @param rnode - the name of the RNode to build the "_flat" table for.
      * @param shortRNode - the short name of the RNode to build the "_flat" table for.
      * @param storageEngine - the storage engine to use for the table created when executing this method.
+     * @param countsTableSubQuery - subquery that retrieves the counts information.
      * @throws SQLException if there are issues executing the SQL queries.
      */
     private static void buildRNodeFlat(
