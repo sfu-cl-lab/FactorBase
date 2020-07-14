@@ -43,10 +43,11 @@ public class RunBB {
         long configEnd = System.currentTimeMillis();
         logger.info("Start Program...");
 
+        logger.info("Input Database: " + config.getProperty("dbname"));
         CountingStrategy countingStrategy = CountingStrategy.determineStrategy(
             config.getProperty("CountingStrategy")
         );
-        logger.info("Counting strategy: " + countingStrategy);
+        logger.info("Counting Strategy: " + countingStrategy);
 
         RuntimeLogger.logRunTime(logger, "Logger + Config Initialization", start, configEnd);
 
