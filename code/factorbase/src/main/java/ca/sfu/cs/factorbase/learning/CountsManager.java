@@ -253,10 +253,9 @@ public class CountsManager {
             shortRNode,
             countingStrategy.useProjection()
         );
-        long rcountsRuntime = System.currentTimeMillis() - start;
 
         // Add runtime to a column used to add to the "Counts" portion and subtract from the "Moebius Join" portion.
-        RuntimeLogger.updateLogEntry(dbConnection, "buildRNodeCounts", rcountsRuntime);
+        RuntimeLogger.updateLogEntry(dbConnection, "buildRNodeCounts", System.currentTimeMillis() - start);
 
         // Build the _star table subquery.
         String starTableSubQuery = buildRNodeStarQuery(rnode, shortRNode);
