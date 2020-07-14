@@ -3,7 +3,7 @@
 SET storage_engine=MEMORY;
 
 CREATE TABLE MetaQueries (
-    Lattice_Point varchar(199), /* e.g. pvid, rchain, prof0, a */
+    Lattice_Point varchar(398), /* e.g. pvid, rchain, prof0, a */
     TableType varchar(100), /* e.g. star, flat, counts */
     ClauseType varchar(10), /* FROM, WHERE, SELECT, GROUPBY */
     EntryType varchar(100), /* e.g. 1node, aggregate like count */

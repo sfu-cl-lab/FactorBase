@@ -54,7 +54,7 @@ public class BDeuScore implements DiscreteLocalScore {
         BigDecimal score = new BigDecimal((r - 1) * q * Math.log(this.structurePrior));
 
         for (List<RandomVariableAssignment> parentAssignments : this.contingencyTableGenerator.getStates(parentColumnIndices)) {
-            long countsSum = 0;
+            double countsSum = 0;
             long counts;
             for (int childStateIndex = 0; childStateIndex < r; childStateIndex++) {
                 RandomVariableAssignment childAssignment = new RandomVariableAssignment(childColumnIndex, childStateIndex);
