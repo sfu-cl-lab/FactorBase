@@ -199,8 +199,6 @@ public class CountsManager {
             for (FunctorNodesInfo rnodeInfo : rchainInfos) {
                 String rnode = rnodeInfo.getID();
                 String shortRNode = rnodeInfo.getShortID();
-                logger.fine("RNode: " + rnode);
-                logger.fine("Short RNode: " + shortRNode);
                 String ctTableName = shortRNode + "_CT";
                 String ctCreationQuery = buildRNodeCTCreationQuery(rnode, shortRNode, joinTableQueries);
 
@@ -491,13 +489,10 @@ public class CountsManager {
         {
             // Get the short and full form rnids for further use.
             String rchain = rchainInfo.getID();
-            logger.fine("\n RChain : " + rchain);
             String shortRchain = rchainInfo.getShortID();
-            logger.fine(" Short RChain : " + shortRchain);
             // Oct 16 2013
             // initialize the cur_CT_Table, at very beginning we will use _counts table to create the _flat table
             String cur_CT_Table = shortRchain + "_counts";
-            logger.fine(" cur_CT_Table : " + cur_CT_Table);
             // counts represents the ct tables where all relationships in Rchain are true
 
             //  create new statement
@@ -515,11 +510,8 @@ public class CountsManager {
             while(rs1.next())
             {       
                 String removed = rs1.getString("removed");
-                logger.fine("\n removed : " + removed);  
                 String removedShort = rs1.getString("short_rnid");
-                logger.fine("\n removed short : " + removedShort);
                 String BaseName = shortRchain + "_" + removedShort;
-                logger.fine(" BaseName : " + BaseName );
 
                 dbConnection.setCatalog(databaseName_BN);
                 Statement st2 = dbConnection.createStatement();
@@ -596,7 +588,6 @@ public class CountsManager {
                 // Oct 16 2013
                 // cur_CT_Table should be the one generated in the previous iteration
                 // for the very first iteration, it's _counts table
-                logger.fine("cur_CT_Table is : " + cur_CT_Table);
 
                 String cur_flat_Table = removedShort + len + "_" + fc + "_flat";
                 String queryStringflat = "SELECT SUM(`" + cur_CT_Table + "`.MULT) AS 'MULT' ";
@@ -735,7 +726,6 @@ public class CountsManager {
 
         while(rs.next()){
             String pvid = rs.getString("pvid");
-            logger.fine("pvid : " + pvid);
             String countsTableName = pvid + "_counts";
             String selectQuery = QueryGenerator.createMetaQueriesExtractionQuery(
                 pvid,
@@ -768,7 +758,6 @@ public class CountsManager {
         st.close();
         long l2 = System.currentTimeMillis(); //@zqian : measure structure learning time
         logger.fine("Building Time(ms) for Pvariables counts: "+(l2-l)+" ms.\n");
-        logger.fine("\n Pvariables are DONE \n" );
     }
 
 
@@ -947,9 +936,7 @@ public class CountsManager {
         for (FunctorNodesInfo rchainInfo : rchainInfos) {
             // Get the short and full form rnids for further use.
             String rchain = rchainInfo.getID();
-            logger.fine("\n RChain: " + rchain);
             String shortRchain = rchainInfo.getShortID();
-            logger.fine(" Short RChain: " + shortRchain);
 
             String countsTableSubQuery = generateCountsTableQuery(
                 dbTargetName,
@@ -976,8 +963,6 @@ public class CountsManager {
                 }
             }
         }
-
-        logger.fine("\n RChain_counts are DONE \n");
     }
 
 
@@ -1401,9 +1386,7 @@ public class CountsManager {
         while(rs.next()){
         //  get rnid
             String short_rnid = rs.getString("short_rnid");
-            logger.fine("\n short_rnid : " + short_rnid);
             String orig_rnid = rs.getString("orig_rnid");
-            logger.fine("\n orig_rnid : " + orig_rnid);
 
             Statement st2 = dbConnection.createStatement();
 
@@ -1431,7 +1414,6 @@ public class CountsManager {
 
         rs.close();
         st.close();
-        logger.fine("\n Rnodes_joins are DONE \n" );
 
         return joinTableQueries;
     }
