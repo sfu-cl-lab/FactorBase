@@ -536,7 +536,6 @@ public class CountsManager {
                 );
                 List<String> columns = extractEntries(rs2, "Entries");
                 String selectString = String.join(", ", columns);
-                logger.fine("Select String : " + selectString);
                 rs2.close();
                 //  create mult query string
                 ResultSet rs3 = st2.executeQuery(
@@ -550,11 +549,9 @@ public class CountsManager {
                 );
                 columns = extractEntries(rs3, "Entries");
                 String MultString = makeStarSepQuery(columns);
-                logger.fine("Mult String : " + MultString+ " as `MULT`");
                 rs3.close();
                 //  create from query string
                 String fromString = String.join(", ", columns);
-                logger.fine("From String : " + fromString);          
                 //  create where query string
                 ResultSet rs5 = st2.executeQuery(
                     QueryGenerator.createMetaQueriesExtractionQuery(
@@ -567,7 +564,6 @@ public class CountsManager {
                 );
                 columns = extractEntries(rs5, "Entries");
                 String whereString = String.join(" AND ", columns);
-               logger.fine("Where String : " + whereString);
                 rs5.close();
                 //  create the final query
                 String queryString ="";
@@ -654,7 +650,6 @@ public class CountsManager {
                 );
                 columns = extractEntries(rs_45, "Entries");
                 String CTJoinString = makeEscapedCommaSepQuery(columns);
-                logger.fine("CT Join String : " + CTJoinString);
 
                 //join false table with join table to add in rnid (= F) and 2nid (= n/a). then can union with CT table
                 String QueryStringCT =
@@ -797,7 +792,6 @@ public class CountsManager {
         dbConnection.setCatalog(databaseName_BN);
         Statement st = dbConnection.createStatement();
         String selectString = String.join(", ", columnAliases);
-        logger.fine("SELECT String: " + selectString);
 
         // Create FROM query.
         String fromQuery = QueryGenerator.createMetaQueriesExtractionQuery(
@@ -847,8 +841,6 @@ public class CountsManager {
         }
 
         st.close();
-
-        logger.fine("WHERE String:" + whereString);
 
         // Create the final query.
         String queryString =
@@ -1040,8 +1032,6 @@ public class CountsManager {
             selectString = String.join(", ", selectAliases);
         }
 
-        logger.fine("SELECT String: " + selectString);
-
         // Create FROM query string.
         String fromString = databaseName_global_counts + ".`" + countsTableName + "`";
 
@@ -1061,8 +1051,6 @@ public class CountsManager {
             List<String> fromAliases = extractEntries(rs3, "Entries");
             fromString = String.join(", ", fromAliases);
         }
-
-        logger.fine("FROM String: " + fromString);
 
         // Create WHERE query string.
         String whereString = null;
