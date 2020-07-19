@@ -26,7 +26,8 @@ public final class RuntimeLogger {
 
 
     /**
-     * Helper method to write out the run times in a consistent format.
+     * Helper method to write out the run times for high level components in a consistent format.
+     *
      * @param logger - the logger to write the runtime to.
      * @param stage - the part of the FactorBase program that was run.
      * @param start - the start time for the given stage (ms).
@@ -34,6 +35,19 @@ public final class RuntimeLogger {
      */
     public static void logRunTime(Logger logger, String stage, long start, long end) {
         logger.info("Runtime[" + stage + "]: " + String.valueOf(end - start) + "ms.");
+    }
+
+
+    /**
+     * Helper method to write out the run times for components of high level components in a consistent format.
+     *
+     * @param logger - the logger to write the runtime to.
+     * @param subStage - the subcomponent of the part of the FactorBase program that was run.
+     * @param start - the start time for the given stage (ms).
+     * @param end - the end time for the given stage (ms).
+     */
+    public static void logRunTimeDetails(Logger logger, String stage, long start, long end) {
+        logger.fine("  Runtime[" + stage + "]: " + String.valueOf(end - start) + "ms.");
     }
 
 

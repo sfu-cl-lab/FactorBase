@@ -167,7 +167,9 @@ public class CountsManager {
         long l = System.currentTimeMillis(); //@zqian : CT table generating time
            // handling Pvars, generating pvars_counts       
         buildPVarsCounts(countingStrategy);
-        RuntimeLogger.updateLogEntry(dbConnection, "buildPVarsCounts", System.currentTimeMillis() - l);
+        long end = System.currentTimeMillis();
+        RuntimeLogger.updateLogEntry(dbConnection, "buildPVarsCounts", end - l);
+        RuntimeLogger.logRunTimeDetails(logger, "buildPVarsCounts", l, end);
 
         // preparing the _join part for _CT tables
         long start = System.currentTimeMillis();
@@ -196,6 +198,7 @@ public class CountsManager {
             }
 
             // Build the CT tables for the first level of the relationship lattice.
+            long ctStart = System.currentTimeMillis();
             for (FunctorNodesInfo rnodeInfo : rchainInfos) {
                 String rnode = rnodeInfo.getID();
                 String shortRNode = rnodeInfo.getShortID();
@@ -211,11 +214,14 @@ public class CountsManager {
                     shortRNode
                 );
             }
+            RuntimeLogger.logRunTimeDetails(logger, "buildRChainsCT-length=1", ctStart, System.currentTimeMillis());
 
             //building the _CT tables. Going up the Rchain lattice
             for(int len = 2; len <= latticeHeight; len++) {
+                ctStart = System.currentTimeMillis();
                 rchainInfos = relationshipLattice.getRChainsInfo(len);
                 buildRChainsCT(rchainInfos, len, joinTableQueries, countingStrategy.getStorageEngine());
+                RuntimeLogger.logRunTimeDetails(logger, "buildRChainsCT-length=" + len, ctStart, System.currentTimeMillis());
             }
             RuntimeLogger.updateLogEntry(dbConnection, "buildFlatStarCT", System.currentTimeMillis() - start);
         }
@@ -255,12 +261,14 @@ public class CountsManager {
         // If we are doing Ondemand counting, it is more efficient to create the table once and read from it to avoid
         // executing the expensive joins twice.
         if (countingStrategy.isOndemand()) {
+            long countsStart = System.currentTimeMillis();
             String tableName = generateCountsTable(
                 databaseName_CT,
                 shortRNode,
                 countingStrategy.getStorageEngine(),
                 countsTableSubQuery
             );
+            RuntimeLogger.logRunTimeDetails(logger, "buildRChainCounts-length=1", countsStart, System.currentTimeMillis());
 
             countsTableSubQuery = "SELECT * FROM " + databaseName_CT + "." + tableName;
         }
@@ -398,7 +406,9 @@ public class CountsManager {
         }
 
         // Generate the counts tables and copy their values to the CT tables if specified to.
+        long countsStart;
         for(int len = startingHeight; len <= latticeHeight; len++) {
+            countsStart = System.currentTimeMillis();
             generateCountsTables(
                 dbTargetName,
                 relationshipLattice.getRChainsInfo(len),
@@ -406,6 +416,7 @@ public class CountsManager {
                 buildByProjection,
                 storageEngine
             );
+            RuntimeLogger.logRunTimeDetails(logger, "buildRChainCounts-length=" + len, countsStart, System.currentTimeMillis());
         }
 
         RuntimeLogger.updateLogEntry(dbConnection, "buildRChainCounts", System.currentTimeMillis() - start);
