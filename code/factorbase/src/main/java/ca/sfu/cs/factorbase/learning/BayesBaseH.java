@@ -367,7 +367,7 @@ public class BayesBaseH {
 
                 Statement st2 = con2.createStatement();
                 // Insert the BN nodes into Entity_BayesNet.
-                logger.fine(selectQuery);
+                RuntimeLogger.logExecutedQuery(logger, selectQuery);
                 ResultSet rs2 = st2.executeQuery(selectQuery);
                 String child = "";
 

@@ -295,7 +295,7 @@ public class CountsManager {
         );
 
         dbConnection.setCatalog(targetDatabaseName);
-        logger.fine("\nCREATE CT table String: " + createCTQuery);
+        RuntimeLogger.logExecutedQuery(logger, createCTQuery);
         try (Statement statement = dbConnection.createStatement()) {
             statement.executeUpdate(createCTQuery);
         }
@@ -607,7 +607,7 @@ public class CountsManager {
                     storageEngine,
                     queryStringflat
                 );
-                logger.fine("\n create flat String : " + createStringflat );         
+                RuntimeLogger.logExecutedQuery(logger, createStringflat);
                 st3.execute(createStringflat);      //create flat table
 
                 // Add covering index.
@@ -840,8 +840,8 @@ public class CountsManager {
             storageEngine,
             queryString
         );
-        logger.fine("CREATE String: " + createString);
 
+        RuntimeLogger.logExecutedQuery(logger, createString);
         dbConnection.setCatalog(targetDatabaseName);
         try (Statement st2 = dbConnection.createStatement()) {
             st2.execute(createString);
@@ -944,11 +944,11 @@ public class CountsManager {
 
             if (copyToCT) {
                 dbConnection.setCatalog(dbTargetName);
+                String createString_CT =
+                    "CREATE TABLE `" + shortRchain + "_CT`" + " AS " +
+                        countsTableSubQuery;
+                RuntimeLogger.logExecutedQuery(logger, createString_CT);
                 try (Statement statement = dbConnection.createStatement()) {
-                    String createString_CT =
-                        "CREATE TABLE `" + shortRchain + "_CT`" + " AS " +
-                            countsTableSubQuery;
-                    logger.fine("CREATE String: " + createString_CT);
                     statement.execute(createString_CT);
                 }
             }
@@ -1257,7 +1257,7 @@ public class CountsManager {
             storageEngine,
             queryString
         );
-        logger.fine("\nCREATE String: " + createString);
+        RuntimeLogger.logExecutedQuery(logger, createString);
         dbConnection.setCatalog(databaseName_CT);
         try (Statement createStatement = dbConnection.createStatement()) {
             createStatement.executeUpdate(createString);

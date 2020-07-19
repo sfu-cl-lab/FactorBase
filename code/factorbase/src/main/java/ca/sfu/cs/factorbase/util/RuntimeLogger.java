@@ -52,6 +52,17 @@ public final class RuntimeLogger {
 
 
     /**
+     * Helper method to write out the SQL query that is being executed.
+     *
+     * @param logger - the logger to write the runtime to.
+     * @param query - the SQL query that is being executed.
+     */
+    public static void logExecutedQuery(Logger logger, String query) {
+        logger.finer("EXECUTING: " + query);
+    }
+
+
+    /**
      * Create the "CallLogs" table within the specified database.
      *
      * @param dbConnection - connection to the database server to create the "CallLogs" table in.
