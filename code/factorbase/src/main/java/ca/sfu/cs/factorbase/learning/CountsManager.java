@@ -293,14 +293,12 @@ public class CountsManager {
             countingStrategy.getStorageEngine(),
             ctCreationQuery
         );
-        start = System.currentTimeMillis();
+
         dbConnection.setCatalog(targetDatabaseName);
         logger.fine("\nCREATE CT table String: " + createCTQuery);
         try (Statement statement = dbConnection.createStatement()) {
             statement.executeUpdate(createCTQuery);
         }
-
-        logger.fine("Build Time for RNode CT: " + (System.currentTimeMillis() - start) + "ms.\n");
     }
 
 
@@ -325,7 +323,6 @@ public class CountsManager {
     ) throws SQLException {
         String ctTablesCacheKey = ctTableName + ctCreationQuery;
         String cacheTableName = ctTablesCache.get(ctTablesCacheKey);
-        long start = System.currentTimeMillis();
         if (cacheTableName == null) {
             // Create the table in the CT cache database.
             cacheTableName = ctTableName + "_" + tableID;
@@ -350,8 +347,6 @@ public class CountsManager {
                 "FROM " + databaseName_CT_cache + "." + cacheTableName;
             createViewStatement.executeUpdate(viewQuery);
         }
-
-        logger.fine("Build Time for RNode CT: " + (System.currentTimeMillis() - start) + "ms.\n");
     }
 
 
@@ -493,8 +488,6 @@ public class CountsManager {
         Map<String, String> joinTableQueries,
         String storageEngine
     ) throws SQLException {
-        logger.fine("\n ****************** \n" +
-                "Building the _CT tables for Length = "+len +"\n" );
         int fc=0;
         for (FunctorNodesInfo rchainInfo : rchainInfos)
         {
@@ -584,7 +577,6 @@ public class CountsManager {
                         "SELECT " + MultString + " AS `MULT` " +
                         "FROM " + fromString;
                 }
-                logger.fine("Query String : " + queryString );   
 
                 dbConnection.setCatalog(databaseName_CT);
                 Statement st3 = dbConnection.createStatement();
@@ -592,9 +584,6 @@ public class CountsManager {
                 //make the rnid shorter 
                 String rnid_or=removedShort;
 
-                logger.fine(queryString);
-
-                long l3 = System.currentTimeMillis(); 
                 //staring to create the _flat table
                 // Oct 16 2013
                 // cur_CT_Table should be the one generated in the previous iteration
@@ -628,8 +617,6 @@ public class CountsManager {
                     cur_flat_Table
                 );
 
-                long l4 = System.currentTimeMillis(); 
-                logger.fine("Building Time(ms) for "+cur_flat_Table+ " : "+(l4-l3)+" ms.\n");
                 /**********starting to create _flase table***using sort_merge*******************************/
 
                 // Computing the false table as the MULT difference between the matching rows of the star and flat tables.
@@ -640,8 +627,6 @@ public class CountsManager {
                     queryString,
                     cur_flat_Table
                 );
-
-                long l5 = System.currentTimeMillis(); 
 
                 // staring to create the CT table
                 ResultSet rs_45 = st2.executeQuery(
@@ -694,13 +679,10 @@ public class CountsManager {
                 //  close statements
                 st2.close();            
                 st3.close();
-                long l6 = System.currentTimeMillis(); 
-                logger.fine("Building Time(ms) for "+cur_CT_Table+ " : "+(l6-l5)+" ms.\n");
             }
             st1.close();
             rs1.close();
         }
-        logger.fine("\n Build CT_RChain_TABLES for length = "+len+" are DONE \n" );
     }
 
 
@@ -711,7 +693,6 @@ public class CountsManager {
      * @throws SQLException if there are issues executing the SQL queries.
      */
     private static void buildPVarsCounts(CountingStrategy countingStrategy) throws SQLException {
-        long l = System.currentTimeMillis(); //@zqian : measure structure learning time
         dbConnection.setCatalog(databaseName_BN);
         Statement st = dbConnection.createStatement();
         ResultSet rs = st.executeQuery(
@@ -767,8 +748,6 @@ public class CountsManager {
 
         rs.close();
         st.close();
-        long l2 = System.currentTimeMillis(); //@zqian : measure structure learning time
-        logger.fine("Building Time(ms) for Pvariables counts: "+(l2-l)+" ms.\n");
     }
 
 
@@ -1196,7 +1175,6 @@ public class CountsManager {
         }
         queryString += " FROM " + fromString;
 
-        logger.fine(queryString);
         return queryString;
     }
 
@@ -1216,8 +1194,6 @@ public class CountsManager {
         String storageEngine,
         String countsTableSubQuery
     ) throws SQLException {
-        long start = System.currentTimeMillis(); // @zqian: measure structure learning time.
-
         dbConnection.setCatalog(databaseName_BN);
         Statement statement = dbConnection.createStatement();
 
@@ -1293,9 +1269,6 @@ public class CountsManager {
             databaseName_CT,
             flatTableName
         );
-
-        long end = System.currentTimeMillis(); // @zqian: measure structure learning time.
-        logger.fine("Build Time(ms) for RNode Flat: " + (end - start) + " ms.\n");
     }
 
 
