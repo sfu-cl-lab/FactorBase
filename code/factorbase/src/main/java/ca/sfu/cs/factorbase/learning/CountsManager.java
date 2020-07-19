@@ -156,12 +156,24 @@ public class CountsManager {
     ) throws SQLException {
         int latticeHeight = relationshipLattice.getHeight();
 
+        /**
+         *  If we are building the RChain "_counts" tables for the Ondemand or Hybrid method, start from a height of 2.
+         *  Since we cache the CT tables for RNodes, we might not need to construct the "_counts" for RNodes as they
+         *  are a prerequisite for constructing CT tables.  Also, for the Hybrid method, a subquery is used instead of
+         *  materializing the "_counts" table for RNodes.
+         */
+        int startingHeight = 1;
+        if (!countingStrategy.isPrecount()) {
+            startingHeight = 2;
+        }
+
         // Build the counts tables for the RChains.
         buildRChainCounts(
             databaseName_CT,
             relationshipLattice,
             countingStrategy.useProjection(),
-            countingStrategy.getStorageEngine()
+            countingStrategy.getStorageEngine(),
+            startingHeight
         );
 
         long l = System.currentTimeMillis(); //@zqian : CT table generating time
@@ -258,8 +270,8 @@ public class CountsManager {
             countingStrategy.useProjection()
         );
 
-        // If we are doing Ondemand counting, it is more efficient to create the table once and read from it to avoid
-        // executing the expensive joins twice.
+        // If we are doing using the Precount or Ondemand method, we read from a materialized table to avoid executing
+        // expensive joins twice.
         if (countingStrategy.isOndemand()) {
             long countsStart = System.currentTimeMillis();
             String tableName = generateCountsTable(
@@ -271,6 +283,8 @@ public class CountsManager {
             RuntimeLogger.logRunTimeDetails(logger, "buildRChainCounts-length=1", countsStart, System.currentTimeMillis());
 
             countsTableSubQuery = "SELECT * FROM " + databaseName_CT + "." + tableName;
+        } else if (countingStrategy.isPrecount()) {
+            countsTableSubQuery = "SELECT * FROM " + databaseName_CT + "." + shortRNode + "_counts";
         }
 
         // Add runtime to a column used to add to the "Counts" portion and subtract from the "Moebius Join" portion.
@@ -361,7 +375,13 @@ public class CountsManager {
         RelationshipLattice relationshipLattice = propagateFunctorSetInfo(dbConnection);
 
         // Generate the global counts in the "_global_counts" database.
-        buildRChainCounts(databaseName_global_counts, relationshipLattice, false, "MEMORY");
+        buildRChainCounts(
+            databaseName_global_counts,
+            relationshipLattice,
+            false,
+            "MEMORY",
+            1
+        );
     }
 
 
@@ -373,13 +393,15 @@ public class CountsManager {
      * @param buildByProjection - True if the counts table should be built by projecting the necessary information from
                                   the global counts table; otherwise false.
      * @param storageEngine - the storage engine to use for the tables created when executing this method.
+     * @param startingHeight - the height of the RChain to start building the counts tables for.
      * @throws SQLException if there are issues executing the SQL queries.
      */
     private static void buildRChainCounts(
         String dbTargetName,
         RelationshipLattice relationshipLattice,
         boolean buildByProjection,
-        String storageEngine
+        String storageEngine,
+        int startingHeight
     ) throws SQLException {
         long start = System.currentTimeMillis();
         int latticeHeight = relationshipLattice.getHeight();
@@ -388,16 +410,6 @@ public class CountsManager {
         boolean copyToCT = true;
         if(linkCorrelation.equals("1")) {
             copyToCT = false;
-        }
-
-        /**
-         *  Skip building the first level (RNodes) if we aren't building the global counts tables since the CT table
-         *  might already exist in the "_CT_cache" database, in which case the "_counts" tables for a given RNode does
-         *  not need to be created.
-         */
-        int startingHeight = 2;
-        if (dbTargetName.equals(databaseName_global_counts)) {
-            startingHeight = 1;
         }
 
         // Generate the counts tables and copy their values to the CT tables if specified to.
