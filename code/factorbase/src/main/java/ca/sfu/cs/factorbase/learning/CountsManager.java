@@ -156,18 +156,32 @@ public class CountsManager {
     ) throws SQLException {
         int latticeHeight = relationshipLattice.getHeight();
 
+        /**
+         *  If we are building the RChain "_counts" tables for the Ondemand or Hybrid method, start from a height of 2.
+         *  Since we cache the CT tables for RNodes, we might not need to construct the "_counts" for RNodes as they
+         *  are a prerequisite for constructing CT tables.  Also, for the Hybrid method, a subquery is used instead of
+         *  materializing the "_counts" table for RNodes.
+         */
+        int startingHeight = 1;
+        if (!countingStrategy.isPrecount()) {
+            startingHeight = 2;
+        }
+
         // Build the counts tables for the RChains.
         buildRChainCounts(
             databaseName_CT,
             relationshipLattice,
             countingStrategy.useProjection(),
-            countingStrategy.getStorageEngine()
+            countingStrategy.getStorageEngine(),
+            startingHeight
         );
 
         long l = System.currentTimeMillis(); //@zqian : CT table generating time
            // handling Pvars, generating pvars_counts       
         buildPVarsCounts(countingStrategy);
-        RuntimeLogger.updateLogEntry(dbConnection, "buildPVarsCounts", System.currentTimeMillis() - l);
+        long end = System.currentTimeMillis();
+        RuntimeLogger.updateLogEntry(dbConnection, "buildPVarsCounts", end - l);
+        RuntimeLogger.logRunTimeDetails(logger, "buildPVarsCounts", l, end);
 
         // preparing the _join part for _CT tables
         long start = System.currentTimeMillis();
@@ -196,11 +210,10 @@ public class CountsManager {
             }
 
             // Build the CT tables for the first level of the relationship lattice.
+            long ctStart = System.currentTimeMillis();
             for (FunctorNodesInfo rnodeInfo : rchainInfos) {
                 String rnode = rnodeInfo.getID();
                 String shortRNode = rnodeInfo.getShortID();
-                logger.fine("RNode: " + rnode);
-                logger.fine("Short RNode: " + shortRNode);
                 String ctTableName = shortRNode + "_CT";
                 String ctCreationQuery = buildRNodeCTCreationQuery(rnode, shortRNode, joinTableQueries);
 
@@ -213,11 +226,14 @@ public class CountsManager {
                     shortRNode
                 );
             }
+            RuntimeLogger.logRunTimeDetails(logger, "buildRChainsCT-length=1", ctStart, System.currentTimeMillis());
 
             //building the _CT tables. Going up the Rchain lattice
             for(int len = 2; len <= latticeHeight; len++) {
+                ctStart = System.currentTimeMillis();
                 rchainInfos = relationshipLattice.getRChainsInfo(len);
                 buildRChainsCT(rchainInfos, len, joinTableQueries, countingStrategy.getStorageEngine());
+                RuntimeLogger.logRunTimeDetails(logger, "buildRChainsCT-length=" + len, ctStart, System.currentTimeMillis());
             }
             RuntimeLogger.updateLogEntry(dbConnection, "buildFlatStarCT", System.currentTimeMillis() - start);
         }
@@ -254,17 +270,21 @@ public class CountsManager {
             countingStrategy.useProjection()
         );
 
-        // If we are doing Ondemand counting, it is more efficient to create the table once and read from it to avoid
-        // executing the expensive joins twice.
+        // If we are doing using the Precount or Ondemand method, we read from a materialized table to avoid executing
+        // expensive joins twice.
         if (countingStrategy.isOndemand()) {
+            long countsStart = System.currentTimeMillis();
             String tableName = generateCountsTable(
                 databaseName_CT,
                 shortRNode,
                 countingStrategy.getStorageEngine(),
                 countsTableSubQuery
             );
+            RuntimeLogger.logRunTimeDetails(logger, "buildRChainCounts-length=1", countsStart, System.currentTimeMillis());
 
             countsTableSubQuery = "SELECT * FROM " + databaseName_CT + "." + tableName;
+        } else if (countingStrategy.isPrecount()) {
+            countsTableSubQuery = "SELECT * FROM " + databaseName_CT + "." + shortRNode + "_counts";
         }
 
         // Add runtime to a column used to add to the "Counts" portion and subtract from the "Moebius Join" portion.
@@ -287,14 +307,12 @@ public class CountsManager {
             countingStrategy.getStorageEngine(),
             ctCreationQuery
         );
-        start = System.currentTimeMillis();
+
         dbConnection.setCatalog(targetDatabaseName);
-        logger.fine("\nCREATE CT table String: " + createCTQuery);
+        RuntimeLogger.logExecutedQuery(logger, createCTQuery);
         try (Statement statement = dbConnection.createStatement()) {
             statement.executeUpdate(createCTQuery);
         }
-
-        logger.fine("Build Time for RNode CT: " + (System.currentTimeMillis() - start) + "ms.\n");
     }
 
 
@@ -319,7 +337,6 @@ public class CountsManager {
     ) throws SQLException {
         String ctTablesCacheKey = ctTableName + ctCreationQuery;
         String cacheTableName = ctTablesCache.get(ctTablesCacheKey);
-        long start = System.currentTimeMillis();
         if (cacheTableName == null) {
             // Create the table in the CT cache database.
             cacheTableName = ctTableName + "_" + tableID;
@@ -344,8 +361,6 @@ public class CountsManager {
                 "FROM " + databaseName_CT_cache + "." + cacheTableName;
             createViewStatement.executeUpdate(viewQuery);
         }
-
-        logger.fine("Build Time for RNode CT: " + (System.currentTimeMillis() - start) + "ms.\n");
     }
 
 
@@ -360,7 +375,13 @@ public class CountsManager {
         RelationshipLattice relationshipLattice = propagateFunctorSetInfo(dbConnection);
 
         // Generate the global counts in the "_global_counts" database.
-        buildRChainCounts(databaseName_global_counts, relationshipLattice, false, "MEMORY");
+        buildRChainCounts(
+            databaseName_global_counts,
+            relationshipLattice,
+            false,
+            "MEMORY",
+            1
+        );
     }
 
 
@@ -372,13 +393,15 @@ public class CountsManager {
      * @param buildByProjection - True if the counts table should be built by projecting the necessary information from
                                   the global counts table; otherwise false.
      * @param storageEngine - the storage engine to use for the tables created when executing this method.
+     * @param startingHeight - the height of the RChain to start building the counts tables for.
      * @throws SQLException if there are issues executing the SQL queries.
      */
     private static void buildRChainCounts(
         String dbTargetName,
         RelationshipLattice relationshipLattice,
         boolean buildByProjection,
-        String storageEngine
+        String storageEngine,
+        int startingHeight
     ) throws SQLException {
         long start = System.currentTimeMillis();
         int latticeHeight = relationshipLattice.getHeight();
@@ -389,18 +412,10 @@ public class CountsManager {
             copyToCT = false;
         }
 
-        /**
-         *  Skip building the first level (RNodes) if we aren't building the global counts tables since the CT table
-         *  might already exist in the "_CT_cache" database, in which case the "_counts" tables for a given RNode does
-         *  not need to be created.
-         */
-        int startingHeight = 2;
-        if (dbTargetName.equals(databaseName_global_counts)) {
-            startingHeight = 1;
-        }
-
         // Generate the counts tables and copy their values to the CT tables if specified to.
+        long countsStart;
         for(int len = startingHeight; len <= latticeHeight; len++) {
+            countsStart = System.currentTimeMillis();
             generateCountsTables(
                 dbTargetName,
                 relationshipLattice.getRChainsInfo(len),
@@ -408,6 +423,7 @@ public class CountsManager {
                 buildByProjection,
                 storageEngine
             );
+            RuntimeLogger.logRunTimeDetails(logger, "buildRChainCounts-length=" + len, countsStart, System.currentTimeMillis());
         }
 
         RuntimeLogger.updateLogEntry(dbConnection, "buildRChainCounts", System.currentTimeMillis() - start);
@@ -484,20 +500,15 @@ public class CountsManager {
         Map<String, String> joinTableQueries,
         String storageEngine
     ) throws SQLException {
-        logger.fine("\n ****************** \n" +
-                "Building the _CT tables for Length = "+len +"\n" );
         int fc=0;
         for (FunctorNodesInfo rchainInfo : rchainInfos)
         {
             // Get the short and full form rnids for further use.
             String rchain = rchainInfo.getID();
-            logger.fine("\n RChain : " + rchain);
             String shortRchain = rchainInfo.getShortID();
-            logger.fine(" Short RChain : " + shortRchain);
             // Oct 16 2013
             // initialize the cur_CT_Table, at very beginning we will use _counts table to create the _flat table
             String cur_CT_Table = shortRchain + "_counts";
-            logger.fine(" cur_CT_Table : " + cur_CT_Table);
             // counts represents the ct tables where all relationships in Rchain are true
 
             //  create new statement
@@ -515,11 +526,8 @@ public class CountsManager {
             while(rs1.next())
             {       
                 String removed = rs1.getString("removed");
-                logger.fine("\n removed : " + removed);  
                 String removedShort = rs1.getString("short_rnid");
-                logger.fine("\n removed short : " + removedShort);
                 String BaseName = shortRchain + "_" + removedShort;
-                logger.fine(" BaseName : " + BaseName );
 
                 dbConnection.setCatalog(databaseName_BN);
                 Statement st2 = dbConnection.createStatement();
@@ -536,7 +544,6 @@ public class CountsManager {
                 );
                 List<String> columns = extractEntries(rs2, "Entries");
                 String selectString = String.join(", ", columns);
-                logger.fine("Select String : " + selectString);
                 rs2.close();
                 //  create mult query string
                 ResultSet rs3 = st2.executeQuery(
@@ -550,11 +557,9 @@ public class CountsManager {
                 );
                 columns = extractEntries(rs3, "Entries");
                 String MultString = makeStarSepQuery(columns);
-                logger.fine("Mult String : " + MultString+ " as `MULT`");
                 rs3.close();
                 //  create from query string
                 String fromString = String.join(", ", columns);
-                logger.fine("From String : " + fromString);          
                 //  create where query string
                 ResultSet rs5 = st2.executeQuery(
                     QueryGenerator.createMetaQueriesExtractionQuery(
@@ -567,7 +572,6 @@ public class CountsManager {
                 );
                 columns = extractEntries(rs5, "Entries");
                 String whereString = String.join(" AND ", columns);
-               logger.fine("Where String : " + whereString);
                 rs5.close();
                 //  create the final query
                 String queryString ="";
@@ -585,7 +589,6 @@ public class CountsManager {
                         "SELECT " + MultString + " AS `MULT` " +
                         "FROM " + fromString;
                 }
-                logger.fine("Query String : " + queryString );   
 
                 dbConnection.setCatalog(databaseName_CT);
                 Statement st3 = dbConnection.createStatement();
@@ -593,14 +596,10 @@ public class CountsManager {
                 //make the rnid shorter 
                 String rnid_or=removedShort;
 
-                logger.fine(queryString);
-
-                long l3 = System.currentTimeMillis(); 
                 //staring to create the _flat table
                 // Oct 16 2013
                 // cur_CT_Table should be the one generated in the previous iteration
                 // for the very first iteration, it's _counts table
-                logger.fine("cur_CT_Table is : " + cur_CT_Table);
 
                 String cur_flat_Table = removedShort + len + "_" + fc + "_flat";
                 String queryStringflat = "SELECT SUM(`" + cur_CT_Table + "`.MULT) AS 'MULT' ";
@@ -620,7 +619,7 @@ public class CountsManager {
                     storageEngine,
                     queryStringflat
                 );
-                logger.fine("\n create flat String : " + createStringflat );         
+                RuntimeLogger.logExecutedQuery(logger, createStringflat);
                 st3.execute(createStringflat);      //create flat table
 
                 // Add covering index.
@@ -630,8 +629,6 @@ public class CountsManager {
                     cur_flat_Table
                 );
 
-                long l4 = System.currentTimeMillis(); 
-                logger.fine("Building Time(ms) for "+cur_flat_Table+ " : "+(l4-l3)+" ms.\n");
                 /**********starting to create _flase table***using sort_merge*******************************/
 
                 // Computing the false table as the MULT difference between the matching rows of the star and flat tables.
@@ -643,8 +640,6 @@ public class CountsManager {
                     cur_flat_Table
                 );
 
-                long l5 = System.currentTimeMillis(); 
-
                 // staring to create the CT table
                 ResultSet rs_45 = st2.executeQuery(
                     "SELECT column_name AS Entries " +
@@ -654,7 +649,6 @@ public class CountsManager {
                 );
                 columns = extractEntries(rs_45, "Entries");
                 String CTJoinString = makeEscapedCommaSepQuery(columns);
-                logger.fine("CT Join String : " + CTJoinString);
 
                 //join false table with join table to add in rnid (= F) and 2nid (= n/a). then can union with CT table
                 String QueryStringCT =
@@ -697,13 +691,10 @@ public class CountsManager {
                 //  close statements
                 st2.close();            
                 st3.close();
-                long l6 = System.currentTimeMillis(); 
-                logger.fine("Building Time(ms) for "+cur_CT_Table+ " : "+(l6-l5)+" ms.\n");
             }
             st1.close();
             rs1.close();
         }
-        logger.fine("\n Build CT_RChain_TABLES for length = "+len+" are DONE \n" );
     }
 
 
@@ -714,7 +705,6 @@ public class CountsManager {
      * @throws SQLException if there are issues executing the SQL queries.
      */
     private static void buildPVarsCounts(CountingStrategy countingStrategy) throws SQLException {
-        long l = System.currentTimeMillis(); //@zqian : measure structure learning time
         dbConnection.setCatalog(databaseName_BN);
         Statement st = dbConnection.createStatement();
         ResultSet rs = st.executeQuery(
@@ -740,7 +730,6 @@ public class CountsManager {
 
         while(rs.next()){
             String pvid = rs.getString("pvid");
-            logger.fine("pvid : " + pvid);
             String countsTableName = pvid + "_counts";
             String selectQuery = QueryGenerator.createMetaQueriesExtractionQuery(
                 pvid,
@@ -771,9 +760,6 @@ public class CountsManager {
 
         rs.close();
         st.close();
-        long l2 = System.currentTimeMillis(); //@zqian : measure structure learning time
-        logger.fine("Building Time(ms) for Pvariables counts: "+(l2-l)+" ms.\n");
-        logger.fine("\n Pvariables are DONE \n" );
     }
 
 
@@ -797,7 +783,6 @@ public class CountsManager {
         dbConnection.setCatalog(databaseName_BN);
         Statement st = dbConnection.createStatement();
         String selectString = String.join(", ", columnAliases);
-        logger.fine("SELECT String: " + selectString);
 
         // Create FROM query.
         String fromQuery = QueryGenerator.createMetaQueriesExtractionQuery(
@@ -848,8 +833,6 @@ public class CountsManager {
 
         st.close();
 
-        logger.fine("WHERE String:" + whereString);
-
         // Create the final query.
         String queryString =
             "SELECT " + selectString + " " +
@@ -869,8 +852,8 @@ public class CountsManager {
             storageEngine,
             queryString
         );
-        logger.fine("CREATE String: " + createString);
 
+        RuntimeLogger.logExecutedQuery(logger, createString);
         dbConnection.setCatalog(targetDatabaseName);
         try (Statement st2 = dbConnection.createStatement()) {
             st2.execute(createString);
@@ -955,9 +938,7 @@ public class CountsManager {
         for (FunctorNodesInfo rchainInfo : rchainInfos) {
             // Get the short and full form rnids for further use.
             String rchain = rchainInfo.getID();
-            logger.fine("\n RChain: " + rchain);
             String shortRchain = rchainInfo.getShortID();
-            logger.fine(" Short RChain: " + shortRchain);
 
             String countsTableSubQuery = generateCountsTableQuery(
                 dbTargetName,
@@ -975,17 +956,15 @@ public class CountsManager {
 
             if (copyToCT) {
                 dbConnection.setCatalog(dbTargetName);
+                String createString_CT =
+                    "CREATE TABLE `" + shortRchain + "_CT`" + " AS " +
+                        countsTableSubQuery;
+                RuntimeLogger.logExecutedQuery(logger, createString_CT);
                 try (Statement statement = dbConnection.createStatement()) {
-                    String createString_CT =
-                        "CREATE TABLE `" + shortRchain + "_CT`" + " AS " +
-                            countsTableSubQuery;
-                    logger.fine("CREATE String: " + createString_CT);
                     statement.execute(createString_CT);
                 }
             }
         }
-
-        logger.fine("\n RChain_counts are DONE \n");
     }
 
 
@@ -1040,8 +1019,6 @@ public class CountsManager {
             selectString = String.join(", ", selectAliases);
         }
 
-        logger.fine("SELECT String: " + selectString);
-
         // Create FROM query string.
         String fromString = databaseName_global_counts + ".`" + countsTableName + "`";
 
@@ -1061,8 +1038,6 @@ public class CountsManager {
             List<String> fromAliases = extractEntries(rs3, "Entries");
             fromString = String.join(", ", fromAliases);
         }
-
-        logger.fine("FROM String: " + fromString);
 
         // Create WHERE query string.
         String whereString = null;
@@ -1212,7 +1187,6 @@ public class CountsManager {
         }
         queryString += " FROM " + fromString;
 
-        logger.fine(queryString);
         return queryString;
     }
 
@@ -1232,8 +1206,6 @@ public class CountsManager {
         String storageEngine,
         String countsTableSubQuery
     ) throws SQLException {
-        long start = System.currentTimeMillis(); // @zqian: measure structure learning time.
-
         dbConnection.setCatalog(databaseName_BN);
         Statement statement = dbConnection.createStatement();
 
@@ -1297,7 +1269,7 @@ public class CountsManager {
             storageEngine,
             queryString
         );
-        logger.fine("\nCREATE String: " + createString);
+        RuntimeLogger.logExecutedQuery(logger, createString);
         dbConnection.setCatalog(databaseName_CT);
         try (Statement createStatement = dbConnection.createStatement()) {
             createStatement.executeUpdate(createString);
@@ -1309,9 +1281,6 @@ public class CountsManager {
             databaseName_CT,
             flatTableName
         );
-
-        long end = System.currentTimeMillis(); // @zqian: measure structure learning time.
-        logger.fine("Build Time(ms) for RNode Flat: " + (end - start) + " ms.\n");
     }
 
 
@@ -1413,9 +1382,7 @@ public class CountsManager {
         while(rs.next()){
         //  get rnid
             String short_rnid = rs.getString("short_rnid");
-            logger.fine("\n short_rnid : " + short_rnid);
             String orig_rnid = rs.getString("orig_rnid");
-            logger.fine("\n orig_rnid : " + orig_rnid);
 
             Statement st2 = dbConnection.createStatement();
 
@@ -1443,7 +1410,6 @@ public class CountsManager {
 
         rs.close();
         st.close();
-        logger.fine("\n Rnodes_joins are DONE \n" );
 
         return joinTableQueries;
     }

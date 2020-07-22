@@ -209,8 +209,6 @@ public class BayesBaseH {
         CountingStrategy countingStrategy,
         RelationshipLattice lattice
     ) throws SQLException, IOException, DataBaseException, DataExtractionException, ParsingException, ScoringException {
-        long l = System.currentTimeMillis(); // @zqian: measure structure learning time.
-
         // Handle pvars.
         if (countingStrategy.isPrecount()) {
             learnStructurePVars(database); // import @zqian
@@ -243,9 +241,6 @@ public class BayesBaseH {
          * 3. Make sure you insert "<rnid> null" into PathBN as well.
          * zqian, when link is off, check the local_ct for rnode?
          */
-
-        long l2 = System.currentTimeMillis(); // @zqian: Measure structure learning time.
-        logger.fine("\n*****************\nStructure Learning Time(ms): " + (l2 - l) + " ms.\n");
     }
 
 
@@ -372,7 +367,7 @@ public class BayesBaseH {
 
                 Statement st2 = con2.createStatement();
                 // Insert the BN nodes into Entity_BayesNet.
-                logger.fine(selectQuery);
+                RuntimeLogger.logExecutedQuery(logger, selectQuery);
                 ResultSet rs2 = st2.executeQuery(selectQuery);
                 String child = "";
 

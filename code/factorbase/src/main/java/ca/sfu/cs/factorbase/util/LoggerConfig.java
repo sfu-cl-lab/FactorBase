@@ -48,6 +48,7 @@ public class LoggerConfig {
     public static void buildLevelMap() {
         levelMap = new HashMap<String, Level>();
         levelMap.put("debug", Level.ALL);
+        levelMap.put("runtimeDetails", Level.FINE);
         levelMap.put("info", Level.INFO);
         levelMap.put("off", Level.OFF);
     }

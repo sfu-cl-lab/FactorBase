@@ -74,13 +74,11 @@ public class Sort_merge3 {
             selectQuery = QueryGenerator.createSubtractionQuery(table1Subquery, table2, "MULT", joinOnList);
         } else {
             // Aug 18, 2014 zqian: Handle the extreme case when there's only the `MULT` column.
-            logger.fine("\n\tHandle the extreme case when there's only the `MULT` column.\n");
             selectQuery =
                 "SELECT (SUBQUERY.MULT - " + table2 + ".MULT) AS MULT " +
                 "FROM (" + table1Subquery + ") AS SUBQUERY, " + table2;
         }
 
-        logger.fine(selectQuery);
         return selectQuery;
     }
 }
