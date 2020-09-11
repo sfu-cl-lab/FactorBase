@@ -64,22 +64,4 @@ INSERT INTO lattice_set
         LS.name = LMEM.name
     GROUP BY
         LS.name;
-
-
-TRUNCATE lattice_mapping;
-INSERT INTO lattice_mapping
-    SELECT
-        LMAP.orig_rnid,
-        LMAP.short_rnid
-    FROM
-        @database@_setup.lattice_mapping LMAP,
-        lattice_membership LMEM,
-        LatticeRNodes LR
-    WHERE
-        LMEM.member = LR.orig_rnid
-    AND
-        LMAP.orig_rnid = LMEM.name
-    GROUP BY
-       LMAP.orig_rnid;
-
 END//

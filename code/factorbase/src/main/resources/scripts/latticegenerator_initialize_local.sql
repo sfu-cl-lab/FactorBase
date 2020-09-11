@@ -23,8 +23,9 @@ CREATE TABLE lattice_set (
 );
 
 
-CREATE TABLE lattice_mapping (
-    orig_rnid VARCHAR(300),
-    short_rnid VARCHAR(20),
-    PRIMARY KEY(orig_rnid, short_rnid)
-);
+CREATE VIEW lattice_mapping AS
+    SELECT
+        orig_rnid,
+        short_rnid
+    FROM
+        @database@_setup.lattice_mapping;
