@@ -53,14 +53,35 @@ CREATE TABLE RNodes AS
         0;
 
 
-/* Set up a table that contains all functor nodes of any arity.  Summarizes all the work we've done. */
-CREATE TABLE FNodes (
-    Fid varchar(199),
-    FunctorName varchar(64),
-    Type varchar(5),
-    main int(11),
-    PRIMARY KEY (Fid)
-);
+/* Make comprehensive view for all functor nodes but restricted to the functor set. */
+CREATE VIEW FNodes AS
+    SELECT
+        1nid AS Fid,
+        COLUMN_NAME AS FunctorName,
+        '1Node' AS Type,
+        main
+    FROM
+        1Nodes
+
+    UNION ALL
+
+    SELECT
+        2nid AS Fid,
+        COLUMN_NAME AS FunctorName,
+        '2Node' AS Type,
+        main
+    FROM
+        2Nodes
+
+    UNION ALL
+
+    SELECT
+        rnid AS Fid,
+        TABLE_NAME AS FunctorName,
+        'Rnode' AS Type,
+        main
+    FROM
+        RNodes;
 
 
 CREATE TABLE RNodes_pvars AS
