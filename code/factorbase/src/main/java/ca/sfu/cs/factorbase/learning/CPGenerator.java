@@ -24,6 +24,11 @@ public class CPGenerator {
             Statement statement = con.createStatement();
             ResultSet results = rnodeStatement.executeQuery("SELECT rnid FROM RNodes;")
         ) {
+            // Convert FNodes view into a table so that UPDATEs can be called on it.
+            statement.executeUpdate("RENAME TABLE FNodes TO FNodes_view");
+            statement.executeUpdate("CREATE TABLE FNodes AS SELECT * FROM FNodes_view");
+            statement.executeUpdate("DROP VIEW FNodes_view");
+
             // Adding possible values of Rnodes into Attribute_Value. // Jun 6.
             while(results.next()) {
                 String rnid = results.getString("rnid");

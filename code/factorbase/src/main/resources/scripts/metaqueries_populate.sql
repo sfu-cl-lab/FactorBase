@@ -245,10 +245,7 @@ INSERT INTO MetaQueries
             '`'
         ) AS Entries
     FROM
-        RNodes_2Nodes RN,
-        2Nodes N
-    WHERE
-        N.2nid = RN.2nid;
+        RNodes_2Nodes N;
 
 
 /**

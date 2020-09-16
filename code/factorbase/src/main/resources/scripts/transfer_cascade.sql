@@ -82,38 +82,6 @@ INSERT INTO RNodes
         N.rnid = F.rnid;
 
 
-/* Make comprehensive table for all functor nodes but restricted to the functor set. */
-TRUNCATE FNodes;
-INSERT INTO FNodes
-    SELECT
-        1nid AS Fid,
-        COLUMN_NAME AS FunctorName,
-        '1Node' AS Type,
-        main
-    FROM
-        1Nodes
-
-    UNION ALL
-
-    SELECT
-        2nid AS Fid,
-        COLUMN_NAME AS FunctorName,
-        '2Node' AS Type,
-        main
-    FROM
-        2Nodes
-
-    UNION ALL
-
-    SELECT
-        rnid AS Fid,
-        TABLE_NAME AS FunctorName,
-        'Rnode' AS Type,
-        main
-    FROM
-        RNodes;
-
-
 TRUNCATE RNodes_pvars;
 INSERT INTO RNodes_pvars
     SELECT
