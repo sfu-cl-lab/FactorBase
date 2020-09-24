@@ -23,6 +23,9 @@ def extractNamespaceMapping(rootElement, key):
 
     """
     nameSpace, _rightBrace, _bifTagName = rootElement.tag[1:].partition('}')
+    if not _bifTagName:
+        return {key : ""}
+
     return {
         key: nameSpace
     }
@@ -77,8 +80,12 @@ def extractStructureInformation(file):
         nodeName = variableElement.find('bifns:NAME', mapping).text
 
         # Extract the values for the node.
-        for outcomeElement in variableElement.findall('bifns:OUTCOME', mapping):
-            nodeValues[nodeName].append(outcomeElement.text)
+        outcomes = variableElement.findall('bifns:OUTCOME', mapping)
+        if not outcomes:
+            nodeValues[nodeName].append(None)
+        else:
+            for outcomeElement in outcomes:
+                nodeValues[nodeName].append(outcomeElement.text)
 
     # Extract the 'DEFINITION' tag elements (Graph Node + Parents).
     for definitionElement in networkElement.findall('bifns:DEFINITION', mapping):
@@ -98,11 +105,12 @@ def extractStructureInformation(file):
     return nodeValues, nodeParents
 
 
-def countEdges(adjacencyList):
+def countEdges(nodes, adjacencyList):
     """
-    Generate basic statistics for the given edges.
+    Generate basic statistics for the given nodes and associated edges.
 
     Args:
+        nodes (list): List of all the node IDs.
         adjacencyList (dict): Dictionary containing key:value pairs nodeID:parentNodeIDs.
 
     Returns:
@@ -116,7 +124,8 @@ def countEdges(adjacencyList):
     minInDegree = float('inf')
 
     totalNumberOfEdges = 0
-    for parentGroup in adjacencyList.values():
+    for node in nodes:
+        parentGroup = adjacencyList[node]
         numberOfEdges = len(parentGroup)
         totalNumberOfEdges += numberOfEdges
         maxInDegree = max(maxInDegree, numberOfEdges)
@@ -208,7 +217,7 @@ def displayGraphInformation(file):
     # Extract the information from the graph.
     graphName = extractGraphname(file)
     nodes, adjacencyList = extractStructureInformation(file)
-    totalEdges, minInDegree, maxInDegree, averageInDegree = countEdges(adjacencyList)
+    totalEdges, minInDegree, maxInDegree, averageInDegree = countEdges(nodes.keys(), adjacencyList)
 
     # Print the graph information.
     print("Graph: {}\n".format(graphName))
@@ -225,7 +234,7 @@ def parseCommandLineArguments():
 
     """
     argument_parser = ArgumentParser(
-        description="Script to help analyze BIF files.",
+        description="Script to help analyze BIF files.  Note: If the BIF file isn't available the XML file in the res directory created by FactorBase can be used instead.",
         add_help=False
     )
 
