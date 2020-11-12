@@ -168,13 +168,14 @@ public class CountsManager {
         }
 
         // Build the counts tables for the RChains.
-        buildRChainCounts(
-            databaseName_CT,
-            relationshipLattice,
-            countingStrategy.useProjection(),
-            countingStrategy.getStorageEngine(),
-            startingHeight
-        );
+        if (!countingStrategy.useProjection()) {
+            buildRChainCounts(
+                databaseName_CT,
+                relationshipLattice,
+                countingStrategy.getStorageEngine(),
+                startingHeight
+            );
+        }
 
         long l = System.currentTimeMillis(); //@zqian : CT table generating time
            // handling Pvars, generating pvars_counts       
@@ -185,7 +186,7 @@ public class CountsManager {
 
         // preparing the _join part for _CT tables
         long start = System.currentTimeMillis();
-        Map<String, String> joinTableQueries = createJoinTableQueries();
+        Map<String, String[]> joinTableQueries = createJoinTableQueries();
         RuntimeLogger.updateLogEntry(dbConnection, "createJoinTableQueries", System.currentTimeMillis() - start);
 
         if (linkCorrelation.equals("1") && relationshipLattice.getHeight() != 0) {
@@ -232,7 +233,12 @@ public class CountsManager {
             for(int len = 2; len <= latticeHeight; len++) {
                 ctStart = System.currentTimeMillis();
                 rchainInfos = relationshipLattice.getRChainsInfo(len);
-                buildRChainsCT(rchainInfos, len, joinTableQueries, countingStrategy.getStorageEngine());
+                buildRChainsCT(
+                    rchainInfos,
+                    len,
+                    joinTableQueries,
+                    countingStrategy
+                );
                 RuntimeLogger.logRunTimeDetails(logger, "buildRChainsCT-length=" + len, ctStart, System.currentTimeMillis());
             }
             RuntimeLogger.updateLogEntry(dbConnection, "buildFlatStarCT", System.currentTimeMillis() - start);
@@ -266,8 +272,7 @@ public class CountsManager {
         String countsTableSubQuery = generateCountsTableQuery(
             databaseName_CT,
             rnode,
-            shortRNode,
-            countingStrategy.useProjection()
+            shortRNode
         );
 
         // If we are doing using the Precount or Ondemand method, we read from a materialized table to avoid executing
@@ -378,7 +383,6 @@ public class CountsManager {
         buildRChainCounts(
             databaseName_global_counts,
             relationshipLattice,
-            false,
             "MEMORY",
             1
         );
@@ -390,8 +394,6 @@ public class CountsManager {
      *
      * @param dbTargetName - name of the database to create the "_counts" tables in.
      * @param relationshipLattice - the relationship lattice containing the RChains to build the "_counts" tables for.
-     * @param buildByProjection - True if the counts table should be built by projecting the necessary information from
-                                  the global counts table; otherwise false.
      * @param storageEngine - the storage engine to use for the tables created when executing this method.
      * @param startingHeight - the height of the RChain to start building the counts tables for.
      * @throws SQLException if there are issues executing the SQL queries.
@@ -399,7 +401,6 @@ public class CountsManager {
     private static void buildRChainCounts(
         String dbTargetName,
         RelationshipLattice relationshipLattice,
-        boolean buildByProjection,
         String storageEngine,
         int startingHeight
     ) throws SQLException {
@@ -420,7 +421,6 @@ public class CountsManager {
                 dbTargetName,
                 relationshipLattice.getRChainsInfo(len),
                 copyToCT,
-                buildByProjection,
                 storageEngine
             );
             RuntimeLogger.logRunTimeDetails(logger, "buildRChainCounts-length=" + len, countsStart, System.currentTimeMillis());
@@ -491,14 +491,14 @@ public class CountsManager {
      * @param rchainInfos - FunctorNodesInfos for the RChains to build the "_CT" tables for.
      * @param len - length of the RChains to consider.
      * @param joinTableQueries - {@code Map} to retrieve the associated query to create a derived JOIN table.
-     * @param storageEngine - the storage engine to use for the tables created when executing this method.
+     * @param countingStrategy - {@link CountingStrategy} to indicate how counts related tables should be generated.
      * @throws SQLException if there are issues executing the SQL queries.
      */
     private static void buildRChainsCT(
         List<FunctorNodesInfo> rchainInfos,
         int len,
-        Map<String, String> joinTableQueries,
-        String storageEngine
+        Map<String, String[]> joinTableQueries,
+        CountingStrategy countingStrategy
     ) throws SQLException {
         int fc=0;
         for (FunctorNodesInfo rchainInfo : rchainInfos)
@@ -542,8 +542,8 @@ public class CountsManager {
                         false
                     )
                 );
-                List<String> columns = extractEntries(rs2, "Entries");
-                String selectString = String.join(", ", columns);
+                List<String> starColumns = extractEntries(rs2, "Entries");
+                String selectString = String.join(", ", starColumns);
                 rs2.close();
                 //  create mult query string
                 ResultSet rs3 = st2.executeQuery(
@@ -555,7 +555,7 @@ public class CountsManager {
                         false
                     )
                 );
-                columns = extractEntries(rs3, "Entries");
+                List<String> columns = extractEntries(rs3, "Entries");
                 String MultString = makeStarSepQuery(columns);
                 rs3.close();
                 //  create from query string
@@ -604,19 +604,24 @@ public class CountsManager {
                 String cur_flat_Table = removedShort + len + "_" + fc + "_flat";
                 String queryStringflat = "SELECT SUM(`" + cur_CT_Table + "`.MULT) AS 'MULT' ";
 
+                String countsDatabasePrefix = "";
+                if (cur_CT_Table.endsWith("_counts") && countingStrategy.isHybrid()) {
+                    countsDatabasePrefix = databaseName_global_counts + ".";
+                }
+
                 if (!selectString.isEmpty()) {
                     queryStringflat +=
                         ", " + selectString + " " +
-                        "FROM `" + cur_CT_Table + "` " +
+                        "FROM " + countsDatabasePrefix + "`" + cur_CT_Table + "` " +
                         "GROUP BY " + selectString + ";";
                 } else {
                     queryStringflat +=
-                        "FROM `" + cur_CT_Table + "`;";
+                        "FROM " + countsDatabasePrefix + "`" + cur_CT_Table + "`;";
                 }
 
                 String createStringflat = QueryGenerator.createSimpleCreateTableQuery(
                     cur_flat_Table,
-                    storageEngine,
+                    countingStrategy.getStorageEngine(),
                     queryStringflat
                 );
                 RuntimeLogger.logExecutedQuery(logger, createStringflat);
@@ -641,19 +646,28 @@ public class CountsManager {
                 );
 
                 // staring to create the CT table
-                ResultSet rs_45 = st2.executeQuery(
-                    "SELECT column_name AS Entries " +
-                    "FROM information_schema.columns " +
-                    "WHERE table_schema = '" + databaseName_CT + "' " +
-                    "AND table_name = '" + cur_CT_Table + "';"
-                );
-                columns = extractEntries(rs_45, "Entries");
-                String CTJoinString = makeEscapedCommaSepQuery(columns);
+                String CTJoinString;
+                if (cur_CT_Table.endsWith("_counts") && countingStrategy.isHybrid()) {
+                    // Get the columns to SELECT by combining the columns from the "star" and "join" tables.
+                    starColumns.add("MULT");
+                    starColumns.add(joinTableQueries.get(rnid_or)[1]);
+                    CTJoinString = String.join(", ", starColumns);
+                } else {
+                    // Get the columns to SELECT by getting the columns from the counts table.
+                    ResultSet rs_45 = st2.executeQuery(
+                        "SELECT column_name AS Entries " +
+                        "FROM information_schema.columns " +
+                        "WHERE table_schema = '" + databaseName_CT + "' " +
+                        "AND table_name = '" + cur_CT_Table + "';"
+                    );
+                    columns = extractEntries(rs_45, "Entries");
+                    CTJoinString = makeEscapedCommaSepQuery(columns);
+                }
 
                 //join false table with join table to add in rnid (= F) and 2nid (= n/a). then can union with CT table
                 String QueryStringCT =
                     "SELECT " + CTJoinString + " " +
-                    "FROM `" + cur_CT_Table + "` " +
+                    "FROM " + countsDatabasePrefix + "`" + cur_CT_Table + "` " +
                     "WHERE MULT > 0 " +
 
                     "UNION ALL " +
@@ -661,7 +675,7 @@ public class CountsManager {
                     "SELECT " + CTJoinString + " " +
                     "FROM " +
                         "(" + falseTableSubQuery + ") AS FALSE_TABLE, " +
-                        "(" + joinTableQueries.get(rnid_or) + ") AS JOIN_TABLE " +
+                        "(" + joinTableQueries.get(rnid_or)[0] + ") AS JOIN_TABLE " +
                     "WHERE MULT > 0;";
 
                 String Next_CT_Table = "";
@@ -680,7 +694,7 @@ public class CountsManager {
                 st3.execute(
                     QueryGenerator.createSimpleCreateTableQuery(
                         Next_CT_Table,
-                        storageEngine,
+                        countingStrategy.getStorageEngine(),
                         QueryStringCT
                     )
                 );
@@ -923,8 +937,6 @@ public class CountsManager {
      * @param rchainInfos - FunctorNodesInfos for the RChains to build the "_counts" tables for.
      * @param copyToCT - True if the values in the generated "_counts" table should be copied to the associated "_CT"
      *                   table; otherwise false.
-     * @param buildByProjection - True if the counts table should be built by projecting the necessary information from
-                                  the global counts table; otherwise false.
      * @param storageEngine - the storage engine to use for the tables created when executing this method.
      * @throws SQLException if there are issues executing the SQL queries.
      */
@@ -932,7 +944,6 @@ public class CountsManager {
         String dbTargetName,
         List<FunctorNodesInfo> rchainInfos,
         boolean copyToCT,
-        boolean buildByProjection,
         String storageEngine
     ) throws SQLException {
         for (FunctorNodesInfo rchainInfo : rchainInfos) {
@@ -943,8 +954,7 @@ public class CountsManager {
             String countsTableSubQuery = generateCountsTableQuery(
                 dbTargetName,
                 rchain,
-                shortRchain,
-                buildByProjection
+                shortRchain
             );
 
             generateCountsTable(
@@ -974,8 +984,6 @@ public class CountsManager {
      * @param dbTargetName - name of the database to create the "_counts" table in.
      * @param rchain - the full form name of the RChain.
      * @param shortRchain - the short form name of the RChain.
-     * @param buildByProjection - True if the counts table should be built by projecting the necessary information from
-                                  the global counts table; otherwise false.
      * @param storageEngine - the storage engine to use for the tables created when executing this method.
      * @return the query for creating the "_counts" table.
      * @throws SQLException if an error occurs when executing the queries.
@@ -983,8 +991,7 @@ public class CountsManager {
     private static String generateCountsTableQuery(
         String dbTargetName,
         String rchain,
-        String shortRchain,
-        boolean buildByProjection
+        String shortRchain
     ) throws SQLException {
         // Name of the counts table to generate.
         String countsTableName = shortRchain + "_counts";
@@ -998,75 +1005,52 @@ public class CountsManager {
             "SELECT Entries " +
             "FROM MetaQueries " +
             "WHERE Lattice_Point = '" + rchain + "' " +
-            "AND ClauseType = 'SELECT' ";
-
-        // If we're trying to project from a "_counts" table we want to SUM(MULT) instead of COUNT(*) so ignore the
-        // 'aggregate" EntryType when generating the SELECT string.
-        if (buildByProjection) {
-            selectQuery += "AND EntryType <> 'aggregate' ";
-        }
-
-        selectQuery += "AND TableType = 'Counts';";
+            "AND ClauseType = 'SELECT' " +
+            "AND TableType = 'Counts';";
 
         ResultSet rs2 = st2.executeQuery(selectQuery);
 
         List<String> selectAliases = extractEntries(rs2, "Entries");
-        String selectString;
-        if (buildByProjection) {
-            selectString = makeDelimitedString(selectAliases, ", ", "AS ");
-            selectString = "SUM(MULT) AS MULT, " + selectString;
-        } else {
-            selectString = String.join(", ", selectAliases);
-        }
+        String selectString = String.join(", ", selectAliases);
 
         // Create FROM query string.
         String fromString = databaseName_global_counts + ".`" + countsTableName + "`";
 
-        // If we aren't projecting from the global counts table, we need to retrieve the tables that need to be joined
-        // in order to generate the counts table.
-        if (!buildByProjection) {
-            ResultSet rs3 = st2.executeQuery(
-                QueryGenerator.createMetaQueriesExtractionQuery(
-                    rchain,
-                    "Counts",
-                    "FROM",
-                    null,
-                    false
-                )
-            );
+        ResultSet rs3 = st2.executeQuery(
+            QueryGenerator.createMetaQueriesExtractionQuery(
+                rchain,
+                "Counts",
+                "FROM",
+                null,
+                false
+            )
+        );
 
-            List<String> fromAliases = extractEntries(rs3, "Entries");
-            fromString = String.join(", ", fromAliases);
-        }
+        List<String> fromAliases = extractEntries(rs3, "Entries");
+        fromString = String.join(", ", fromAliases);
 
         // Create WHERE query string.
         String whereString = null;
 
-        // The WHERE clause is for joining tables to generate the counts from and isn't necessary if we are projecting
-        // from the global counts table.
-        if (!buildByProjection) {
-            ResultSet rs4 = st2.executeQuery(
-                QueryGenerator.createMetaQueriesExtractionQuery(
-                    rchain,
-                    "Counts",
-                    "WHERE",
-                    null,
-                    false
-                )
-            );
+        // The WHERE clause is for joining tables to generate the counts from.
+        ResultSet rs4 = st2.executeQuery(
+            QueryGenerator.createMetaQueriesExtractionQuery(
+                rchain,
+                "Counts",
+                "WHERE",
+                null,
+                false
+            )
+        );
 
-            List<String> columns = extractEntries(rs4, "Entries");
-            whereString = String.join(" AND ", columns);
-        }
+        List<String> columns = extractEntries(rs4, "Entries");
+        whereString = String.join(" AND ", columns);
 
         // Create the final query.
         String queryString =
             "SELECT " + selectString + " " +
-            "FROM " + fromString;
-
-        if (!buildByProjection) {
-            queryString += " WHERE " + whereString;
-        }
+            "FROM " + fromString + " " +
+            "WHERE " + whereString;
 
         // Create GROUP BY query string.
         // This seems unnecessarily complicated - isn't there always a GROUP BY clause?
@@ -1083,7 +1067,7 @@ public class CountsManager {
                 )
             );
 
-            List<String> columns = extractEntries(rs_6, "Entries");
+            columns = extractEntries(rs_6, "Entries");
             String GroupByString = String.join(", ", columns);
 
             if (!GroupByString.isEmpty()) {
@@ -1316,7 +1300,7 @@ public class CountsManager {
     private static String buildRNodeCTCreationQuery(
         String rnode,
         String shortRNode,
-        Map<String, String> joinTableQueries
+        Map<String, String[]> joinTableQueries
     ) throws SQLException {
         // Must specify the columns or there will be column mismatches when taking the UNION of the counts and false
         // tables.
@@ -1356,7 +1340,7 @@ public class CountsManager {
             "SELECT " + UnionColumnString + " " +
             "FROM " +
                 "(" + FALSE_SUBQUERY_PLACEHOLDER + ") AS FALSE_TABLE, " +
-                "(" + joinTableQueries.get(shortRNode) + ") AS JOIN_TABLE " +
+                "(" + joinTableQueries.get(shortRNode)[0] + ") AS JOIN_TABLE " +
             "WHERE MULT > 0";
         return createCTString;
     }
@@ -1369,11 +1353,11 @@ public class CountsManager {
      * JOIN tables are cross joined with "_false" tables to help generate the "_CT" tables.
      * </p>
      * @return a {@code Map} object containing queries that can be used to create JOIN tables as derived tables.  The
-     *         entries in the {@code Map} object have the form of &lt;short_rnid&gt;:&lt;joinTableQuery&gt;.
+     *         entries in the {@code Map} object have the form of &lt;short_rnid&gt;:[&lt;joinTableQuery&gt;,&lt;joinTableColumns&gt;].
      * @throws SQLException if there are issues executing the SQL queries.
      */
-    private static Map<String, String> createJoinTableQueries() throws SQLException {
-        Map<String, String> joinTableQueries = new HashMap<String, String>();
+    private static Map<String, String[]> createJoinTableQueries() throws SQLException {
+        Map<String, String[]> joinTableQueries = new HashMap<String, String[]>();
 
         dbConnection.setCatalog(databaseName_BN);
         Statement st = dbConnection.createStatement();
@@ -1400,11 +1384,19 @@ public class CountsManager {
             List<String> columns = extractEntries(rs2, "Entries");
             String additionalColumns = String.join(", ", columns);
             StringBuilder joinTableQuerybuilder = new StringBuilder("SELECT \"F\" AS `" + orig_rnid + "`");
+            StringBuilder joinTableColumnbuilder = new StringBuilder("`" + orig_rnid + "`");
             if (!additionalColumns.isEmpty()) {
                 joinTableQuerybuilder.append(", " + additionalColumns);
+                joinTableColumnbuilder.append(", " + additionalColumns);
             }
 
-            joinTableQueries.put(short_rnid, joinTableQuerybuilder.toString());
+            joinTableQueries.put(
+                short_rnid,
+                new String[] {
+                    joinTableQuerybuilder.toString(),
+                    joinTableColumnbuilder.toString()
+                }
+            );
             st2.close();
         }
 
