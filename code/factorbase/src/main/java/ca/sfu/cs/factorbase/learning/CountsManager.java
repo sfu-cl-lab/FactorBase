@@ -176,13 +176,9 @@ public class CountsManager {
             startingHeight
         );
 
-        long l = System.currentTimeMillis(); //@zqian : CT table generating time
         if (!countingStrategy.useProjection()) {
             // Generating pvars_counts.
             buildPVarsCounts(databaseName_CT, countingStrategy);
-            long end = System.currentTimeMillis();
-            RuntimeLogger.updateLogEntry(dbConnection, "buildPVarsCounts", end - l);
-            RuntimeLogger.logRunTimeDetails(logger, "buildPVarsCounts", l, end);
         }
 
         // preparing the _join part for _CT tables
@@ -190,6 +186,7 @@ public class CountsManager {
         Map<String, String> joinTableQueries = createJoinTableQueries();
         RuntimeLogger.updateLogEntry(dbConnection, "createJoinTableQueries", System.currentTimeMillis() - start);
 
+        long l = System.currentTimeMillis(); //@zqian: CT table generating time
         if (linkCorrelation.equals("1") && relationshipLattice.getHeight() != 0) {
             start = System.currentTimeMillis();
 
@@ -755,6 +752,7 @@ public class CountsManager {
         String targetDatabaseName,
         CountingStrategy countingStrategy
     ) throws SQLException {
+        long start = System.currentTimeMillis();
         dbConnection.setCatalog(databaseName_BN);
         Statement st = dbConnection.createStatement();
         ResultSet rs = st.executeQuery(
@@ -810,6 +808,10 @@ public class CountsManager {
 
         rs.close();
         st.close();
+
+        long end = System.currentTimeMillis();
+        RuntimeLogger.updateLogEntry(dbConnection, "buildPVarsCounts", end - start);
+        RuntimeLogger.logRunTimeDetails(logger, "buildPVarsCounts", start, end);
     }
 
 
