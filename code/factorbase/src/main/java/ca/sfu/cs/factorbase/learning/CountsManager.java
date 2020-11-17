@@ -177,11 +177,13 @@ public class CountsManager {
         );
 
         long l = System.currentTimeMillis(); //@zqian : CT table generating time
-           // handling Pvars, generating pvars_counts       
-        buildPVarsCounts(countingStrategy);
-        long end = System.currentTimeMillis();
-        RuntimeLogger.updateLogEntry(dbConnection, "buildPVarsCounts", end - l);
-        RuntimeLogger.logRunTimeDetails(logger, "buildPVarsCounts", l, end);
+        if (!countingStrategy.useProjection()) {
+            // Generating pvars_counts.
+            buildPVarsCounts(databaseName_CT, countingStrategy);
+            long end = System.currentTimeMillis();
+            RuntimeLogger.updateLogEntry(dbConnection, "buildPVarsCounts", end - l);
+            RuntimeLogger.logRunTimeDetails(logger, "buildPVarsCounts", l, end);
+        }
 
         // preparing the _join part for _CT tables
         long start = System.currentTimeMillis();
@@ -232,7 +234,7 @@ public class CountsManager {
             for(int len = 2; len <= latticeHeight; len++) {
                 ctStart = System.currentTimeMillis();
                 rchainInfos = relationshipLattice.getRChainsInfo(len);
-                buildRChainsCT(rchainInfos, len, joinTableQueries, countingStrategy.getStorageEngine());
+                buildRChainsCT(rchainInfos, len, joinTableQueries, countingStrategy.getStorageEngine(), countingStrategy);
                 RuntimeLogger.logRunTimeDetails(logger, "buildRChainsCT-length=" + len, ctStart, System.currentTimeMillis());
             }
             RuntimeLogger.updateLogEntry(dbConnection, "buildFlatStarCT", System.currentTimeMillis() - start);
@@ -291,7 +293,11 @@ public class CountsManager {
         RuntimeLogger.updateLogEntry(dbConnection, "buildRNodeCounts", System.currentTimeMillis() - start);
 
         // Build the _star table subquery.
-        String starTableSubQuery = buildRNodeStarQuery(rnode, shortRNode);
+        String starTableSubQuery = buildRNodeStarQuery(
+            rnode,
+            shortRNode,
+            countingStrategy
+        );
 
         // Build the _flat table.
         buildRNodeFlat(rnode, shortRNode, countingStrategy.getStorageEngine(), countsTableSubQuery);
@@ -374,7 +380,13 @@ public class CountsManager {
         dbConnection.setCatalog(databaseName_BN);
         RelationshipLattice relationshipLattice = propagateFunctorSetInfo(dbConnection);
 
-        // Generate the global counts in the "_global_counts" database.
+        // Generate the global counts in the "_global_counts" database for the PVars.
+        buildPVarsCounts(
+            databaseName_global_counts,
+            CountingStrategy.PreCount
+        );
+
+        // Generate the global counts in the "_global_counts" database for the RChains.
         buildRChainCounts(
             databaseName_global_counts,
             relationshipLattice,
@@ -492,13 +504,15 @@ public class CountsManager {
      * @param len - length of the RChains to consider.
      * @param joinTableQueries - {@code Map} to retrieve the associated query to create a derived JOIN table.
      * @param storageEngine - the storage engine to use for the tables created when executing this method.
+     * @param countingStrategy - {@link CountingStrategy} to indicate where counts tables should be read from.
      * @throws SQLException if there are issues executing the SQL queries.
      */
     private static void buildRChainsCT(
         List<FunctorNodesInfo> rchainInfos,
         int len,
         Map<String, String> joinTableQueries,
-        String storageEngine
+        String storageEngine,
+        CountingStrategy countingStrategy
     ) throws SQLException {
         int fc=0;
         for (FunctorNodesInfo rchainInfo : rchainInfos)
@@ -559,7 +573,14 @@ public class CountsManager {
                 String MultString = makeStarSepQuery(columns);
                 rs3.close();
                 //  create from query string
-                String fromString = String.join(", ", columns);
+                String fromString;
+                if (countingStrategy.isHybrid()) {
+                    // When the hybrid method is used, the counts are projected from the global counts.
+                    fromString = prefixCountsTables(columns, databaseName_global_counts);
+                } else {
+                    fromString = String.join(", ", columns);
+                }
+
                 //  create where query string
                 ResultSet rs5 = st2.executeQuery(
                     QueryGenerator.createMetaQueriesExtractionQuery(
@@ -699,12 +720,41 @@ public class CountsManager {
 
 
     /**
+     * Add the given database name prefix to any "_counts" tables in the given list.
+     *
+     * @param tableNames - table names to add a database prefix to.
+     * @param databasePrefix - the name of the database to use as a prefix.
+     * @return a CSV of the given tables with any "_counts" tables prefixed with the given database
+     *         name.
+     */
+    private static String prefixCountsTables(
+        List<String> tableNames,
+        String databasePrefix
+    ) {
+        StringJoiner csv = new StringJoiner(", ");
+        for (String tableName : tableNames) {
+            if (tableName.endsWith("_counts")) {
+                csv.add(databasePrefix + "." + tableName);
+            } else {
+                csv.add(tableName);
+            }
+        }
+
+        return csv.toString();
+    }
+
+
+    /**
      * Build the "_counts" tables for the population variables.
      *
+     * @param targetDatabaseName - the name of the database to generate the "_counts" table in.
      * @param countingStrategy - {@link CountingStrategy} to indicate how counts related tables should be generated.
      * @throws SQLException if there are issues executing the SQL queries.
      */
-    private static void buildPVarsCounts(CountingStrategy countingStrategy) throws SQLException {
+    private static void buildPVarsCounts(
+        String targetDatabaseName,
+        CountingStrategy countingStrategy
+    ) throws SQLException {
         dbConnection.setCatalog(databaseName_BN);
         Statement st = dbConnection.createStatement();
         ResultSet rs = st.executeQuery(
@@ -750,7 +800,7 @@ public class CountsManager {
             }
 
             generateCountsMethod.apply(
-                databaseName_CT,
+                targetDatabaseName,
                 countsTableName,
                 columnAliases,
                 countingStrategy.getStorageEngine(),
@@ -1137,12 +1187,14 @@ public class CountsManager {
      *
      * @param rnode - the name of the RNode to build the "_star" table for.
      * @param shortRNode - the short name of the RNode to build the "_star" table for.
+     * @param countingStrategy - {@link CountingStrategy} to indicate where counts tables should be read from.
      * @return an SQL query to generate the star table for the given RNode.
      * @throws SQLException if there are issues executing the SQL queries.
      */
     private static String buildRNodeStarQuery(
         String rnode,
-        String shortRNode
+        String shortRNode,
+        CountingStrategy countingStrategy
     ) throws SQLException {
         dbConnection.setCatalog(databaseName_BN);
         Statement statement = dbConnection.createStatement();
@@ -1177,8 +1229,12 @@ public class CountsManager {
         statement.close();
         String multiplicationString = makeStarSepQuery(columns);
 
+        String dbPrefix = databaseName_CT;
+        if (countingStrategy.isHybrid() && columns.get(0).endsWith("_counts")) {
+            dbPrefix = databaseName_global_counts;
+        }
         // Create FROM query string.
-        String fromString = databaseName_CT + "." + String.join(", " + databaseName_CT + ".", columns);
+        String fromString = dbPrefix + "." + String.join(", " + dbPrefix + ".", columns);
 
         // Create the final query string.
         String queryString = "SELECT " + multiplicationString + " AS MULT";
