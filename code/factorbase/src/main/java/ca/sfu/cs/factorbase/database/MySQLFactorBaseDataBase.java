@@ -490,15 +490,19 @@ public class MySQLFactorBaseDataBase implements FactorBaseDataBase {
 
             String tableName = null;
             String shortID = functorInfos.getShortID();
+            String sourceDatabaseName = dbInfo.getCTDatabaseName();
             if (shortID != null) {
                 tableName = shortID + "_CT";
             } else {
                 tableName = functorInfos.getID() + "_counts";
+                if (countingStrategy.isHybrid()) {
+                    sourceDatabaseName = dbInfo.getGlobalCountsDatabaseName();
+                }
             }
 
             PreparedStatement query = this.dbConnection.prepareStatement(
                 "SELECT * " +
-                "FROM " + dbInfo.getCTDatabaseName() + ".`" + tableName + "` " +
+                "FROM " + sourceDatabaseName + ".`" + tableName + "` " +
                 "WHERE MULT > 0;"
             );
 
