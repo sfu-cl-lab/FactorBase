@@ -222,7 +222,7 @@ public class CountsManager {
                 String ctCreationQuery = buildRNodeCTCreationQuery(rnode, shortRNode, joinTableQueries);
 
                 long ctStart = System.currentTimeMillis();
-                buildCTMethod.apply(
+                boolean builtFromCache = buildCTMethod.apply(
                     dbInfo.getCTDatabaseName(),
                     ctTableName,
                     countingStrategy,
@@ -235,6 +235,7 @@ public class CountsManager {
                     logPDPOutput(
                         dbInfo.getCTDatabaseName(),
                         ctTableName,
+                        builtFromCache,
                         1,
                         ctStart,
                         System.currentTimeMillis()
@@ -267,9 +268,11 @@ public class CountsManager {
      * @param ctCreationQuery - SELECT query used to create the CT table.
      * @param rnode - the name of the RNode to generate the CT table for.
      * @param shortRNode - the short name of the RNode to generate the CT table for.
+     * @return True if the CT table was generated from a cache; this method doesn't use a cache, so it always returns
+     *         false.
      * @throws SQLException if there are issues executing the SQL queries.
      */
-    private static void buildRNodesCT(
+    private static boolean buildRNodesCT(
         String targetDatabaseName,
         String ctTableName,
         CountingStrategy countingStrategy,
@@ -328,6 +331,9 @@ public class CountsManager {
         try (Statement statement = dbConnection.createStatement()) {
             statement.executeUpdate(createCTQuery);
         }
+
+        // This method is not supposed to use a cache, so it should always return false.
+        return false;
     }
 
 
@@ -340,9 +346,10 @@ public class CountsManager {
      * @param ctCreationQuery - SELECT query used to create the CT table.
      * @param rnode - the name of the RNode to generate the CT table for.
      * @param shortRNode - the short name of the RNode to generate the CT table for.
+     * @return True if the CT table was generated from a cache; otherwise false.
      * @throws SQLException if there are issues executing the SQL queries.
      */
-    private static void buildRNodesCTFromCache(
+    private static boolean buildRNodesCTFromCache(
         String targetDatabaseName,
         String ctTableName,
         CountingStrategy countingStrategy,
@@ -352,6 +359,7 @@ public class CountsManager {
     ) throws SQLException {
         String ctTablesCacheKey = ctTableName + ctCreationQuery;
         String cacheTableName = ctTablesCache.get(ctTablesCacheKey);
+        boolean cacheUsed = cacheTableName != null;
         if (cacheTableName == null) {
             // Create the table in the CT cache database.
             cacheTableName = ctTableName + "_" + tableID;
@@ -376,6 +384,8 @@ public class CountsManager {
                 "FROM " + dbInfo.getCTCacheDatabaseName() + "." + cacheTableName;
             createViewStatement.executeUpdate(viewQuery);
         }
+
+        return cacheUsed;
     }
 
 
@@ -469,11 +479,19 @@ public class CountsManager {
      *
      * @param database - the name of the database containing the "_CT" table to get the PDP information for.
      * @param table - the name of the table to get the PDP information for.
+     * @param cacheUsed - True if a cache was used to generate the "_CT" table; otherwise false.
      * @param rchainLength - the RChain length that the given "_CT" table was generated for.
      * @param start - table creation start time of the given "_CT" table.
      * @param end - table creation end time of the given "_CT" table.
      */
-    private static void logPDPOutput(String database, String table, int rchainLength, long start, long end) {
+    private static void logPDPOutput(
+        String database,
+        String table,
+        boolean cacheUsed,
+        int rchainLength,
+        long start,
+        long end
+    ) {
         try {
             MySQLDataExtractor extractor = new MySQLDataExtractor(
                 dbConnection.prepareStatement("SELECT * FROM " + database + "." + table),
@@ -501,7 +519,11 @@ public class CountsManager {
             // Note: The division below will take the floor of the result.
             String V = String.valueOf(totalNumberOfValuesPerColumn.divide(new BigInteger(String.valueOf(C))));
 
-            RuntimeLogger.pdpOutput(logger, "CT Build Time", "L" + L + ",C" + C + ",V" + V,
+            String cacheUsedAsString = String.valueOf(cacheUsed).substring(0, 1).toUpperCase();
+            RuntimeLogger.pdpOutput(
+                logger,
+                "CT Build Time",
+                "cached" + cacheUsedAsString + ",L" + L + ",C" + C + ",V" + V,
                 start,
                 end
             );
@@ -1658,10 +1680,11 @@ public class CountsManager {
      * @param <E> (String) the name of the RNode to generate the CT table for.
      * @param <F> (String) the short name of the RNode to generate the CT table for.
      * @param <G> (SQLException) the SQLException that should be thrown if there are issues executing the SQL queries.
+     * @return True if the CT table was generated from a cache; otherwise false.
      */
     @FunctionalInterface
     private interface BuildRNodesCTMethod<A, B, C, D, E, F, G extends SQLException> {
-        public void apply(
+        public boolean apply(
             A targetDatabaseName,
             B ctTableName,
             C countingStrategy,
