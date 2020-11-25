@@ -1,5 +1,6 @@
 package ca.sfu.cs.factorbase.learning;
 
+import java.math.BigInteger;
 import java.sql.Connection;
 
 /*zqian, April 1st, 2014 fixed the bug of too many connections by adding con4.close()*/
@@ -34,9 +35,13 @@ import java.util.StringJoiner;
 import java.util.logging.Logger;
 
 import ca.sfu.cs.common.Configuration.Config;
+import ca.sfu.cs.factorbase.data.DataSet;
+import ca.sfu.cs.factorbase.data.DataSetMetaData;
 import ca.sfu.cs.factorbase.data.FunctorNodesInfo;
+import ca.sfu.cs.factorbase.data.MySQLDataExtractor;
 import ca.sfu.cs.factorbase.database.FactorBaseDataBaseInfo;
 import ca.sfu.cs.factorbase.database.MySQLFactorBaseDataBase;
+import ca.sfu.cs.factorbase.exception.DataExtractionException;
 import ca.sfu.cs.factorbase.lattice.LatticeGenerator;
 import ca.sfu.cs.factorbase.lattice.RelationshipLattice;
 import ca.sfu.cs.factorbase.util.MySQLScriptRunner;
@@ -56,6 +61,7 @@ public class CountsManager {
     private static String dbUsername;
     private static String dbPassword;
     private static String dbaddress;
+    private static boolean generatePDPInfo;
     private static String linkCorrelation;
     private static long dbTemporaryTableSize;
     /*
@@ -208,13 +214,14 @@ public class CountsManager {
             }
 
             // Build the CT tables for the first level of the relationship lattice.
-            long ctStart = System.currentTimeMillis();
+            long ctAllStart = System.currentTimeMillis();
             for (FunctorNodesInfo rnodeInfo : rchainInfos) {
                 String rnode = rnodeInfo.getID();
                 String shortRNode = rnodeInfo.getShortID();
                 String ctTableName = shortRNode + "_CT";
                 String ctCreationQuery = buildRNodeCTCreationQuery(rnode, shortRNode, joinTableQueries);
 
+                long ctStart = System.currentTimeMillis();
                 buildCTMethod.apply(
                     dbInfo.getCTDatabaseName(),
                     ctTableName,
@@ -223,15 +230,25 @@ public class CountsManager {
                     rnode,
                     shortRNode
                 );
+
+                if(generatePDPInfo) {
+                    logPDPOutput(
+                        dbInfo.getCTDatabaseName(),
+                        ctTableName,
+                        1,
+                        ctStart,
+                        System.currentTimeMillis()
+                    );
+                }
             }
-            RuntimeLogger.logRunTimeDetails(logger, "buildRChainsCT-length=1", ctStart, System.currentTimeMillis());
+            RuntimeLogger.logRunTimeDetails(logger, "buildRChainsCT-length=1", ctAllStart, System.currentTimeMillis());
 
             //building the _CT tables. Going up the Rchain lattice
             for(int len = 2; len <= latticeHeight; len++) {
-                ctStart = System.currentTimeMillis();
+                ctAllStart = System.currentTimeMillis();
                 rchainInfos = relationshipLattice.getRChainsInfo(len);
                 buildRChainsCT(rchainInfos, len, joinTableQueries, countingStrategy.getStorageEngine());
-                RuntimeLogger.logRunTimeDetails(logger, "buildRChainsCT-length=" + len, ctStart, System.currentTimeMillis());
+                RuntimeLogger.logRunTimeDetails(logger, "buildRChainsCT-length=" + len, ctAllStart, System.currentTimeMillis());
             }
             RuntimeLogger.updateLogEntry(dbConnection, "buildFlatStarCT", System.currentTimeMillis() - start);
         }
@@ -442,7 +459,57 @@ public class CountsManager {
         dbTemporaryTableSize = Math.round(1024 * 1024 * 1024 * Double.valueOf(conf.getProperty("dbtemporarytablesize")));
         linkCorrelation = conf.getProperty("LinkCorrelations");
         cont = conf.getProperty("Continuous");
+        String loggingLevel = conf.getProperty("LoggingLevel");
+        generatePDPInfo = loggingLevel.equals("runtimeDetails") || loggingLevel.equals("debug");
     }
+
+
+    /**
+     * Log the necessary information to generate a partial dependency plot (PDP) for constructing "_CT" tables.
+     *
+     * @param database - the name of the database containing the "_CT" table to get the PDP information for.
+     * @param table - the name of the table to get the PDP information for.
+     * @param rchainLength - the RChain length that the given "_CT" table was generated for.
+     * @param start - table creation start time of the given "_CT" table.
+     * @param end - table creation end time of the given "_CT" table.
+     */
+    private static void logPDPOutput(String database, String table, int rchainLength, long start, long end) {
+        try {
+            MySQLDataExtractor extractor = new MySQLDataExtractor(
+                dbConnection.prepareStatement("SELECT * FROM " + database + "." + table),
+                dbInfo.getCountColumnName(),
+                dbInfo.isDiscrete()
+            );
+            DataSet data = extractor.extractData();
+            DataSetMetaData metadata = data.getMetaData();
+            int countColumnIndex = metadata.getCountColumnIndex();
+
+            // L is the length of the RChain the CT table was built for.
+            int L = rchainLength;
+
+            // C is the number of non-ID columns, excluding the "MULT" column.
+            int C = metadata.getVariableNames().size();
+            BigInteger totalNumberOfValuesPerColumn = new BigInteger("0");
+            for (int i = 0; i <= C; i++) {
+                if (i != countColumnIndex) {
+                    String numberOfValues = String.valueOf(metadata.getNumberOfStates(i));
+                    totalNumberOfValuesPerColumn = totalNumberOfValuesPerColumn.add(new BigInteger(numberOfValues));
+                }
+            }
+
+            // V is the average number of possible values each non-ID column contains.
+            // Note: The division below will take the floor of the result.
+            String V = String.valueOf(totalNumberOfValuesPerColumn.divide(new BigInteger(String.valueOf(C))));
+
+            RuntimeLogger.pdpOutput(logger, "CT Build Time", "L" + L + ",C" + C + ",V" + V,
+                start,
+                end
+            );
+        } catch (DataExtractionException | SQLException e) {
+            logger.warning("Ran into a problem collecting the PDP data - " + e.getMessage());
+        }
+    }
+
 
     /**
      * Connect to database via MySQL JDBC driver
