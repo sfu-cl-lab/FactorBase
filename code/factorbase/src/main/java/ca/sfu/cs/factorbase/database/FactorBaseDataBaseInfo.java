@@ -7,7 +7,9 @@ import ca.sfu.cs.common.Configuration.Config;
  */
 public class FactorBaseDataBaseInfo {
     private String bnDatabaseName;
+    private String ctCacheDatabaseName;
     private String ctDatabaseName;
+    private String globalCountsDatabaseName;
     private String setupDatabaseName;
     private String countColumnName;
     private boolean isDiscrete;
@@ -20,7 +22,9 @@ public class FactorBaseDataBaseInfo {
     public FactorBaseDataBaseInfo(Config config) {
         String dbName = config.getProperty("dbname");
         this.bnDatabaseName = dbName + "_BN";
+        this.ctCacheDatabaseName = dbName + "_CT_cache";
         this.ctDatabaseName = dbName + "_CT";
+        this.globalCountsDatabaseName = dbName + "_global_counts";
         this.setupDatabaseName = dbName + "_setup";
         this.countColumnName = "MULT";
         this.isDiscrete = !config.getProperty("Continuous").equals("1");
@@ -38,12 +42,32 @@ public class FactorBaseDataBaseInfo {
 
 
     /**
+     * Retrieve the name of the CT cache database for FactorBase.
+     *
+     * @return the name of the CT cache database.
+     */
+    public String getCTCacheDatabaseName() {
+        return this.ctCacheDatabaseName;
+    }
+
+
+    /**
      * Retrieve the name of the CT database for FactorBase.
      *
      * @return the name of the CT database.
      */
     public String getCTDatabaseName() {
         return this.ctDatabaseName;
+    }
+
+
+    /**
+     * Retrieve the name of the global counts database for FactorBase.
+     *
+     * @return the name of the global counts database.
+     */
+    public String getGlobalCountsDatabaseName() {
+        return this.globalCountsDatabaseName;
     }
 
 
