@@ -26,6 +26,26 @@ public final class RuntimeLogger {
 
 
     /**
+     * Log the information necessary to produce partial dependency plots (PDPs).
+     *
+     * @param logger - {@code Logger} to write the PDP information to.
+     * @param component - label for the component that the PDP information is for.
+     * @param details - parameters that can be used for the x and y axes of the PDP plots to generate.
+     * @param start - the creation start time of the component the PDP is for.
+     * @param end - the creation end time of the component the PDP is for.
+     */
+    public static void pdpOutput(
+        Logger logger,
+        String component,
+        String details,
+        long start,
+        long end
+    ) {
+        logger.fine("PDP[" + component + "|" + details + "]: " + String.valueOf(end - start) + "ms.");
+    }
+
+
+    /**
      * Helper method to write out the run times for high level components in a consistent format.
      *
      * @param logger - the logger to write the runtime to.

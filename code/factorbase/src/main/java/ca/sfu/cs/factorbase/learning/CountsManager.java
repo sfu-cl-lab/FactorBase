@@ -1,5 +1,6 @@
 package ca.sfu.cs.factorbase.learning;
 
+import java.math.BigInteger;
 import java.sql.Connection;
 
 /*zqian, April 1st, 2014 fixed the bug of too many connections by adding con4.close()*/
@@ -34,8 +35,13 @@ import java.util.StringJoiner;
 import java.util.logging.Logger;
 
 import ca.sfu.cs.common.Configuration.Config;
+import ca.sfu.cs.factorbase.data.DataSet;
+import ca.sfu.cs.factorbase.data.DataSetMetaData;
 import ca.sfu.cs.factorbase.data.FunctorNodesInfo;
+import ca.sfu.cs.factorbase.data.MySQLDataExtractor;
+import ca.sfu.cs.factorbase.database.FactorBaseDataBaseInfo;
 import ca.sfu.cs.factorbase.database.MySQLFactorBaseDataBase;
+import ca.sfu.cs.factorbase.exception.DataExtractionException;
 import ca.sfu.cs.factorbase.lattice.LatticeGenerator;
 import ca.sfu.cs.factorbase.lattice.RelationshipLattice;
 import ca.sfu.cs.factorbase.util.MySQLScriptRunner;
@@ -50,14 +56,12 @@ public class CountsManager {
     private static final String FALSE_SUBQUERY_PLACEHOLDER = "@@F_SUBQUERY@@";
     private static int tableID;
     private static Map<String, String> ctTablesCache = new HashMap<String, String>();
+    private static FactorBaseDataBaseInfo dbInfo;
     private static String databaseName_std;
-    private static String databaseName_BN;
-    private static String databaseName_CT;
-    private static String databaseName_CT_cache;
-    private static String databaseName_global_counts;
     private static String dbUsername;
     private static String dbPassword;
     private static String dbaddress;
+    private static boolean generatePDPInfo;
     private static String linkCorrelation;
     private static long dbTemporaryTableSize;
     /*
@@ -83,12 +87,12 @@ public class CountsManager {
     ) throws SQLException {
         RuntimeLogger.addLogEntry(dbConnection);
         try (Statement statement = dbConnection.createStatement()) {
-            statement.execute("DROP SCHEMA IF EXISTS " + databaseName_CT + ";");
-            statement.execute("CREATE SCHEMA " + databaseName_CT + " /*M!100316 COLLATE utf8_general_ci*/;");
+            statement.execute("DROP SCHEMA IF EXISTS " + dbInfo.getCTDatabaseName() + ";");
+            statement.execute("CREATE SCHEMA " + dbInfo.getCTDatabaseName() + " /*M!100316 COLLATE utf8_general_ci*/;");
         }
 
         // Propagate metadata based on the FunctorSet.
-        dbConnection.setCatalog(databaseName_BN);
+        dbConnection.setCatalog(dbInfo.getBNDatabaseName());
         RelationshipLattice relationshipLattice = propagateFunctorSetInfo(dbConnection);
 
         // building CT tables for Rchain
@@ -169,7 +173,7 @@ public class CountsManager {
 
         // Build the counts tables for the RChains.
         buildRChainCounts(
-            databaseName_CT,
+            dbInfo.getCTDatabaseName(),
             relationshipLattice,
             countingStrategy.useProjection(),
             countingStrategy.getStorageEngine(),
@@ -210,30 +214,42 @@ public class CountsManager {
             }
 
             // Build the CT tables for the first level of the relationship lattice.
-            long ctStart = System.currentTimeMillis();
+            long ctAllStart = System.currentTimeMillis();
             for (FunctorNodesInfo rnodeInfo : rchainInfos) {
                 String rnode = rnodeInfo.getID();
                 String shortRNode = rnodeInfo.getShortID();
                 String ctTableName = shortRNode + "_CT";
                 String ctCreationQuery = buildRNodeCTCreationQuery(rnode, shortRNode, joinTableQueries);
 
-                buildCTMethod.apply(
-                    databaseName_CT,
+                long ctStart = System.currentTimeMillis();
+                boolean builtFromCache = buildCTMethod.apply(
+                    dbInfo.getCTDatabaseName(),
                     ctTableName,
                     countingStrategy,
                     ctCreationQuery,
                     rnode,
                     shortRNode
                 );
+
+                if(generatePDPInfo) {
+                    logPDPOutput(
+                        dbInfo.getCTDatabaseName(),
+                        ctTableName,
+                        builtFromCache,
+                        1,
+                        ctStart,
+                        System.currentTimeMillis()
+                    );
+                }
             }
-            RuntimeLogger.logRunTimeDetails(logger, "buildRChainsCT-length=1", ctStart, System.currentTimeMillis());
+            RuntimeLogger.logRunTimeDetails(logger, "buildRChainsCT-length=1", ctAllStart, System.currentTimeMillis());
 
             //building the _CT tables. Going up the Rchain lattice
             for(int len = 2; len <= latticeHeight; len++) {
-                ctStart = System.currentTimeMillis();
+                ctAllStart = System.currentTimeMillis();
                 rchainInfos = relationshipLattice.getRChainsInfo(len);
                 buildRChainsCT(rchainInfos, len, joinTableQueries, countingStrategy.getStorageEngine());
-                RuntimeLogger.logRunTimeDetails(logger, "buildRChainsCT-length=" + len, ctStart, System.currentTimeMillis());
+                RuntimeLogger.logRunTimeDetails(logger, "buildRChainsCT-length=" + len, ctAllStart, System.currentTimeMillis());
             }
             RuntimeLogger.updateLogEntry(dbConnection, "buildFlatStarCT", System.currentTimeMillis() - start);
         }
@@ -252,9 +268,11 @@ public class CountsManager {
      * @param ctCreationQuery - SELECT query used to create the CT table.
      * @param rnode - the name of the RNode to generate the CT table for.
      * @param shortRNode - the short name of the RNode to generate the CT table for.
+     * @return True if the CT table was generated from a cache; this method doesn't use a cache, so it always returns
+     *         false.
      * @throws SQLException if there are issues executing the SQL queries.
      */
-    private static void buildRNodesCT(
+    private static boolean buildRNodesCT(
         String targetDatabaseName,
         String ctTableName,
         CountingStrategy countingStrategy,
@@ -264,7 +282,7 @@ public class CountsManager {
     ) throws SQLException {
         long start = System.currentTimeMillis();
         String countsTableSubQuery = generateCountsTableQuery(
-            databaseName_CT,
+            dbInfo.getCTDatabaseName(),
             rnode,
             shortRNode,
             countingStrategy.useProjection()
@@ -275,16 +293,16 @@ public class CountsManager {
         if (countingStrategy.isOndemand()) {
             long countsStart = System.currentTimeMillis();
             String tableName = generateCountsTable(
-                databaseName_CT,
+                dbInfo.getCTDatabaseName(),
                 shortRNode,
                 countingStrategy.getStorageEngine(),
                 countsTableSubQuery
             );
             RuntimeLogger.logRunTimeDetails(logger, "buildRChainCounts-length=1", countsStart, System.currentTimeMillis());
 
-            countsTableSubQuery = "SELECT * FROM " + databaseName_CT + "." + tableName;
+            countsTableSubQuery = "SELECT * FROM " + dbInfo.getCTDatabaseName() + "." + tableName;
         } else if (countingStrategy.isPrecount()) {
-            countsTableSubQuery = "SELECT * FROM " + databaseName_CT + "." + shortRNode + "_counts";
+            countsTableSubQuery = "SELECT * FROM " + dbInfo.getCTDatabaseName() + "." + shortRNode + "_counts";
         }
 
         // Add runtime to a column used to add to the "Counts" portion and subtract from the "Moebius Join" portion.
@@ -313,6 +331,9 @@ public class CountsManager {
         try (Statement statement = dbConnection.createStatement()) {
             statement.executeUpdate(createCTQuery);
         }
+
+        // This method is not supposed to use a cache, so it should always return false.
+        return false;
     }
 
 
@@ -325,9 +346,10 @@ public class CountsManager {
      * @param ctCreationQuery - SELECT query used to create the CT table.
      * @param rnode - the name of the RNode to generate the CT table for.
      * @param shortRNode - the short name of the RNode to generate the CT table for.
+     * @return True if the CT table was generated from a cache; otherwise false.
      * @throws SQLException if there are issues executing the SQL queries.
      */
-    private static void buildRNodesCTFromCache(
+    private static boolean buildRNodesCTFromCache(
         String targetDatabaseName,
         String ctTableName,
         CountingStrategy countingStrategy,
@@ -337,12 +359,13 @@ public class CountsManager {
     ) throws SQLException {
         String ctTablesCacheKey = ctTableName + ctCreationQuery;
         String cacheTableName = ctTablesCache.get(ctTablesCacheKey);
+        boolean cacheUsed = cacheTableName != null;
         if (cacheTableName == null) {
             // Create the table in the CT cache database.
             cacheTableName = ctTableName + "_" + tableID;
             tableID++;
             buildRNodesCT(
-                databaseName_CT_cache,
+                dbInfo.getCTCacheDatabaseName(),
                 cacheTableName,
                 countingStrategy,
                 ctCreationQuery,
@@ -353,14 +376,16 @@ public class CountsManager {
             ctTablesCache.put(ctTablesCacheKey, cacheTableName);
         }
 
-        dbConnection.setCatalog(databaseName_CT);
+        dbConnection.setCatalog(dbInfo.getCTDatabaseName());
         try (Statement createViewStatement = dbConnection.createStatement()) {
             String viewQuery =
                 "CREATE VIEW " + ctTableName + " AS " +
                 "SELECT * " +
-                "FROM " + databaseName_CT_cache + "." + cacheTableName;
+                "FROM " + dbInfo.getCTCacheDatabaseName() + "." + cacheTableName;
             createViewStatement.executeUpdate(viewQuery);
         }
+
+        return cacheUsed;
     }
 
 
@@ -371,12 +396,12 @@ public class CountsManager {
         RuntimeLogger.addLogEntry(dbConnection);
 
         // Propagate metadata based on the FunctorSet.
-        dbConnection.setCatalog(databaseName_BN);
+        dbConnection.setCatalog(dbInfo.getBNDatabaseName());
         RelationshipLattice relationshipLattice = propagateFunctorSetInfo(dbConnection);
 
         // Generate the global counts in the "_global_counts" database.
         buildRChainCounts(
-            databaseName_global_counts,
+            dbInfo.getGlobalCountsDatabaseName(),
             relationshipLattice,
             false,
             "MEMORY",
@@ -436,18 +461,77 @@ public class CountsManager {
      */
     private static void setVarsFromConfig() {
         Config conf = new Config();
+        dbInfo = new FactorBaseDataBaseInfo(conf);
         databaseName_std = conf.getProperty("dbname");
-        databaseName_BN = databaseName_std + "_BN";
-        databaseName_CT_cache = databaseName_std + "_CT_cache";
-        databaseName_global_counts = databaseName_std + "_global_counts";
-        databaseName_CT = databaseName_std + "_CT";
         dbUsername = conf.getProperty("dbusername");
         dbPassword = conf.getProperty("dbpassword");
         dbaddress = conf.getProperty("dbaddress");
         dbTemporaryTableSize = Math.round(1024 * 1024 * 1024 * Double.valueOf(conf.getProperty("dbtemporarytablesize")));
         linkCorrelation = conf.getProperty("LinkCorrelations");
         cont = conf.getProperty("Continuous");
+        String loggingLevel = conf.getProperty("LoggingLevel");
+        generatePDPInfo = loggingLevel.equals("runtimeDetails") || loggingLevel.equals("debug");
     }
+
+
+    /**
+     * Log the necessary information to generate a partial dependency plot (PDP) for constructing "_CT" tables.
+     *
+     * @param database - the name of the database containing the "_CT" table to get the PDP information for.
+     * @param table - the name of the table to get the PDP information for.
+     * @param cacheUsed - True if a cache was used to generate the "_CT" table; otherwise false.
+     * @param rchainLength - the RChain length that the given "_CT" table was generated for.
+     * @param start - table creation start time of the given "_CT" table.
+     * @param end - table creation end time of the given "_CT" table.
+     */
+    private static void logPDPOutput(
+        String database,
+        String table,
+        boolean cacheUsed,
+        int rchainLength,
+        long start,
+        long end
+    ) {
+        try {
+            MySQLDataExtractor extractor = new MySQLDataExtractor(
+                dbConnection.prepareStatement("SELECT * FROM " + database + "." + table),
+                dbInfo.getCountColumnName(),
+                dbInfo.isDiscrete()
+            );
+            DataSet data = extractor.extractData();
+            DataSetMetaData metadata = data.getMetaData();
+            int countColumnIndex = metadata.getCountColumnIndex();
+
+            // L is the length of the RChain the CT table was built for.
+            int L = rchainLength;
+
+            // C is the number of non-ID columns, excluding the "MULT" column.
+            int C = metadata.getVariableNames().size();
+            BigInteger totalNumberOfValuesPerColumn = new BigInteger("0");
+            for (int i = 0; i <= C; i++) {
+                if (i != countColumnIndex) {
+                    String numberOfValues = String.valueOf(metadata.getNumberOfStates(i));
+                    totalNumberOfValuesPerColumn = totalNumberOfValuesPerColumn.add(new BigInteger(numberOfValues));
+                }
+            }
+
+            // V is the average number of possible values each non-ID column contains.
+            // Note: The division below will take the floor of the result.
+            String V = String.valueOf(totalNumberOfValuesPerColumn.divide(new BigInteger(String.valueOf(C))));
+
+            String cacheUsedAsString = String.valueOf(cacheUsed).substring(0, 1).toUpperCase();
+            RuntimeLogger.pdpOutput(
+                logger,
+                "CT Build Time",
+                "cached" + cacheUsedAsString + ",L" + L + ",C" + C + ",V" + V,
+                start,
+                end
+            );
+        } catch (DataExtractionException | SQLException e) {
+            logger.warning("Ran into a problem collecting the PDP data - " + e.getMessage());
+        }
+    }
+
 
     /**
      * Connect to database via MySQL JDBC driver
@@ -512,7 +596,7 @@ public class CountsManager {
             // counts represents the ct tables where all relationships in Rchain are true
 
             //  create new statement
-            dbConnection.setCatalog(databaseName_BN);
+            dbConnection.setCatalog(dbInfo.getBNDatabaseName());
             Statement st1 = dbConnection.createStatement();
             ResultSet rs1 = st1.executeQuery(
                 "SELECT removed, short_rnid " +
@@ -529,7 +613,7 @@ public class CountsManager {
                 String removedShort = rs1.getString("short_rnid");
                 String BaseName = shortRchain + "_" + removedShort;
 
-                dbConnection.setCatalog(databaseName_BN);
+                dbConnection.setCatalog(dbInfo.getBNDatabaseName());
                 Statement st2 = dbConnection.createStatement();
 
                 //  create select query string  
@@ -590,7 +674,7 @@ public class CountsManager {
                         "FROM " + fromString;
                 }
 
-                dbConnection.setCatalog(databaseName_CT);
+                dbConnection.setCatalog(dbInfo.getCTDatabaseName());
                 Statement st3 = dbConnection.createStatement();
 
                 //make the rnid shorter 
@@ -625,7 +709,7 @@ public class CountsManager {
                 // Add covering index.
                 addCoveringIndex(
                     dbConnection,
-                    databaseName_CT,
+                    dbInfo.getCTDatabaseName(),
                     cur_flat_Table
                 );
 
@@ -635,7 +719,7 @@ public class CountsManager {
                 // This is a big join!
                 String falseTableSubQuery = Sort_merge3.sort_merge(
                     dbConnection,
-                    databaseName_CT,
+                    dbInfo.getCTDatabaseName(),
                     queryString,
                     cur_flat_Table
                 );
@@ -644,7 +728,7 @@ public class CountsManager {
                 ResultSet rs_45 = st2.executeQuery(
                     "SELECT column_name AS Entries " +
                     "FROM information_schema.columns " +
-                    "WHERE table_schema = '" + databaseName_CT + "' " +
+                    "WHERE table_schema = '" + dbInfo.getCTDatabaseName() + "' " +
                     "AND table_name = '" + cur_CT_Table + "';"
                 );
                 columns = extractEntries(rs_45, "Entries");
@@ -705,7 +789,7 @@ public class CountsManager {
      * @throws SQLException if there are issues executing the SQL queries.
      */
     private static void buildPVarsCounts(CountingStrategy countingStrategy) throws SQLException {
-        dbConnection.setCatalog(databaseName_BN);
+        dbConnection.setCatalog(dbInfo.getBNDatabaseName());
         Statement st = dbConnection.createStatement();
         ResultSet rs = st.executeQuery(
             "SELECT " +
@@ -741,7 +825,7 @@ public class CountsManager {
 
             // Extract column aliases.
             List<String> columnAliases;
-            dbConnection.setCatalog(databaseName_BN);
+            dbConnection.setCatalog(dbInfo.getBNDatabaseName());
             try (
                 Statement selectStatement = dbConnection.createStatement();
                 ResultSet selectResultSet = selectStatement.executeQuery(selectQuery)
@@ -750,7 +834,7 @@ public class CountsManager {
             }
 
             generateCountsMethod.apply(
-                databaseName_CT,
+                dbInfo.getCTDatabaseName(),
                 countsTableName,
                 columnAliases,
                 countingStrategy.getStorageEngine(),
@@ -780,7 +864,7 @@ public class CountsManager {
         String storageEngine,
         String pvid
     ) throws SQLException {
-        dbConnection.setCatalog(databaseName_BN);
+        dbConnection.setCatalog(dbInfo.getBNDatabaseName());
         Statement st = dbConnection.createStatement();
         String selectString = String.join(", ", columnAliases);
 
@@ -894,7 +978,7 @@ public class CountsManager {
             cacheTableName = countsTableName + "_" + tableID;
             tableID++;
             generatePVarsCountsTable(
-                databaseName_CT_cache,
+                dbInfo.getCTCacheDatabaseName(),
                 cacheTableName,
                 columnAliases,
                 storageEngine,
@@ -909,7 +993,7 @@ public class CountsManager {
             String viewQuery =
                 "CREATE VIEW " + countsTableName + " AS " +
                 "SELECT * " +
-                "FROM " + databaseName_CT_cache + "." + cacheTableName;
+                "FROM " + dbInfo.getCTCacheDatabaseName() + "." + cacheTableName;
             createViewStatement.executeUpdate(viewQuery);
         }
     }
@@ -990,7 +1074,7 @@ public class CountsManager {
         String countsTableName = shortRchain + "_counts";
 
         // Create new statements.
-        dbConnection.setCatalog(databaseName_BN);
+        dbConnection.setCatalog(dbInfo.getBNDatabaseName());
         Statement st2 = dbConnection.createStatement();
 
         // Create SELECT query string.
@@ -1020,7 +1104,7 @@ public class CountsManager {
         }
 
         // Create FROM query string.
-        String fromString = databaseName_global_counts + ".`" + countsTableName + "`";
+        String fromString = dbInfo.getGlobalCountsDatabaseName() + ".`" + countsTableName + "`";
 
         // If we aren't projecting from the global counts table, we need to retrieve the tables that need to be joined
         // in order to generate the counts table.
@@ -1144,7 +1228,7 @@ public class CountsManager {
         String rnode,
         String shortRNode
     ) throws SQLException {
-        dbConnection.setCatalog(databaseName_BN);
+        dbConnection.setCatalog(dbInfo.getBNDatabaseName());
         Statement statement = dbConnection.createStatement();
 
         // Create SELECT query string.
@@ -1178,7 +1262,7 @@ public class CountsManager {
         String multiplicationString = makeStarSepQuery(columns);
 
         // Create FROM query string.
-        String fromString = databaseName_CT + "." + String.join(", " + databaseName_CT + ".", columns);
+        String fromString = dbInfo.getCTDatabaseName() + "." + String.join(", " + dbInfo.getCTDatabaseName() + ".", columns);
 
         // Create the final query string.
         String queryString = "SELECT " + multiplicationString + " AS MULT";
@@ -1206,7 +1290,7 @@ public class CountsManager {
         String storageEngine,
         String countsTableSubQuery
     ) throws SQLException {
-        dbConnection.setCatalog(databaseName_BN);
+        dbConnection.setCatalog(dbInfo.getBNDatabaseName());
         Statement statement = dbConnection.createStatement();
 
         // Create SELECT query string.
@@ -1270,7 +1354,7 @@ public class CountsManager {
             queryString
         );
         RuntimeLogger.logExecutedQuery(logger, createString);
-        dbConnection.setCatalog(databaseName_CT);
+        dbConnection.setCatalog(dbInfo.getCTDatabaseName());
         try (Statement createStatement = dbConnection.createStatement()) {
             createStatement.executeUpdate(createString);
         }
@@ -1278,7 +1362,7 @@ public class CountsManager {
         // Add covering index.
         addCoveringIndex(
             dbConnection,
-            databaseName_CT,
+            dbInfo.getCTDatabaseName(),
             flatTableName
         );
     }
@@ -1296,7 +1380,7 @@ public class CountsManager {
         // Computing the false table as the MULT difference between the matching rows of the star and flat tables.
         return Sort_merge3.sort_merge(
             dbConnection,
-            databaseName_CT,
+            dbInfo.getCTDatabaseName(),
             starTableSubQuery,
             shortRNode + "_flat"
         );
@@ -1330,7 +1414,7 @@ public class CountsManager {
 
         // Extract and escape the column names since they look like function calls to MySQL.
         List<String> columns;
-        dbConnection.setCatalog(databaseName_BN);
+        dbConnection.setCatalog(dbInfo.getBNDatabaseName());
         try (
             Statement statement = dbConnection.createStatement();
             ResultSet result = statement.executeQuery(columnQuery)
@@ -1375,7 +1459,7 @@ public class CountsManager {
     private static Map<String, String> createJoinTableQueries() throws SQLException {
         Map<String, String> joinTableQueries = new HashMap<String, String>();
 
-        dbConnection.setCatalog(databaseName_BN);
+        dbConnection.setCatalog(dbInfo.getBNDatabaseName());
         Statement st = dbConnection.createStatement();
         ResultSet rs = st.executeQuery("select orig_rnid, short_rnid from LatticeRNodes ;");
 
@@ -1596,10 +1680,11 @@ public class CountsManager {
      * @param <E> (String) the name of the RNode to generate the CT table for.
      * @param <F> (String) the short name of the RNode to generate the CT table for.
      * @param <G> (SQLException) the SQLException that should be thrown if there are issues executing the SQL queries.
+     * @return True if the CT table was generated from a cache; otherwise false.
      */
     @FunctionalInterface
     private interface BuildRNodesCTMethod<A, B, C, D, E, F, G extends SQLException> {
-        public void apply(
+        public boolean apply(
             A targetDatabaseName,
             B ctTableName,
             C countingStrategy,
@@ -1616,7 +1701,7 @@ public class CountsManager {
      * @throws SQLException if there are issues connecting to the databases.
      */
     public static void connectDB() throws SQLException {
-        dbConnection = connectDB(databaseName_BN);
+        dbConnection = connectDB(dbInfo.getBNDatabaseName());
     }
 
 
