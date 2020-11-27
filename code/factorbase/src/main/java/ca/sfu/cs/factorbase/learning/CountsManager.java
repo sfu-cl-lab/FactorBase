@@ -494,7 +494,11 @@ public class CountsManager {
     ) {
         try {
             MySQLDataExtractor extractor = new MySQLDataExtractor(
-                dbConnection.prepareStatement("SELECT * FROM " + database + "." + table),
+                dbConnection.prepareStatement(
+                    "SELECT * " +
+                    "FROM " + database + ".`" + table + "` " +
+                    "WHERE " + dbInfo.getCountColumnName() + " > 0;"
+                ),
                 dbInfo.getCountColumnName(),
                 dbInfo.isDiscrete()
             );
