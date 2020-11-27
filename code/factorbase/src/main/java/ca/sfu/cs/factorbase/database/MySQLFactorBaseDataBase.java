@@ -499,7 +499,7 @@ public class MySQLFactorBaseDataBase implements FactorBaseDataBase {
             PreparedStatement query = this.dbConnection.prepareStatement(
                 "SELECT * " +
                 "FROM " + dbInfo.getCTDatabaseName() + ".`" + tableName + "` " +
-                "WHERE MULT > 0;"
+                "WHERE " + dbInfo.getCountColumnName() + " > 0;"
             );
 
             DataExtractor dataextractor = new MySQLDataExtractor(query, dbInfo.getCountColumnName(), dbInfo.isDiscrete());
