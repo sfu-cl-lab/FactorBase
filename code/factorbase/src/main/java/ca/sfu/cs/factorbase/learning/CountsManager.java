@@ -532,7 +532,7 @@ public class CountsManager {
                 end
             );
         } catch (DataExtractionException | SQLException e) {
-            logger.warning("Ran into a problem collecting the PDP data - " + e.getMessage());
+            logger.warning("Ran into a problem collecting the PDP data - " + e.getCause());
         }
     }
 
