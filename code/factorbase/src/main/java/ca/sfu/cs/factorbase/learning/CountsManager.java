@@ -619,6 +619,7 @@ public class CountsManager {
 
                 dbConnection.setCatalog(dbInfo.getBNDatabaseName());
                 Statement st2 = dbConnection.createStatement();
+                long ctStart = System.currentTimeMillis();
 
                 //  create select query string  
                 ResultSet rs2 = st2.executeQuery(
@@ -772,6 +773,18 @@ public class CountsManager {
                         QueryStringCT
                     )
                 );
+
+                if (generatePDPInfo) {
+                    logPDPOutput(
+                        dbInfo.getCTDatabaseName(),
+                        Next_CT_Table,
+                        false,
+                        len,
+                        ctStart,
+                        System.currentTimeMillis()
+                    );
+                }
+
                 rs1.previous();
 
                 fc++;   
