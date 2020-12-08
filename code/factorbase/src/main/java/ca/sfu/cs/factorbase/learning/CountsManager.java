@@ -215,14 +215,14 @@ public class CountsManager {
 
             // Build the CT tables for the first level of the relationship lattice.
             long ctAllStart = System.currentTimeMillis();
+            String finalTableName = null;
             for (FunctorNodesInfo rnodeInfo : rchainInfos) {
                 String rnode = rnodeInfo.getID();
                 String shortRNode = rnodeInfo.getShortID();
                 String ctTableName = shortRNode + "_CT";
                 String ctCreationQuery = buildRNodeCTCreationQuery(rnode, shortRNode, joinTableQueries);
 
-                long ctStart = System.currentTimeMillis();
-                boolean builtFromCache = buildCTMethod.apply(
+                buildCTMethod.apply(
                     dbInfo.getCTDatabaseName(),
                     ctTableName,
                     countingStrategy,
@@ -231,16 +231,7 @@ public class CountsManager {
                     shortRNode
                 );
 
-                if(generatePDPInfo) {
-                    logPDPOutput(
-                        dbInfo.getCTDatabaseName(),
-                        ctTableName,
-                        builtFromCache,
-                        1,
-                        ctStart,
-                        System.currentTimeMillis()
-                    );
-                }
+                finalTableName = ctTableName;
             }
             RuntimeLogger.logRunTimeDetails(logger, "buildRChainsCT-length=1", ctAllStart, System.currentTimeMillis());
 
@@ -248,9 +239,21 @@ public class CountsManager {
             for(int len = 2; len <= latticeHeight; len++) {
                 ctAllStart = System.currentTimeMillis();
                 rchainInfos = relationshipLattice.getRChainsInfo(len);
-                buildRChainsCT(rchainInfos, len, joinTableQueries, countingStrategy.getStorageEngine());
+                finalTableName = buildRChainsCT(rchainInfos, len, joinTableQueries, countingStrategy.getStorageEngine());
                 RuntimeLogger.logRunTimeDetails(logger, "buildRChainsCT-length=" + len, ctAllStart, System.currentTimeMillis());
             }
+
+            if (generatePDPInfo) {
+                logPDPOutput(
+                    dbInfo.getCTDatabaseName(),
+                    finalTableName,
+                    false,
+                    latticeHeight,
+                    start,
+                    System.currentTimeMillis()
+                );
+            }
+
             RuntimeLogger.updateLogEntry(dbConnection, "buildFlatStarCT", System.currentTimeMillis() - start);
         }
 
@@ -580,15 +583,17 @@ public class CountsManager {
      * @param len - length of the RChains to consider.
      * @param joinTableQueries - {@code Map} to retrieve the associated query to create a derived JOIN table.
      * @param storageEngine - the storage engine to use for the tables created when executing this method.
+     * @return the name of the final CT table that gets created.
      * @throws SQLException if there are issues executing the SQL queries.
      */
-    private static void buildRChainsCT(
+    private static String buildRChainsCT(
         List<FunctorNodesInfo> rchainInfos,
         int len,
         Map<String, String> joinTableQueries,
         String storageEngine
     ) throws SQLException {
         int fc=0;
+        String finalTableName = null;
         for (FunctorNodesInfo rchainInfo : rchainInfos)
         {
             // Get the short and full form rnids for further use.
@@ -619,7 +624,6 @@ public class CountsManager {
 
                 dbConnection.setCatalog(dbInfo.getBNDatabaseName());
                 Statement st2 = dbConnection.createStatement();
-                long ctStart = System.currentTimeMillis();
 
                 //  create select query string  
                 ResultSet rs2 = st2.executeQuery(
@@ -764,6 +768,7 @@ public class CountsManager {
                 // Oct 16 2013
                 // preparing the CT table for next iteration
                 cur_CT_Table = Next_CT_Table;
+                finalTableName = cur_CT_Table;
 
                 // Create CT table.
                 st3.execute(
@@ -773,17 +778,6 @@ public class CountsManager {
                         QueryStringCT
                     )
                 );
-
-                if (generatePDPInfo) {
-                    logPDPOutput(
-                        dbInfo.getCTDatabaseName(),
-                        Next_CT_Table,
-                        false,
-                        len,
-                        ctStart,
-                        System.currentTimeMillis()
-                    );
-                }
 
                 rs1.previous();
 
@@ -796,6 +790,8 @@ public class CountsManager {
             st1.close();
             rs1.close();
         }
+
+        return finalTableName;
     }
 
 
