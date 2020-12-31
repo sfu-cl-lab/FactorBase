@@ -1252,7 +1252,7 @@ public class CountsManager {
         List<String> selectAliases = extractEntries(rs2, "Entries");
         String selectString;
         if (buildByProjection) {
-            selectString = makeDelimitedString(selectAliases, ", ", "AS ");
+            selectString = makeDelimitedString(selectAliases, ", ", " AS ");
             selectString = "SUM(MULT) AS MULT, " + selectString;
         } else {
             selectString = String.join(", ", selectAliases);
