@@ -1500,6 +1500,7 @@ public class CountsManager {
         int maxR = 0;
         int avgD = 0;
         int maxD = 0;
+        Set<String> rtables = new HashSet<String>();
         String[] equalities = whereConditions.split(AND_SEPARATOR);
 
         // for loop to process all the equalities.
@@ -1507,12 +1508,14 @@ public class CountsManager {
             // for loop to process the left and right sides of the equality.
             for (String equalityComponent : equality.split(" = ")) {
                 String[] tableColRef = equalityComponent.split("\\.");
-                String databaseTable = tableAliases.get(tableColRef[0]);
-                if (relationTables.contains(tableColRef[0])) {
+                String tableAlias = tableColRef[0];
+                String databaseTable = tableAliases.get(tableAlias);
+                if (relationTables.contains(tableAlias)) {
                     // If the table reference is a relationship table, then compute the degree information.
                     int[] degreeInfo = computeDegree(databaseTable, tableColRef[1]);
                     avgD = Math.max(avgD, degreeInfo[0]);
                     maxD = Math.max(maxD,  degreeInfo[1]);
+                    rtables.add(tableAlias);
                 } else {
                     // If the table reference is an entity table, then get the total number of rows in the table.
                     maxR = Math.max(maxR, countRows(databaseTable));
@@ -1520,7 +1523,7 @@ public class CountsManager {
             }
         }
 
-        return "d" + avgD + ",D" + maxD + ",R" + maxR;
+        return "d" + avgD + ",D" + maxD + ",R" + maxR + ",t" + rtables.size();
     }
 
 
