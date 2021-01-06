@@ -28,9 +28,11 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.Set;
 import java.util.StringJoiner;
 import java.util.logging.Logger;
 
@@ -52,10 +54,13 @@ import ca.sfu.cs.factorbase.util.Sort_merge3;
 public class CountsManager {
 
     private static Connection dbConnection;
+    private static final String AND_SEPARATOR = " AND ";
+    private static final String CSV_SEPARATOR = ", ";
     private static final String COUNTS_SUBQUERY_PLACEHOLDER = "@@C_SUBQUERY@@";
     private static final String FALSE_SUBQUERY_PLACEHOLDER = "@@F_SUBQUERY@@";
     private static int tableID;
     private static Map<String, String> ctTablesCache = new HashMap<String, String>();
+    private static Set<String> relationTables;
     private static FactorBaseDataBaseInfo dbInfo;
     private static String databaseName_std;
     private static String dbUsername;
@@ -295,12 +300,29 @@ public class CountsManager {
         // expensive joins twice.
         if (countingStrategy.isOndemand()) {
             long countsStart = System.currentTimeMillis();
-            String tableName = generateCountsTable(
-                dbInfo.getCTDatabaseName(),
-                shortRNode,
-                countingStrategy.getStorageEngine(),
-                countsTableSubQuery
-            );
+            String tableName;
+            if (generatePDPInfo) {
+                String[] subQueryComponents = generateCountsTableQueryDetails(
+                    dbInfo.getCTDatabaseName(),
+                    rnode,
+                    shortRNode,
+                    countingStrategy.useProjection()
+                );
+
+                tableName = generateCountsTableAndPDPInfo(
+                    dbInfo.getCTDatabaseName(),
+                    shortRNode,
+                    countingStrategy.getStorageEngine(),
+                    subQueryComponents
+                );
+            } else {
+                tableName = generateCountsTable(
+                    dbInfo.getCTDatabaseName(),
+                    shortRNode,
+                    countingStrategy.getStorageEngine(),
+                    countsTableSubQuery
+                );
+            }
             RuntimeLogger.logRunTimeDetails(logger, "buildRChainCounts-length=1", countsStart, System.currentTimeMillis());
 
             countsTableSubQuery = "SELECT * FROM " + dbInfo.getCTDatabaseName() + "." + tableName;
@@ -1036,20 +1058,39 @@ public class CountsManager {
             // Get the short and full form rnids for further use.
             String rchain = rchainInfo.getID();
             String shortRchain = rchainInfo.getShortID();
+            String countsTableSubQuery;
 
-            String countsTableSubQuery = generateCountsTableQuery(
-                dbTargetName,
-                rchain,
-                shortRchain,
-                buildByProjection
-            );
+            if (generatePDPInfo && !buildByProjection) {
+                String[] subQueryComponents = generateCountsTableQueryDetails(
+                    dbTargetName,
+                    rchain,
+                    shortRchain,
+                    buildByProjection
+                );
 
-            generateCountsTable(
-                dbTargetName,
-                shortRchain,
-                storageEngine,
-                countsTableSubQuery
-            );
+                countsTableSubQuery = subQueryComponents[0];
+
+                generateCountsTableAndPDPInfo(
+                    dbTargetName,
+                    shortRchain,
+                    storageEngine,
+                    subQueryComponents
+                );
+            } else {
+                countsTableSubQuery = generateCountsTableQuery(
+                    dbTargetName,
+                    rchain,
+                    shortRchain,
+                    buildByProjection
+                );
+
+                generateCountsTable(
+                    dbTargetName,
+                    shortRchain,
+                    storageEngine,
+                    countsTableSubQuery
+                );
+            }
 
             if (copyToCT) {
                 dbConnection.setCatalog(dbTargetName);
@@ -1091,6 +1132,128 @@ public class CountsManager {
         Statement st2 = dbConnection.createStatement();
 
         // Create SELECT query string.
+        String selectString = createCountsTableSelectString(
+            st2,
+            rchain,
+            buildByProjection
+        );
+
+        // Create FROM query string.
+        String fromString = createCountsTableFromString(
+            st2,
+            rchain,
+            buildByProjection,
+            countsTableName
+        );
+
+        // Create WHERE query string.
+        String whereString = createCountsTableWhereString(
+            st2,
+            rchain,
+            buildByProjection
+        );
+
+        // Create the final query.
+        String queryString = createCountsTableFinalQuery(
+            st2,
+            rchain,
+            selectString,
+            fromString,
+            whereString
+        );
+
+        // Close statements.
+        st2.close();
+
+        return queryString;
+    }
+
+
+    /**
+     * Generate the query for creating the "_counts" table for the given RChain.
+     *
+     * @param dbTargetName - name of the database to create the "_counts" table in.
+     * @param rchain - the full form name of the RChain.
+     * @param shortRchain - the short form name of the RChain.
+     * @param buildByProjection - True if the counts table should be built by projecting the necessary information from
+                                  the global counts table; otherwise false.
+     * @return the query for creating the "_counts" table (String[0]), the table references of the FROM clause
+     *         (String[1]), and the conditions for the WHERE clause (String[2]).
+     * @throws SQLException if an error occurs when executing the queries.
+     */
+    private static String[] generateCountsTableQueryDetails(
+        String dbTargetName,
+        String rchain,
+        String shortRchain,
+        boolean buildByProjection
+    ) throws SQLException {
+        String[] countsTableQueryDetails = new String[3];
+
+        // Name of the counts table to generate.
+        String countsTableName = shortRchain + "_counts";
+
+        // Create new statements.
+        dbConnection.setCatalog(dbInfo.getBNDatabaseName());
+        Statement statement = dbConnection.createStatement();
+
+        // Create SELECT query string.
+        String selectString = createCountsTableSelectString(
+            statement,
+            rchain,
+            buildByProjection
+        );
+
+        // Create FROM query string.
+        String fromString = createCountsTableFromString(
+            statement,
+            rchain,
+            buildByProjection,
+            countsTableName
+        );
+
+        // Create WHERE query string.
+        String whereString = createCountsTableWhereString(
+            statement,
+            rchain,
+            buildByProjection
+        );
+
+        // Create the final query.
+        String queryString = createCountsTableFinalQuery(
+            statement,
+            rchain,
+            selectString,
+            fromString,
+            whereString
+        );
+
+        // Close statements.
+        statement.close();
+
+        countsTableQueryDetails[0] = queryString;
+        countsTableQueryDetails[1] = fromString;
+        countsTableQueryDetails[2] = whereString;
+
+        return countsTableQueryDetails;
+    }
+
+
+    /**
+     * Create the {@code String} for the SELECT clause of the query for creating the "_counts" table for the given
+     * RChain.
+     *
+     * @param statement - {@code Statement} object created by a {@code Connection} to the "_BN" database.
+     * @param rchain - the full form name of the RChain.
+     * @param buildByProjection - True if the counts table should be built by projecting the necessary information from
+                                  the global counts table; otherwise false.
+     * @return the column expressions used in the SELECT clause of the query for creating the "_counts" table.
+     * @throws SQLException if an error occurs when executing the queries.
+     */
+    private static String createCountsTableSelectString(
+        Statement statement,
+        String rchain,
+        boolean buildByProjection
+    ) throws SQLException {
         String selectQuery =
             "SELECT Entries " +
             "FROM MetaQueries " +
@@ -1105,24 +1268,46 @@ public class CountsManager {
 
         selectQuery += "AND TableType = 'Counts';";
 
-        ResultSet rs2 = st2.executeQuery(selectQuery);
+        ResultSet rs2 = statement.executeQuery(selectQuery);
 
         List<String> selectAliases = extractEntries(rs2, "Entries");
         String selectString;
         if (buildByProjection) {
-            selectString = makeDelimitedString(selectAliases, ", ", "AS ");
+            selectString = makeDelimitedString(selectAliases, ", ", " AS ");
             selectString = "SUM(MULT) AS MULT, " + selectString;
         } else {
             selectString = String.join(", ", selectAliases);
         }
 
-        // Create FROM query string.
+        return selectString;
+    }
+
+
+    /**
+     * Create the {@code String} for the FROM clause of the query for creating the "_counts" table for the given
+     * RChain.
+     *
+     * @param statement - {@code Statement} object created by a {@code Connection} to the "_BN" database.
+     * @param rchain - the full form name of the RChain.
+     * @param buildByProjection - True if the counts table should be built by projecting the necessary information from
+                                  the global counts table; otherwise false.
+     * @param countsTableName - name of the counts table expected to be found in the "_global_counts" database if we
+     *                          are projecting the count information from the "_global_counts" database.
+     * @return the table(s) to get the count information from.
+     * @throws SQLException if an error occurs when executing the queries.
+     */
+    private static String createCountsTableFromString(
+        Statement statement,
+        String rchain,
+        boolean buildByProjection,
+        String countsTableName
+    ) throws SQLException {
         String fromString = dbInfo.getGlobalCountsDatabaseName() + ".`" + countsTableName + "`";
 
         // If we aren't projecting from the global counts table, we need to retrieve the tables that need to be joined
         // in order to generate the counts table.
         if (!buildByProjection) {
-            ResultSet rs3 = st2.executeQuery(
+            ResultSet rs3 = statement.executeQuery(
                 QueryGenerator.createMetaQueriesExtractionQuery(
                     rchain,
                     "Counts",
@@ -1133,16 +1318,36 @@ public class CountsManager {
             );
 
             List<String> fromAliases = extractEntries(rs3, "Entries");
-            fromString = String.join(", ", fromAliases);
+            fromString = String.join(CSV_SEPARATOR, fromAliases);
         }
 
-        // Create WHERE query string.
+        return fromString;
+    }
+
+
+    /**
+     * Create the {@code String} for the WHERE clause of the query for creating the "_counts" table for the given
+     * RChain.
+     *
+     * @param statement - {@code Statement} object created by a {@code Connection} to the "_BN" database.
+     * @param rchain - the full form name of the RChain.
+     * @param buildByProjection - True if the counts table should be built by projecting the necessary information from
+                                  the global counts table; otherwise false.
+     * @return the conditions that are needed to JOIN tables or {@code null} if we are projecting from the global
+     *         counts tables.
+     * @throws SQLException if an error occurs when executing the queries.
+     */
+    private static String createCountsTableWhereString(
+        Statement statement,
+        String rchain,
+        boolean buildByProjection
+    ) throws SQLException {
         String whereString = null;
 
         // The WHERE clause is for joining tables to generate the counts from and isn't necessary if we are projecting
         // from the global counts table.
         if (!buildByProjection) {
-            ResultSet rs4 = st2.executeQuery(
+            ResultSet rs4 = statement.executeQuery(
                 QueryGenerator.createMetaQueriesExtractionQuery(
                     rchain,
                     "Counts",
@@ -1153,15 +1358,37 @@ public class CountsManager {
             );
 
             List<String> columns = extractEntries(rs4, "Entries");
-            whereString = String.join(" AND ", columns);
+            whereString = String.join(AND_SEPARATOR, columns);
         }
 
-        // Create the final query.
+        return whereString;
+    }
+
+
+    /**
+     * Create the {@code String} of the query for creating the "_counts" table for the given RChain.
+     *
+     * @param statement - {@code Statement} object created by a {@code Connection} to the "_BN" database.
+     * @param rchain - the full form name of the RChain.
+     * @param selectString - the {@code String} returned by the
+     *                       {@link CountsManager#createCountsTableSelectString(Statement, String, boolean)} method.
+     * @param fromString - the {@code String} returned by the {@link CountsManager#createCountsTableFromString(Statement, String, boolean, String)} method.
+     * @param whereString - the {@code String} returned by the {@link CountsManager#createCountsTableWhereString(Statement, String, boolean)} method.
+     * @return the query for creating the "_counts" table for the given RChain.
+     * @throws SQLException if an error occurs when executing the queries.
+     */
+    private static String createCountsTableFinalQuery(
+        Statement statement,
+        String rchain,
+        String selectString,
+        String fromString,
+        String whereString
+    ) throws SQLException {
         String queryString =
             "SELECT " + selectString + " " +
             "FROM " + fromString;
 
-        if (!buildByProjection) {
+        if (whereString != null) {
             queryString += " WHERE " + whereString;
         }
 
@@ -1170,7 +1397,7 @@ public class CountsManager {
         // Okay, not with continuous data, but still.
         // Continuous probably requires a different approach.  OS August 22.
         if (!cont.equals("1")) {
-            ResultSet rs_6 = st2.executeQuery(
+            ResultSet rs_6 = statement.executeQuery(
                 QueryGenerator.createMetaQueriesExtractionQuery(
                     rchain,
                     "Counts",
@@ -1187,9 +1414,6 @@ public class CountsManager {
                 queryString = queryString + " GROUP BY "  + GroupByString;
             }
         }
-
-        // Close statements.
-        st2.close();
 
         return queryString;
     }
@@ -1226,6 +1450,202 @@ public class CountsManager {
         }
 
         return tableName;
+    }
+
+
+    /**
+     * Create the "_counts" table for the given RChain, extracting the information necessary to generate a partial
+     * dependency plot (PDP) for doing table JOINs.
+     *
+     * @param dbTargetName - name of the database to create the "_counts" table in.
+     * @param shortRchain - the short form name of the RChain.
+     * @param storageEngine - the storage engine to use for the tables created when executing this method.
+     * @param subQueryDetails - {@code String[]} containing the query for creating the "_counts" table (String[0]), the
+     *                          table references of the FROM clause in the given query (String[1]), and the conditions
+     *                          for the WHERE clause in the given query (String[2]).
+     * @return the name of the "_counts" table generated.
+     * @throws SQLException if an error occurs when executing the queries.
+     */
+    private static String generateCountsTableAndPDPInfo(
+        String dbTargetName,
+        String shortRchain,
+        String storageEngine,
+        String[] subQueryDetails
+    ) throws SQLException {
+        String countsTableSubQuery = subQueryDetails[0];
+        String fromTables = subQueryDetails[1];
+        String whereConditions = subQueryDetails[2];
+        String parameters = extractJoinPDPInfo(fromTables, whereConditions);
+        long start = System.currentTimeMillis();
+
+        String tableName = generateCountsTable(
+            dbTargetName,
+            shortRchain,
+            storageEngine,
+            countsTableSubQuery
+        );
+
+        RuntimeLogger.pdpOutput(
+            logger,
+            "Counts Build Time",
+            parameters,
+            start,
+            System.currentTimeMillis()
+        );
+
+        return tableName;
+    }
+
+
+    /**
+     * Extract the parameters of interest to generate partial dependency plots (PDPs) for JOINing database tables.
+     *
+     * @param fromTables - CSV of table aliases for the FROM clause to generate an "_counts" table.
+     * @param whereConditions - equality conditions for the WHERE clause to generate an "_counts" table.
+     * @return CSV of the parameters used to generate PDPs for JOINing database tables.
+     * @throws SQLException if an error occurs when executing the queries.
+     */
+    private static String extractJoinPDPInfo(
+        String fromTables,
+        String whereConditions
+    ) throws SQLException {
+        if (relationTables == null) {
+            // Retrieve the names of all the relationship tables.
+            relationTables = retrieveRelationTables();
+        }
+
+        // Map the aliases to their true database table name.
+        Map<String, String> tableAliases = mapAliases(fromTables);
+
+        int maxR = 0;
+        int avgD = 0;
+        int maxD = 0;
+        Set<String> rtables = new HashSet<String>();
+        String[] equalities = whereConditions.split(AND_SEPARATOR);
+
+        // for loop to process all the equalities.
+        for (String equality : equalities) {
+            // for loop to process the left and right sides of the equality.
+            for (String equalityComponent : equality.split(" = ")) {
+                String[] tableColRef = equalityComponent.split("\\.");
+                String tableAlias = tableColRef[0];
+                String databaseTable = tableAliases.get(tableAlias);
+                if (relationTables.contains(tableAlias)) {
+                    // If the table reference is a relationship table, then compute the degree information.
+                    int[] degreeInfo = computeDegree(databaseTable, tableColRef[1]);
+                    avgD = Math.max(avgD, degreeInfo[0]);
+                    maxD = Math.max(maxD,  degreeInfo[1]);
+                    rtables.add(tableAlias);
+                } else {
+                    // If the table reference is an entity table, then get the total number of rows in the table.
+                    maxR = Math.max(maxR, countRows(databaseTable));
+                }
+            }
+        }
+
+        return "d" + avgD + ",D" + maxD + ",R" + maxR + ",t" + rtables.size();
+    }
+
+
+    /**
+     * Determine the average and max degree of the entries in the given table for the specified column.
+     *
+     * @param table - name of the table to get the degree information from.
+     * @param column - the column in the given table to get the degree information for.
+     * @return {@code int[]} containing the average degree (int[0]) and the max degree (int[1]).
+     * @throws SQLException if an error occurs when executing the queries.
+     */
+    private static int[] computeDegree(String table, String column) throws SQLException {
+        String degreeQuery =
+            "SELECT " +
+                "AVG(TOTAL) AS AVG, " +
+                "MAX(TOTAL) AS MAX " +
+            "FROM (" +
+                "SELECT " +
+                    column + ", " +
+                    "COUNT(*) AS TOTAL " +
+                "FROM " +
+                    table + " " +
+                "GROUP BY " +
+                    column +
+            ") AS TABULATED;";
+
+        try (
+            Statement statement = dbConnection.createStatement();
+            ResultSet results = statement.executeQuery(degreeQuery)
+        ) {
+            results.next();
+            int[] stats = new int[2];
+            stats[0] = results.getInt("AVG");
+            stats[1] = results.getInt("MAX");
+
+            return stats;
+        }
+    }
+
+
+    /**
+     * Get the row count for the given database table.
+     *
+     * @param databaseTable - name of the database table to get the row count for.
+     * @return the number of rows in the given database table.
+     * @throws SQLException if an error occurs when executing the queries.
+     */
+    private static int countRows(String databaseTable) throws SQLException {
+        try (
+            Statement statement = dbConnection.createStatement();
+            ResultSet results = statement.executeQuery(
+                "SELECT COUNT(*) AS TOTAL FROM " + databaseTable
+            )
+        ) {
+            results.next();
+            return results.getInt("TOTAL");
+        }
+    }
+
+
+    /**
+     * Retrieve the aliases for all the relationship tables in the input database.
+     *
+     * @return the aliases for all the relationship tables.
+     * @throws SQLException if an error occurs when executing the queries.
+     */
+    private static Set<String> retrieveRelationTables() throws SQLException {
+        Set<String> relationTableAliases = new HashSet<String>();
+        dbConnection.setCatalog(dbInfo.getSetupDatabaseName());
+        try (
+            Statement statement = dbConnection.createStatement();
+            ResultSet results = statement.executeQuery(
+                "SELECT " +
+                    "rnid " +
+                "FROM " +
+                    "RNodes"
+            )
+        ) {
+            while(results.next()) {
+                relationTableAliases.add("`" + results.getString("rnid") + "`");
+            }
+        }
+
+        return relationTableAliases;
+    }
+
+
+    /**
+     * Create a mapping from table aliases back to their original table name.
+     *
+     * @param aliases - CSV of table aliases.
+     * @return {@code Map} containing key:value pairs alias:original-table-name.
+     */
+    private static Map<String, String> mapAliases(String aliases) {
+        Map<String, String> aliasMapping = new HashMap<String, String>();
+
+        for(String alias : aliases.split(CSV_SEPARATOR)) {
+            String[] aliasComponents = alias.split(" AS ");
+            aliasMapping.put(aliasComponents[1], aliasComponents[0]);
+        }
+
+        return aliasMapping;
     }
 
 
