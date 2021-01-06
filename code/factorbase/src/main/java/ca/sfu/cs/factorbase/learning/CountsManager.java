@@ -300,12 +300,29 @@ public class CountsManager {
         // expensive joins twice.
         if (countingStrategy.isOndemand()) {
             long countsStart = System.currentTimeMillis();
-            String tableName = generateCountsTable(
-                dbInfo.getCTDatabaseName(),
-                shortRNode,
-                countingStrategy.getStorageEngine(),
-                countsTableSubQuery
-            );
+            String tableName;
+            if (generatePDPInfo) {
+                String[] subQueryComponents = generateCountsTableQueryDetails(
+                    dbInfo.getCTDatabaseName(),
+                    rnode,
+                    shortRNode,
+                    countingStrategy.useProjection()
+                );
+
+                tableName = generateCountsTableAndPDPInfo(
+                    dbInfo.getCTDatabaseName(),
+                    shortRNode,
+                    countingStrategy.getStorageEngine(),
+                    subQueryComponents
+                );
+            } else {
+                tableName = generateCountsTable(
+                    dbInfo.getCTDatabaseName(),
+                    shortRNode,
+                    countingStrategy.getStorageEngine(),
+                    countsTableSubQuery
+                );
+            }
             RuntimeLogger.logRunTimeDetails(logger, "buildRChainCounts-length=1", countsStart, System.currentTimeMillis());
 
             countsTableSubQuery = "SELECT * FROM " + dbInfo.getCTDatabaseName() + "." + tableName;
@@ -1446,9 +1463,10 @@ public class CountsManager {
      * @param subQueryDetails - {@code String[]} containing the query for creating the "_counts" table (String[0]), the
      *                          table references of the FROM clause in the given query (String[1]), and the conditions
      *                          for the WHERE clause in the given query (String[2]).
+     * @return the name of the "_counts" table generated.
      * @throws SQLException if an error occurs when executing the queries.
      */
-    private static void generateCountsTableAndPDPInfo(
+    private static String generateCountsTableAndPDPInfo(
         String dbTargetName,
         String shortRchain,
         String storageEngine,
@@ -1460,7 +1478,7 @@ public class CountsManager {
         String parameters = extractJoinPDPInfo(fromTables, whereConditions);
         long start = System.currentTimeMillis();
 
-        generateCountsTable(
+        String tableName = generateCountsTable(
             dbTargetName,
             shortRchain,
             storageEngine,
@@ -1474,6 +1492,8 @@ public class CountsManager {
             start,
             System.currentTimeMillis()
         );
+
+        return tableName;
     }
 
 
