@@ -178,13 +178,17 @@ public class CountsManager {
         }
 
         // Build the counts tables for the RChains.
-        buildRChainCounts(
-            dbInfo.getCTDatabaseName(),
-            relationshipLattice,
-            countingStrategy.useProjection(),
-            countingStrategy.getStorageEngine(),
-            startingHeight
-        );
+        if (!countingStrategy.isHybrid()) {
+            // Hybrid does not need to generate these tables since the information will be projected from the global
+            // counts tables.
+            buildRChainCounts(
+                dbInfo.getCTDatabaseName(),
+                relationshipLattice,
+                countingStrategy.useProjection(),
+                countingStrategy.getStorageEngine(),
+                startingHeight
+            );
+        }
 
         long l = System.currentTimeMillis(); //@zqian : CT table generating time
            // handling Pvars, generating pvars_counts       
@@ -245,7 +249,7 @@ public class CountsManager {
             for(int len = 2; len <= latticeHeight; len++) {
                 ctAllStart = System.currentTimeMillis();
                 rchainInfos = relationshipLattice.getRChainsInfo(len);
-                finalTableName = buildRChainsCT(rchainInfos, len, joinTableQueries, countingStrategy.getStorageEngine());
+                finalTableName = buildRChainsCT(rchainInfos, len, joinTableQueries, countingStrategy);
                 RuntimeLogger.logRunTimeDetails(logger, "buildRChainsCT-length=" + len, ctAllStart, System.currentTimeMillis());
             }
 
@@ -297,7 +301,7 @@ public class CountsManager {
             countingStrategy.useProjection()
         );
 
-        // If we are doing using the Precount or Ondemand method, we read from a materialized table to avoid executing
+        // If we are using the Precount or Ondemand method, we read from a materialized table to avoid executing
         // expensive joins twice.
         if (countingStrategy.isOndemand()) {
             long countsStart = System.currentTimeMillis();
@@ -605,7 +609,7 @@ public class CountsManager {
      * @param rchainInfos - FunctorNodesInfos for the RChains to build the "_CT" tables for.
      * @param len - length of the RChains to consider.
      * @param joinTableQueries - {@code Map} to retrieve the associated query to create a derived JOIN table.
-     * @param storageEngine - the storage engine to use for the tables created when executing this method.
+     * @param countingStrategy - {@link CountingStrategy} to indicate how counts related tables should be generated.
      * @return the name of the final CT table that gets created.
      * @throws SQLException if there are issues executing the SQL queries.
      */
@@ -613,7 +617,7 @@ public class CountsManager {
         List<FunctorNodesInfo> rchainInfos,
         int len,
         Map<String, String> joinTableQueries,
-        String storageEngine
+        CountingStrategy countingStrategy
     ) throws SQLException {
         int fc=0;
         String finalTableName = null;
@@ -627,8 +631,23 @@ public class CountsManager {
             String cur_CT_Table = shortRchain + "_counts";
             // counts represents the ct tables where all relationships in Rchain are true
 
-            //  create new statement
+            String databasePrefix = "";
+            String selectColumns = "";
             dbConnection.setCatalog(dbInfo.getBNDatabaseName());
+            if (countingStrategy.useProjection()) {
+                /*
+                 * If projecting the counts information from the global counts, need to initially specify the global
+                 * counts database and columns to SELECT for combining the True and False counts.  After this initial
+                 * counts information is collected, the successive Pivots can extract the required information from the
+                 * CT table created in the previous iteration.
+                 */
+                databasePrefix = dbInfo.getGlobalCountsDatabaseName() + ".";
+                try (Statement statement = dbConnection.createStatement()) {
+                    selectColumns = createCountsTableSelectString(statement, rchain, true);
+                }
+            }
+
+            // Create new statement.
             Statement st1 = dbConnection.createStatement();
             ResultSet rs1 = st1.executeQuery(
                 "SELECT removed, short_rnid " +
@@ -723,16 +742,16 @@ public class CountsManager {
                 if (!selectString.isEmpty()) {
                     queryStringflat +=
                         ", " + selectString + " " +
-                        "FROM `" + cur_CT_Table + "` " +
+                        "FROM " + databasePrefix + "`" + cur_CT_Table + "` " +
                         "GROUP BY " + selectString + ";";
                 } else {
                     queryStringflat +=
-                        "FROM `" + cur_CT_Table + "`;";
+                        "FROM " + databasePrefix + "`" + cur_CT_Table + "`;";
                 }
 
                 String createStringflat = QueryGenerator.createSimpleCreateTableQuery(
                     cur_flat_Table,
-                    storageEngine,
+                    countingStrategy.getStorageEngine(),
                     queryStringflat
                 );
                 RuntimeLogger.logExecutedQuery(logger, createStringflat);
@@ -757,24 +776,38 @@ public class CountsManager {
                 );
 
                 // staring to create the CT table
-                ResultSet rs_45 = st2.executeQuery(
-                    "SELECT column_name AS Entries " +
-                    "FROM information_schema.columns " +
-                    "WHERE table_schema = '" + dbInfo.getCTDatabaseName() + "' " +
-                    "AND table_name = '" + cur_CT_Table + "';"
-                );
-                columns = extractEntries(rs_45, "Entries");
-                String CTJoinString = makeEscapedCommaSepQuery(columns);
+                String CTJoinStringTrue = "";
+                String CTJoinStringFalse = "";
+                String groupByString = "";
+                if (selectColumns.isEmpty()) {
+                    // Generate query information based on CT table from previous iteration.
+                    ResultSet rs_45 = st2.executeQuery(
+                        "SELECT column_name AS Entries " +
+                        "FROM information_schema.columns " +
+                        "WHERE table_schema = '" + dbInfo.getCTDatabaseName() + "' " +
+                        "AND table_name = '" + cur_CT_Table + "';"
+                    );
+                    columns = extractEntries(rs_45, "Entries");
+                    CTJoinStringTrue = makeEscapedCommaSepQuery(columns);
+                    CTJoinStringFalse = CTJoinStringTrue;
+                } else {
+                    // Create query string components to project the counts information from the global counts for the
+                    // True counts and just a normal SELECT for the False counts.
+                    CTJoinStringTrue = selectColumns;
+                    groupByString = "GROUP BY " + createCountsTableGroupByString(st2, rchain) + " ";
+                    CTJoinStringFalse = selectColumns.replaceFirst("SUM\\(MULT\\) AS MULT", "MULT");
+                }
 
                 //join false table with join table to add in rnid (= F) and 2nid (= n/a). then can union with CT table
                 String QueryStringCT =
-                    "SELECT " + CTJoinString + " " +
-                    "FROM `" + cur_CT_Table + "` " +
+                    "SELECT " + CTJoinStringTrue + " " +
+                    "FROM " + databasePrefix + "`" + cur_CT_Table + "` " +
                     "WHERE MULT > 0 " +
+                    groupByString +
 
                     "UNION ALL " +
 
-                    "SELECT " + CTJoinString + " " +
+                    "SELECT " + CTJoinStringFalse + " " +
                     "FROM " +
                         "(" + falseTableSubQuery + ") AS FALSE_TABLE, " +
                         "(" + joinTableQueries.get(rnid_or) + ") AS JOIN_TABLE " +
@@ -792,12 +825,14 @@ public class CountsManager {
                 // preparing the CT table for next iteration
                 cur_CT_Table = Next_CT_Table;
                 finalTableName = cur_CT_Table;
+                databasePrefix = "";
+                selectColumns = "";
 
                 // Create CT table.
                 st3.execute(
                     QueryGenerator.createSimpleCreateTableQuery(
                         Next_CT_Table,
-                        storageEngine,
+                        countingStrategy.getStorageEngine(),
                         QueryStringCT
                     )
                 );
@@ -1367,6 +1402,32 @@ public class CountsManager {
 
 
     /**
+     * Create the {@code String} for the GROUP BY clause of the query for creating the "_counts" table for the given
+     * RChain.
+     *
+     * @param statement - {@code Statement} object created by a {@code Connection} to the "_BN" database.
+     * @param rchain - the full form name of the RChain.
+     * @return the column(s) to GROUP BY to generate the counts information.
+     * @throws SQLException if an error occurs when executing the queries.
+     */
+    private static String createCountsTableGroupByString(Statement statement, String rchain) throws SQLException {
+        ResultSet rs_6 = statement.executeQuery(
+            QueryGenerator.createMetaQueriesExtractionQuery(
+                rchain,
+                "Counts",
+                "GROUPBY",
+                null,
+                false
+            )
+        );
+
+        List<String> columns = extractEntries(rs_6, "Entries");
+        String GroupByString = String.join(", ", columns);
+        return GroupByString;
+    }
+
+
+    /**
      * Create the {@code String} of the query for creating the "_counts" table for the given RChain.
      *
      * @param statement - {@code Statement} object created by a {@code Connection} to the "_BN" database.
@@ -1398,19 +1459,7 @@ public class CountsManager {
         // Okay, not with continuous data, but still.
         // Continuous probably requires a different approach.  OS August 22.
         if (!cont.equals("1")) {
-            ResultSet rs_6 = statement.executeQuery(
-                QueryGenerator.createMetaQueriesExtractionQuery(
-                    rchain,
-                    "Counts",
-                    "GROUPBY",
-                    null,
-                    false
-                )
-            );
-
-            List<String> columns = extractEntries(rs_6, "Entries");
-            String GroupByString = String.join(", ", columns);
-
+            String GroupByString = createCountsTableGroupByString(statement, rchain);
             if (!GroupByString.isEmpty()) {
                 queryString = queryString + " GROUP BY "  + GroupByString;
             }
