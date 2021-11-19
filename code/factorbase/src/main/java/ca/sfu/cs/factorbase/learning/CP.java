@@ -317,7 +317,7 @@ public class CP {
         st.execute(
             "CREATE TABLE `" + tableName + "` (" +
                 "`" + nodeName + "` VARCHAR(200) NOT NULL, " +
-                "CP FLOAT, " +
+                "CP FLOAT(7,6), " +
                 "MULT DECIMAL(65), " +
                 "local_mult DECIMAL(65)" +
             ");"
@@ -554,7 +554,7 @@ public class CP {
 
         st.execute(
             "ALTER TABLE " + escapedTableName + " " +
-            "ADD CP FLOAT;"
+            "ADD CP FLOAT(7, 6);"
         );
         // Our resolution is only up to 6 digits. This is mainly to help with exporting to BIF format later.
         st.execute(
