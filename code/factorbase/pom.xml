@@ -221,7 +221,7 @@
                     <include>com/mysql/cj/protocol/Abstract*</include>
                     <include>com/mysql/cj/protocol/Authentication*</include>
                     <include>com/mysql/cj/protocol/ColumnDefinition.class</include>
-                    <include>com/mysql/cj/protocol/ExportControlled.class</include>
+                    <include>com/mysql/cj/protocol/ExportControlled*</include>
                     <include>com/mysql/cj/protocol/FullReadInputStream.class</include>
                     <include>com/mysql/cj/protocol/InternalDate.class</include>
                     <include>com/mysql/cj/protocol/InternalTimestamp.class</include>

@@ -56,7 +56,7 @@ do
 
     echo "  Extracting table: $table"
     echo "Table: $table" >> $output
-    $mysqlCommand "use $database; select * from \`$table\`;" | sort >> $output
+    $mysqlCommand "use $database; select * from \`$table\`;" | sort -f >> $output
     if [[ $? -ne 0 ]]
     then
       extractionFailed=1
