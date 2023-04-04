@@ -9,9 +9,11 @@ output="mysql-extraction.txt"
 defaultName="unielwin"
 mysqlCommand="mysql -u root -B"
 
-while getopts "n:p:" argument
+while getopts "h:n:p:" argument
 do
   case $argument in
+    h) host=$OPTARG
+       ;;
     n) name=$OPTARG
        ;;
     p) password=$OPTARG
@@ -21,6 +23,11 @@ done
 if [[ -z $name ]]
 then
   name=$defaultName
+fi
+
+if [[ -n $host ]]
+then
+  mysqlCommand="$mysqlCommand -h $host"
 fi
 
 if [[ -n $password ]]
@@ -56,7 +63,7 @@ do
 
     echo "  Extracting table: $table"
     echo "Table: $table" >> $output
-    $mysqlCommand "use $database; select * from \`$table\`;" | sort >> $output
+    $mysqlCommand "use $database; select * from \`$table\`;" | sort -f >> $output
     if [[ $? -ne 0 ]]
     then
       extractionFailed=1

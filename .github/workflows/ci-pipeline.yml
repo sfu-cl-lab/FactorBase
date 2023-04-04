@@ -1,0 +1,59 @@
+name: CI Pipeline
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    services:
+      mariadb:
+        image: mariadb:10.4.17
+        env:
+          MYSQL_ROOT_PASSWORD: 123456
+        options: >-
+          --health-cmd "mysqladmin ping"
+          --health-interval 5s
+          --health-timeout 2s
+          --health-retries 3
+        ports:
+          - 3306:3306
+    steps:
+    - uses: actions/checkout@v2
+    - name: Set up OpenJDK 11
+      uses: actions/setup-java@v2
+      with:
+        java-version: '11.0.12'
+        distribution: 'temurin'
+        cache: maven
+    - name: Setup Database
+      run: |
+        mysql -h 127.0.0.1 -uroot -p123456 < travis-resources/unielwin_course.sql
+        mysql -h 127.0.0.1 -uroot -p123456 < travis-resources/unielwin_prof.sql
+        mysql -h 127.0.0.1 -uroot -p123456 < travis-resources/unielwin_RA.sql
+        mysql -h 127.0.0.1 -uroot -p123456 < travis-resources/unielwin_registration.sql
+        mysql -h 127.0.0.1 -uroot -p123456 < travis-resources/unielwin_student.sql
+        mysql -h 127.0.0.1 -uroot -p123456 < travis-resources/tests-database.sql
+    - name: Build and Test
+      run: |
+        cd code
+        mvn install -DtestDBUserName=root -DtestDBPassword=123456
+        java -Dconfig=../travis-resources/config.cfg -jar factorbase/target/factorbase*SNAPSHOT.jar
+        ls -lh
+        tail dag_.txt
+        # Compare the structure of the graphs in the BIF files.
+        python3 ../travis-resources/bifchecker.py --compare Bif_unielwin.xml ../travis-resources/expected-output/Bif_unielwin.xml
+        # Check for any differences in the BIF files.
+        diff Bif_unielwin.xml ../travis-resources/expected-output/Bif_unielwin.xml
+        bash ../travis-resources/dbdump.sh -h 127.0.0.1 -n unielwin -p 123456
+        diff mysql-extraction.txt ../travis-resources/expected-output/mysql-extraction.txt
+        java -Dconfig=../travis-resources/config.cfg -jar mlnexporter/target/mlnexporter*SNAPSHOT.jar > mln_jar.txt
+        tail mln_jar.txt
+    - name: View Database
+      run: |
+        mysql -e "show databases;" -h 127.0.0.1 -uroot -p123456
+        mysql -e "use unielwin_BN; show tables;" -h 127.0.0.1 -uroot -p123456
+        mysql -e "use unielwin_CT; show tables;" -h 127.0.0.1 -uroot -p123456

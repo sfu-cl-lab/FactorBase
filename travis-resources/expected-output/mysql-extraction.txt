@@ -5,8 +5,8 @@ diff(course0)	1
 grade(course0,student0)	3.0000000000000004
 intelligence(student0)	1
 popularity(prof0)	2
-ranking(student0)	3.0000000000000004
 RA(prof0,student0)	1
+ranking(student0)	3.0000000000000004
 rating(course0)	1
 registration(course0,student0)	1
 salary(prof0,student0)	1
@@ -86,8 +86,8 @@ Fid	FunctorName	Type	main
 grade(course0,student0)	grade	2Node	1
 intelligence(student0)	intelligence	1Node	1
 popularity(prof0)	popularity	1Node	1
-ranking(student0)	ranking	1Node	1
 RA(prof0,student0)	RA(prof0,student0)	Rnode	1
+ranking(student0)	ranking	1Node	1
 rating(course0)	rating	1Node	1
 registration(course0,student0)	registration(course0,student0)	Rnode	1
 salary(prof0,student0)	salary	2Node	1
@@ -102,9 +102,9 @@ grade(course0,student0)	course0
 grade(course0,student0)	student0
 intelligence(student0)	student0
 popularity(prof0)	prof0
-ranking(student0)	student0
 RA(prof0,student0)	prof0
 RA(prof0,student0)	student0
+ranking(student0)	student0
 rating(course0)	course0
 registration(course0,student0)	course0
 registration(course0,student0)	student0
@@ -140,9 +140,9 @@ RA(prof0,student0),registration(course0,student0)	intelligence(student0)	RA(prof
 RA(prof0,student0),registration(course0,student0)	intelligence(student0)	registration(course0,student0)
 RA(prof0,student0),registration(course0,student0)	popularity(prof0)	RA(prof0,student0)
 RA(prof0,student0),registration(course0,student0)	popularity(prof0)	teachingability(prof0)
+RA(prof0,student0),registration(course0,student0)	RA(prof0,student0)	
 RA(prof0,student0),registration(course0,student0)	ranking(student0)	intelligence(student0)
 RA(prof0,student0),registration(course0,student0)	ranking(student0)	RA(prof0,student0)
-RA(prof0,student0),registration(course0,student0)	RA(prof0,student0)	
 RA(prof0,student0),registration(course0,student0)	rating(course0)	
 RA(prof0,student0),registration(course0,student0)	registration(course0,student0)	
 RA(prof0,student0),registration(course0,student0)	salary(prof0,student0)	RA(prof0,student0)
@@ -159,8 +159,8 @@ RA(prof0,student0),registration(course0,student0)	grade(course0,student0)	regist
 RA(prof0,student0),registration(course0,student0)	intelligence(student0)	RA(prof0,student0)
 RA(prof0,student0),registration(course0,student0)	popularity(prof0)	RA(prof0,student0)
 RA(prof0,student0),registration(course0,student0)	popularity(prof0)	teachingability(prof0)
-RA(prof0,student0),registration(course0,student0)	ranking(student0)	intelligence(student0)
 RA(prof0,student0),registration(course0,student0)	RA(prof0,student0)	salary(prof0,student0)
+RA(prof0,student0),registration(course0,student0)	ranking(student0)	intelligence(student0)
 RA(prof0,student0),registration(course0,student0)	sat(course0,student0)	grade(course0,student0)
 Rchain	child	parent
 Table: Knowledge_Forbidden_Edges
@@ -215,6 +215,16 @@ RA(prof0,student0)	Flat	SELECT	1node	`teachingability(prof0)`
 RA(prof0,student0)	Flat	SELECT	aggregate	SUM(`a_counts`.MULT) AS "MULT"
 RA(prof0,student0)	Join	COLUMN	2nid	"N/A" AS `capability(prof0,student0)`
 RA(prof0,student0)	Join	COLUMN	2nid	"N/A" AS `salary(prof0,student0)`
+RA(prof0,student0)	Star	FROM	table	prof0_counts
+RA(prof0,student0)	Star	FROM	table	student0_counts
+RA(prof0,student0)	Star	SELECT	1nid	`intelligence(student0)`
+RA(prof0,student0)	Star	SELECT	1nid	`popularity(prof0)`
+RA(prof0,student0)	Star	SELECT	1nid	`ranking(student0)`
+RA(prof0,student0)	Star	SELECT	1nid	`teachingability(prof0)`
+RA(prof0,student0)	Star	SELECT	RA(prof0,student0)	`intelligence(student0)`
+RA(prof0,student0)	Star	SELECT	RA(prof0,student0)	`popularity(prof0)`
+RA(prof0,student0)	Star	SELECT	RA(prof0,student0)	`ranking(student0)`
+RA(prof0,student0)	Star	SELECT	RA(prof0,student0)	`teachingability(prof0)`
 RA(prof0,student0),registration(course0,student0)	Counts	FROM	rtable	unielwin.RA AS `RA(prof0,student0)`
 RA(prof0,student0),registration(course0,student0)	Counts	FROM	rtable	unielwin.registration AS `registration(course0,student0)`
 RA(prof0,student0),registration(course0,student0)	Counts	FROM	table	unielwin.course AS course0
@@ -249,10 +259,10 @@ RA(prof0,student0),registration(course0,student0)	Counts	WHERE	rtable	`RA(prof0,
 RA(prof0,student0),registration(course0,student0)	Counts	WHERE	rtable	`RA(prof0,student0)`.student_id = student0.student_id
 RA(prof0,student0),registration(course0,student0)	Counts	WHERE	rtable	`registration(course0,student0)`.course_id = course0.course_id
 RA(prof0,student0),registration(course0,student0)	Counts	WHERE	rtable	`registration(course0,student0)`.student_id = student0.student_id
-RA(prof0,student0),registration(course0,student0)	Star	FROM	RA(prof0,student0)	`b_CT`
 RA(prof0,student0),registration(course0,student0)	Star	FROM	RA(prof0,student0)	prof0_counts
-RA(prof0,student0),registration(course0,student0)	Star	FROM	registration(course0,student0)	`a_CT`
+RA(prof0,student0),registration(course0,student0)	Star	FROM	RA(prof0,student0)	`b_CT`
 RA(prof0,student0),registration(course0,student0)	Star	FROM	registration(course0,student0)	course0_counts
+RA(prof0,student0),registration(course0,student0)	Star	FROM	registration(course0,student0)	`a_CT`
 RA(prof0,student0),registration(course0,student0)	Star	SELECT	RA(prof0,student0)	`diff(course0)`
 RA(prof0,student0),registration(course0,student0)	Star	SELECT	RA(prof0,student0)	`grade(course0,student0)`
 RA(prof0,student0),registration(course0,student0)	Star	SELECT	RA(prof0,student0)	`intelligence(student0)`
@@ -266,22 +276,12 @@ RA(prof0,student0),registration(course0,student0)	Star	SELECT	registration(cours
 RA(prof0,student0),registration(course0,student0)	Star	SELECT	registration(course0,student0)	`diff(course0)`
 RA(prof0,student0),registration(course0,student0)	Star	SELECT	registration(course0,student0)	`intelligence(student0)`
 RA(prof0,student0),registration(course0,student0)	Star	SELECT	registration(course0,student0)	`popularity(prof0)`
-RA(prof0,student0),registration(course0,student0)	Star	SELECT	registration(course0,student0)	`ranking(student0)`
 RA(prof0,student0),registration(course0,student0)	Star	SELECT	registration(course0,student0)	`RA(prof0,student0)`
+RA(prof0,student0),registration(course0,student0)	Star	SELECT	registration(course0,student0)	`ranking(student0)`
 RA(prof0,student0),registration(course0,student0)	Star	SELECT	registration(course0,student0)	`rating(course0)`
 RA(prof0,student0),registration(course0,student0)	Star	SELECT	registration(course0,student0)	`salary(prof0,student0)`
 RA(prof0,student0),registration(course0,student0)	Star	SELECT	registration(course0,student0)	`teachingability(prof0)`
 RA(prof0,student0),registration(course0,student0)	Star	WHERE	RA(prof0,student0)	`registration(course0,student0)` = "T"
-RA(prof0,student0)	Star	FROM	table	prof0_counts
-RA(prof0,student0)	Star	FROM	table	student0_counts
-RA(prof0,student0)	Star	SELECT	1nid	`intelligence(student0)`
-RA(prof0,student0)	Star	SELECT	1nid	`popularity(prof0)`
-RA(prof0,student0)	Star	SELECT	1nid	`ranking(student0)`
-RA(prof0,student0)	Star	SELECT	1nid	`teachingability(prof0)`
-RA(prof0,student0)	Star	SELECT	RA(prof0,student0)	`intelligence(student0)`
-RA(prof0,student0)	Star	SELECT	RA(prof0,student0)	`popularity(prof0)`
-RA(prof0,student0)	Star	SELECT	RA(prof0,student0)	`ranking(student0)`
-RA(prof0,student0)	Star	SELECT	RA(prof0,student0)	`teachingability(prof0)`
 registration(course0,student0)	Counts	FROM	rtable	unielwin.registration AS `registration(course0,student0)`
 registration(course0,student0)	Counts	FROM	table	unielwin.course AS course0
 registration(course0,student0)	Counts	FROM	table	unielwin.student AS student0
@@ -355,22 +355,22 @@ Table: Path_BN_nodes
 RA(prof0,student0)	capability(prof0,student0)
 RA(prof0,student0)	intelligence(student0)
 RA(prof0,student0)	popularity(prof0)
-RA(prof0,student0)	ranking(student0)
 RA(prof0,student0)	RA(prof0,student0)
+RA(prof0,student0)	ranking(student0)
+RA(prof0,student0)	salary(prof0,student0)
+RA(prof0,student0)	teachingability(prof0)
 RA(prof0,student0),registration(course0,student0)	capability(prof0,student0)
 RA(prof0,student0),registration(course0,student0)	diff(course0)
 RA(prof0,student0),registration(course0,student0)	grade(course0,student0)
 RA(prof0,student0),registration(course0,student0)	intelligence(student0)
 RA(prof0,student0),registration(course0,student0)	popularity(prof0)
-RA(prof0,student0),registration(course0,student0)	ranking(student0)
 RA(prof0,student0),registration(course0,student0)	RA(prof0,student0)
+RA(prof0,student0),registration(course0,student0)	ranking(student0)
 RA(prof0,student0),registration(course0,student0)	rating(course0)
 RA(prof0,student0),registration(course0,student0)	registration(course0,student0)
 RA(prof0,student0),registration(course0,student0)	salary(prof0,student0)
 RA(prof0,student0),registration(course0,student0)	sat(course0,student0)
 RA(prof0,student0),registration(course0,student0)	teachingability(prof0)
-RA(prof0,student0)	salary(prof0,student0)
-RA(prof0,student0)	teachingability(prof0)
 Rchain	node
 registration(course0,student0)	diff(course0)
 registration(course0,student0)	grade(course0,student0)
@@ -385,8 +385,10 @@ RA(prof0,student0)	capability(prof0,student0)	salary(prof0,student0)
 RA(prof0,student0)	intelligence(student0)	RA(prof0,student0)
 RA(prof0,student0)	popularity(prof0)	RA(prof0,student0)
 RA(prof0,student0)	popularity(prof0)	teachingability(prof0)
-RA(prof0,student0)	ranking(student0)	intelligence(student0)
 RA(prof0,student0)	RA(prof0,student0)	salary(prof0,student0)
+RA(prof0,student0)	ranking(student0)	intelligence(student0)
+RA(prof0,student0)	salary(prof0,student0)	
+RA(prof0,student0)	teachingability(prof0)	
 RA(prof0,student0),registration(course0,student0)	capability(prof0,student0)	RA(prof0,student0)
 RA(prof0,student0),registration(course0,student0)	capability(prof0,student0)	salary(prof0,student0)
 RA(prof0,student0),registration(course0,student0)	diff(course0)	grade(course0,student0)
@@ -396,17 +398,15 @@ RA(prof0,student0),registration(course0,student0)	intelligence(student0)	RA(prof
 RA(prof0,student0),registration(course0,student0)	intelligence(student0)	registration(course0,student0)
 RA(prof0,student0),registration(course0,student0)	popularity(prof0)	RA(prof0,student0)
 RA(prof0,student0),registration(course0,student0)	popularity(prof0)	teachingability(prof0)
+RA(prof0,student0),registration(course0,student0)	RA(prof0,student0)	
 RA(prof0,student0),registration(course0,student0)	ranking(student0)	intelligence(student0)
 RA(prof0,student0),registration(course0,student0)	ranking(student0)	RA(prof0,student0)
-RA(prof0,student0),registration(course0,student0)	RA(prof0,student0)	
 RA(prof0,student0),registration(course0,student0)	rating(course0)	
 RA(prof0,student0),registration(course0,student0)	registration(course0,student0)	
 RA(prof0,student0),registration(course0,student0)	salary(prof0,student0)	RA(prof0,student0)
 RA(prof0,student0),registration(course0,student0)	sat(course0,student0)	grade(course0,student0)
 RA(prof0,student0),registration(course0,student0)	sat(course0,student0)	registration(course0,student0)
 RA(prof0,student0),registration(course0,student0)	teachingability(prof0)	RA(prof0,student0)
-RA(prof0,student0)	salary(prof0,student0)	
-RA(prof0,student0)	teachingability(prof0)	
 Rchain	child	parent
 registration(course0,student0)	diff(course0)	grade(course0,student0)
 registration(course0,student0)	grade(course0,student0)	intelligence(student0)
@@ -433,18 +433,32 @@ RA(prof0,student0)	popularity(prof0)	intelligence(student0)
 RA(prof0,student0)	popularity(prof0)	popularity(prof0)
 RA(prof0,student0)	popularity(prof0)	ranking(student0)
 RA(prof0,student0)	popularity(prof0)	salary(prof0,student0)
-RA(prof0,student0)	ranking(student0)	capability(prof0,student0)
-RA(prof0,student0)	ranking(student0)	popularity(prof0)
-RA(prof0,student0)	ranking(student0)	ranking(student0)
-RA(prof0,student0)	ranking(student0)	RA(prof0,student0)
-RA(prof0,student0)	ranking(student0)	salary(prof0,student0)
-RA(prof0,student0)	ranking(student0)	teachingability(prof0)
 RA(prof0,student0)	RA(prof0,student0)	capability(prof0,student0)
 RA(prof0,student0)	RA(prof0,student0)	intelligence(student0)
 RA(prof0,student0)	RA(prof0,student0)	popularity(prof0)
-RA(prof0,student0)	RA(prof0,student0)	ranking(student0)
 RA(prof0,student0)	RA(prof0,student0)	RA(prof0,student0)
+RA(prof0,student0)	RA(prof0,student0)	ranking(student0)
 RA(prof0,student0)	RA(prof0,student0)	teachingability(prof0)
+RA(prof0,student0)	ranking(student0)	capability(prof0,student0)
+RA(prof0,student0)	ranking(student0)	popularity(prof0)
+RA(prof0,student0)	ranking(student0)	RA(prof0,student0)
+RA(prof0,student0)	ranking(student0)	ranking(student0)
+RA(prof0,student0)	ranking(student0)	salary(prof0,student0)
+RA(prof0,student0)	ranking(student0)	teachingability(prof0)
+RA(prof0,student0)	salary(prof0,student0)	capability(prof0,student0)
+RA(prof0,student0)	salary(prof0,student0)	intelligence(student0)
+RA(prof0,student0)	salary(prof0,student0)	popularity(prof0)
+RA(prof0,student0)	salary(prof0,student0)	RA(prof0,student0)
+RA(prof0,student0)	salary(prof0,student0)	ranking(student0)
+RA(prof0,student0)	salary(prof0,student0)	salary(prof0,student0)
+RA(prof0,student0)	salary(prof0,student0)	teachingability(prof0)
+RA(prof0,student0)	teachingability(prof0)	capability(prof0,student0)
+RA(prof0,student0)	teachingability(prof0)	intelligence(student0)
+RA(prof0,student0)	teachingability(prof0)	popularity(prof0)
+RA(prof0,student0)	teachingability(prof0)	RA(prof0,student0)
+RA(prof0,student0)	teachingability(prof0)	ranking(student0)
+RA(prof0,student0)	teachingability(prof0)	salary(prof0,student0)
+RA(prof0,student0)	teachingability(prof0)	teachingability(prof0)
 RA(prof0,student0),registration(course0,student0)	capability(prof0,student0)	capability(prof0,student0)
 RA(prof0,student0),registration(course0,student0)	capability(prof0,student0)	diff(course0)
 RA(prof0,student0),registration(course0,student0)	capability(prof0,student0)	grade(course0,student0)
@@ -459,8 +473,8 @@ RA(prof0,student0),registration(course0,student0)	diff(course0)	capability(prof0
 RA(prof0,student0),registration(course0,student0)	diff(course0)	diff(course0)
 RA(prof0,student0),registration(course0,student0)	diff(course0)	intelligence(student0)
 RA(prof0,student0),registration(course0,student0)	diff(course0)	popularity(prof0)
-RA(prof0,student0),registration(course0,student0)	diff(course0)	ranking(student0)
 RA(prof0,student0),registration(course0,student0)	diff(course0)	RA(prof0,student0)
+RA(prof0,student0),registration(course0,student0)	diff(course0)	ranking(student0)
 RA(prof0,student0),registration(course0,student0)	diff(course0)	rating(course0)
 RA(prof0,student0),registration(course0,student0)	diff(course0)	registration(course0,student0)
 RA(prof0,student0),registration(course0,student0)	diff(course0)	salary(prof0,student0)
@@ -470,8 +484,8 @@ RA(prof0,student0),registration(course0,student0)	grade(course0,student0)	capabi
 RA(prof0,student0),registration(course0,student0)	grade(course0,student0)	diff(course0)
 RA(prof0,student0),registration(course0,student0)	grade(course0,student0)	grade(course0,student0)
 RA(prof0,student0),registration(course0,student0)	grade(course0,student0)	popularity(prof0)
-RA(prof0,student0),registration(course0,student0)	grade(course0,student0)	ranking(student0)
 RA(prof0,student0),registration(course0,student0)	grade(course0,student0)	RA(prof0,student0)
+RA(prof0,student0),registration(course0,student0)	grade(course0,student0)	ranking(student0)
 RA(prof0,student0),registration(course0,student0)	grade(course0,student0)	rating(course0)
 RA(prof0,student0),registration(course0,student0)	grade(course0,student0)	salary(prof0,student0)
 RA(prof0,student0),registration(course0,student0)	grade(course0,student0)	sat(course0,student0)
@@ -496,6 +510,18 @@ RA(prof0,student0),registration(course0,student0)	popularity(prof0)	rating(cours
 RA(prof0,student0),registration(course0,student0)	popularity(prof0)	registration(course0,student0)
 RA(prof0,student0),registration(course0,student0)	popularity(prof0)	salary(prof0,student0)
 RA(prof0,student0),registration(course0,student0)	popularity(prof0)	sat(course0,student0)
+RA(prof0,student0),registration(course0,student0)	RA(prof0,student0)	capability(prof0,student0)
+RA(prof0,student0),registration(course0,student0)	RA(prof0,student0)	diff(course0)
+RA(prof0,student0),registration(course0,student0)	RA(prof0,student0)	grade(course0,student0)
+RA(prof0,student0),registration(course0,student0)	RA(prof0,student0)	intelligence(student0)
+RA(prof0,student0),registration(course0,student0)	RA(prof0,student0)	popularity(prof0)
+RA(prof0,student0),registration(course0,student0)	RA(prof0,student0)	RA(prof0,student0)
+RA(prof0,student0),registration(course0,student0)	RA(prof0,student0)	ranking(student0)
+RA(prof0,student0),registration(course0,student0)	RA(prof0,student0)	rating(course0)
+RA(prof0,student0),registration(course0,student0)	RA(prof0,student0)	registration(course0,student0)
+RA(prof0,student0),registration(course0,student0)	RA(prof0,student0)	salary(prof0,student0)
+RA(prof0,student0),registration(course0,student0)	RA(prof0,student0)	sat(course0,student0)
+RA(prof0,student0),registration(course0,student0)	RA(prof0,student0)	teachingability(prof0)
 RA(prof0,student0),registration(course0,student0)	ranking(student0)	capability(prof0,student0)
 RA(prof0,student0),registration(course0,student0)	ranking(student0)	diff(course0)
 RA(prof0,student0),registration(course0,student0)	ranking(student0)	grade(course0,student0)
@@ -506,25 +532,13 @@ RA(prof0,student0),registration(course0,student0)	ranking(student0)	registration
 RA(prof0,student0),registration(course0,student0)	ranking(student0)	salary(prof0,student0)
 RA(prof0,student0),registration(course0,student0)	ranking(student0)	sat(course0,student0)
 RA(prof0,student0),registration(course0,student0)	ranking(student0)	teachingability(prof0)
-RA(prof0,student0),registration(course0,student0)	RA(prof0,student0)	capability(prof0,student0)
-RA(prof0,student0),registration(course0,student0)	RA(prof0,student0)	diff(course0)
-RA(prof0,student0),registration(course0,student0)	RA(prof0,student0)	grade(course0,student0)
-RA(prof0,student0),registration(course0,student0)	RA(prof0,student0)	intelligence(student0)
-RA(prof0,student0),registration(course0,student0)	RA(prof0,student0)	popularity(prof0)
-RA(prof0,student0),registration(course0,student0)	RA(prof0,student0)	ranking(student0)
-RA(prof0,student0),registration(course0,student0)	RA(prof0,student0)	RA(prof0,student0)
-RA(prof0,student0),registration(course0,student0)	RA(prof0,student0)	rating(course0)
-RA(prof0,student0),registration(course0,student0)	RA(prof0,student0)	registration(course0,student0)
-RA(prof0,student0),registration(course0,student0)	RA(prof0,student0)	salary(prof0,student0)
-RA(prof0,student0),registration(course0,student0)	RA(prof0,student0)	sat(course0,student0)
-RA(prof0,student0),registration(course0,student0)	RA(prof0,student0)	teachingability(prof0)
 RA(prof0,student0),registration(course0,student0)	rating(course0)	capability(prof0,student0)
 RA(prof0,student0),registration(course0,student0)	rating(course0)	diff(course0)
 RA(prof0,student0),registration(course0,student0)	rating(course0)	grade(course0,student0)
 RA(prof0,student0),registration(course0,student0)	rating(course0)	intelligence(student0)
 RA(prof0,student0),registration(course0,student0)	rating(course0)	popularity(prof0)
-RA(prof0,student0),registration(course0,student0)	rating(course0)	ranking(student0)
 RA(prof0,student0),registration(course0,student0)	rating(course0)	RA(prof0,student0)
+RA(prof0,student0),registration(course0,student0)	rating(course0)	ranking(student0)
 RA(prof0,student0),registration(course0,student0)	rating(course0)	rating(course0)
 RA(prof0,student0),registration(course0,student0)	rating(course0)	registration(course0,student0)
 RA(prof0,student0),registration(course0,student0)	rating(course0)	salary(prof0,student0)
@@ -535,8 +549,8 @@ RA(prof0,student0),registration(course0,student0)	registration(course0,student0)
 RA(prof0,student0),registration(course0,student0)	registration(course0,student0)	grade(course0,student0)
 RA(prof0,student0),registration(course0,student0)	registration(course0,student0)	intelligence(student0)
 RA(prof0,student0),registration(course0,student0)	registration(course0,student0)	popularity(prof0)
-RA(prof0,student0),registration(course0,student0)	registration(course0,student0)	ranking(student0)
 RA(prof0,student0),registration(course0,student0)	registration(course0,student0)	RA(prof0,student0)
+RA(prof0,student0),registration(course0,student0)	registration(course0,student0)	ranking(student0)
 RA(prof0,student0),registration(course0,student0)	registration(course0,student0)	rating(course0)
 RA(prof0,student0),registration(course0,student0)	registration(course0,student0)	registration(course0,student0)
 RA(prof0,student0),registration(course0,student0)	registration(course0,student0)	salary(prof0,student0)
@@ -557,8 +571,8 @@ RA(prof0,student0),registration(course0,student0)	sat(course0,student0)	capabili
 RA(prof0,student0),registration(course0,student0)	sat(course0,student0)	diff(course0)
 RA(prof0,student0),registration(course0,student0)	sat(course0,student0)	intelligence(student0)
 RA(prof0,student0),registration(course0,student0)	sat(course0,student0)	popularity(prof0)
-RA(prof0,student0),registration(course0,student0)	sat(course0,student0)	ranking(student0)
 RA(prof0,student0),registration(course0,student0)	sat(course0,student0)	RA(prof0,student0)
+RA(prof0,student0),registration(course0,student0)	sat(course0,student0)	ranking(student0)
 RA(prof0,student0),registration(course0,student0)	sat(course0,student0)	rating(course0)
 RA(prof0,student0),registration(course0,student0)	sat(course0,student0)	salary(prof0,student0)
 RA(prof0,student0),registration(course0,student0)	sat(course0,student0)	sat(course0,student0)
@@ -574,20 +588,6 @@ RA(prof0,student0),registration(course0,student0)	teachingability(prof0)	registr
 RA(prof0,student0),registration(course0,student0)	teachingability(prof0)	salary(prof0,student0)
 RA(prof0,student0),registration(course0,student0)	teachingability(prof0)	sat(course0,student0)
 RA(prof0,student0),registration(course0,student0)	teachingability(prof0)	teachingability(prof0)
-RA(prof0,student0)	salary(prof0,student0)	capability(prof0,student0)
-RA(prof0,student0)	salary(prof0,student0)	intelligence(student0)
-RA(prof0,student0)	salary(prof0,student0)	popularity(prof0)
-RA(prof0,student0)	salary(prof0,student0)	ranking(student0)
-RA(prof0,student0)	salary(prof0,student0)	RA(prof0,student0)
-RA(prof0,student0)	salary(prof0,student0)	salary(prof0,student0)
-RA(prof0,student0)	salary(prof0,student0)	teachingability(prof0)
-RA(prof0,student0)	teachingability(prof0)	capability(prof0,student0)
-RA(prof0,student0)	teachingability(prof0)	intelligence(student0)
-RA(prof0,student0)	teachingability(prof0)	popularity(prof0)
-RA(prof0,student0)	teachingability(prof0)	ranking(student0)
-RA(prof0,student0)	teachingability(prof0)	RA(prof0,student0)
-RA(prof0,student0)	teachingability(prof0)	salary(prof0,student0)
-RA(prof0,student0)	teachingability(prof0)	teachingability(prof0)
 Rchain	child	parent
 registration(course0,student0)	diff(course0)	diff(course0)
 registration(course0,student0)	diff(course0)	intelligence(student0)
@@ -638,6 +638,8 @@ RA(prof0,student0)	intelligence(student0)	intelligence(student0)
 RA(prof0,student0)	intelligence(student0)	ranking(student0)
 RA(prof0,student0)	popularity(prof0)	popularity(prof0)
 RA(prof0,student0)	ranking(student0)	ranking(student0)
+RA(prof0,student0)	teachingability(prof0)	popularity(prof0)
+RA(prof0,student0)	teachingability(prof0)	teachingability(prof0)
 RA(prof0,student0),registration(course0,student0)	capability(prof0,student0)	capability(prof0,student0)
 RA(prof0,student0),registration(course0,student0)	capability(prof0,student0)	intelligence(student0)
 RA(prof0,student0),registration(course0,student0)	capability(prof0,student0)	popularity(prof0)
@@ -668,6 +670,11 @@ RA(prof0,student0),registration(course0,student0)	popularity(prof0)	intelligence
 RA(prof0,student0),registration(course0,student0)	popularity(prof0)	popularity(prof0)
 RA(prof0,student0),registration(course0,student0)	popularity(prof0)	ranking(student0)
 RA(prof0,student0),registration(course0,student0)	popularity(prof0)	salary(prof0,student0)
+RA(prof0,student0),registration(course0,student0)	RA(prof0,student0)	capability(prof0,student0)
+RA(prof0,student0),registration(course0,student0)	RA(prof0,student0)	intelligence(student0)
+RA(prof0,student0),registration(course0,student0)	RA(prof0,student0)	popularity(prof0)
+RA(prof0,student0),registration(course0,student0)	RA(prof0,student0)	ranking(student0)
+RA(prof0,student0),registration(course0,student0)	RA(prof0,student0)	teachingability(prof0)
 RA(prof0,student0),registration(course0,student0)	ranking(student0)	capability(prof0,student0)
 RA(prof0,student0),registration(course0,student0)	ranking(student0)	diff(course0)
 RA(prof0,student0),registration(course0,student0)	ranking(student0)	grade(course0,student0)
@@ -677,11 +684,6 @@ RA(prof0,student0),registration(course0,student0)	ranking(student0)	rating(cours
 RA(prof0,student0),registration(course0,student0)	ranking(student0)	salary(prof0,student0)
 RA(prof0,student0),registration(course0,student0)	ranking(student0)	sat(course0,student0)
 RA(prof0,student0),registration(course0,student0)	ranking(student0)	teachingability(prof0)
-RA(prof0,student0),registration(course0,student0)	RA(prof0,student0)	capability(prof0,student0)
-RA(prof0,student0),registration(course0,student0)	RA(prof0,student0)	intelligence(student0)
-RA(prof0,student0),registration(course0,student0)	RA(prof0,student0)	popularity(prof0)
-RA(prof0,student0),registration(course0,student0)	RA(prof0,student0)	ranking(student0)
-RA(prof0,student0),registration(course0,student0)	RA(prof0,student0)	teachingability(prof0)
 RA(prof0,student0),registration(course0,student0)	rating(course0)	diff(course0)
 RA(prof0,student0),registration(course0,student0)	rating(course0)	grade(course0,student0)
 RA(prof0,student0),registration(course0,student0)	rating(course0)	intelligence(student0)
@@ -711,8 +713,6 @@ RA(prof0,student0),registration(course0,student0)	teachingability(prof0)	popular
 RA(prof0,student0),registration(course0,student0)	teachingability(prof0)	ranking(student0)
 RA(prof0,student0),registration(course0,student0)	teachingability(prof0)	salary(prof0,student0)
 RA(prof0,student0),registration(course0,student0)	teachingability(prof0)	teachingability(prof0)
-RA(prof0,student0)	teachingability(prof0)	popularity(prof0)
-RA(prof0,student0)	teachingability(prof0)	teachingability(prof0)
 Rchain	child	parent
 registration(course0,student0)	diff(course0)	diff(course0)
 registration(course0,student0)	diff(course0)	rating(course0)
@@ -751,10 +751,10 @@ intelligence(student0)	prof0
 intelligence(student0)	student0
 popularity(prof0)	prof0
 popularity(prof0)	student0
-ranking(student0)	prof0
-ranking(student0)	student0
 RA(prof0,student0)	prof0
 RA(prof0,student0)	student0
+ranking(student0)	prof0
+ranking(student0)	student0
 rating(course0)	course0
 registration(course0,student0)	course0
 registration(course0,student0)	student0
@@ -770,8 +770,8 @@ child	pvid	Tuples
 diff(course0)	prof0	6
 grade(course0,student0)	prof0	6
 popularity(prof0)	course0	10
-ranking(student0)	course0	10
 RA(prof0,student0)	course0	10
+ranking(student0)	course0	10
 rating(course0)	prof0	6
 rating(course0)	student0	38
 registration(course0,student0)	prof0	6
@@ -788,10 +788,10 @@ RA(prof0,student0)	CP	MULT	local_mult	likelihood	prior
 T	0.109991	251	25	-55.26	0.109649
 Table: RChain_pvars
 RA(prof0,student0)	prof0
+RA(prof0,student0)	student0
 RA(prof0,student0),registration(course0,student0)	course0
 RA(prof0,student0),registration(course0,student0)	prof0
 RA(prof0,student0),registration(course0,student0)	student0
-RA(prof0,student0)	student0
 rchain	pvid
 registration(course0,student0)	course0
 registration(course0,student0)	student0
@@ -814,8 +814,8 @@ Table: RNodes_BN_Nodes
 RA(prof0,student0)	capability(prof0,student0)	1
 RA(prof0,student0)	intelligence(student0)	1
 RA(prof0,student0)	popularity(prof0)	1
-RA(prof0,student0)	ranking(student0)	1
 RA(prof0,student0)	RA(prof0,student0)	1
+RA(prof0,student0)	ranking(student0)	1
 RA(prof0,student0)	salary(prof0,student0)	1
 RA(prof0,student0)	teachingability(prof0)	1
 registration(course0,student0)	diff(course0)	1
@@ -881,8 +881,8 @@ Fid	LogLikelihood	Normal_LogLikelihood	Parameters	SampleSize	BIC	AIC	Pseudo_BIC	
 grade(course0,student0)	-73.22	-0.19	18	380	-253.36	-91.22	-107.30	-18.19	2280
 intelligence(student0)	-2440.73	-1.07	8	2280	-4943.32	-2448.73	-64.00	-9.07	2280
 popularity(prof0)	-70.93	-0.31	4	228	-163.58	-74.93	-22.34	-4.31	2280
-ranking(student0)	-162.56	-0.71	24	228	-455.42	-186.56	-131.72	-24.71	2280
 RA(prof0,student0)	-78.84	-0.35	1	228	-163.11	-79.84	-6.13	-1.35	2280
+ranking(student0)	-162.56	-0.71	24	228	-455.42	-186.56	-131.72	-24.71	2280
 rating(course0)	-6.11	-0.61	1	10	-14.52	-7.11	-3.52	-1.61	2280
 registration(course0,student0)	-210.33	-0.55	1	380	-426.60	-211.33	-7.04	-1.55	2280
 salary(prof0,student0)	-26.27	-0.12	4	228	-74.26	-30.27	-21.96	-4.12	2280
@@ -893,8 +893,8 @@ Table: capability(prof0,student0)_CP
 20	1	T	low	50	2	0.400000	-1.83	0.021930
 20	2	T	low	50	2	0.400000	-1.83	0.017544
 20	2	T	med	90	2	0.222222	-3.01	0.017544
-2030	N/A	F	N/A	2030	203	1.000000	0.00	0.890351
 20	3	T	high	110	2	0.181818	-3.41	0.030702
+2030	N/A	F	N/A	2030	203	1.000000	0.00	0.890351
 30	1	T	med	90	3	0.333333	-3.30	0.021930
 40	3	T	med	90	4	0.444444	-3.24	0.030702
 40	5	T	high	110	4	0.363636	-4.05	0.017544
@@ -951,7 +951,6 @@ Table: capability(prof0,student0)_CP_pairs
 0	N/A	T	N/A
 MULT	capability(prof0,student0)	RA(prof0,student0)	salary(prof0,student0)
 Table: capability(prof0,student0)_CP_smoothed
-11	3	T	low	56	NULL	0.196429	NULL	NULL
 1	1	F	high	6	NULL	0.166667	NULL	NULL
 1	1	F	low	6	NULL	0.166667	NULL	NULL
 1	1	F	med	6	NULL	0.166667	NULL	NULL
@@ -969,20 +968,20 @@ Table: capability(prof0,student0)_CP_smoothed
 1	3	F	med	6	NULL	0.166667	NULL	NULL
 1	3	F	N/A	2036	NULL	0.000491	NULL	NULL
 1	3	T	N/A	6	NULL	0.166667	NULL	NULL
-1	4	F	high	6	NULL	0.166665	NULL	NULL
-1	4	F	low	6	NULL	0.166665	NULL	NULL
-1	4	F	med	6	NULL	0.166665	NULL	NULL
+1	4	F	high	6	NULL	0.166667	NULL	NULL
+1	4	F	low	6	NULL	0.166667	NULL	NULL
+1	4	F	med	6	NULL	0.166667	NULL	NULL
 1	4	F	N/A	2036	NULL	0.000491	NULL	NULL
 1	4	T	low	56	NULL	0.017857	NULL	NULL
 1	4	T	med	96	NULL	0.010417	NULL	NULL
-1	4	T	N/A	6	NULL	0.166665	NULL	NULL
-1	5	F	high	6	NULL	0.166667	NULL	NULL
-1	5	F	low	6	NULL	0.166667	NULL	NULL
-1	5	F	med	6	NULL	0.166667	NULL	NULL
+1	4	T	N/A	6	NULL	0.166667	NULL	NULL
+1	5	F	high	6	NULL	0.166665	NULL	NULL
+1	5	F	low	6	NULL	0.166665	NULL	NULL
+1	5	F	med	6	NULL	0.166665	NULL	NULL
 1	5	F	N/A	2036	NULL	0.000491	NULL	NULL
 1	5	T	low	56	NULL	0.017857	NULL	NULL
 1	5	T	med	96	NULL	0.010417	NULL	NULL
-1	5	T	N/A	6	NULL	0.166667	NULL	NULL
+1	5	T	N/A	6	NULL	0.166665	NULL	NULL
 1	N/A	F	high	6	NULL	0.166667	NULL	NULL
 1	N/A	F	low	6	NULL	0.166667	NULL	NULL
 1	N/A	F	med	6	NULL	0.166667	NULL	NULL
@@ -990,6 +989,7 @@ Table: capability(prof0,student0)_CP_smoothed
 1	N/A	T	low	56	NULL	0.017857	NULL	NULL
 1	N/A	T	med	96	NULL	0.010417	NULL	NULL
 1	N/A	T	N/A	6	NULL	0.166667	NULL	NULL
+11	3	T	low	56	NULL	0.196429	NULL	NULL
 2031	N/A	F	N/A	2036	NULL	0.997545	NULL	NULL
 21	1	T	low	56	NULL	0.375000	NULL	NULL
 21	2	T	low	56	NULL	0.375000	NULL	NULL
@@ -1042,8 +1042,8 @@ Table: grade(course0,student0)_CP
 36	3	2	T	180	6	0.200000	-9.66	0.047368
 42	1	2	T	180	7	0.233333	-10.19	0.084211
 444	N/A	3	F	444	74	1.000000	0.00	0.757895
-600	N/A	2	F	600	100	1.000000	0.00	0.757895
 6	2	1	T	156	1	0.038462	-3.26	0.076316
+600	N/A	2	F	600	100	1.000000	0.00	0.757895
 66	2	3	T	216	11	0.305556	-13.04	0.076316
 684	N/A	1	F	684	114	1.000000	0.00	0.757895
 72	3	1	T	156	12	0.461538	-9.28	0.047368
@@ -1082,7 +1082,6 @@ Table: grade(course0,student0)_CP_pairs
 0	N/A	3	T
 MULT	grade(course0,student0)	intelligence(student0)	registration(course0,student0)
 Table: grade(course0,student0)_CP_smoothed
-103	2	2	T	185	NULL	0.556758	NULL	NULL
 1	1	1	F	689	NULL	0.001451	NULL	NULL
 1	1	1	T	161	NULL	0.006211	NULL	NULL
 1	1	2	F	605	NULL	0.001653	NULL	NULL
@@ -1099,10 +1098,11 @@ Table: grade(course0,student0)_CP_smoothed
 1	4	2	T	185	NULL	0.005405	NULL	NULL
 1	4	3	F	449	NULL	0.002227	NULL	NULL
 1	4	3	T	221	NULL	0.004525	NULL	NULL
-151	1	3	T	221	NULL	0.683258	NULL	NULL
 1	N/A	1	T	161	NULL	0.006211	NULL	NULL
 1	N/A	2	T	185	NULL	0.005405	NULL	NULL
 1	N/A	3	T	221	NULL	0.004525	NULL	NULL
+103	2	2	T	185	NULL	0.556758	NULL	NULL
+151	1	3	T	221	NULL	0.683258	NULL	NULL
 37	3	2	T	185	NULL	0.200000	NULL	NULL
 43	1	2	T	185	NULL	0.232432	NULL	NULL
 445	N/A	3	F	449	NULL	0.991092	NULL	NULL
@@ -1257,7 +1257,6 @@ Table: ranking(student0)_CP_smoothed
 1	1	1	T	45	NULL	0.022222	NULL	NULL
 1	1	2	F	655	NULL	0.001527	NULL	NULL
 1	1	2	T	135	NULL	0.007407	NULL	NULL
-11	4	2	T	135	NULL	0.081481	NULL	NULL
 1	2	1	F	805	NULL	0.001242	NULL	NULL
 1	2	1	T	45	NULL	0.022222	NULL	NULL
 1	3	1	F	805	NULL	0.001242	NULL	NULL
@@ -1271,6 +1270,7 @@ Table: ranking(student0)_CP_smoothed
 1	5	2	T	135	NULL	0.007407	NULL	NULL
 1	5	3	F	585	NULL	0.001709	NULL	NULL
 1	5	3	T	85	NULL	0.011765	NULL	NULL
+11	4	2	T	135	NULL	0.081481	NULL	NULL
 161	2	3	F	585	NULL	0.275214	NULL	NULL
 21	2	3	T	85	NULL	0.247059	NULL	NULL
 251	2	2	F	655	NULL	0.383206	NULL	NULL
@@ -1317,11 +1317,11 @@ Table: salary(prof0,student0)_CP_pairs
 0	N/A	T
 MULT	salary(prof0,student0)	RA(prof0,student0)
 Table: salary(prof0,student0)_CP_smoothed
-111	high	T	254	NULL	0.437008	NULL	NULL
 1	high	F	2034	NULL	0.000492	NULL	NULL
 1	low	F	2034	NULL	0.000492	NULL	NULL
 1	med	F	2034	NULL	0.000492	NULL	NULL
 1	N/A	T	254	NULL	0.003937	NULL	NULL
+111	high	T	254	NULL	0.437008	NULL	NULL
 2031	N/A	F	2034	NULL	0.998524	NULL	NULL
 51	low	T	254	NULL	0.200787	NULL	NULL
 91	med	T	254	NULL	0.358268	NULL	NULL
@@ -1398,14 +1398,10 @@ Table: sat(course0,student0)_CP_smoothed
 1	3	1	F	4	NULL	0.250000	NULL	NULL
 1	3	1	T	196	NULL	0.005102	NULL	NULL
 1	3	2	F	4	NULL	0.250000	NULL	NULL
-13	3	2	T	178	NULL	0.073034	NULL	NULL
 1	3	3	F	4	NULL	0.250000	NULL	NULL
 1	3	4	F	4	NULL	0.250000	NULL	NULL
 1	3	N/A	F	1732	NULL	0.000577	NULL	NULL
 1	3	N/A	T	4	NULL	0.250000	NULL	NULL
-1729	N/A	N/A	F	1732	NULL	0.998269	NULL	NULL
-175	1	1	T	196	NULL	0.892857	NULL	NULL
-19	2	1	T	196	NULL	0.096939	NULL	NULL
 1	N/A	1	F	4	NULL	0.250000	NULL	NULL
 1	N/A	1	T	196	NULL	0.005102	NULL	NULL
 1	N/A	2	F	4	NULL	0.250000	NULL	NULL
@@ -1415,6 +1411,10 @@ Table: sat(course0,student0)_CP_smoothed
 1	N/A	4	F	4	NULL	0.250000	NULL	NULL
 1	N/A	4	T	82	NULL	0.012195	NULL	NULL
 1	N/A	N/A	T	4	NULL	0.250000	NULL	NULL
+13	3	2	T	178	NULL	0.073034	NULL	NULL
+1729	N/A	N/A	F	1732	NULL	0.998269	NULL	NULL
+175	1	1	T	196	NULL	0.892857	NULL	NULL
+19	2	1	T	196	NULL	0.096939	NULL	NULL
 37	3	3	T	112	NULL	0.330357	NULL	NULL
 73	1	2	T	178	NULL	0.410112	NULL	NULL
 73	2	3	T	112	NULL	0.651785	NULL	NULL
@@ -1468,11 +1468,11 @@ F	F	N/A	N/A	N/A	N/A	18	1	1	2	5	1	3
 F	F	N/A	N/A	N/A	N/A	18	2	1	1	4	1	2
 F	F	N/A	N/A	N/A	N/A	19	2	1	2	5	2	2
 F	F	N/A	N/A	N/A	N/A	19	2	2	2	2	1	3
+F	F	N/A	N/A	N/A	N/A	2	1	3	2	2	1	2
+F	F	N/A	N/A	N/A	N/A	2	1	3	2	2	2	2
 F	F	N/A	N/A	N/A	N/A	20	2	2	1	2	2	2
 F	F	N/A	N/A	N/A	N/A	20	2	2	1	3	1	2
 F	F	N/A	N/A	N/A	N/A	20	2	3	1	1	1	2
-F	F	N/A	N/A	N/A	N/A	2	1	3	2	2	1	2
-F	F	N/A	N/A	N/A	N/A	2	1	3	2	2	2	2
 F	F	N/A	N/A	N/A	N/A	22	1	2	1	2	2	2
 F	F	N/A	N/A	N/A	N/A	22	2	1	2	4	1	3
 F	F	N/A	N/A	N/A	N/A	23	1	1	2	4	2	2
@@ -1480,12 +1480,12 @@ F	F	N/A	N/A	N/A	N/A	24	2	1	1	5	1	2
 F	F	N/A	N/A	N/A	N/A	24	2	2	2	3	1	3
 F	F	N/A	N/A	N/A	N/A	26	1	1	2	5	2	2
 F	F	N/A	N/A	N/A	N/A	28	2	3	2	1	1	3
-F	F	N/A	N/A	N/A	N/A	30	2	1	1	4	2	2
-F	F	N/A	N/A	N/A	N/A	30	2	2	1	3	2	2
-F	F	N/A	N/A	N/A	N/A	30	2	3	1	1	2	2
 F	F	N/A	N/A	N/A	N/A	3	1	2	2	2	1	2
 F	F	N/A	N/A	N/A	N/A	3	1	2	2	3	1	2
 F	F	N/A	N/A	N/A	N/A	3	2	3	2	2	2	2
+F	F	N/A	N/A	N/A	N/A	30	2	1	1	4	2	2
+F	F	N/A	N/A	N/A	N/A	30	2	2	1	3	2	2
+F	F	N/A	N/A	N/A	N/A	30	2	3	1	1	2	2
 F	F	N/A	N/A	N/A	N/A	34	2	1	2	4	2	3
 F	F	N/A	N/A	N/A	N/A	35	2	2	2	3	2	3
 F	F	N/A	N/A	N/A	N/A	36	2	1	2	5	1	3
@@ -1494,16 +1494,16 @@ F	F	N/A	N/A	N/A	N/A	38	2	1	1	5	2	2
 F	F	N/A	N/A	N/A	N/A	4	1	1	2	4	1	2
 F	F	N/A	N/A	N/A	N/A	4	1	2	1	2	1	2
 F	F	N/A	N/A	N/A	N/A	4	1	3	1	2	1	2
-F	F	N/A	N/A	N/A	N/A	42	1	2	2	2	2	3
 F	F	N/A	N/A	N/A	N/A	4	2	2	1	4	1	2
 F	F	N/A	N/A	N/A	N/A	4	2	3	2	2	1	2
+F	F	N/A	N/A	N/A	N/A	42	1	2	2	2	2	3
 F	F	N/A	N/A	N/A	N/A	43	1	3	1	1	2	2
 F	F	N/A	N/A	N/A	N/A	43	2	3	2	1	2	3
 F	F	N/A	N/A	N/A	N/A	44	1	2	1	3	2	2
 F	F	N/A	N/A	N/A	N/A	46	1	1	1	4	2	2
-F	F	N/A	N/A	N/A	N/A	50	1	2	2	3	2	3
 F	F	N/A	N/A	N/A	N/A	5	1	3	2	1	1	2
 F	F	N/A	N/A	N/A	N/A	5	1	3	2	2	1	3
+F	F	N/A	N/A	N/A	N/A	50	1	2	2	3	2	3
 F	F	N/A	N/A	N/A	N/A	52	1	1	1	5	2	2
 F	F	N/A	N/A	N/A	N/A	54	1	1	2	4	2	3
 F	F	N/A	N/A	N/A	N/A	57	2	1	2	5	2	3
@@ -1522,12 +1522,12 @@ F	F	N/A	N/A	N/A	N/A	9	1	2	2	4	2	3
 F	F	N/A	N/A	N/A	N/A	9	2	1	2	4	1	2
 F	F	N/A	N/A	N/A	N/A	9	2	2	1	2	1	2
 F	F	N/A	N/A	N/A	N/A	9	2	2	2	4	2	3
-F	T	N/A	1	N/A	1	10	1	3	1	2	2	2
 F	T	N/A	1	N/A	1	1	1	2	2	3	1	2
 F	T	N/A	1	N/A	1	1	1	2	2	3	2	2
 F	T	N/A	1	N/A	1	1	1	3	2	1	1	2
-F	T	N/A	1	N/A	1	12	2	3	2	1	2	3
 F	T	N/A	1	N/A	1	1	2	3	2	2	2	2
+F	T	N/A	1	N/A	1	10	1	3	1	2	2	2
+F	T	N/A	1	N/A	1	12	2	3	2	1	2	3
 F	T	N/A	1	N/A	1	14	1	3	2	2	2	3
 F	T	N/A	1	N/A	1	17	1	3	1	1	2	2
 F	T	N/A	1	N/A	1	2	1	2	1	3	1	2
@@ -1647,8 +1647,8 @@ F	T	N/A	3	N/A	3	2	2	2	2	3	1	3
 F	T	N/A	3	N/A	3	3	2	1	2	5	1	3
 F	T	N/A	3	N/A	3	4	1	2	1	3	2	2
 F	T	N/A	3	N/A	3	5	1	2	2	3	2	3
-F	T	N/A	4	N/A	3	12	1	1	2	5	2	3
 F	T	N/A	4	N/A	3	1	2	1	2	4	1	2
+F	T	N/A	4	N/A	3	12	1	1	2	5	2	3
 F	T	N/A	4	N/A	3	2	1	1	2	5	1	2
 F	T	N/A	4	N/A	3	2	2	1	1	4	1	2
 F	T	N/A	4	N/A	3	2	2	1	2	4	1	3
@@ -1840,13 +1840,13 @@ intelligence	2
 intelligence	3
 popularity	1
 popularity	2
+RA(prof0,student0)	F
+RA(prof0,student0)	T
 ranking	1
 ranking	2
 ranking	3
 ranking	4
 ranking	5
-RA(prof0,student0)	F
-RA(prof0,student0)	T
 rating	1
 rating	2
 registration(course0,student0)	F
@@ -1872,8 +1872,8 @@ Fid	FunctorName	Type	main
 grade(course0,student0)	grade	2Node	1
 intelligence(student0)	intelligence	1Node	1
 popularity(prof0)	popularity	1Node	1
-ranking(student0)	ranking	1Node	1
 RA(prof0,student0)	RA	Rnode	1
+ranking(student0)	ranking	1Node	1
 rating(course0)	rating	1Node	1
 registration(course0,student0)	registration	Rnode	1
 salary(prof0,student0)	salary	2Node	1
@@ -1888,9 +1888,9 @@ grade(course0,student0)	course0
 grade(course0,student0)	student0
 intelligence(student0)	student0
 popularity(prof0)	prof0
-ranking(student0)	student0
 RA(prof0,student0)	prof0
 RA(prof0,student0)	student0
+ranking(student0)	student0
 rating(course0)	course0
 registration(course0,student0)	course0
 registration(course0,student0)	student0
@@ -1918,8 +1918,8 @@ Fid
 grade(course0,student0)
 intelligence(student0)
 popularity(prof0)
-ranking(student0)
 RA(prof0,student0)
+ranking(student0)
 rating(course0)
 registration(course0,student0)
 salary(prof0,student0)
