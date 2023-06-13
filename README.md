@@ -26,9 +26,10 @@ One of the key computational problems in relational learning and inference is to
 
 1. **Import data into a Mysql server**
 
-	We provide two sets of example datasets in `testsql` folder. These are `.sql` files for:
-	* Mutagenesis
-	* Uneilwin : Dataset about the following schema ![University Schema](/images/univschema.png)
+	We provide example datasets in the `examples` folder. For debugging and testing, we recommend starting with the `Unielwin` dataset. This is a small today dataset. 
+	* Unielwin schema ![University Schema](/images/univschema.png)
+
+<i> We recommend using the MariaDB MySQL server. </i> We have tested Factorbase on MariaDB version 10.4.28. 
 
 2. **Install the program** 
 
@@ -37,7 +38,8 @@ One of the key computational problems in relational learning and inference is to
 	```shell
 	git clone https://github.com/sfu-cl-lab/FactorBase.git
 	```
-
+    1. Simple approach: use the compiled [.jar file]()
+    2. More complex approach: build from scratch. 
 	FactorBase and other tools in the project can all be built using the following command (make sure to have [Maven](https://maven.apache.org) installed):
 
 	```shell
@@ -59,11 +61,15 @@ One of the key computational problems in relational learning and inference is to
 	mvn clean install -DskipTests
 	```
 
-3.  **Update `config.cfg`  with your own configuration according to format explained [here](https://sfu-cl-lab.github.io/FactorBase/options.html)**
+3.  **Update `config.cfg`  with your own analysis according to format explained [here](https://sfu-cl-lab.github.io/FactorBase/options.html)** By default the executable JAR file will look for the configuration file in the current directory (i.e. where you are running the command), if you would like to specify a different configuration file to use when running FactorBase you can use the parameter `-Dconfig=<config-file>`.  For example:
 
-4. **Point to the required database in your MySQL server**
+	```shell
+	java -Dconfig=../travis-resources/config.cfg -jar factorbase/target/factorbase-<version>-SNAPSHOT.jar
+	```
 
-	Modify `travis-resources/config.cfg` with your own configuration according to the sample format explained in the image.
+4. **Point to the database that you want to analyse**
+
+	Modify the configuration file with your own connection parameters according to the sample format explained in the image.
 	
 	 ![Sample Configuration](/images/configuration.png).
 
@@ -90,17 +96,13 @@ One of the key computational problems in relational learning and inference is to
 	java -jar -Xmx8G factorbase/target/factorbase-<version>-SNAPSHOT.jar
 	```
 
-	By default the executable JAR file will look for the configuration file in the current directory (i.e. where you are running the command), if you would like to specify a different configuration file to use when running FactorBase you can use the parameter `-Dconfig=<config-file>`.  For example:
-
-	```shell
-	java -Dconfig=../travis-resources/config.cfg -jar factorbase/target/factorbase-<version>-SNAPSHOT.jar
-	```
+	
 
 6. **Inspect the Bayesian Network (BN)**
 
 	We follow the [BayesStore](http://dl.acm.org/citation.cfm?id=1453896) design philosphy where statistical objects are treated as managed within the database. 
 
-	1. The network structure is stored in the table `Final_Path_BayesNets` of the `<db>_BN` database where `<db>` is the model database specified in your configuration file.
+	1. The network structure is stored in the table `Final_Path_BayesNets` of the `<db>_BN` database where `<db>` is the model database specified in your configuration file. For nodes with no parents, see the view `View_Final_Path_BayesNets`.
 	2. The conditional probability tables are stored in tables named `<nodename>_CP` of the `<db>_BN` database where `<db>` is the model database specified in your configuration file and `<nodename>` is the name of the child node.
 
 ===============
