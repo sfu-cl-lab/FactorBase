@@ -38,7 +38,7 @@ One of the key computational problems in relational learning and inference is to
 	```shell
 	git clone https://github.com/sfu-cl-lab/FactorBase.git
 	```
-    1. Simple approach: use the compiled [.jar file]()
+    1. Simple approach: use the compiled [.jar file](https://github.com/sfu-cl-lab/FactorBase/tree/master/examples)
     2. More complex approach: build from scratch. 
 	FactorBase and other tools in the project can all be built using the following command (make sure to have [Maven](https://maven.apache.org) installed):
 
