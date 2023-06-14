@@ -1,5 +1,7 @@
 -- Initialize the databases required by FactorBase.
-/*M!100316 SET collation_server = 'utf8_general_ci';*/
+
+/*M!100316 SET collation_server = 'latin1_swedish_ci';*/
+SET collation_database = 'latin1_swedish_ci';
 
 DROP SCHEMA IF EXISTS @database@_setup;
 CREATE SCHEMA @database@_setup;
@@ -15,3 +17,11 @@ CREATE SCHEMA @database@_global_counts;
 
 DROP SCHEMA IF EXISTS @database@_CT_cache;
 CREATE SCHEMA @database@_CT_cache;
+
+ALTER DATABASE @database@_setup CHARACTER SET latin1 COLLATE  latin1_swedish_ci;
+ALTER DATABASE unielwin_bn CHARACTER SET latin1 COLLATE  latin1_swedish_ci;
+ALTER DATABASE @database@_CT CHARACTER SET latin1 COLLATE  latin1_swedish_ci;
+ALTER DATABASE @database@_global_counts CHARACTER SET latin1 COLLATE  latin1_swedish_ci;
+ALTER DATABASE @database@_CT_cache CHARACTER SET latin1 COLLATE  latin1_swedish_ci;
+
+
