@@ -1,6 +1,6 @@
 /* Create the table and view necessary for storing metaquery information. */
 
-SET storage_engine=MEMORY;
+SET storage_engine=INNODB;
 
 CREATE TABLE MetaQueries (
     Lattice_Point varchar(398), /* e.g. pvid, rchain, prof0, a */
