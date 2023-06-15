@@ -19,7 +19,7 @@ DROP SCHEMA IF EXISTS @database@_CT_cache;
 CREATE SCHEMA @database@_CT_cache;
 
 ALTER DATABASE @database@_setup CHARACTER SET latin1 COLLATE  latin1_swedish_ci;
-ALTER DATABASE unielwin_bn CHARACTER SET latin1 COLLATE  latin1_swedish_ci;
+ALTER DATABASE @database@_BN CHARACTER SET latin1 COLLATE  latin1_swedish_ci;
 ALTER DATABASE @database@_CT CHARACTER SET latin1 COLLATE  latin1_swedish_ci;
 ALTER DATABASE @database@_global_counts CHARACTER SET latin1 COLLATE  latin1_swedish_ci;
 ALTER DATABASE @database@_CT_cache CHARACTER SET latin1 COLLATE  latin1_swedish_ci;
