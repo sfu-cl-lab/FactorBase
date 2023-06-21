@@ -48,6 +48,7 @@ One of the key computational problems in relational learning and inference is to
 	mvn install
 	```
 
+
 	After the above commands are successfully run, an executable JAR file for FactorBase can be found at:
 
 	```shell
@@ -55,20 +56,20 @@ One of the key computational problems in relational learning and inference is to
 	```
 	Where the `<version>` field is the version of FactorBase that you have generated.
 
-	Note: The Maven build will run some tests that expect a test database to be setup.  If you just want to create the JAR file for FactorBase, then you can run the following command instead:
+	Note: The Maven build will run some tests that expect a test database to be setup. The required the setup file could be found at [here](https://github.com/sfu-cl-lab/FactorBase/blob/master/travis-resources/tests-database.sql). If you just want to create the JAR file for FactorBase, then you can run the following command instead:
 
 	```shell
 	cd FactorBase/code
 	mvn clean install -DskipTests
 	```
 
-3.  **Update `config.cfg`  with your own analysis according to format explained [here](https://sfu-cl-lab.github.io/FactorBase/options.html)** By default the executable JAR file will look for the configuration file in the current directory (i.e. where you are running the command), if you would like to specify a different configuration file to use when running FactorBase you can use the parameter `-Dconfig=<config-file>`.  For example:
+4.  **Update `config.cfg`  with your own analysis according to format explained [here](https://sfu-cl-lab.github.io/FactorBase/options.html)** By default the executable JAR file will look for the configuration file in the current directory (i.e. where you are running the command), if you would like to specify a different configuration file to use when running FactorBase you can use the parameter `-Dconfig=<config-file>`.  For example:
 
 	```shell
 	java -Dconfig=../travis-resources/config.cfg -jar factorbase/target/factorbase-<version>-SNAPSHOT.jar
 	```
 
-4. **Point to the database that you want to analyse**
+5. **Point to the database that you want to analyse**
 
 	Modify the configuration file with your own connection parameters according to the sample format explained in the image.
 	
@@ -81,7 +82,7 @@ One of the key computational problems in relational learning and inference is to
 	- info: only show info, warning and error messages(no debug message), which is the default;
 	- off: show no log message;
 
-5. **Learn a Bayesian Network Structure**
+6. **Learn a Bayesian Network Structure**
 
 	In the `FactorBase` folder, run
 
@@ -99,7 +100,7 @@ One of the key computational problems in relational learning and inference is to
 
 	
 
-6. **Inspect the Bayesian Network (BN)**
+7. **Inspect the Bayesian Network (BN)**
 
 	We follow the [BayesStore](http://dl.acm.org/citation.cfm?id=1453896) design philosphy where statistical objects are treated as managed within the database. 
 
