@@ -8,6 +8,7 @@
   <name>factorbase-aggregator</name>
   <url>https://github.com/sfu-cl-lab/FactorBase</url>
   <modules>
+    <module>thirdparty</module>
     <module>common</module>
     <module>componentsrunner</module>
     <module>factorbase</module>
