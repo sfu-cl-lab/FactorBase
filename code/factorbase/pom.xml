@@ -8,13 +8,6 @@
   <name>factorbase</name>
   <url>https://github.com/sfu-cl-lab/FactorBase/factorbase</url>
 
-  <repositories>
-    <repository>
-      <id>ccd-releases</id>
-      <url>https://cloud.ccd.pitt.edu/nexus/content/repositories/releases/</url>
-    </repository>
-  </repositories>
-
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <maven.compiler.source>1.8</maven.compiler.source>
