@@ -388,6 +388,7 @@ CREATE table RNodes_MM_Self AS
             AND RelationTables.TABLE_NAME = ForeignKeys_pvars1.TABLE_NAME
             AND ForeignKeys_pvars1.ARGUMENT_POSITION < ForeignKeys_pvars2.ARGUMENT_POSITION
             AND ForeignKeys_pvars1.index_number < ForeignKeys_pvars2.index_number /*comment this out to allow all pairs of Pvariables as Rnodes*/
+            AND ForeignKeys_pvars1.index_number != ForeignKeys_pvars2.index_number
             AND RelationTables.SelfRelationship = 1
             AND RelationTables.Many_OneRelationship = 0;
 
