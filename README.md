@@ -39,7 +39,7 @@ One of the key computational problems in relational learning and inference is to
 	```shell
 	git clone https://github.com/sfu-cl-lab/FactorBase.git
 	```
-    1. Simple approach: use the compiled [.jar file](https://github.com/sfu-cl-lab/FactorBase/tree/master/examples)
+    1. Simple approach: use the compiled .jar file at the root directory [factorbase-1.0.jar](https://github.com/sfu-cl-lab/FactorBase/blob/master/factorbase-1.0.jar)
     2. More complex approach: build from scratch. 
 	FactorBase and other tools in the project can all be built using the following command (make sure to have [Maven](https://maven.apache.org) installed):
 
@@ -66,7 +66,7 @@ One of the key computational problems in relational learning and inference is to
 4.  **Update `config.cfg`  with your own analysis according to format explained [here](https://sfu-cl-lab.github.io/FactorBase/options.html)** By default the executable JAR file will look for the configuration file in the current directory (i.e. where you are running the command), if you would like to specify a different configuration file to use when running FactorBase you can use the parameter `-Dconfig=<config-file>`.  For example:
 
 	```shell
-	java -Dconfig=../travis-resources/config.cfg -jar factorbase/target/factorbase-<version>-SNAPSHOT.jar
+	java -Dconfig=../config.cfg -jar factorbase/target/factorbase-<version>-SNAPSHOT.jar
 	```
 
 5. **Point to the database that you want to analyse**
@@ -120,9 +120,9 @@ The learned BN structure can be exported from the database to support a number o
 
 	| datasets      	      | sql                         | BIF/XML                   |
 	| :-------------: 	      |:-------------:              |  :-----:                   |
-	| unielwin | [unielwin.sql](./testsql/unielwin) | [Bif_unielwin.xml](./BN_xml/Bif_unielwin.xml) | 
-	| Mutagenesis_std | [Mutagenesis_std.sql](./testsql/Mutagenesis_std) | [Bif_Mutagenesis_std.xml](./BN_xml/Bif_Mutagenesis_std.xml) |
-	| MovieLens_std | [MovieLens_std.sql](./testsql/MovieLens_std) | [Bif_MovieLens_std.xml](./BN_xml/Bif_MovieLens_std.xml) |
+	| unielwin | [unielwin.sql](https://github.com/sfu-cl-lab/FactorBase/tree/master/examples/unielwin/input) | [Bif_unielwin.xml](https://github.com/sfu-cl-lab/FactorBase/tree/master/examples/unielwin/output) | 
+	| Mutagenesis_std | [Mutagenesis_std.sql](./testsql/Mutagenesis_std) | [Bif_Mutagenesis_std.xml](https://github.com/sfu-cl-lab/FactorBase/tree/master/examples/Mutagenesis_std/output) |
+	| MovieLens_std | [MovieLens_std.sql](https://github.com/sfu-cl-lab/FactorBase/tree/master/examples/MovieLens_std/input) | [Bif_MovieLens_std.xml](https://github.com/sfu-cl-lab/FactorBase/tree/master/examples/MovieLens_std/output) |
 
 
 + **[MLN_Generator](https://github.com/sfu-cl-lab/MLN_Generator)**
