@@ -66,7 +66,7 @@ One of the key computational problems in relational learning and inference is to
 4.  **Update `config.cfg`  with your own analysis according to format explained [here](https://sfu-cl-lab.github.io/FactorBase/options.html)** By default the executable JAR file will look for the configuration file in the current directory (i.e. where you are running the command), if you would like to specify a different configuration file to use when running FactorBase you can use the parameter `-Dconfig=<config-file>`.  For example:
 
 	```shell
-	java -Dconfig=../travis-resources/config.cfg -jar factorbase/target/factorbase-<version>-SNAPSHOT.jar
+	java -Dconfig=../config.cfg -jar factorbase/target/factorbase-<version>-SNAPSHOT.jar
 	```
 
 5. **Point to the database that you want to analyse**
