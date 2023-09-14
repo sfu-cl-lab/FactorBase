@@ -121,7 +121,7 @@ The learned BN structure can be exported from the database to support a number o
 	| datasets      	      | sql                         | BIF/XML                   |
 	| :-------------: 	      |:-------------:              |  :-----:                   |
 	| unielwin | [unielwin.sql](https://github.com/sfu-cl-lab/FactorBase/tree/master/examples/unielwin/input) | [Bif_unielwin.xml](https://github.com/sfu-cl-lab/FactorBase/tree/master/examples/unielwin/output) | 
-	| Mutagenesis_std | [Mutagenesis_std.sql](./testsql/Mutagenesis_std) | [Bif_Mutagenesis_std.xml](https://github.com/sfu-cl-lab/FactorBase/tree/master/examples/Mutagenesis_std/output) |
+	| Mutagenesis_std | [Mutagenesis_std.sql](https://github.com/sfu-cl-lab/FactorBase/tree/master/examples/Mutagenesis_std/input) | [Bif_Mutagenesis_std.xml](https://github.com/sfu-cl-lab/FactorBase/tree/master/examples/Mutagenesis_std/output) |
 	| MovieLens_std | [MovieLens_std.sql](https://github.com/sfu-cl-lab/FactorBase/tree/master/examples/MovieLens_std/input) | [Bif_MovieLens_std.xml](https://github.com/sfu-cl-lab/FactorBase/tree/master/examples/MovieLens_std/output) |
 
 
