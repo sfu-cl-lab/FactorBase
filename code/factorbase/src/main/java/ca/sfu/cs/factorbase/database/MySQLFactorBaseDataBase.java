@@ -46,6 +46,7 @@ public class MySQLFactorBaseDataBase implements FactorBaseDataBase {
     private Connection dbConnection;
     private FactorBaseDataBaseInfo dbInfo;
     private Map<String, DataExtractor> dataExtractors;
+    private String dbCollation;
     private CountingStrategy countingStrategy;
 
 
@@ -66,10 +67,12 @@ public class MySQLFactorBaseDataBase implements FactorBaseDataBase {
         String dbname,
         String username,
         String password,
+        String dbCollation,
         CountingStrategy countingStrategy
     ) throws DataBaseException {
         this.dbInfo = dbInfo;
         this.baseDatabaseName = dbname;
+        this.dbCollation = dbCollation;
         this.countingStrategy = countingStrategy;
         String baseConnectionString = MessageFormat.format(CONNECTION_STRING, dbaddress, dbname);
         Properties connectionProperties = getConnectionStringProperties(username, password);
@@ -89,7 +92,8 @@ public class MySQLFactorBaseDataBase implements FactorBaseDataBase {
             MySQLScriptRunner.runScript(
                 this.dbConnection,
                 Config.SCRIPTS_DIRECTORY + "initialize_databases.sql",
-                this.baseDatabaseName
+                this.baseDatabaseName,
+                this.dbCollation
             );
 
             // Switch to start using the setup database.
@@ -97,12 +101,14 @@ public class MySQLFactorBaseDataBase implements FactorBaseDataBase {
             MySQLScriptRunner.runScript(
                 this.dbConnection,
                 Config.SCRIPTS_DIRECTORY + "metadata.sql",
-                this.baseDatabaseName
+                this.baseDatabaseName,
+                this.dbCollation
             );
             MySQLScriptRunner.runScript(
                 this.dbConnection,
                 Config.SCRIPTS_DIRECTORY + "metadata_storedprocedures.sql",
                 this.baseDatabaseName,
+                this.dbCollation,
                 "//"
             );
             MySQLScriptRunner.callSP(this.dbConnection, "find_values");
@@ -111,7 +117,8 @@ public class MySQLFactorBaseDataBase implements FactorBaseDataBase {
             MySQLScriptRunner.runScript(
                 this.dbConnection,
                 Config.SCRIPTS_DIRECTORY + "latticegenerator_initialize.sql",
-                this.baseDatabaseName
+                this.baseDatabaseName,
+                this.dbCollation
             );
 
             // Switch to start using the BN database.
@@ -120,50 +127,59 @@ public class MySQLFactorBaseDataBase implements FactorBaseDataBase {
             RuntimeLogger.setupLoggingTable(
                 this.dbConnection,
                 this.baseDatabaseName,
-                this.dbInfo.getBNDatabaseName()
+                this.dbInfo.getBNDatabaseName(),
+                this.dbCollation
             );
             MySQLScriptRunner.runScript(
                 this.dbConnection,
                 Config.SCRIPTS_DIRECTORY + "latticegenerator_initialize_local.sql",
-                this.baseDatabaseName
+                this.baseDatabaseName,
+                this.dbCollation
             );
             MySQLScriptRunner.runScript(
                 this.dbConnection,
                 Config.SCRIPTS_DIRECTORY + "latticegenerator_populate.sql",
                 this.baseDatabaseName,
+                this.dbCollation,
                 "//"
             );
             MySQLScriptRunner.runScript(
                 this.dbConnection,
                 Config.SCRIPTS_DIRECTORY + "transfer_initialize.sql",
-                this.baseDatabaseName
+                this.baseDatabaseName,
+                this.dbCollation
             );
             MySQLScriptRunner.runScript(
                 this.dbConnection,
                 Config.SCRIPTS_DIRECTORY + "transfer_cascade.sql",
                 this.baseDatabaseName,
+                this.dbCollation,
                 "//"
             );
             MySQLScriptRunner.runScript(
                 this.dbConnection,
                 Config.SCRIPTS_DIRECTORY + "modelmanager_initialize.sql",
-                this.baseDatabaseName
+                this.baseDatabaseName,
+                this.dbCollation
             );
             MySQLScriptRunner.runScript(
                 this.dbConnection,
                 Config.SCRIPTS_DIRECTORY + "metaqueries_initialize.sql",
-                this.baseDatabaseName
+                this.baseDatabaseName,
+                this.dbCollation
             );
             MySQLScriptRunner.runScript(
                 this.dbConnection,
                 Config.SCRIPTS_DIRECTORY + "metaqueries_populate.sql",
                 this.baseDatabaseName,
+                this.dbCollation,
                 "//"
             );
             MySQLScriptRunner.runScript(
                 this.dbConnection,
                 Config.SCRIPTS_DIRECTORY + "metaqueries_RChain.sql",
                 this.baseDatabaseName,
+                this.dbCollation,
                 "//"
             );
         } catch (SQLException | IOException e) {

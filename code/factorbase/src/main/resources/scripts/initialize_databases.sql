@@ -1,7 +1,5 @@
 -- Initialize the databases required by FactorBase.
-/*M!100316 SET collation_server = 'utf8_general_ci';*/
-
-SET collation_server = 'utf8_general_ci';
+SET collation_server = @dbcollation@;
 
 DROP SCHEMA IF EXISTS @database@_setup;
 CREATE SCHEMA @database@_setup;

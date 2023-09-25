@@ -32,9 +32,14 @@ public class MySQLScriptRunner {
      *
      * @param fileName - the file to create a copy of with the variables filled in.
      * @param databaseName - the name of the database to replace instances of "@database@" with.
+     * @param databaseCollation - the collation to use for the tables created.
      * @throws IOException if there is an issue reading from the script.
      */
-    private static String prepareFile(String fileName, String databaseName) throws IOException {
+    private static String prepareFile(
+        String fileName,
+        String databaseName,
+        String databaseCollation
+    ) throws IOException {
         InputStream inputStream = MySQLScriptRunner.class.getClassLoader().getResourceAsStream(fileName);
         if (inputStream == null) {
             throw new FileNotFoundException("Unable to read the file: " + fileName);
@@ -59,6 +64,7 @@ public class MySQLScriptRunner {
         String finalOutput = "";
         while (line != null) {
             line = line.replace("@database@", databaseName);
+            line = line.replace("@dbcollation@", databaseCollation);
             finalOutput += line + System.getProperty("line.separator");
             line = input.readLine();
         }
@@ -94,11 +100,17 @@ public class MySQLScriptRunner {
      * @param dbConnection - connection to the database to execute the script on.
      * @param scriptFileName - the path to the MySQL script to execute.
      * @param databaseName - the name of the database to replace instances of "@database@" with.
+     * @param databaseCollation - the collation to use for the tables created.
      * @throws SQLException if there is an issue executing the command(s).
      * @throws IOException if there is an issue reading from the script.
      */
-    public static void runScript(Connection dbConnection, String scriptFileName, String databaseName) throws SQLException, IOException {
-        runScript(dbConnection, scriptFileName, databaseName, ";");
+    public static void runScript(
+        Connection dbConnection,
+        String scriptFileName,
+        String databaseName,
+        String databaseCollation
+    ) throws SQLException, IOException {
+        runScript(dbConnection, scriptFileName, databaseName, databaseCollation, ";");
     }
 
 
@@ -110,12 +122,19 @@ public class MySQLScriptRunner {
      * @param dbConnection - connection to the database to execute the script on.
      * @param scriptFileName - the path to the MySQL script to execute.
      * @param databaseName - the name of the database to replace instances of "@database@" with.
+     * @param databaseCollation - the collation to use for the tables created.
      * @param delimiter - the delimiter to use when reading the commands from the given script.
      * @throws SQLException if there is an issue executing the command(s).
      * @throws IOException if there is an issue reading from the script.
      */
-    public static void runScript(Connection dbConnection, String scriptFileName, String databaseName, String delimiter) throws SQLException, IOException {
-        String newScriptFileName = prepareFile(scriptFileName, databaseName);
+    public static void runScript(
+        Connection dbConnection,
+        String scriptFileName,
+        String databaseName,
+        String databaseCollation,
+        String delimiter
+    ) throws SQLException, IOException {
+        String newScriptFileName = prepareFile(scriptFileName, databaseName, databaseCollation);
 
         ScriptRunner runner = new ScriptRunner(dbConnection);
         try (
