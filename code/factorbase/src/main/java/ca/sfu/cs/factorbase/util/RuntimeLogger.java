@@ -94,13 +94,15 @@ public final class RuntimeLogger {
     public static void setupLoggingTable(
         Connection dbConnection,
         String baseDatabaseName,
-        String loggingTableDatabaseName
+        String loggingTableDatabaseName,
+        String databaseCollation
     ) throws SQLException, IOException {
         dbName = loggingTableDatabaseName;
         MySQLScriptRunner.runScript(
             dbConnection,
             Config.SCRIPTS_DIRECTORY + "logging.sql",
-            baseDatabaseName
+            baseDatabaseName,
+            databaseCollation
         );
     }
 

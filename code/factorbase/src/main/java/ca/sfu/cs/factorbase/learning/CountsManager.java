@@ -69,6 +69,7 @@ public class CountsManager {
     private static boolean generatePDPInfo;
     private static String linkCorrelation;
     private static long dbTemporaryTableSize;
+    private static String dbCollation;
     /*
      * cont is Continuous
      * ToDo: Refactor
@@ -93,7 +94,7 @@ public class CountsManager {
         RuntimeLogger.addLogEntry(dbConnection);
         try (Statement statement = dbConnection.createStatement()) {
             statement.execute("DROP SCHEMA IF EXISTS " + dbInfo.getCTDatabaseName() + ";");
-            statement.execute("CREATE SCHEMA " + dbInfo.getCTDatabaseName() + " /*M!100316 COLLATE utf8_general_ci*/;");
+            statement.execute("CREATE SCHEMA " + dbInfo.getCTDatabaseName() + " COLLATE " + dbCollation + ";");
         }
 
         // Propagate metadata based on the FunctorSet.
@@ -492,6 +493,7 @@ public class CountsManager {
         dbPassword = conf.getProperty("dbpassword");
         dbaddress = conf.getProperty("dbaddress");
         dbTemporaryTableSize = Math.round(1024 * 1024 * 1024 * Double.valueOf(conf.getProperty("dbtemporarytablesize")));
+        dbCollation = conf.getProperty("dbcollation");
         linkCorrelation = conf.getProperty("LinkCorrelations");
         cont = conf.getProperty("Continuous");
         String loggingLevel = conf.getProperty("LoggingLevel");
