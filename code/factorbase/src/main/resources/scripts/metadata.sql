@@ -237,7 +237,8 @@ FROM
     SelfRelationships
 WHERE
     EntityTables.TABLE_NAME = SelfRelationships.REFERENCED_TABLE_NAME
-AND EntityTables.COLUMN_NAME = SelfRelationships.REFERENCED_COLUMN_NAME
+AND EntityTables.COLUMN_NAME = SelfRelationships.REFERENCED_COLUMN_NAME;
+/*
 UNION 
 SELECT 
     CONCAT(EntityTables.TABLE_NAME, '2') AS pvid,
@@ -249,6 +250,7 @@ FROM
 WHERE
     EntityTables.TABLE_NAME = SelfRelationships.REFERENCED_TABLE_NAME
 AND EntityTables.COLUMN_NAME = SelfRelationships.REFERENCED_COLUMN_NAME ;
+*/
             
 /*zqian,Oct-02-13, reduce copies from 3 to 2*/
 /*
@@ -388,7 +390,6 @@ CREATE table RNodes_MM_Self AS
             AND RelationTables.TABLE_NAME = ForeignKeys_pvars1.TABLE_NAME
             AND ForeignKeys_pvars1.ARGUMENT_POSITION < ForeignKeys_pvars2.ARGUMENT_POSITION
             AND ForeignKeys_pvars1.index_number < ForeignKeys_pvars2.index_number /*comment this out to allow all pairs of Pvariables as Rnodes*/
-            AND ForeignKeys_pvars1.index_number != ForeignKeys_pvars2.index_number
             AND RelationTables.SelfRelationship = 1
             AND RelationTables.Many_OneRelationship = 0;
 
@@ -634,7 +635,8 @@ CREATE TABLE RNodes_2Nodes AS
         2Nodes,
         RNodes
     WHERE
-        2Nodes.TABLE_NAME = RNodes.TABLE_NAME;
+        2Nodes.TABLE_NAME = RNodes.TABLE_NAME
+       AND RNodes.pvid1 = 2Nodes.pvid1 AND RNodes.pvid2 = 2Nodes.pvid2 ;
 
 
 /*** for each functor node, record which population variables appear in it ***/

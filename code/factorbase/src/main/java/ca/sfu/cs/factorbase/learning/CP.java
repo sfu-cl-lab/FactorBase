@@ -287,15 +287,19 @@ public class CP {
         }
         // zqian Nov 13, computing sum(mult) from biggest CT table
         // and close the connections
+   
         java.sql.Statement st2 = con1.createStatement();
         String sql2 =
             "SELECT SUM(MULT) " +
             "FROM " + databaseName2 + ".`" + bigTable + "`;"; // Only need to do this query once, Nov 12 zqian.
         logger.fine(sql2 + "\n");
         ResultSet deno = st2.executeQuery(sql2);
+        
         deno.absolute(1);
         double mydeno = deno.getDouble(1);
+
         logger.fine("SUM(mult) in bigCTTable : "+mydeno + "\n");
+
         for(int i = 0; i < noparent_tables.size(); i++) {
             nopar_update(rchain, bigTable, noparent_tables.get(i), con1, mydeno);
         }
@@ -317,7 +321,7 @@ public class CP {
         st.execute(
             "CREATE TABLE `" + tableName + "` (" +
                 "`" + nodeName + "` VARCHAR(200) NOT NULL, " +
-                "CP FLOAT(7,6), " +
+                "CP FLOAT(10,10), " +
                 "MULT DECIMAL(65), " +
                 "local_mult DECIMAL(65)" +
             ");"
@@ -334,10 +338,13 @@ public class CP {
         );
 
         ArrayList<String> column_value = new ArrayList<String>();
+
+        
         while(rst.next()) {
             logger.fine("column value: " + rst.getString(1) + "\n");
             column_value.add(rst.getString(1));
         }
+
 
         for(int i = 0; i < column_value.size(); i++) {
             String sql =
@@ -359,6 +366,7 @@ public class CP {
                 "WHERE `" + nodeName + "` = '" + column_value.get(i) + "';";
             logger.fine(sql3 + "\n");
             st2.execute(sql3);
+
             st2.execute(
                 "UPDATE `" + tableName + "` " +
                 "SET CP = MULT / " + mydeno + " " +
