@@ -94,6 +94,7 @@ public class RunBB {
             globalLattice,
             countingStrategy
         );
+       
         RuntimeLogger.logRunTime(logger, "Running BayesBaseH", bayesBaseHStart, System.currentTimeMillis());
 
         // Now eliminate temporary tables. Keep only the tables for the longest Rchain. Turn this off for debugging.
