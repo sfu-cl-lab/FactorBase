@@ -317,7 +317,7 @@ public class CP {
         st.execute(
             "CREATE TABLE `" + tableName + "` (" +
                 "`" + nodeName + "` VARCHAR(200) NOT NULL, " +
-                "CP FLOAT(7,6), " +
+                "CP FLOAT(10,10), " +
                 "MULT DECIMAL(65), " +
                 "local_mult DECIMAL(65)" +
             ");"

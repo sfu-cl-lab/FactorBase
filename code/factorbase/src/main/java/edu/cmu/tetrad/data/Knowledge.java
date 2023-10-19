@@ -698,12 +698,13 @@ public final class Knowledge implements TetradSerializable, IKnowledge {
                 throw new IllegalStateException("The edge " + var1 + "-->" + var2 +
                         " is required by a knowledge group. Please remove that requirement first.");
             }
-        
+        /*
             if (edgeRequired(var1, var2)) {
                 throw new IllegalStateException("The edge " + var1 + "-->" +
                         var2 +
                         " is already required. Please first remove that requirement.");
             }
+        */
 
             explicitlyForbiddenEdges.add(new KnowledgeEdge(var1, var2));
             this.forbiddenEdges = null;
