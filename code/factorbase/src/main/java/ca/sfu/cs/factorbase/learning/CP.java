@@ -370,13 +370,13 @@ public class CP {
             while(rs.next()) {
                 local = Long.parseLong (rs.getString("Tuples"));
                 logger.fine("local is " + local);
-                mynume = mynume / local;
+                // mynume = mynume / local;   set local_mult = mult OS Dec 5, 2023
 //                logger.fine("set local_mult = mult, May 21, 2014 zqian ");
                 // set local_mult = mult, May 21, 2014 zqian
             }
             if (!rs.first()) {
                 logger.fine("local is 1, ******");
-                mynume = mynume / local;
+               // mynume = mynume / local;   set local_mult = mult OS Dec 5, 2023
             }
             // updating the local_mult = mult / local , Dec 3rd
             String sql4 =
@@ -573,7 +573,8 @@ public class CP {
         while(rs.next()) {
             local = Long.parseLong (rs.getString("Tuples"));
             logger.fine("local is " + local);
-            String sql = "UPDATE " + escapedTableName + " SET local_mult = MULT / " + local + ";";
+            // String sql = "UPDATE " + escapedTableName + " SET local_mult = MULT / " + local + ";"; OS Dec 5 make local_mult = mult
+            String sql = "UPDATE " + escapedTableName + " SET local_mult = MULT;"; 
 //            String sql = "update " + table_name + " set local_mult = mult;";
             logger.fine(sql);
             // set local_mult = mult, May 21, 2014 zqian
@@ -581,7 +582,8 @@ public class CP {
         }
         if (!rs.first()) {
             logger.fine("local is 1, ******" );
-            String sql = "UPDATE " + escapedTableName + " SET local_mult = MULT / " + local + ";";
+            String sql = "UPDATE " + escapedTableName + " SET local_mult = MULT; ";
+          //  String sql = "UPDATE " + escapedTableName + " SET local_mult = MULT / " + local + ";"; OS Dec 5 make local_mult = mult
             st1.execute(sql);
         }
 
