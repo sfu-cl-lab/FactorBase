@@ -70,6 +70,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Properties;
 import java.util.StringJoiner;
 import java.util.logging.Logger;
@@ -191,6 +192,30 @@ public class CP {
             " FROM Path_BayesNets as FamilyRNodes, FNodes as RNode_check " +
             " where FamilyRNodes.Rchain = '" + rchain + "' and RNode_check.Fid = FamilyRNodes.parent and RNode_check.Type = 'RNode';"
         );
+        // pnaddaf Dec 5ht 2023
+        st.execute("drop view if exists RNodes_inFamily_view;");
+        st.execute(
+            "CREATE VIEW RNodes_inFamily_view AS " +
+            "SELECT distinct child, rnid, short_rnid " + 
+            "from `Final_Path_BayesNets_view` `BN`, `RNodes`, lattice_mapping lm " +
+            "where `RNodes`.`rnid` = `BN`.`parent` AND lm.orig_rnid = BN.parent " +   
+            "union " +
+            "select distinct `BN`.`child` AS `child`, `RNodes`.`rnid` AS rnid, short_rnid " +
+            "from `Final_Path_BayesNets_view` `BN`, `RNodes`, lattice_mapping lm " +
+            "where `RNodes`.`rnid` = `BN`.`child` AND lm.orig_rnid = child " +
+            "union " +
+            "select distinct `BN`.`child` AS `child`, `RNodes_2Nodes`.`rnid` AS `Rnid`,short_rnid " +
+            "from (`Final_Path_BayesNets_view` `BN`, lattice_mapping lm " +
+            "join `RNodes_2Nodes`)  " +
+            "where `RNodes_2Nodes`.`2nid` = `BN`.`parent` and `RNodes_2Nodes`.`rnid`=lm.orig_rnid " + 
+            "union " + 
+            "select distinct `BN`.`child` AS `child`,  `RNodes_2Nodes`.`rnid` AS `Rnid`, short_rnid " +  
+            "from (`Final_Path_BayesNets_view` `BN`, lattice_mapping lm " + 
+            "join `RNodes_2Nodes`) " + 
+            "where `RNodes_2Nodes`.`2nid` = `BN`.`child` and `RNodes_2Nodes`.`rnid` = lm.orig_rnid ; " 
+        );
+
+
 
         st.execute("drop table if exists 2Nodes_inFamily;");
         st.execute(
@@ -285,24 +310,83 @@ public class CP {
             logger.fine("noparent node: " + rst.getString(1));
             noparent_tables.add(rst.getString(1));
         }
-        // zqian Nov 13, computing sum(mult) from biggest CT table
-        // and close the connections
-        java.sql.Statement st2 = con1.createStatement();
-        String sql2 =
-            "SELECT SUM(MULT) " +
-            "FROM " + databaseName2 + ".`" + bigTable + "`;"; // Only need to do this query once, Nov 12 zqian.
-        logger.fine(sql2 + "\n");
-        ResultSet deno = st2.executeQuery(sql2);
-        deno.absolute(1);
-        double mydeno = deno.getDouble(1);
-        logger.fine("SUM(mult) in bigCTTable : "+mydeno + "\n");
-        for(int i = 0; i < noparent_tables.size(); i++) {
-            nopar_update(rchain, bigTable, noparent_tables.get(i), con1, mydeno);
-        }
+        // pnaddaf Dec 5th 2023        
+        for (int i = 0; i < noparent_tables.size(); i++) {
+            ResultSet rst_short_rnids = st.executeQuery("SELECT short_rnid FROM RNodes_inFamily_view where child = '" + noparent_tables.get(i) + "' ORDER BY short_rnid;");
+            logger.fine("*************************************************");
+            logger.fine("SELECT short_rnid FROM RNodes_inFamily_view where child = '" + noparent_tables.get(i) + "';");
+            // Initialize a StringBuilder to concatenate the elements
+            StringBuilder concatenated_rnids = new StringBuilder();
+            boolean isFirst = true;
+            if (rst_short_rnids.next()) {        
+                do{
+                    // Add a comma if it's not the first value
+                    if (!isFirst) {
+                        concatenated_rnids.append(",");
+                    } else {
+                        isFirst = false;
+                    }
+                    // Retrieve data from the result set
+                    String short_rnid = rst_short_rnids.getString("short_rnid");
 
-        st2.close();
-        st.close();
-    }
+                    // Append the value to the StringBuilder
+                    concatenated_rnids.append(short_rnid);
+
+                } while(rst_short_rnids.next());
+
+                bigTable = concatenated_rnids.toString() + "_CT";
+                logger.fine("tableName for " +  noparent_tables.get(i) + " is: " + bigTable);
+
+
+            } else {
+                // ResultSet is empty
+                
+                logger.fine("ResultSet is empty");
+                ResultSet rst_pvid = st.executeQuery("SELECT distinct pvid FROM Pvars_Family WHERE child = '" + noparent_tables.get(i) + "' ;");
+                if (rst_pvid.next()) {
+                    do {
+                            // Add a comma if it's not the first value
+                        if (!isFirst) {
+                            concatenated_rnids.append(",");
+                        } else {
+                            isFirst = false;
+                        }
+                        // Retrieve data from the result set
+                        String short_rnid = rst_pvid.getString("pvid");
+            
+                        // Append the value to the concatenated_rnids
+                        concatenated_rnids.append(short_rnid);
+                    } while (rst_pvid.next());
+
+                }
+                bigTable = concatenated_rnids.toString() + "_counts";
+                logger.fine("tableName is: " + bigTable);
+
+                // Close the ResultSet when you're done with it
+                rst_pvid.close();
+            }
+        
+            // Close the ResultSet when you're done with it
+            rst_short_rnids.close();
+       
+        
+            // zqian Nov 13, computing sum(mult) from biggest CT table
+            // and close the connections
+            java.sql.Statement st2 = con1.createStatement();
+            String sql2 =
+                "SELECT SUM(MULT) " +
+                "FROM " + databaseName2 + ".`" + bigTable + "`;"; 
+            logger.fine(sql2 + "\n");
+            ResultSet deno = st2.executeQuery(sql2);
+            deno.absolute(1);
+            double mydeno = deno.getDouble(1);
+            logger.fine("SUM(mult) in bigTable : "+mydeno + "\n");
+            nopar_update(rchain, bigTable, noparent_tables.get(i), con1, mydeno);
+            st2.close();
+        } 
+    st.close();
+}
+
 
     /**
      * Similar simpler computation for nodes without parents.
@@ -317,11 +401,15 @@ public class CP {
         st.execute(
             "CREATE TABLE `" + tableName + "` (" +
                 "`" + nodeName + "` VARCHAR(200) NOT NULL, " +
-                "CP FLOAT(11,10), " +
+                "CP FLOAT(7,6), " +
                 "MULT DECIMAL(65), " +
                 "local_mult DECIMAL(65)" +
             ");"
         );
+        logger.fine("tableName : "+ tableName + "\n");
+        logger.fine("nodeName : "+ nodeName + "\n");
+        logger.fine("databaseName2 : "+ databaseName2 + "\n");
+        logger.fine("bigTable : "+ bigTable + "\n");
         st.execute(
             "INSERT INTO `" + tableName + "` (`" + nodeName + "`) " +
             "SELECT DISTINCT `" + nodeName + "` " +
@@ -460,10 +548,71 @@ public class CP {
             logger.fine("hasparent node: " + rst.getString(1));
             hasparent_tables.add(rst.getString(1));
         }
-        for(int i = 0; i < hasparent_tables.size(); i++) {
+
+
+        // pnaddaf Dec 8th 2023        
+        for (int i = 0; i < hasparent_tables.size(); i++) {
+            ResultSet rst_short_rnids = st.executeQuery("SELECT short_rnid FROM RNodes_inFamily_view where child = '" + hasparent_tables.get(i) + "' ORDER BY short_rnid ;");
+            logger.fine("*************************************************");
+            logger.fine("SELECT short_rnid FROM RNodes_inFamily_view where child = '" + hasparent_tables.get(i) + "';");
+            // Initialize a StringBuilder to concatenate the elements
+            StringBuilder concatenated_rnids = new StringBuilder();
+            boolean isFirst = true;
+            if (rst_short_rnids.next()) {        
+                do{
+                    // Add a comma if it's not the first value
+                    if (!isFirst) {
+                        concatenated_rnids.append(",");
+                    } else {
+                        isFirst = false;
+                    }
+                    // Retrieve data from the result set
+                    String short_rnid = rst_short_rnids.getString("short_rnid");
+
+                    // Append the value to the StringBuilder
+                    concatenated_rnids.append(short_rnid);
+
+                } while(rst_short_rnids.next());
+
+                bigTable = concatenated_rnids.toString() + "_CT";
+                logger.fine("tableName for " +  hasparent_tables.get(i) + " is: " + bigTable);
+
+
+            } else {
+                // ResultSet is empty
+                
+                logger.fine("ResultSet is empty");
+                ResultSet rst_pvid = st.executeQuery("SELECT distinct pvid FROM Pvars_Family WHERE child = '" + hasparent_tables.get(i) + "';");
+                if (rst_pvid.next()) {
+                    do {
+                            // Add a comma if it's not the first value
+                        if (!isFirst) {
+                            concatenated_rnids.append(",");
+                        } else {
+                            isFirst = false;
+                        }
+                        // Retrieve data from the result set
+                        String short_rnid = rst_pvid.getString("pvid");
+            
+                        // Append the value to the concatenated_rnids
+                        concatenated_rnids.append(short_rnid);
+                    } while (rst_pvid.next());
+
+                }
+                bigTable = concatenated_rnids.toString() + "_counts";
+                logger.fine("tableName is: " + bigTable);
+
+                // Close the ResultSet when you're done with it
+                rst_pvid.close();
+            }
+        
+            // Close the ResultSet when you're done with it
+            rst_short_rnids.close();
             haspar_update(rchain, bigTable, hasparent_tables.get(i), con1, databaseName2);
+        
+       
         }
-        st.close();
+        st.close(); 
     }
 
     /**
@@ -586,7 +735,7 @@ public class CP {
           //  String sql = "UPDATE " + escapedTableName + " SET local_mult = MULT / " + local + ";"; OS Dec 5 make local_mult = mult
             st1.execute(sql);
         }
-
+        logger.fine("UPDATE " + escapedTableName + " SET likelihood = LOG(CP) * local_mult;");
         st.execute("UPDATE " + escapedTableName + " SET likelihood = LOG(CP) * local_mult;");
         st.execute("drop table if exists temp;");
 

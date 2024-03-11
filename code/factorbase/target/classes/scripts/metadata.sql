@@ -238,19 +238,17 @@ FROM
 WHERE
     EntityTables.TABLE_NAME = SelfRelationships.REFERENCED_TABLE_NAME
 AND EntityTables.COLUMN_NAME = SelfRelationships.REFERENCED_COLUMN_NAME;
-/*
-UNION 
-SELECT 
-    CONCAT(EntityTables.TABLE_NAME, '2') AS pvid,
-    EntityTables.TABLE_NAME, EntityTables.COLUMN_NAME as ID_COLUMN_NAME,
-    2 AS index_number
-FROM
-    EntityTables,
-    SelfRelationships
-WHERE
-    EntityTables.TABLE_NAME = SelfRelationships.REFERENCED_TABLE_NAME
-AND EntityTables.COLUMN_NAME = SelfRelationships.REFERENCED_COLUMN_NAME ;
-*/
+-- UNION 
+-- SELECT 
+--     CONCAT(EntityTables.TABLE_NAME, '2') AS pvid,
+--     EntityTables.TABLE_NAME, EntityTables.COLUMN_NAME as ID_COLUMN_NAME,
+--     2 AS index_number
+-- FROM
+--     EntityTables,
+--     SelfRelationships
+-- WHERE
+--     EntityTables.TABLE_NAME = SelfRelationships.REFERENCED_TABLE_NAME
+-- AND EntityTables.COLUMN_NAME = SelfRelationships.REFERENCED_COLUMN_NAME ;
             
 /*zqian,Oct-02-13, reduce copies from 3 to 2*/
 /*
@@ -389,7 +387,9 @@ CREATE table RNodes_MM_Self AS
         ForeignKeys_pvars1.TABLE_NAME = ForeignKeys_pvars2.TABLE_NAME
             AND RelationTables.TABLE_NAME = ForeignKeys_pvars1.TABLE_NAME
             AND ForeignKeys_pvars1.ARGUMENT_POSITION < ForeignKeys_pvars2.ARGUMENT_POSITION
-            AND ForeignKeys_pvars1.index_number < ForeignKeys_pvars2.index_number /*comment this out to allow all pairs of Pvariables as Rnodes*/
+            -- AND (ForeignKeys_pvars1.index_number = 0 AND ForeignKeys_pvars2.index_number = 1)  /* Jan17th 2024 - pnaddaf: removing loops*/
+            -- OR (ForeignKeys_pvars1.index_number = 1 AND ForeignKeys_pvars2.index_number = 2 )
+            AND ForeignKeys_pvars1.index_number = ForeignKeys_pvars2.index_number -1  /*comment this out to allow all pairs of Pvariables as Rnodes*/
             AND RelationTables.SelfRelationship = 1
             AND RelationTables.Many_OneRelationship = 0;
 
