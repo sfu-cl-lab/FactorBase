@@ -108,6 +108,7 @@ public class BayesBaseH {
     public static void runBBH(
         FactorBaseDataBase database,
         RelationshipLattice globalLattice,
+        String databaseCollation,
         CountingStrategy countingStrategy
     ) throws SQLException, IOException, DataBaseException, DataExtractionException, ParsingException, ScoringException {
         initProgram(FirstRunning);
@@ -124,6 +125,7 @@ public class BayesBaseH {
         StructureLearning(
             database,
             con2,
+            databaseCollation,
             countingStrategy,
             globalLattice
         );
@@ -206,6 +208,7 @@ public class BayesBaseH {
     private static void StructureLearning(
         FactorBaseDataBase database,
         Connection conn,
+        String databaseCollation,
         CountingStrategy countingStrategy,
         RelationshipLattice lattice
     ) throws SQLException, IOException, DataBaseException, DataExtractionException, ParsingException, ScoringException {
@@ -221,7 +224,8 @@ public class BayesBaseH {
         MySQLScriptRunner.runScript(
             conn,
             Config.SCRIPTS_DIRECTORY + "modelmanager_populate.sql",
-            databaseName
+            databaseName,
+            databaseCollation
         );
 
         // Handle rnodes in a bottom-up way following the lattice.

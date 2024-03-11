@@ -52,12 +52,14 @@ public class RunBB {
         RuntimeLogger.logRunTime(logger, "Logger + Config Initialization", start, configEnd);
 
         long databaseStart = System.currentTimeMillis();
+        String databaseCollation = config.getProperty("dbcollation");
         FactorBaseDataBase factorBaseDatabase = new MySQLFactorBaseDataBase(
             new FactorBaseDataBaseInfo(config),
             config.getProperty("dbaddress"),
             config.getProperty("dbname"),
             config.getProperty("dbusername"),
             config.getProperty("dbpassword"),
+            databaseCollation,
             countingStrategy
         );
         RuntimeLogger.logRunTime(logger, "Creating Database Connection", databaseStart, System.currentTimeMillis());
@@ -92,6 +94,7 @@ public class RunBB {
         BayesBaseH.runBBH(
             factorBaseDatabase,
             globalLattice,
+            databaseCollation,
             countingStrategy
         );
        
