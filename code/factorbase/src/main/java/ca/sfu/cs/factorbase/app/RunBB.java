@@ -97,11 +97,13 @@ public class RunBB {
             databaseCollation,
             countingStrategy
         );
+       
         RuntimeLogger.logRunTime(logger, "Running BayesBaseH", bayesBaseHStart, System.currentTimeMillis());
 
         // Now eliminate temporary tables. Keep only the tables for the longest Rchain. Turn this off for debugging.
         long cleanupStart = System.currentTimeMillis();
-        factorBaseDatabase.cleanupDatabase();
+
+        //factorBaseDatabase.cleanupDatabase();
         RuntimeLogger.logRunTime(logger, "Cleanup Database", cleanupStart, System.currentTimeMillis());
 
         // Disconnect from the database.

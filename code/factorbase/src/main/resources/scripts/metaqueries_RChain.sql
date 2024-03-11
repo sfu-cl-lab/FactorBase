@@ -18,16 +18,6 @@ SELECT
 FROM
     RNodes_2Nodes N;
 
-/**************
- * Generating flat, star, and join tables for Rnodes
-
-/**********************************
- * Generating metqueries for the flat table.
- * For each rnode, the flat table drops the rnid and the 2nids from the rnodes_counts table. Then it sums up the remaining mults to get marginal sums.
- * That is, the counts are conditional on Rnode = T but we drop the rnid and 2nid ids.
- * so we have to sum over them
- */
-
 
 /* the base table is the rnode counts
  * 
