@@ -106,6 +106,7 @@ One of the key computational problems in relational learning and inference is to
 
 	1. The network structure is stored in the table `Final_Path_BayesNets` of the `<db>_BN` database where `<db>` is the model database specified in your configuration file. For nodes with no parents, see the view `View_Final_Path_BayesNets`.
 	2. The conditional probability tables are stored in tables named `<nodename>_CP` of the `<db>_BN` database where `<db>` is the model database specified in your configuration file and `<nodename>` is the name of the child node.
+ 	3. The file `Bif_<db>.xml` contains a Bayes net specification that can be loaded into a Bayes net tool (see next Section). This file is written to the directory that contains your config.cfg file.
 
 ===============
 ## Other Output Formats: BIF, MLN, ETL
